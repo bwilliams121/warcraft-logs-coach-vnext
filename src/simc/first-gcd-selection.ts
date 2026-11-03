@@ -147,7 +147,19 @@ export type RotationalGcdBlocker =
    * would be a confident first-GCD selection resting on a condition that was
    * never evaluated.
    */
-  | "UNREAD_CONDITION_ON_GCD_ACTION";
+  | "UNREAD_CONDITION_ON_GCD_ACTION"
+  /**
+   * The scan selected a waiting action — `pool_resource`, `wait`,
+   * `wait_until_ready` or `wait_for_cooldown` — in a world being explored
+   * (ONB-S5; see `pooling.ts`).
+   *
+   * Not a lane question and not a refusal of the authority: the authority's
+   * answer at this instant is "cast nothing yet". Simulated time then passes
+   * (a pool's ~100 ms draw, a wait's duration) and the next selection reads
+   * regenerated resources, which this zero-time engine does not model. So no
+   * first GCD is named, and the wait step is preserved as the evidence.
+   */
+  | "APL_WAIT_SELECTED";
 
 export const ROTATIONAL_GCD_BLOCKERS = [
   "ONE_SCAN_BLOCKED",
@@ -158,6 +170,7 @@ export const ROTATIONAL_GCD_BLOCKERS = [
   "NO_PROGRESS_CYCLE",
   "DIVERGENT_GCD_OUTCOMES",
   "UNREAD_CONDITION_ON_GCD_ACTION",
+  "APL_WAIT_SELECTED",
 ] as const satisfies readonly RotationalGcdBlocker[];
 
 /**
@@ -956,6 +969,21 @@ export function firstGcdSelectionAcrossRescans<TState>(
       branches: [],
       outcome: "",
     };
+    // ONB-S5. A waiting action selects no ability: the scan ends and simulated
+    // time passes before the next one, whatever a spec's lane data says. Never
+    // executed as a zero-time step and never read as a GCD selection.
+    if (candidate.step.waitAction !== undefined) {
+      return {
+        kind: "UNKNOWN",
+        blocker: "APL_WAIT_SELECTED",
+        scanBlocker: null,
+        blockedAt: candidate.step,
+        detail:
+          "the authority pools or waits here: no ability is selected now, and the selection that follows " +
+          "needs simulated time to pass, which this engine does not model",
+        trace: { ...emptyTrace, outcome: "UNKNOWN APL_WAIT_SELECTED" },
+      };
+    }
     // M11-D3-B2. A retarget pseudo-action is zero-time and NON_GCD by its pinned
     // semantics, whatever a spec's lane data says, and executing it is what
     // matters: `retarget` moves every later target-scoped read onto an enemy

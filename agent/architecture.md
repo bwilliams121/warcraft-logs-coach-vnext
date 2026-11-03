@@ -12113,6 +12113,91 @@ coverage starts at the pull). Recorded in `agent/follow-ups.md`.
 public decision changes. Cohort D representatives (ONB-D*) supply their
 profile and own what the anchor means for their decisions.
 
+## ONB-S5 — Shared resource pooling and wait semantics
+
+Autopilot queue entry ONB-S5. Internal shared engine only: no public contract
+change, no specialization module changes, no Warcraft Logs request.
+
+**Question.** What does the APL select while it pools, and how does an
+observed cast compare with that? Cohort C (Outlaw, Feral) guards finishers and
+builders with `pool_resource,for_next=1`. Several pinned lists also use
+`wait`. Before this tranche, `for_next` and `sec` were unrecognised options, so
+those lines blocked. A bare `wait` or `pool_resource` line was read as an
+ordinary player action.
+
+**Where.** `src/simc/pooling.ts` holds the pinned semantics.
+`src/simc/wait-actions.ts` holds the tokens. The nested scan, the first-GCD
+query and the single-list walker apply them.
+
+**Pinned semantics** (SimulationCraft 33622e9d, player.cpp:9706-9840,
+10640-10816, 14175-14267; action.cpp:2381-2396, 2567-2667, 2856-2865):
+
+- `pool_resource,for_next=1` guards the very next line of its list. When that
+  line is background (NOT_APPLICABLE), the pool line is pruned with it. When no
+  line follows, it is background. It is ready iff the guarded line is NOT ready
+  now and IS ready with the pooled resource at its maximum (`resource=`, else
+  the player's primary resource). "Ready" is the guarded line's whole
+  `action_ready()`, including its `if=`. Its own `if=` must also hold.
+- `pool_resource` without `for_next`: ready iff its own `if=` holds. It has
+  no cost, cooldown or cast time.
+- `wait`, `wait_until_ready`, `wait_for_cooldown`: a true `if=` makes them
+  POSSIBLE at most. Their readiness also needs the player not moving, and the
+  previous foreground action not being this wait. `wait_for_cooldown` also
+  needs its named cooldown to be down. None of these is established here.
+- There is no `wait_for` token at the pinned commit.
+- `wait=`, `force_wait=` and `sec=` change only the duration, never readiness.
+  `extra_amount=`, `line_cd=`, any other option and malformed values are
+  refused (`UNMODELLED_WAIT_ACTION`).
+
+**The scan.** A waiting line is read before applicability, since it has no
+spell. A `for_next` pool line is PENDING (`POOL_PENDING_GUARDED_LINE`) until
+its guarded line has been read by the ordinary rules, then it is settled:
+
+- guarded line background: `PRUNED_WITH_GUARDED_LINE`;
+- guarded line SELECTED: `GUARDED_READY`, so the pool is not ready;
+- guarded line not ready now:
+  - its `line_cd` running, or a resource-independent PROVEN_UNUSABLE reason
+    (cooldown, static readiness, stealth, aura): `NOT_RESOURCE_LIMITED`;
+  - otherwise (a false condition, `INSUFFICIENT_RESOURCE`, a prefix
+    execution), the specialization's `PoolingResolver` is asked for the
+    at-maximum readiness. It gets the scan's bindings, assigned variables
+    included, because SimulationCraft does not re-execute variables. Without
+    a resolver the answer is UNKNOWN;
+- guarded line undecided now: `UNDECIDED`.
+
+`POOLS` under a certain condition SELECTS the pool line and ends the scan. An
+undecided pool line may fire and is placed ahead of the guarded line's own
+candidate, so nothing below it becomes a confident selection. A guarded line
+that is not an ordinary player action (a variable, a dispatch, another wait,
+a retarget) is refused.
+
+`guardedReadinessUnder(line, bindingsAtMax, usabilityAtMax)` is a narrow
+helper for resolvers. It is UNKNOWN for any option it would have to
+interpret, an unsupported condition, or a true condition without proven
+usability.
+
+**Continuous resources stay intervals.** The guarded line is read now with
+whatever bindings the specialization supplies. A `ONE_OF` or unknown resource
+that cannot decide it leaves the pool UNDECIDED.
+
+**First-GCD query.** A waiting selection casts nothing, and the next scan
+needs simulated time, which the zero-time engine does not advance. In any
+world, it is refused as `APL_WAIT_SELECTED` (new rescan blocker), with the
+waiting step as `blockedAt`. Decision coverage classifies it `OTHER`.
+
+**Observed comparison.** Against a waiting selection, an observed cast is
+UNKNOWN (`AUTHORITY_SELECTION_UNRESOLVED`, raw blocker `APL_WAIT_SELECTED`).
+It is never MATCH, because no action was selected. In this build it is never
+REJECTED either: the public comparison bases have no pooling member, and
+adding one is a public contract change (see `agent/follow-ups.md` "After
+ONB-S5").
+
+**Single-list walker.** A waiting line is never its definite winner.
+
+**No consumer yet.** No registered APL contains a waiting line, so no public
+decision changes. ONB-C1 (Feral) and ONB-C2 (Outlaw) supply the resolver for
+their resource and own what pooling means for their findings.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

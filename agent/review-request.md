@@ -4,281 +4,141 @@ Rolling file: overwritten for each review cycle.
 
 ## Change
 
-ONB-S4: shared cast and channel decision anchor. Branch `autopilot/onb-s4`,
-from main at d0ebe22.
+ONB-S5: shared resource pooling and wait semantics. Branch `autopilot/onb-s5`,
+from main at 400987b.
 
-- **Internal shared engine only.** One new module,
-  `src/engine/game-state/casting/cast-decision-anchor.ts`. Nothing under
+- **Internal shared engine only.** New `src/simc/pooling.ts` and
+  `src/simc/wait-actions.ts`. Changes to `nested-selection.ts`,
+  `first-gcd-selection.ts` and `list-selection.ts`. Nothing under
   `src/contracts/`, `src/api/` or `src/mcp/` changes, and no specialization
-  module changes. Nothing imports the new module yet, so no public decision
-  changes.
-- **Warcraft Logs: NONE.** No request, probe or capture. The real-evidence
-  tests read only retained, committed slices of b1PmaKrd6CDfzngc fight 48
-  (corpus Mage 121 prepull slice; evidence-archive Restoration Shaman 122
-  casts).
-- Queue bookkeeping: ONB-S2 is recorded MERGED (PR #41, d0ebe223…) and ONB-S4
+  module changes. No registered APL contains a waiting line (checked:
+  `src/simc/data/*.json` has no `pool_resource` or `wait*` token), so no
+  public decision changes.
+- **Warcraft Logs: NONE.** No request, probe or capture. All tests are
+  synthetic authorities.
+- Queue bookkeeping: ONB-S4 is recorded MERGED (PR #42, 400987bc…) and ONB-S5
   is set PR_OPEN. The other merged tranches the supervisor listed were
   already recorded MERGED with their pr and mergeSha.
 
 ## Direction
 
-`agent/autopilot-queue.md` ONB-S4. CLAUDE.md "Decision Points" (cast time,
-channel time, GCD overlap) and the M11-D0/A3 Cohort D blocker: a caster's
-decision point is its `begincast`, and the shared observed-decision model
-anchors on `cast`.
-
+`agent/autopilot-queue.md` ONB-S5 (M11-D0 census Cohort C: Outlaw, Feral).
 Scope:
 
-- A shared decision-point model for cast-time and channelled actions.
-- The anchor is at cast start, from `begincast` or derived from completion
-  with reviewed cast-time data.
-- Channels and interrupted casts are handled. There is no artificial missed
-  action in progress.
-- When the anchor cannot be established, the result is UNKNOWN.
-- Shared plumbing only. Casters own the meaning.
+- Pinned semantics for `pool_resource`, `wait`, `wait_for` and pooling-gated
+  lines in the shared engine.
+- What the APL selects while pooling.
+- How an observed cast compares against a pooling decision.
+- Undecidable pooling states are UNKNOWN. Continuous resources stay
+  intervals.
 
-## Design (agent/architecture.md "ONB-S4")
+## Pinned semantics (SimulationCraft 33622e9d)
 
-`buildCastTimeline({ state, actorId, profile })` returns one anchor per
-foreground completion, the unpaired begins, the cast spans, and
-`occupancyAt(t)`.
+Sources: player.cpp:9706-9840 (wait family), 10640-10816 (`pool_resource_t`),
+11115-11126 (tokens), 14175-14267 (`select_action`), 7130-7133
+(`available()`); action.cpp:2381-2396, 2567-2667 (readiness), 2856-2865
+(pruning). Recorded in the `pooling.ts` header.
 
-**Specialization-owned input (`CastAnchorProfile`):**
+- **Tokens:** `pool_resource`, `wait`, `wait_until_ready`,
+  `wait_for_cooldown`. There is no `wait_for` token at the pin, so it is not
+  recognised.
+- **`pool_resource,for_next=1`:**
+  - It guards the very NEXT line of its list. When that line is background,
+    `init()` prunes the pool line with it. With no next line, `reset()`
+    backgrounds it.
+  - It is ready iff the guarded line's whole `action_ready()` is false now
+    and true with the pooled resource at its maximum, and its own `if=`
+    holds.
+  - `extra_amount` is refused.
+- **`pool_resource` without `for_next`:** ready iff its `if=` holds. There is
+  no cost, cooldown or cast time, and it is usable while moving.
+- **`wait`, `wait_until_ready`, `wait_for_cooldown`:** readiness also fails
+  while moving (`execute_time() > 0`) or right after the same wait, and
+  `wait_for_cooldown` also needs its cooldown down. None of these is
+  established, so a true `if=` makes the line POSSIBLE at most.
+- **Duration-only options:** `wait=`, `force_wait=` and `sec=` never change
+  readiness.
+- **A ready waiting line is RETURNED by the scan.** No ability is cast, and
+  time passes before the next scan.
 
-- `executionOf(id)`: INSTANT, CAST_TIME, CHANNEL, or `null` (unreviewed).
-- `castTimeAt(completion)`: INSTANT, POSITIVE{exactMs | null}, or UNKNOWN.
-- `channelDurationAt(completion)`: AT_MOST{maxMs} or UNKNOWN.
+## Design (agent/architecture.md "ONB-S5")
 
-`hastedCastTime(base, castSpeed)` is the shared arithmetic. It never clamps:
-a positive base is POSITIVE whatever the haste, and exact only with a KNOWN
-multiplier.
+**Nested scan.** A waiting line is read before applicability.
 
-**Pinned wire facts, from retained data:**
+- A modelled `for_next` pool line is pushed as `POOL_PENDING_GUARDED_LINE`.
+  The guarded line is then read by the ordinary rules, and the pool step is
+  settled from that step:
+  - NOT_APPLICABLE: `PRUNED_WITH_GUARDED_LINE`;
+  - SELECTED: `GUARDED_READY`;
+  - `line_cd` running, or PROVEN_UNUSABLE for a resource-independent reason:
+    `NOT_RESOURCE_LIMITED`;
+  - condition FALSE, INSUFFICIENT_RESOURCE, or a prefix execution: the new
+    optional `poolingFor` resolver (`PoolingResolver`) is asked. It gets the
+    scan's bindings, assigned variables included. It defaults to UNKNOWN;
+  - MAY_SELECT: `UNDECIDED`.
+- `POOLS` with a certain condition is SELECTED and ends the scan. Otherwise
+  the pool line is a MAY_SELECT candidate, inserted before the guarded line's
+  own candidate.
+- Refused (new blocker `UNMODELLED_WAIT_ACTION`): unmodelled options, and a
+  guarded line that is a variable, a dispatch, another wait or a retarget.
+- Steps carry `waitAction: { kind, pooling? { guarded, resourceOption,
+  decision, atMax? } }`.
+- A new step outcome, `POOL_NOT_READY_CONTINUE`, is kept apart from
+  `ELIMINATED_CONTINUE` (a false condition).
 
-- A hard cast records a begin, then a completion.
-- A channel (Arcane Missiles 5143, ×20) records `cast` only, at its start.
-- Same-millisecond retrieval order is NOT proven (M11-G2). Both shapes occur
-  in the Restoration Shaman slice.
+**First-GCD query.** Any candidate with `waitAction` returns UNKNOWN
+`APL_WAIT_SELECTED` (new rescan blocker) before the lane is consulted. It is
+never executed as a zero-time step, and coverage classifies it OTHER.
 
-It is NOT assumed that every hard cast records a begin. A missing begin is
-never read as an instant cast.
+**Observed comparison.** No change to `observed-comparison.ts`. Against a
+waiting selection, an observed cast is UNKNOWN `AUTHORITY_SELECTION_UNRESOLVED`
+(raw blocker `APL_WAIT_SELECTED`). It is never MATCH and, in this build, never
+REJECTED: `PUBLIC_COMPARISON_BASES` has no pooling basis, and adding one is a
+public contract change. This is recorded in `agent/follow-ups.md`.
 
-**CAST_TIME pairing is order-invariant:**
+**Single-list walker.** A waiting line is capped at POSSIBLE.
 
-- Each begin in a completion's own millisecond is one unknown bit.
-- A completion pairs with the latest begin after the previous completion.
-- Consistent placements are enumerated, with neighbours checked one either
-  side (local, so it can only add ambiguity):
-  - a POSITIVE cast time cannot complete in its begin's millisecond;
-  - INSTANT is decided at completion and consumes only a same-millisecond
-    begin.
-- One agreed anchor gives OBSERVED_BEGINCAST, only with COMPLETE CASTS
-  coverage for the actor from the begin to the completion. A different
-  ability's begin, or a channel start, in between is CAST_EVIDENCE_CONFLICT.
-- Disagreement gives BEGINCAST_PAIRING_AMBIGUOUS, with the candidates
-  listed. Two begins or two completions in one millisecond are ambiguous
-  outright.
-- No begin:
-  - complete coverage: BEGINCAST_NOT_OBSERVED;
-  - incomplete coverage with an exact cast time: DERIVED_FROM_COMPLETION;
-  - otherwise: CAST_TIME_UNKNOWN, carrying the evidence reason.
-  - The first completion's window opens before the pull, so absence is never
-    proven for it.
-
-**Other executions:**
-
-- INSTANT: INSTANT_COMPLETION.
-- CHANNEL: CHANNEL_START. A begin of a reviewed instant or channel is
-  CAST_EVIDENCE_CONFLICT.
-- Unreviewed: EXECUTION_NOT_REVIEWED.
-- Non-monotonic fight: NON_MONOTONIC_TIME.
-
-**Occupancy:**
-
-- CASTING only inside a paired or derived hard cast.
-- UNKNOWN inside a channel (cancellable): from its start to min(proven bound,
-  next cast or channel start), else unbounded. Also UNKNOWN after an unpaired
-  begin, and before an unresolved or unreviewed completion.
-- NOT_CASTING only when no span covers t AND CASTS coverage for the actor is
-  COMPLETE from the pull to t.
-
-So an instant inside a cast or channel is never "idle".
-
-**Unpaired begins** are INTERRUPTED only when coverage proves nothing
-completed before the next start. Otherwise they are UNKNOWN.
-
-## Review cycle 1 fixes
-
-1. **Possibly-running begins.** Before, any begin referenced in ANY placement
-   was excluded from unpaired handling. Now `pairChain` also returns
-   `surelyPaired`: the begins EVERY consistent placement pairs.
-   - For a begin in a completion's own millisecond, either that completion
-     takes it in every placement, or, in each placement where it follows,
-     every placement of the next completion takes it.
-   - Every other begin is reported in `unpairedBegins` and keeps a POSSIBLE
-     span to the next cast or channel start (unbounded if none). It is
-     `INTERRUPTED` only when never referenced and coverage proves no
-     completion. Otherwise it is UNKNOWN: `PAIRING_NOT_PROVEN`,
-     `EXECUTION_NOT_REVIEWED` (its ability completes unreviewed), or the
-     coverage reason.
-   - Regressions: the reviewer's case (begins 1000 and 2000, completion at
-     2000, UNKNOWN cast time) in both orders gives occupancy UNKNOWN at 2500
-     and through the end. A proven instant with a same-millisecond begin, in
-     both orders, gives `beginPosition: null`, the begin `PAIRING_NOT_PROVEN`
-     and 2500 UNKNOWN. The POSITIVE back-to-back chain, in both orders, gives
-     no unpaired begin and NOT_CASTING after.
-   - Real Restoration Shaman: the three INTERRUPTED are unchanged, and 50
-     begins are now `PAIRING_NOT_PROVEN` (pinned).
-2. **Derived anchors are validated.** `completion − exactMs` becomes
-   `DERIVED_FROM_COMPLETION` only when all of these hold:
-   - it is not before the previous completion of the ability;
-   - no own begin or channel start is strictly inside it;
-   - no other CAST_TIME completion is strictly inside it;
-   - it overlaps no other CASTING span (a post-pass, for same-millisecond
-     completions).
-   Otherwise it is `CAST_EVIDENCE_CONFLICT`. When coverage over the derived
-   cast itself is COMPLETE, it is `BEGINCAST_NOT_OBSERVED`. Tests:
-   - the old overlapping case (1550 < 1700) is now CONFLICT, with one CASTING
-     span and UNKNOWN occupancy;
-   - a valid derivation (1800, after the 1700 completion) is kept;
-   - an interleaved Blast begin gives CONFLICT;
-   - two same-millisecond derived completions both give CONFLICT;
-   - a fully covered derived window gives NOT_OBSERVED.
-
-## Review cycle 2 fixes
-
-1. **An ambiguous placement with no paired begin keeps its unknown start.**
-   When any consistent placement pairs no begin, the possible span starts at
-   the previous completion of the ability (unbounded for the first), not at
-   the earliest candidate. An interleaved-start conflict also starts at the
-   previous completion now. Regression: a begin and completion at 2000
-   (after a Bolt completed at 1200), UNKNOWN cast time, both orders, gives
-   1500 and 1999 UNKNOWN (`CAST_START_UNKNOWN`). The first-completion
-   variant gives 1100 UNKNOWN.
-2. **A conflicting channel keeps its possible channel span.** A CHANNEL whose
-   review a begin contradicts now also gets the channel tail
-   `[cast, next cast start)`. The contradicted review's AT_MOST bound is not
-   used. Regressions:
-   - a begin strictly before (1000, cast at 2000, bound 500): UNKNOWN at
-     1500, 2000, 2500 and 4900;
-   - a same-millisecond begin, both orders: UNKNOWN at 1500 and 2500;
-   - a later Bolt begin still ends it: 2500 UNKNOWN, 3500 CASTING.
-3. **Same class, found on self-audit:**
-   - An unreviewed completion's possible span now runs from the previous
-     completion to the next cast start, since it may have been a channel.
-     Before, it ended at its own cast.
-   - A contradicted INSTANT also gets the channel tail.
-   - The conflict span starts at the previous completion, not the earliest
-     contradicting begin.
-   - Tests: unreviewed gives 2600 UNKNOWN, and 4500 NOT_CASTING after a later
-     Bolt. A contradicted instant has a `CHANNEL_END_UNKNOWN` span
-     `[1500, 3000)` and NOT_CASTING at 4500.
-
-## Review cycle 3 fixes
-
-**Incompatible observed casts are never both certain.**
-
-- The interleave check now counts another ability's begin or channel start
-  in the anchor's own millisecond (`>=`), since order is not proven. It also
-  counts another CAST_TIME ability's completion strictly inside the cast.
-- On that conflict the paired begin is removed from `surelyPaired`, so it
-  keeps a possible span (it may still have been running).
-- The overlap post-pass now covers EVERY CASTING span, observed or derived.
-  All mutually overlapping spans become `CAST_EVIDENCE_CONFLICT`, with a
-  POSSIBLE span from the previous completion of their ability
-  (`windowStartByCompletion`). Their begins are released.
-
-Regressions:
-
-- The reviewer's case (Bolt and Blast begin at 1000, complete at 2000 and
-  3000), in both orders of the simultaneous begins: both conflicts, no
-  CASTING span, UNKNOWN at 1500, 2500 and 3500.
-- Overlapping observed casts (Bolt [1000, 2000), Blast [1500, 2500)): both
-  conflicts, no CASTING span, UNKNOWN at 1200 and 4000.
-- Real-evidence counts are unchanged.
-
-## Review cycle 4 fix
-
-**Same-millisecond rule for derived starts.** The derived-start check now
-counts an own begin or channel start at exactly the derived millisecond
-(`>=`), as the observed-begin path does. Completions keep `>`: a completion at
-a start's millisecond is back-to-back casting.
-
-Regressions (UNVERIFIED CASTS, so derivation is otherwise allowed; Bolt
-completes at 3000 with an exact 2000 ms cast time):
-
-- a channel start at 1000: `CAST_EVIDENCE_CONFLICT`, no CASTING span,
-  UNKNOWN at 1500;
-- another ability's begin at 1000: the same;
-- a begin at 1001, strictly inside: a conflict;
-- an instant at 999, outside: `DERIVED_FROM_COMPLETION@1000` stands.
-
-## Review cycle 5 fix
-
-**Duplicate begins strictly inside a window.** `pairChain` now marks a
-completion AMBIGUOUS_GROUP when the latest millisecond strictly inside its
-window holds two or more begins of the ability. Before, `inside()` chose the
-last in retrieval order. The begins are not surely paired, so each is
-`PAIRING_NOT_PROVEN` with a possible span. An earlier duplicate superseded by
-a later single begin still decides nothing.
-
-Regression: two Bolt begins at 1000 and a completion at 2000, in both retrieval
-orders (distinct locators). The result is BEGINCAST_PAIRING_AMBIGUOUS, with no
-CASTING span, both begins PAIRING_NOT_PROVEN, and 1500 and 2500 UNKNOWN. With a
-later single begin at 1500 the result is `OBSERVED_BEGINCAST@1500`.
-
-Self-audit of the other order-sensitive spots:
-
-- every pairing decision reads times, counts or per-millisecond groups only;
-- duplicate completion times are already broken groups;
-- interleave and derivation checks use `>=` for starts;
-- only listing order (`unpairedBegins`, `spans`) follows canonical position.
+**Resolver helper.** `guardedReadinessUnder(line, bindingsAtMax,
+usabilityAtMax)` returns UNKNOWN for any option it would have to interpret,
+an unsupported condition, or a true condition without proven usability.
 
 ## Files
 
-- `src/engine/game-state/casting/cast-decision-anchor.ts`: new. It imports
-  only engine modules (`state`, `evidence`, `normalization` types).
-- `tests/unit/onb-s4-cast-decision-anchor.test.ts`: new, 41 tests.
-  - Synthetic cases for every anchor source and unknown reason, both
-    same-millisecond orders, channels, conflicts, coverage gaps
-    (PARTIAL/UNVERIFIED), non-monotonic order, melee/id-less/other-actor
-    exclusion, and an import-boundary check.
-  - Real retained evidence:
-    - Mage 121, POSITIVE: 30451 ×6 and 1295924 ×4 paired, 20 channel starts,
-      one interrupted begin.
-    - Mage 121, UNKNOWN: two 30451 ambiguous.
-    - Restoration Shaman 122, instant procs not excluded: Chain Heal 36
-      established / 49 ambiguous, Healing Wave 16 / 16, three interrupted, 50
-      begins PAIRING_NOT_PROVEN, no conflict.
-- `agent/architecture.md`: new section "ONB-S4", plus a pointer at the
-  cooldown contract's "would need its own anchor" sentence.
-- `agent/follow-ups.md`: the A3 "Cast/channel decision anchors" item is
-  marked resolved as shared plumbing, with what remains: no consumer yet,
-  empower events, channel end from auras, prepull hard casts, same-millisecond
-  ambiguity without a proven cast time, complete-review requirement, and
-  pushback.
-- `agent/testing.md`: index block for the new tests.
-- `agent/spec-onboarding-inventory.md`: notes mention ONB-S4 changes no
-  specialization state.
-- `agent/autopilot-queue.md`: ONB-S2 MERGED; ONB-S4 PR_OPEN.
+- `src/simc/wait-actions.ts`: new. The tokens, kept apart so
+  `list-selection.ts` can import them without a cycle.
+- `src/simc/pooling.ts`: new. Semantics header, structure reader, resolver
+  types, `poolDecisionOf`, the resource-independent reasons and the helper.
+- `src/simc/nested-selection.ts`: `scanWaitLine`, `settlePendingPool`, the
+  `poolingFor` input, the step field, two step outcomes and one blocker.
+- `src/simc/first-gcd-selection.ts`: the `APL_WAIT_SELECTED` blocker and
+  check.
+- `src/simc/list-selection.ts`: the POSSIBLE cap.
+- `tests/unit/onb-s5-pooling-wait.test.ts`: new, 39 tests.
+- `tests/contracts/m5c3c3b-engine-scope.test.ts`: the exact rescan-blocker
+  list gains `APL_WAIT_SELECTED`, with its reason.
+- `agent/architecture.md` (new section "ONB-S5"), `agent/follow-ups.md`
+  ("After ONB-S5"), `agent/testing.md` (index block),
+  `agent/spec-onboarding-inventory.md` (notes), `agent/autopilot-queue.md`.
 
 ## Validation
 
-- `npx tsc --noEmit`: clean. `npx prettier --check .`: clean.
-  `git diff --check`: clean.
-- `tests/unit/onb-s4-cast-decision-anchor.test.ts`: 41/41 (after cycle 5).
-- Full `npx vitest run`: 11953 passed, 24 failed. All 24 are in 13 heavy
-  files (simulation runner service, raid-night orchestration, Protection and
-  Retribution projections, corpus harness, G2 re-cut), and none imports the
-  new module.
-  - They were timeouts or STACK_TRACE_ERROR under full parallel load, plus
-    one leftover-temp-directory assertion in runner-service-queue.
-  - Rerun on their own with `--maxWorkers=2`: 209/210, and the one remaining
-    file (runner-service-queue) passes 12/12 alone.
+- `npx tsc --noEmit`: clean. `npx prettier --check` on every changed file:
+  clean.
+- `tests/unit/onb-s5-pooling-wait.test.ts`: 39/39.
+  `tests/contracts/m5c3c3b-engine-scope.test.ts`: green.
+- Full `npx vitest run` (default parallelism): 12029 passed, 21 failed in 14
+  heavy files, all timeouts under load (simulation runner service, public
+  projections, corpus harness). None imports the new modules.
+- Rerun with `--maxWorkers=4`: 12044 passed, 6 failed (timeouts). Those six
+  files rerun serially: 96/97. The one remaining failure,
+  `tests/regression/m8g-encounter-context-composition.test.ts` (workers
+  project, 5 s timeout), fails identically on the untouched main tree on
+  this machine (stashed comparison), so it is not caused by this change.
 
 ## Questions for the reviewer
 
-1. Is the local (one-neighbour) consistency check acceptable, given it can
-   only add ambiguity?
-2. Is UNKNOWN occupancy for the whole of an unbounded channel the right
-   fail-closed choice (rather than ending it at the next own instant)?
+1. Is UNKNOWN (rather than a new REJECTED basis) the right pinned comparison
+   for an observed cast against a definite pool, given the public-contract
+   constraint?
+2. Is the resource-independent PROVEN_UNUSABLE set (cooldown, static,
+   stealth, vanish, aura) sound for "not ready even at the maximum"?

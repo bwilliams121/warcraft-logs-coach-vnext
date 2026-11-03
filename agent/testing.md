@@ -1746,6 +1746,21 @@ cast and channel decision anchor (ONB-S4, tests/unit/onb-s4-cast-decision-anchor
   unreviewed ability / non-monotonic fight     -> EXECUTION_NOT_REVIEWED, window before it UNKNOWN / NON_MONOTONIC_TIME
   NOT_CASTING                                  -> only with COMPLETE cast coverage from the pull; missing page / UNVERIFIED -> UNKNOWN
   real Mage 121 / Restoration Shaman 122       -> Arcane Missiles cast-only; pinned pair / ambiguity / interrupted counts
+pooling and wait semantics (ONB-S5, tests/unit/onb-s5-pooling-wait.test.ts):
+  tokens                                       -> pool_resource, wait, wait_until_ready, wait_for_cooldown; no `wait_for`
+  extra_amount / line_cd / bad bool / empty sec -> UNMODELLED_WAIT_ACTION, never a guess
+  guarded line ready now                       -> GUARDED_READY; the guarded line is selected; resolver never asked
+  guarded not ready, ready at max              -> POOLS: pool SELECTED, nothing below reached
+  guarded not ready, not ready at max          -> NOT_RESOURCE_LIMITED; the scan continues
+  guarded not ready, no resolver               -> pool MAY_SELECT; a definite lower line is NOT the answer
+  cooldown / line_cd blocks the guarded line   -> NOT_RESOURCE_LIMITED without the resolver; INSUFFICIENT_RESOURCE asks it
+  guarded undecided / energy ONE_OF {41,58} vs 50 -> UNDECIDED; pool ahead of the guarded candidate
+  guarded line background / nothing follows    -> PRUNED_WITH_GUARDED_LINE
+  guarded variable, call or wait               -> UNMODELLED_WAIT_ACTION
+  wait lines with a true condition             -> MAY_SELECT only (movement and history unknown)
+  first-GCD query                              -> APL_WAIT_SELECTED, never a GCD selection; coverage UNKNOWN
+  observed cast vs a pool                      -> UNKNOWN AUTHORITY_SELECTION_UNRESOLVED; never MATCH, never REJECTED
+  single-list walker                           -> a waiting line is never its definite winner
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)
