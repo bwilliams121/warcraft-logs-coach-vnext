@@ -876,16 +876,45 @@ and the analysis coverage.
 ### M15-C: Evidence-grounded impact estimation
 
 ```autopilot
-status: OWNER_DECISION_REQUIRED
+status: PR_OPEN
 dependsOn: M15-B
+branch: autopilot/m15-c
 wcl: NONE
 publicContract: NONE
-ownerDecision: What authority may estimate a finding's impact. Options: the published SimulationCraft model, which today exists only for Blood on 69933, with every other spec or build reporting UNKNOWN; observed factual deltas from M14-D, which are bounds and never causal by themselves; or no numeric impact, only an evidence-quality and actionability ordering. This sets what "impact" means on every report.
 ```
 
-**Direction.** `agent/architecture.md` "Milestone 15" (impact estimation),
-CLAUDE.md "Confidence" (confidence must not simply reflect the size of a
-difference).
+**Direction.** `agent/architecture.md` "Milestone 15", owner decision
+(2026-11-02) "impact is non-numeric prioritization; final scoring
+deferred"; CLAUDE.md "Confidence" (confidence must not simply reflect the
+size of a difference).
+
+**Owner resolution (2026-11-02).** In v1, impact means NON-NUMERIC
+PRIORITIZATION ONLY.
+
+**Scope.**
+
+- Prioritize trustworthy findings on the M15-A ranking from structured
+  evidence only:
+  - authority-backed actionability;
+  - evidence quality and completeness;
+  - repeated occurrence and pattern frequency;
+  - the scope or severity of the demonstrated finding;
+  - whether the result is actionable.
+- Use a qualitative vocabulary (for example `HIGH_PRIORITY`,
+  `MEDIUM_PRIORITY`, `LOW_PRIORITY`, `NOT_PRIORITIZED`). It means "where
+  should the player look first", never "how much it cost".
+- **No numeric estimate.** No DPS lost, percent performance lost, damage
+  lost, ranking gain or output recovered.
+- **No penalty for non-results.** UNKNOWN, NO_AUTHORITY_AVAILABLE,
+  SUPPRESSED and unsupported results receive no failure or impact penalty.
+- **Existing numbers keep their meaning.** Counts, durations, uptime,
+  timing differences and bounded comparison deltas are never converted into
+  causal impact.
+- **Extension point.** Add an explicit hook for future authority-backed
+  numeric estimators. Each declares its authority, supported spec, build
+  and domain, evidence requirements, uncertainty, units and provenance.
+  With none registered, every case is UNKNOWN or NOT_AVAILABLE.
+- **Contract tests** pin the absence of numeric-impact keys.
 
 ### M15-D: Advanced report presentation
 
@@ -913,15 +942,32 @@ access.
 ### M15-E: Optional scoring
 
 ```autopilot
-status: OWNER_DECISION_REQUIRED
-dependsOn: M15-C
+status: BLOCKED
+dependsOn: M15-C, ONB-Z
 wcl: NONE
 publicContract: EXPECTED
-ownerDecision: Whether the product shows a score at all, and if so its scale, what it summarizes (which decision categories, and whether impact from M15-C contributes), and how low coverage is disclosed in it. UNKNOWN, NO_AUTHORITY_AVAILABLE and unsupported results never contribute a penalty under any choice.
 ```
 
 **Direction.** `agent/architecture.md` "Milestone 15": optional scoring, and
 only trustworthy findings may influence a score.
+
+**Deliberately deferred (owner decision, 2026-11-02).** This is a
+product-sequencing decision, not an unresolved architecture blocker.
+
+- **When.** Final scoring semantics are revisited only after every playable
+  specialization in the pinned roster reaches a terminal onboarding
+  disposition (ONB-Z). They are designed against the complete evidence
+  landscape across DPS, tanks, healers and Augmentation.
+- **Status.** The entry is BLOCKED, not OWNER_DECISION_REQUIRED, so it
+  never stops the autopilot during onboarding. When ONB-Z is merged, the
+  owner sets the scoring decision and the entry becomes runnable.
+- **Until then.** Only scoring-neutral infrastructure useful under any
+  eventual model may land, and only inside another reviewed tranche.
+- **Never:**
+  - a universal score;
+  - qualitative priority turned into hidden DPS-loss weights;
+  - negative scoring of UNKNOWN or unsupported behavior;
+  - onboarding blocked on scoring.
 
 ### M15-F: Product hardening and final coverage disclosure
 
@@ -1023,6 +1069,12 @@ authority or evidence condition.
    specializations remain.
 7. **Network.** `wcl: NONE` on every entry. No new Warcraft Logs permission
    is granted here. Missing evidence is recorded for ONB-EV, never fetched.
+8. **Prioritization inputs (owner decision, 2026-11-02).** Every onboarded
+   specialization exposes the structured evidence and actionability
+   information the M15-C non-numeric prioritization needs.
+   - No numeric impact estimate is required or invented.
+   - Final scoring (M15-E) is deferred until ONB-Z and never blocks
+     onboarding.
 
 ### ONB-S1: Shared precombat action-list execution for APL variables
 

@@ -4,97 +4,119 @@ Rolling file: overwritten for each review cycle.
 
 ## Change
 
-Roadmap: full playable-specialization onboarding. Branch
-`roadmap/spec-onboarding-queue`, from main at 8cb47d1.
+M15-C: evidence-grounded impact estimation, as owner-decided non-numeric
+prioritization. Branch `autopilot/m15-c`, from main at a49b5ff.
 
-This is a planning/documentation change only:
+- **Internal only.** No change under `src/contracts/`, `src/api/` or
+  `src/mcp/`. Nothing is wired into the service.
+- **Warcraft Logs: NONE.** No request, probe or capture. The tests use
+  synthetic records and the committed M11-G2 subject fight.
 
-- no source, test, analyzer, runtime-data or public-contract change;
-- **Warcraft Logs: NONE.** No request, probe or capture was made.
+## Owner decision this implements (2026-11-02)
 
-## Owner product decision (2026-11-02)
+This branch also commits the owner's decision record, which had been written
+uncommitted:
 
-The project is not complete when M15-F is complete. Onboarding continues
-until every playable specialization in the pinned roster
-(`src/data/game/spec-roster.json`, 40 playable) has a terminal disposition:
+- `agent/architecture.md` "Owner decision (2026-11-02): impact is
+  non-numeric prioritization; final scoring deferred";
+- the M15-C entry (READY with scope, now PR_OPEN);
+- M15-E (BLOCKED on ONB-Z);
+- onboarding rule 8 in `agent/autopilot-queue.md`.
 
-1. PUBLIC;
-2. DEFERRED by owner decision;
-3. BLOCKED on a documented, genuine missing authority or evidence condition.
-
-An empty queue while ordinary specs remain unsupported is not completion,
-and a shared foundation never counts as a supported specialization.
+In v1, impact means a qualitative "where to look first" label. There is no
+DPS, damage or performance lost, no ranking gain and no output recovered.
+Non-results get no penalty, and there is an explicit hook for future
+authority-backed numeric estimators.
 
 ## Files
 
-### `agent/spec-onboarding-inventory.md` (new)
+### `src/reporting/priority-labels.ts` (new)
 
-- The completion rule and the state and evidence vocabularies.
-- A machine-readable `onboarding-progress` JSON block: 40 playable, 6
-  PUBLIC, 0 INTERNAL_ONLY, 1 FOUNDATION (Restoration Shaman), 33
-  NOT_STARTED; 15% publicly supported, 15% terminally dispositioned.
-- A 40-row roster matrix with each specialization's state, known retained
-  evidence and owning queue entries.
-- The cohort design by engineering pattern, following the M11-D0 census.
-- The onboarding evidence policy.
+`labelPriorities(FindingPrioritization)` labels every M15-A item. It reads
+only section, standing, state evidence and item kind.
 
-### `agent/autopilot-queue.md`
+- **HIGH_PRIORITY:** a PATTERN of ACTIONABLE_AUTHORITY_DIVERGENCE.
+- **MEDIUM_PRIORITY:** a SINGLE actionable divergence.
+- **LOW_PRIORITY:** a divergence whose actionability is unproven, at any
+  size.
+- **NOT_PRIORITIZED:** informational items and every non-assessment
+  (SUPPRESSED, UNKNOWN, NO_AUTHORITY_AVAILABLE, UNSUPPORTED).
 
-- A "Specialization onboarding" section with rules shared by every entry:
-  - per-spec ownership, with no universal evaluator and no `if spec ===`;
-  - every internal entry runs authority review, then INTERNAL_ONLY
-    implementation, then real-evidence validation;
-  - PUBLIC promotion is a separate reviewed entry under the existing gates;
-  - owner stops only for genuine decisions;
-  - existing gates are never weakened;
-  - `wcl: NONE` on every entry, with missing evidence routed to ONB-EV.
-- 54 new entries, inserted before `M11-G4-5-R`:
-  - **Shared capabilities:** ONB-S1 precombat variables, S2 combining
-    operations, S4 cast/channel anchor, S5 pooling/wait, S6 pet mapping.
-  - **Healers:** HEAL-A/AP (Restoration Shaman), then B1 (Holy Paladin,
-    Restoration Druid, Mistweaver), B2 (Holy Priest), B3 (Discipline) and
-    B4 (Preservation), each with a public entry.
-  - **Cohorts:** A (Havoc, then Subtlety, Fury, Protection Warrior);
-    B (Arms, then Frost DK, Enhancement); B3 (Devourer alone);
-    C (Feral, then Outlaw); T (Windwalker, then Guardian, Beast Mastery,
-    Survival); D (Destruction, then Elemental/Balance/Shadow,
-    Arcane/Frost Mage, Affliction/Marksmanship); X (Fire, Devastation,
-    Vengeance, Demonology, Unholy, each alone). Every one has a public
-    entry.
-  - **ONB-Z:** the completion matrix, regenerated from the registry, with a
-    contract test.
-- Two new OWNER_DECISION_REQUIRED entries, so the autopilot cannot decide
-  them:
-  - **ONB-S3:** the enemy-set and target-count authority model.
-    `TARGET_COUNT` is currently a permanent blocker; Cohort T depends on it.
-  - **ONB-EV:** a bounded, neutral Warcraft Logs evidence campaign for
-    specs with no retained real evidence.
-- Bookkeeping: M15-F is recorded MERGED (#37, 8cb47d1).
-- Existing entries are otherwise unchanged; this was verified with the
-  supervisor's own `ConvertFrom-QueueText`.
+Labels never increase down the M15-A ranking. A forged PRIORITIZED item that
+is not a PROVEN divergence gets no priority. Refused records stay unlabelled.
+The result states `meaning: WHERE_TO_LOOK_FIRST`,
+`numericEstimate: NOT_PRODUCED`, `producerSeverity: NOT_DECLARED` and
+`findingEffect` NONE.
+
+### `src/reporting/impact-estimators.ts` (new)
+
+The extension point. `IMPACT_ESTIMATORS` is empty.
+
+- **Registry validation.** `buildImpactEstimatorRegistry` refuses the whole
+  registry for:
+  - a missing or NO_AUTHORITY authority;
+  - empty supported specs, builds or categories, or an unknown category;
+  - no evidence requirements;
+  - uncertainty other than BOUNDED_INTERVAL;
+  - missing units or provenance;
+  - a duplicate id;
+  - overlapping spec × build × category cells.
+- **`estimateImpact` resolution.**
+  - **NOT_AVAILABLE:** not a prioritized divergence; no estimator, or none
+    that supports the item; an undeclared build; a refused registry.
+  - **UNKNOWN:** an unknown build (`BUILD_NOT_ESTABLISHED`, with
+    `estimatorId: null`); an estimator UNKNOWN, throw or malformed interval.
+  - **Selection** matches spec, category and build together, so estimators
+    with disjoint builds resolve the same in any registration order
+    (review cycle 1 fix, with a regression test in both orders).
+  - **ESTIMATED:** otherwise, with the declaration restated.
+- The labels never import it.
+
+### Tests
+
+- `tests/unit/m15c-priority-labels.test.ts`:
+  - every label rule, and labels never increasing down the ranking;
+  - every non-result is NOT_PRIORITIZED (a 30-record UNKNOWN pattern
+    included);
+  - refusal paths;
+  - every estimator resolution and registry problem;
+  - an estimate never changes the labels;
+  - the real Blood fight.
+- `tests/contracts/m15c-impact-contract.test.ts`:
+  - no numeric-impact key in the public analysis or raid-night schemas
+    (with a non-vacuity check) or in the labelling;
+  - exactly four labels;
+  - the labels never read the hook, and no estimator is registered;
+  - nothing outside `src/reporting/` imports either module.
+- `tests/contracts/m15a-reporting-layering.test.ts`: lists the two new
+  files. The import rules and importer edges are unchanged.
+
+### Docs
+
+- `agent/architecture.md`: an "M15-C — Non-numeric impact prioritization"
+  section.
+- `agent/follow-ups.md`: "After M15-C". Not published; no real fight reaches
+  HIGH or MEDIUM; severity is undeclared; the pattern threshold is not
+  validated; no estimator exists and no build input is passed; M15-E stays
+  deferred.
+
+## Real evidence
+
+The committed Blood fight:
+
+- 0 HIGH and 0 MEDIUM. Every prioritized item is LOW, led by the
+  45-occurrence `heart_strike` pattern at rank 1 (alternative unproven).
+- 224 UNKNOWN decisions are NOT_PRIORITIZED.
+- Nothing is refused, and every impact is NOT_AVAILABLE.
 
 ## Validation
 
-- The supervisor parser reads 79 entries, with no duplicate IDs and no
-  unknown dependencies.
-- An offline selection simulation runs every entry except those behind the
-  four owner decisions (M15-C, M15-E, ONB-S3, ONB-EV), Cohort T and ONB-Z
-  (which depend on ONB-S3), and the deferred M11-G4-5-R.
-- `prettier --check` passes on both files.
-
-## Review cycle 2
-
-The reviewer found that the universal APL/MATCH requirement conflicted with
-the healer scope. Fixed:
-
-- The onboarding rules now separate the rotational internal tranche
-  (rule 2, unchanged) from a healer internal tranche (rule 3).
-- Rule 3 keeps the M12-D verdict limits and replaces the APL and
-  MATCH/discrimination steps with healer validation: real cooldown
-  observations, ASSIGNMENT outcomes against a supplied plan, identity and
-  completeness (UNKNOWN on PARTIAL or ABSENT), missing-plan
-  NO_AUTHORITY_AVAILABLE, and negative controls (no HPS ranking, no
-  per-cast verdict, no cooldown-quality verdict without a plan).
-- Public promotion (rule 4) uses the gate for its analyzer kind.
-- HEAL-AP defines and pins the healer gate, separate from the unchanged
-  rotational gate.
+- `npx tsc --noEmit`: clean.
+- Focused tests after the cycle 1 fix: 3 files, 31 tests passed.
+- Full suite with the default 5 s timeout: 19 timeouts in unrelated
+  simulation and runner tests under machine load.
+- Full suite with `--testTimeout=180000`: 11,876 of 11,878 passed. The two
+  failures were the M9-B corpus cases (`m9b-corpus-harness` Protection
+  Paladin, `m9b-corpus-gate` under workerd). Both pass when rerun alone, and
+  neither touches `src/reporting/`.
+- `prettier --check` and `git diff --check`: clean.

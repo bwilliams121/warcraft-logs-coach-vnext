@@ -9279,6 +9279,76 @@ Improve:
 
 Only trustworthy findings should influence score.
 
+## Owner decision (2026-11-02): impact is non-numeric prioritization; final scoring deferred
+
+**Context.** The owner does not intend to use or launch the product until
+the full playable-specialization onboarding program
+(`agent/spec-onboarding-inventory.md`) is complete.
+
+### Impact (M15-C proceeds now)
+
+In v1, "impact" means NON-NUMERIC PRIORITIZATION ONLY.
+
+- **No universal numeric estimate.** This covers DPS lost, percent
+  performance lost, damage lost, estimated ranking gain and theoretical
+  output recovered.
+- **Why.** Current evidence cannot support those meanings consistently
+  across specs, roles, builds, healers and Augmentation:
+  - SimulationCraft covers only limited model and build cases (today only
+    Blood on 69933);
+  - M14-D deltas are observations and bounds, not causal estimates.
+- **What prioritization uses.** Only structured evidence:
+  - authority-backed actionability;
+  - evidence quality and completeness;
+  - repeated occurrence and pattern frequency;
+  - the scope or severity of the demonstrated finding;
+  - whether the result is actionable.
+- **No penalty for non-results.** UNKNOWN, NO_AUTHORITY_AVAILABLE,
+  SUPPRESSED and unsupported results never receive a failure or impact
+  penalty.
+- **Vocabulary.** A qualitative label (`HIGH_PRIORITY`, `MEDIUM_PRIORITY`,
+  `LOW_PRIORITY`, `NOT_PRIORITIZED`, or an equivalent that fits the M15-A
+  ranking) means "where should the player look first among trustworthy
+  findings". It never means "how much DPS, healing or performance this
+  cost".
+- **Existing numbers keep their meaning.** Counts, durations, uptime,
+  timing differences and bounded comparison deltas may still be shown.
+  They are never converted into causal impact.
+- **Extension point.** Keep an explicit hook for future authority-backed
+  numeric impact estimators. Each must declare:
+  - its authority;
+  - the specs, builds and domains it supports;
+  - its evidence requirements;
+  - its uncertainty, units and provenance.
+
+  Unsupported cases stay UNKNOWN or NOT_AVAILABLE.
+- **Network.** No Warcraft Logs request is authorized by this decision.
+
+### Final scoring (M15-E deliberately deferred)
+
+This is a product-sequencing decision, not an unresolved architecture
+blocker.
+
+- **Timing.** The final scoring model is designed only after every playable
+  specialization in the pinned roster reaches a terminal onboarding
+  disposition (PUBLIC, owner-DEFERRED or documented BLOCKED).
+- **Why.** The score must be designed against the complete evidence
+  landscape across DPS, tanks, healers and Augmentation, not around the
+  first few supported specs.
+- **Allowed before then.** Only scoring-neutral infrastructure that is
+  useful under any eventual model.
+- **Not allowed:**
+  - inventing a universal score now;
+  - turning qualitative priority into hidden DPS-loss weights;
+  - scoring UNKNOWN or unsupported behavior negatively;
+  - blocking specialization onboarding on scoring.
+
+### Onboarding requirement
+
+Every subsequently onboarded specialization exposes the structured evidence
+and actionability information the M15-C prioritization needs. None is
+required to invent a numeric impact estimate.
+
 ---
 
 # Raid-First Scope
@@ -11609,6 +11679,85 @@ rating, percentage or correctness (the M6-C sweep runs over it).
 coverage, the 45-occurrence `heart_strike` pattern first with standing
 `DIVERGENCE_ALTERNATIVE_ACTIONABILITY_UNPROVEN`, 0 actionable records, 224
 UNKNOWN rotation decisions tallied, diagnosis NOT_ASSESSED disclosed.
+
+## M15-C — Non-numeric impact prioritization
+
+Milestone 15 (autopilot queue entry M15-C), implementing the owner decision
+of 2026-11-02 above ("impact is non-numeric prioritization"). Internal: no
+public contract change, nothing wired into the service. No Warcraft Logs
+request: synthetic records and the committed M11-G2 subject fight.
+
+**Question.** "Among the trustworthy findings, where should the player look
+first?" Never "how much did it cost". No DPS, damage or performance lost,
+ranking gain or output recovered is produced, read or implied.
+
+**Labels** (`src/reporting/priority-labels.ts`, `finding-priority-label/1`).
+`labelPriorities(prioritization)` labels every M15-A item. It reads only
+section, standing, state evidence and item kind (stated as `inputs`):
+
+| Basis | Label |
+| --- | --- |
+| PATTERN of `ACTIONABLE_AUTHORITY_DIVERGENCE` | `HIGH_PRIORITY` |
+| SINGLE `ACTIONABLE_AUTHORITY_DIVERGENCE` | `MEDIUM_PRIORITY` |
+| divergence with actionability unproven (either other standing), any size | `LOW_PRIORITY` |
+| informational (consistent, observed fact, a zero count included) | `NOT_PRIORITIZED` |
+| non-assessment (SUPPRESSED, UNKNOWN, NO_AUTHORITY_AVAILABLE, UNSUPPORTED) | `NOT_PRIORITIZED` |
+
+- **Repeated occurrence** counts only as M15-A's PATTERN (the configured
+  threshold) and as rank within a label. It never lifts an unproven
+  divergence above a proven one.
+- **Labels follow the ranking.** M15-A orders by standing first, and a
+  PATTERN always outnumbers a SINGLE, so labels never increase down the
+  ranking. A label restates the rank coarsely and never reorders it.
+- **Fail-safe.** A PRIORITIZED item that is not a PROVEN divergence gets no
+  priority. Records M15-A refused are listed unlabelled. A refused
+  prioritization labels nothing (`NOT_LABELLED`).
+- **Stated on the result:** `meaning: WHERE_TO_LOOK_FIRST`,
+  `numericEstimate: NOT_PRODUCED`, `producerSeverity: NOT_DECLARED` (no
+  producer declares one, so none is invented), and `findingEffect` NONE.
+  "No penalty for non-results" is the NOT_PRIORITIZED label: it is the
+  absence of a priority, never a failure.
+
+**Numeric estimator hook** (`src/reporting/impact-estimators.ts`). This is
+the extension point the owner asked for. `IMPACT_ESTIMATORS` is empty.
+
+- **Validation.** `buildImpactEstimatorRegistry` refuses the WHOLE registry
+  if any estimator lacks one of: an authority (never
+  NO_AUTHORITY_AVAILABLE), non-empty supported specs, builds and
+  categories, evidence requirements, `BOUNDED_INTERVAL` uncertainty, units
+  or provenance. It also refuses a duplicate id, or two estimators claiming
+  the same spec × build × category cell.
+- **Resolution** (`estimateImpact(item, build, registry)`):
+  - an item that is not a prioritized divergence is NOT_AVAILABLE, so
+    UNKNOWN and every other non-result never carries an impact;
+  - no estimator, no supporting estimator, an undeclared build or a refused
+    registry is NOT_AVAILABLE (no standard);
+  - an estimator is selected by spec, category AND build together; cells
+    never overlap, so registration order never decides;
+  - a supported spec and category with no established build is UNKNOWN
+    `BUILD_NOT_ESTABLISHED`, naming no estimator (several may cover
+    disjoint builds);
+  - an estimator UNKNOWN, a thrown error or a malformed interval is UNKNOWN,
+    never repaired into a number;
+  - otherwise the result is ESTIMATED, restating the declaration.
+- **Independence.** The labels never import the hook, and an estimate
+  changes no label, rank, disposition, confidence or suppression.
+
+**Contract** (`tests/contracts/m15c-impact-contract.test.ts`).
+- No key of the public analysis or raid-night schemas, and none of the
+  labelling, matches the numeric-impact pattern (lost/gain/recovered,
+  impact, estimate).
+- The labels are exactly the four words.
+- Nothing outside `src/reporting/` imports either module.
+- The layering test lists both files.
+
+**Real evidence** (the subject's Blood analysis):
+- 0 HIGH and 0 MEDIUM;
+- every prioritized item is LOW, led by the 45-occurrence `heart_strike`
+  pattern at rank 1, whose alternative is unproven;
+- the 224 UNKNOWN decisions are NOT_PRIORITIZED;
+- nothing is refused;
+- every item's impact is NOT_AVAILABLE.
 
 ## M15-D — Advanced report presentation
 
