@@ -1805,6 +1805,18 @@ healer public shape and healer promotion gate (HEAL-AP, tests/integration/heal-a
   gate IDENTITY                                -> other spec IDENTITY_REFUSED (+ SUBJECT_NOT_ASSESSED); unstated SUBJECT_SPECIALIZATION_NOT_STATED
   gate COMPLETENESS                            -> CASTS withdrawn: listing and cast-less entry UNKNOWN CAPABILITY_UNVERIFIED; PLAYER_CONTEXT: ROSTER_NOT_IN_SCOPE
   gate NEGATIVE CONTROLS                       -> no hps/amount/total/rank/score/confidence/quality/state/status key; no verdict word
+three internal healers (HEAL-B1, tests/unit/specs/heal-b1-healer-evaluators.test.ts, heal-b1-healer-registrations.test.ts, tests/unit/data/healing-cooldown-identity-artifact.test.ts):
+  each of Holy Paladin, Resto Druid, Mistweaver -> wrong spec/class, unlisted actor, other-class actor, pet, other fight: IDENTITY_REFUSED
+  no plan / any cast                           -> ASSIGNMENT NO_AUTHORITY_AVAILABLE; HEALING_DECISION NO_AUTHORITY_AVAILABLE; no failure word
+  begincast, aura, other player, pet, unidentified or another healer's cooldown -> never a use; stated pet counted as a source
+  CASTS gap                                    -> listing UNKNOWN INSUFFICIENT_COVERAGE, known uses kept
+  plan                                         -> MET; no cast in a covered window UNKNOWN READINESS; NOT_ACTIONABLE after kill; ABILITY_NOT_REGISTERED; Spirit Link Totem not this spec's
+  PLAYER_CONTEXT / FULL_RAID                   -> ROSTER_NOT_IN_SCOPE / overlap counts the player and its pet only
+  registration                                 -> INTERNAL_ONLY; public lookup null; identity table refuses; public request SPEC_NOT_SUPPORTED, no dispatch
+  real M13-A Holy Paladin 5                    -> Avenging Wrath 184,987 and Aura Mastery 272,367 (raw-checked); listing UNKNOWN; ROSTER_NOT_IN_SCOPE
+  real fight 48 Holy Paladin 1, Mistweaver 9   -> no use, listing UNKNOWN, never "none used"; Mistweaver sources 9 + four stated pets
+  artifact reader                              -> four artifacts load; cast id = row override (Avenging Crusader 216331, not 394088); node type, class/spec, siblings checked
+  shared modules                               -> Restoration Shaman tests, the HEAL-AP gate and the corpus run unchanged over them
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)

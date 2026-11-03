@@ -55,6 +55,9 @@ describe("every Node-executable layer of the corpus executes clean", () => {
       "SPEC_BREWMASTER_MONK",
       "SPEC_AUGMENTATION_EVOKER",
       "SPEC_RESTORATION_SHAMAN",
+      "SPEC_HOLY_PALADIN",
+      "SPEC_RESTORATION_DRUID",
+      "SPEC_MISTWEAVER_MONK",
       "APPLICATION_SERVICE",
     ]);
   });

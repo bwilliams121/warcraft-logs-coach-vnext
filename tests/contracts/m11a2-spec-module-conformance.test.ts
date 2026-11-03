@@ -131,6 +131,18 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
     sourceId: 122,
     archive: true,
   },
+  // HEAL-B1: actor 1 of the same fight, the Holy Paladin the committed M12
+  // context reports. Archive evidence only.
+  "paladin/holy": {
+    artifactId: "wcl-fight-context-b1pm-fight-48",
+    fightId: 48,
+    sourceId: 1,
+    archive: true,
+  },
+  // HEAL-B1: actors 2 and 17 of gtKb fight 22, the Restoration Druid and the
+  // Mistweaver Monk the committed corpus context reports.
+  "druid/restoration": { artifactId: "wcl-fight-context-gtkb-fight-22", fightId: 22, sourceId: 2 },
+  "monk/mistweaver": { artifactId: "wcl-fight-context-gtkb-fight-22", fightId: 22, sourceId: 17 },
 };
 
 const ARCHIVE_GRAPHQL: Record<string, string> = import.meta.glob("../evidence/artifacts/wcl-graphql/*.json", {
@@ -346,7 +358,7 @@ describe("the supplemental seam is not wired to any transport, service, contract
 });
 
 describe("what the tree exports today", () => {
-  it("is exactly the seven public modules, each with zero supplemental analyses", () => {
+  it("is exactly the seven public modules and, since HEAL-B1, three INTERNAL_ONLY healer modules, each with zero supplemental analyses", () => {
     // A reviewed snapshot, not the rule: every proof above is per module and
     // count-independent. The third module (M11-A4) first changed this line
     // WITHOUT the five-site identity move — INTERNAL_ONLY, carrying the
@@ -365,9 +377,13 @@ describe("what the tree exports today", () => {
       ]),
     ).toEqual([
       ["BLOOD_DEATH_KNIGHT_MODULE", "deathknight/blood", "PUBLIC", 0],
+      // HEAL-B1: healers on Restoration Shaman's architecture, INTERNAL_ONLY.
+      ["RESTORATION_DRUID_MODULE", "druid/restoration", "INTERNAL_ONLY", 0],
       // M13-E: INTERNAL_ONLY, binding no decision authority; PUBLIC since M13-F.
       ["AUGMENTATION_EVOKER_MODULE", "evoker/augmentation", "PUBLIC", 0],
       ["BREWMASTER_MONK_MODULE", "monk/brewmaster", "PUBLIC", 0],
+      ["MISTWEAVER_MONK_MODULE", "monk/mistweaver", "INTERNAL_ONLY", 0],
+      ["HOLY_PALADIN_MODULE", "paladin/holy", "INTERNAL_ONLY", 0],
       ["PROTECTION_PALADIN_MODULE", "paladin/protection", "PUBLIC", 0],
       ["RETRIBUTION_PALADIN_MODULE", "paladin/retribution", "PUBLIC", 0],
       ["ASSASSINATION_MODULE", "rogue/assassination", "PUBLIC", 0],

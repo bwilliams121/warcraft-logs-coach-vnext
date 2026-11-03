@@ -86,7 +86,7 @@ describe("the production catalog", () => {
     expect(validateAnalyzerCatalog(ANALYZER_REGISTRATIONS).ok).toBe(true);
   });
 
-  it("carries seven PUBLIC registrations — Assassination, both Paladins, Blood Death Knight (since M11-B12), Brewmaster Monk (since M11-C4j), Augmentation Evoker (INTERNAL_ONLY in M13-E, PUBLIC since M13-F) and Restoration Shaman (INTERNAL_ONLY in HEAL-A, PUBLIC since HEAL-AP)", () => {
+  it("carries seven PUBLIC registrations — Assassination, both Paladins, Blood Death Knight (since M11-B12), Brewmaster Monk (since M11-C4j), Augmentation Evoker (INTERNAL_ONLY in M13-E, PUBLIC since M13-F) and Restoration Shaman (INTERNAL_ONLY in HEAL-A, PUBLIC since HEAL-AP), plus three INTERNAL_ONLY healer rows since HEAL-B1", () => {
     expect(
       PRODUCTION_CATALOG.registrations.map((registration) => [
         registration.analyzerId,
@@ -101,10 +101,14 @@ describe("the production catalog", () => {
       ["monk-brewmaster-observed-decisions", "monk/brewmaster", "PUBLIC"],
       ["evoker-augmentation-support-observations", "evoker/augmentation", "PUBLIC"],
       ["shaman-restoration-healer-findings", "shaman/restoration", "PUBLIC"],
+      // HEAL-B1: healer rows on Restoration Shaman's architecture, INTERNAL_ONLY.
+      ["paladin-holy-healer-findings", "paladin/holy", "INTERNAL_ONLY"],
+      ["druid-restoration-healer-findings", "druid/restoration", "INTERNAL_ONLY"],
+      ["monk-mistweaver-healer-findings", "monk/mistweaver", "INTERNAL_ONLY"],
     ]);
     // The public set is DERIVED from the rows' exposure, never hand-listed:
-    // six of seven rows in HEAL-A (Restoration Shaman was INTERNAL_ONLY), and
-    // all seven since HEAL-AP.
+    // six of seven rows in HEAL-A (Restoration Shaman was INTERNAL_ONLY), all
+    // seven from HEAL-AP, and seven of ten since HEAL-B1.
     expect(ENABLED_ANALYZERS).toEqual(publicAnalyzers(PRODUCTION_CATALOG));
     expect(ENABLED_ANALYZERS).toHaveLength(7);
     expect(ENABLED_ANALYZERS.map((analyzer) => analyzer.specId)).toEqual([
@@ -162,7 +166,7 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
     const rows = catalog.registrations as AnalyzerRegistration[];
     expect(() => rows.push({ ...rogue, analyzerId: "second" })).toThrow(TypeError);
     expect(() => rows.push({ ...paladin, analyzerId: "third" })).toThrow(TypeError);
-    expect(catalog.registrations).toHaveLength(7);
+    expect(catalog.registrations).toHaveLength(10);
   });
 
   it("exposure cannot be flipped back to INTERNAL_ONLY", () => {

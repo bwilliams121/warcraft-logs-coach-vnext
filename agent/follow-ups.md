@@ -433,6 +433,43 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After HEAL-B1: what the three internal healer registrations do not establish
+
+**Raised:** HEAL-B1 (2026-11-03).
+
+- **None of the three can pass the healer promotion gate on committed
+  evidence yet (HEAL-B1P).** The gate needs, per PUBLIC healer, a real subject
+  with a COMPLETE use listing, at least one use, and a met and a not-met plan
+  entry over those uses. Holy Paladin's only real uses (M13-A actor 5,
+  Avenging Wrath and Aura Mastery) sit in a filtered capture whose listing is
+  UNKNOWN; b1PmaKrd6CDfzngc fight 48 holds no cast of the Holy Paladin or the
+  Mistweaver; no committed capture holds a Restoration Druid event. HEAL-B1P
+  needs whole-fight cast captures of each subject: for the fight 48 Holy
+  Paladin and Mistweaver, possibly cut from the retained, authorized M11-E2
+  raw capture (no new request); for Restoration Druid, authorized evidence
+  (an ONB-EV / owner decision). Never a weaker gate.
+- **Six of the ten identified abilities are identified from the pinned row
+  only.** Only Aura Mastery (31821) and Avenging Wrath (31884) are observed
+  as casts in committed evidence. In particular, the activated cast id of
+  Avenging Crusader (216331) rests on the row's `id_override_spell` alone,
+  and Tranquility's cast-event shape (a channel) is not observed. An
+  identified id that is never observed can only leave a use unlisted, and
+  the listing completeness and READINESS_NOT_ESTABLISHED keep that from
+  becoming a miss.
+- **The selections are deliberately narrow.** Externals (Blessing of
+  Sacrifice, Ironbark, Life Cocoon), Tyr's Deliverance (its row's spell id was
+  not reviewed against a cast), Divine Toll, Celestial Conduit (hero tree) and
+  class-tree spells are not identified. A plan entry for one is
+  `ABILITY_NOT_REGISTERED`, never reinterpreted. Widening a selection is a
+  reviewed data change.
+- **The registrations are copies of one shape.** Each healer registration
+  (four, with Restoration Shaman's) restates the same facade around its own
+  evaluator. A shared healer registration helper was not introduced: every
+  registration in the tree is specialization-owned, and the copies differ in
+  identity and data. Revisit if a fifth healer copies it again.
+
+---
+
 ## After HEAL-AP: what the public Restoration Shaman does not establish
 
 **Raised:** HEAL-AP (2026-11-03).

@@ -578,13 +578,40 @@
       "passed": 1
     },
     {
-      "assertions": 17,
-      "cases": 13,
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_HOLY_PALADIN.REGISTRATION_RESULT"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_HOLY_PALADIN",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_RESTORATION_DRUID.REGISTRATION_RESULT"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_RESTORATION_DRUID",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_MISTWEAVER_MONK.REGISTRATION_RESULT"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_MISTWEAVER_MONK",
+      "passed": 1
+    },
+    {
+      "assertions": 20,
+      "cases": 16,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 17
+      "passed": 20
     },
     {
       "assertions": 14,
@@ -698,6 +725,34 @@
           "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
           "ordinal": 0,
           "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.holy-paladin-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.mistweaver-monk-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
         },
         {
           "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
@@ -721,6 +776,20 @@
       ],
       "authority": null,
       "caseId": "application-service.protection-paladin-subject-is-analyzed-under-player-context",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.restoration-druid-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -5122,6 +5191,34 @@
       "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-opener"]
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_HOLY_PALADIN.REGISTRATION_RESULT",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-holy-paladin.unstated-subject-yields-no-healer-finding",
+      "owningLayer": "SPEC_HOLY_PALADIN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_MISTWEAVER_MONK.REGISTRATION_RESULT",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-mistweaver-monk.unstated-subject-yields-no-healer-finding",
+      "owningLayer": "SPEC_MISTWEAVER_MONK",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
       "artifactId": "wcl-protection-paladin-a7r6-rotational-45s",
       "assertions": [
         {
@@ -6142,6 +6239,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_RESTORATION_DRUID.REGISTRATION_RESULT",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-restoration-druid.unstated-subject-yields-no-healer-finding",
+      "owningLayer": "SPEC_RESTORATION_DRUID",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_RESTORATION_SHAMAN.REGISTRATION_RESULT",
           "ordinal": 0,
           "status": "PASSED"
@@ -6986,13 +7097,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 782,
-    "cases": 187,
+    "assertions": 788,
+    "cases": 193,
     "declared": 0,
-    "executable": 782,
+    "executable": 788,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 782
+    "passed": 788
   }
 }

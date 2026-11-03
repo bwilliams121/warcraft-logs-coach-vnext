@@ -1256,11 +1256,13 @@ finding shape.
 ### HEAL-AP: Restoration Shaman public promotion
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: HEAL-A
 branch: autopilot/heal-ap
 wcl: NONE
 publicContract: EXPECTED
+pr: 46
+mergeSha: 7abddea1241e35e5066125b1843479915af2eb37
 ```
 
 **Scope.** Promote Restoration Shaman PUBLIC through a healer public result
@@ -1278,8 +1280,9 @@ healing context with coverage disclosure.
 ### HEAL-B1: Holy Paladin, Restoration Druid and Mistweaver Monk (internal)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: HEAL-A
+branch: autopilot/heal-b1
 wcl: NONE
 publicContract: NONE
 ```

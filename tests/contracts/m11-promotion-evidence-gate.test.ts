@@ -674,15 +674,16 @@ describe("M13-F / HEAL-AP: a PUBLIC registration that binds no decision authorit
 });
 
 describe("INTERNAL_ONLY mode — reported, never failed, paired against the module's own WCL identity", () => {
-  it("there is no production INTERNAL_ONLY registration since HEAL-AP, and the partition agrees", () => {
+  it("the production INTERNAL_ONLY registrations are exactly the three HEAL-B1 healers, and the partition agrees", () => {
     // Blood Death Knight held this half from M11-B2 until M11-B12 promoted
     // it; Brewmaster Monk held it from M11-C2 until M11-C4j promoted it;
     // Augmentation Evoker held it in M13-E until M13-F promoted it; Restoration
-    // Shaman held it in HEAL-A until HEAL-AP promoted it. The synthetic module
-    // below still exercises the branch.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
+    // Shaman held it in HEAL-A until HEAL-AP promoted it. HEAL-B1 put the
+    // three healers on its architecture here. The synthetic module below still
+    // exercises the branch.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["paladin/holy", "druid/restoration", "monk/mistweaver"]);
     const internal = PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY");
-    expect(internal).toEqual([]);
+    expect(internal.map((row) => row.specId)).toEqual([...INTERNAL_ONLY_SPEC_IDS]);
   });
   it("the internal pairing finds nothing for Brewmaster Monk now that the identity table resolves it (M11-C4j)", async () => {
     // The mirror of the Blood and Retribution cases: the internal pairing

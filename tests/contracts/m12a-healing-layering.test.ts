@@ -77,6 +77,9 @@ const HEALING_MODULES = allPaths().filter((path) => path.startsWith("src/healing
 describe("the healing domain exists and is fully covered by these checks", () => {
   it("captured every module under src/healing", () => {
     expect(HEALING_MODULES).toEqual([
+      // HEAL-B1: observed healing-cooldown uses and their overlap, lifted
+      // unchanged from the Restoration Shaman evaluator.
+      "src/healing/cooldown-use-context.ts",
       "src/healing/damage-episodes.ts",
       "src/healing/death-timeline.ts",
       "src/healing/received-during-episodes.ts",
@@ -188,8 +191,20 @@ describe("there is nowhere to branch on a specialization or write a judgement", 
  * still nothing in the analysis service, the contracts, the API or MCP
  * imports the healing domain: the registration reaches it only through the
  * evaluator.
+ *
+ * HEAL-B1 names three more, each a healer specialization evaluator that owns
+ * its verdicts the same way: Holy Paladin, Restoration Druid and Mistweaver
+ * Monk. The facts they share (`cooldown-use-context.ts`) moved here from the
+ * Restoration Shaman evaluator unchanged; the plan rules they share live in
+ * `src/findings/healer-assignment-execution.ts`, which does not import this
+ * domain.
  */
-const HEALING_CONSUMERS = ["src/specs/shaman/restoration/evaluator.ts"];
+const HEALING_CONSUMERS = [
+  "src/specs/shaman/restoration/evaluator.ts",
+  "src/specs/paladin/holy/evaluator.ts",
+  "src/specs/druid/restoration/evaluator.ts",
+  "src/specs/monk/mistweaver/evaluator.ts",
+];
 
 describe("only the named consumers read it", () => {
   const OUTSIDE = allPaths().filter(

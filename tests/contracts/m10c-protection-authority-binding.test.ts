@@ -182,7 +182,7 @@ describe("cross-spec authority access is refused structurally", () => {
     expect(Object.isFrozen(PROTECTION_PALADIN_REGISTRATION.authority)).toBe(true);
   });
 
-  it("the production catalog holds the seven registrations, each citing only its own authority (Augmentation and Restoration Shaman none)", () => {
+  it("the production catalog holds the ten registrations, each citing only its own authority (Augmentation and the four healers none)", () => {
     const cited = PRODUCTION_CATALOG.registrations.map((registration) => [
       registration.specId,
       registration.authorityBindings.map((binding) => binding.authorityId),
@@ -200,6 +200,10 @@ describe("cross-spec authority access is refused structurally", () => {
       ["evoker/augmentation", []],
       // HEAL-A: binds no pinned decision authority; its healer families are provider-less.
       ["shaman/restoration", []],
+      // HEAL-B1: the three healer rows on the same architecture bind nothing either.
+      ["paladin/holy", []],
+      ["druid/restoration", []],
+      ["monk/mistweaver", []],
     ]);
   });
 });

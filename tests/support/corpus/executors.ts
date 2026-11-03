@@ -30,6 +30,9 @@ import * as blood from "./executors/spec-blood-death-knight.js";
 import * as brewmaster from "./executors/spec-brewmaster-monk.js";
 import * as augmentation from "./executors/spec-augmentation-evoker.js";
 import * as restoration from "./executors/spec-restoration-shaman.js";
+import * as holyPaladin from "./executors/spec-holy-paladin.js";
+import * as restorationDruid from "./executors/spec-restoration-druid.js";
+import * as mistweaver from "./executors/spec-mistweaver-monk.js";
 import * as sharedEngine from "./executors/shared-decision-engine.js";
 import * as transport from "./executors/wcl-transport.js";
 
@@ -628,6 +631,12 @@ export async function executeAssertion(
       return augmentation.registrationResult(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_RESTORATION_SHAMAN.REGISTRATION_RESULT":
       return restoration.registrationResult(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_HOLY_PALADIN.REGISTRATION_RESULT":
+      return holyPaladin.registrationResult(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_RESTORATION_DRUID.REGISTRATION_RESULT":
+      return restorationDruid.registrationResult(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_MISTWEAVER_MONK.REGISTRATION_RESULT":
+      return mistweaver.registrationResult(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "APPLICATION_SERVICE.INTERNAL_REGISTRATION":
       return applicationService.internalRegistration(params as ParamsOf<typeof assertion.kind>);
     case "PUBLIC_CONTRACT.REST_MCP_PARITY":
@@ -743,6 +752,9 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_BREWMASTER_MONK.SPEC_GATE",
   "SPEC_AUGMENTATION_EVOKER.REGISTRATION_RESULT",
   "SPEC_RESTORATION_SHAMAN.REGISTRATION_RESULT",
+  "SPEC_HOLY_PALADIN.REGISTRATION_RESULT",
+  "SPEC_RESTORATION_DRUID.REGISTRATION_RESULT",
+  "SPEC_MISTWEAVER_MONK.REGISTRATION_RESULT",
   "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
   "PUBLIC_CONTRACT.REST_MCP_PARITY",
 ];

@@ -6575,6 +6575,192 @@ const BREWMASTER_CASES = [
       ],
     },
   ),
+  // ---- SPEC_HOLY_PALADIN (HEAL-B1, INTERNAL_ONLY) ---------------------------
+  kase(
+    "spec-holy-paladin.unstated-subject-yields-no-healer-finding",
+    PP,
+    "SPEC_HOLY_PALADIN",
+    "src/specs/paladin/holy/registration.ts (facade, capabilities, bindings); src/services/analyzer-registry.ts internalAnalyzerForSpec, runAnalyzer",
+    "Through the production catalog's internal lookup, the INTERNAL_ONLY Holy Paladin registration derives FULL_RAID from its declared healer capabilities, resolves COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and HEALING_DECISION to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER, no evaluator result and no healer finding set: nothing is evaluated for a subject whose identity is not established, and nothing is ANALYZED. The public lookup finds nothing.",
+    [
+      a("SPEC_HOLY_PALADIN.REGISTRATION_RESULT", {
+        actorId: TANK,
+        expected: {
+          requiredScope: "FULL_RAID",
+          status: "INSUFFICIENT_EVIDENCE",
+          domains: [
+            { domain: "COOLDOWN_ASSIGNMENT", resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN" },
+            { domain: "HEALING_COOLDOWN", resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN" },
+            { domain: "HEALING_DECISION", resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN" },
+          ],
+          subjectSpecialization: "NOT_IN_FRIENDLY_ROSTER",
+          evaluationState: null,
+          healerFindings: "SUBJECT_SPECIALIZATION_NOT_STATED",
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Missing identity is not a default identity: a subject with no Warcraft Logs-stated specialization is never assumed to be the Holy Paladin the caller named. And no pinned authority is not an UNKNOWN: every healer family is provider-less by construction, which is why the registration can never produce an ANALYZED result.",
+    {
+      limitations: [
+        "This single-slice fight has no fight context, so every subject is NOT_IN_FRIENDLY_ROSTER; the Holy Paladin evaluator's results over stated identities are pinned by tests/unit/specs/heal-b1-healer-registrations.test.ts.",
+      ],
+      related: [
+        "tests/unit/specs/heal-b1-healer-registrations.test.ts",
+        "tests/contracts/m11a2-cross-spec-isolation.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "application-service.holy-paladin-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Holy Paladin registration for the INTERNAL lookup only, INTERNAL_ONLY, in either catalog order; the public lookup finds nothing and the public identity table does not resolve Paladin/Holy, so no public request can select it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "paladin/holy",
+        expected: {
+          internalAnalyzerId: "paladin-holy-healer-findings",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Its healer findings have no reviewed public shape yet (HEAL-B1P), so registration changes what internal evaluation derives, not what a public request can reach.",
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  // ---- SPEC_RESTORATION_DRUID (HEAL-B1, INTERNAL_ONLY) ---------------------------
+  kase(
+    "spec-restoration-druid.unstated-subject-yields-no-healer-finding",
+    PP,
+    "SPEC_RESTORATION_DRUID",
+    "src/specs/druid/restoration/registration.ts (facade, capabilities, bindings); src/services/analyzer-registry.ts internalAnalyzerForSpec, runAnalyzer",
+    "Through the production catalog's internal lookup, the INTERNAL_ONLY Restoration Druid registration derives FULL_RAID from its declared healer capabilities, resolves COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and HEALING_DECISION to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER, no evaluator result and no healer finding set: nothing is evaluated for a subject whose identity is not established, and nothing is ANALYZED. The public lookup finds nothing.",
+    [
+      a("SPEC_RESTORATION_DRUID.REGISTRATION_RESULT", {
+        actorId: TANK,
+        expected: {
+          requiredScope: "FULL_RAID",
+          status: "INSUFFICIENT_EVIDENCE",
+          domains: [
+            { domain: "COOLDOWN_ASSIGNMENT", resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN" },
+            { domain: "HEALING_COOLDOWN", resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN" },
+            { domain: "HEALING_DECISION", resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN" },
+          ],
+          subjectSpecialization: "NOT_IN_FRIENDLY_ROSTER",
+          evaluationState: null,
+          healerFindings: "SUBJECT_SPECIALIZATION_NOT_STATED",
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Missing identity is not a default identity: a subject with no Warcraft Logs-stated specialization is never assumed to be the Restoration Druid the caller named. And no pinned authority is not an UNKNOWN: every healer family is provider-less by construction, which is why the registration can never produce an ANALYZED result.",
+    {
+      limitations: [
+        "This single-slice fight has no fight context, so every subject is NOT_IN_FRIENDLY_ROSTER; the Restoration Druid evaluator's results over stated identities are pinned by tests/unit/specs/heal-b1-healer-registrations.test.ts.",
+      ],
+      related: [
+        "tests/unit/specs/heal-b1-healer-registrations.test.ts",
+        "tests/contracts/m11a2-cross-spec-isolation.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "application-service.restoration-druid-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Restoration Druid registration for the INTERNAL lookup only, INTERNAL_ONLY, in either catalog order; the public lookup finds nothing and the public identity table does not resolve Druid/Restoration, so no public request can select it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "druid/restoration",
+        expected: {
+          internalAnalyzerId: "druid-restoration-healer-findings",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Its healer findings have no reviewed public shape yet (HEAL-B1P), so registration changes what internal evaluation derives, not what a public request can reach.",
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  // ---- SPEC_MISTWEAVER_MONK (HEAL-B1, INTERNAL_ONLY) ---------------------------
+  kase(
+    "spec-mistweaver-monk.unstated-subject-yields-no-healer-finding",
+    PP,
+    "SPEC_MISTWEAVER_MONK",
+    "src/specs/monk/mistweaver/registration.ts (facade, capabilities, bindings); src/services/analyzer-registry.ts internalAnalyzerForSpec, runAnalyzer",
+    "Through the production catalog's internal lookup, the INTERNAL_ONLY Mistweaver Monk registration derives FULL_RAID from its declared healer capabilities, resolves COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and HEALING_DECISION to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER, no evaluator result and no healer finding set: nothing is evaluated for a subject whose identity is not established, and nothing is ANALYZED. The public lookup finds nothing.",
+    [
+      a("SPEC_MISTWEAVER_MONK.REGISTRATION_RESULT", {
+        actorId: TANK,
+        expected: {
+          requiredScope: "FULL_RAID",
+          status: "INSUFFICIENT_EVIDENCE",
+          domains: [
+            { domain: "COOLDOWN_ASSIGNMENT", resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN" },
+            { domain: "HEALING_COOLDOWN", resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN" },
+            { domain: "HEALING_DECISION", resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN" },
+          ],
+          subjectSpecialization: "NOT_IN_FRIENDLY_ROSTER",
+          evaluationState: null,
+          healerFindings: "SUBJECT_SPECIALIZATION_NOT_STATED",
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Missing identity is not a default identity: a subject with no Warcraft Logs-stated specialization is never assumed to be the Mistweaver Monk the caller named. And no pinned authority is not an UNKNOWN: every healer family is provider-less by construction, which is why the registration can never produce an ANALYZED result.",
+    {
+      limitations: [
+        "This single-slice fight has no fight context, so every subject is NOT_IN_FRIENDLY_ROSTER; the Mistweaver Monk evaluator's results over stated identities are pinned by tests/unit/specs/heal-b1-healer-registrations.test.ts.",
+      ],
+      related: [
+        "tests/unit/specs/heal-b1-healer-registrations.test.ts",
+        "tests/contracts/m11a2-cross-spec-isolation.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "application-service.mistweaver-monk-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Mistweaver Monk registration for the INTERNAL lookup only, INTERNAL_ONLY, in either catalog order; the public lookup finds nothing and the public identity table does not resolve Monk/Mistweaver, so no public request can select it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "monk/mistweaver",
+        expected: {
+          internalAnalyzerId: "monk-mistweaver-healer-findings",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Its healer findings have no reviewed public shape yet (HEAL-B1P), so registration changes what internal evaluation derives, not what a public request can reach.",
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
   kase(
     "application-service.brewmaster-monk-subject-is-publicly-supported-since-m11-c4j",
     BREWMASTER_GTKB,

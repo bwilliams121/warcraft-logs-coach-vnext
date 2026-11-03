@@ -167,9 +167,16 @@ const REGISTERED_TREES: readonly SpecTree[] = TREES.filter(
  * M13-E: registered trees that bind NO decision authority, and so own no APL
  * artifact. Named exactly; each must be a registered tree. The one-APL-per-tree
  * count below applies to every other registered tree. HEAL-A added Restoration
- * Shaman, the first healer registration.
+ * Shaman, the first healer registration, and HEAL-B1 the three healer
+ * registrations on its architecture.
  */
-const AUTHORITY_FREE_REGISTERED_TREES: readonly string[] = ["evoker/augmentation", "shaman/restoration"];
+const AUTHORITY_FREE_REGISTERED_TREES: readonly string[] = [
+  "evoker/augmentation",
+  "shaman/restoration",
+  "paladin/holy",
+  "druid/restoration",
+  "monk/mistweaver",
+];
 
 const ROSTER = (() => {
   const loaded = pinnedSpecRoster();

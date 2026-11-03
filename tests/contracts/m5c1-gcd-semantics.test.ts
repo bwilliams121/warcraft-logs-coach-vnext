@@ -621,8 +621,15 @@ describe("M5-A and M5-B are untouched by execution lane", () => {
     // contract's healer assignment schema, exactly once, as a literal whose
     // actionability is pinned NOT_EVALUATED. It stays an assignment outcome on
     // the wire, never an actionability status.
+    //
+    // HEAL-B1 MOVED the issuing file, not the exception: the plan rules left
+    // the Restoration Shaman evaluator, unchanged, for the shared
+    // `healer-assignment-execution.ts` every healer specialization calls. Still
+    // exactly one file issues the literal, with the same evidence-bearing
+    // reason, and the evaluator no longer spells it.
     const ASSIGNMENT_OUTCOME = '"ASSIGNMENT_NOT_ACTIONABLE"';
-    const ASSIGNMENT_EVALUATOR = "src/specs/shaman/restoration/evaluator.ts";
+    const ASSIGNMENT_EVALUATOR = "src/findings/healer-assignment-execution.ts";
+    expect(codeOf("src/specs/shaman/restoration/evaluator.ts")).not.toContain(ASSIGNMENT_OUTCOME);
     const PUBLIC_CONTRACT = "src/contracts/analysis-contract.ts";
     const evaluator = codeOf(ASSIGNMENT_EVALUATOR);
     expect(evaluator).toContain(ASSIGNMENT_OUTCOME);
