@@ -12866,6 +12866,51 @@ or an Atonement heal event (fight 48 has no Discipline Priest), so HEAL-B3P
 cannot pass the healer promotion gate on committed evidence; see
 agent/follow-ups.md "After HEAL-B3".
 
+## HEAL-B3P — Discipline Priest public promotion: not promoted
+
+Autopilot queue entry HEAL-B3P. Public contract: declared EXPECTED; actual
+change NONE, because nothing passes. No Warcraft Logs request.
+
+**The outcome.** Discipline Priest does not pass the HEAL-AP healer promotion
+gate and stays INTERNAL_ONLY (onboarding rule 4: a specialization that cannot
+pass stays INTERNAL_ONLY, its reason in the inventory and its evidence gap on
+ONB-EV). The gate is not weakened and gains no subject.
+
+**Why it cannot pass.** The gate's OBSERVATIONS check needs a real subject
+whose COOLDOWN listing is COMPLETE with at least one observed use, and its
+ASSIGNMENT check needs a met and a not-met entry over those uses. That needs a
+capture of the subject's whole-fight casts retrieved COMPLETE with no actor
+filter. The census of committed and retained evidence (offline, no request):
+
+- committed: the M13-A Discipline Priest (actor 9) is in a filtered capture,
+  and the G2 cohort246 fight 33 Discipline Priest (actor 88) is in a
+  PLAYER_CONTEXT capture of another actor whose query excluded heals. Every
+  listing is UNKNOWN on both (pinned by
+  `tests/unit/specs/heal-b3-discipline-priest.test.ts`), so neither can be a
+  gate subject;
+- retained M11-E2 (b1PmaKrd6CDfzngc fight 48, the canonical healer fight): no
+  Discipline Priest in the fight;
+- retained M11-C4f (rXAfw9t1q8YpmkKD fight 13, no actor filter): no
+  Discipline Priest in its fight context, and the capture covers the fixed
+  165 s window of a 271.8 s fight, so it could not be whole-fight anyway;
+- the retained raw pages (M10-B, M10-C5, M11-C4f) hold no event of Power Word:
+  Barrier (62618), Ultimate Penitence (421453), Evangelism (472433), Penance
+  (47540) or the Atonement buff and heal (194384, 81751).
+
+**What stays pinned.** No code changed. `INTERNAL_ONLY_SPEC_IDS` stays
+`druid/restoration`, `priest/discipline` (`m10d-public-registration`); the
+gate's coverage check makes every PUBLIC healer row need a pinned subject, so
+promoting Discipline Priest without one fails it; a Priest/Discipline public
+request stays SPEC_NOT_SUPPORTED, with its one retrieval for preparation alone
+(`tests/unit/analysis-composition-refusals.test.ts`) and never resolvable
+through the public identity table (`tests/unit/spec-identity.test.ts`).
+
+**What a later promotion must do.** After ONB-EV supplies a qualifying capture,
+a new public entry promotes Discipline Priest through the unchanged gate by
+the five-site promotion, and decides what HEAL-B3 left open: whether and how
+the Atonement facts are published, and what the gate requires of them
+(agent/follow-ups.md "After HEAL-B3").
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

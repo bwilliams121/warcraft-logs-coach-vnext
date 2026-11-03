@@ -446,6 +446,13 @@ current total (5,748,495 bytes), with what each row buys.
   one. HEAL-B3P therefore needs authorized new evidence (ONB-EV, an owner
   decision about a Warcraft Logs request), or stays INTERNAL_ONLY with its gap
   recorded exactly as Restoration Druid's is. Never a weaker gate.
+  **HEAL-B3P (2026-11-03): not promoted.** Its offline census found no
+  qualifying evidence either: the retained M11-C4f fight (rXAfw9t1q8YpmkKD 13)
+  has no Discipline Priest and covers 165 s of 271.8 s, and no retained raw
+  page (M10-B, M10-C5, M11-C4f) holds a Discipline ability event
+  (agent/architecture.md "HEAL-B3P"). Discipline Priest stays INTERNAL_ONLY;
+  its promotion is a new public entry once ONB-EV supplies a whole-fight
+  capture, and that entry also settles the two items below.
 - **Its public Atonement shape is undecided.** The Atonement facts are attached
   to the evaluation, not to the shared healer finding set or view. HEAL-B3P
   (publicContract EXPECTED) must decide whether and how they are published, and

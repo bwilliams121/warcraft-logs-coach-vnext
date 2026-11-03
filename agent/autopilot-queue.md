@@ -1353,11 +1353,13 @@ left (ONB-EV).
 ### HEAL-B3: Discipline Priest (internal, own representative)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: HEAL-B1
 branch: autopilot/heal-b3
 wcl: NONE
 publicContract: NONE
+pr: 51
+mergeSha: 1a7c7568252a39b1959fb535706333a4a9912dbd
 ```
 
 **Scope.** Discipline heals substantially through damage (Atonement), a
@@ -1380,11 +1382,30 @@ holds (agent/follow-ups.md "After HEAL-B3"; appended to ONB-EV).
 ### HEAL-B3P: Discipline Priest (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: HEAL-B3, HEAL-AP
+branch: autopilot/heal-b3p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** Discipline Priest cannot pass the HEAL-AP healer promotion gate
+and stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public
+contract is unchanged. The gate needs a real subject whose cooldown listing is
+COMPLETE, and no committed or retained capture can supply one:
+
+- the committed Discipline Priest evidence (M13-A actor 9; G2 cohort246 fight
+  33 actor 88) is filtered or PLAYER_CONTEXT, so every listing is UNKNOWN;
+- the canonical fight 48 (retained M11-E2 capture) has no Discipline Priest;
+- the only other unfiltered retained capture (M11-C4f, rXAfw9t1q8YpmkKD fight
+  13) has no Discipline Priest and covers 165 s of a 271.8 s fight;
+- no retained raw page file (M10-B, M10-C5, M11-C4f) holds one event of
+  Power Word: Barrier, Ultimate Penitence, Evangelism, Penance or Atonement.
+
+The evidence gap stays on ONB-EV, as HEAL-B3 recorded. A Discipline Priest
+promotion after ONB-EV supplies evidence is a new public entry that meets the
+unchanged gate and decides the public Atonement shape
+(agent/architecture.md "HEAL-B3P"; agent/follow-ups.md "After HEAL-B3").
 
 ### HEAL-B4: Preservation Evoker (internal, own representative)
 
