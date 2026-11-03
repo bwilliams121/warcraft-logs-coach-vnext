@@ -198,12 +198,15 @@ describe("there is nowhere to branch on a specialization or write a judgement", 
  * Restoration Shaman evaluator unchanged; the plan rules they share live in
  * `src/findings/healer-assignment-execution.ts`, which does not import this
  * domain.
+ *
+ * HEAL-B2 names one more the same way: the Holy Priest evaluator.
  */
 const HEALING_CONSUMERS = [
   "src/specs/shaman/restoration/evaluator.ts",
   "src/specs/paladin/holy/evaluator.ts",
   "src/specs/druid/restoration/evaluator.ts",
   "src/specs/monk/mistweaver/evaluator.ts",
+  "src/specs/priest/holy/evaluator.ts",
 ];
 
 describe("only the named consumers read it", () => {

@@ -12649,6 +12649,69 @@ for either is AUTHORITY_NOT_AVAILABLE (or INSUFFICIENT_EVIDENCE when the
 evidence states no specialization) and carries no healer findings and no
 plan.
 
+## HEAL-B2 — Holy Priest (internal)
+
+Autopilot queue entry HEAL-B2. Public contract: NONE. No Warcraft Logs
+request: committed evidence and the pinned SimulationCraft trait table only.
+The M12-D verdict-category limits and the M12-E plan semantics apply
+unchanged.
+
+**The tree** (`src/specs/priest/holy/`, revision `holy-priest-evaluator/1`):
+a fourth healer on the HEAL-B1 architecture, a copy of the Restoration Druid
+(internal) shape with its own identity and data. It consumes the shared
+`src/healing/cooldown-use-context.ts`,
+`src/findings/healer-assignment-execution.ts`,
+`src/findings/healer-finding-projection.ts` and the shared artifact reader;
+none of them changed. It owns:
+
+- its identity gate (stated Priest/Holy, and a Priest player in the master
+  data; otherwise IDENTITY_REFUSED). A Discipline or Shadow Priest is
+  refused as NOT_THIS_SPECIALIZATION: the class alone is not the
+  specialization;
+- its healing-cooldown identity data
+  (`src/data/game/priest-holy-healing-cooldowns.{json,ts}`), verbatim
+  specialization-tree rows of the pinned `trait_data.inc` (commit 33622e9d,
+  client data 12.1.0.69587), class 5, spec 257: Divine Hymn 64843 and
+  Apotheosis 200183, each on a NORMAL node of its own, neither row with an
+  `id_override_spell`. The pinned Holy tree has no Holy Word: Salvation row,
+  so it is not identified. Guardian Spirit (an external), Symbol of Hope and
+  the hero-tree spells are not identified either; a plan entry naming one is
+  ABILITY_NOT_REGISTERED;
+- that a use is its own completed cast. Divine Hymn is a channel: its use is
+  the `cast` of 64843, once. Its healing pulses arrive as `cast` events of
+  another spell, 64844 (as the committed capture records), which is not
+  identified, so a pulse is never a use and an assignment window holding only
+  pulses is not MET;
+- that its Warcraft Logs-stated pets count as its sources (fight 48's Holy
+  Priest has one, actor 94);
+- its registration: three provider-less families declared from
+  `HOLY_PRIEST_REQUIRED_INPUTS` (FULL_RAID derived), no binding, never
+  ANALYZED, AUTHORITY_NOT_AVAILABLE when evaluated and INSUFFICIENT_EVIDENCE
+  otherwise, the plan from `SpecAnalysisInput`, no healer view and no public
+  prose.
+
+**Reachability.** `priest/holy` is in `INTERNAL_ONLY_SPEC_IDS` (now
+`druid/restoration`, `priest/holy`). `analyzerForSpec` never selects it, the
+identity table does not resolve Priest/Holy, and a public request stays
+SPEC_NOT_SUPPORTED. The catalog has eleven rows. The corpus gained one layer
+(`SPEC_HOLY_PRIEST`) and two cases, the same pair HEAL-B1 added per healer.
+The `m12a` healing-consumer list names the new evaluator.
+
+**Real evidence** (committed, checked against the raw bytes):
+
+- the M13-A Holy Priest (actor 2): Apotheosis at 168,785, Divine Hymn at
+  249,326 and Apotheosis at 289,544, the only casts of identified ids. The
+  capture is filtered, so the listing is UNKNOWN (INSUFFICIENT_COVERAGE), and
+  its breadth gives ROSTER_NOT_IN_SCOPE overlap;
+- b1PmaKrd6CDfzngc fight 48, Holy Priest actor 2, over the friendly-players
+  window that carries no cast of its own: no use, listing UNKNOWN, never "none
+  used"; its sources are itself and its stated pet 94.
+
+Its public promotion is HEAL-B2P, through the unchanged HEAL-AP healer gate.
+No committed capture yet holds the fight-48 Holy Priest's whole-fight casts
+(the cut HEAL-B1P made for actors 1 and 9); see agent/follow-ups.md "After
+HEAL-B2".
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

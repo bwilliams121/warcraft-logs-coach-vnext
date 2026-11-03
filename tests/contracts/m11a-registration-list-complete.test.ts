@@ -236,7 +236,7 @@ describe("the production catalog and the tree name the same registrations", () =
 // ---------------------------------------------------------------------------
 
 describe("what the tree registers today", () => {
-  it("is exactly Assassination Rogue, the two Paladins, Blood Death Knight, Brewmaster Monk, Augmentation Evoker, Restoration Shaman, Holy Paladin and Mistweaver Monk, all PUBLIC, plus Restoration Druid INTERNAL_ONLY", () => {
+  it("is exactly Assassination Rogue, the two Paladins, Blood Death Knight, Brewmaster Monk, Augmentation Evoker, Restoration Shaman, Holy Paladin and Mistweaver Monk, all PUBLIC, plus Restoration Druid and Holy Priest INTERNAL_ONLY", () => {
     // A reviewed list, not the rule: the rules above scale to any number of
     // registrations. This snapshot exists so that a new registration module
     // is a VISIBLE change to this file, reviewed alongside the five-site
@@ -253,7 +253,8 @@ describe("what the tree registers today", () => {
     // and Mistweaver Monk arrived INTERNAL_ONLY at HEAL-B1 on its architecture,
     // and Holy Paladin and Mistweaver Monk became PUBLIC at HEAL-B1P with the
     // shared healer view; Restoration Druid has no retained evidence for the
-    // healer gate and stays INTERNAL_ONLY.
+    // healer gate and stays INTERNAL_ONLY; Holy Priest arrived INTERNAL_ONLY
+    // at HEAL-B2 on the same architecture.
     expect(DISCOVERED.map((found) => [found.path, found.exportName, found.registration.exposure])).toEqual([
       ["src/specs/deathknight/blood/registration.ts", "BLOOD_DEATH_KNIGHT_REGISTRATION", "PUBLIC"],
       ["src/specs/druid/restoration/registration.ts", "RESTORATION_DRUID_REGISTRATION", "INTERNAL_ONLY"],
@@ -263,6 +264,7 @@ describe("what the tree registers today", () => {
       ["src/specs/paladin/holy/registration.ts", "HOLY_PALADIN_REGISTRATION", "PUBLIC"],
       ["src/specs/paladin/protection/registration.ts", "PROTECTION_PALADIN_REGISTRATION", "PUBLIC"],
       ["src/specs/paladin/retribution/registration.ts", "RETRIBUTION_PALADIN_REGISTRATION", "PUBLIC"],
+      ["src/specs/priest/holy/registration.ts", "HOLY_PRIEST_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/rogue/assassination/registration.ts", "ASSASSINATION_REGISTRATION", "PUBLIC"],
       ["src/specs/shaman/restoration/registration.ts", "RESTORATION_SHAMAN_REGISTRATION", "PUBLIC"],
     ]);

@@ -605,13 +605,22 @@
       "passed": 1
     },
     {
-      "assertions": 20,
-      "cases": 16,
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_HOLY_PRIEST.REGISTRATION_RESULT"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_HOLY_PRIEST",
+      "passed": 1
+    },
+    {
+      "assertions": 21,
+      "cases": 17,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 20
+      "passed": 21
     },
     {
       "assertions": 14,
@@ -729,6 +738,20 @@
       ],
       "authority": null,
       "caseId": "application-service.holy-paladin-registration-is-public-since-heal-b1p",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.holy-priest-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -5208,6 +5231,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_HOLY_PRIEST.REGISTRATION_RESULT",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-holy-priest.unstated-subject-yields-no-healer-finding",
+      "owningLayer": "SPEC_HOLY_PRIEST",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_MISTWEAVER_MONK.REGISTRATION_RESULT",
           "ordinal": 0,
           "status": "PASSED"
@@ -7097,13 +7134,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 788,
-    "cases": 193,
+    "assertions": 790,
+    "cases": 195,
     "declared": 0,
-    "executable": 788,
+    "executable": 790,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 788
+    "passed": 790
   }
 }

@@ -170,6 +170,7 @@ describe("REST: a real Retribution Paladin identity resolves publicly", () => {
       "paladin-holy-healer-findings": 0,
       "druid-restoration-healer-findings": 0,
       "monk-mistweaver-healer-findings": 0,
+      "priest-holy-healer-findings": 0,
     });
     const parsed = PublicAnalysisResultSchema.safeParse(rest.body);
     expect(parsed.success).toBe(true);

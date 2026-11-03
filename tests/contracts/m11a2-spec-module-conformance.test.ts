@@ -143,6 +143,14 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
   // Mistweaver Monk the committed corpus context reports.
   "druid/restoration": { artifactId: "wcl-fight-context-gtkb-fight-22", fightId: 22, sourceId: 2 },
   "monk/mistweaver": { artifactId: "wcl-fight-context-gtkb-fight-22", fightId: 22, sourceId: 17 },
+  // HEAL-B2: actor 2 of b1pm fight 48, the Holy Priest the committed evidence
+  // archive context reports (also actor 2 of the M13-A context).
+  "priest/holy": {
+    artifactId: "wcl-fight-context-b1pm-fight-48",
+    fightId: 48,
+    sourceId: 2,
+    archive: true,
+  },
 };
 
 const ARCHIVE_GRAPHQL: Record<string, string> = import.meta.glob("../evidence/artifacts/wcl-graphql/*.json", {
@@ -358,7 +366,7 @@ describe("the supplemental seam is not wired to any transport, service, contract
 });
 
 describe("what the tree exports today", () => {
-  it("is exactly the nine public modules and, since HEAL-B1, one INTERNAL_ONLY healer module (Restoration Druid), each with zero supplemental analyses", () => {
+  it("is exactly the nine public modules and two INTERNAL_ONLY healer modules (Restoration Druid since HEAL-B1, Holy Priest since HEAL-B2), each with zero supplemental analyses", () => {
     // A reviewed snapshot, not the rule: every proof above is per module and
     // count-independent. The third module (M11-A4) first changed this line
     // WITHOUT the five-site identity move — INTERNAL_ONLY, carrying the
@@ -386,6 +394,8 @@ describe("what the tree exports today", () => {
       ["HOLY_PALADIN_MODULE", "paladin/holy", "PUBLIC", 0],
       ["PROTECTION_PALADIN_MODULE", "paladin/protection", "PUBLIC", 0],
       ["RETRIBUTION_PALADIN_MODULE", "paladin/retribution", "PUBLIC", 0],
+      // HEAL-B2: a fourth healer on the same architecture, INTERNAL_ONLY.
+      ["HOLY_PRIEST_MODULE", "priest/holy", "INTERNAL_ONLY", 0],
       ["ASSASSINATION_MODULE", "rogue/assassination", "PUBLIC", 0],
       // HEAL-A: the first healer, INTERNAL_ONLY, binding no pinned decision authority; PUBLIC since HEAL-AP.
       ["RESTORATION_SHAMAN_MODULE", "shaman/restoration", "PUBLIC", 0],

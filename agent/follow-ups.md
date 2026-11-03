@@ -433,6 +433,42 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After HEAL-B2: what the internal Holy Priest registration does not establish
+
+**Raised:** HEAL-B2 (2026-11-03).
+
+- **It cannot pass the healer promotion gate on committed evidence yet
+  (HEAL-B2P).** The gate needs a real subject with a COMPLETE use listing, at
+  least one use, and a met and a not-met plan entry over those uses. The M13-A
+  Holy Priest's three uses sit in a filtered capture whose listing is
+  UNKNOWN, and no committed capture holds the fight-48 Holy Priest's (actor 2)
+  whole-fight casts. HEAL-B2P needs that cut, exactly as HEAL-B1P cut actors 1
+  and 9: from the retained, authorized M11-E2 raw capture (no new request) if
+  it holds actor 2's casts, otherwise authorized evidence (ONB-EV). Never a
+  weaker gate.
+- **The selection is deliberately narrow.** Divine Hymn and Apotheosis only.
+  Holy Word: Salvation has no row in the pinned Holy tree; Guardian Spirit is
+  an external; Symbol of Hope, Divine Image, Holy Word: Sanctify and the
+  hero-tree spells are not healing cooldowns by this selection. A plan entry
+  for one is ABILITY_NOT_REGISTERED. Widening is a reviewed data change.
+- **Both identified abilities are observed** as completed casts in committed
+  evidence (M13-A actor 2), including Divine Hymn's channel shape: the 64843
+  cast, then 64844 pulse casts. Nothing is identified from the row alone.
+- **The registration facade is copied a fifth time.** "After HEAL-B1" and
+  "After HEAL-B1P" said to revisit at the fifth healer. Revisited: Holy Priest
+  is a mechanical copy of the Restoration Druid internal shape (identity
+  strings and data loader differ, nothing else). A shared healer
+  registration helper would rewrite four registrations already reviewed, two
+  of them PUBLIC, inside a tranche that declares one internal specialization,
+  so it is not done here. It is the right change before the next healer
+  registration copies the shape again (HEAL-B2P adds Holy Priest's public
+  view and prose; HEAL-B3 and HEAL-B4 are their own representatives and may
+  not share it). The evaluators' composition is copied too, but each owns a
+  different identity gate, data and source rule, and the shared parts are
+  already the shared modules.
+
+---
+
 ## After HEAL-B1P: what the public Holy Paladin and Mistweaver Monk do not establish
 
 **Raised:** HEAL-B1P (2026-11-03).

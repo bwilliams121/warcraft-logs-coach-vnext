@@ -206,6 +206,8 @@ describe("no unsupported identity falls through to a supported specialization", 
     ["Rogue", "Subtlety"],
     // Holy, with the class another Holy specialization belongs to (HEAL-B1P
     // made Paladin/Holy supported, so it is no longer a nearest miss here).
+    // Holy Priest is also registered INTERNAL_ONLY since HEAL-B2: never
+    // publicly resolvable.
     ["Priest", "Holy"],
     // Restoration Druid: registered INTERNAL_ONLY, never publicly resolvable.
     ["Druid", "Restoration"],

@@ -1824,6 +1824,14 @@ Holy Paladin and Mistweaver Monk public (HEAL-B1P, tests/contracts/heal-ap-heale
   Restoration Druid                            -> still INTERNAL_ONLY; public request SPEC_NOT_SUPPORTED, no dispatch (no evidence for the gate)
   shared healer view                           -> Restoration Shaman's public tests unchanged over healer-view-projection.ts
   raid night                                   -> a stated-spec-less Mistweaver cell INSUFFICIENT_EVIDENCE, never SPEC_NOT_SUPPORTED, never Brewmaster's
+Holy Priest internal (HEAL-B2, tests/unit/specs/heal-b2-holy-priest.test.ts; a fourth case in heal-b1-healer-evaluators/registrations and healing-cooldown-identity-artifact):
+  shared healer cases                          -> every HEAL-B1 evaluator and registration case passes for Holy Priest (other class: Paladin)
+  artifact                                     -> exactly Divine Hymn 64843 and Apotheosis 200183, NORMAL; Discipline 256 / Shadow 258 refused; 64844 refused
+  Divine Hymn pulses (64844 casts)             -> never a use; a window holding only pulses ASSIGNMENT_UNKNOWN READINESS_NOT_ESTABLISHED, never MET
+  real M13-A Holy Priest 2                     -> Apotheosis 168,785, Divine Hymn 249,326, Apotheosis 289,544 (raw-checked); listing UNKNOWN; ROSTER_NOT_IN_SCOPE
+  real M13-A Discipline 9, Shadow 10           -> IDENTITY_REFUSED NOT_THIS_SPECIALIZATION; NOT_ASSESSED
+  real fight 48 Holy Priest 2                  -> no use, listing UNKNOWN, never "none used"; sources 2 + stated pet 94
+  registration                                 -> INTERNAL_ONLY; public lookup null; identity table refuses; public request SPEC_NOT_SUPPORTED, no dispatch
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)
