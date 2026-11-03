@@ -64,14 +64,14 @@ never assumed.
   "rosterSource": "src/data/game/spec-roster.json",
   "playableTotal": 40,
   "public": 10,
-  "internalOnly": 2,
+  "internalOnly": 3,
   "foundation": 0,
   "blocked": 0,
   "deferred": 0,
-  "notStarted": 28,
+  "notStarted": 27,
   "publiclySupportedPercent": 25,
   "terminallyDispositionedPercent": 25,
-  "notes": "Augmentation Evoker became PUBLIC with M13-F (#36). Restoration Shaman became PUBLIC with HEAL-AP (registered INTERNAL_ONLY in HEAL-A; binds no pinned authority; publishes healerFindings) after passing the healer promotion gate (tests/contracts/heal-ap-healer-promotion-gate.test.ts). Holy Paladin, Restoration Druid and Mistweaver Monk were registered INTERNAL_ONLY in HEAL-B1 (on Restoration Shaman's healer architecture, binding no pinned authority). HEAL-B1P promoted Holy Paladin and Mistweaver Monk PUBLIC after each passed the healer promotion gate on its whole-fight casts in b1PmaKrd6CDfzngc fight 48 (cut from the retained M11-E2 capture, no new request). Restoration Druid stays INTERNAL_ONLY: no committed or retained capture holds one of its events, so it cannot meet the gate; its evidence gap is recorded on ONB-EV. Holy Priest was registered INTERNAL_ONLY in HEAL-B2 (on the same healer architecture, binding no pinned authority); HEAL-B2P promoted it PUBLIC after it passed the healer promotion gate on its whole-fight casts in b1PmaKrd6CDfzngc fight 48 (actor 2, cut from the retained M11-E2 capture, no new request). Discipline Priest is INTERNAL_ONLY since HEAL-B3 (its own representative on the same healer architecture, binding no pinned authority, reporting its observed Atonement as facts); HEAL-B3P did not promote it: no committed or retained capture holds its whole-fight casts (fight 48 and the M11-C4f fight have no Discipline Priest, and no retained raw page holds a Discipline ability event), so it cannot meet the healer promotion gate; it stays INTERNAL_ONLY and its evidence gap is on ONB-EV. Shared foundations (src/healing, src/support, the M14 comparison facts) are never counted. ONB-S1 (shared precombat variable execution), ONB-S2 (shared variable combining operations), ONB-S4 (shared cast and channel decision anchor), ONB-S5 (shared pooling and wait semantics) and ONB-S6 (shared pet actor mapping) change no specialization's state."
+  "notes": "Augmentation Evoker became PUBLIC with M13-F (#36). Restoration Shaman became PUBLIC with HEAL-AP (registered INTERNAL_ONLY in HEAL-A; binds no pinned authority; publishes healerFindings) after passing the healer promotion gate (tests/contracts/heal-ap-healer-promotion-gate.test.ts). Holy Paladin, Restoration Druid and Mistweaver Monk were registered INTERNAL_ONLY in HEAL-B1 (on Restoration Shaman's healer architecture, binding no pinned authority). HEAL-B1P promoted Holy Paladin and Mistweaver Monk PUBLIC after each passed the healer promotion gate on its whole-fight casts in b1PmaKrd6CDfzngc fight 48 (cut from the retained M11-E2 capture, no new request). Restoration Druid stays INTERNAL_ONLY: no committed or retained capture holds one of its events, so it cannot meet the gate; its evidence gap is recorded on ONB-EV. Holy Priest was registered INTERNAL_ONLY in HEAL-B2 (on the same healer architecture, binding no pinned authority); HEAL-B2P promoted it PUBLIC after it passed the healer promotion gate on its whole-fight casts in b1PmaKrd6CDfzngc fight 48 (actor 2, cut from the retained M11-E2 capture, no new request). Discipline Priest is INTERNAL_ONLY since HEAL-B3 (its own representative on the same healer architecture, binding no pinned authority, reporting its observed Atonement as facts); HEAL-B3P did not promote it: no committed or retained capture holds its whole-fight casts (fight 48 and the M11-C4f fight have no Discipline Priest, and no retained raw page holds a Discipline ability event), so it cannot meet the healer promotion gate; it stays INTERNAL_ONLY and its evidence gap is on ONB-EV. Preservation Evoker is INTERNAL_ONLY since HEAL-B4 (its own representative on the same healer architecture, binding no pinned authority; its roster role stays UNKNOWN as pinned, never guessed; an identified cooldown observed empowered stops evaluation); its public promotion is HEAL-B4P, which no committed or retained capture can yet supply (evidence gap appended to ONB-EV). Shared foundations (src/healing, src/support, the M14 comparison facts) are never counted. ONB-S1 (shared precombat variable execution), ONB-S2 (shared variable combining operations), ONB-S4 (shared cast and channel decision anchor), ONB-S5 (shared pooling and wait semantics) and ONB-S6 (shared pet actor mapping) change no specialization's state."
 }
 ```
 
@@ -94,7 +94,7 @@ The percentages are `public / playableTotal` and
 | `monk/mistweaver` | HEALER | PUBLIC | COMMITTED (HEAL-B1P archive, fight 48, actor 9, whole-fight casts) | HEAL-B1, HEAL-B1P (terminal) |
 | `priest/holy` | HEALER | PUBLIC | COMMITTED (HEAL-B2P archive, fight 48, actor 2, whole-fight casts; also the filtered M13-A capture, actor 2) | HEAL-B2, HEAL-B2P (terminal) |
 | `priest/discipline` | HEALER | INTERNAL_ONLY | COMMITTED (filtered M13-A capture, actor 9: Evangelism and Ultimate Penitence casts; G2 cohort246 fight 33 actor 88: Atonement applications onto the capture's subject; no whole-fight casts: cannot meet the healer promotion gate, gap recorded on ONB-EV) | HEAL-B3, HEAL-B3P (not promoted), ONB-EV |
-| `evoker/preservation` | UNKNOWN (healer) | NOT_STARTED | CONTEXT_ONLY | HEAL-B4, HEAL-B4P |
+| `evoker/preservation` | UNKNOWN (healer) | INTERNAL_ONLY | COMMITTED (filtered M13-A capture, actor 8: Stasis and Rewind casts; no whole-fight casts: cannot meet the healer promotion gate yet, gap recorded on ONB-EV) | HEAL-B4, HEAL-B4P, ONB-EV |
 | `demonhunter/havoc` | DPS | NOT_STARTED | RETAINED_RAW (fight 48) | ONB-A1, ONB-A1P |
 | `rogue/subtlety` | DPS | NOT_STARTED | CONTEXT_ONLY | ONB-A2, ONB-A2P |
 | `warrior/fury` | DPS | NOT_STARTED | NONE_KNOWN | ONB-A2, ONB-A2P (evidence: ONB-EV) |
@@ -123,7 +123,7 @@ The percentages are `public / playableTotal` and
 | `warlock/demonology` | DPS | NOT_STARTED | RETAINED_RAW (fight 48) | ONB-X4, ONB-X4P |
 | `deathknight/unholy` | DPS | NOT_STARTED | CONTEXT_ONLY | ONB-X5, ONB-X5P |
 
-Counts: 40 rows; PUBLIC 10, INTERNAL_ONLY 2, FOUNDATION 0, NOT_STARTED 28.
+Counts: 40 rows; PUBLIC 10, INTERNAL_ONLY 3, FOUNDATION 0, NOT_STARTED 27.
 
 ## Cohort design
 

@@ -12911,6 +12911,98 @@ the five-site promotion, and decides what HEAL-B3 left open: whether and how
 the Atonement facts are published, and what the gate requires of them
 (agent/follow-ups.md "After HEAL-B3").
 
+## HEAL-B4 — Preservation Evoker (internal, own representative)
+
+Autopilot queue entry HEAL-B4. Public contract: NONE. No Warcraft Logs
+request: committed evidence and the pinned SimulationCraft data only. The
+M12-D verdict-category limits and the M12-E plan semantics apply unchanged.
+
+**Why its own representative.** Two things no earlier healer had:
+
+- **Empowered casts.** Warcraft Logs records an empowered cast as an
+  `empowerstart`, a `cast` of the same spell at that start, and a later
+  `empowerend` (the release); an empowered spell made instant records the
+  `cast` alone. Pinned from the committed M13-A capture (actor 8): six Dream
+  Breaths with the `cast` in the `empowerstart`'s millisecond; three Fire
+  Breaths, two the same and one with the `cast` one millisecond later; and two
+  Fire Breaths with only a `cast`, each after a Tip the Scales cast. So for an empowered
+  spell a `cast` is a START, and the shared rule "a use is a completed
+  `cast`" (`src/healing/cooldown-use-context.ts`) is sound only for an
+  ability that is not empowered.
+- **Role.** The pinned roster states Preservation's role `UNKNOWN` with no
+  role evidence (`spec-roster.ts`: no Evoker specialization carries the role
+  passive the extractor reads).
+
+**The decisions.**
+
+- The identified healing cooldowns are none of the empowered spells, and the
+  evaluator checks that against the evidence: an `empowerstart` or
+  `empowerend` envelope from the player of an identified ability contradicts
+  the data, and the evaluation is `RUNTIME_DATA_CONTRADICTED`
+  (`IDENTIFIED_ABILITY_OBSERVED_EMPOWERED`) with every such envelope and its
+  locator as evidence. Nothing is evaluated, nothing is a use and no finding
+  set is built; the registration answers INSUFFICIENT_EVIDENCE. A start is
+  never counted as a use. Another actor's envelopes are not the player's.
+- The envelopes stay envelope-only in normalization. No shared change: the
+  check is a filter over normalized envelopes, and which ids must not be
+  empowered is Preservation's (CLAUDE.md "Specialization-Owned Evaluation").
+  The empowerment level is not decoded and no empowered cast is judged.
+- ROLE is carried, never guessed. The module identity carries the roster's
+  `UNKNOWN` (`defineSpecModule` copies it); the healer families are declared
+  by the registration, not derived from a role; nothing reads or asserts one.
+- ONB-S4's cast and channel decision anchor has landed and is NOT consumed.
+  No healer category anchors a decision (an assignment is judged on the
+  completed cast, which is the decision for every identified ability here),
+  and the anchor's `CastAnchorProfile` has no empowered execution kind. A
+  later empowered DECISION needs that kind first; the wire fact above is its
+  input (agent/follow-ups.md "After HEAL-B4").
+
+**The tree** (`src/specs/evoker/preservation/`, revision
+`preservation-evoker-evaluator/1`): a healer on the HEAL-B1 architecture. It
+consumes the shared cooldown-use facts, plan rules, finding-set restatement and
+artifact reader unchanged, and owns:
+
+- its identity gate (stated Evoker/Preservation, and an Evoker player in the
+  master data; Augmentation and Devastation refused as
+  NOT_THIS_SPECIALIZATION);
+- its healing-cooldown identity data
+  (`src/data/game/evoker-preservation-healing-cooldowns.{json,ts}`), verbatim
+  specialization-tree rows of the pinned `trait_data.inc` (commit 33622e9d,
+  client data 12.1.0.69587), class 13, spec 1468: Rewind 363534 on a NORMAL
+  node, and Dream Flight 359816 and Stasis 370537 on choice node 93267. No row
+  has an `id_override_spell`. The pinned tree has no Emerald Communion row.
+  Time Dilation (an external), Tip the Scales and Zephyr (class tree) and the
+  empowered spells are not identified; a plan entry naming one is
+  ABILITY_NOT_REGISTERED;
+- that a use is its own completed cast: Stasis's use is the `cast` of 370537,
+  once; its release arrives as a `cast` of another spell, 370564, which is not
+  identified, so a release is never a use and an assignment window holding
+  only a release is not MET;
+- that its Warcraft Logs-stated pets count as its sources;
+- its registration: the HEAL-B1 shape (three provider-less families declared
+  from `PRESERVATION_EVOKER_REQUIRED_INPUTS`, FULL_RAID derived, no binding,
+  never ANALYZED, AUTHORITY_NOT_AVAILABLE when evaluated and
+  INSUFFICIENT_EVIDENCE otherwise, no healer view and no public prose).
+
+**Reachability.** `evoker/preservation` is in `INTERNAL_ONLY_SPEC_IDS` (now
+`druid/restoration`, `priest/discipline`, `evoker/preservation`).
+`analyzerForSpec` never selects it, the identity table does not resolve
+Evoker/Preservation, and a public request stays SPEC_NOT_SUPPORTED. The
+catalog has thirteen rows. The corpus gained one layer
+(`SPEC_PRESERVATION_EVOKER`) and two cases, the pair every internal healer
+added. The `m12a` healing-consumer list names the evaluator.
+
+**Real evidence** (committed, checked against the raw bytes): the M13-A
+Preservation Evoker (actor 8): Stasis at 176,828 and 272,401 (released, as
+370564 casts, at 199,450 and 288,323) and Rewind at 284,626, with no empower
+envelope of an identified id. The capture is filtered, so the listing is
+UNKNOWN (INSUFFICIENT_COVERAGE) and the overlap is ROSTER_NOT_IN_SCOPE. The
+M13-A Augmentation Evoker (actor 1) is refused.
+
+No committed or retained capture holds a Preservation Evoker's whole-fight
+casts (fight 48 has none), so HEAL-B4P cannot pass the healer promotion gate on
+committed evidence; see agent/follow-ups.md "After HEAL-B4".
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

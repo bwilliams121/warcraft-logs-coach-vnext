@@ -192,6 +192,7 @@ describe("a Blood Death Knight alone", () => {
       "monk-mistweaver-healer-findings": 0,
       "priest-holy-healer-findings": 0,
       "priest-discipline-healer-findings": 0,
+      "evoker-preservation-healer-findings": 0,
     });
     expectBloodCell(cellOf(run.aggregate.cells, BLOOD_DK));
     expect(run.aggregate.coverage).toMatchObject({
@@ -232,6 +233,7 @@ describe("a mixed roster — all four supported specializations plus Arms — ov
       "monk-mistweaver-healer-findings": 0,
       "priest-holy-healer-findings": 0,
       "priest-discipline-healer-findings": 0,
+      "evoker-preservation-healer-findings": 0,
     });
   });
 

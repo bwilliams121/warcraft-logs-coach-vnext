@@ -83,6 +83,8 @@ const EVERY_ANALYZER = [
   "priest-holy-healer-findings",
   // HEAL-B3: Discipline Priest INTERNAL_ONLY.
   "priest-discipline-healer-findings",
+  // HEAL-B4: Preservation Evoker INTERNAL_ONLY.
+  "evoker-preservation-healer-findings",
 ] as const;
 
 let nextId = 1;

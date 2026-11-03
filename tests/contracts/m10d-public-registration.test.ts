@@ -54,7 +54,7 @@ function defectsOf(rows: readonly AnalyzerRegistration[]): readonly string[] {
 }
 
 describe("the five sites agree", () => {
-  it("public partition: the nine public ids since HEAL-B1P; internal-only: Restoration Druid and, since HEAL-B3, Discipline Priest (Augmentation Evoker held it in M13-E, Restoration Shaman in HEAL-A, Holy Paladin and Mistweaver Monk in HEAL-B1, Holy Priest in HEAL-B2)", () => {
+  it("public partition: the nine public ids since HEAL-B1P; internal-only: Restoration Druid, since HEAL-B3 Discipline Priest and, since HEAL-B4, Preservation Evoker (Augmentation Evoker held it in M13-E, Restoration Shaman in HEAL-A, Holy Paladin and Mistweaver Monk in HEAL-B1, Holy Priest in HEAL-B2)", () => {
     expect([...PUBLIC_SPEC_IDS]).toEqual([
       "rogue/assassination",
       "paladin/protection",
@@ -67,7 +67,11 @@ describe("the five sites agree", () => {
       "monk/mistweaver",
       "priest/holy",
     ]);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration", "priest/discipline"]);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([
+      "druid/restoration",
+      "priest/discipline",
+      "evoker/preservation",
+    ]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
 
@@ -120,7 +124,8 @@ describe("the five sites agree", () => {
     // passed on its own real subject; Restoration Druid has no retained
     // evidence and stays INTERNAL_ONLY. HEAL-B2 put a fourth INTERNAL_ONLY
     // healer row in, Holy Priest, which HEAL-B2P made PUBLIC. HEAL-B3 put an
-    // INTERNAL_ONLY Discipline Priest row in, NOT among the enabled analyzers.
+    // INTERNAL_ONLY Discipline Priest row in, NOT among the enabled analyzers,
+    // and HEAL-B4 an INTERNAL_ONLY Preservation Evoker row, NOT among them either.
     expect(ANALYZER_REGISTRATIONS.map((row) => [row.specId, row.exposure])).toEqual([
       ["rogue/assassination", "PUBLIC"],
       ["paladin/protection", "PUBLIC"],
@@ -135,6 +140,7 @@ describe("the five sites agree", () => {
       ["monk/mistweaver", "PUBLIC"],
       ["priest/holy", "PUBLIC"],
       ["priest/discipline", "INTERNAL_ONLY"],
+      ["evoker/preservation", "INTERNAL_ONLY"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -233,6 +239,7 @@ describe("the complete-catalog helper", () => {
       "monk-mistweaver-healer-findings": 0,
       "priest-holy-healer-findings": 0,
       "priest-discipline-healer-findings": 0,
+      "evoker-preservation-healer-findings": 0,
     });
   });
 });

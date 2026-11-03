@@ -623,13 +623,22 @@
       "passed": 1
     },
     {
-      "assertions": 22,
-      "cases": 18,
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_PRESERVATION_EVOKER.REGISTRATION_RESULT"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_PRESERVATION_EVOKER",
+      "passed": 1
+    },
+    {
+      "assertions": 23,
+      "cases": 19,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 22
+      "passed": 23
     },
     {
       "assertions": 14,
@@ -789,6 +798,20 @@
       ],
       "authority": null,
       "caseId": "application-service.mistweaver-monk-registration-is-public-since-heal-b1p",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.preservation-evoker-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -5293,6 +5316,20 @@
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_PRESERVATION_EVOKER.REGISTRATION_RESULT",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-preservation-evoker.unstated-subject-yields-no-healer-finding",
+      "owningLayer": "SPEC_PRESERVATION_EVOKER",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
       "artifactId": "wcl-protection-paladin-a7r6-rotational-45s",
       "assertions": [
         {
@@ -7171,13 +7208,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 792,
-    "cases": 197,
+    "assertions": 794,
+    "cases": 199,
     "declared": 0,
-    "executable": 792,
+    "executable": 794,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 792
+    "passed": 794
   }
 }

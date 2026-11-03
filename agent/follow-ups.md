@@ -433,6 +433,50 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After HEAL-B4: what the internal Preservation Evoker registration does not establish
+
+**Raised:** HEAL-B4 (2026-11-03).
+
+- **It cannot pass the healer promotion gate on committed evidence
+  (HEAL-B4P).** The gate needs a real subject with a COMPLETE use listing, at
+  least one use, and a met and a not-met plan entry over those uses. The M13-A
+  Preservation Evoker's three uses sit in a filtered capture whose listing is
+  UNKNOWN; fight 48 (the retained M11-E2 capture) has no Preservation Evoker;
+  and the retained M11-C4f capture of rXAfw9t1q8YpmkKD fight 13 covers 165 s
+  of a 271.8 s fight and holds its Preservation Evoker's (actor 17) Stasis aura
+  events but no cast of an identified ability (offline scan, no request).
+  HEAL-B4P therefore needs authorized new evidence (ONB-EV, appended), or stays
+  INTERNAL_ONLY with its gap recorded. Never a weaker gate.
+- **No empowered decision is modelled.** The empower envelopes stay
+  envelope-only; their empowerment level is not decoded. ONB-S4's
+  `CastAnchorProfile` has no empowered execution kind, so an empowered spell
+  has no decision anchor. Before any Preservation (or Devastation,
+  Augmentation) decision that involves an empowered spell, that kind needs a
+  reviewed definition from the pinned wire fact: `empowerstart` and `cast` at
+  the start (same millisecond or one later), `empowerend` at the release, and
+  a `cast` alone when the spell was made instant. The healer evaluator only
+  refuses to read an identified ability's empowered `cast` as a use.
+- **Role stays UNKNOWN.** The roster role is the mechanically pinned one;
+  Preservation's is UNKNOWN until a pinned source states it. The healer
+  promotion gate does not read the roster role, so HEAL-B4P need not change
+  it, and must not set it by hand.
+- **The selection is narrow.** Rewind, Dream Flight and Stasis only. Time
+  Dilation is an external; Tip the Scales and Zephyr are class-tree utility;
+  Temporal Anomaly, Echo and the empowered spells are not healing cooldowns by
+  this selection; the pinned tree has no Emerald Communion row. Dream Flight
+  has no observed cast in committed evidence (identified from its row and its
+  choice-node pairing with an observed Stasis). Widening is a reviewed data
+  change.
+- **Stasis's stored spells are not attributed.** Stasis stores the next spells
+  cast and releases them (370564); which healing came from released spells is
+  not modelled, and the use is the 370537 cast only.
+- **The registration facade is copied a seventh time.** Preservation's
+  evaluator differs (the empower check), its registration facade does not.
+  The shared healer registration helper ("After HEAL-B2P") remains its own
+  reviewed refactor.
+
+---
+
 ## After HEAL-B3: what the internal Discipline Priest registration does not establish
 
 **Raised:** HEAL-B3 (2026-11-03).

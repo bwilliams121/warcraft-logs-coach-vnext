@@ -2,7 +2,9 @@
  * HEAL-B1: the Holy Paladin, Restoration Druid and Mistweaver Monk evaluators,
  * since HEAL-B2 the Holy Priest evaluator, and since HEAL-B3 the Discipline
  * Priest evaluator (its Atonement observation is pinned in
- * tests/unit/specs/heal-b3-discipline-priest.test.ts).
+ * tests/unit/specs/heal-b3-discipline-priest.test.ts), and since HEAL-B4 the
+ * Preservation Evoker evaluator (its empowered-cast check is pinned in
+ * tests/unit/specs/heal-b4-preservation-evoker.test.ts).
  *
  * Each is run through the same cases, because each must keep the M12-D
  * verdict-category limits on its own identity and its own data:
@@ -38,6 +40,7 @@ import type { AssignmentEvaluation } from "../../../src/findings/healer-assignme
 import type { CooldownUse, CooldownUseListing } from "../../../src/healing/cooldown-use-context.js";
 import type { RaidCooldownAssignment, RaidCooldownPlan } from "../../../src/raid-plan/raid-cooldown-plan.js";
 import { evaluateRestorationDruid } from "../../../src/specs/druid/restoration/evaluator.js";
+import { evaluatePreservationEvoker } from "../../../src/specs/evoker/preservation/evaluator.js";
 import { evaluateMistweaverMonk } from "../../../src/specs/monk/mistweaver/evaluator.js";
 import { evaluateHolyPaladin } from "../../../src/specs/paladin/holy/evaluator.js";
 import { evaluateDisciplinePriest } from "../../../src/specs/priest/discipline/evaluator.js";
@@ -168,6 +171,18 @@ const CASES: readonly Case[] = [
     cooldownB: 62618, // Power Word: Barrier
     notACooldown: 33206, // Pain Suppression: an external, not identified
     otherClassName: "Paladin",
+  },
+  {
+    label: "Preservation Evoker",
+    evaluate: evaluatePreservationEvoker as unknown as Evaluate,
+    revision: "preservation-evoker-evaluator/1",
+    className: "Evoker",
+    specName: "Preservation",
+    datasetId: "SIMC_DBC_EVOKER_PRESERVATION_HEALING_COOLDOWNS",
+    cooldownA: 363534, // Rewind
+    cooldownB: 359816, // Dream Flight
+    notACooldown: 357170, // Time Dilation: an external, not identified
+    otherClassName: "Priest",
   },
 ];
 

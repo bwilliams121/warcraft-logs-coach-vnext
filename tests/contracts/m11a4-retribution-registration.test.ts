@@ -340,6 +340,7 @@ describe("the public path analyzes (M11-A5), and the internal path analyzes the 
       "monk-mistweaver-healer-findings": 0,
       "priest-holy-healer-findings": 0,
       "priest-discipline-healer-findings": 0,
+      "evoker-preservation-healer-findings": 0,
     });
     const document = projectAnalysisResult(result.analysis);
     expect(document).toMatchObject({

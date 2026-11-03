@@ -109,8 +109,13 @@ describe("identity and partition", () => {
     // in HEAL-A, was empty from HEAL-AP, held the three HEAL-B1 healers, and
     // held Restoration Druid alone from HEAL-B1P, held it and Holy Priest from
     // HEAL-B2, held Restoration Druid alone again from HEAL-B2P, and holds it
-    // and Discipline Priest since HEAL-B3.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration", "priest/discipline"]);
+    // and Discipline Priest from HEAL-B3, and those two and Preservation
+    // Evoker since HEAL-B4.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([
+      "druid/restoration",
+      "priest/discipline",
+      "evoker/preservation",
+    ]);
     expect(PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");
     expect(requirePublicSpecId("deathknight/blood")).toBe("deathknight/blood");

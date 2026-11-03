@@ -1857,6 +1857,18 @@ Discipline Priest public (HEAL-B3P: not promoted; no test changed, the existing 
   gate coverage                                -> every PUBLIC healer row needs a pinned subject (heal-ap gate), so a subject-less promotion fails
   registration                                 -> still INTERNAL_ONLY beside Restoration Druid (m10d-public-registration, m10d invariance)
   public request                               -> Priest/Discipline SPEC_NOT_SUPPORTED, one retrieval for preparation alone (analysis-composition-refusals)
+Preservation Evoker internal (HEAL-B4, tests/unit/specs/heal-b4-preservation-evoker.test.ts; a sixth case in heal-b1-healer-evaluators/registrations):
+  shared healer cases                          -> every HEAL-B1 evaluator and registration case passes for Preservation Evoker (other class: Priest)
+  cooldown artifact                            -> exactly Rewind 363534 (NORMAL) and Dream Flight 359816 + Stasis 370537 (CHOICE, siblings); no empowered spell, 370564 not identified
+  role                                         -> roster UNKNOWN, roleEvidence null; module identity role UNKNOWN; never HEALER by guess
+  unidentified empowered spell                 -> empowerstart + cast + empowerend (and a cast alone) add no use; listing stays COMPLETE
+  identified ability seen empowered            -> RUNTIME_DATA_CONTRADICTED IDENTIFIED_ABILITY_OBSERVED_EMPOWERED with the envelopes; no use, no finding set; registration INSUFFICIENT_EVIDENCE
+  another actor's empower envelope             -> contradicts nothing; the subject's cast is a use
+  Stasis release (370564 cast)                 -> never a use; a window holding only a release ASSIGNMENT_UNKNOWN READINESS_NOT_ESTABLISHED, never MET
+  real M13-A empower shape                     -> six Dream Breaths: empowerstart, cast in its millisecond, then empowerend (raw-checked)
+  real M13-A Preservation 8                    -> Stasis 176,828 and 272,401, Rewind 284,626 (raw-checked, releases 199,450 and 288,323); listing UNKNOWN; ROSTER_NOT_IN_SCOPE
+  real M13-A Augmentation 1                    -> IDENTITY_REFUSED NOT_THIS_SPECIALIZATION; NOT_ASSESSED
+  registration                                 -> INTERNAL_ONLY; public lookup null; identity table refuses; public request SPEC_NOT_SUPPORTED, no dispatch
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)
