@@ -100,6 +100,7 @@ const NINE_PUBLIC = [
   "paladin/holy",
   "monk/mistweaver",
   "priest/holy",
+  "evoker/preservation",
 ];
 
 const SOURCES: Record<string, string> = import.meta.glob("../../src/**/*.ts", {
@@ -132,12 +133,8 @@ describe("identity and partition", () => {
     // through M11-C4i, and the five sites moved in one reviewed edit.
     expect(isSpecId("monk/brewmaster")).toBe(true);
     expect(isPublicSpecId("monk/brewmaster")).toBe(true);
-    // The internal-only half never holds Brewmaster again; it held Restoration Shaman in HEAL-A, was empty from HEAL-AP, held the three HEAL-B1 healers, held Restoration Druid alone from HEAL-B1P, held it and Holy Priest from HEAL-B2, held Restoration Druid alone again from HEAL-B2P, held it and Discipline Priest from HEAL-B3, and holds those two and Preservation Evoker since HEAL-B4.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([
-      "druid/restoration",
-      "priest/discipline",
-      "evoker/preservation",
-    ]);
+    // The internal-only half never holds Brewmaster again; it held Restoration Shaman in HEAL-A, was empty from HEAL-AP, held the three HEAL-B1 healers, held Restoration Druid alone from HEAL-B1P, held it and Holy Priest from HEAL-B2, held Restoration Druid alone again from HEAL-B2P, held it and Discipline Priest from HEAL-B3, those two and Preservation Evoker from HEAL-B4, and holds Restoration Druid and Discipline Priest since HEAL-B4P.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration", "priest/discipline"]);
     expect([...PUBLIC_SPEC_IDS]).toEqual(NINE_PUBLIC);
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("monk/brewmaster");
     expect(requirePublicSpecId("monk/brewmaster")).toBe("monk/brewmaster");
@@ -187,9 +184,9 @@ describe("identity and partition", () => {
     );
     // The public prose is DERIVED from the PUBLIC set and moved with it.
     expect(SUPPORTED_SPECIALIZATIONS_SENTENCE).toBe(
-      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Holy Paladin, Holy Priest, Mistweaver Monk, Protection Paladin, Restoration Shaman and Retribution Paladin.",
+      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Holy Paladin, Holy Priest, Mistweaver Monk, Preservation Evoker, Protection Paladin, Restoration Shaman and Retribution Paladin.",
     );
-    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(10);
+    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(11);
     expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toContainEqual(
       BREWMASTER_MONK_REGISTRATION.publicLimits,
     );

@@ -6,14 +6,14 @@
  * tests/unit/specs/heal-b2-holy-priest.test.ts); and, since HEAL-B3, the
  * INTERNAL_ONLY Discipline Priest registration (its real-evidence and
  * Atonement checks are tests/unit/specs/heal-b3-discipline-priest.test.ts);
- * and, since HEAL-B4, the INTERNAL_ONLY Preservation Evoker registration (its
- * real-evidence and empowered-cast checks are
+ * and the Preservation Evoker registration, INTERNAL_ONLY from HEAL-B4 and PUBLIC
+ * since HEAL-B4P (its real-evidence and empowered-cast checks are
  * tests/unit/specs/heal-b4-preservation-evoker.test.ts).
  *
  * What is pinned per registration:
- * - Restoration Druid, Discipline Priest and Preservation Evoker are listed INTERNAL_ONLY rows; the public lookup, the
+ * - Restoration Druid and Discipline Priest are listed INTERNAL_ONLY rows; the public lookup, the
  *   public identity table and a public request never reach it. Holy Paladin,
- *   Mistweaver Monk and Holy Priest are listed PUBLIC rows: both lookups find the same
+ *   Mistweaver Monk, Holy Priest and Preservation Evoker are listed PUBLIC rows: both lookups find the same
  *   row, the identity table resolves them, a public request dispatches them
  *   once, and they carry public prose and a healer view;
  * - it declares the three provider-less healer families from its own
@@ -168,7 +168,7 @@ const CASES: readonly Case[] = [
     className: "Evoker",
     specName: "Preservation",
     required: PRESERVATION_EVOKER_REQUIRED_INPUTS,
-    exposure: "INTERNAL_ONLY",
+    exposure: "PUBLIC",
   },
 ];
 

@@ -6828,6 +6828,316 @@
       }
     },
     {
+      "artifactId": "wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-0-20",
+      "path": "artifacts/wcl-events/wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-0-20.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "21b0c0b9aebbd4c2fe0195365b0d814f6455f0e596c9f8e457bfa6053616460f",
+      "byteLength": 8413,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "gtKb2xHn87pNcFfW",
+          "fightId": 22,
+          "reportRevision": 22,
+          "sourceActorId": 25,
+          "encounterId": 3420,
+          "difficulty": 4,
+          "capturedOn": "2026-09-15",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2415041,
+            "endTimeMs": 2435041
+          },
+          "completeness": {
+            "eventsReturned": 18318,
+            "pagesRetrieved": 2,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Two pages (10,004 then 8,314 events), the second terminal (nextPageTimestamp null): the whole 20-second window was retrieved. The fight's first event, the subject's combatantinfo, is at 2,415,041 = the fight start, so coverage runs from the pull."
+          },
+          "captureTooling": {
+            "name": ".probe/m9c2-capture.probe.ts (temporary, gitignored) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R3–R4 opener window: EVENTS_QUERY over [2,415,041 .. 2,435,041] (the pull's first 20 s) at limit 10,000 with resources; bounded to 5 pages in advance, run once by hand on 2026-09-15 (4 requests in total for the whole capture, bound 8)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m9c2-opener-pages.json — gitignored, not retained in the repository",
+          "performanceContext": {
+            "source": "reportData.report.rankings(fightIDs:[22]) — the report's own per-fight rankings, one request; the subject was selected as row 0 of the Sszorak heroic Assassination dps board page captured by scripts/probe/wcl-rankings-shape.probe.ts",
+            "partition": 1,
+            "metric": "dps",
+            "subjects": [
+              {
+                "actorId": 25,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 100,
+                "bracketPercent": 100,
+                "bracket": 18,
+                "bracketData": 325,
+                "totalParses": 8606
+              },
+              {
+                "actorId": 8,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 8,
+                "bracketPercent": 17,
+                "bracket": 10,
+                "bracketData": 299,
+                "totalParses": 8606
+              }
+            ],
+            "fightOutcome": "KILL",
+            "fightDurationMs": 284791
+          }
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m9c2-opener-pages.json ../../../evidence/artifacts/wcl-events/wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-0-20.json --actor-slice 15 2435041 --from 2415040 --families cast,begincast,empowerstart,empowerend --compact"
+            },
+            "detail": "The page envelopes concatenated in page order (two pages, terminal), then the --actor-slice predicate for actor 15: every event whose sourceID or targetID is 15, with --from 2415040 (exclusive) and the bound 2435041 (inclusive), restricted by --families to cast, begincast, empowerstart and empowerend. In place and order preserved; written as compact JSON (--compact). 26 of 18,318 events: 20 casts, 1 begincasts, 2 empowerstarts and 3 empowerends; 23 sourced by actor 15, the rest targeting it.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS"],
+              "actorScope": [15],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2415041,
+                  "toReportTimeMs": 2435041
+                }
+              ]
+            }
+          ],
+          "basis": "CASTS is complete for actor 15 over [2,415,041 .. 2,435,041] by the predicate 'every cast, begincast or empower envelope actor 15 sources or is targeted by, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (two pages, terminal). No other category is granted: auras, healing, damage, absorbs, resources, summons and deaths are excluded families, and nothing is granted to any other actor, pets included. The segment is one part of a three-part bundle, joined by adjacency, that spans the whole fight."
+        },
+        "retainedFor": "HEAL-B4P: the Preservation Evoker's real casts over a whole fight (fight 22 is the only retained capture that holds one whole), so the healer promotion gate's observations (three Stasis casts and one Rewind) and the COMPLETE coverage behind 'these are all of them' are proven on Warcraft Logs bytes, alongside the committed fight context that states the player's class and specialization. The empower envelopes are the input of the evaluator's contradiction check.",
+        "limitations": [
+          "One segment of the whole fight: on its own it grants no coverage outside its range; only the composed bundle covers the fight.",
+          "Casts, begincasts and empower envelopes only: no aura, heal, damage, absorb, summon, resource or death event is retained, so nothing here says when an aura was active, what a cast healed, or whether the player was alive.",
+          "Actor 15 only: any pet's own casts are not retained.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-165-285",
+      "path": "artifacts/wcl-events/wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-165-285.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "622cab45635a04ca10e2323698525010b601e63203e9e83f6581d4dc81f55778",
+      "byteLength": 54781,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "gtKb2xHn87pNcFfW",
+          "fightId": 22,
+          "reportRevision": 22,
+          "sourceActorId": 4,
+          "encounterId": 3420,
+          "difficulty": 4,
+          "capturedOn": "2026-09-25",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2580041,
+            "endTimeMs": 2699832
+          },
+          "completeness": {
+            "eventsReturned": 91236,
+            "pagesRetrieved": 10,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Ten pages (10,006 / 10,006 / 10,000 / 10,005 / 10,002 / 10,004 / 10,003 / 10,004 / 10,000 / 1,206 events; cursors 2,593,693, 2,607,411, 2,621,052, 2,633,173, 2,645,188, 2,659,438, 2,673,359, 2,685,139, 2,698,114, then null): the whole window through the fight end was retrieved inside the 20-page cap. The first event is at 2,580,050 and the last at 2,699,832, the fight end. R1 (FIGHT_CONTEXT_QUERY, actor 4) read revision 22 and fight bounds [2,415,041 .. 2,699,832]; REPORT_REVISION_QUERY after the last page read 22 — the revision of the M9-C2 and M11-C4 captures (.probe/m11c4b-request-count.json). No event lies at 2,580,041 in this capture, and the M11-C4 capture's last event is 2,580,038, so neither capture holds an event in [2,580,039 .. 2,580,049]."
+          },
+          "captureTooling": {
+            "name": ".probe/m11c4b-capture.probe.ts (temporary, gitignored; the M11-C4 probe with the window start offset, the window end (the fight end) and output names changed) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R11 full-fight extension window: EVENTS_QUERY over [2,580,041 .. 2,699,832] (the pull's +165 s .. the fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 20 pages in .probe/m11c4b-capture-plan.md before running, run once by hand on 2026-09-25 (12 requests in total for the whole capture, bound 22)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11c4b-pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 22
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11c4b-pages.json ../../../evidence/artifacts/wcl-events/wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-165-285.json --actor-slice 15 2699832 --from 2580041 --families cast,begincast,empowerstart,empowerend --compact"
+            },
+            "detail": "The page envelopes concatenated in page order (ten pages, terminal, revision 22 before and after), then the --actor-slice predicate for actor 15: every event whose sourceID or targetID is 15, with --from 2580041 (exclusive) and the bound 2699832 (inclusive), restricted by --families to cast, begincast, empowerstart and empowerend. In place and order preserved; written as compact JSON (--compact). 160 of 91,236 events: 133 casts, 7 begincasts, 10 empowerstarts and 10 empowerends; 149 sourced by actor 15, the rest targeting it.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS"],
+              "actorScope": [15],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2580042,
+                  "toReportTimeMs": 2699832
+                }
+              ]
+            }
+          ],
+          "basis": "CASTS is complete for actor 15 over [2,580,042 .. 2,699,832] by the predicate 'every cast, begincast or empower envelope actor 15 sources or is targeted by, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (ten pages, terminal, revision 22 before and after). No other category is granted: auras, healing, damage, absorbs, resources, summons and deaths are excluded families, and nothing is granted to any other actor, pets included. The segment is one part of a three-part bundle, joined by adjacency, that spans the whole fight."
+        },
+        "retainedFor": "HEAL-B4P: the Preservation Evoker's real casts over a whole fight (fight 22 is the only retained capture that holds one whole), so the healer promotion gate's observations (three Stasis casts and one Rewind) and the COMPLETE coverage behind 'these are all of them' are proven on Warcraft Logs bytes, alongside the committed fight context that states the player's class and specialization. The empower envelopes are the input of the evaluator's contradiction check.",
+        "limitations": [
+          "One segment of the whole fight: on its own it grants no coverage outside its range; only the composed bundle covers the fight.",
+          "Casts, begincasts and empower envelopes only: no aura, heal, damage, absorb, summon, resource or death event is retained, so nothing here says when an aura was active, what a cast healed, or whether the player was alive.",
+          "Actor 15 only: any pet's own casts are not retained.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-20-165",
+      "path": "artifacts/wcl-events/wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-20-165.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "9eb778abad5f3124bbc1211067fd97f5cb99454961e10f324c6940139a27c8b5",
+      "byteLength": 59959,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "gtKb2xHn87pNcFfW",
+          "fightId": 22,
+          "reportRevision": 22,
+          "sourceActorId": 4,
+          "encounterId": 3420,
+          "difficulty": 4,
+          "capturedOn": "2026-09-25",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2435041,
+            "endTimeMs": 2580041
+          },
+          "completeness": {
+            "eventsReturned": 118289,
+            "pagesRetrieved": 12,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twelve pages (10,004 / 10,005 / 10,000 / 10,002 / 10,004 / 10,005 / 10,001 / 10,006 / 10,005 / 10,015 / 10,001 / 8,241 events; cursors 2,443,209, 2,452,384, 2,463,779, 2,476,260, 2,488,649, 2,500,416, 2,514,169, 2,528,777, 2,542,603, 2,554,704, 2,568,323, then null): the whole 145-second window was retrieved inside the 20-page cap. The first event is at 2,435,041 and the last at 2,580,038. R1 (FIGHT_CONTEXT_QUERY, actor 4) read revision 22 and REPORT_REVISION_QUERY after the last page read 22 — the revision the M9-C2 opener capture recorded (.probe/m11c4-request-count.json). The seven events at 2,435,041 are returned by BOTH captures, byte-identical and in the same order, and none of them is sourced by or targets actor 4."
+          },
+          "captureTooling": {
+            "name": ".probe/m11c4-capture.probe.ts (temporary, gitignored; the M10-C5 Phase B probe with the report, fight, actor, window offsets, page cap and output names changed) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R13 extension window: EVENTS_QUERY over [2,435,041 .. 2,580,041] (the pull's +20 s .. +165 s) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 20 pages in .probe/m11c4-capture-plan.md before running, run once by hand on 2026-09-25 (14 requests in total for the whole capture, bound 22)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11c4-pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 22
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11c4-pages.json ../../../evidence/artifacts/wcl-events/wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-20-165.json --actor-slice 15 2580041 --from 2435041 --families cast,begincast,empowerstart,empowerend --compact"
+            },
+            "detail": "The page envelopes concatenated in page order (twelve pages, terminal, revision 22 before and after), then the --actor-slice predicate for actor 15: every event whose sourceID or targetID is 15, with --from 2435041 (exclusive) and the bound 2580041 (inclusive), restricted by --families to cast, begincast, empowerstart and empowerend. In place and order preserved; written as compact JSON (--compact). 181 of 118,289 events: 144 casts, 11 begincasts, 13 empowerstarts and 13 empowerends; 167 sourced by actor 15, the rest targeting it.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS"],
+              "actorScope": [15],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2435042,
+                  "toReportTimeMs": 2580041
+                }
+              ]
+            }
+          ],
+          "basis": "CASTS is complete for actor 15 over [2,435,042 .. 2,580,041] by the predicate 'every cast, begincast or empower envelope actor 15 sources or is targeted by, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twelve pages, terminal, revision 22 before and after). No other category is granted: auras, healing, damage, absorbs, resources, summons and deaths are excluded families, and nothing is granted to any other actor, pets included. The segment is one part of a three-part bundle, joined by adjacency, that spans the whole fight."
+        },
+        "retainedFor": "HEAL-B4P: the Preservation Evoker's real casts over a whole fight (fight 22 is the only retained capture that holds one whole), so the healer promotion gate's observations (three Stasis casts and one Rewind) and the COMPLETE coverage behind 'these are all of them' are proven on Warcraft Logs bytes, alongside the committed fight context that states the player's class and specialization. The empower envelopes are the input of the evaluator's contradiction check.",
+        "limitations": [
+          "One segment of the whole fight: on its own it grants no coverage outside its range; only the composed bundle covers the fight.",
+          "Casts, begincasts and empower envelopes only: no aura, heal, damage, absorb, summon, resource or death event is retained, so nothing here says when an aura was active, what a cast healed, or whether the player was alive.",
+          "Actor 15 only: any pet's own casts are not retained.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ]
+      }
+    },
+    {
       "artifactId": "wcl-m13a-aug1-fight-1-support.seg-0-75",
       "path": "artifacts/wcl-events/wcl-m13a-aug1-fight-1-support.seg-0-75.json",
       "encoding": "JSON",
@@ -7750,6 +8060,96 @@
       "authority": null,
       "limitations": [],
       "relatedTests": ["tests/unit/sanitize-probe.test.ts", "tests/unit/m11c4f-selection-frame.test.ts"]
+    },
+    {
+      "caseId": "normalization.gtkb-preservation-evoker-15-casts-seg-0-20-normalizes-whole-and-in-order",
+      "artifactId": "wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-0-20",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from --families",
+      "purpose": "The 26-event cast-and-empower segment of actor 15 (fight +0 s .. +20 s) normalizes with every raw type recognised and every event kept in capture order.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 26
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the cast, begincast and empower events sourced by or targeting actor 15 in its range, and nothing else."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/contracts/heal-ap-healer-promotion-gate.test.ts"]
+    },
+    {
+      "caseId": "normalization.gtkb-preservation-evoker-15-casts-seg-165-285-normalizes-whole-and-in-order",
+      "artifactId": "wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-165-285",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from --families",
+      "purpose": "The 160-event cast-and-empower segment of actor 15 (fight +165 s .. +285 s) normalizes with every raw type recognised and every event kept in capture order.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 160
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the cast, begincast and empower events sourced by or targeting actor 15 in its range, and nothing else."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/contracts/heal-ap-healer-promotion-gate.test.ts"]
+    },
+    {
+      "caseId": "normalization.gtkb-preservation-evoker-15-casts-seg-20-165-normalizes-whole-and-in-order",
+      "artifactId": "wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-20-165",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from --families",
+      "purpose": "The 181-event cast-and-empower segment of actor 15 (fight +20 s .. +165 s) normalizes with every raw type recognised and every event kept in capture order.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 181
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the cast, begincast and empower events sourced by or targeting actor 15 in its range, and nothing else."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/contracts/heal-ap-healer-promotion-gate.test.ts"]
     },
     {
       "caseId": "normalization.m13a-aug1-fight-1-support-seg-0-75-normalizes-whole-and-in-order",

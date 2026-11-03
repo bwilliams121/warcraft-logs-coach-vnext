@@ -384,7 +384,7 @@ describe("the supplemental seam is not wired to any transport, service, contract
 });
 
 describe("what the tree exports today", () => {
-  it("is exactly the ten public modules and three INTERNAL_ONLY healer modules (Restoration Druid since HEAL-B1, Discipline Priest since HEAL-B3, Preservation Evoker since HEAL-B4), each with zero supplemental analyses", () => {
+  it("is exactly the eleven public modules and two INTERNAL_ONLY healer modules (Restoration Druid since HEAL-B1, Discipline Priest since HEAL-B3), each with zero supplemental analyses", () => {
     // A reviewed snapshot, not the rule: every proof above is per module and
     // count-independent. The third module (M11-A4) first changed this line
     // WITHOUT the five-site identity move — INTERNAL_ONLY, carrying the
@@ -408,7 +408,7 @@ describe("what the tree exports today", () => {
       // M13-E: INTERNAL_ONLY, binding no decision authority; PUBLIC since M13-F.
       ["AUGMENTATION_EVOKER_MODULE", "evoker/augmentation", "PUBLIC", 0],
       // HEAL-B4: a healer on the same architecture, its roster role UNKNOWN as pinned, INTERNAL_ONLY.
-      ["PRESERVATION_EVOKER_MODULE", "evoker/preservation", "INTERNAL_ONLY", 0],
+      ["PRESERVATION_EVOKER_MODULE", "evoker/preservation", "PUBLIC", 0],
       ["BREWMASTER_MONK_MODULE", "monk/brewmaster", "PUBLIC", 0],
       ["MISTWEAVER_MONK_MODULE", "monk/mistweaver", "PUBLIC", 0],
       ["HOLY_PALADIN_MODULE", "paladin/holy", "PUBLIC", 0],

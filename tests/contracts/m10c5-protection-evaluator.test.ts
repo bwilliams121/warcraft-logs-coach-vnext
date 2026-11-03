@@ -298,6 +298,7 @@ describe("Protection is public since M10-D", () => {
       "paladin/holy",
       "monk/mistweaver",
       "priest/holy",
+      "evoker/preservation",
     ]);
     expect(PROTECTION_PALADIN_REGISTRATION.exposure).toBe("PUBLIC");
   });

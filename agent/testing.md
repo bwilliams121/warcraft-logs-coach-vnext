@@ -1869,6 +1869,14 @@ Preservation Evoker internal (HEAL-B4, tests/unit/specs/heal-b4-preservation-evo
   real M13-A Preservation 8                    -> Stasis 176,828 and 272,401, Rewind 284,626 (raw-checked, releases 199,450 and 288,323); listing UNKNOWN; ROSTER_NOT_IN_SCOPE
   real M13-A Augmentation 1                    -> IDENTITY_REFUSED NOT_THIS_SPECIALIZATION; NOT_ASSESSED
   registration                                 -> INTERNAL_ONLY; public lookup null; identity table refuses; public request SPEC_NOT_SUPPORTED, no dispatch
+Preservation Evoker public (HEAL-B4P, tests/contracts/heal-ap-healer-promotion-gate.test.ts, heal-b1-healer-registrations.test.ts, heal-b4-preservation-evoker.test.ts):
+  gate subject                                 -> gtKb fight 22 Preservation Evoker 15 whole-fight casts and empower envelopes; every HEAL-AP gate check passes
+  real uses                                    -> 3 Stasis + 1 Rewind; listing COMPLETE; 3 releases (370564) and empowered Dream Breaths are never uses; no envelope on an identified id (raw-checked)
+  plan entries                                 -> MET Rewind (cast 2,515,073); not-met Rewind 2,600,000 ± 3 s; Stasis after the end; Dream Breath unregistered
+  registration                                 -> PUBLIC; both lookups the same row; identity table resolves Evoker/Preservation; public request dispatched once
+  identity                                     -> Evoker/Preservation resolves to evoker/preservation only; Evoker/Devastation stays unsupported
+  contradiction                                -> view passes RUNTIME_DATA_CONTRADICTED through as NOT_ASSESSED; the public reason list holds it
+  Restoration Druid, Discipline Priest         -> still the INTERNAL_ONLY rows; public request SPEC_NOT_SUPPORTED, no dispatch
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)

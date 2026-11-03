@@ -108,14 +108,10 @@ describe("identity and partition", () => {
     // M11-C2 until M11-C4j, Augmentation Evoker in M13-E, Restoration Shaman
     // in HEAL-A, was empty from HEAL-AP, held the three HEAL-B1 healers, and
     // held Restoration Druid alone from HEAL-B1P, held it and Holy Priest from
-    // HEAL-B2, held Restoration Druid alone again from HEAL-B2P, and holds it
-    // and Discipline Priest from HEAL-B3, and those two and Preservation
-    // Evoker since HEAL-B4.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([
-      "druid/restoration",
-      "priest/discipline",
-      "evoker/preservation",
-    ]);
+    // HEAL-B2, held Restoration Druid alone again from HEAL-B2P, held it and
+    // Discipline Priest from HEAL-B3, those two and Preservation Evoker from
+    // HEAL-B4, and holds Restoration Druid and Discipline Priest since HEAL-B4P.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration", "priest/discipline"]);
     expect(PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");
     expect(requirePublicSpecId("deathknight/blood")).toBe("deathknight/blood");
@@ -150,6 +146,7 @@ describe("identity and partition", () => {
       "paladin/holy",
       "monk/mistweaver",
       "priest/holy",
+      "evoker/preservation",
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.specId)).toContain("deathknight/blood");
     expect(ENABLED_ANALYSIS_REQUIREMENTS.map((requirement) => requirement.analyzerId)).toContain(
@@ -157,9 +154,9 @@ describe("identity and partition", () => {
     );
     // The public prose is DERIVED from the PUBLIC set and moved with it.
     expect(SUPPORTED_SPECIALIZATIONS_SENTENCE).toBe(
-      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Holy Paladin, Holy Priest, Mistweaver Monk, Protection Paladin, Restoration Shaman and Retribution Paladin.",
+      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Holy Paladin, Holy Priest, Mistweaver Monk, Preservation Evoker, Protection Paladin, Restoration Shaman and Retribution Paladin.",
     );
-    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(10);
+    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(11);
     expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toContainEqual(
       BLOOD_DEATH_KNIGHT_REGISTRATION.publicLimits,
     );

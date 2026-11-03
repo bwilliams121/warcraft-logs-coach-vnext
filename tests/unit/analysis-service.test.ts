@@ -231,7 +231,7 @@ describe("analyzeFight", () => {
     }
   });
 
-  it("enables_exactly_the_ten_public_analyzers", () => {
+  it("enables_exactly_the_eleven_public_analyzers", () => {
     // Superseded `milestone_2_enables_no_analyzers`, in M10-D
     // `enables_exactly_the_assassination_analyzer`, in M11-A5
     // `enables_exactly_the_two_public_analyzers`, in M11-B12
@@ -290,6 +290,11 @@ describe("analyzeFight", () => {
       }, // HEAL-B2P: Holy Priest, FULL_RAID by its declared healer inputs, no resources.
       {
         analyzerId: "priest-holy-healer-findings",
+        requiredScope: "FULL_RAID",
+        includeResources: false,
+      }, // HEAL-B4P: Preservation Evoker, FULL_RAID by its declared healer inputs, no resources.
+      {
+        analyzerId: "evoker-preservation-healer-findings",
         requiredScope: "FULL_RAID",
         includeResources: false,
       },

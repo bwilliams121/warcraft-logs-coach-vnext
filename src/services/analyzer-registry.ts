@@ -435,12 +435,11 @@ export function requireValidatedCatalog(
 /**
  * Every registration this build carries, as written by the specializations.
  *
- * Thirteen rows: ten PUBLIC (Augmentation Evoker was INTERNAL_ONLY in M13-E,
+ * Thirteen rows: eleven PUBLIC (Augmentation Evoker was INTERNAL_ONLY in M13-E,
  * Restoration Shaman in HEAL-A, Holy Paladin and Mistweaver Monk in HEAL-B1,
- * Holy Priest in HEAL-B2) and three INTERNAL_ONLY: since HEAL-B1, Restoration
- * Druid, the one healer HEAL-B1P could not promote (no retained evidence of
- * one), since HEAL-B3, Discipline Priest, which HEAL-B3P could not promote,
- * and since HEAL-B4, Preservation Evoker, whose public promotion is HEAL-B4P.
+ * Holy Priest in HEAL-B2, Preservation Evoker in HEAL-B4) and two INTERNAL_ONLY:
+ * since HEAL-B1, Restoration Druid, which HEAL-B1P did not promote, and since
+ * HEAL-B3, Discipline Priest, which HEAL-B3P could not promote.
  * A publicly unsupported
  * specialization is represented by ABSENCE from the PUBLIC set — an
  * INTERNAL_ONLY row, when one exists, is in the catalog and reachable by
@@ -463,7 +462,7 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   // INTERNAL_ONLY from HEAL-A; PUBLIC since HEAL-AP. The first healer row: binds no pinned authority, publishes healer findings.
   RESTORATION_SHAMAN_REGISTRATION,
   // Healer rows on Restoration Shaman's architecture, from HEAL-B1. Holy Paladin and Mistweaver Monk PUBLIC since
-  // HEAL-B1P; Restoration Druid INTERNAL_ONLY (no retained evidence for the healer promotion gate).
+  // HEAL-B1P; Restoration Druid INTERNAL_ONLY (not yet gated; agent/follow-ups.md "After HEAL-B4P").
   HOLY_PALADIN_REGISTRATION,
   RESTORATION_DRUID_REGISTRATION,
   MISTWEAVER_MONK_REGISTRATION,
@@ -472,8 +471,8 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   // INTERNAL_ONLY since HEAL-B3: a healer row on the same architecture that also reports observed Atonement. No
   // public shape yet (HEAL-B3P).
   DISCIPLINE_PRIEST_REGISTRATION,
-  // INTERNAL_ONLY since HEAL-B4: a healer row on the same architecture whose identified cooldowns are checked
-  // against empowered casts. No public shape yet (HEAL-B4P).
+  // INTERNAL_ONLY from HEAL-B4; PUBLIC since HEAL-B4P. A healer row on the same architecture whose identified
+  // cooldowns are checked against empowered casts.
   PRESERVATION_EVOKER_REGISTRATION,
 ]);
 

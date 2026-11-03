@@ -145,6 +145,7 @@ describe("the public vocabularies match the internal ones exactly", () => {
       "paladin/holy",
       "monk/mistweaver",
       "priest/holy",
+      "evoker/preservation",
     ]);
   });
 

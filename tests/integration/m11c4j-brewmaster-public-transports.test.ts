@@ -81,6 +81,7 @@ const EVERY_ANALYZER = [
   "monk-mistweaver-healer-findings",
   // HEAL-B2: Holy Priest INTERNAL_ONLY; PUBLIC since HEAL-B2P.
   "priest-holy-healer-findings",
+  "evoker-preservation-healer-findings",
   // HEAL-B3: Discipline Priest INTERNAL_ONLY.
   "priest-discipline-healer-findings",
   // HEAL-B4: Preservation Evoker INTERNAL_ONLY.

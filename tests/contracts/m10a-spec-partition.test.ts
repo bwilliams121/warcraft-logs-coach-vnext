@@ -57,6 +57,7 @@ describe("the known specialization ids are exactly partitioned", () => {
       "paladin/holy",
       "monk/mistweaver",
       "priest/holy",
+      "evoker/preservation",
     ]);
     expect(isPublicSpecId("paladin/holy")).toBe(true);
     expect(isPublicSpecId("monk/mistweaver")).toBe(true);
@@ -89,7 +90,7 @@ describe("the known specialization ids are exactly partitioned", () => {
     // added Holy Priest, which HEAL-B2P promoted. HEAL-B4 added Preservation
     // Evoker, whose public promotion is HEAL-B4P. HEAL-B3 added Discipline
     // Priest, whose public promotion is HEAL-B3P.
-    expect(INTERNAL_ONLY_SPEC_IDS).toEqual(["druid/restoration", "priest/discipline", "evoker/preservation"]);
+    expect(INTERNAL_ONLY_SPEC_IDS).toEqual(["druid/restoration", "priest/discipline"]);
     for (const id of INTERNAL_ONLY_SPEC_IDS) {
       expect(isSpecId(id), id).toBe(true);
       expect(isPublicSpecId(id), id).toBe(false);

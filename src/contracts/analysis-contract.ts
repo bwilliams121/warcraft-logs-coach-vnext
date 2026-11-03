@@ -78,6 +78,7 @@ export const PUBLIC_SPEC_IDS = [
   "paladin/holy",
   "monk/mistweaver",
   "priest/holy",
+  "evoker/preservation",
 ] as const satisfies readonly SpecId[];
 
 type ListedSpecId = (typeof PUBLIC_SPEC_IDS)[number];
@@ -1786,11 +1787,18 @@ export const SupportObservationsSchema = z.discriminatedUnion("assessment", [
 // Healer findings (HEAL-AP)
 // ---------------------------------------------------------------------------
 
-/** Why no healer finding was built. Nothing is claimed about the player. */
+/**
+ * Why no healer finding was built. Nothing is claimed about the player.
+ * RUNTIME_DATA_CONTRADICTED (HEAL-B4P): the data was usable, and the player's
+ * own events contradict it, so a Preservation Evoker's identified ability seen
+ * empowered is not read as a use. It joined by the same additive widening as a
+ * `specId`.
+ */
 export const PUBLIC_HEALER_NOT_ASSESSED_REASONS = [
   "SUBJECT_SPECIALIZATION_NOT_STATED",
   "IDENTITY_REFUSED",
   "RUNTIME_DATA_UNAVAILABLE",
+  "RUNTIME_DATA_CONTRADICTED",
 ] as const;
 
 /** The completeness-gate reasons, as the shared absence gate states them. */

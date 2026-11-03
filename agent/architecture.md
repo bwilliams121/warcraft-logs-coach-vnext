@@ -13001,7 +13001,79 @@ M13-A Augmentation Evoker (actor 1) is refused.
 
 No committed or retained capture holds a Preservation Evoker's whole-fight
 casts (fight 48 has none), so HEAL-B4P cannot pass the healer promotion gate on
-committed evidence; see agent/follow-ups.md "After HEAL-B4".
+committed evidence; see agent/follow-ups.md "After HEAL-B4". HEAL-B4P found
+this census incomplete; see below.
+
+## HEAL-B4P — Preservation Evoker public promotion
+
+Autopilot queue entry HEAL-B4P. Public contract: EXPECTED (additive under
+`analysis/1`: the `specId` value `evoker/preservation` and the healer
+NOT_ASSESSED reason `RUNTIME_DATA_CONTRADICTED`). No Warcraft Logs request: new
+archive segments cut offline from retained raw captures.
+
+**The census correction.** HEAL-B4 and HEAL-B3P read M11-E2, M10-B, M10-C5 and
+M11-C4f. HEAL-B4P read every retained raw page file and found:
+
+- gtKb2xHn87pNcFfW fight 22 (284,791 ms) is retained whole in three adjoining
+  captures, each COMPLETE with no actor filter at revision 22: M9-C2 opener
+  [2,415,041 .. 2,435,041], M11-C4 [2,435,041 .. 2,580,041], M11-C4b
+  [2,580,041 .. 2,699,832]. Actor 15 is its Preservation Evoker: `friendlySpecs`
+  Preservation in the committed context, and combatantinfo specID 1468. It was
+  the only whole-fight capture of one, so choosing it picked no outcome.
+- The earlier statement that M11-C4f's actor 17 has no cast of an identified
+  ability was wrong: the raw pages hold two Stasis casts. That capture is still
+  165 s of a 271.8 s fight, so it could not qualify.
+- A7R6kxPJ1hC8YQ4w fight 7's actor 5 (M10-B and M10-C5) has casts too, in a 165 s window of a longer fight.
+- The same fight's Restoration Druid (actor 2) is retained whole too. Recorded,
+  not promoted here (agent/follow-ups.md "After HEAL-B4P").
+
+**What passed.** The HEAL-AP healer promotion gate
+(`tests/contracts/heal-ap-healer-promotion-gate.test.ts`) is unchanged in
+substance; it gained one pinned subject, and the subject passes every check
+through the public service:
+
+- Preservation Evoker, gtKb fight 22 actor 15: three Stasis (2,418,645,
+  2,516,125, 2,625,623) and one Rewind (2,515,073), the listing COMPLETE; a met
+  Rewind entry (2,515,000 ± 2 s), a not-met Rewind entry (2,600,000 ± 3 s), a
+  Stasis entry after the encounter's end (2,710,000), and Dream Breath (really
+  cast at 2,444,195, empowered, not identified).
+- Its three Stasis releases (370564) and its empowered Dream Breaths are never
+  uses, and no empower envelope names an identified ability
+  (`tests/unit/specs/heal-b4-preservation-evoker.test.ts` pins this on the real
+  bytes), so the rules HEAL-B4 stated are proven over a whole fight.
+
+**Evidence** (`tests/evidence/`, ordinary archive growth, 123,153 bytes). Three
+compact segments, `wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-{0-20,20-165,165-285}`,
+cut by `sanitize-probe.mjs --actor-slice 15 --from --families
+cast,begincast,empowerstart,empowerend --compact`. Unlike the earlier healer
+cuts they retain the empower envelopes, because this evaluator's contradiction
+check reads them: a cast-only cut would grant CASTS while holding back what that
+check needs. The `--from` bounds are exclusive, so the seven events at 2,435,041
+that both the opener and M11-C4 returned are kept once. Each grants CASTS for
+actor 15 over its range only. The catalog is the regression corpus's committed
+`wcl-fight-context-gtkb-fight-22`, which an archive case may reference.
+
+**Reachability: the five-site promotion**, by the same reviewed edit as every
+earlier promotion: the partition (`INTERNAL_ONLY_SPEC_IDS` now holds
+`druid/restoration` and `priest/discipline`), the public contract's `specId`
+enum, the identity table, the `satisfies PublicSpecId` on `spec.ts`, and the
+registration's `exposure`. The registration gains its healer view (the shared
+`healerViewOfEvaluation`) and public limits prose. The evaluator, data and
+revision are unchanged (`preservation-evoker-evaluator/1`).
+
+**The one new public vocabulary value.** A contradiction was internal until now,
+so the healer view's NOT_ASSESSED reason gains `RUNTIME_DATA_CONTRADICTED`
+(`PUBLIC_HEALER_NOT_ASSESSED_REASONS` and `HealerViewOutcome`). Reporting it as
+`RUNTIME_DATA_UNAVAILABLE` would state something false: the data loaded, and the
+player's own events contradict it. The envelopes stay internal; the public result
+is INSUFFICIENT_EVIDENCE with the reason and the detail sentence.
+
+**What a public request now receives.** An Evoker/Preservation identity
+dispatches its own row, derives FULL_RAID, and publishes `healerFindings` exactly
+as the other public healers do: AUTHORITY_NOT_AVAILABLE when evaluated,
+INSUFFICIENT_EVIDENCE otherwise, never ANALYZED. Roster role stays UNKNOWN, and
+nothing reads it. Devastation stays SPEC_NOT_SUPPORTED: the class alone never
+selects a row.
 
 ## AUTOPILOT — the local project supervisor (tooling)
 

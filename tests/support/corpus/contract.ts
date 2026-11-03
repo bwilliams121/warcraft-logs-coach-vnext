@@ -390,7 +390,7 @@ export const OWNING_LAYERS = {
   SPEC_HOLY_PRIEST: ["src/specs/priest/holy/"],
   /** HEAL-B3. The INTERNAL_ONLY Discipline Priest healer evaluator and nothing else. */
   SPEC_DISCIPLINE_PRIEST: ["src/specs/priest/discipline/"],
-  /** HEAL-B4. The INTERNAL_ONLY Preservation Evoker healer evaluator and nothing else. */
+  /** HEAL-B4; PUBLIC since HEAL-B4P. The Preservation Evoker healer evaluator and nothing else. */
   SPEC_PRESERVATION_EVOKER: ["src/specs/evoker/preservation/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
   PUBLIC_CONTRACT: ["src/contracts/", "src/api/", "src/mcp/"],
@@ -3415,7 +3415,7 @@ export const ASSERTION_KINDS = {
       "Through the production catalog's internal lookup, the INTERNAL_ONLY Discipline Priest registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established. The public lookup never selects it.",
   },
 
-  // ---- SPEC_PRESERVATION_EVOKER (HEAL-B4, INTERNAL_ONLY) ---------------
+  // ---- SPEC_PRESERVATION_EVOKER (HEAL-B4; PUBLIC since HEAL-B4P) --------
   //
   // A healer registration on Restoration Shaman's architecture, driven the
   // same way: through the production catalog's INTERNAL lookup and
@@ -3449,7 +3449,7 @@ export const ASSERTION_KINDS = {
     runtime: "ANY",
     requiresAuthority: false,
     description:
-      "Through the production catalog's internal lookup, the INTERNAL_ONLY Preservation Evoker registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established. The public lookup never selects it.",
+      "Through the production catalog's internal lookup (PUBLIC since HEAL-B4P, so the public lookup finds the same row), the Preservation Evoker registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established.",
   },
 
   // ---- SHARED_DECISION_ENGINE ---------------------------------------------

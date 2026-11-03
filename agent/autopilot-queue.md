@@ -1216,7 +1216,7 @@ status: OWNER_DECISION_REQUIRED
 dependsOn: none
 wcl: NONE
 publicContract: NONE
-ownerDecision: Authorize one bounded, neutral, deterministic Warcraft Logs evidence campaign for the specializations that have no retained, already-authorized real evidence. Known today: Fury Warrior, Protection Warrior, Outlaw Rogue, Survival Hunter and Vengeance Demon Hunter appear in no committed fight context, and onboarding tranches append any further spec whose review finds its evidence inadequate. Appended by HEAL-B1P: Restoration Druid (identity only, gtKb2xHn87pNcFfW fight 22 actor 2; no committed or retained capture holds one of its events, so it cannot meet the healer promotion gate). Appended by HEAL-B3: Discipline Priest (committed evidence is a filtered M13-A cast capture, actor 9, and Atonement applications by the G2 cohort246 fight 33 actor 88 onto another player; no committed or retained capture holds its whole-fight casts or any Atonement heal event, and fight 48 has no Discipline Priest, so HEAL-B3P cannot meet the healer promotion gate). Appended by HEAL-B4: Preservation Evoker (committed evidence is a filtered M13-A cast capture, actor 8; the retained M11-C4f capture of rXAfw9t1q8YpmkKD fight 13 (actor 17) covers the fixed 165 s window of a 271.8 s fight and holds its Stasis aura events but no cast of an identified ability, and fight 48 has no Preservation Evoker, so HEAL-B4P cannot meet the healer promotion gate). The proposal is the smallest campaign: per spec, the first public raid fight in a fixed order containing it, with its actor slice (casts, auras, resources, combatant info), and no ranking or comparison data.
+ownerDecision: Authorize one bounded, neutral, deterministic Warcraft Logs evidence campaign for the specializations that have no retained, already-authorized real evidence. Known today: Fury Warrior, Protection Warrior, Outlaw Rogue, Survival Hunter and Vengeance Demon Hunter appear in no committed fight context, and onboarding tranches append any further spec whose review finds its evidence inadequate. Appended by HEAL-B1P, and corrected by HEAL-B4P: Restoration Druid needs no campaign (its whole-fight events in gtKb2xHn87pNcFfW fight 22, actor 2, are in the retained M9-C2, M11-C4 and M11-C4b captures, which HEAL-B1P's census did not read; agent/follow-ups.md "After HEAL-B4P"). Appended by HEAL-B3: Discipline Priest (committed evidence is a filtered M13-A cast capture, actor 9, and Atonement applications by the G2 cohort246 fight 33 actor 88 onto another player; no committed or retained capture holds its whole-fight casts or any Atonement heal event, and fight 48 has no Discipline Priest, so HEAL-B3P cannot meet the healer promotion gate). (Preservation Evoker, appended by HEAL-B4, was removed by HEAL-B4P: it passed the gate on retained evidence.) The proposal is the smallest campaign: per spec, the first public raid fight in a fixed order containing it, with its actor slice (casts, auras, resources, combatant info), and no ranking or comparison data.
 ```
 
 **Direction.** The owner's onboarding evidence policy: neutral,
@@ -1412,11 +1412,13 @@ unchanged gate and decides the public Atonement shape
 ### HEAL-B4: Preservation Evoker (internal, own representative)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: HEAL-B1
 branch: autopilot/heal-b4
 wcl: NONE
 publicContract: NONE
+pr: 53
+mergeSha: e45096845c03ff275d9605260e94746e0c719e95
 ```
 
 **Scope.** Preservation combines empowered casts with a roster role the
@@ -1433,19 +1435,29 @@ evaluator stops as RUNTIME_DATA_CONTRADICTED when the player is observed
 casting an identified ability empowered. ONB-S4's anchor has landed and is not
 consumed: no healer category anchors a decision, and its execution profile has
 no empowered kind (agent/architecture.md "HEAL-B4"). Evaluated over the M13-A
-Preservation Evoker's casts (listing UNKNOWN, filtered capture). HEAL-B4P's
-healer gate needs a whole-fight capture of a Preservation Evoker, which no
-committed or retained evidence holds (agent/follow-ups.md "After HEAL-B4";
-appended to ONB-EV).
+Preservation Evoker's casts (listing UNKNOWN, filtered capture). Its statement
+that no retained evidence holds a whole-fight Preservation Evoker was wrong; see
+HEAL-B4P.
 
 ### HEAL-B4P: Preservation Evoker (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: HEAL-B4, HEAL-AP
+branch: autopilot/heal-b4p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** Preservation Evoker passed the HEAL-AP healer promotion gate on its
+whole-fight casts in gtKb2xHn87pNcFfW fight 22 (actor 15: three Stasis casts and
+one Rewind), cut from the three adjoining retained captures of that fight
+(M9-C2 opener, M11-C4, M11-C4b; no new request), and is PUBLIC. The public
+contract gains the `specId` `evoker/preservation` and the healer NOT_ASSESSED
+reason `RUNTIME_DATA_CONTRADICTED`. Its evidence gap is off ONB-EV. The same
+census shows that fight's Restoration Druid (actor 2) is retained whole too, so
+its ONB-EV entry is wrong and its promotion needs no new request
+(agent/follow-ups.md "After HEAL-B4P").
 
 ### ONB-A1: Havoc Demon Hunter (internal, Cohort A representative)
 

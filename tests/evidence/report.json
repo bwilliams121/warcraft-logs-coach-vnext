@@ -435,6 +435,27 @@
       "sha256": "babc6e5a384f3cc80b4edde18da9bf0a814a83334d1f46aea92122572562fdf2"
     },
     {
+      "artifactId": "wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-0-20",
+      "byteLength": 8413,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "21b0c0b9aebbd4c2fe0195365b0d814f6455f0e596c9f8e457bfa6053616460f"
+    },
+    {
+      "artifactId": "wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-165-285",
+      "byteLength": 54781,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "622cab45635a04ca10e2323698525010b601e63203e9e83f6581d4dc81f55778"
+    },
+    {
+      "artifactId": "wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-20-165",
+      "byteLength": 59959,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "9eb778abad5f3124bbc1211067fd97f5cb99454961e10f324c6940139a27c8b5"
+    },
+    {
       "artifactId": "wcl-m13a-aug1-fight-1-support.seg-0-75",
       "byteLength": 236664,
       "payloadKind": "WCL_EVENT_ARRAY",
@@ -465,8 +486,8 @@
   ],
   "byLayer": [
     {
-      "assertions": 51,
-      "cases": 17,
+      "assertions": 60,
+      "cases": 20,
       "failed": 0,
       "kindsExercised": [
         "NORMALIZATION.ACTOR_EVENT_CENSUS",
@@ -477,7 +498,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "NORMALIZATION",
-      "passed": 51
+      "passed": 60
     },
     {
       "assertions": 9,
@@ -863,6 +884,78 @@
       "referencedArtifactIds": ["wcl-brewmaster-monk-rxaf-rotational-165s.seg-20-165"]
     },
     {
+      "artifactId": "wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-0-20",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.gtkb-preservation-evoker-15-casts-seg-0-20-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-0-20"]
+    },
+    {
+      "artifactId": "wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-165-285",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.gtkb-preservation-evoker-15-casts-seg-165-285-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-165-285"]
+    },
+    {
+      "artifactId": "wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-20-165",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.gtkb-preservation-evoker-15-casts-seg-20-165-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-20-165"]
+    },
+    {
       "artifactId": "wcl-m13a-aug1-fight-1-support.seg-0-75",
       "assertions": [
         {
@@ -1073,15 +1166,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 19236914,
-    "artifacts": 66,
-    "assertions": 60,
-    "cases": 22,
+    "artifactBytes": 19360067,
+    "artifacts": 69,
+    "assertions": 69,
+    "cases": 25,
     "declared": 0,
-    "executable": 60,
+    "executable": 69,
     "failed": 0,
     "largestArtifactBytes": 499916,
     "notExecuted": 0,
-    "passed": 60
+    "passed": 69
   }
 }
