@@ -1,6 +1,7 @@
 /**
- * M13-E: the Augmentation Evoker registration (INTERNAL_ONLY), and the
- * provider-less decision domains it is the first to declare.
+ * M13-E: the Augmentation Evoker registration (INTERNAL_ONLY in M13-E,
+ * PUBLIC since M13-F), and the provider-less decision domains it is the
+ * first to declare.
  *
  * What must hold, and what must NOT happen:
  * - the FULL_RAID requirement is DERIVED from the declared capabilities,
@@ -16,8 +17,10 @@
  * - a subject with no stated specialization, a pet, or another
  *   specialization yields no support fact, and is never defaulted to an
  *   Augmentation Evoker;
- * - a public request for an Augmentation Evoker stays SPEC_NOT_SUPPORTED and
- *   never runs the registration.
+ * - since M13-F, a public request for an Augmentation Evoker dispatches the
+ *   registration exactly once, retrieving FULL_RAID derived from its declared
+ *   requirement (never hand-picked), and is AUTHORITY_NOT_AVAILABLE with its
+ *   support observations, never SPEC_NOT_SUPPORTED and never ANALYZED.
  */
 
 import { beforeAll, describe, expect, it } from "vitest";
@@ -84,14 +87,17 @@ function internalRun(fight: CombatFight, actorId: number): AugmentationEvokerAna
 }
 
 describe("the registration row", () => {
-  it("is the listed INTERNAL_ONLY row: found by the internal lookup, never by the public one", () => {
+  it("is the listed PUBLIC row since M13-F: both lookups find the same row, and the identity table resolves it", () => {
     const registration = registrationOf();
     // The validated catalog holds a frozen snapshot; the raw list holds the module's own row.
     expect(ANALYZER_REGISTRATIONS.filter((row) => row === AUGMENTATION_EVOKER_REGISTRATION)).toHaveLength(1);
     expect(registration.analyzerId).toBe(AUGMENTATION_EVOKER_ANALYZER_ID);
-    expect(registration.exposure).toBe("INTERNAL_ONLY");
-    expect(analyzerForSpec(AUGMENTATION_EVOKER_SPEC_ID, PRODUCTION_CATALOG)).toBeNull();
-    expect(resolveSpecIdentity({ className: "Evoker", specName: "Augmentation" }).ok).toBe(false);
+    expect(registration.exposure).toBe("PUBLIC");
+    expect(analyzerForSpec(AUGMENTATION_EVOKER_SPEC_ID, PRODUCTION_CATALOG)).toBe(registration);
+    expect(resolveSpecIdentity({ className: "Evoker", specName: "Augmentation" })).toEqual({
+      ok: true,
+      specId: AUGMENTATION_EVOKER_SPEC_ID,
+    });
   });
 
   it("declares the two provider-less support families from REQUIRED_INPUTS, and binds nothing", () => {
@@ -269,7 +275,7 @@ describe("the internal path over the real Augmentation Evoker (M13AAUGAAAAAAAAA 
     expect(analysis.evaluation?.state).toBe("RUNTIME_DATA_UNAVAILABLE");
   });
 
-  it("a public request for the Augmentation Evoker stays SPEC_NOT_SUPPORTED and never runs the registration", async () => {
+  it("a public request for the Augmentation Evoker runs the registration once, at the DERIVED FULL_RAID scope, and publishes its support observations", async () => {
     const counted = countedProductionCatalog();
     const scopes: IngestionScope[] = [];
     const result = await analyzeFight(
@@ -302,11 +308,18 @@ describe("the internal path over the real Augmentation Evoker (M13AAUGAAAAAAAAA 
     );
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.analysis.analysis.status).toBe("SPEC_NOT_SUPPORTED");
-    expect(result.analysis.specId).toBeNull();
-    expect(result.analysis.analyzerId).toBeNull();
-    expect(counted.calls[AUGMENTATION_EVOKER_ANALYZER_ID]).toBe(0);
-    // Only the shared preparation producer's own requirement was retrieved.
-    expect(scopes).toEqual(["PLAYER_CONTEXT"]);
+    expect(result.state).toBe("PARTIAL");
+    expect(result.analysis.analysis.status).toBe("AUTHORITY_NOT_AVAILABLE");
+    expect(result.analysis.specId).toBe(AUGMENTATION_EVOKER_SPEC_ID);
+    expect(result.analysis.analyzerId).toBe(AUGMENTATION_EVOKER_ANALYZER_ID);
+    expect(result.analysis.observedDecisions).toBeNull();
+    expect(result.analysis.supportObservations?.assessment).toBe("ASSESSED");
+    expect(counted.calls[AUGMENTATION_EVOKER_ANALYZER_ID]).toBe(1);
+    for (const [analyzerId, calls] of Object.entries(counted.calls)) {
+      if (analyzerId !== AUGMENTATION_EVOKER_ANALYZER_ID) expect(calls, analyzerId).toBe(0);
+    }
+    // One retrieval, at the scope derived from the registration's declared
+    // requirement unioned with preparation's: FULL_RAID, never hand-picked.
+    expect(scopes).toEqual(["FULL_RAID"]);
   });
 });

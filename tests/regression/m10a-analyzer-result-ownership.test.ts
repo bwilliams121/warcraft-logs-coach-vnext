@@ -36,6 +36,7 @@ import { PROTECTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/protect
 import { RETRIBUTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/retribution/registration.js";
 import { BLOOD_DEATH_KNIGHT_REGISTRATION } from "../../src/specs/deathknight/blood/registration.js";
 import { BREWMASTER_MONK_REGISTRATION } from "../../src/specs/monk/brewmaster/registration.js";
+import { AUGMENTATION_EVOKER_REGISTRATION } from "../../src/specs/evoker/augmentation/registration.js";
 import { analyzeObservedProtectionPaladinDecisions } from "../../src/specs/paladin/protection/observed-analysis.js";
 import { analyzeObservedAssassinationDecisions } from "../../src/specs/rogue/assassination/observed-analysis.js";
 import {
@@ -267,6 +268,8 @@ describe("a mismatched result cannot reach observedDecisionViewOf", () => {
       { ...RETRIBUTION_PALADIN_REGISTRATION, observedDecisionView: retributionView },
       { ...BLOOD_DEATH_KNIGHT_REGISTRATION, observedDecisionView: bloodView },
       { ...BREWMASTER_MONK_REGISTRATION, observedDecisionView: brewmasterView },
+      // M13-F: the sixth public row; it has no decision view to reach.
+      AUGMENTATION_EVOKER_REGISTRATION,
     ]);
     const real = realAssassinationAnalysis();
     if (real.status !== "ANALYZED") throw new Error("expected ANALYZED");

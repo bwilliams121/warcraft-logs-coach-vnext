@@ -63,7 +63,9 @@ import type {
   AnalyzedEnvelope,
   SpecAnalysisEnvelope,
   SpecAnalysisInput,
+  UnanalyzedEnvelope,
 } from "../findings/analysis-envelope.js";
+import type { SupportObservationOutcome } from "../findings/support-observation-view.js";
 import { providerMayGovern } from "../findings/authority-domain.js";
 import { validateCapabilities, type CapabilityDefectRecord } from "../findings/decision-capability.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
@@ -424,8 +426,8 @@ export function requireValidatedCatalog(
 /**
  * Every registration this build carries, as written by the specializations.
  *
- * Six rows: five PUBLIC (all PUBLIC from M11-C4j until M13-E) and, since
- * M13-E, Augmentation Evoker INTERNAL_ONLY. A publicly unsupported
+ * Six rows, all PUBLIC since M13-F (Augmentation Evoker was INTERNAL_ONLY in
+ * M13-E). A publicly unsupported
  * specialization is represented by ABSENCE from the PUBLIC set — an
  * INTERNAL_ONLY row, when one exists, is in the catalog and reachable by
  * internal lookup and tests, and is never selected for a public request —
@@ -442,7 +444,7 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   BLOOD_DEATH_KNIGHT_REGISTRATION,
   // INTERNAL_ONLY from M11-C2; PUBLIC since M11-C4j.
   BREWMASTER_MONK_REGISTRATION,
-  // INTERNAL_ONLY since M13-E: binds no authority; its support facts have no public shape yet (M13-F).
+  // INTERNAL_ONLY from M13-E; PUBLIC since M13-F. Binds no authority: never ANALYZED, publishes support observations.
   AUGMENTATION_EVOKER_REGISTRATION,
 ]);
 
@@ -625,6 +627,34 @@ export function observedDecisionViewOf(
   }
   assertAnalysisOwnership(registration, analysis);
   return registration.observedDecisionView(analysis);
+}
+
+/**
+ * The owning registration's support-observation view of an UNANALYZED result
+ * (M13-F), or `null` when that registration publishes none.
+ *
+ * Found and ownership-checked exactly as `observedDecisionViewOf` is: never
+ * adapted by a neighbour's view. `null` means only "this registration has no
+ * support observations to publish" — it is never an empty observation set.
+ */
+export function supportObservationViewOf(
+  catalog: ValidatedAnalyzerCatalog,
+  analysis: UnanalyzedEnvelope,
+): SupportObservationOutcome | null {
+  const registration = requireValidated(catalog).find((candidate) => candidate.specId === analysis.specId);
+  if (registration === undefined) {
+    throw new AnalyzerCatalogIntegrityError([
+      {
+        defect: "UNKNOWN_SPEC_ID",
+        analyzerId: null,
+        detail: `an analysis for '${String(analysis.specId)}' has no registration in this catalog`,
+      },
+    ]);
+  }
+  assertAnalysisOwnership(registration, analysis);
+  return registration.supportObservationView === undefined
+    ? null
+    : registration.supportObservationView(analysis);
 }
 
 export type AnalyzerRun =

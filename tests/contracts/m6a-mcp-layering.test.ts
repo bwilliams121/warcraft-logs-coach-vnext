@@ -316,12 +316,14 @@ describe("the public contract stays transport-neutral and secret-free", () => {
 
     // PREP-2: the preparation report's TYPES (projected field for field).
     // M14-F: the diagnosis projection's TYPES (projected field for field).
+    // M13-F: the support-observation view (shared vocabulary under src/findings).
     expect([...specifiers].sort()).toEqual([
       "../analysis/preparation/consumable-status.js",
       "../diagnosis/diagnosis.js",
       "../engine/evidence/locator.js",
       "../findings/observed-decision-view.js",
       "../findings/spec-id.js",
+      "../findings/support-observation-view.js",
       "../services/result.js",
       "./analysis-contract.js",
     ]);

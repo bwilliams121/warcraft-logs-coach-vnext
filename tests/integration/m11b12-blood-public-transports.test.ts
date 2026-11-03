@@ -324,7 +324,7 @@ describe("MCP: the same public semantics as REST", () => {
     // form is pinned by m11a-tools-list-supported-specializations.
     const { sentence, limits } = PUBLIC_SPECIALIZATION_DESCRIPTIONS;
     expect(sentence).toBe(
-      "Supported specializations: Assassination Rogue, Blood Death Knight, Brewmaster Monk, Protection Paladin and Retribution Paladin.",
+      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Protection Paladin and Retribution Paladin.",
     );
     const blood = limits.find((entry) => entry.analysis.includes("Blood Death Knight analysis"));
     expect(blood?.analysis).toContain("observed offensive global-cooldown decisions");

@@ -42,6 +42,9 @@ import { PROTECTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/protect
 import { RETRIBUTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/retribution/registration.js";
 import { BLOOD_DEATH_KNIGHT_REGISTRATION } from "../../src/specs/deathknight/blood/registration.js";
 import { BREWMASTER_MONK_REGISTRATION } from "../../src/specs/monk/brewmaster/registration.js";
+// PUBLIC since M13-F and binds no authority, so it completes every catalog
+// below without taking part in the authority rule.
+import { AUGMENTATION_EVOKER_REGISTRATION } from "../../src/specs/evoker/augmentation/registration.js";
 
 const PINNED_COMMIT = "33622e9d1662ff0e451691edf85a6b49cc9d11d9";
 const PINNED_REVISION = "simc-33622e9d-1";
@@ -121,7 +124,7 @@ describe("DUPLICATE_DECISION_AUTHORITY_BINDING — two analyzers may not own one
     // Alone, each row's only problem would be the public set (two of three
     // public ids missing) — which is exactly the partition rule, not the
     // authority rule.
-    for (const alone of [rogue, paladin, retribution, blood, brewmaster]) {
+    for (const alone of [rogue, paladin, retribution, blood, brewmaster, AUGMENTATION_EVOKER_REGISTRATION]) {
       const validation = validateAnalyzerCatalog([alone]);
       expect(validation.ok).toBe(false);
       if (!validation.ok) {
@@ -134,7 +137,14 @@ describe("DUPLICATE_DECISION_AUTHORITY_BINDING — two analyzers may not own one
   });
 
   it("together, the ONLY defect is DUPLICATE_DECISION_AUTHORITY_BINDING, on the second owner, naming the first", () => {
-    const validation = validateAnalyzerCatalog([rogue, paladin, retribution, blood, brewmaster]);
+    const validation = validateAnalyzerCatalog([
+      rogue,
+      paladin,
+      retribution,
+      blood,
+      brewmaster,
+      AUGMENTATION_EVOKER_REGISTRATION,
+    ]);
     expect(validation.ok).toBe(false);
     if (validation.ok) return;
     expect(validation.defects).toEqual([
@@ -147,7 +157,14 @@ describe("DUPLICATE_DECISION_AUTHORITY_BINDING — two analyzers may not own one
   });
 
   it("is order-independent in substance: reversing the rows moves the blame, not the verdict", () => {
-    const validation = validateAnalyzerCatalog([paladin, rogue, retribution, blood, brewmaster]);
+    const validation = validateAnalyzerCatalog([
+      paladin,
+      rogue,
+      retribution,
+      blood,
+      brewmaster,
+      AUGMENTATION_EVOKER_REGISTRATION,
+    ]);
     expect(validation.ok).toBe(false);
     if (validation.ok) return;
     expect(validation.defects.map((defect) => defect.defect)).toEqual([
@@ -165,7 +182,14 @@ describe("DUPLICATE_DECISION_AUTHORITY_BINDING — two analyzers may not own one
     const other = row("paladin/protection", "probe-other", "Protection Paladin", [
       unloadableBinding("SIMC_APL_OTHER_PROBE"),
     ]);
-    const validation = validateAnalyzerCatalog([single, other, retribution, blood, brewmaster]);
+    const validation = validateAnalyzerCatalog([
+      single,
+      other,
+      retribution,
+      blood,
+      brewmaster,
+      AUGMENTATION_EVOKER_REGISTRATION,
+    ]);
     expect(validation.ok).toBe(true);
   });
 });
@@ -191,7 +215,16 @@ describe("control — shared provenance is legal; only the decision-authority id
     expect(rogue.authorityBindings[0]?.commitSha).toBe(paladin.authorityBindings[0]?.commitSha);
     expect(rogue.authorityBindings[0]?.artifactRevision).toBe(paladin.authorityBindings[0]?.artifactRevision);
     expect(retribution.authorityBindings[0]?.commitSha).toBe(paladin.authorityBindings[0]?.commitSha);
-    expect(validateAnalyzerCatalog([rogue, paladin, retribution, blood, brewmaster])).toMatchObject({
+    expect(
+      validateAnalyzerCatalog([
+        rogue,
+        paladin,
+        retribution,
+        blood,
+        brewmaster,
+        AUGMENTATION_EVOKER_REGISTRATION,
+      ]),
+    ).toMatchObject({
       ok: true,
     });
   });
@@ -245,6 +278,7 @@ describe("control — shared provenance is legal; only the decision-authority id
         RETRIBUTION_PALADIN_REGISTRATION,
         BLOOD_DEATH_KNIGHT_REGISTRATION,
         BREWMASTER_MONK_REGISTRATION,
+        AUGMENTATION_EVOKER_REGISTRATION,
       ]),
     ).toMatchObject({ ok: true });
   });

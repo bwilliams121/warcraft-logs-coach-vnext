@@ -1,12 +1,15 @@
-# Augmentation Evoker (M13-A; registered INTERNAL_ONLY since M13-E)
+# Augmentation Evoker (M13-A; registered in M13-E; PUBLIC since M13-F)
 
 The Augmentation Foundation. Owner decision 2026-11-01
 (`agent/autopilot-queue.md` "M13-A").
 
-Since M13-E it is **registered INTERNAL_ONLY** (`registration.ts`,
-`evoker/augmentation` in `INTERNAL_ONLY_SPEC_IDS`). The internal lookup and
-tests reach it; no public request, raid-night cell, REST or MCP response
-selects it, and it has no public surface (M13-F). It holds no decision
+It was registered INTERNAL_ONLY in M13-E (`registration.ts`) and is
+**PUBLIC since M13-F** (`evoker/augmentation` in `PUBLIC_SPEC_IDS`, the
+five-site edit). A public request dispatches it at the FULL_RAID scope its
+requirement derives; the document is AUTHORITY_NOT_AVAILABLE (or
+INSUFFICIENT_EVIDENCE) and carries `supportObservations`, built by
+`support-observation-view.ts` from the evaluator's result, field for field.
+Raid-night cells evaluate nothing and carry no support observations. It holds no decision
 authority: no APL artifact, no binding. Its two declared families,
 SUPPORT_TARGETING and SUPPORT_TIMING, are PROVIDER-LESS domains
 (`src/findings/authority-domain.ts`) that resolve
@@ -55,6 +58,15 @@ recipient's stated specialization. Each ally window carries the lookup:
 `IDENTIFIED` (a `REVIEWED_SUBSET`, never every cooldown), `UNKNOWN` (no
 established specialization, or the registry is unusable) or `UNSUPPORTED`
 (no reviewed data for that specialization).
+
+## Public shape (M13-F)
+
+`supportObservations` (`src/contracts/analysis-contract.ts`): both support
+families as NO_AUTHORITY_AVAILABLE (or UNKNOWN for a declared model missing
+ally state), `evaluatesSupportQuality: false`, every window list and the
+support-cast list with its completeness, support time as a lower bound or
+UNKNOWN with no number. A recipient-quality model that could be applied
+(`ALLY_STATE_SUFFICIENT`) has no public form: the adapter throws.
 
 ## Never
 

@@ -231,8 +231,8 @@ describe("ingestion is requested from the analyzer's declared requirement", () =
     // A different question from "what should THIS request retrieve". It
     // describes what the deployment supports, and the service is deliberately
     // not given it.
-    // Five public analyzers since M11-C4j, each deriving the same requirement
-    // from its own capabilities.
+    // Six public analyzers since M13-F, each deriving its requirement from its
+    // own capabilities (Augmentation FULL_RAID, from its support inputs).
     expect(ENABLED_ANALYZERS.map((analyzer) => analyzer.requirement)).toEqual([
       {
         analyzerId: "rogue-assassination-observed-decisions",
@@ -258,6 +258,12 @@ describe("ingestion is requested from the analyzer's declared requirement", () =
         analyzerId: "monk-brewmaster-observed-decisions",
         requiredScope: "PLAYER_CONTEXT",
         includeResources: true,
+      },
+      // M13-F: Augmentation Evoker, FULL_RAID by its declared support inputs, no resources.
+      {
+        analyzerId: "evoker-augmentation-support-observations",
+        requiredScope: "FULL_RAID",
+        includeResources: false,
       },
     ]);
   });

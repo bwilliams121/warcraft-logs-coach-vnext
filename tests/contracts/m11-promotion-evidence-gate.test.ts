@@ -65,6 +65,11 @@
  *                  asserted to REFUSE it. `evidenceReady: true` authorizes
  *                  nothing by itself.
  *
+ * Since M13-F, PUBLIC mode covers the PUBLIC registrations that bind a
+ * decision authority. One that binds none (Augmentation Evoker) can publish
+ * no decision, so there is nothing for these gates to measure; it is pinned
+ * as exempt below, by name, domains and view.
+ *
  * TWO EVIDENCE ROOTS (M11-C4e)
  *
  * Qualifying assertions may live in the regression corpus or in the evidence
@@ -211,13 +216,26 @@ describe("the gate's inputs", () => {
 // PUBLIC mode
 // ---------------------------------------------------------------------------
 
+/**
+ * M13-F: the gates measure observed DECISIONS, so they apply to a public
+ * registration that can publish one — one that binds a decision authority.
+ * A registration that binds none can never return an ANALYZED result that
+ * passes ownership (an ANALYZED envelope must cite an authority its
+ * registration binds: RESULT_CITES_FOREIGN_AUTHORITY), so it publishes no
+ * decision and has nothing for these gates to measure. Exactly one such row
+ * exists (Augmentation Evoker); see the describe block after PUBLIC mode.
+ */
+const bindsDecisionAuthority = (row: AnalyzerRegistration): boolean => row.authorityBindings.length > 0;
+
 describe("PUBLIC mode — every public registration is backed by real, resolved, identity-paired evidence", () => {
   const publicRegistrations: readonly AnalyzerRegistration[] = PRODUCTION_CATALOG.registrations.filter(
-    (row) => row.exposure === "PUBLIC",
+    (row) => row.exposure === "PUBLIC" && bindsDecisionAuthority(row),
   );
 
-  it("evaluates exactly the PUBLIC partition", () => {
-    expect(publicRegistrations.map((row) => row.specId).sort()).toEqual([...PUBLIC_SPEC_IDS].sort());
+  it("evaluates exactly the PUBLIC partition, less the one registration that binds no decision authority", () => {
+    expect(publicRegistrations.map((row) => row.specId).sort()).toEqual(
+      [...PUBLIC_SPEC_IDS].filter((id) => id !== "evoker/augmentation").sort(),
+    );
   });
 
   for (const registration of publicRegistrations) {
@@ -581,33 +599,57 @@ describe("M11-C4j: Brewmaster Monk passes BOTH global gates in PUBLIC mode, on t
   });
 });
 
-describe("INTERNAL_ONLY mode — reported, never failed, paired against the module's own WCL identity", () => {
-  it("the one production INTERNAL_ONLY registration is Augmentation Evoker since M13-E, and the partition agrees", () => {
-    // Blood Death Knight held this half from M11-B2 until M11-B12 promoted
-    // it; Brewmaster Monk held it from M11-C2 until M11-C4j promoted it.
-    // Augmentation Evoker arrived here in M13-E. The synthetic module below
-    // still exercises the branch independently of whichever real row holds
-    // the half.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["evoker/augmentation"]);
-    expect(
-      PRODUCTION_CATALOG.registrations
-        .filter((row) => row.exposure === "INTERNAL_ONLY")
-        .map((row) => row.specId),
-    ).toEqual(["evoker/augmentation"]);
+describe("M13-F: a PUBLIC registration that binds no decision authority publishes no decision, so the gates do not apply", () => {
+  const exempt = PRODUCTION_CATALOG.registrations.filter(
+    (row) => row.exposure === "PUBLIC" && !bindsDecisionAuthority(row),
+  );
+
+  it("is exactly Augmentation Evoker, which declares only provider-less support domains", () => {
+    expect(exempt.map((row) => row.specId)).toEqual(["evoker/augmentation"]);
+    for (const row of exempt) {
+      expect(row.capabilities.map((capability) => capability.domain).sort()).toEqual([
+        "SUPPORT_TARGETING",
+        "SUPPORT_TIMING",
+      ]);
+      // Every declared domain resolves to no authority from the row's own access.
+      for (const capability of row.capabilities) {
+        expect(row.authority.forDomain(capability.domain).outcome).toBe("NO_PINNED_AUTHORITY_FOR_DOMAIN");
+      }
+      // It publishes support observations instead, through its own view.
+      expect(typeof row.supportObservationView).toBe("function");
+    }
   });
 
-  it("Augmentation Evoker's internal readiness is reported, and is not ready: it has no decision evidence, by design", async () => {
-    // It binds no decision authority (support targeting and timing are
-    // NO_AUTHORITY_AVAILABLE), so no corpus case can show it a real decision
-    // coverage, and this gate can never make it publishable as an
-    // observed-decision analyzer. Its public shape is M13-F's, not this gate's.
+  it("an ANALYZED result from it could never pass ownership: it binds no authority to cite", () => {
+    const [row] = exempt;
+    if (row === undefined) throw new Error("no exempt row");
+    const forged = {
+      status: "ANALYZED",
+      specId: row.specId,
+      authority: { authorityId: "SIMC_APL_EVOKER_AUGMENTATION", artifactRevision: "forged" },
+    } as unknown as Parameters<AnalyzerRegistration["observedDecisionView"]>[0];
+    expect(() => row.observedDecisionView(forged)).toThrow();
+  });
+
+  it("its decision readiness is empty by design, and that is not a gate failure", async () => {
+    // The same search as PUBLIC mode, reported: no corpus case can show it a
+    // decision coverage, because it has no decision. Its public content is
+    // `supportObservations`, which the M13-F contract tests own.
     const tiers = await tiersPromise;
-    const module = MODULES.find((candidate) => candidate.identity.specId === "evoker/augmentation");
-    if (module === undefined) throw new Error("no Augmentation module");
-    const readiness = evaluate(tiers, "evoker/augmentation", "INTERNAL_ONLY", internalPairing(module));
-    expect(readiness.exposure).toBe("INTERNAL_ONLY");
+    const readiness = evaluate(tiers, "evoker/augmentation", "PUBLIC", publicPairing("evoker/augmentation"));
     expect(readiness.qualifyingAssertions).toEqual([]);
     expect(readiness.evidenceReady).toBe(false);
+  });
+});
+
+describe("INTERNAL_ONLY mode — reported, never failed, paired against the module's own WCL identity", () => {
+  it("no production INTERNAL_ONLY registration exists since M13-F, and the partition agrees", () => {
+    // Blood Death Knight held this half from M11-B2 until M11-B12 promoted
+    // it; Brewmaster Monk held it from M11-C2 until M11-C4j promoted it;
+    // Augmentation Evoker held it in M13-E until M13-F promoted it. The
+    // synthetic module below still exercises the branch with no real row.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
+    expect(PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY")).toEqual([]);
   });
 
   it("the internal pairing finds nothing for Brewmaster Monk now that the identity table resolves it (M11-C4j)", async () => {

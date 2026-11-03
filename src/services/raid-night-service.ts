@@ -579,12 +579,31 @@ export async function analyzeRaidNight(
         continue;
       }
 
+      // THIS player's evidence breadth (M13-F): derived from the requirement
+      // of the analyzer running for THEM plus preparation's — exactly what the
+      // single-fight service derives for the same player. The fight-level
+      // union above governs only retrieval; using it here would let one
+      // FULL_RAID analyzer (Augmentation) widen every other player's view, so
+      // a neighbour's registration would change their cell.
+      const playerScope = deriveIngestionScope(
+        entry.kind === "SUPPORTED"
+          ? [entry.analyzer.requirement, PREPARATION_REQUIREMENT]
+          : [PREPARATION_REQUIREMENT],
+      );
+      if (!playerScope.ok) {
+        return failure(
+          "INTERNAL_ERROR",
+          "No ingestion scope could be derived for a selected analyzer, so no raid night was assembled.",
+        );
+      }
+
       // One focused view, one state. Both fall out of scope at the end of this
-      // iteration; nothing accumulates them.
+      // iteration; nothing accumulates them. Owned-pet evidence keeps its
+      // fight-level union, as before M13-F.
       const focused = focusedFightFor(
         core,
         entry.sourceId,
-        scope.scope,
+        playerScope.scope,
         scope.ownedPetEvidence === true ? { ownedPetEvidence: true } : undefined,
       );
       // The shared producer over this player's own focused view, for EVERY
@@ -623,7 +642,7 @@ export async function analyzeRaidNight(
           identity: identityForPlayer(analysisSnapshot, fightId, entry.sourceId, entry.specName),
           specId: entry.analyzer.specId,
           analyzerId: entry.analyzer.analyzerId,
-          scope: scope.scope,
+          scope: playerScope.scope,
           analysis,
           observedDecisions:
             analysis.status === "ANALYZED" ? observedDecisionViewOf(registry, analysis) : null,

@@ -14,6 +14,7 @@ import type { DiagnosisOutcome } from "../diagnosis/diagnosis.js";
 import type { SpecAnalysisEnvelope } from "../findings/analysis-envelope.js";
 import type { SpecId } from "../findings/finding.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
+import type { SupportObservationOutcome } from "../findings/support-observation-view.js";
 import type { FightReport } from "../reporting/fight-report.js";
 import type { FightTldr } from "../reporting/tldr.js";
 import type { FightIdentity } from "../wcl/types.js";
@@ -235,6 +236,13 @@ export interface FightAnalysis {
    * envelopes no diagnosis ran for (raid night).
    */
   readonly diagnosis?: DiagnosisOutcome;
+  /**
+   * The registration's own support-observation view of an UNANALYZED result
+   * (M13-F). Present exactly when the selected registration publishes one
+   * (Augmentation Evoker): ASSESSED with the facts, or NOT_ASSESSED with why
+   * none was reconstructed. Absent for every other registration and status.
+   */
+  readonly supportObservations?: SupportObservationOutcome;
   /**
    * The TLDR (M15-B), built LAST, from the restated findings of the view and
    * the preparation report plus the coverage, by `src/reporting/`. It edits

@@ -1,5 +1,5 @@
 /**
- * Augmentation Evoker's analyzer registration (M13-E, INTERNAL_ONLY).
+ * Augmentation Evoker's analyzer registration (M13-E; PUBLIC since M13-F).
  *
  * THIS IS WHERE AUGMENTATION STATES WHAT IT IS, AND THE ONLY PLACE.
  *
@@ -34,9 +34,20 @@
  *                               unusable: no fact was reconstructed.
  *
  * The payload rides on an unanalyzed envelope. Shared orchestration reads only
- * `status`, `specId` and `detail` of such an envelope, so the facts reach no
- * projector; they are for internal evaluation until M13-F gives them a
- * reviewed public shape.
+ * `status`, `specId` and `detail` of such an envelope, plus — since M13-F —
+ * the SUPPORT-OBSERVATION VIEW this registration builds from it
+ * (`support-observation-view.ts`). That view is the facts' reviewed public
+ * shape: field for field, with every listing's completeness, every UNKNOWN and
+ * both NO_AUTHORITY_AVAILABLE families, and no recipient-quality conclusion.
+ *
+ * PUBLIC SINCE M13-F, AND WHAT THAT CHANGED. The five-site edit (the
+ * partition, the public contract's `specId` enum, the identity table, the
+ * `satisfies PublicSpecId` on `spec.ts`, and `exposure` below) plus the
+ * view. Reachability, not analysis: a public request for an Evoker/Augmentation
+ * identity now dispatches this row, derives FULL_RAID from its declared
+ * requirement, and receives exactly the result the internal lookup always
+ * produced. It is never ANALYZED, so the promotion-evidence gates (which
+ * measure observed DECISIONS) do not apply to it: it publishes none.
  *
  * IDENTITY. The facade is handed `SpecAnalysisInput`, which carries no
  * preflight identity. The evaluator's gate is fed the normalized fight's own
@@ -66,6 +77,7 @@ import {
   type StateRequirements,
 } from "../../../findings/decision-capability.js";
 import type { ObservedDecisionView } from "../../../findings/observed-decision-view.js";
+import type { SupportObservationOutcome } from "../../../findings/support-observation-view.js";
 import { defineSpecModule, type SpecModule } from "../../../findings/spec-module.js";
 import {
   statedSpecializationOf,
@@ -84,6 +96,7 @@ import {
   AUGMENTATION_EVOKER_WCL_CLASS_NAME,
   AUGMENTATION_EVOKER_WCL_SPEC_NAME,
 } from "./spec.js";
+import { augmentationSupportObservations } from "./support-observation-view.js";
 
 // ---------------------------------------------------------------------------
 // Capabilities and authority
@@ -212,8 +225,8 @@ export function analyzeAugmentationEvoker(
         status: "AUTHORITY_NOT_AVAILABLE",
         detail:
           "No approved authority governs Augmentation support targeting or support timing, so no support " +
-          "decision was evaluated and nothing here is a finding. The observable support facts were " +
-          "reconstructed for internal use only.",
+          "decision was evaluated and nothing here is a finding. Only the observable support facts are " +
+          "reported (supportObservations); this is not an assessment of the player.",
       };
   }
 }
@@ -230,9 +243,36 @@ function noObservedDecisionView(analysis: never): ObservedDecisionView {
   );
 }
 
+/** The view of this registration's own result (M13-F). Shared code reads nothing else of the payload. */
+export function augmentationSupportObservationView(
+  analysis: AugmentationEvokerAnalysis,
+): SupportObservationOutcome {
+  return augmentationSupportObservations(analysis.evaluation);
+}
+
 /**
- * The Augmentation Evoker specialization module (M13-E), INTERNAL_ONLY. No
- * public limitation prose: nothing about it is published.
+ * What the public tool descriptions say about Augmentation (M13-F). It is
+ * observation-only, and the prose says so before anything else.
+ */
+export const AUGMENTATION_LIMITS = Object.freeze({
+  analysis: [
+    "Augmentation Evoker analysis reports OBSERVED SUPPORT FACTS ONLY, in supportObservations: Ebon Might",
+    "and Prescience windows on each recipient with the recipient's identity, stated specialization, observed",
+    "deaths and observed casts of a reviewed subset of its cooldowns, proven support time (a lower bound),",
+    "the Evoker's own Ebon Might windows, and every support-ability cast, each with its listing completeness.",
+    "No gameplay decision is evaluated: support targeting and support timing have no approved standard and",
+    "are NO_AUTHORITY_AVAILABLE, so the status is AUTHORITY_NOT_AVAILABLE. It never says whether a recipient",
+    "or a timing was good or wrong, it does not evaluate the Evoker's own damage rotation, and it does not",
+    "score performance. A fact the evidence cannot establish is UNKNOWN, never zero or absent.",
+  ].join("\n"),
+  raidNight: [
+    "Augmentation Evoker cells evaluate no gameplay decision (AUTHORITY_NOT_AVAILABLE): support targeting and",
+    "timing have no approved standard, and the cells carry no support observations.",
+  ].join("\n"),
+});
+
+/**
+ * The Augmentation Evoker specialization module (M13-E; PUBLIC since M13-F).
  */
 export const AUGMENTATION_EVOKER_MODULE: SpecModule = defineSpecModule({
   identity: {
@@ -242,13 +282,14 @@ export const AUGMENTATION_EVOKER_MODULE: SpecModule = defineSpecModule({
     wclClassName: AUGMENTATION_EVOKER_WCL_CLASS_NAME,
     wclSpecName: AUGMENTATION_EVOKER_WCL_SPEC_NAME,
   },
-  exposure: "INTERNAL_ONLY",
+  exposure: "PUBLIC",
   capabilities: AUGMENTATION_CAPABILITIES,
   authorityBindings: AUGMENTATION_AUTHORITY_BINDINGS,
-  limitsProse: Object.freeze({ analysis: "", raidNight: "" }),
+  limitsProse: AUGMENTATION_LIMITS,
   supplementalAnalyses: [],
   analyze: (input, authority): AugmentationEvokerAnalysis => analyzeAugmentationEvoker(input, authority),
   observedDecisionView: noObservedDecisionView,
+  supportObservationView: (analysis) => augmentationSupportObservationView(analysis),
 });
 
 /** The row the production catalog lists. The module owns it. */

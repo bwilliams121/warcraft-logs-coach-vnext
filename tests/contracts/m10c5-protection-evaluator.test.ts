@@ -293,6 +293,7 @@ describe("Protection is public since M10-D", () => {
       "paladin/retribution",
       "deathknight/blood",
       "monk/brewmaster",
+      "evoker/augmentation",
     ]);
     expect(PROTECTION_PALADIN_REGISTRATION.exposure).toBe("PUBLIC");
   });

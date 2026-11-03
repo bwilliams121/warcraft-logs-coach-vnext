@@ -50,6 +50,7 @@ import { PROTECTION_PALADIN_ANALYZER_ID } from "../../src/specs/paladin/protecti
 import { RETRIBUTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/retribution/registration.js";
 import { BLOOD_DEATH_KNIGHT_REGISTRATION } from "../../src/specs/deathknight/blood/registration.js";
 import { BREWMASTER_MONK_REGISTRATION } from "../../src/specs/monk/brewmaster/registration.js";
+import { AUGMENTATION_EVOKER_REGISTRATION } from "../../src/specs/evoker/augmentation/registration.js";
 import { RETRIBUTION_PALADIN_ANALYZER_ID } from "../../src/specs/paladin/retribution/spec.js";
 import { MCP_TEST_ENV } from "../support/analysis-transports.js";
 import { analyzedFightAnalysis } from "../support/aggregation-fixture.js";
@@ -84,7 +85,7 @@ describe("the production catalog", () => {
     expect(validateAnalyzerCatalog(ANALYZER_REGISTRATIONS).ok).toBe(true);
   });
 
-  it("carries five PUBLIC registrations — Assassination, both Paladins, Blood Death Knight (since M11-B12) and Brewmaster Monk (since M11-C4j) — and, since M13-E, one INTERNAL_ONLY row (Augmentation Evoker)", () => {
+  it("carries six PUBLIC registrations — Assassination, both Paladins, Blood Death Knight (since M11-B12), Brewmaster Monk (since M11-C4j) and Augmentation Evoker (INTERNAL_ONLY in M13-E, PUBLIC since M13-F)", () => {
     expect(
       PRODUCTION_CATALOG.registrations.map((registration) => [
         registration.analyzerId,
@@ -97,20 +98,21 @@ describe("the production catalog", () => {
       [RETRIBUTION_PALADIN_ANALYZER_ID, "paladin/retribution", "PUBLIC"],
       ["deathknight-blood-observed-decisions", "deathknight/blood", "PUBLIC"],
       ["monk-brewmaster-observed-decisions", "monk/brewmaster", "PUBLIC"],
-      ["evoker-augmentation-support-observations", "evoker/augmentation", "INTERNAL_ONLY"],
+      ["evoker-augmentation-support-observations", "evoker/augmentation", "PUBLIC"],
     ]);
     // The public set is DERIVED from the rows' exposure, never hand-listed:
-    // all five rows since M11-C4j (Brewmaster was the INTERNAL_ONLY row from
-    // M11-C2), and the derivation is what would drop a row the moment one went
+    // all six rows since M13-F (Augmentation was the INTERNAL_ONLY row in
+    // M13-E), and the derivation is what would drop a row the moment one went
     // back to INTERNAL_ONLY.
     expect(ENABLED_ANALYZERS).toEqual(publicAnalyzers(PRODUCTION_CATALOG));
-    expect(ENABLED_ANALYZERS).toHaveLength(5);
+    expect(ENABLED_ANALYZERS).toHaveLength(6);
     expect(ENABLED_ANALYZERS.map((analyzer) => analyzer.specId)).toEqual([
       "rogue/assassination",
       "paladin/protection",
       "paladin/retribution",
       "deathknight/blood",
       "monk/brewmaster",
+      "evoker/augmentation",
     ]);
   });
 
@@ -220,6 +222,7 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
       RETRIBUTION_PALADIN_REGISTRATION,
       BLOOD_DEATH_KNIGHT_REGISTRATION,
       BREWMASTER_MONK_REGISTRATION,
+      AUGMENTATION_EVOKER_REGISTRATION,
     ];
     const validated = requireValidatedCatalog(rows);
 
@@ -231,7 +234,7 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
     expect(analyzerForSpec("paladin/protection", validated)?.exposure).toBe("PUBLIC");
     expect(analyzerForSpec("paladin/protection", validated)?.requirement.includeResources).toBe(true);
     expect(analyzerForSpec("paladin/protection", validated)?.authorityBindings).toHaveLength(1);
-    expect(validated.registrations).toHaveLength(5);
+    expect(validated.registrations).toHaveLength(6);
     // And re-validating the mutated rows now refuses them: a duplicate, and a
     // demoted Protection row that leaves the public set incomplete.
     const defects = defectsOf(rows);
@@ -266,6 +269,7 @@ describe("every lookup requires a validated catalog", () => {
     RETRIBUTION_PALADIN_REGISTRATION,
     BLOOD_DEATH_KNIGHT_REGISTRATION,
     BREWMASTER_MONK_REGISTRATION,
+    AUGMENTATION_EVOKER_REGISTRATION,
   ];
   const DUPLICATE_ANALYZER = [
     ASSASSINATION_REGISTRATION,
@@ -279,6 +283,7 @@ describe("every lookup requires a validated catalog", () => {
     RETRIBUTION_PALADIN_REGISTRATION,
     BLOOD_DEATH_KNIGHT_REGISTRATION,
     BREWMASTER_MONK_REGISTRATION,
+    AUGMENTATION_EVOKER_REGISTRATION,
   ];
   const AUTHORITY_MISMATCH = [
     {
@@ -366,6 +371,7 @@ describe("the public set is one promise across the partition, the identity table
         RETRIBUTION_PALADIN_REGISTRATION,
         BLOOD_DEATH_KNIGHT_REGISTRATION,
         BREWMASTER_MONK_REGISTRATION,
+        AUGMENTATION_EVOKER_REGISTRATION,
       ],
       [
         ASSASSINATION_REGISTRATION,
@@ -373,6 +379,7 @@ describe("the public set is one promise across the partition, the identity table
         RETRIBUTION_PALADIN_REGISTRATION,
         BLOOD_DEATH_KNIGHT_REGISTRATION,
         BREWMASTER_MONK_REGISTRATION,
+        AUGMENTATION_EVOKER_REGISTRATION,
       ],
       [
         ASSASSINATION_REGISTRATION,
@@ -380,6 +387,7 @@ describe("the public set is one promise across the partition, the identity table
         { ...RETRIBUTION_PALADIN_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
         BLOOD_DEATH_KNIGHT_REGISTRATION,
         BREWMASTER_MONK_REGISTRATION,
+        AUGMENTATION_EVOKER_REGISTRATION,
       ],
       [
         ASSASSINATION_REGISTRATION,
@@ -387,6 +395,7 @@ describe("the public set is one promise across the partition, the identity table
         RETRIBUTION_PALADIN_REGISTRATION,
         { ...BLOOD_DEATH_KNIGHT_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
         BREWMASTER_MONK_REGISTRATION,
+        AUGMENTATION_EVOKER_REGISTRATION,
       ],
       [
         ASSASSINATION_REGISTRATION,
@@ -394,6 +403,15 @@ describe("the public set is one promise across the partition, the identity table
         RETRIBUTION_PALADIN_REGISTRATION,
         BLOOD_DEATH_KNIGHT_REGISTRATION,
         { ...BREWMASTER_MONK_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
+        AUGMENTATION_EVOKER_REGISTRATION,
+      ],
+      [
+        ASSASSINATION_REGISTRATION,
+        PROTECTION_PALADIN_REGISTRATION,
+        RETRIBUTION_PALADIN_REGISTRATION,
+        BLOOD_DEATH_KNIGHT_REGISTRATION,
+        BREWMASTER_MONK_REGISTRATION,
+        { ...AUGMENTATION_EVOKER_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
       ],
     ]) {
       const defects = defectsOf(demoted);
@@ -404,6 +422,7 @@ describe("the public set is one promise across the partition, the identity table
 
   it("lookup is independent of registration order", () => {
     const reversed = requireValidatedCatalog([
+      AUGMENTATION_EVOKER_REGISTRATION,
       BREWMASTER_MONK_REGISTRATION,
       BLOOD_DEATH_KNIGHT_REGISTRATION,
       RETRIBUTION_PALADIN_REGISTRATION,
@@ -432,7 +451,11 @@ describe("the public set is one promise across the partition, the identity table
         "rogue/assassination",
         "deathknight/blood",
         "monk/brewmaster",
+        "evoker/augmentation",
       ].sort(),
+    );
+    expect(analyzerForSpec("evoker/augmentation", reversed)?.analyzerId).toBe(
+      "evoker-augmentation-support-observations",
     );
   });
 

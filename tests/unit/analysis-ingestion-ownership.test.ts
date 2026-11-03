@@ -157,6 +157,14 @@ const PRODUCTION_BLOOD: RegisteredAnalyzer = productionRegistrationFor("deathkni
  */
 const PRODUCTION_BREWMASTER: RegisteredAnalyzer = productionRegistrationFor("monk/brewmaster");
 
+/**
+ * The production Augmentation Evoker row, unmodified. PUBLIC since M13-F, so
+ * every injected catalog below must carry it too. It declares FULL_RAID, so
+ * it is also a real registered FULL_RAID analyzer that a Rogue request must
+ * never widen to.
+ */
+const PRODUCTION_AUGMENTATION: RegisteredAnalyzer = productionRegistrationFor("evoker/augmentation");
+
 function deps(registry: readonly RegisteredAnalyzer[], ingest: CombatIngestionPort): AnalysisServiceDeps {
   return { env: ENV, preflight: PREFLIGHT, ingest, registry };
 }
@@ -175,6 +183,7 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_RETRIBUTION,
           PRODUCTION_BLOOD,
           PRODUCTION_BREWMASTER,
+          PRODUCTION_AUGMENTATION,
         ],
         ingest,
       ),
@@ -199,6 +208,7 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_RETRIBUTION,
           PRODUCTION_BLOOD,
           PRODUCTION_BREWMASTER,
+          PRODUCTION_AUGMENTATION,
         ],
         first,
       ),
@@ -212,6 +222,7 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_RETRIBUTION,
           PRODUCTION_BLOOD,
           PRODUCTION_BREWMASTER,
+          PRODUCTION_AUGMENTATION,
         ],
         second,
       ),
@@ -236,6 +247,7 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_RETRIBUTION,
           PRODUCTION_BLOOD,
           PRODUCTION_BREWMASTER,
+          PRODUCTION_AUGMENTATION,
         ],
         production,
       ),
@@ -249,6 +261,7 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_RETRIBUTION,
           PRODUCTION_BLOOD,
           PRODUCTION_BREWMASTER,
+          PRODUCTION_AUGMENTATION,
         ],
         widened,
       ),
@@ -270,6 +283,7 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_RETRIBUTION,
           PRODUCTION_BLOOD,
           PRODUCTION_BREWMASTER,
+          PRODUCTION_AUGMENTATION,
         ],
         FIXTURE_INGEST,
       ),
@@ -291,6 +305,7 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_RETRIBUTION,
           PRODUCTION_BLOOD,
           PRODUCTION_BREWMASTER,
+          PRODUCTION_AUGMENTATION,
         ],
         FIXTURE_INGEST,
       ),
@@ -322,6 +337,7 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
           PRODUCTION_RETRIBUTION,
           PRODUCTION_BLOOD,
           PRODUCTION_BREWMASTER,
+          PRODUCTION_AUGMENTATION,
         ],
         ingest,
       ),
@@ -341,7 +357,14 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
     await analyzeFight(
       REQUEST,
       deps(
-        [frugal, PRODUCTION_PROTECTION, PRODUCTION_RETRIBUTION, PRODUCTION_BLOOD, PRODUCTION_BREWMASTER],
+        [
+          frugal,
+          PRODUCTION_PROTECTION,
+          PRODUCTION_RETRIBUTION,
+          PRODUCTION_BLOOD,
+          PRODUCTION_BREWMASTER,
+          PRODUCTION_AUGMENTATION,
+        ],
         ingest,
       ),
     );
@@ -366,6 +389,7 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
             PRODUCTION_RETRIBUTION,
             PRODUCTION_BLOOD,
             PRODUCTION_BREWMASTER,
+            PRODUCTION_AUGMENTATION,
           ],
           ingest,
         ),
@@ -388,6 +412,7 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
           PRODUCTION_RETRIBUTION,
           PRODUCTION_BLOOD,
           PRODUCTION_BREWMASTER,
+          PRODUCTION_AUGMENTATION,
         ],
         ingest,
       ),

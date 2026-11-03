@@ -180,7 +180,8 @@ describe("an unsupported specialization", () => {
     for (const [className, specName] of [
       ["Rogue", "Outlaw"],
       ["Rogue", "Subtlety"],
-      ["Evoker", "Augmentation"],
+      // Evoker/Augmentation is NOT in this list since M13-F; Devastation is the Evoker miss.
+      ["Evoker", "Devastation"],
       ["Warrior", "Arms"],
       ["Paladin", "Holy"],
       ["Priest", "Discipline"],

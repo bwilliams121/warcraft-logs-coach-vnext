@@ -6452,13 +6452,13 @@ const BREWMASTER_CASES = [
     { related: ["tests/regression/m10a-analyzer-result-ownership.test.ts", ...BREWMASTER_RELATED] },
   ),
 
-  // ---- SPEC_AUGMENTATION_EVOKER (M13-E, INTERNAL_ONLY) ---------------------
+  // ---- SPEC_AUGMENTATION_EVOKER (M13-E; PUBLIC since M13-F) ----------------
   kase(
     "spec-augmentation-evoker.unstated-subject-yields-no-support-fact",
     PP,
     "SPEC_AUGMENTATION_EVOKER",
     "src/specs/evoker/augmentation/registration.ts (facade, capabilities, bindings); src/services/analyzer-registry.ts internalAnalyzerForSpec, runAnalyzer",
-    "Through the production catalog's internal lookup, the Augmentation Evoker registration derives FULL_RAID from its declared support capabilities, resolves SUPPORT_TARGETING and SUPPORT_TIMING to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER and no evaluator result: no support fact is reconstructed for a subject whose identity is not established, and nothing is ANALYZED.",
+    "Through the production catalog (both lookups find the same row since M13-F), the Augmentation Evoker registration derives FULL_RAID from its declared support capabilities, resolves SUPPORT_TARGETING and SUPPORT_TIMING to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER and no evaluator result: no support fact is reconstructed for a subject whose identity is not established, and nothing is ANALYZED.",
     [
       a("SPEC_AUGMENTATION_EVOKER.REGISTRATION_RESULT", {
         actorId: TANK,
@@ -6487,24 +6487,24 @@ const BREWMASTER_CASES = [
     },
   ),
   kase(
-    "application-service.augmentation-evoker-registration-is-internal-only",
+    "application-service.augmentation-evoker-registration-is-public-since-m13-f",
     PP,
     "APPLICATION_SERVICE",
     "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
-    "The validated production catalog carries the Augmentation Evoker registration for the INTERNAL lookup only, INTERNAL_ONLY, in either catalog order; the public lookup finds nothing and the public identity table does not resolve evoker/augmentation, so no public request can select it.",
+    "RE-PINNED AT M13-F, INVERTING THE M13-E CASE. The validated production catalog carries the Augmentation Evoker registration PUBLIC, in either catalog order: both lookups find the same row, and the public identity table resolves Evoker/Augmentation to evoker/augmentation, so a public request selects it. The five public sites moved together in one reviewed edit (the partition, the public contract's specId enum, the identity table, the `satisfies PublicSpecId` on spec.ts, and the registration's exposure), with the registration's support-observation view.",
     [
       a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
         specId: "evoker/augmentation",
         expected: {
           internalAnalyzerId: "evoker-augmentation-support-observations",
-          publicAnalyzerId: null,
-          exposure: "INTERNAL_ONLY",
-          identityResolvesPublicly: false,
+          publicAnalyzerId: "evoker-augmentation-support-observations",
+          exposure: "PUBLIC",
+          identityResolvesPublicly: true,
         },
       }),
     ],
     ["OWNED_CONTRACT"],
-    "Its support facts have no reviewed public shape yet (M13-F), so registration changes what internal evaluation derives, not what a public request can reach.",
+    "Promotion changed reachability, not analysis: the registration still binds no authority and is never ANALYZED; what a public request now receives is its observable support facts (supportObservations), never a recipient-quality or timing verdict.",
     {
       related: [
         "tests/contracts/m10a-registry-integrity.test.ts",

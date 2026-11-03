@@ -1,11 +1,11 @@
 /**
- * SPEC_AUGMENTATION_EVOKER executors (M13-E): the INTERNAL_ONLY Augmentation
- * Evoker registration, as orchestration holds it.
+ * SPEC_AUGMENTATION_EVOKER executors (M13-E; PUBLIC since M13-F): the
+ * Augmentation Evoker registration, as orchestration holds it.
  *
  * Driven through the production catalog's internal lookup and `runAnalyzer`,
  * so what is pinned is the registration row — its derived requirement, its
  * own authority access and its ownership-checked result — not a direct call
- * to the evaluator. The public lookup is asserted to find nothing.
+ * to the evaluator. Since M13-F the public lookup must find the SAME row.
  */
 
 import {
@@ -34,10 +34,11 @@ export function registrationResult(
       actual: { registered: false },
     });
   }
-  if (analyzerForSpec(SPEC_ID, PRODUCTION_CATALOG) !== null) {
-    return fail("the public lookup selects the INTERNAL_ONLY Augmentation registration", {
-      expected: { publicAnalyzer: null },
-      actual: { publicAnalyzer: registration.analyzerId },
+  const publicRow = analyzerForSpec(SPEC_ID, PRODUCTION_CATALOG);
+  if (publicRow !== registration) {
+    return fail("the public lookup does not select the same Augmentation registration", {
+      expected: { publicAnalyzer: registration.analyzerId },
+      actual: { publicAnalyzer: publicRow?.analyzerId ?? null },
     });
   }
   const run = runAnalyzer(registration, {

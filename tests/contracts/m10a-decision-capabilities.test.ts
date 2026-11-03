@@ -105,7 +105,7 @@ describe("the ingestion requirement is derived from the declaration", () => {
     expect(both.contributingAnalyzers).toEqual([fixture.analyzerId]);
   });
 
-  it("the build's public requirement set is the five public analyzers' derived requirements", () => {
+  it("the build's public requirement set is the six public analyzers' derived requirements", () => {
     expect(ENABLED_ANALYSIS_REQUIREMENTS).toEqual([
       {
         analyzerId: "rogue-assassination-observed-decisions",
@@ -133,6 +133,12 @@ describe("the ingestion requirement is derived from the declaration", () => {
         analyzerId: "monk-brewmaster-observed-decisions",
         requiredScope: "PLAYER_CONTEXT",
         includeResources: true,
+      },
+      // M13-F: Augmentation Evoker, FULL_RAID by its declared support inputs, no resources.
+      {
+        analyzerId: "evoker-augmentation-support-observations",
+        requiredScope: "FULL_RAID",
+        includeResources: false,
       },
     ]);
   });

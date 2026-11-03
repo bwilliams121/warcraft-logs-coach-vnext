@@ -54,15 +54,16 @@ function defectsOf(rows: readonly AnalyzerRegistration[]): readonly string[] {
 }
 
 describe("the five sites agree", () => {
-  it("public partition: the five public ids since M11-C4j; internal-only: Augmentation Evoker since M13-E", () => {
+  it("public partition: the six public ids since M13-F; internal-only: empty (Augmentation Evoker held it in M13-E)", () => {
     expect([...PUBLIC_SPEC_IDS]).toEqual([
       "rogue/assassination",
       "paladin/protection",
       "paladin/retribution",
       "deathknight/blood",
       "monk/brewmaster",
+      "evoker/augmentation",
     ]);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["evoker/augmentation"]);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
 
@@ -77,6 +78,7 @@ describe("the five sites agree", () => {
       ["paladin/retribution", "paladin/retribution"],
       ["deathknight/blood", "deathknight/blood"],
       ["monk/brewmaster", "monk/brewmaster"],
+      ["evoker/augmentation", "evoker/augmentation"],
     ]);
   });
 
@@ -85,7 +87,7 @@ describe("the five sites agree", () => {
     expect(PUBLIC_SPEC_IDS as readonly string[]).toContain(PROTECTION_PALADIN_SPEC_ID);
   });
 
-  it("the registration is PUBLIC and the catalog carries exactly five enabled analyzers", () => {
+  it("the registration is PUBLIC and the catalog carries exactly six enabled analyzers", () => {
     expect(PROTECTION_PALADIN_REGISTRATION.exposure).toBe("PUBLIC");
     expect(ASSASSINATION_REGISTRATION.exposure).toBe("PUBLIC");
     // M11-A4 put a third, INTERNAL_ONLY row in the catalog, NOT among the
@@ -99,14 +101,16 @@ describe("the five sites agree", () => {
     // it PUBLIC by the same move after the global observation and
     // discrimination gates passed on two independent subjects. M13-E put a
     // sixth, INTERNAL_ONLY row in — Augmentation Evoker support observations —
-    // NOT among the enabled analyzers.
+    // NOT among the enabled analyzers, and M13-F made it PUBLIC by the same
+    // move with its support-observation view. It publishes no decision, so
+    // the decision-evidence gates do not apply to it.
     expect(ANALYZER_REGISTRATIONS.map((row) => [row.specId, row.exposure])).toEqual([
       ["rogue/assassination", "PUBLIC"],
       ["paladin/protection", "PUBLIC"],
       ["paladin/retribution", "PUBLIC"],
       ["deathknight/blood", "PUBLIC"],
       ["monk/brewmaster", "PUBLIC"],
-      ["evoker/augmentation", "INTERNAL_ONLY"],
+      ["evoker/augmentation", "PUBLIC"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -114,6 +118,7 @@ describe("the five sites agree", () => {
       "paladin-retribution-observed-decisions",
       "deathknight-blood-observed-decisions",
       "monk-brewmaster-observed-decisions",
+      "evoker-augmentation-support-observations",
     ]);
     expect(ENABLED_ANALYSIS_REQUIREMENTS.map((requirement) => requirement.analyzerId)).toEqual(
       ENABLED_ANALYZERS.map((row) => row.analyzerId),
