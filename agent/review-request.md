@@ -150,6 +150,13 @@ assertions).
   byte-identical reports (187/782), and the report is committed.
 - `node scripts/corpus/gate.mjs --root evidence`: 16 cases and 42 assertions
   passed in both runs.
+- **CI cycle 1 (PR #45):** corpus passed. `verify` failed on one missed
+  workers-project pin:
+  `tests/regression/m10d-public-second-registration-invariance.test.ts`
+  expected six catalog rows and no INTERNAL_ONLY row. It now expects seven
+  rows (six PUBLIC, plus INTERNAL_ONLY `shaman/restoration`) and checks that
+  the public lookup does not find the Restoration row. The file passes
+  (13/13), and that was the only CI failure (12189 passed).
 
 ## Questions for the reviewer
 
