@@ -1761,6 +1761,23 @@ pooling and wait semantics (ONB-S5, tests/unit/onb-s5-pooling-wait.test.ts):
   first-GCD query                              -> APL_WAIT_SELECTED, never a GCD selection; coverage UNKNOWN
   observed cast vs a pool                      -> UNKNOWN AUTHORITY_SELECTION_UNRESOLVED; never MATCH, never REJECTED
   single-list walker                           -> a waiting line is never its definite winner
+shared pet mapping (ONB-S6, tests/unit/onb-s6-pet-state.test.ts):
+  malformed profile                            -> PetProfileError; a shared gameID is NOT a defect
+  ownership                                    -> WCL petOwner only; another player's pet never maps
+  unstated-owner candidate / gameID-less pet   -> OWNERSHIP_NOT_STATED for absence and count ceilings
+  two entities, one gameID                     -> both AMBIGUOUS; every answer UNKNOWN
+  single summon < t < summon + min lifetime    -> PRESENT, summon cited; summon AT t / min edge decides nothing
+  no min lifetime / death since summon         -> never PRESENT; a death never proves absence
+  casts / damage the pet sources               -> never a presence proof on their own
+  later events appended (O2)                   -> every answer at t unchanged; no future bracketing
+  no summon in [t - D, t]                      -> NOT_PRESENT only with SUMMONS COMPLETE over [t - D, t]
+  past cast outside every pinned life          -> LIFETIME_BOUND_CONTRADICTED, absence never claimed
+  missing SUMMONS page / UNVERIFIED / scope    -> UNKNOWN; no key NOT_PRESENT; count has no ceiling
+  pre-pull reach / no lifetime / unpinned start -> PRE_PULL_INSTANCE_POSSIBLE / LIFETIME_BOUND_NOT_PINNED / INSTANCE_START_NOT_PINNED
+  two summons in window / cast before summon / mixed null -> never PRESENT; count without ceiling
+  non-monotonic canonical order                -> NON_MONOTONIC_TIME on every surface, PRESENT included
+  atoms                                        -> UNKNOWN presence unbound (enumerated); counts KNOWN / ONE_OF / BOUNDED
+  real Blood 15 (fight 48)                     -> Ghoul 47 settled; Blood Beast blocked by unstated owner 142; Rune Weapon AMBIGUOUS
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)

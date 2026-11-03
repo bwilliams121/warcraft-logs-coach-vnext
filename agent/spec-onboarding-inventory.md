@@ -71,7 +71,7 @@ never assumed.
   "notStarted": 33,
   "publiclySupportedPercent": 15,
   "terminallyDispositionedPercent": 15,
-  "notes": "Augmentation Evoker became PUBLIC with M13-F (#36). Restoration Shaman is FOUNDATION (M12-D evaluator, unregistered). Shared foundations (src/healing, src/support, the M14 comparison facts) are never counted. ONB-S1 (shared precombat variable execution), ONB-S2 (shared variable combining operations), ONB-S4 (shared cast and channel decision anchor) and ONB-S5 (shared pooling and wait semantics) change no specialization's state."
+  "notes": "Augmentation Evoker became PUBLIC with M13-F (#36). Restoration Shaman is FOUNDATION (M12-D evaluator, unregistered). Shared foundations (src/healing, src/support, the M14 comparison facts) are never counted. ONB-S1 (shared precombat variable execution), ONB-S2 (shared variable combining operations), ONB-S4 (shared cast and channel decision anchor), ONB-S5 (shared pooling and wait semantics) and ONB-S6 (shared pet actor mapping) change no specialization's state."
 }
 ```
 

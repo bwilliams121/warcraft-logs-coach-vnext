@@ -4,141 +4,147 @@ Rolling file: overwritten for each review cycle.
 
 ## Change
 
-ONB-S5: shared resource pooling and wait semantics. Branch `autopilot/onb-s5`,
-from main at 400987b.
+ONB-S6: shared pet actor mapping for pet-driven APL state. Branch
+`autopilot/onb-s6`, from main at 668d34d.
 
-- **Internal shared engine only.** New `src/simc/pooling.ts` and
-  `src/simc/wait-actions.ts`. Changes to `nested-selection.ts`,
-  `first-gcd-selection.ts` and `list-selection.ts`. Nothing under
-  `src/contracts/`, `src/api/` or `src/mcp/` changes, and no specialization
-  module changes. No registered APL contains a waiting line (checked:
-  `src/simc/data/*.json` has no `pool_resource` or `wait*` token), so no
-  public decision changes.
-- **Warcraft Logs: NONE.** No request, probe or capture. All tests are
-  synthetic authorities.
-- Queue bookkeeping: ONB-S4 is recorded MERGED (PR #42, 400987bc…) and ONB-S5
-  is set PR_OPEN. The other merged tranches the supervisor listed were
-  already recorded MERGED with their pr and mergeSha.
+- **Internal shared engine only.** New `src/engine/game-state/pets/pet-state.ts`
+  and `src/simc/expression/pet-atoms.ts`. Nothing under `src/contracts/`,
+  `src/api/` or `src/mcp/` changes, no existing module changes, and no
+  specialization module changes. No registered specialization builds a pet
+  state, so no public decision changes.
+- **Warcraft Logs: NONE.** No request, probe or capture. Tests are synthetic,
+  plus the already-committed evidence archive (b1PmaKrd6CDfzngc fight 48
+  owned-pet segments, M11-E2.1).
+- Queue bookkeeping: ONB-S5 is recorded MERGED (PR #43, 668d34db…) and ONB-S6
+  is set PR_OPEN. The other merged tranches the supervisor listed were already
+  recorded MERGED with their pr and mergeSha.
 
 ## Direction
 
-`agent/autopilot-queue.md` ONB-S5 (M11-D0 census Cohort C: Outlaw, Feral).
-Scope:
+`agent/autopilot-queue.md` ONB-S6, `agent/follow-ups.md` "After M11-G3-1"
+(pets are not mapped to WCL actors), and the M11-E2.1 owned-pet tooling.
+Scope: a shared, evidence-backed mapping between pinned SimulationCraft pet
+entities and Warcraft Logs pet actors (stated `petOwner`, summon events),
+plus pet-count and pet-active state for APL reads. An ambiguous mapping is
+UNKNOWN, never a guess.
 
-- Pinned semantics for `pool_resource`, `wait`, `wait_for` and pooling-gated
-  lines in the shared engine.
-- What the APL selects while pooling.
-- How an observed cast compares against a pooling decision.
-- Undecidable pooling states are UNKNOWN. Continuous resources stay
-  intervals.
+## Design (agent/architecture.md "ONB-S6")
 
-## Pinned semantics (SimulationCraft 33622e9d)
+**Review history.**
 
-Sources: player.cpp:9706-9840 (wait family), 10640-10816 (`pool_resource_t`),
-11115-11126 (tokens), 14175-14267 (`select_action`), 7130-7133
-(`available()`); action.cpp:2381-2396, 2567-2667 (readiness), 2856-2865
-(pruning). Recorded in the `pooling.ts` header.
+- Cycle 1: non-monotonic time must refuse every surface. Fixed in `guard`,
+  with an unsorted-sequence regression.
+- Cycle 2: presence used a cast AFTER t to bracket t, which O2
+  (architecture.md "No future bracketing") forbids for authority. Presence
+  was redesigned to read only events at or before t. The continuity option
+  is removed, and a regression appends later events and proves every
+  surface unchanged.
 
-- **Tokens:** `pool_resource`, `wait`, `wait_until_ready`,
-  `wait_for_cooldown`. There is no `wait_for` token at the pin, so it is not
-  recognised.
-- **`pool_resource,for_next=1`:**
-  - It guards the very NEXT line of its list. When that line is background,
-    `init()` prunes the pool line with it. With no next line, `reset()`
-    backgrounds it.
-  - It is ready iff the guarded line's whole `action_ready()` is false now
-    and true with the pooled resource at its maximum, and its own `if=`
-    holds.
-  - `extra_amount` is refused.
-- **`pool_resource` without `for_next`:** ready iff its `if=` holds. There is
-  no cost, cooldown or cast time, and it is usable while moving.
-- **`wait`, `wait_until_ready`, `wait_for_cooldown`:** readiness also fails
-  while moving (`execute_time() > 0`) or right after the same wait, and
-  `wait_for_cooldown` also needs its cooldown down. None of these is
-  established, so a true `if=` makes the line POSSIBLE at most.
-- **Duration-only options:** `wait=`, `force_wait=` and `sec=` never change
-  readiness.
-- **A ready waiting line is RETURNED by the scan.** No ability is cast, and
-  time passes before the next scan.
+**Ownership split.** Shared code holds the mapping, the evidence rules and
+the fail-closed gates, and knows no pet. The specialization supplies a frozen
+`PetMappingProfile` (`definePetMappingProfile` throws on a malformed one).
+Each entity gives:
 
-## Design (agent/architecture.md "ONB-S5")
+- `simcName` and `wclGameIds`;
+- a proven `minLifetimeMs` (cannot end sooner) or `null`;
+- a proven `maxLifetimeMs` or `null`;
+- `instancesBeginWithSummon` (reviewed).
 
-**Nested scan.** A waiting line is read before applicability.
+What `pet.X.active`, a count or a pet aura means in an APL stays the
+specialization's.
 
-- A modelled `for_next` pool line is pushed as `POOL_PENDING_GUARDED_LINE`.
-  The guarded line is then read by the ordinary rules, and the pool step is
-  settled from that step:
-  - NOT_APPLICABLE: `PRUNED_WITH_GUARDED_LINE`;
-  - SELECTED: `GUARDED_READY`;
-  - `line_cd` running, or PROVEN_UNUSABLE for a resource-independent reason:
-    `NOT_RESOURCE_LIMITED`;
-  - condition FALSE, INSUFFICIENT_RESOURCE, or a prefix execution: the new
-    optional `poolingFor` resolver (`PoolingResolver`) is asked. It gets the
-    scan's bindings, assigned variables included. It defaults to UNKNOWN;
-  - MAY_SELECT: `UNDECIDED`.
-- `POOLS` with a certain condition is SELECTED and ends the scan. Otherwise
-  the pool line is a MAY_SELECT candidate, inserted before the guarded line's
-  own candidate.
-- Refused (new blocker `UNMODELLED_WAIT_ACTION`): unmodelled options, and a
-  guarded line that is a variable, a dispatch, another wait or a retarget.
-- Steps carry `waitAction: { kind, pooling? { guarded, resourceOption,
-  decision, atMax? } }`.
-- A new step outcome, `POOL_NOT_READY_CONTINUE`, is kept apart from
-  `ELIMINATED_CONTINUE` (a false condition).
+**Mapping.**
 
-**First-GCD query.** Any candidate with `waitAction` returns UNKNOWN
-`APL_WAIT_SELECTED` (new rescan blocker) before the lane is consulted. It is
-never executed as a zero-time step, and coverage classifies it OTHER.
+- Ownership is WCL `petOwner` only, never a summon source.
+- Two entities listing one gameID are both AMBIGUOUS, so every answer is
+  UNKNOWN. This is how the Rune Weapon shared across engine pets is handled.
+- A catalog actor of a listed gameID with an unstated owner, or an owned
+  actor with no gameID, blocks absence and count ceilings
+  (`OWNERSHIP_NOT_STATED`).
 
-**Observed comparison.** No change to `observed-comparison.ts`. Against a
-waiting selection, an observed cast is UNKNOWN `AUTHORITY_SELECTION_UNRESOLVED`
-(raw blocker `APL_WAIT_SELECTED`). It is never MATCH and, in this build, never
-REJECTED: `PUBLIC_COMPARISON_BASES` has no pooling basis, and adding one is a
-public contract change. This is recorded in `agent/follow-ups.md`.
+**No future evidence (O2), throughout the millisecond.** The answer at t
+reads only events at or before t, and holds whatever the unproven
+same-millisecond order. PRESENT needs all of:
 
-**Single-list walker.** A waiting line is capped at POSSIBLE.
+- a pinned minimum lifetime;
+- a single summon strictly before t, with t < summon + min;
+- no positive death since the summon;
+- up to t, no cast before the summon or after summon + max, and no null
+  instance id beside numbered ones.
 
-**Resolver helper.** `guardedReadinessUnder(line, bindingsAtMax,
-usabilityAtMax)` returns UNKNOWN for any option it would have to interpret,
-an unsupported condition, or a true condition without proven usability.
+Casts and damage never prove presence on their own (M11-ED delayed damage).
+A death never proves absence.
+
+**No unobserved instance.** NOT_PRESENT and a count ceiling need all of:
+
+- summon start and maximum lifetime D pinned;
+- t − D not before the pull;
+- SUMMONS COMPLETE over [t − D, t] for the owner and every mapped actor, via
+  the shared `gateAbsenceClaim`;
+- no owner-sourced summon in the window to an actor without a gameID;
+- no unstated-owner candidate;
+- no past cast contradicting D (`LIFETIME_BOUND_CONTRADICTED`).
+
+Then a key with no summon in [t − D, t] is NOT_PRESENT. Otherwise no key is
+NOT_PRESENT, and `instancesAt` reports `unobservedKeysPossible`. A later
+summon is never used to prove an earlier absence. A non-monotonic order
+refuses every surface.
+
+**Counts.** EXACT, BOUNDED with a ceiling (undecided window keys), or BOUNDED
+without one (an unobserved instance is possible, or one key has two summons
+in the window). As atoms they become KNOWN_NUMBER, ONE_OF_NUMBERS and
+BOUNDED_NUMBER. An undecided presence binds no truth, so the evaluator
+enumerates it, and it is never false.
+
+**Layering.** `pet-atoms.ts` takes structural inputs, so `src/simc` still
+imports nothing from `src/engine`. The specializations bridge the two, as
+they already do for cooldowns.
+
+## Retained evidence (test profiles; the lifetimes are not game data)
+
+b1PmaKrd6CDfzngc fight 48, focus 15:
+
+- Ghoul 47: three instances, one summon each. Another player's Ghoul (41) is
+  not mapped. With test lifetimes of 30 s minimum and 61 s maximum, at
+  one-second samples:
+  - 90 PRESENT;
+  - 159 NOT_PRESENT;
+  - 65 undecided;
+  - 31 pre-pull blocked.
+- Blood Beast 45: four instances, each ending in a death. Unstated owner
+  actor 142 blocks every absence claim: 20 PRESENT, 325 UNKNOWN.
+- Rune Weapon 44: AMBIGUOUS throughout. Warband Bank Convergence 224:
+  unclassified.
 
 ## Files
 
-- `src/simc/wait-actions.ts`: new. The tokens, kept apart so
-  `list-selection.ts` can import them without a cycle.
-- `src/simc/pooling.ts`: new. Semantics header, structure reader, resolver
-  types, `poolDecisionOf`, the resource-independent reasons and the helper.
-- `src/simc/nested-selection.ts`: `scanWaitLine`, `settlePendingPool`, the
-  `poolingFor` input, the step field, two step outcomes and one blocker.
-- `src/simc/first-gcd-selection.ts`: the `APL_WAIT_SELECTED` blocker and
-  check.
-- `src/simc/list-selection.ts`: the POSSIBLE cap.
-- `tests/unit/onb-s5-pooling-wait.test.ts`: new, 39 tests.
-- `tests/contracts/m5c3c3b-engine-scope.test.ts`: the exact rescan-blocker
-  list gains `APL_WAIT_SELECTED`, with its reason.
-- `agent/architecture.md` (new section "ONB-S5"), `agent/follow-ups.md`
-  ("After ONB-S5"), `agent/testing.md` (index block),
-  `agent/spec-onboarding-inventory.md` (notes), `agent/autopilot-queue.md`.
+- `src/engine/game-state/pets/pet-state.ts`: new.
+- `src/simc/expression/pet-atoms.ts`: new.
+- `tests/unit/onb-s6-pet-state.test.ts`: new, 49 tests.
+- `agent/architecture.md` (new section "ONB-S6"), `agent/follow-ups.md`
+  ("After ONB-S6", and a pointer in "After M11-G3-1"), `agent/testing.md`
+  (index block), `agent/spec-onboarding-inventory.md` (notes),
+  `agent/autopilot-queue.md`.
 
 ## Validation
 
-- `npx tsc --noEmit`: clean. `npx prettier --check` on every changed file:
-  clean.
-- `tests/unit/onb-s5-pooling-wait.test.ts`: 39/39.
-  `tests/contracts/m5c3c3b-engine-scope.test.ts`: green.
-- Full `npx vitest run` (default parallelism): 12029 passed, 21 failed in 14
-  heavy files, all timeouts under load (simulation runner service, public
-  projections, corpus harness). None imports the new modules.
-- Rerun with `--maxWorkers=4`: 12044 passed, 6 failed (timeouts). Those six
-  files rerun serially: 96/97. The one remaining failure,
+- `npx tsc --noEmit`: clean. `npx prettier --check` on every changed source
+  and test file: clean.
+- `tests/unit/onb-s6-pet-state.test.ts`: 49/49. This includes the engine
+  vocabulary and layering contracts that sweep `src/engine` and `src/simc`.
+- Rerun after the cycle 2 rework: `onb-s6-pet-state`, `m4-state-vocabulary` and`n  `m5-boundary-and-vocabulary`: 130/130. The rework touched only the new`n  files, which nothing else imports.
+- Full `npx vitest run` before the rework (default parallelism): 12089 passed and 20 failed, in
+  13 heavy files. All 20 are timeouts under load (simulation runner service,
+  public projections, corpus harness, raid night). None imports the new
+  modules.
+- Those 13 files rerun serially: 209/210. The one remaining failure is
   `tests/regression/m8g-encounter-context-composition.test.ts` (workers
-  project, 5 s timeout), fails identically on the untouched main tree on
-  this machine (stashed comparison), so it is not caused by this change.
+  project), which took 5.9 s against a 5 s timeout. ONB-S5 recorded the same
+  failure on the untouched main tree on this machine.
 
 ## Questions for the reviewer
 
-1. Is UNKNOWN (rather than a new REJECTED basis) the right pinned comparison
-   for an observed cast against a definite pool, given the public-contract
-   constraint?
-2. Is the resource-independent PROVEN_UNUSABLE set (cooldown, static,
-   stealth, vanish, aura) sound for "not ready even at the maximum"?
+1. Is a pinned minimum lifetime, with a single summon strictly before t, the
+   right past-only basis for PRESENT under O2?
+2. Is cast-contradiction of the maximum lifetime (`LIFETIME_BOUND_CONTRADICTED`)
+   a sufficient guard for an absence claim that rests on D?

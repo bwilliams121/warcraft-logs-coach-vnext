@@ -29,6 +29,43 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After ONB-S6: what the shared pet mapping does not establish
+
+**Raised:** ONB-S6 (2026-11-03). Each item is UNKNOWN today, never guessed.
+
+- **No reviewed profile exists.** The lifetimes, summon-start and continuity
+  facts are the consuming specialization's to pin, with SimulationCraft and
+  wire evidence, in ONB-X4 (Demonology), ONB-X5 (Unholy) and ONB-T2 (Beast
+  Mastery). The retained Blood measurement uses test values only.
+- **PRESENT needs a proven minimum lifetime.** Under O2 (no future
+  evidence), presence at t comes only from a summon before t plus a pinned
+  minimum life. A pet that can die or be dismissed at any moment (most
+  permanent pets) is never PRESENT. Positive presence for those needs a
+  reviewed past-only rule, for example "a cast within the last N ms proves
+  the pet still exists", with its own evidence. A post-hoc "observed before
+  and after t" report is allowed by O2, but is not built here.
+- **Death never proves absence.** A positive death ends PRESENT, but
+  NOT_PRESENT after a death needs a decoded resurrection contract
+  (`death-state.ts`). Until then, a pet that died and was not re-summoned is
+  UNKNOWN until its maximum lifetime expires, or forever when it has none.
+- **No pre-pull start.** A permanent pet summoned before the pull has no
+  summon event, so it is never PRESENT and its absence is never claimed.
+  COMBATANT_INFO pet facts, if Warcraft Logs states any, are unread.
+- **Unstated owners block absence.** On the retained fight, actor 142 (a
+  Blood Beast with no stated owner) blocks every Blood Beast absence claim
+  for focus 15. Attributing an unstated-owner pet needs an owner-approved
+  rule. A summon source is not one.
+- **Reused instance keys stay undecided.** The retained Rune Weapon has more
+  summon events than instances. A key with two summons is never decided,
+  even where a missing summon page is excluded.
+- **SimulationCraft spawner semantics are not modelled.** Expressions like a
+  spawner's `active`, `remains` or per-pet remaining-duration reads, and
+  Demonic Tyrant's lifetime extension, are each specialization's to resolve
+  over these primitives. Nothing here is a pinned SimulationCraft pet
+  expression.
+
+---
+
 ## After ONB-S5: what pooling and wait semantics do not establish
 
 **Raised:** ONB-S5 (2026-11-03).
@@ -1697,6 +1734,10 @@ M11-G3-1).
   other execution parameters for Blood.
 
 **Pets are not mapped to WCL actors.**
+- ONB-S6 adds the shared, spec-profiled mapping
+  (`src/engine/game-state/pets/pet-state.ts`). No specialization supplies a
+  reviewed profile yet, and a gameID several engine pets share stays
+  AMBIGUOUS there.
 - Only Blood Beast (217228) is engine-derived.
 - The Rune Weapon is AMBIGUOUS across three engine pets.
 - Risen Ghoul is not established.

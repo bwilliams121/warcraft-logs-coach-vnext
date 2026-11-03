@@ -1167,11 +1167,13 @@ while a cast or channel is in progress.
 ### ONB-S5: Shared resource pooling and wait semantics
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: none
 branch: autopilot/onb-s5
 wcl: NONE
 publicContract: NONE
+pr: 43
+mergeSha: 668d34db3d1a72e50fdce17a6db15da36579c93c
 ```
 
 **Direction.** The M11-D0 census Cohort C (pooling: Outlaw, Feral).
@@ -1185,8 +1187,9 @@ intervals.
 ### ONB-S6: Shared pet actor mapping for pet-driven APL state
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: none
+branch: autopilot/onb-s6
 wcl: NONE
 publicContract: NONE
 ```
