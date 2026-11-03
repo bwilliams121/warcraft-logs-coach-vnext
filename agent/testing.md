@@ -1852,6 +1852,11 @@ Discipline Priest internal (HEAL-B3, tests/unit/specs/heal-b3-discipline-priest.
   real G2 cohort246 f33 Discipline 88          -> 7 Atonement applications onto actor 7 (raw-checked: 7 apply + 7 remove); listings UNKNOWN INSUFFICIENT_COVERAGE; heals excluded by the query, never "none"
   real M13-A Holy 2, Shadow 10                 -> IDENTITY_REFUSED NOT_THIS_SPECIALIZATION; NOT_ASSESSED
   registration                                 -> INTERNAL_ONLY; public lookup null; identity table refuses; public request SPEC_NOT_SUPPORTED, no dispatch
+Discipline Priest public (HEAL-B3P: not promoted; no test changed, the existing pins carry it):
+  gate subject                                 -> none: no committed or retained whole-fight capture (agent/architecture.md "HEAL-B3P"); the gate is not weakened
+  gate coverage                                -> every PUBLIC healer row needs a pinned subject (heal-ap gate), so a subject-less promotion fails
+  registration                                 -> still INTERNAL_ONLY beside Restoration Druid (m10d-public-registration, m10d invariance)
+  public request                               -> Priest/Discipline SPEC_NOT_SUPPORTED, one retrieval for preparation alone (analysis-composition-refusals)
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)

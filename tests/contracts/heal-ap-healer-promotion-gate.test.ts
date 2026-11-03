@@ -48,7 +48,9 @@
  * each on its own whole-fight casts in the same canonical fight, driven by the
  * same checks; Restoration Druid has no retained evidence and stays
  * INTERNAL_ONLY. HEAL-B2P added Holy Priest the same way (actor 2, cut from
- * the same capture).
+ * the same capture). HEAL-B3P added no subject: no committed or retained
+ * capture holds a Discipline Priest's whole-fight casts, so it stays
+ * INTERNAL_ONLY.
  */
 
 import { beforeAll, describe, expect, it } from "vitest";
