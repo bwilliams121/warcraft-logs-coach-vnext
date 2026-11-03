@@ -1081,11 +1081,13 @@ authority or evidence condition.
 ### ONB-S1: Shared precombat action-list execution for APL variables
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: none
 branch: autopilot/onb-s1
 wcl: NONE
 publicContract: NONE
+pr: 40
+mergeSha: f1614c70fc2a3be09b493c5fa0f356ef79c1ee46
 ```
 
 **Direction.** `agent/follow-ups.md` "After M11-D3-C2" (precombat
@@ -1106,8 +1108,9 @@ combat.
 ### ONB-S2: Shared APL variable combining operations
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-S1
+branch: autopilot/onb-s2
 wcl: NONE
 publicContract: NONE
 ```

@@ -138,6 +138,7 @@ import { targetingOutcomeFor, type TargetIfVerdict, type TargetingOutcome } from
 import { firstGcdPseudoEffectOf, pseudoActionOf, type PseudoActionRecord } from "./pseudo-actions.js";
 import {
   establishedVariableDefaults,
+  neverFoldedVariables,
   executeVariableLine,
   type VariableExecutionRecord,
 } from "./variable-execution.js";
@@ -948,6 +949,8 @@ interface ScanContext {
   variables: ScanVariables;
   /** Each variable's pinned `default_value_`, what `op=reset` restores (ONB-S1). */
   readonly variableDefaults: ReadonlyMap<string, NumericBinding>;
+  /** The variables SimulationCraft never folds to a constant: where `floor`/`ceil` execute (ONB-S2). */
+  readonly variablesNeverFolded: ReadonlySet<string>;
 }
 
 /**
@@ -1414,13 +1417,15 @@ function walkList(
       //
       // `cycling_variable` takes this branch too (M11-D1). Its value is a fold
       // over every enemy (variable.cpp:369-391), which nothing here computes,
-      // so it writes UNKNOWN.
+      // so it writes UNKNOWN. The combining operations on a plain `variable`
+      // are executed since ONB-S2.
       const execution = executeVariableLine(
         action,
         gate,
         bindingsOf(context),
         context.variables,
         context.variableDefaults,
+        context.variablesNeverFolded,
       );
       context.variables = execution.state;
       context.steps.push(
@@ -2137,6 +2142,7 @@ export function resolveOneForegroundScan(input: NestedSelectionInput): OneForegr
     // (ONB-S1).
     variables: incomingScanVariables(input.authority, input.bindings),
     variableDefaults: establishedVariableDefaults(input.authority),
+    variablesNeverFolded: neverFoldedVariables(input.authority),
   };
 
   const outcome = scanList(context, input.entryListName, boundary.startOrdinal, [], []);
@@ -2219,6 +2225,7 @@ export function selectAcrossLists(input: NestedSelectionInput): TraversalResult 
     // (ONB-S1).
     variables: incomingScanVariables(input.authority, input.bindings),
     variableDefaults: establishedVariableDefaults(input.authority),
+    variablesNeverFolded: neverFoldedVariables(input.authority),
   };
 
   const outcome = scanList(context, input.entryListName, boundary.startOrdinal, [], []);
