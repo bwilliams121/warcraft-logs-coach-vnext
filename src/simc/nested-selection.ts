@@ -128,15 +128,20 @@ import {
   type GateIrrelevanceResolver,
 } from "./action-applicability.js";
 import {
-  initialScanVariables,
   joinScanVariables,
   type AtomBindings,
+  type NumericBinding,
   type ScanVariables,
 } from "./expression/evaluate.js";
 import type { TargetIndependenceFailure, TargetIndependentElimination } from "./target-independence.js";
 import { targetingOutcomeFor, type TargetIfVerdict, type TargetingOutcome } from "./target-if.js";
 import { firstGcdPseudoEffectOf, pseudoActionOf, type PseudoActionRecord } from "./pseudo-actions.js";
-import { executeVariableLine, type VariableExecutionRecord } from "./variable-execution.js";
+import {
+  establishedVariableDefaults,
+  executeVariableLine,
+  type VariableExecutionRecord,
+} from "./variable-execution.js";
+import { incomingScanVariables } from "./precombat-variables.js";
 import {
   lineCooldownOptionOf,
   NO_LINE_COOLDOWN_HISTORY,
@@ -941,6 +946,8 @@ interface ScanContext {
    * that restores the value it started from leaks nothing into its sibling.
    */
   variables: ScanVariables;
+  /** Each variable's pinned `default_value_`, what `op=reset` restores (ONB-S1). */
+  readonly variableDefaults: ReadonlyMap<string, NumericBinding>;
 }
 
 /**
@@ -1408,7 +1415,13 @@ function walkList(
       // `cycling_variable` takes this branch too (M11-D1). Its value is a fold
       // over every enemy (variable.cpp:369-391), which nothing here computes,
       // so it writes UNKNOWN.
-      const execution = executeVariableLine(action, gate, bindingsOf(context), context.variables);
+      const execution = executeVariableLine(
+        action,
+        gate,
+        bindingsOf(context),
+        context.variables,
+        context.variableDefaults,
+      );
       context.variables = execution.state;
       context.steps.push(
         stepOf(action, path, gate, "UNKNOWN", "VARIABLE_EXECUTED_CONTINUE", {
@@ -2119,8 +2132,11 @@ export function resolveOneForegroundScan(input: NestedSelectionInput): OneForegr
     gateIrrelevanceFor: input.gateIrrelevanceFor ?? noGateIrrelevance(),
     steps,
     // Every variable starts at its INCOMING value: the previous scan's, which
-    // this project does not have (M11-D3-C2).
-    variables: initialScanVariables(),
+    // this project does not have (M11-D3-C2) — except a variable only the
+    // precombat list writes, which every scan reads as precombat left it
+    // (ONB-S1).
+    variables: incomingScanVariables(input.authority, input.bindings),
+    variableDefaults: establishedVariableDefaults(input.authority),
   };
 
   const outcome = scanList(context, input.entryListName, boundary.startOrdinal, [], []);
@@ -2198,8 +2214,11 @@ export function selectAcrossLists(input: NestedSelectionInput): TraversalResult 
     gateIrrelevanceFor: input.gateIrrelevanceFor ?? noGateIrrelevance(),
     steps,
     // Every variable starts at its INCOMING value: the previous scan's, which
-    // this project does not have (M11-D3-C2).
-    variables: initialScanVariables(),
+    // this project does not have (M11-D3-C2) — except a variable only the
+    // precombat list writes, which every scan reads as precombat left it
+    // (ONB-S1).
+    variables: incomingScanVariables(input.authority, input.bindings),
+    variableDefaults: establishedVariableDefaults(input.authority),
   };
 
   const outcome = scanList(context, input.entryListName, boundary.startOrdinal, [], []);

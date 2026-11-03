@@ -56,7 +56,7 @@
  * write.
  */
 
-import { parseAplLine, type AplAction } from "./apl-authority.js";
+import { parseAplLine, type AplAction, type AplAuthority } from "./apl-authority.js";
 import type { LineCondition } from "./list-selection.js";
 import {
   actingAction,
@@ -109,19 +109,121 @@ const MODELLED_OPTION_KEYS: readonly string[] = [
   "value_else",
 ];
 
-const DEFAULT_LITERAL = /^[0-9]+(?:\.[0-9]+)?$/;
+const DEFAULT_LITERAL = /^-?[0-9]+(?:\.[0-9]+)?$/;
+
+/** The operations `get_operation` recognises (variable.hpp:72-88). Any other `op=` makes the line inert. */
+const KNOWN_OPERATIONS: readonly string[] = [
+  "set",
+  "print",
+  "reset",
+  "add",
+  "sub",
+  "mul",
+  "div",
+  "pow",
+  "mod",
+  "min",
+  "max",
+  "floor",
+  "ceil",
+  "setif",
+  "report",
+];
+
+/** Operations whose constructor does not require `value=` (variable.cpp:74-76). */
+const VALUELESS_OPERATIONS: readonly string[] = ["floor", "ceil", "reset", "print", "report"];
+
+/**
+ * Every variable's `default_value_`, keyed by lower-cased name (ONB-S1).
+ *
+ * Pinned: the value a variable holds after a player reset (player.cpp:6727-6728,
+ * action_variable.hpp `reset()`) and what `op=reset` restores
+ * (variable.cpp:321-323) is the `default=` of the FIRST `variable` action
+ * constructed for that name — later lines with the same name find the existing
+ * variable and their `default=` is ignored (variable.cpp:108-125). Actions are
+ * constructed list by list in the order precombat, default, then the other
+ * lists alphabetically (player.cpp:526-559, 4199-4243), and a line the
+ * constructor makes background before that point — no `name=`, an unknown
+ * `op=`, a missing `value=`, `condition=` or `value_else=` (variable.cpp:52-98)
+ * — creates no variable.
+ *
+ * A name absent from the map has no established default and reads UNKNOWN. A
+ * line whose structure is malformed cannot be attributed to a name, so it
+ * leaves EVERY default unestablished and the map is empty. A `default=` that is
+ * not a plain number is UNKNOWN for that name. The sim-level
+ * `apl_variable.<name>` override (variable.cpp:43-50) belongs to a simulation
+ * profile, not to the authority, and is not modelled — as for `op=reset`.
+ */
+export function establishedVariableDefaults(authority: AplAuthority): ReadonlyMap<string, NumericBinding> {
+  const cached = defaultsByAuthority.get(authority);
+  if (cached !== undefined) return cached;
+  const defaults = new Map<string, NumericBinding>();
+  let attributable = true;
+  for (const listName of constructionOrder(authority)) {
+    const lookup = authority.actionsInList(listName);
+    if (!lookup.found) continue;
+    for (const action of lookup.actions) {
+      if (action.entryKind !== "VARIABLE_ASSIGNMENT") continue;
+      const structure = parseAplLine(action.actionStringVerbatim);
+      const names = structure.options.filter((option) => option.key === "name");
+      if (!structure.balanced || structure.malformedSegments.length > 0 || names.length > 1) {
+        attributable = false;
+        continue;
+      }
+      const rawName = names[0]?.value;
+      if (rawName === undefined || rawName.length === 0) continue;
+      const name = rawName.toLowerCase();
+      if (defaults.has(name)) continue;
+      const written = (key: string) => structure.options.filter((option) => option.key === key);
+      const value = (key: string) => written(key)[0]?.value ?? "";
+      const operation = (written("op")[0]?.value ?? "set").toLowerCase();
+      if (!KNOWN_OPERATIONS.includes(operation)) continue;
+      if (!VALUELESS_OPERATIONS.includes(operation) && value("value").length === 0) continue;
+      if (operation === "setif" && (value("condition").length === 0 || value("value_else").length === 0))
+        continue;
+      const defaultOptions = written("default");
+      const literal = defaultOptions[0]?.value;
+      defaults.set(
+        name,
+        defaultOptions.length === 0
+          ? knownNumber(0)
+          : defaultOptions.length === 1 && literal !== undefined && DEFAULT_LITERAL.test(literal)
+            ? knownNumber(Number(literal))
+            : unknownNumber("STATE_NOT_MODELLED"),
+      );
+    }
+  }
+  const result: ReadonlyMap<string, NumericBinding> = attributable ? defaults : new Map();
+  defaultsByAuthority.set(authority, result);
+  return result;
+}
+
+const defaultsByAuthority = new WeakMap<AplAuthority, ReadonlyMap<string, NumericBinding>>();
+
+/** The authority's list names in SimulationCraft's construction order (player.cpp:526-559). */
+export function constructionOrder(authority: AplAuthority): readonly string[] {
+  const names = [...new Set(authority.artifact.lists.map((list) => list.listName))];
+  const rank = (name: string) => (name === "precombat" ? 0 : name === "default" ? 1 : 2);
+  return names.sort((left, right) => rank(left) - rank(right) || (left < right ? -1 : left > right ? 1 : 0));
+}
 
 /**
  * Executes one variable line against the scan's current variables.
  *
  * `gate` is the line's own `if=` as the traversal already evaluated it, under
  * the same `bindings` — so the condition and the value read the same state.
+ *
+ * `defaults` are the authority's established defaults
+ * (`establishedVariableDefaults`): what `op=reset` restores. Without them a
+ * reset restores the line's own `default=`, which is the pinned value only
+ * when that line constructed the variable.
  */
 export function executeVariableLine(
   action: AplAction,
   gate: LineCondition,
   bindings: AtomBindings,
   state: ScanVariables,
+  defaults?: ReadonlyMap<string, NumericBinding>,
 ): { readonly state: ScanVariables; readonly record: VariableExecutionRecord } {
   const structure = parseAplLine(action.actionStringVerbatim);
   const names = structure.options.filter((option) => option.key === "name").map((option) => option.value);
@@ -201,11 +303,17 @@ export function executeVariableLine(
         : joinNumericBindings(value, otherwise);
     modelled = "SETIF";
   } else if (operation === "reset") {
-    // `default=` as written; 0 when absent. The sim-level `apl_variable.<name>`
-    // override belongs to a simulation profile, not to the authority.
-    const written = option("default");
-    if (written !== undefined && !DEFAULT_LITERAL.test(written)) return notModelled("MISSING_EXPRESSION");
-    assigned = knownNumber(written === undefined ? 0 : Number(written));
+    // The variable's `default_value_` (ONB-S1): the established default when
+    // the caller supplied them, else `default=` as written (0 when absent).
+    // The sim-level `apl_variable.<name>` override belongs to a simulation
+    // profile, not to the authority.
+    if (defaults !== undefined) {
+      assigned = defaults.get(name) ?? unknownNumber("STATE_NOT_ESTABLISHED");
+    } else {
+      const written = option("default");
+      if (written !== undefined && !DEFAULT_LITERAL.test(written)) return notModelled("MISSING_EXPRESSION");
+      assigned = knownNumber(written === undefined ? 0 : Number(written));
+    }
     modelled = "RESET";
   } else {
     return notModelled("OPERATION");
