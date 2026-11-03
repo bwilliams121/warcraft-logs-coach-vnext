@@ -184,7 +184,7 @@ describe("the two queries keep separate vocabularies", () => {
     expect(overlap).toEqual([]);
   });
 
-  it("admits exactly the eight rescan blockers", () => {
+  it("admits exactly the nine rescan blockers", () => {
     expect([...ROTATIONAL_GCD_BLOCKERS]).toEqual([
       "ONE_SCAN_BLOCKED",
       "UNKNOWN_EXECUTION_LANE",
@@ -197,6 +197,10 @@ describe("the two queries keep separate vocabularies", () => {
       // GCD-consuming candidate whose condition was never read can never be the
       // answer, whatever a resolver claims about it.
       "UNREAD_CONDITION_ON_GCD_ACTION",
+      // ONB-S5. The scan selected a pool or wait: the authority casts nothing
+      // now, and the next selection needs simulated time this engine does not
+      // advance. Never a lane question, never a GCD selection.
+      "APL_WAIT_SELECTED",
     ]);
   });
 

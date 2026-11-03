@@ -72,6 +72,7 @@ import type { AplAction, AplAuthority } from "./apl-authority.js";
 import { parseSimcExpression, type ParseFailureReason } from "./expression/parse.js";
 import { targetingOutcomeFor } from "./target-if.js";
 import { pseudoActionOf } from "./pseudo-actions.js";
+import { waitActionOf } from "./wait-actions.js";
 import {
   actingAction,
   evaluateSimcExpression,
@@ -415,9 +416,14 @@ export function selectWithinList(
     const ordinary = outcomeOf(truthOfCondition(condition), usability);
     // `retarget_auto_attack` is never proven to fire: its pinned readiness also
     // needs an auto attack aimed at a different enemy, which nothing here can
-    // know (M11-D3-B2, `pseudo-actions.ts`).
+    // know (M11-D3-B2, `pseudo-actions.ts`). A waiting action (ONB-S5,
+    // `pooling.ts`) is never this walker's winner either: it selects no
+    // ability, and a pool line's readiness reads the line after it, which this
+    // walker does not model.
     const outcome =
-      ordinary === "DEFINITE_WINNER" && pseudoActionOf(action.actionToken) === "RETARGET_AUTO_ATTACK"
+      ordinary === "DEFINITE_WINNER" &&
+      (pseudoActionOf(action.actionToken) === "RETARGET_AUTO_ATTACK" ||
+        waitActionOf(action.actionToken) !== null)
         ? "POSSIBLE"
         : ordinary;
     const line: LineEvaluation = {

@@ -1141,11 +1141,13 @@ ownerDecision: Whether, and on what evidence, the analyzer may model the enemy s
 ### ONB-S4: Shared cast and channel decision anchor
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: none
 branch: autopilot/onb-s4
 wcl: NONE
 publicContract: NONE
+pr: 42
+mergeSha: 400987bce9370aaff3d787ee4b51850412de9a41
 ```
 
 **Direction.** CLAUDE.md "Decision Points" (cast time, channel time, GCD
@@ -1165,8 +1167,9 @@ while a cast or channel is in progress.
 ### ONB-S5: Shared resource pooling and wait semantics
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: none
+branch: autopilot/onb-s5
 wcl: NONE
 publicContract: NONE
 ```

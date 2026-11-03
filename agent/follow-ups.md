@@ -29,6 +29,34 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After ONB-S5: what pooling and wait semantics do not establish
+
+**Raised:** ONB-S5 (2026-11-03).
+
+- **No REJECTED against a pool.** When the APL definitely pools, an observed
+  cast is UNKNOWN, never REJECTED. A REJECTED would need a pooling comparison
+  basis, which changes the public `PUBLIC_COMPARISON_BASES`, so it is its own
+  reviewed public tranche. It should be revisited only with a specialization
+  whose resolver makes `POOLS` reachable on real evidence.
+- **No time advance.** The first-GCD query refuses a waiting selection
+  (`APL_WAIT_SELECTED`). Answering "what is cast after the pool" needs a
+  regeneration model and a non-zero transition, which the engine refuses
+  today.
+- **Refused options.** `extra_amount=` (an evaluated amount shifts the
+  readiness test), `line_cd=` on a waiting line, and `wait_on_ready=` (still an
+  unrecognised option on any line) all block. `wait_for_cooldown` readiness
+  is never proven: a cooldown with charges can be ready with remains above
+  zero.
+- **Resolvers are spec-owned and absent.** No specialization supplies a
+  `PoolingResolver` yet, so the at-maximum readiness is UNKNOWN wherever a
+  resolver is needed. ONB-C1 (Feral) and ONB-C2 (Outlaw) own theirs, along with
+  `max_energy=1` on the pinned Feral `ferocious_bite`, which is still refused.
+- **Runtime background.** Pruning follows the existing rule: NOT_APPLICABLE
+  stands for init-time background. A guarded line made background later at
+  runtime is not modelled separately.
+
+---
+
 ## After M15-C: what non-numeric prioritization does not establish
 
 **Raised:** M15-C (2026-11-03).

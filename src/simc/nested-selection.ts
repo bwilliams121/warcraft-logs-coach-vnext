@@ -150,6 +150,18 @@ import {
   type LineCooldownRecord,
   type LineCooldownResolver,
 } from "./line-cooldown.js";
+import {
+  noPoolingModel,
+  poolDecisionOf,
+  RESOURCE_INDEPENDENT_UNUSABLE_REASONS,
+  waitActionOf,
+  waitLineStructureOf,
+  type GuardedReadinessAtMax,
+  type GuardedReadinessNow,
+  type PoolingResolver,
+  type WaitActionKind,
+  type WaitActionRecord,
+} from "./pooling.js";
 
 // --------------------------------------------------------------------------
 // Path and trace
@@ -268,6 +280,21 @@ export type TraversalStepOutcome =
    * multi-target refusal needs to be able to tell them apart.
    */
   | "TARGET_INDEPENDENT_ELIMINATION_CONTINUE"
+  /**
+   * A `pool_resource,for_next=1` line whose readiness depends on the line it
+   * guards (ONB-S5; see `pooling.ts`). The scan reads that line next and then
+   * settles this step. It stays PENDING only when the scan stopped at or
+   * before the guarded line.
+   */
+  | "POOL_PENDING_GUARDED_LINE"
+  /**
+   * A pool line proven NOT ready although its own condition may hold
+   * (ONB-S5): its guarded line is ready now, is not ready even with the pooled
+   * resource at its maximum, or is background, which prunes the pool line
+   * with it. Distinct from `ELIMINATED_CONTINUE`, which says the CONDITION was
+   * false.
+   */
+  | "POOL_NOT_READY_CONTINUE"
   /** A player action that might fire: true condition with unknown usability, or an undecided condition. */
   | "MAY_SELECT"
   /** A player action proven to fire. The scan is over. */
@@ -329,6 +356,14 @@ export interface TraversalStep {
    * see `line-cooldown.ts`). ABSENT for every entry whose line carries none.
    */
   readonly lineCooldown?: LineCooldownRecord;
+  /**
+   * The waiting action this entry is — `pool_resource`, `wait`,
+   * `wait_until_ready` or `wait_for_cooldown` — and, for a guarding pool line,
+   * its pooling decision (ONB-S5; see `pooling.ts`). ABSENT for every other
+   * entry. A candidate carrying it selects no ability: the scan ends and
+   * simulated time passes.
+   */
+  readonly waitAction?: WaitActionRecord;
   /**
    * The gate-irrelevance claim, when one carried this entry past an unreadable
    * condition (M5-D1).
@@ -453,7 +488,15 @@ export type TraversalBlocker =
    * (`MALFORMED_STRUCTURE`: a second `if=`, a non-`key=value` segment,
    * unbalanced grouping) — on a player, run or call entry alike.
    */
-  | "UNSUPPORTED_ACTION_OPTION";
+  | "UNSUPPORTED_ACTION_OPTION"
+  /**
+   * A waiting line (`pool_resource`, `wait`, `wait_until_ready`,
+   * `wait_for_cooldown`) this project does not model (ONB-S5): an option such
+   * as `extra_amount` or `line_cd`, a malformed structure, or a `for_next`
+   * pool line whose guarded line is not an ordinary player action. Distinct
+   * from `UNSUPPORTED_ACTION_OPTION`, which points at target enumeration.
+   */
+  | "UNMODELLED_WAIT_ACTION";
 
 export const TRAVERSAL_BLOCKERS = [
   "UNSUPPORTED_AUTHORITY_EXPRESSION",
@@ -468,6 +511,7 @@ export const TRAVERSAL_BLOCKERS = [
   "INVALID_START_BOUNDARY",
   "APPLICABILITY_NOT_ESTABLISHED",
   "UNSUPPORTED_ACTION_OPTION",
+  "UNMODELLED_WAIT_ACTION",
 ] as const satisfies readonly TraversalBlocker[];
 
 export type TraversalResult =
@@ -585,6 +629,15 @@ export interface NestedSelectionInput {
    * that may fire at most, never a timer assumed idle.
    */
   readonly lineCooldownFor?: LineCooldownResolver;
+  /**
+   * A `for_next` pool line's guarded line, read with the pooled resource at
+   * its maximum (ONB-S5; see `pooling.ts`).
+   *
+   * OPTIONAL, defaulting to UNKNOWN. Asked only when the guarded line is
+   * proven not ready now for a reason the resource could change; a caller
+   * that supplies no model gets a pool line that may fire at most.
+   */
+  readonly poolingFor?: PoolingResolver;
   /** Defaults to the top of the entry list. */
   readonly startBoundary?: ScanStartBoundary;
 }
@@ -887,9 +940,11 @@ function stepOf(
     readonly pseudoAction?: PseudoActionRecord | undefined;
     readonly variableExecution?: VariableExecutionRecord | undefined;
     readonly lineCooldown?: LineCooldownRecord | undefined;
+    readonly waitAction?: WaitActionRecord | undefined;
   } = {},
 ): TraversalStep {
   return {
+    ...(verdicts.waitAction === undefined ? {} : { waitAction: verdicts.waitAction }),
     ...(verdicts.lineCooldown === undefined ? {} : { lineCooldown: verdicts.lineCooldown }),
     ...(verdicts.pseudoAction === undefined ? {} : { pseudoAction: verdicts.pseudoAction }),
     ...(verdicts.variableExecution === undefined ? {} : { variableExecution: verdicts.variableExecution }),
@@ -938,6 +993,7 @@ interface ScanContext {
   readonly lineCooldownFor: LineCooldownResolver;
   readonly applicabilityFor: ActionApplicabilityResolver;
   readonly gateIrrelevanceFor: GateIrrelevanceResolver;
+  readonly poolingFor: PoolingResolver;
   /** Every step visited anywhere, in visit order. Accumulated across recursion. */
   readonly steps: TraversalStep[];
   /**
@@ -1396,9 +1452,18 @@ function walkList(
   let transferred = false;
   /** Set when a world explored here or in a callee ended the selection with nothing (M11-D3-A). */
   let mayEndEmpty = false;
+  /** A `for_next` pool line whose guarded line is being read (ONB-S5). */
+  let pendingPool: PendingPool | null = null;
 
   for (const action of lookup.actions) {
     if (action.priorityOrdinal < startOrdinal) continue;
+
+    // ---- a pool line, settled once its guarded line has been read ----
+    if (pendingPool !== null && action !== pendingPool.guarded) {
+      const settled = settlePendingPool(context, pendingPool, candidates);
+      pendingPool = null;
+      if (settled === "POOL_SELECTED") break;
+    }
 
     const gate = evaluateCondition(action, bindingsOf(context));
 
@@ -1699,6 +1764,20 @@ function walkList(
         blockedAt: step,
         detail: "an entry kind this module does not model appeared in the scan",
       });
+    }
+
+    // ---- waiting actions (ONB-S5; see `pooling.ts`) ----
+    //
+    // Core actions with pinned semantics of their own, read before
+    // applicability: they have no spell for a specialization to apply, and a
+    // `for_next` pool line is background exactly when its guarded line is.
+    const waitKind = waitActionOf(action.actionToken);
+    if (waitKind !== null) {
+      const waited = scanWaitLine(context, action, waitKind, gate, path, candidates, lookup.actions);
+      if (waited.kind === "BLOCKED") return earliestObstacle(candidates, waited.blocked);
+      if (waited.kind === "SELECTED") break;
+      if (waited.kind === "PENDING") pendingPool = waited.pending;
+      continue;
     }
 
     // ---- retarget pseudo-actions (M11-D3-B2) ----
@@ -2038,7 +2117,305 @@ function walkList(
     candidates.push({ identity: action.actionToken, step, definite: false });
   }
 
+  // The guarded line was the list's last, or it was selected: settle the pool
+  // line now. A pool that fires here ends the walk all the same.
+  if (pendingPool !== null) settlePendingPool(context, pendingPool, candidates);
+
   return { kind: "COMPLETED", candidates, transferred, mayEndEmpty, collapse: pending.collapse };
+}
+
+// --------------------------------------------------------------------------
+// Waiting actions (ONB-S5)
+// --------------------------------------------------------------------------
+
+/** A `for_next` pool line whose readiness waits on its guarded line. */
+interface PendingPool {
+  readonly action: AplAction;
+  readonly guarded: AplAction;
+  readonly gate: LineCondition;
+  readonly path: readonly TraversalPathEntry[];
+  /** Where the pool line's PENDING step sits in `context.steps`; settling replaces it. */
+  readonly stepIndex: number;
+  readonly resourceOption: string | null;
+}
+
+type WaitLineScan =
+  | { readonly kind: "CONTINUE" }
+  | { readonly kind: "SELECTED" }
+  | { readonly kind: "PENDING"; readonly pending: PendingPool }
+  | { readonly kind: "BLOCKED"; readonly blocked: BlockedScan };
+
+function guardedEntryOf(action: AplAction): TraversalPathEntry {
+  return pathEntryOf(action);
+}
+
+/**
+ * One waiting line, by its pinned semantics (`pooling.ts`).
+ *
+ *   wait, wait_until_ready, wait_for_cooldown
+ *       condition FALSE -> not ready; otherwise POSSIBLE at most, because
+ *       readiness also needs the player not moving and (for
+ *       `wait_for_cooldown`) the named cooldown not ready, neither of which
+ *       is established here
+ *   pool_resource without for_next=1
+ *       ready exactly when its condition holds: a certain condition SELECTS it
+ *   pool_resource,for_next=1
+ *       condition FALSE -> not ready; otherwise PENDING on the guarded line,
+ *       which is read next and settles it (`settlePendingPool`)
+ */
+function scanWaitLine(
+  context: ScanContext,
+  action: AplAction,
+  waitKind: WaitActionKind,
+  gate: LineCondition,
+  path: readonly TraversalPathEntry[],
+  candidates: Candidate[],
+  listActions: readonly AplAction[],
+): WaitLineScan {
+  const structure = waitLineStructureOf(action, waitKind);
+  const record: WaitActionRecord = { kind: waitKind };
+
+  if (structure.kind === "UNMODELLED") {
+    const step = stepOf(action, path, gate, "UNKNOWN", "BLOCKED", { waitAction: record });
+    context.steps.push(step);
+    return {
+      kind: "BLOCKED",
+      blocked: {
+        kind: "BLOCKED",
+        blocker: "UNMODELLED_WAIT_ACTION",
+        blockedAt: step,
+        detail: "a waiting line carries an option or structure whose pinned semantics are not modelled",
+      },
+    };
+  }
+
+  // A pool line has no cost, no cooldown and no cast time, so its own base
+  // readiness cannot fail. A wait line spends time, so it is not ready while
+  // moving, and movement is never established here.
+  const usability: ActionUsability = waitKind === "POOL_RESOURCE" ? "PROVEN_USABLE" : "UNKNOWN";
+
+  if (gate.kind === "UNSUPPORTED") {
+    const step = stepOf(action, path, gate, usability, "BLOCKED", { waitAction: record });
+    context.steps.push(step);
+    return {
+      kind: "BLOCKED",
+      blocked: {
+        kind: "BLOCKED",
+        blocker: "UNSUPPORTED_AUTHORITY_EXPRESSION",
+        blockedAt: step,
+        detail: "a waiting line's condition is outside the supported expression subset",
+      },
+    };
+  }
+
+  if (gateIsCertainlyNotEntered(gate)) {
+    context.steps.push(stepOf(action, path, gate, usability, "ELIMINATED_CONTINUE", { waitAction: record }));
+    return { kind: "CONTINUE" };
+  }
+
+  if (waitKind !== "POOL_RESOURCE" || !structure.guardsNext) {
+    const definite = waitKind === "POOL_RESOURCE" && gateIsCertainlyEntered(gate);
+    const step = stepOf(action, path, gate, usability, definite ? "SELECTED" : "MAY_SELECT", {
+      waitAction: record,
+    });
+    context.steps.push(step);
+    candidates.push({ identity: action.actionToken, step, definite });
+    return definite ? { kind: "SELECTED" } : { kind: "CONTINUE" };
+  }
+
+  // ---- pool_resource,for_next=1: the guarded line is the very next one ----
+  const guarded = listActions[listActions.indexOf(action) + 1];
+  if (guarded === undefined) {
+    // `reset()` finds no next action and backgrounds the line
+    // (player.cpp:10736-10740).
+    context.steps.push(
+      stepOf(action, path, gate, usability, "POOL_NOT_READY_CONTINUE", {
+        waitAction: {
+          kind: waitKind,
+          pooling: {
+            guarded: null,
+            resourceOption: structure.resourceOption,
+            decision: "PRUNED_WITH_GUARDED_LINE",
+          },
+        },
+      }),
+    );
+    return { kind: "CONTINUE" };
+  }
+
+  const pooling = {
+    guarded: guardedEntryOf(guarded),
+    resourceOption: structure.resourceOption,
+    decision: "PENDING" as const,
+  };
+  if (
+    guarded.entryKind !== "PLAYER_ACTION" ||
+    waitActionOf(guarded.actionToken) !== null ||
+    pseudoActionOf(guarded.actionToken) !== null
+  ) {
+    const step = stepOf(action, path, gate, usability, "BLOCKED", {
+      waitAction: { kind: waitKind, pooling },
+    });
+    context.steps.push(step);
+    return {
+      kind: "BLOCKED",
+      blocked: {
+        kind: "BLOCKED",
+        blocker: "UNMODELLED_WAIT_ACTION",
+        blockedAt: step,
+        detail:
+          "a pool line guards a line that is not an ordinary player action, whose readiness inside the " +
+          "pool's check is not modelled",
+      },
+    };
+  }
+
+  context.steps.push(
+    stepOf(action, path, gate, usability, "POOL_PENDING_GUARDED_LINE", {
+      waitAction: { kind: waitKind, pooling },
+    }),
+  );
+  return {
+    kind: "PENDING",
+    pending: {
+      action,
+      guarded,
+      gate,
+      path,
+      stepIndex: context.steps.length - 1,
+      resourceOption: structure.resourceOption,
+    },
+  };
+}
+
+/**
+ * Settles a `for_next` pool line from what the scan established about its
+ * guarded line, which SimulationCraft reads inside the pool line's own
+ * readiness (player.cpp:10765-10811).
+ *
+ *   guarded line background               the pool line was pruned with it
+ *   guarded line SELECTED                 ready now: the pool line is not
+ *   guarded line not ready now            ask the at-maximum question:
+ *                                           a resource-independent reason
+ *                                           (`line_cd`, a cooldown, an aura)
+ *                                           answers it here; anything else
+ *                                           asks the specialization resolver
+ *   guarded line undecided                the pool line may fire
+ *
+ * A pool line that POOLS under a certain condition is SELECTED and ends the
+ * walk; under an undecided one it may fire. A pool line that may fire is
+ * placed before the guarded line's own candidate, keeping priority order.
+ */
+function settlePendingPool(
+  context: ScanContext,
+  pending: PendingPool,
+  candidates: Candidate[],
+): "CONTINUE" | "POOL_SELECTED" {
+  const guardedStep = context.steps
+    .slice(pending.stepIndex + 1)
+    .find(
+      (step) =>
+        step.listName === pending.guarded.listName &&
+        step.priorityOrdinal === pending.guarded.priorityOrdinal &&
+        step.path.length === pending.path.length + 1,
+    );
+
+  let pruned = false;
+  let now: GuardedReadinessNow = "UNDECIDED";
+  let atMax: GuardedReadinessAtMax | null = null;
+  const askResolver = (): GuardedReadinessAtMax =>
+    context.poolingFor({
+      poolLine: pending.action,
+      guardedLine: pending.guarded,
+      resourceOption: pending.resourceOption,
+      bindings: bindingsOf(context),
+    });
+
+  switch (guardedStep?.outcome) {
+    case "NOT_APPLICABLE_CONTINUE":
+      pruned = true;
+      break;
+    case "SELECTED":
+      now = "READY";
+      break;
+    case "LINE_COOLDOWN_NOT_READY_CONTINUE":
+      now = "NOT_READY";
+      atMax = {
+        kind: "NOT_READY_AT_MAX",
+        basis: "the guarded line's own line_cd runs whatever the resource",
+      };
+      break;
+    case "PROVEN_UNUSABLE_CONTINUE": {
+      now = "NOT_READY";
+      const verdict = guardedStep.usabilityVerdict;
+      const independent =
+        verdict?.kind === "PROVEN_UNUSABLE" &&
+        (RESOURCE_INDEPENDENT_UNUSABLE_REASONS as readonly string[]).includes(verdict.reason);
+      atMax =
+        independent && verdict.kind === "PROVEN_UNUSABLE"
+          ? {
+              kind: "NOT_READY_AT_MAX",
+              basis: `the guarded line is unusable whatever the resource: ${verdict.reason}`,
+            }
+          : askResolver();
+      break;
+    }
+    case "ELIMINATED_CONTINUE":
+    case "TARGET_INDEPENDENT_ELIMINATION_CONTINUE":
+      now = "NOT_READY";
+      atMax = askResolver();
+      break;
+    default:
+      // MAY_SELECT, or nothing recorded: the guarded line's readiness now is
+      // not established, so neither is the pool's.
+      now = "UNDECIDED";
+  }
+
+  const decision = pruned ? "PRUNED_WITH_GUARDED_LINE" : poolDecisionOf(now, atMax);
+  const record: WaitActionRecord = {
+    kind: "POOL_RESOURCE",
+    pooling: {
+      guarded: guardedEntryOf(pending.guarded),
+      resourceOption: pending.resourceOption,
+      decision,
+      ...(atMax === null ? {} : { atMax }),
+    },
+  };
+
+  if (
+    decision === "PRUNED_WITH_GUARDED_LINE" ||
+    decision === "GUARDED_READY" ||
+    decision === "NOT_RESOURCE_LIMITED"
+  ) {
+    context.steps[pending.stepIndex] = stepOf(
+      pending.action,
+      pending.path,
+      pending.gate,
+      "PROVEN_USABLE",
+      "POOL_NOT_READY_CONTINUE",
+      { waitAction: record },
+    );
+    return "CONTINUE";
+  }
+
+  const definite = decision === "POOLS" && gateIsCertainlyEntered(pending.gate);
+  const step = stepOf(
+    pending.action,
+    pending.path,
+    pending.gate,
+    "PROVEN_USABLE",
+    definite ? "SELECTED" : "MAY_SELECT",
+    {
+      waitAction: record,
+    },
+  );
+  context.steps[pending.stepIndex] = step;
+  const candidate: Candidate = { identity: pending.action.actionToken, step, definite };
+  const guardedCandidate =
+    guardedStep === undefined ? -1 : candidates.findIndex((c) => c.step === guardedStep);
+  if (guardedCandidate < 0) candidates.push(candidate);
+  else candidates.splice(guardedCandidate, 0, candidate);
+  return definite ? "POOL_SELECTED" : "CONTINUE";
 }
 
 // --------------------------------------------------------------------------
@@ -2135,6 +2512,7 @@ export function resolveOneForegroundScan(input: NestedSelectionInput): OneForegr
     lineCooldownFor: input.lineCooldownFor ?? NO_LINE_COOLDOWN_HISTORY,
     applicabilityFor: input.applicabilityFor ?? allApplicable(),
     gateIrrelevanceFor: input.gateIrrelevanceFor ?? noGateIrrelevance(),
+    poolingFor: input.poolingFor ?? noPoolingModel(),
     steps,
     // Every variable starts at its INCOMING value: the previous scan's, which
     // this project does not have (M11-D3-C2) — except a variable only the
@@ -2218,6 +2596,7 @@ export function selectAcrossLists(input: NestedSelectionInput): TraversalResult 
     lineCooldownFor: input.lineCooldownFor ?? NO_LINE_COOLDOWN_HISTORY,
     applicabilityFor: input.applicabilityFor ?? allApplicable(),
     gateIrrelevanceFor: input.gateIrrelevanceFor ?? noGateIrrelevance(),
+    poolingFor: input.poolingFor ?? noPoolingModel(),
     steps,
     // Every variable starts at its INCOMING value: the previous scan's, which
     // this project does not have (M11-D3-C2) — except a variable only the
