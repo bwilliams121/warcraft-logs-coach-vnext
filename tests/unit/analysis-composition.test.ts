@@ -231,8 +231,8 @@ describe("ingestion is requested from the analyzer's declared requirement", () =
     // A different question from "what should THIS request retrieve". It
     // describes what the deployment supports, and the service is deliberately
     // not given it.
-    // Seven public analyzers since HEAL-AP, each deriving its requirement from its
-    // own capabilities (Augmentation and Restoration Shaman FULL_RAID, from their inputs).
+    // Nine public analyzers since HEAL-B1P, each deriving its requirement from its
+    // own capabilities (Augmentation and the three healers FULL_RAID, from their inputs).
     expect(ENABLED_ANALYZERS.map((analyzer) => analyzer.requirement)).toEqual([
       {
         analyzerId: "rogue-assassination-observed-decisions",
@@ -267,6 +267,16 @@ describe("ingestion is requested from the analyzer's declared requirement", () =
       },
       {
         analyzerId: "shaman-restoration-healer-findings",
+        requiredScope: "FULL_RAID",
+        includeResources: false,
+      }, // HEAL-B1P: Holy Paladin and Mistweaver Monk, FULL_RAID by their declared healer inputs, no resources.
+      {
+        analyzerId: "paladin-holy-healer-findings",
+        requiredScope: "FULL_RAID",
+        includeResources: false,
+      },
+      {
+        analyzerId: "monk-mistweaver-healer-findings",
         requiredScope: "FULL_RAID",
         includeResources: false,
       },

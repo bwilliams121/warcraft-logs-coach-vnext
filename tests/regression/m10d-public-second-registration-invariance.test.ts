@@ -182,18 +182,21 @@ function keysOf(value: unknown, into = new Set<string>()): Set<string> {
 }
 
 describe("the production catalog", () => {
-  it("is exactly the seven PUBLIC registrations (Blood since M11-B12, Brewmaster since M11-C4j, Augmentation since M13-F, Restoration Shaman since HEAL-AP) plus the three INTERNAL_ONLY HEAL-B1 healers, and both lookups answer alike for every public one", () => {
+  it("is exactly the nine PUBLIC registrations (Blood since M11-B12, Brewmaster since M11-C4j, Augmentation since M13-F, Restoration Shaman since HEAL-AP, Holy Paladin and Mistweaver Monk since HEAL-B1P) plus Restoration Druid INTERNAL_ONLY, and both lookups answer alike for every public one", () => {
     expect(ANALYZER_REGISTRATIONS).toHaveLength(10);
-    expect(ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "PUBLIC")).toHaveLength(7);
-    // HEAL-B1: three INTERNAL_ONLY healer rows, invisible to the public lookup.
+    expect(ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "PUBLIC")).toHaveLength(9);
+    // HEAL-B1: one INTERNAL_ONLY healer row since HEAL-B1P, invisible to the public lookup.
     const internal = ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "INTERNAL_ONLY");
-    expect(internal.map((row) => row.specId)).toEqual([
-      "paladin/holy",
-      "druid/restoration",
-      "monk/mistweaver",
-    ]);
+    expect(internal.map((row) => row.specId)).toEqual(["druid/restoration"]);
     for (const row of internal)
       expect(analyzerForSpec(row.specId, PRODUCTION_CATALOG), row.specId).toBeNull();
+    // The Holy Paladin and Mistweaver Monk rows were INTERNAL_ONLY in HEAL-B1; both lookups now find them.
+    for (const specId of ["paladin/holy", "monk/mistweaver"] as const) {
+      expect(analyzerForSpec(specId, PRODUCTION_CATALOG)?.exposure, specId).toBe("PUBLIC");
+      expect(internalAnalyzerForSpec(specId, PRODUCTION_CATALOG), specId).toBe(
+        analyzerForSpec(specId, PRODUCTION_CATALOG),
+      );
+    }
     // The Restoration Shaman row was INTERNAL_ONLY in HEAL-A; both lookups now find it.
     expect(analyzerForSpec("shaman/restoration", PRODUCTION_CATALOG)?.exposure).toBe("PUBLIC");
     expect(internalAnalyzerForSpec("shaman/restoration", PRODUCTION_CATALOG)).toBe(

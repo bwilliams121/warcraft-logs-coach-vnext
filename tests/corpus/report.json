@@ -728,7 +728,7 @@
         }
       ],
       "authority": null,
-      "caseId": "application-service.holy-paladin-registration-is-internal-only",
+      "caseId": "application-service.holy-paladin-registration-is-public-since-heal-b1p",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -742,7 +742,7 @@
         }
       ],
       "authority": null,
-      "caseId": "application-service.mistweaver-monk-registration-is-internal-only",
+      "caseId": "application-service.mistweaver-monk-registration-is-public-since-heal-b1p",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },

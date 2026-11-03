@@ -4,125 +4,128 @@ Rolling file: overwritten for each review cycle.
 
 ## Change
 
-HEAL-B1: Holy Paladin, Restoration Druid and Mistweaver Monk (internal).
-Branch `autopilot/heal-b1`, from main at 7abddea.
+HEAL-B1P: Holy Paladin and Mistweaver Monk public promotion (Restoration
+Druid stays INTERNAL_ONLY). Branch `autopilot/heal-b1p`, from main at 760f83f.
 
-- **Warcraft Logs: NONE.** No request, probe or capture. Real evidence is
-  committed only (the M13-A capture, the b1PmaKrd6CDfzngc fight 48 archive
-  window and its context, and the gtKb fight 22 corpus context). Runtime data
-  rows come from the already-pinned SimulationCraft `trait_data.inc`
-  (commit 33622e9d, sha256 7818328b…, the same file Restoration Shaman's data
-  cites).
-- **Public contract: NONE.** Nothing under `src/contracts/`, `src/api/` or
-  `src/mcp/` changes. The three ids are INTERNAL_ONLY; a public request for
-  any of them stays SPEC_NOT_SUPPORTED with no analyzer dispatched.
-- **Queue bookkeeping:** HEAL-AP is recorded MERGED (PR #46, 7abddea1…), and
-  HEAL-B1 is set PR_OPEN. The other merged tranches the supervisor listed were
-  already recorded MERGED with their pr and mergeSha.
+- **Warcraft Logs: NONE.** No request, probe or capture. The new archive
+  segments are cut OFFLINE from the retained, already-authorized M11-E2 raw
+  capture (`.probe/m11e2/pages.json`, b1PmaKrd6CDfzngc fight 48, whole fight,
+  no actor filter, COMPLETE), with the committed slicer, exactly as M12-D cut
+  the Restoration Shaman's. `agent/follow-ups.md` "After HEAL-B1" named this
+  route ("possibly cut from the retained, authorized M11-E2 raw capture (no new
+  request)").
+- **Public contract: EXPECTED, additive under `analysis/1`.** Precisely:
+  - `src/contracts/analysis-contract.ts` `PUBLIC_SPEC_IDS` (the `specId`
+    enum) gains `"paladin/holy"` and `"monk/mistweaver"`, appended after
+    `"shaman/restoration"`. No schema shape, field, vocabulary or version
+    changes. Both new ids produce exactly the HEAL-AP `healerFindings` shape
+    (never ANALYZED), with the HEAL-AP plan-disclosure / TLDR / report
+    behavior unchanged.
+  - The derived public prose changes because it is derived from the PUBLIC
+    set: the supported-specializations sentence now reads "…, Brewmaster Monk,
+    Holy Paladin, Mistweaver Monk, Protection Paladin, …", and the MCP tool
+    description gains each new registration's limits prose (same text as
+    Restoration Shaman's, with its own identified cooldowns). No file under
+    `src/api/` or `src/mcp/` is edited.
+  - A public Paladin/Holy or Monk/Mistweaver identity, previously
+    SPEC_NOT_SUPPORTED, now dispatches its own registration at FULL_RAID. A
+    raid-night cell for either is AUTHORITY_NOT_AVAILABLE or
+    INSUFFICIENT_EVIDENCE, with no healer findings and no plan (as Restoration
+    Shaman's). Druid/Restoration stays SPEC_NOT_SUPPORTED.
+- **Queue bookkeeping:** HEAL-B1 is recorded MERGED (PR #47, 760f83f7…);
+  HEAL-B1P is set PR_OPEN with its outcome. Every other merged tranche the
+  supervisor listed was already recorded MERGED with its pr and mergeSha.
+  Restoration Druid is appended to the ONB-EV evidence list, as onboarding
+  rule 4 directs.
 
-## Design: lift what is no specialization's, keep what is
+## The gate: unchanged bar, two more subjects
 
-Restoration Shaman's M12-D evaluator mixed spec-owned code (identity gate,
-healing-cooldown data, counting its totems) with code that is no
-specialization's: the CLAUDE.md "Healer Cooldown Assignments" plan rules, the
-observed-use and overlap facts, the artifact reader, the finding-set
-restatement. Three more healers would have copied the second kind three times
-(CLAUDE.md "Shared Finding Primitives"). It moved, **unchanged in behavior**:
+`tests/contracts/heal-ap-healer-promotion-gate.test.ts` runs every check per
+subject through the public service. It gained two pinned subjects and a
+per-subject `identified` list (its COMPLETENESS check had named Restoration
+Shaman's two ids literally). No check was relaxed. Both pass:
 
-| New shared module | From | Notes |
+| Subject (fight 48) | Real identified casts | Plan entries (MET / not met / after end / not identified) |
 | --- | --- | --- |
-| `src/healing/cooldown-use-context.ts` | Resto evaluator `castsOf`, unidentified casts, listing, pet set, `overlapOf` | facts only; ids and "count pets?" are caller inputs; passes `m12a-healing-layering` (no spec/judgement word, imports only engine + `./`) |
-| `src/findings/healer-assignment-execution.ts` | Resto evaluator `evaluatePlan` / `evaluateAssignment` | the plan rules; never imports `src/healing/`; the `m5c1` `"ASSIGNMENT_NOT_ACTIONABLE"` exception moved with it (still one issuing file, same reason) |
-| `src/findings/healer-finding-projection.ts` | Resto `healer-findings.ts` body | `healerFindingSetOf(spec, …)` |
-| `src/data/game/healing-cooldown-identity-artifact.ts` | Resto data loader | parameterized by dataset/class/spec; two added row checks (below) |
+| Holy Paladin, actor 1 | Avenging Wrath ×3, Aura Mastery ×2 (listing COMPLETE) | AM 7,480,000±2 s (cast 7,480,036) / AM 7,600,000±3 s / AW 7,790,000 / Holy Shock |
+| Mistweaver Monk, actor 9 | Invoke Yu'lon ×3, Restoral ×2 (listing COMPLETE) | Restoral 7,461,000±2 s (cast 7,461,179) / Yu'lon 7,600,000±3 s / Restoral 7,790,000 / Vivify |
 
-Proof of no behavior change: Restoration Shaman's evaluator, registration and
-public tests, the HEAL-AP healer promotion gate and the corpus all run
-unchanged. Its evaluator revision stays `/2` and re-exports the moved types
-under their old names.
+The cast times were read from the raw capture before the plan entries were
+written; the not-met entries sit where the subject made no cast of that id.
+Identity, missing-plan, completeness and negative-control checks are the
+same code for all three subjects. The rotational gates are unchanged and now
+exempt four authority-free rows (Augmentation and the three healers), each
+healer governed by this gate.
 
-The reader gained two checks, both satisfied by the Restoration Shaman
-artifact: the entry's node type must equal the row's `node_type`; and the
-cast id is the row's `id_override_spell` when non-zero
-(`trait_data.hpp`: "id_spell is overriden by id_override_spell for
-display/activation in-game"), else `id_spell`. A CHOICE node may have no
-identified sibling; a NORMAL node never has one.
+**Restoration Druid cannot pass**: no committed or retained capture holds one
+of its events (identity only, gtKb fight 22 actor 2). It stays INTERNAL_ONLY
+(onboarding rule 4); the inventory records the reason; ONB-EV carries the gap.
 
-## The three specialization trees
+## Evidence (ordinary archive growth, 403,697 bytes)
 
-Each of `src/specs/paladin/holy/`, `src/specs/druid/restoration/`,
-`src/specs/monk/mistweaver/` owns `spec.ts` (identity strings, REQUIRED_INPUTS
-FULL_RAID), `evaluator.ts` (identity gate → its data → shared facts and plan
-rules), `registration.ts` (HEAL-A's shape: three provider-less families from
-REQUIRED_INPUTS, no binding, never ANALYZED; AUTHORITY_NOT_AVAILABLE /
-INSUFFICIENT_EVIDENCE; no healer view; empty public prose) and a README with
-its supported surface. The M12-D verdict-category limits apply unchanged:
-ASSIGNMENT only against a supplied plan (MET / NOT_ACTIONABLE after a completed
-encounter / UNKNOWN; MISSED, EARLY, LATE unreachable), COOLDOWN observational,
-HEALING_DECISION NO_AUTHORITY_AVAILABLE.
+Four compact segments in `tests/evidence/artifacts/wcl-events/`:
+`wcl-b1pm-fight-48-holy-paladin-1-casts.seg-{0-180,180-345}` (315 + 289
+events) and `wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-{0-180,180-345}`
+(282 + 276), each every `cast`/`begincast` sourced by or targeting its actor
+in its range (`sanitize-probe.mjs --actor-slice <a> <to> --from <from>
+--families cast,begincast --compact`, revision 8). Each grants CASTS for its
+own actor over its own range only; pets get nothing. Manifest records are
+generated by `scripts/corpus/build-manifest.mjs` (a HEAL-B1P block modelled on
+M12-D's), with four normalization census cases. `m11c4e-evidence-archive`
+pins the bytes as a named ordinary-growth group; the archive minus the two
+owner exceptions stays under the 4 MiB notice line; the regression corpus
+bytes are untouched.
 
-Runtime data (`src/data/game/<class>-<spec>-healing-cooldowns.{json,ts}`,
-spec-owned under R3), each entry a verbatim spec-tree row, extracted by a
-script from the pinned file, selection hand reviewed and noted per entry:
+## Code
 
-- Holy Paladin (2/65): Aura Mastery 31821; Avenging Wrath 31884 | Avenging
-  Crusader 216331 (talent spell 394088, override 216331).
-- Restoration Druid (11/105): Tranquility 740; Flourish 197721; Incarnation:
-  Tree of Life 33891 | Convoke the Spirits 391528 (the spec-105 row only).
-- Mistweaver Monk (10/270): Revival 115310 | Restoral 388615; Invoke Yu'lon
-  322118 | Invoke Chi-Ji 325197.
+- **Five-site promotion** for both ids: `src/findings/spec-id.ts` partition
+  (internal-only = `druid/restoration` alone), the contract enum,
+  `src/services/spec-identity.ts`, `satisfies PublicSpecId` in each
+  `spec.ts`, and `exposure: "PUBLIC"` in each registration, which also gains
+  `healerView` and `limitsProse`. Evaluators, data and revisions unchanged.
+- **Shared healer view** `src/findings/healer-view-projection.ts`
+  (`healerViewOfEvaluation`): Restoration Shaman's HEAL-AP view builder moved
+  verbatim, its input declared structurally so `src/findings/` still never
+  imports `src/healing/`. Restoration Shaman's `healer-view.ts` delegates to
+  it. Proof of no behavior change: Restoration Shaman's public projection
+  tests and gate subject pass unchanged.
+- A HEAL-B1 copy slip fixed: the Mistweaver and Restoration Druid registration
+  headers said "THIS IS WHERE HOLY PALADIN STATES WHAT IT IS".
 
-Externals (Blessing of Sacrifice, Ironbark, Life Cocoon), Tyr's Deliverance,
-hero and class-tree spells are deliberately not identified; a plan entry for
-one is `ABILITY_NOT_REGISTERED` (follow-ups "After HEAL-B1").
+## Test ripple
 
-## Registration ripple
-
-Ids appended to `SPEC_IDS` and `INTERNAL_ONLY_SPEC_IDS`; three rows appended
-to `ANALYZER_REGISTRATIONS` (ten rows; seven PUBLIC). Test pins updated to the
-new catalog: partition, registry, catalog and module snapshots, counted-catalog
-call maps, roster count (30 unregistered), isolation trees, authority-free
-trees, healing consumers, identity evidence (fight 48 actor 1; gtKb fight 22
-actors 2 and 17), corpus layers `SPEC_HOLY_PALADIN`, `SPEC_RESTORATION_DRUID`,
-`SPEC_MISTWEAVER_MONK` (one kind, one executor, two cases each: unstated
-subject → INSUFFICIENT_EVIDENCE; internal-only reachability). Corpus: 193
-cases / 788 assertions; `report.json` rewritten by the gate.
-
-## Real evidence (committed; checked against raw bytes)
-
-- M13-A Holy Paladin (actor 5): Avenging Wrath at 184,987 and Aura Mastery at
-  272,367, its only casts of identified ids; filtered capture → listing UNKNOWN
-  (INSUFFICIENT_COVERAGE); breadth → ROSTER_NOT_IN_SCOPE overlap.
-- Fight 48 Holy Paladin (actor 1) and Mistweaver (actor 9), friendly-players
-  window with none of their casts: no use, listing UNKNOWN, never "none used";
-  Mistweaver sources = 9 plus its four stated pets.
-- The same stated Holy Paladin run as Druid or Mistweaver: IDENTITY_REFUSED.
-
-## Negative cases pinned (per specialization)
-
-Wrong spec/class, unlisted actor, other-class actor, pet, other fight →
-IDENTITY_REFUSED. No plan → NO_AUTHORITY_AVAILABLE even when the player and
-another healer cast the cooldown. Begincast, aura, another player's cast, the
-pet's own cast, an unidentified class spell and Spirit Link Totem are never
-uses. CASTS gap → listing UNKNOWN. No cast in a covered window → UNKNOWN
-READINESS_NOT_ESTABLISHED, never missed. Another healer's cooldown in a plan →
-ABILITY_NOT_REGISTERED. PLAYER_CONTEXT → ROSTER_NOT_IN_SCOPE.
+Pins moved from seven to nine public rows (partition, five sites, registry,
+discovery and module snapshots, requirement lists, contract enum, identity
+table, sentence, limits count, catalogs hand-listed in tests now carry the two
+public rows plus a demotion variant each). Tests that used Paladin/Holy or
+Monk/Mistweaver as the "unsupported" example now use Priest/Holy or
+Druid/Restoration, and positively assert the new resolution. The gtKb mixed
+raid night's Mistweaver now reaches only its own analyzer (cell
+INSUFFICIENT_EVIDENCE: the opener core states no specialization). Corpus:
+both `SPEC_*` executors now require the public lookup to find the same row,
+and the two reachability cases are re-pinned PUBLIC
+(`application-service.<spec>-registration-is-public-since-heal-b1p`), as
+HEAL-AP did for Restoration Shaman.
 
 ## Validation
 
-- `npm run typecheck`: clean. `npm run format:check`: clean.
-- `npm test` (node + workers), full run: 12,481 passed; the failures were
-  two missed pins (fixed and rerun green) and 5 s timeouts in unrelated heavy
-  suites at 97% CPU. Rerun at two workers, all passed except
-  `m8g-encounter-context-composition` "byte-identical across…", which times
-  out identically (6.2 s) on an origin/main worktree on this machine: not a
-  regression.
-- `npm run test:evidence`: PASSED.
-- `npm run test:corpus -- --write-report`: PASSED (two byte-identical workerd
-  runs, 193 cases, 788 assertions).
+- `npm run typecheck`: clean. Prettier check over every changed and new file: clean.
+- `npm test` full run (node + workers): 12,503 passed, 21 failed, every
+  failure a 5 s timeout or a load-sensitive suite (Protection projection,
+  m7f raid night, simulation runner, m9b corpus, m11g2, m10c5b). Rerun of
+  those files at two workers: 343 passed, 0 failed.
+  `m8g-encounter-context-composition` "byte-identical across…" times out
+  alone too, and identically on the main baseline (stashed tree) on this
+  machine: not a regression.
+- `tests/contracts/heal-ap-healer-promotion-gate.test.ts`: 19 passed (three
+  subjects × six checks + coverage).
+- `npm run test:evidence`: PASSED (20 cases, 54 assertions; report rewritten).
+- `npm run test:corpus -- --write-report` then `npm run test:corpus`: PASSED
+  (two byte-identical workerd runs, 193 cases, 788 assertions).
 
-## Not established (follow-ups "After HEAL-B1")
+## Not established (follow-ups "After HEAL-B1P")
 
-None of the three can pass the healer promotion gate on committed evidence
-(HEAL-B1P needs whole-fight cast captures); six of ten identified ids are
-row-only; selections are narrow; four registrations restate one facade.
+Restoration Druid unpromoted (no evidence); real healing context never
+COMPLETE (cast-only subjects); pseudonyms re-labelled for the public plan;
+Avenging Crusader, Revival and Invoke Chi-Ji still row-only; registration
+facades still copied.

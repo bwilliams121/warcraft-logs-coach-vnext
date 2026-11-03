@@ -73,9 +73,9 @@ const EVERY_ANALYZER = [
   "deathknight-blood-observed-decisions",
   BREWMASTER_MONK_ANALYZER_ID,
   "evoker-augmentation-support-observations",
-  // HEAL-A: INTERNAL_ONLY, so never dispatched by a public transport.
+  // HEAL-A; PUBLIC since HEAL-AP.
   "shaman-restoration-healer-findings",
-  // HEAL-B1: INTERNAL_ONLY, so never dispatched by a public transport.
+  // HEAL-B1: Holy Paladin and Mistweaver Monk PUBLIC since HEAL-B1P; Restoration Druid INTERNAL_ONLY.
   "paladin-holy-healer-findings",
   "druid-restoration-healer-findings",
   "monk-mistweaver-healer-findings",
@@ -340,8 +340,28 @@ describe("REST: a real Brewmaster Monk identity resolves publicly", () => {
     });
   });
 
-  it("another Monk specialization is still SPEC_NOT_SUPPORTED: promotion named Brewmaster and nothing else", async () => {
-    for (const specName of ["Mistweaver", "Windwalker"]) {
+  it("another Monk specialization never reaches Brewmaster: Windwalker is SPEC_NOT_SUPPORTED, Mistweaver only its own analyzer", async () => {
+    // HEAL-B1P: a stated Mistweaver dispatches its own healer row, once, and
+    // never Brewmaster's. The subject's identity is not established as a
+    // Mistweaver by this evidence, so nothing is evaluated and nothing is
+    // ANALYZED.
+    const mistweaver = localRunner(await fightOf(SUBJECT_1), {
+      sourceId: SUBJECT_1.actor,
+      className: "Monk",
+      specName: "Mistweaver",
+    });
+    const asMistweaver = await restResult(mistweaver.ids, mistweaver.analyze);
+    expect(asMistweaver.status).toBe(200);
+    for (const [analyzerId, count] of Object.entries(mistweaver.calls)) {
+      expect(count, analyzerId).toBe(analyzerId === "monk-mistweaver-healer-findings" ? 1 : 0);
+    }
+    expect(asMistweaver.body).toMatchObject({
+      status: "INSUFFICIENT_EVIDENCE",
+      specialization: { specId: "monk/mistweaver" },
+      healerFindings: { assessment: "NOT_ASSESSED" },
+    });
+
+    for (const specName of ["Windwalker"]) {
       const runner = localRunner(await fightOf(SUBJECT_1), {
         sourceId: SUBJECT_1.actor,
         className: "Monk",

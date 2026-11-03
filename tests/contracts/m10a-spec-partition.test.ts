@@ -45,7 +45,7 @@ describe("the known specialization ids are exactly partitioned", () => {
     for (const id of PUBLIC_SPEC_IDS) expect(INTERNAL_ONLY_SPEC_IDS as readonly string[]).not.toContain(id);
   });
 
-  it("Assassination, both Paladins, Blood Death Knight, Brewmaster Monk, Augmentation Evoker and Restoration Shaman are public", () => {
+  it("Assassination, Protection and Retribution Paladin, Blood Death Knight, Brewmaster Monk, Augmentation Evoker, Restoration Shaman, Holy Paladin and Mistweaver Monk are public", () => {
     expect(PUBLIC_SPEC_IDS).toEqual([
       "rogue/assassination",
       "paladin/protection",
@@ -54,7 +54,11 @@ describe("the known specialization ids are exactly partitioned", () => {
       "monk/brewmaster",
       "evoker/augmentation",
       "shaman/restoration",
+      "paladin/holy",
+      "monk/mistweaver",
     ]);
+    expect(isPublicSpecId("paladin/holy")).toBe(true);
+    expect(isPublicSpecId("monk/mistweaver")).toBe(true);
     expect(isPublicSpecId("shaman/restoration")).toBe(true);
     expect(isPublicSpecId("evoker/augmentation")).toBe(true);
     expect(isPublicSpecId("monk/brewmaster")).toBe(true);
@@ -68,7 +72,7 @@ describe("the known specialization ids are exactly partitioned", () => {
     expect(isSpecId("deathknight/blood")).toBe(true);
   });
 
-  it("the internal-only set holds the three HEAL-B1 healers", () => {
+  it("the internal-only set holds Restoration Druid, the one HEAL-B1 healer HEAL-B1P did not promote", () => {
     // Deliberate and pinned. The set was empty from M10-D to M11-A3, held
     // Retribution Paladin from M11-A4, was empty again from M11-A5, held the
     // Blood Death Knight measurement slice from M11-B2, was empty again from
@@ -77,9 +81,11 @@ describe("the known specialization ids are exactly partitioned", () => {
     // registration with no decision authority), was empty again from M13-F,
     // which published its support observations, held Restoration Shaman (the
     // first healer registration) in HEAL-A, was empty again from HEAL-AP,
-    // which published its healer findings, and holds Holy Paladin, Restoration
-    // Druid and Mistweaver Monk since HEAL-B1.
-    expect(INTERNAL_ONLY_SPEC_IDS).toEqual(["paladin/holy", "druid/restoration", "monk/mistweaver"]);
+    // which published its healer findings, held Holy Paladin, Restoration
+    // Druid and Mistweaver Monk from HEAL-B1, and holds Restoration Druid alone
+    // since HEAL-B1P, which promoted the other two (no retained evidence holds
+    // a Restoration Druid event, so it cannot meet the healer gate).
+    expect(INTERNAL_ONLY_SPEC_IDS).toEqual(["druid/restoration"]);
     for (const id of INTERNAL_ONLY_SPEC_IDS) {
       expect(isSpecId(id), id).toBe(true);
       expect(isPublicSpecId(id), id).toBe(false);
@@ -87,6 +93,8 @@ describe("the known specialization ids are exactly partitioned", () => {
     }
     expect(isSpecId("shaman/restoration")).toBe(true);
     expect(requirePublicSpecId("shaman/restoration")).toBe("shaman/restoration");
+    expect(requirePublicSpecId("paladin/holy")).toBe("paladin/holy");
+    expect(requirePublicSpecId("monk/mistweaver")).toBe("monk/mistweaver");
     expect(isSpecId("evoker/augmentation")).toBe(true);
     expect(requirePublicSpecId("evoker/augmentation")).toBe("evoker/augmentation");
     // The narrowing boundary still refuses a name that is no specialization at all.

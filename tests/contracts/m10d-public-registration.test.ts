@@ -54,7 +54,7 @@ function defectsOf(rows: readonly AnalyzerRegistration[]): readonly string[] {
 }
 
 describe("the five sites agree", () => {
-  it("public partition: the seven public ids since HEAL-AP; internal-only: the three HEAL-B1 healers (Augmentation Evoker held it in M13-E, Restoration Shaman in HEAL-A)", () => {
+  it("public partition: the nine public ids since HEAL-B1P; internal-only: Restoration Druid (Augmentation Evoker held it in M13-E, Restoration Shaman in HEAL-A, Holy Paladin and Mistweaver Monk in HEAL-B1)", () => {
     expect([...PUBLIC_SPEC_IDS]).toEqual([
       "rogue/assassination",
       "paladin/protection",
@@ -63,8 +63,10 @@ describe("the five sites agree", () => {
       "monk/brewmaster",
       "evoker/augmentation",
       "shaman/restoration",
+      "paladin/holy",
+      "monk/mistweaver",
     ]);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["paladin/holy", "druid/restoration", "monk/mistweaver"]);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration"]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
 
@@ -81,6 +83,8 @@ describe("the five sites agree", () => {
       ["monk/brewmaster", "monk/brewmaster"],
       ["evoker/augmentation", "evoker/augmentation"],
       ["shaman/restoration", "shaman/restoration"],
+      ["paladin/holy", "paladin/holy"],
+      ["monk/mistweaver", "monk/mistweaver"],
     ]);
   });
 
@@ -89,7 +93,7 @@ describe("the five sites agree", () => {
     expect(PUBLIC_SPEC_IDS as readonly string[]).toContain(PROTECTION_PALADIN_SPEC_ID);
   });
 
-  it("the registration is PUBLIC and the catalog carries exactly seven enabled analyzers", () => {
+  it("the registration is PUBLIC and the catalog carries exactly nine enabled analyzers", () => {
     expect(PROTECTION_PALADIN_REGISTRATION.exposure).toBe("PUBLIC");
     expect(ASSASSINATION_REGISTRATION.exposure).toBe("PUBLIC");
     // M11-A4 put a third, INTERNAL_ONLY row in the catalog, NOT among the
@@ -108,7 +112,11 @@ describe("the five sites agree", () => {
     // the decision-evidence gates do not apply to it. HEAL-A put a seventh,
     // INTERNAL_ONLY row in — Restoration Shaman, the first healer — NOT among
     // the enabled analyzers, and HEAL-AP made it PUBLIC by the same move with
-    // its healer view, after the healer promotion gate passed.
+    // its healer view, after the healer promotion gate passed. HEAL-B1 put
+    // three INTERNAL_ONLY healer rows in, and HEAL-B1P made Holy Paladin and
+    // Mistweaver Monk PUBLIC by the same move, each after the healer gate
+    // passed on its own real subject; Restoration Druid has no retained
+    // evidence and stays INTERNAL_ONLY.
     expect(ANALYZER_REGISTRATIONS.map((row) => [row.specId, row.exposure])).toEqual([
       ["rogue/assassination", "PUBLIC"],
       ["paladin/protection", "PUBLIC"],
@@ -117,10 +125,10 @@ describe("the five sites agree", () => {
       ["monk/brewmaster", "PUBLIC"],
       ["evoker/augmentation", "PUBLIC"],
       ["shaman/restoration", "PUBLIC"],
-      // HEAL-B1: three INTERNAL_ONLY healer rows, NOT among the enabled analyzers.
-      ["paladin/holy", "INTERNAL_ONLY"],
+      // HEAL-B1 healer rows: two PUBLIC since HEAL-B1P; Restoration Druid NOT among the enabled analyzers.
+      ["paladin/holy", "PUBLIC"],
       ["druid/restoration", "INTERNAL_ONLY"],
-      ["monk/mistweaver", "INTERNAL_ONLY"],
+      ["monk/mistweaver", "PUBLIC"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -130,6 +138,8 @@ describe("the five sites agree", () => {
       "monk-brewmaster-observed-decisions",
       "evoker-augmentation-support-observations",
       "shaman-restoration-healer-findings",
+      "paladin-holy-healer-findings",
+      "monk-mistweaver-healer-findings",
     ]);
     expect(ENABLED_ANALYSIS_REQUIREMENTS.map((requirement) => requirement.analyzerId)).toEqual(
       ENABLED_ANALYZERS.map((row) => row.analyzerId),

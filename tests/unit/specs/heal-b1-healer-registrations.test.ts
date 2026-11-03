@@ -1,10 +1,14 @@
 /**
  * HEAL-B1: the Holy Paladin, Restoration Druid and Mistweaver Monk
- * registrations, INTERNAL_ONLY.
+ * registrations, INTERNAL_ONLY; Holy Paladin and Mistweaver Monk PUBLIC since
+ * HEAL-B1P.
  *
  * What is pinned per registration:
- * - it is the listed INTERNAL_ONLY row; the public lookup, the public
- *   identity table and a public request never reach it;
+ * - Restoration Druid is the listed INTERNAL_ONLY row; the public lookup, the
+ *   public identity table and a public request never reach it. Holy Paladin
+ *   and Mistweaver Monk are listed PUBLIC rows: both lookups find the same
+ *   row, the identity table resolves them, a public request dispatches them
+ *   once, and they carry public prose and a healer view;
  * - it declares the three provider-less healer families from its own
  *   REQUIRED_INPUTS, binds nothing, derives FULL_RAID, and is never ANALYZED;
  * - a subject with no stated specialization is INSUFFICIENT_EVIDENCE, never
@@ -88,6 +92,8 @@ interface Case {
   readonly className: string;
   readonly specName: string;
   readonly required: { readonly scope: string; readonly categories: readonly string[] };
+  /** HEAL-B1P promoted the two healers that passed the healer promotion gate. */
+  readonly exposure: "PUBLIC" | "INTERNAL_ONLY";
 }
 
 const CASES: readonly Case[] = [
@@ -99,6 +105,7 @@ const CASES: readonly Case[] = [
     className: "Paladin",
     specName: "Holy",
     required: HOLY_PALADIN_REQUIRED_INPUTS,
+    exposure: "PUBLIC",
   },
   {
     label: "Restoration Druid",
@@ -108,6 +115,7 @@ const CASES: readonly Case[] = [
     className: "Druid",
     specName: "Restoration",
     required: RESTORATION_DRUID_REQUIRED_INPUTS,
+    exposure: "INTERNAL_ONLY",
   },
   {
     label: "Mistweaver Monk",
@@ -117,6 +125,7 @@ const CASES: readonly Case[] = [
     className: "Monk",
     specName: "Mistweaver",
     required: MISTWEAVER_MONK_REQUIRED_INPUTS,
+    exposure: "PUBLIC",
   },
 ];
 
@@ -153,17 +162,28 @@ function setOf(analysis: HealerAnalysis): HealerFindingSet {
 }
 
 describe.each(CASES)("the $label registration row", (testCase) => {
-  it("is the listed INTERNAL_ONLY row: the public lookup and the public identity table never reach it", () => {
+  it("is the listed row with its exposure: only a PUBLIC row is reached by the public lookup and identity table", () => {
     const registration = registrationOf(testCase.specId);
     expect(ANALYZER_REGISTRATIONS.filter((row) => row === testCase.registration)).toHaveLength(1);
     expect(registration.analyzerId).toBe(testCase.analyzerId);
-    expect(registration.exposure).toBe("INTERNAL_ONLY");
-    expect(analyzerForSpec(testCase.specId, PRODUCTION_CATALOG)).toBeNull();
-    expect(resolveSpecIdentity({ className: testCase.className, specName: testCase.specName }).ok).toBe(
-      false,
+    expect(registration.exposure).toBe(testCase.exposure);
+    const resolved = resolveSpecIdentity({ className: testCase.className, specName: testCase.specName });
+    if (testCase.exposure === "INTERNAL_ONLY") {
+      expect(analyzerForSpec(testCase.specId, PRODUCTION_CATALOG)).toBeNull();
+      expect(resolved.ok).toBe(false);
+      expect(registration.publicLimits).toEqual({ analysis: "", raidNight: "" });
+      expect(registration.healerView).toBeUndefined();
+      return;
+    }
+    expect(analyzerForSpec(testCase.specId, PRODUCTION_CATALOG)).toBe(registration);
+    expect(resolved).toEqual({ ok: true, specId: testCase.specId });
+    expect(registration.publicLimits.analysis).toContain(
+      `${testCase.label} analysis reports HEALER FINDINGS ONLY`,
     );
-    expect(registration.publicLimits).toEqual({ analysis: "", raidNight: "" });
-    expect(registration.healerView).toBeUndefined();
+    expect(registration.publicLimits.raidNight).toContain(
+      `${testCase.label} cells evaluate no gameplay decision`,
+    );
+    expect(registration.healerView).toBeTypeOf("function");
   });
 
   it("declares the three provider-less healer families from REQUIRED_INPUTS, binds nothing, and derives FULL_RAID", () => {
@@ -216,7 +236,7 @@ describe.each(CASES)("the $label registration row", (testCase) => {
     });
   });
 
-  it("a public request for this specialization is SPEC_NOT_SUPPORTED and dispatches no analyzer", async () => {
+  it("a public request dispatches the row exactly once when PUBLIC, and is SPEC_NOT_SUPPORTED with no dispatch when INTERNAL_ONLY", async () => {
     const fight = m5d2Fight();
     const identity: FightIdentity = {
       report: { code: fight.report.code, revision: fight.report.revision, startTime: 0, endTime: 1 },
@@ -245,9 +265,19 @@ describe.each(CASES)("the $label registration row", (testCase) => {
     });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.analysis.analysis.status).toBe("SPEC_NOT_SUPPORTED");
-    expect(result.analysis.specId).toBeNull();
-    for (const [analyzerId, calls] of Object.entries(counted.calls)) expect(calls, analyzerId).toBe(0);
+    if (testCase.exposure === "INTERNAL_ONLY") {
+      expect(result.analysis.analysis.status).toBe("SPEC_NOT_SUPPORTED");
+      expect(result.analysis.specId).toBeNull();
+      for (const [analyzerId, calls] of Object.entries(counted.calls)) expect(calls, analyzerId).toBe(0);
+      return;
+    }
+    // The fixture states no specialization for the subject: the dispatched row
+    // refuses to assume one, never a SPEC_NOT_SUPPORTED and never ANALYZED.
+    expect(result.analysis.analysis.status).toBe("INSUFFICIENT_EVIDENCE");
+    expect(result.analysis.specId).toBe(testCase.specId);
+    for (const [analyzerId, calls] of Object.entries(counted.calls)) {
+      expect(calls, analyzerId).toBe(analyzerId === testCase.analyzerId ? 1 : 0);
+    }
   });
 });
 

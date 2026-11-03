@@ -231,13 +231,14 @@ describe("analyzeFight", () => {
     }
   });
 
-  it("enables_exactly_the_seven_public_analyzers", () => {
+  it("enables_exactly_the_nine_public_analyzers", () => {
     // Superseded `milestone_2_enables_no_analyzers`, in M10-D
     // `enables_exactly_the_assassination_analyzer`, in M11-A5
     // `enables_exactly_the_two_public_analyzers`, in M11-B12
     // `enables_exactly_the_three_public_analyzers` and in M11-C4j
     // `enables_exactly_the_four_public_analyzers`, and in M13-F
-    // `enables_exactly_the_five_public_analyzers`. Pinned exactly, because
+    // `enables_exactly_the_five_public_analyzers`, and in HEAL-B1P
+    // `enables_exactly_the_seven_public_analyzers`. Pinned exactly, because
     // this list is build capability metadata and a silent addition would
     // misstate what the deployment supports.
     expect(ENABLED_ANALYSIS_REQUIREMENTS).toEqual([
@@ -274,6 +275,16 @@ describe("analyzeFight", () => {
       },
       {
         analyzerId: "shaman-restoration-healer-findings",
+        requiredScope: "FULL_RAID",
+        includeResources: false,
+      }, // HEAL-B1P: Holy Paladin and Mistweaver Monk, FULL_RAID by their declared healer inputs, no resources.
+      {
+        analyzerId: "paladin-holy-healer-findings",
+        requiredScope: "FULL_RAID",
+        includeResources: false,
+      },
+      {
+        analyzerId: "monk-mistweaver-healer-findings",
         requiredScope: "FULL_RAID",
         includeResources: false,
       },

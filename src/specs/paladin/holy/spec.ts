@@ -1,18 +1,22 @@
 /**
  * Holy Paladin's identity and declared inputs (HEAL-B1, registered
- * INTERNAL_ONLY).
+ * INTERNAL_ONLY; PUBLIC since HEAL-B1P).
  *
  * The Warcraft Logs class and specialization strings are the ones the
  * committed fight context records for the identity subject (b1PmaKrd6CDfzngc
  * fight 48, actor 1: `subType` "Paladin", `friendlySpecs` "Holy").
  */
 
-import type { InternalOnlySpecId } from "../../../findings/spec-id.js";
+import type { PublicSpecId } from "../../../findings/spec-id.js";
 
 export const HOLY_PALADIN_EVALUATOR_REVISION = "holy-paladin-evaluator/1" as const;
 
-/** The id. `InternalOnlySpecId`: the compile-time side of the exposure. */
-export const HOLY_PALADIN_SPEC_ID = "paladin/holy" satisfies InternalOnlySpecId;
+/**
+ * The id. `PublicSpecId` since HEAL-B1P (it was `InternalOnlySpecId` in
+ * HEAL-B1): the compile-time side of the exposure, one of the five promotion
+ * sites.
+ */
+export const HOLY_PALADIN_SPEC_ID = "paladin/holy" satisfies PublicSpecId;
 
 export const HOLY_PALADIN_ANALYZER_ID = "paladin-holy-healer-findings";
 

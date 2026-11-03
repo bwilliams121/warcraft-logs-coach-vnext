@@ -149,6 +149,20 @@ const M12D_EVIDENCE: Readonly<Record<string, number>> = {
 };
 const M12D_BYTES = Object.values(M12D_EVIDENCE).reduce((sum, bytes) => sum + bytes, 0);
 /**
+ * HEAL-B1P: the canonical Holy Paladin's (actor 1) and Mistweaver Monk's
+ * (actor 9) casts and begincasts over the whole fight, two compact segments
+ * each of the M11-E2 capture, cut exactly as M12-D's, for the healer
+ * promotion gate. Ordinary archive growth (403,697 bytes), named and pinned
+ * like M12-D.
+ */
+const HEALB1P_EVIDENCE: Readonly<Record<string, number>> = {
+  "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-0-180": 114638,
+  "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-180-345": 103702,
+  "wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-0-180": 95593,
+  "wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-180-345": 89764,
+};
+const HEALB1P_BYTES = Object.values(HEALB1P_EVIDENCE).reduce((sum, bytes) => sum + bytes, 0);
+/**
  * M13-A: the one bounded Augmentation Evoker capture (owner grant
  * 2026-11-01): the sanitized fight context and the two merged segments of its
  * three server-filtered streams, which grant nothing. Ordinary archive growth
@@ -217,6 +231,12 @@ describe("the committed evidence archive", () => {
     expect(loaded.archive.artifacts.map((entry) => entry.record.artifactId)).toEqual([
       // M12-B: the friendly-players raid damage segments (code-point order puts them first).
       ...Object.keys(M12B_EVIDENCE),
+      // HEAL-B1P: the Holy Paladin's cast segments (code-point order: "h" < "m" < "r").
+      "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-0-180",
+      "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-180-345",
+      // HEAL-B1P: the Mistweaver Monk's cast segments.
+      "wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-0-180",
+      "wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-180-345",
       // M12-D: the Restoration Shaman's cast segments.
       ...Object.keys(M12D_EVIDENCE),
       // M11-E2.1: the canonical Blood Death Knight owned-pet segments, code-point order.
@@ -245,8 +265,8 @@ describe("the committed evidence archive", () => {
       ...Object.keys(M13D_EVIDENCE),
     ]);
     // M12-B added one normalization census per raid damage segment, M12-D one per cast
-    // segment, M13-A one per merged support segment.
-    expect(loaded.archive.cases).toHaveLength(16);
+    // segment, M13-A one per merged support segment, HEAL-B1P one per cast segment.
+    expect(loaded.archive.cases).toHaveLength(20);
     // Accounting is per root: the archive counts its own bytes only.
     expect(loaded.archive.totalArtifactBytes).toBe(
       308961 +
@@ -258,6 +278,7 @@ describe("the committed evidence archive", () => {
         M11G4_BYTES +
         M12B_BYTES +
         M12D_BYTES +
+        HEALB1P_BYTES +
         M13A_BYTES +
         M13D_BYTES,
     );
@@ -268,6 +289,7 @@ describe("the committed evidence archive", () => {
       ...M11G4_EVIDENCE,
       ...M12B_EVIDENCE,
       ...M12D_EVIDENCE,
+      ...HEALB1P_EVIDENCE,
       ...M13A_EVIDENCE,
       ...M13D_EVIDENCE,
     })) {
@@ -302,7 +324,9 @@ describe("the committed evidence archive", () => {
     // ordinary raid damage evidence: 18,038,979. M12-D adds 119,216 bytes of
     // ordinary Restoration Shaman cast evidence: 18,158,195. M13-A adds 504,031
     // bytes of ordinary Augmentation Evoker evidence: 18,662,226. M13-D adds
-    // 62,316 bytes of ordinary certification tables: 18,724,542.
+    // 62,316 bytes of ordinary certification tables: 18,724,542. HEAL-B1P adds
+    // 403,697 bytes of ordinary Holy Paladin and Mistweaver Monk cast evidence:
+    // 19,128,239.
     expect(M11G1_BYTES).toBe(364631);
     expect(M11G2_BYTES).toBe(12162150);
     expect(M11G4_BYTES).toBe(206);
@@ -310,10 +334,19 @@ describe("the committed evidence archive", () => {
     expect(M12D_BYTES).toBe(119216);
     expect(M13A_BYTES).toBe(504031);
     expect(M13D_BYTES).toBe(62316);
+    expect(HEALB1P_BYTES).toBe(403697);
     expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(
-      4537019 + M11G1_BYTES + M11G2_BYTES + M11G4_BYTES + M12B_BYTES + M12D_BYTES + M13A_BYTES + M13D_BYTES,
+      4537019 +
+        M11G1_BYTES +
+        M11G2_BYTES +
+        M11G4_BYTES +
+        M12B_BYTES +
+        M12D_BYTES +
+        HEALB1P_BYTES +
+        M13A_BYTES +
+        M13D_BYTES,
     );
-    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(18724542);
+    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(19128239);
     expect(loaded.archive.totalArtifactBytes + frameBytes).toBeGreaterThan(EVIDENCE_ARCHIVE_NOTICE_BYTES);
     // The regression corpus's own ceiling is untouched by the archive.
     expect(MAX_CORPUS_BYTES).toBe(6 * 1024 * 1024);

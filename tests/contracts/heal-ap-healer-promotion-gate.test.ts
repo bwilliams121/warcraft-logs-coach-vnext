@@ -44,7 +44,10 @@
  *                  NO_AUTHORITY_AVAILABLE; quality flags pinned false.
  *
  * A healer that cannot pass stays INTERNAL_ONLY. Followers meet this gate;
- * none meets a weakened one.
+ * none meets a weakened one. HEAL-B1P added Holy Paladin and Mistweaver Monk,
+ * each on its own whole-fight casts in the same canonical fight, driven by the
+ * same checks; Restoration Druid has no retained evidence and stays
+ * INTERNAL_ONLY.
  */
 
 import { beforeAll, describe, expect, it } from "vitest";
@@ -59,13 +62,23 @@ import type { CombatFight } from "../../src/engine/normalization/combat-fight.js
 import { PRODUCTION_CATALOG } from "../../src/services/analyzer-registry.js";
 import {
   ASCENDANCE,
+  AURA_MASTERY,
+  AVENGING_WRATH,
   CHAIN_HEAL,
+  HOLY_PALADIN_SUBJECT_ACTOR,
+  HOLY_SHOCK,
+  INVOKE_YULON,
+  loadHolyPaladinSubject,
+  loadMistweaverSubject,
   loadRestorationSubject,
+  MISTWEAVER_SUBJECT_ACTOR,
   requestPlan,
+  RESTORAL,
   RESTORATION_SUBJECT_ACTOR,
   restorationIdentityFor,
   restorationRunner,
   SPIRIT_LINK_TOTEM,
+  VIVIFY,
   type RestorationSubject,
 } from "../support/heal-ap-restoration-subject.js";
 
@@ -81,6 +94,8 @@ interface HealerGateSubject {
   readonly className: string;
   readonly specName: string;
   readonly actorId: number;
+  /** The identified healing cooldowns the subject's plan entries name. */
+  readonly identified: readonly number[];
   readonly load: () => Promise<{
     readonly fight: CombatFight;
     readonly rostered: CombatFight;
@@ -97,6 +112,7 @@ const HEALER_GATE_SUBJECTS: readonly HealerGateSubject[] = [
     className: "Shaman",
     specName: "Restoration",
     actorId: RESTORATION_SUBJECT_ACTOR,
+    identified: [SPIRIT_LINK_TOTEM, ASCENDANCE],
     load: async () => {
       const subject: RestorationSubject = await loadRestorationSubject();
       return {
@@ -110,6 +126,52 @@ const HEALER_GATE_SUBJECTS: readonly HealerGateSubject[] = [
           { name: subject.name, abilityId: SPIRIT_LINK_TOTEM, atReportTimeMs: 7_790_000, toleranceMs: 2_000 },
           // An ability the specialization does not identify.
           { name: subject.name, abilityId: CHAIN_HEAL, atReportTimeMs: 7_500_000, toleranceMs: 2_000 },
+        ],
+      };
+    },
+  },
+  {
+    specId: "paladin/holy",
+    className: "Paladin",
+    specName: "Holy",
+    actorId: HOLY_PALADIN_SUBJECT_ACTOR,
+    identified: [AURA_MASTERY, AVENGING_WRATH],
+    load: async () => {
+      const subject: RestorationSubject = await loadHolyPaladinSubject();
+      return {
+        ...subject,
+        entries: [
+          // Around the real Aura Mastery cast at 7,480,036.
+          { name: subject.name, abilityId: AURA_MASTERY, atReportTimeMs: 7_480_000, toleranceMs: 2_000 },
+          // Aura Mastery, where the subject did not cast it (its casts: 7,480,036 and 7,723,719).
+          { name: subject.name, abilityId: AURA_MASTERY, atReportTimeMs: 7_600_000, toleranceMs: 3_000 },
+          // After the completed encounter's end (7,781,469).
+          { name: subject.name, abilityId: AVENGING_WRATH, atReportTimeMs: 7_790_000, toleranceMs: 2_000 },
+          // An ability the specialization does not identify.
+          { name: subject.name, abilityId: HOLY_SHOCK, atReportTimeMs: 7_500_000, toleranceMs: 2_000 },
+        ],
+      };
+    },
+  },
+  {
+    specId: "monk/mistweaver",
+    className: "Monk",
+    specName: "Mistweaver",
+    actorId: MISTWEAVER_SUBJECT_ACTOR,
+    identified: [RESTORAL, INVOKE_YULON],
+    load: async () => {
+      const subject: RestorationSubject = await loadMistweaverSubject();
+      return {
+        ...subject,
+        entries: [
+          // Around the real Restoral cast at 7,461,179.
+          { name: subject.name, abilityId: RESTORAL, atReportTimeMs: 7_461_000, toleranceMs: 2_000 },
+          // Invoke Yu'lon, where the subject did not cast it (its casts: 7,438,004, 7,558,042 and 7,678,725).
+          { name: subject.name, abilityId: INVOKE_YULON, atReportTimeMs: 7_600_000, toleranceMs: 3_000 },
+          // After the completed encounter's end (7,781,469).
+          { name: subject.name, abilityId: RESTORAL, atReportTimeMs: 7_790_000, toleranceMs: 2_000 },
+          // An ability the specialization does not identify.
+          { name: subject.name, abilityId: VIVIFY, atReportTimeMs: 7_500_000, toleranceMs: 2_000 },
         ],
       };
     },
@@ -347,7 +409,7 @@ for (const gate of HEALER_GATE_SUBJECTS) {
       expect(healer.categories[1]).toMatchObject({
         listing: { completeness: "UNKNOWN", reason: "CAPABILITY_UNVERIFIED" },
       });
-      const identified = new Set([SPIRIT_LINK_TOTEM, ASCENDANCE]);
+      const identified = new Set(gate.identified);
       for (const entry of healer.assignments) {
         if (!identified.has(entry.abilityGameId)) continue;
         if (entry.result.resolution === "UNKNOWN") {

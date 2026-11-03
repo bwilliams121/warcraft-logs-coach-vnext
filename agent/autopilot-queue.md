@@ -1216,7 +1216,7 @@ status: OWNER_DECISION_REQUIRED
 dependsOn: none
 wcl: NONE
 publicContract: NONE
-ownerDecision: Authorize one bounded, neutral, deterministic Warcraft Logs evidence campaign for the specializations that have no retained, already-authorized real evidence. Known today: Fury Warrior, Protection Warrior, Outlaw Rogue, Survival Hunter and Vengeance Demon Hunter appear in no committed fight context, and onboarding tranches append any further spec whose review finds its evidence inadequate. The proposal is the smallest campaign: per spec, the first public raid fight in a fixed order containing it, with its actor slice (casts, auras, resources, combatant info), and no ranking or comparison data.
+ownerDecision: Authorize one bounded, neutral, deterministic Warcraft Logs evidence campaign for the specializations that have no retained, already-authorized real evidence. Known today: Fury Warrior, Protection Warrior, Outlaw Rogue, Survival Hunter and Vengeance Demon Hunter appear in no committed fight context, and onboarding tranches append any further spec whose review finds its evidence inadequate. Appended by HEAL-B1P: Restoration Druid (identity only, gtKb2xHn87pNcFfW fight 22 actor 2; no committed or retained capture holds one of its events, so it cannot meet the healer promotion gate). The proposal is the smallest campaign: per spec, the first public raid fight in a fixed order containing it, with its actor slice (casts, auras, resources, combatant info), and no ranking or comparison data.
 ```
 
 **Direction.** The owner's onboarding evidence policy: neutral,
@@ -1280,11 +1280,13 @@ healing context with coverage disclosure.
 ### HEAL-B1: Holy Paladin, Restoration Druid and Mistweaver Monk (internal)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: HEAL-A
 branch: autopilot/heal-b1
 wcl: NONE
 publicContract: NONE
+pr: 47
+mergeSha: 760f83f75d80ab5720e34a8808fb1fded71a4cb0
 ```
 
 **Scope.** Three healer evaluators on the proven healer architecture. Each
@@ -1295,11 +1297,19 @@ own tree, and consumes the shared `RaidCooldownPlan` and the
 ### HEAL-B1P: Holy Paladin, Restoration Druid and Mistweaver Monk (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: HEAL-B1, HEAL-AP
+branch: autopilot/heal-b1p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** Holy Paladin and Mistweaver Monk passed the HEAL-AP healer
+promotion gate on their whole-fight casts in b1PmaKrd6CDfzngc fight 48, cut
+from the retained M11-E2 capture (no new request), and are PUBLIC. Restoration
+Druid cannot pass: no retained, authorized capture holds one of its events. It
+stays INTERNAL_ONLY, recorded in `agent/spec-onboarding-inventory.md`, and its
+evidence gap is ONB-EV's (rule 4).
 
 ### HEAL-B2: Holy Priest (internal)
 

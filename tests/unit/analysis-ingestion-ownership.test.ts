@@ -172,6 +172,15 @@ const PRODUCTION_AUGMENTATION: RegisteredAnalyzer = productionRegistrationFor("e
  */
 const PRODUCTION_RESTORATION: RegisteredAnalyzer = productionRegistrationFor("shaman/restoration");
 
+/**
+ * The production Holy Paladin and Mistweaver Monk rows, unmodified. PUBLIC
+ * since HEAL-B1P, so every injected catalog below must carry them too. Both
+ * declare FULL_RAID: two more real FULL_RAID analyzers a Rogue request must
+ * never widen to.
+ */
+const PRODUCTION_HOLY_PALADIN: RegisteredAnalyzer = productionRegistrationFor("paladin/holy");
+const PRODUCTION_MISTWEAVER: RegisteredAnalyzer = productionRegistrationFor("monk/mistweaver");
+
 function deps(registry: readonly RegisteredAnalyzer[], ingest: CombatIngestionPort): AnalysisServiceDeps {
   return { env: ENV, preflight: PREFLIGHT, ingest, registry };
 }
@@ -192,6 +201,8 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_BREWMASTER,
           PRODUCTION_AUGMENTATION,
           PRODUCTION_RESTORATION,
+          PRODUCTION_HOLY_PALADIN,
+          PRODUCTION_MISTWEAVER,
         ],
         ingest,
       ),
@@ -218,6 +229,8 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_BREWMASTER,
           PRODUCTION_AUGMENTATION,
           PRODUCTION_RESTORATION,
+          PRODUCTION_HOLY_PALADIN,
+          PRODUCTION_MISTWEAVER,
         ],
         first,
       ),
@@ -233,6 +246,8 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_BREWMASTER,
           PRODUCTION_AUGMENTATION,
           PRODUCTION_RESTORATION,
+          PRODUCTION_HOLY_PALADIN,
+          PRODUCTION_MISTWEAVER,
         ],
         second,
       ),
@@ -259,6 +274,8 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_BREWMASTER,
           PRODUCTION_AUGMENTATION,
           PRODUCTION_RESTORATION,
+          PRODUCTION_HOLY_PALADIN,
+          PRODUCTION_MISTWEAVER,
         ],
         production,
       ),
@@ -274,6 +291,8 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_BREWMASTER,
           PRODUCTION_AUGMENTATION,
           PRODUCTION_RESTORATION,
+          PRODUCTION_HOLY_PALADIN,
+          PRODUCTION_MISTWEAVER,
         ],
         widened,
       ),
@@ -297,6 +316,8 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_BREWMASTER,
           PRODUCTION_AUGMENTATION,
           PRODUCTION_RESTORATION,
+          PRODUCTION_HOLY_PALADIN,
+          PRODUCTION_MISTWEAVER,
         ],
         FIXTURE_INGEST,
       ),
@@ -320,6 +341,8 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_BREWMASTER,
           PRODUCTION_AUGMENTATION,
           PRODUCTION_RESTORATION,
+          PRODUCTION_HOLY_PALADIN,
+          PRODUCTION_MISTWEAVER,
         ],
         FIXTURE_INGEST,
       ),
@@ -353,6 +376,8 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
           PRODUCTION_BREWMASTER,
           PRODUCTION_AUGMENTATION,
           PRODUCTION_RESTORATION,
+          PRODUCTION_HOLY_PALADIN,
+          PRODUCTION_MISTWEAVER,
         ],
         ingest,
       ),
@@ -380,6 +405,8 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
           PRODUCTION_BREWMASTER,
           PRODUCTION_AUGMENTATION,
           PRODUCTION_RESTORATION,
+          PRODUCTION_HOLY_PALADIN,
+          PRODUCTION_MISTWEAVER,
         ],
         ingest,
       ),
@@ -407,6 +434,8 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
             PRODUCTION_BREWMASTER,
             PRODUCTION_AUGMENTATION,
             PRODUCTION_RESTORATION,
+            PRODUCTION_HOLY_PALADIN,
+            PRODUCTION_MISTWEAVER,
           ],
           ingest,
         ),
@@ -431,6 +460,8 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
           PRODUCTION_BREWMASTER,
           PRODUCTION_AUGMENTATION,
           PRODUCTION_RESTORATION,
+          PRODUCTION_HOLY_PALADIN,
+          PRODUCTION_MISTWEAVER,
         ],
         ingest,
       ),

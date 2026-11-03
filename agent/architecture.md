@@ -12589,6 +12589,66 @@ cases.
 - Restoration Druid: identity only (gtKb fight 22, actor 2, in the committed
   context). No event capture holds one.
 
+## HEAL-B1P — Holy Paladin and Mistweaver Monk public promotion
+
+Autopilot queue entry HEAL-B1P. Public contract: EXPECTED (additive under
+`analysis/1`: two `specId` values). No Warcraft Logs request: new archive
+segments cut offline from the retained M11-E2 raw capture.
+
+**What passed, and what did not.** The HEAL-AP healer promotion gate
+(`tests/contracts/heal-ap-healer-promotion-gate.test.ts`) is unchanged in
+substance; it gained two pinned subjects and per-subject identified ids (the
+completeness check named Restoration Shaman's two ids literally). Both new
+subjects pass every check through the public service:
+
+- Holy Paladin, b1PmaKrd6CDfzngc fight 48 actor 1: three Avenging Wrath and
+  two Aura Mastery casts, the listing COMPLETE; a met Aura Mastery entry
+  (cast 7,480,036), a not-met one (7,600,000 ± 3 s), one after the encounter's
+  end, and Holy Shock (not identified);
+- Mistweaver Monk, fight 48 actor 9: three Invoke Yu'lon and two Restoral
+  casts, the listing COMPLETE; a met Restoral entry (cast 7,461,179), a
+  not-met Invoke Yu'lon (7,600,000 ± 3 s), one after the end, and Vivify.
+
+Restoration Druid cannot pass: no committed or retained capture holds one of
+its events. It stays INTERNAL_ONLY (onboarding rule 4), its row and reason are
+in `agent/spec-onboarding-inventory.md`, and its evidence gap is appended to
+ONB-EV. The gate is not weakened for it.
+
+**Evidence** (`tests/evidence/`, ordinary archive growth, 403,697 bytes). Four
+compact cast-only segments, `wcl-b1pm-fight-48-{holy-paladin-1,mistweaver-monk-9}-casts.seg-{0-180,180-345}`,
+cut by `sanitize-probe.mjs --actor-slice <actor> --families cast,begincast
+--compact` exactly as M12-D cut actor 122's. Each grants CASTS for its own
+actor over its range only; nothing is granted to pets. The cut is from the
+whole-fight capture retrieved COMPLETE with no actor filter, so "these are all
+of its casts" holds. The archive without the two owner exceptions stays under
+the 4 MiB notice line; the regression corpus is untouched.
+
+**Reachability: the five-site promotion**, for both ids, by the same reviewed
+edit as every earlier promotion: the partition (`INTERNAL_ONLY_SPEC_IDS` now
+holds `druid/restoration` alone), the public contract's `specId` enum, the
+identity table, the `satisfies PublicSpecId` on each `spec.ts`, and each
+registration's `exposure`. Each registration gains its healer view and public
+limits prose. Evaluators, data and revisions are unchanged
+(`holy-paladin-evaluator/1`, `mistweaver-monk-evaluator/1`).
+
+**The shared healer view** (`src/findings/healer-view-projection.ts`). Restoration
+Shaman's view builder (HEAL-AP) was spec-independent restatement, and two more
+healers would have copied it. It moved to shared code unchanged in behavior,
+as HEAL-B1 moved the finding-set restatement: `healerViewOfEvaluation(evaluation,
+set)`. Its input is declared structurally, so `src/findings/` still never
+imports `src/healing/` (`m12a-healing-layering`). Restoration Shaman's
+`healer-view.ts` delegates to it; its public projection tests and gate subject
+are unchanged.
+
+**What a public request now receives.** A Paladin/Holy or Monk/Mistweaver
+identity dispatches its own row, derives FULL_RAID, and publishes
+`healerFindings` exactly as Restoration Shaman does: AUTHORITY_NOT_AVAILABLE
+when evaluated, INSUFFICIENT_EVIDENCE otherwise, never ANALYZED. The plan
+disclosure, TLDR and report behavior is HEAL-AP's, unchanged. A raid-night cell
+for either is AUTHORITY_NOT_AVAILABLE (or INSUFFICIENT_EVIDENCE when the
+evidence states no specialization) and carries no healer findings and no
+plan.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

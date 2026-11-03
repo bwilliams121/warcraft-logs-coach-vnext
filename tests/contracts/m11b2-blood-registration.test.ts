@@ -106,8 +106,9 @@ describe("identity and partition", () => {
     expect(isPublicSpecId("deathknight/blood")).toBe(true);
     // The internal-only half never holds Blood; it held Brewmaster Monk from
     // M11-C2 until M11-C4j, Augmentation Evoker in M13-E, Restoration Shaman
-    // in HEAL-A, was empty from HEAL-AP, and holds the three HEAL-B1 healers.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["paladin/holy", "druid/restoration", "monk/mistweaver"]);
+    // in HEAL-A, was empty from HEAL-AP, held the three HEAL-B1 healers, and
+    // holds Restoration Druid alone since HEAL-B1P.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration"]);
     expect(PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");
     expect(requirePublicSpecId("deathknight/blood")).toBe("deathknight/blood");
@@ -139,6 +140,8 @@ describe("identity and partition", () => {
       "monk/brewmaster",
       "evoker/augmentation",
       "shaman/restoration",
+      "paladin/holy",
+      "monk/mistweaver",
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.specId)).toContain("deathknight/blood");
     expect(ENABLED_ANALYSIS_REQUIREMENTS.map((requirement) => requirement.analyzerId)).toContain(
@@ -146,9 +149,9 @@ describe("identity and partition", () => {
     );
     // The public prose is DERIVED from the PUBLIC set and moved with it.
     expect(SUPPORTED_SPECIALIZATIONS_SENTENCE).toBe(
-      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Protection Paladin, Restoration Shaman and Retribution Paladin.",
+      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Holy Paladin, Mistweaver Monk, Protection Paladin, Restoration Shaman and Retribution Paladin.",
     );
-    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(7);
+    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(9);
     expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toContainEqual(
       BLOOD_DEATH_KNIGHT_REGISTRATION.publicLimits,
     );
