@@ -177,6 +177,8 @@ describe("the projection produces a valid v1 raid-night document", () => {
       "capability",
       "cells",
       "coverage",
+      // M15-F: additive, optional in the schema, always emitted.
+      "coverageDisclosure",
       "fights",
       "identity",
       "partialFailures",

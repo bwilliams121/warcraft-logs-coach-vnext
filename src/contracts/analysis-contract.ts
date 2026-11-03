@@ -893,6 +893,13 @@ export const PUBLIC_TLDR_DISCLOSURES = [
   "CONSUMABLE_COUNT_UNKNOWN",
   "PREPARATION_NOT_ASSESSED",
   "DAMAGE_DIAGNOSIS_NOT_ASSESSED",
+  /**
+   * M15-F: the document carries `supportObservations`, which neither the TLDR
+   * nor the report summarizes. Observed facts, no verdict.
+   */
+  "SUPPORT_OBSERVATIONS_NOT_SUMMARIZED",
+  /** M15-F: the document carries `raidCooldownPlan`; its assignments were not evaluated. */
+  "RAID_COOLDOWN_PLAN_NOT_EVALUATED",
 ] as const;
 
 /** Why no TLDR was built. The rest of the document stands; nothing is summarized. */

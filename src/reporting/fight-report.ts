@@ -71,6 +71,7 @@ import {
   restateFight,
   STANDING_SENTENCES,
   TLDR_DISCLOSURES,
+  UNSUMMARIZED_SENTENCES,
   type TldrContext,
   type TldrDiagnosisInput,
   type TldrDisclosure,
@@ -384,6 +385,10 @@ export function renderReportMarkdown(body: ReportBody): string {
     `- Damage diagnosis: ${diagnosisText(coverage.damageDiagnosis)}`,
     `- Records by disposition: ${coverage.recordsByDisposition.map((row) => `${code(row.disposition)} ${String(row.records)}`).join(", ")}.`,
     `- Not established: ${coverage.disclosures.map(code).join(", ")}.`,
+    // M15-F: blocks the document publishes that this report does not restate.
+    ...(["SUPPORT_OBSERVATIONS_NOT_SUMMARIZED", "RAID_COOLDOWN_PLAN_NOT_EVALUATED"] as const)
+      .filter((disclosure) => coverage.disclosures.includes(disclosure))
+      .map((disclosure) => `- Not in this report: ${UNSUMMARIZED_SENTENCES[disclosure]}`),
     "",
     "## Findings by decision category",
     "",

@@ -97,8 +97,35 @@ describe("the service discloses a supplied plan and evaluates none of it", () =>
       (await analyzed({ ...D2_REQUEST, raidCooldownPlan: NOTE_PLAN })).analysis,
     );
     expect(PublicAnalysisResultSchema.safeParse(withPlan).success).toBe(true);
-    const { raidCooldownPlan, ...rest } = withPlan;
-    expect(rest).toEqual(without);
+    const { raidCooldownPlan, tldr, report, ...rest } = withPlan;
+    const { tldr: tldrWithout, report: reportWithout, ...restWithout } = without;
+    expect(rest).toEqual(restWithout);
+    // M15-F: the TLDR and the report differ only by saying the plan was not
+    // evaluated: one disclosure code, and one sentence each.
+    const code = "RAID_COOLDOWN_PLAN_NOT_EVALUATED";
+    const sentence =
+      "The supplied raid cooldown plan was not evaluated; nothing is claimed about any assignment.";
+    if (tldr?.assessment !== "ASSESSED" || tldrWithout?.assessment !== "ASSESSED") throw new Error("no TLDR");
+    expect(tldr.disclosures).toContain(code);
+    expect(tldr.lines).toContain(sentence);
+    expect({
+      ...tldr,
+      disclosures: tldr.disclosures.filter((held) => held !== code),
+      lines: tldr.lines.filter((line) => line !== sentence),
+    }).toEqual(tldrWithout);
+    if (report?.assessment !== "ASSESSED" || reportWithout?.assessment !== "ASSESSED")
+      throw new Error("no report");
+    expect(report.coverage.disclosures).toContain(code);
+    expect({
+      ...report,
+      coverage: {
+        ...report.coverage,
+        disclosures: report.coverage.disclosures.filter((held) => held !== code),
+      },
+      markdown: report.markdown
+        .replace(`, \`${code}\`.`, ".")
+        .replace(`- Not in this report: ${sentence}\n`, ""),
+    }).toEqual(reportWithout);
     expect(raidCooldownPlan).toEqual({
       authority: "USER_PROVIDED_RAID_PLAN",
       schema: "raid-cooldown-plan/1",

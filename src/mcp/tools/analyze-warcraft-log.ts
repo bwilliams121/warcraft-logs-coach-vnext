@@ -139,6 +139,8 @@ export function analyzeToolDescription(descriptions: PublicSpecializationDescrip
     "actionability order, never by damage or impact), INFORMATIONAL (MATCH results and observed facts,",
     "never an endorsement) or CARRIED (UNKNOWN, SUPPRESSED and other non-assessments, with their",
     "reasons, never a fault). report.markdown is the same report as text, rendered only from those fields.",
+    "Neither tldr nor report summarizes supportObservations or raidCooldownPlan; when the result carries",
+    "either, their disclosures say so (SUPPORT_OBSERVATIONS_NOT_SUMMARIZED, RAID_COOLDOWN_PLAN_NOT_EVALUATED).",
     "",
     "Partial coverage is expected: most decisions typically resolve to UNKNOWN, and casts whose",
     "execution lane is not established are excluded from the denominator entirely. Read the coverage",

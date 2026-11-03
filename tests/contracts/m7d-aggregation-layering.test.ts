@@ -71,6 +71,8 @@ describe("the aggregation domain exists and is fully covered by these checks", (
     expect(AGGREGATION_MODULES).toEqual([
       "src/aggregation/cell-projection.ts",
       "src/aggregation/cell.ts",
+      // M15-F: the night's coverage disclosure, a pure function of the aggregate.
+      "src/aggregation/raid-night-disclosure.ts",
       "src/aggregation/raid-night.ts",
       "src/aggregation/roster-aggregator.ts",
     ]);

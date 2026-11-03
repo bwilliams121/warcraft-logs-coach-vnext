@@ -29,6 +29,36 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After M15-F: what the final coverage disclosure does not establish
+
+**Raised:** M15-F (2026-11-02).
+
+- **Disclosed, still not summarized.** The TLDR and the report now NAME the
+  blocks they do not restate (`SUPPORT_OBSERVATIONS_NOT_SUMMARIZED`,
+  `RAID_COOLDOWN_PLAN_NOT_EVALUATED`). They still present no support fact and
+  no plan content: summarizing either needs a reviewed M15-A adapter, and must
+  never rank an observation as a finding.
+- **The raid-night disclosure is night-level only.** It is derived from the
+  night's coverage totals and its cells' preparation. Cells still carry no
+  TLDR, report, diagnosis or support block; the night says so
+  (`PER_FIGHT_PRESENTATION_NOT_INCLUDED`) and points at `analysisRef`. A
+  per-cell summary would need its own reviewed shape and payload budget.
+- **The encounter-context document (M8-G) is not changed.** It reuses raid-night
+  cells and recurrence but is its own contract family; it gains no coverage
+  disclosure in M15-F. Doing so is a separate, additive tranche.
+- **Lines are English templates**, like the TLDR's; the codes are the
+  contract.
+- **The integrated negative suite runs on fixtures and the M13-A capture**:
+  Assassination (M5-A, M5-D2), the Arms unsupported subject, the real
+  Augmentation Evoker, and synthetic raid nights. No fixture proves an
+  alternative actionable, so "nothing actionable without evidence" is shown
+  as the absence of DECISION_PROVEN_ACTIONABLE, not by a positive case.
+- **Resolved here:** "After M15-B" / "After M15-D" raid night carries no coverage
+  summary (it now carries `coverageDisclosure`); "After M13-F" TLDR/report
+  silence about support facts (now disclosed by name, not summarized).
+
+---
+
 ## After M15-D: what the report does not establish
 
 **Raised:** M15-D (2026-11-02).
@@ -45,7 +75,8 @@ current total (5,748,495 bytes), with what each row buys.
   locators with references to `decisions` positions.
 - **English templates only.** The markdown is fixed English over the
   structured fields; consumers should read the fields.
-- **Raid night carries no report**, as for the TLDR.
+- **Raid night carries no report**, as for the TLDR. Since M15-F it carries
+  a night-level `coverageDisclosure` instead (see "After M15-F").
 
 ---
 
@@ -65,9 +96,9 @@ current total (5,748,495 bytes), with what each row buys.
   readers. It changes no finding; the rest are counted and disclosed.
 - **Prose is English templates.** `lines` are fixed sentences over the
   structured fields; no localization, and consumers should read the fields.
-- **Raid night carries no TLDR.** Its contract is unchanged; a per-cell or
-  per-night summary needs its own decision about what a night-level
-  coverage sentence says.
+- **Raid night carries no TLDR.** RESOLVED in part by M15-F: the night now
+  carries a night-level `coverageDisclosure` (codes plus a coverage sentence
+  templated from its own totals). A per-cell summary is still absent.
 
 ---
 ## After M15-A: what finding prioritization does not establish
@@ -280,7 +311,8 @@ current total (5,748,495 bytes), with what each row buys.
 - **The TLDR and the report present no support facts.** They disclose
   GAMEPLAY_NOT_ANALYZED; the facts are in `supportObservations` only. Whether
   the report should summarize them is presentation work (M15-F at the earliest)
-  and must never rank them as findings.
+  and must never rank them as findings. M15-F: both now disclose
+  `SUPPORT_OBSERVATIONS_NOT_SUMMARIZED`; they still summarize nothing of it.
 - **"Supported specializations" now names Augmentation Evoker.** The MCP
   limits paragraph states it is observation-only. The sentence itself is
   derived from the PUBLIC set and carries no per-specialization qualifier.

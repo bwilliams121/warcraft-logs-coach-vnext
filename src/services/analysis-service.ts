@@ -437,6 +437,7 @@ async function unsupportedSpec(
       gameplay: { status: "SPEC_NOT_SUPPORTED" },
       preparation: retrieval.preparation,
       diagnosis: null,
+      unsummarized: plan === null ? [] : ["RAID_COOLDOWN_PLAN"],
     }),
   };
   return { ok: true, state: resultStateFor(analysis), analysis };
@@ -764,6 +765,11 @@ export async function analyzeFight(
           },
     preparation: { state: "ASSESSED", report: preparation },
     diagnosis: diagnosis === null ? null : tldrDiagnosisOf(diagnosis),
+    // M15-F: what the document carries beside them that they do not restate.
+    unsummarized: [
+      ...(supportObservations === null ? [] : (["SUPPORT_OBSERVATIONS"] as const)),
+      ...(planDisclosure === null ? [] : (["RAID_COOLDOWN_PLAN"] as const)),
+    ],
   });
 
   const fightAnalysis: FightAnalysis = {
