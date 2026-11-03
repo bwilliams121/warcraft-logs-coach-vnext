@@ -60,7 +60,7 @@ never assumed.
 
 ```onboarding-progress
 {
-  "asOf": "2026-11-02",
+  "asOf": "2026-11-03",
   "rosterSource": "src/data/game/spec-roster.json",
   "playableTotal": 40,
   "public": 6,
@@ -71,7 +71,7 @@ never assumed.
   "notStarted": 33,
   "publiclySupportedPercent": 15,
   "terminallyDispositionedPercent": 15,
-  "notes": "Augmentation Evoker became PUBLIC with M13-F (#36). Restoration Shaman is FOUNDATION (M12-D evaluator, unregistered). Shared foundations (src/healing, src/support, the M14 comparison facts) are never counted."
+  "notes": "Augmentation Evoker became PUBLIC with M13-F (#36). Restoration Shaman is FOUNDATION (M12-D evaluator, unregistered). Shared foundations (src/healing, src/support, the M14 comparison facts) are never counted. ONB-S1 (shared precombat variable execution) changes no specialization's state."
 }
 ```
 

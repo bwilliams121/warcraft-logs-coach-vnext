@@ -876,11 +876,13 @@ and the analysis coverage.
 ### M15-C: Evidence-grounded impact estimation
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: M15-B
 branch: autopilot/m15-c
 wcl: NONE
 publicContract: NONE
+pr: 39
+mergeSha: 411596921b23e5200b869e4dbb0d0cdab68de6ee
 ```
 
 **Direction.** `agent/architecture.md` "Milestone 15", owner decision
@@ -1079,8 +1081,9 @@ authority or evidence condition.
 ### ONB-S1: Shared precombat action-list execution for APL variables
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: none
+branch: autopilot/onb-s1
 wcl: NONE
 publicContract: NONE
 ```

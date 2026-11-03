@@ -4642,8 +4642,52 @@ never 0 and never the line's `default=`.
   in both (exact, one-of, a common lower bound, else UNKNOWN). Nothing crosses
   a first-GCD rescan: every scan starts from the unknown incoming value, so
   the spec's state key stays the whole cross-scan state.
-- Not executed: the single-list walker (`list-selection.ts`) and the
-  precombat list; their variables read UNKNOWN.
+- Not executed: the single-list walker (`list-selection.ts`); its variables
+  read UNKNOWN. The precombat list is executed since ONB-S1 (below).
+
+*Since ONB-S1* the precombat list is executed for VARIABLE assignment only
+(`src/simc/precombat-variables.ts`). Pinned: each variable starts every
+iteration at the `default=` of the FIRST `variable` action constructed for its
+name (player.cpp:6727-6728, variable.cpp:108-125; construction order
+precombat, default, then the other lists alphabetically, player.cpp:526-559;
+a line the constructor makes background creates no variable). `combat_begin`
+then executes every ready precombat action in order (player.cpp:6150-6183),
+and stops after a HARMFUL action has entered combat (player.cpp:6180-6181,
+action.cpp:1841-1842). A value persists until a variable action writes it.
+
+- `establishedVariableDefaults(authority)` is that default per name. It is
+  also what `op=reset` restores, in precombat and in combat scans alike (a
+  reset restores the variable's `default_value_`, not its own line's
+  `default=`). A malformed line leaves every default unestablished; an
+  unreadable `default=` is UNKNOWN for its name; the profile-level
+  `apl_variable.<name>` override is not modelled.
+- Precombat expressions read PRE-PULL state, which the evidence does not
+  establish. They are evaluated under `precombatBindings`: the talents and the
+  specialization's vocabulary only. Resources are UNKNOWN, no buff, DoT or
+  cooldown is known, and no spec atom carries a value — so a pre-pull
+  buff- or resource-dependent value stays UNKNOWN (or a join), and a talent-,
+  constant- or default-derived value resolves.
+- Every non-variable precombat line is not executed; unless it is a pinned
+  non-harmful core action (`snapshot_stats`, `flask`, `food`,
+  `augmentation`, `potion`: snapshot_stats.cpp:16-25, consumable.cpp:791-808)
+  it may be the harmful action that stops the walk, so each LATER variable
+  line's effect is joined with the state before it. A precombat
+  `call_action_list`/`run_action_list` carries nothing.
+- CARRIED: only variables NO combat list writes. Their precombat value is the
+  incoming value of every combat scan (`incomingScanVariables`, the start
+  state of `selectAcrossLists` and `resolveOneForegroundScan`). A combat
+  write means the incoming value is an earlier scan's, so those stay UNKNOWN.
+  A malformed precombat line, or a combat variable line that cannot be
+  attributed to one name, carries nothing. A carried value is a scan
+  assignment, so it takes precedence over a spec-seeded initial value
+  (Retribution's `pre_es_wake` seed and its carried value are both KNOWN 0).
+- Public re-measure: on the five pinned public authorities the carried values
+  are Retribution `pre_es_wake` KNOWN 0 (as seeded before), its trinket
+  variables UNKNOWN or a two-member set, and Assassination
+  `trinket_sync_slot` one of {0, 1, 2}. Every combat read of the trinket
+  variables sits in a condition that also contains unparsed `trinket.*` or
+  `fight_remains`, so no public decision changes; Blood, Brewmaster and
+  Protection have no precombat variable.
 
 *Since M11-D3-C3* the nested scan reads `line_cd=` as READINESS
 (`src/simc/line-cooldown.ts`). Pinned: every APL LINE is its own `action_t`

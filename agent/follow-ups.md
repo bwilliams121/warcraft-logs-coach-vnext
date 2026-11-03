@@ -1840,12 +1840,17 @@ analyzer.
 
 **Raised:** M11-D3-C2 (2026-10-03). Coverage, not soundness: each reads UNKNOWN.
 
-**Precombat variables.** Many Cohort A/B variables are assigned ONLY in the
-precombat list (trinket buffs and priorities for Fury, Arms, Frost DK,
-Devourer and Subtlety; everything Havoc assigns). Pinned, their value
-persists from precombat into combat; nothing here executes the precombat
-list, so every read of them is the unknown incoming value. Executing it needs
-a decision about precombat state (buffs and resources before the pull).
+**Precombat variables.** Resolved in ONB-S1 (`src/simc/precombat-variables.ts`,
+agent/architecture.md "Since ONB-S1"). What remains:
+
+- `trinket.*` expressions do not parse, so trinket-derived precombat values
+  (the bulk of Cohort A/B precombat variables) stay UNKNOWN or a set.
+- Specialization atoms carry no value in precombat. A talent-derived spec atom
+  would need a declared combat-invariance flag before it could be read there.
+- Non-variable precombat actions outside the five pinned non-harmful core
+  actions are treated as possibly harmful, so later variable lines are joined.
+- The single-list walker (`list-selection.ts`) still starts at the unknown
+  incoming value; only the nested scans carry precombat values.
 
 **Values across first-GCD rescans.** SimulationCraft's rescan after a NON_GCD
 action sees the previous scan's assignments; each scan here starts from the
