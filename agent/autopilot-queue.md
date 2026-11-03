@@ -642,11 +642,13 @@ published): registering needs FULL_RAID derivation from
 ### M13-F: Public Augmentation support observations
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: M13-E
 branch: autopilot/m13-f
 wcl: NONE
 publicContract: EXPECTED
+pr: 36
+mergeSha: 1d6ead6f653e2843c44d9f867c73e914a6fca765
 ```
 
 **Owner resolution (2026-11-02).** M13-F attempt 1 stopped for the owner
@@ -924,8 +926,9 @@ only trustworthy findings may influence a score.
 ### M15-F: Product hardening and final coverage disclosure
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: M15-D, M13-F, M14-F
+branch: autopilot/m15-f
 wcl: NONE
 publicContract: EXPECTED
 ```

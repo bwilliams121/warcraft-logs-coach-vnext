@@ -11667,6 +11667,59 @@ occurrences equal the view's rejected, matched and UNKNOWN counts. The
 45-occurrence `heart_strike` pattern is at position 1, nothing is actionable,
 there are no suppressions, and the document validates. The report adds about
 53 KB to a 233 KB document; the markdown is 8.3 KB.
+
+## M15-F — Product hardening and final coverage disclosure
+
+Milestone 15 (autopilot queue entry M15-F). Public contract: EXPECTED,
+additive under both `analysis/1` and `raid-night/1`. No Warcraft Logs
+request; no new analysis capability.
+
+**Question.** "Can a reader of ANY report shape tell how much was analyzed,
+and what the summary leaves out?" Before M15-F two shapes could not: the raid
+night stated coverage only as integer counts, and a single-fight TLDR/report
+said nothing about blocks it did not restate (`supportObservations`,
+`raidCooldownPlan`), so it could read as everything the document carried.
+
+**Single fight.** Two codes are appended to the shared TLDR/report
+disclosure vocabulary: `SUPPORT_OBSERVATIONS_NOT_SUMMARIZED` (the document
+carries `supportObservations`) and `RAID_COOLDOWN_PLAN_NOT_EVALUATED` (it
+carries `raidCooldownPlan`, whose assignments are never evaluated). The
+service tells the presentation which of those blocks it publishes beside it
+(`TldrInput.unsummarized`, absent = none); the disclosure rule shared by the
+TLDR and the report adds the code, the TLDR adds one templated line each,
+and the report markdown adds one "Not in this report" line each, derived from
+`coverage.disclosures`. Nothing of either block is summarized or ranked.
+
+**Raid night.** A new optional `coverageDisclosure` (always emitted):
+`revision: raid-night-coverage-disclosure/1`, `assessmentScope: PARTIAL`,
+`disclosures` (never empty, `PUBLIC_RAID_NIGHT_DISCLOSURES` order) and
+`lines` (the coverage sentence first). It is a pure function of the
+aggregate (`src/aggregation/raid-night-disclosure.ts`) over its own
+`coverage` totals and its cells' preparation, called by the projection and
+copied field by field, so it cannot describe a different night. Codes:
+NO_CELL_ANALYZED or ONLY_OBSERVED_DECISIONS_VERIFIED; DECISIONS_UNKNOWN;
+CASTS_EXCLUDED; CELLS_SPEC_NOT_SUPPORTED; CELLS_NOT_ANALYZED (authority, profile
+or evidence); CELLS_ANALYSIS_UNAVAILABLE; FIGHTS_MISSING; FIGHTS_FAILED;
+CONSUMABLE_COUNT_UNKNOWN; PREPARATION_NOT_ASSESSED; and, always,
+PER_FIGHT_PRESENTATION_NOT_INCLUDED (cells carry counts only; each fight's
+TLDR, report, diagnosis and support observations are at `analysisRef`). The
+lines never name clean play (the M7-E contract forbids the word on a night):
+a night with no analyzed cell says "nothing is claimed about how anyone
+played".
+
+**MCP descriptions** state both additions; REST and MCP publish the same
+projection, unchanged.
+
+**Hardening suite.** `tests/integration/m15f-integrated-report-hardening.test.ts`
+publishes every shape (ANALYZED with divergences, ANALYZED partial, ANALYZED
+with a plan, SPEC_NOT_SUPPORTED, the real Augmentation support document, a
+mixed and an unanalyzed raid night) through the real service and BOTH
+transports, requires REST ≡ MCP ≡ MCP text, schema validity, and asserts the
+CLAUDE.md mandatory negative cases on the integrated documents: unsupported
+never clean, low coverage never complete, UNKNOWN never highlighted or zero,
+UNKNOWN vs NO_AUTHORITY_AVAILABLE, no inferred assignment, nothing actionable
+without evidence, no score key, consumables never omitted, no racial
+finding.
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

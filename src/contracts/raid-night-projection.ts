@@ -45,6 +45,10 @@ import type {
   RecurrenceSummary,
   SeriesPoint,
 } from "../aggregation/raid-night.js";
+import {
+  discloseRaidNightCoverage,
+  type RaidNightCoverageDisclosure,
+} from "../aggregation/raid-night-disclosure.js";
 import { CAPABILITY } from "./analysis-contract.js";
 import {
   PublicRaidNightResultSchema,
@@ -56,6 +60,7 @@ import {
   type PublicCoverageSummary,
   type PublicFightSummary,
   type PublicPlayerSummary,
+  type PublicRaidNightCoverageDisclosure,
   type PublicRaidNightResult,
   type PublicRecurrenceGroup,
 } from "./raid-night-contract.js";
@@ -327,6 +332,22 @@ function projectSeries(series: PlayerSeries) {
   };
 }
 
+/**
+ * The night's coverage disclosure (M15-F), copied field by field. Derived by
+ * the aggregation domain's pure function from this same aggregate's coverage
+ * and cells, so it cannot describe a different night; nothing is computed here.
+ */
+function projectCoverageDisclosure(
+  disclosure: RaidNightCoverageDisclosure,
+): PublicRaidNightCoverageDisclosure {
+  return {
+    revision: disclosure.revision,
+    assessmentScope: disclosure.assessmentScope,
+    disclosures: [...disclosure.disclosures],
+    lines: [...disclosure.lines],
+  };
+}
+
 function projectBatchFailure(failure: BatchFailure) {
   return { fightId: failure.fightId, reason: failure.reason };
 }
@@ -370,6 +391,7 @@ export function projectRaidNightResult(aggregate: RaidNightAnalysis): PublicRaid
     roster: aggregate.roster.map(projectPlayer),
     cells: aggregate.cells.map((cell) => projectCell(reportCode, cell)),
     coverage: projectCoverage(aggregate.coverage),
+    coverageDisclosure: projectCoverageDisclosure(discloseRaidNightCoverage(aggregate)),
     recurrence: projectRecurrence(aggregate.recurrence),
     trendEvidence: { series: aggregate.trendEvidence.series.map(projectSeries) },
     partialFailures: aggregate.partialFailures.map(projectBatchFailure),

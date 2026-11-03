@@ -633,6 +633,49 @@ export const PublicBatchFailureSchema = z
   .strict();
 
 // ---------------------------------------------------------------------------
+// Coverage disclosure (M15-F)
+// ---------------------------------------------------------------------------
+
+/**
+ * What a raid night does not establish. Declared independently of the
+ * aggregation module's list and pinned equal to it by
+ * `tests/contracts/m15f-coverage-disclosure-contract.test.ts`.
+ */
+export const PUBLIC_RAID_NIGHT_DISCLOSURES = [
+  "NO_CELL_ANALYZED",
+  "ONLY_OBSERVED_DECISIONS_VERIFIED",
+  "DECISIONS_UNKNOWN",
+  "CASTS_EXCLUDED",
+  "CELLS_SPEC_NOT_SUPPORTED",
+  "CELLS_NOT_ANALYZED",
+  "CELLS_ANALYSIS_UNAVAILABLE",
+  "FIGHTS_MISSING",
+  "FIGHTS_FAILED",
+  "CONSUMABLE_COUNT_UNKNOWN",
+  "PREPARATION_NOT_ASSESSED",
+  "PER_FIGHT_PRESENTATION_NOT_INCLUDED",
+] as const;
+
+/**
+ * The night's coverage disclosure (M15-F), the counterpart of the single-fight
+ * TLDR's coverage line: `assessmentScope` is always PARTIAL, `disclosures` is
+ * never empty, and the first of `lines` is always the coverage sentence. It
+ * is derived from `coverage` and the cells' preparation only. It names no
+ * score, rate or ranking, and NO_CELL_ANALYZED is not clean play.
+ *
+ * `lines` are author-templated sentences over the same counts; the codes are
+ * the contract.
+ */
+export const RaidNightCoverageDisclosureSchema = z
+  .object({
+    revision: z.literal("raid-night-coverage-disclosure/1"),
+    assessmentScope: z.literal("PARTIAL"),
+    disclosures: z.array(z.enum(PUBLIC_RAID_NIGHT_DISCLOSURES)).min(1),
+    lines: z.array(z.string().min(1)).min(1),
+  })
+  .strict();
+
+// ---------------------------------------------------------------------------
 // The result
 // ---------------------------------------------------------------------------
 
@@ -662,6 +705,11 @@ export const PublicRaidNightResultSchema = z
     /** Ascending by (fight id, source id). A proven complete matrix. */
     cells: z.array(PublicCellSchema),
     coverage: PublicCoverageSummarySchema,
+    /**
+     * M15-F. Optional in the schema only (an additive v1 field, per the rule
+     * above); this build always emits it.
+     */
+    coverageDisclosure: RaidNightCoverageDisclosureSchema.optional(),
     recurrence: PublicRecurrenceSummarySchema,
     trendEvidence: PublicTrendEvidenceSchema,
     /** Ascending by (fight id, reason). Fight-level only, never player-level. */
@@ -680,3 +728,4 @@ export type PublicCoverageSummary = z.infer<typeof PublicCoverageSummarySchema>;
 export type PublicRecurrenceGroup = z.infer<typeof PublicRecurrenceGroupSchema>;
 export type PublicTrendEvidence = z.infer<typeof PublicTrendEvidenceSchema>;
 export type PublicBatchFailure = z.infer<typeof PublicBatchFailureSchema>;
+export type PublicRaidNightCoverageDisclosure = z.infer<typeof RaidNightCoverageDisclosureSchema>;

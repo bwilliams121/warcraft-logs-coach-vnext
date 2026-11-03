@@ -117,8 +117,36 @@ export const TLDR_DISCLOSURES = [
   "CONSUMABLE_COUNT_UNKNOWN",
   "PREPARATION_NOT_ASSESSED",
   "DAMAGE_DIAGNOSIS_NOT_ASSESSED",
+  "SUPPORT_OBSERVATIONS_NOT_SUMMARIZED",
+  "RAID_COOLDOWN_PLAN_NOT_EVALUATED",
 ] as const;
 export type TldrDisclosure = (typeof TLDR_DISCLOSURES)[number];
+
+/**
+ * Blocks the same document publishes that no reviewed adapter restates
+ * (M15-F). The TLDR and the report do not summarize them, and say so, so a
+ * reader never takes the summary for everything the document carries:
+ *
+ *   SUPPORT_OBSERVATIONS  observed support facts (M13-F); no verdict exists
+ *   RAID_COOLDOWN_PLAN    the supplied plan (M12-E); never evaluated
+ */
+export const UNSUMMARIZED_BLOCKS = ["SUPPORT_OBSERVATIONS", "RAID_COOLDOWN_PLAN"] as const;
+export type UnsummarizedBlock = (typeof UNSUMMARIZED_BLOCKS)[number];
+
+const UNSUMMARIZED_DISCLOSURES: Readonly<Record<UnsummarizedBlock, TldrDisclosure>> = {
+  SUPPORT_OBSERVATIONS: "SUPPORT_OBSERVATIONS_NOT_SUMMARIZED",
+  RAID_COOLDOWN_PLAN: "RAID_COOLDOWN_PLAN_NOT_EVALUATED",
+};
+
+/** The sentence each unsummarized-block disclosure adds, shared by the TLDR lines and the report markdown. */
+export const UNSUMMARIZED_SENTENCES: Readonly<
+  Record<"SUPPORT_OBSERVATIONS_NOT_SUMMARIZED" | "RAID_COOLDOWN_PLAN_NOT_EVALUATED", string>
+> = {
+  SUPPORT_OBSERVATIONS_NOT_SUMMARIZED:
+    "Support observations are published separately as observed facts and are not summarized here; they judge no recipient and no timing.",
+  RAID_COOLDOWN_PLAN_NOT_EVALUATED:
+    "The supplied raid cooldown plan was not evaluated; nothing is claimed about any assignment.",
+};
 
 export const TLDR_NOT_ASSESSED_REASONS = [
   "INVALID_TLDR_CONFIG",
@@ -147,6 +175,8 @@ export interface TldrInput {
     | { readonly state: "NOT_ASSESSED"; readonly reason: string };
   /** Null exactly when gameplay was not analyzed: no diagnosis runs then. */
   readonly diagnosis: TldrDiagnosisInput | null;
+  /** The blocks the document publishes beside this summary that it does not restate (M15-F). */
+  readonly unsummarized?: readonly UnsummarizedBlock[];
 }
 
 export interface TldrHighlight {
@@ -190,6 +220,8 @@ export interface TldrContext {
   readonly gameplay: TldrGameplay;
   readonly preparation: TldrPreparation;
   readonly diagnosis: TldrDiagnosisInput | null;
+  /** Absent means none (M15-F). */
+  readonly unsummarized?: readonly UnsummarizedBlock[];
 }
 
 export type FightTldr =
@@ -344,6 +376,7 @@ export function restateFight(input: TldrInput): RestatedFight {
             }
           : { assessment: "NOT_ASSESSED", reason: input.preparation.reason },
       diagnosis: input.diagnosis,
+      unsummarized: input.unsummarized ?? [],
     },
   };
 }
@@ -386,6 +419,7 @@ export function coverageDisclosures(
   )
     held.add("CONSUMABLE_COUNT_UNKNOWN");
   if (diagnosis?.assessment === "NOT_ASSESSED") held.add("DAMAGE_DIAGNOSIS_NOT_ASSESSED");
+  for (const block of context.unsummarized ?? []) held.add(UNSUMMARIZED_DISCLOSURES[block]);
   return held;
 }
 
@@ -497,6 +531,11 @@ export function summarizeFindings(
     lines.push(
       `Damage diagnosis: ${plural(diagnosisState.statements, "statement links", "statements link")} rejected decisions to a proven difference; see diagnosis.`,
     );
+  for (const disclosure of [
+    "SUPPORT_OBSERVATIONS_NOT_SUMMARIZED",
+    "RAID_COOLDOWN_PLAN_NOT_EVALUATED",
+  ] as const)
+    if (held.has(disclosure)) lines.push(UNSUMMARIZED_SENTENCES[disclosure]);
 
   return {
     assessment: "ASSESSED",
