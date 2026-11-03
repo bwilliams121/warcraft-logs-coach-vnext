@@ -330,6 +330,7 @@ describe("the public path analyzes (M11-A5), and the internal path analyzes the 
       "deathknight-blood-observed-decisions": 0,
       "monk-brewmaster-observed-decisions": 0,
       "evoker-augmentation-support-observations": 0,
+      "shaman-restoration-healer-findings": 0,
     });
     const document = projectAnalysisResult(result.analysis);
     expect(document).toMatchObject({

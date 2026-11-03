@@ -4,147 +4,157 @@ Rolling file: overwritten for each review cycle.
 
 ## Change
 
-ONB-S6: shared pet actor mapping for pet-driven APL state. Branch
-`autopilot/onb-s6`, from main at 668d34d.
+HEAL-A: Restoration Shaman registration and the healer finding shape
+(internal). Branch `autopilot/heal-a`, from main at 03d967d.
 
-- **Internal shared engine only.** New `src/engine/game-state/pets/pet-state.ts`
-  and `src/simc/expression/pet-atoms.ts`. Nothing under `src/contracts/`,
-  `src/api/` or `src/mcp/` changes, no existing module changes, and no
-  specialization module changes. No registered specialization builds a pet
-  state, so no public decision changes.
+- **Public contract: NONE.** Nothing under `src/contracts/`, `src/api/` or
+  `src/mcp/` changes. The registration is INTERNAL_ONLY, so a public request
+  for a Restoration Shaman is still SPEC_NOT_SUPPORTED and the plan
+  disclosure still says `NO_PUBLIC_ASSIGNMENT_EVALUATOR`.
 - **Warcraft Logs: NONE.** No request, probe or capture. Tests are synthetic,
-  plus the already-committed evidence archive (b1PmaKrd6CDfzngc fight 48
-  owned-pet segments, M11-E2.1).
-- Queue bookkeeping: ONB-S5 is recorded MERGED (PR #43, 668d34db…) and ONB-S6
-  is set PR_OPEN. The other merged tranches the supervisor listed were already
-  recorded MERGED with their pr and mergeSha.
+  plus the already-committed evidence archive (b1PmaKrd6CDfzngc fight 48,
+  actor 122, the M12-D subject).
+- **Queue bookkeeping:** ONB-S6 is recorded MERGED (PR #44, 03d967dd…), and
+  HEAL-A is set PR_OPEN. The other merged tranches the supervisor listed were
+  already recorded MERGED with their pr and mergeSha.
 
 ## Direction
 
-`agent/autopilot-queue.md` ONB-S6, `agent/follow-ups.md` "After M11-G3-1"
-(pets are not mapped to WCL actors), and the M11-E2.1 owned-pet tooling.
-Scope: a shared, evidence-backed mapping between pinned SimulationCraft pet
-entities and Warcraft Logs pet actors (stated `petOwner`, summon events),
-plus pet-count and pet-active state for APL reads. An ambiguous mapping is
-UNKNOWN, never a guess.
+`agent/autopilot-queue.md` HEAL-A and `agent/follow-ups.md` "After M12-D".
+The evaluator needed three things:
 
-## Design (agent/architecture.md "ONB-S6")
+- a registration shape for an evaluator with no SimulationCraft authority;
+- FULL_RAID derived from `RESTORATION_SHAMAN_REQUIRED_INPUTS`;
+- a shared finding shape for ASSIGNMENT, COOLDOWN and HEALING_DECISION.
 
-**Review history.**
+It also had to remove the unregistered-tree exceptions. The M12-D verdict
+scope and the M12-E plan semantics are unchanged:
 
-- Cycle 1: non-monotonic time must refuse every surface. Fixed in `guard`,
-  with an unsorted-sequence regression.
-- Cycle 2: presence used a cast AFTER t to bracket t, which O2
-  (architecture.md "No future bracketing") forbids for authority. Presence
-  was redesigned to read only events at or before t. The continuity option
-  is removed, and a regression appends later events and proves every
-  surface unchanged.
+- HEALING_DECISION is NO_AUTHORITY_AVAILABLE;
+- ASSIGNMENT is NO_AUTHORITY_AVAILABLE without a plan;
+- COOLDOWN is observational.
 
-**Ownership split.** Shared code holds the mapping, the evidence rules and
-the fail-closed gates, and knows no pet. The specialization supplies a frozen
-`PetMappingProfile` (`definePetMappingProfile` throws on a malformed one).
-Each entity gives:
+## Design (agent/architecture.md "HEAL-A")
 
-- `simcName` and `wclGameIds`;
-- a proven `minLifetimeMs` (cannot end sooner) or `null`;
-- a proven `maxLifetimeMs` or `null`;
-- `instancesBeginWithSummon` (reviewed).
+**Provider-less healer domains.** COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and
+HEALING_DECISION join `PROVIDERLESS_DOMAINS`, by the M13-E mechanism:
+declarable, never bindable, always NO_PINNED_AUTHORITY_FOR_DOMAIN.
+COOLDOWN_ASSIGNMENT is provider-less because its only standard is the
+caller's plan: per-request input, never a pinned artifact.
 
-What `pet.X.active`, a count or a pet aura means in an APL stays the
-specialization's.
+**Plan transport.** `SpecAnalysisInput.raidCooldownPlan` is new and
+optional. Absent or `null` means no plan. The analysis service now passes
+the request's plan through to the selected analyzer, untouched. No public
+analyzer reads it.
 
-**Mapping.**
+**Shared healer finding shape** (`src/findings/healer-finding.ts`). It is
+kept separate from the rotational `Finding`, and `DecisionCategory` stays
+ROTATION.
 
-- Ownership is WCL `petOwner` only, never a summon source.
-- Two entities listing one gameID are both AMBIGUOUS, so every answer is
-  UNKNOWN. This is how the Rune Weapon shared across engine pets is handled.
-- A catalog actor of a listed gameID with an unstated owner, or an owned
-  actor with no gameID, blocks absence and count ceilings
-  (`OWNERSHIP_NOT_STATED`).
+- `categories` lists all three, in order:
+  - ASSIGNMENT is NO_AUTHORITY_AVAILABLE (no plan, or another fight's plan),
+    UNKNOWN (the binding cannot be established), or EVALUATED_AGAINST_PLAN,
+    citing the plan;
+  - COOLDOWN is OBSERVED, `WCL_OBSERVED_FACT`, with its listing completeness;
+  - HEALING_DECISION is NO_AUTHORITY_AVAILABLE.
+- `findings` holds the per-entry ASSIGNMENT results (OUTCOME, with the
+  spec-owned outcome string and the shared two-member actionability, or
+  UNKNOWN with its reason) and one COOLDOWN observation per use, which has no
+  verdict field.
+- `createHealerFindingSet` checks the authority rules rather than trusting
+  them. It throws when:
+  - an ASSIGNMENT finding exists without plan evaluation, or cites a
+    different plan;
+  - a COOLDOWN finding exists without an OBSERVED category;
+  - an id is duplicated or a finding belongs to another specialization.
+- No confidence, severity, score, HPS or plan-quality field exists.
 
-**No future evidence (O2), throughout the millisecond.** The answer at t
-reads only events at or before t, and holds whatever the unproven
-same-millisecond order. PRESENT needs all of:
+**Registration** (`src/specs/shaman/restoration/registration.ts`,
+INTERNAL_ONLY).
 
-- a pinned minimum lifetime;
-- a single summon strictly before t, with t < summon + min;
-- no positive death since the summon;
-- up to t, no cast before the summon or after summon + max, and no null
-  instance id beside numbered ones.
+- Three capabilities are declared from REQUIRED_INPUTS, so the derived
+  requirement is FULL_RAID. There are no bindings.
+- **Envelope status, a decision for review.** The result is never ANALYZED,
+  because ANALYZED cites pinned `AnalysisAuthorityMetadata` and a request's
+  plan is not that.
+  - AUTHORITY_NOT_AVAILABLE when the evaluator ran. It means "no pinned
+    decision authority". Plan-backed findings carry their own authority.
+  - INSUFFICIENT_EVIDENCE when the identity is not established or the data is
+    unusable. The payload then says NOT_ASSESSED with the reason, never an
+    empty finding set.
+  - What the public status should be for a plan-evaluated healer result is
+    recorded as HEAL-AP's decision ("After HEAL-A").
+- **Identity** follows M13-E: the subject's stated specialization, plus the
+  actor catalog's name for plan-name matching. The evaluator's identity input
+  is narrowed to `RestorationShamanSubjectIdentity`, which `FightIdentity`
+  satisfies, with a nullable name. With no known name, every unresolved plan
+  entry may be the subject's, so it is UNKNOWN and never counted as another
+  player's. This fail-closed fix bumps the evaluator revision to `/2`.
+- **Projection** (`healer-findings.ts`) restates the evaluation and adds
+  nothing. An entry for an unidentified ability is UNKNOWN
+  ABILITY_NOT_REGISTERED.
 
-Casts and damage never prove presence on their own (M11-ED delayed damage).
-A death never proves absence.
+**Guards.** The unregistered-tree list in `m11a2-cross-spec-isolation` is
+now empty, and `m10a` expects `registration.ts`. The tree is a second
+authority-free registered tree with no APL artifact. Every pin of the catalog
+and partition now includes the seventh, INTERNAL_ONLY row. The corpus gains
+the `SPEC_RESTORATION_SHAMAN` layer and two cases (187 cases, 782
+assertions).
 
-**No unobserved instance.** NOT_PRESENT and a count ceiling need all of:
+## Real evidence (actor 122, fight 48)
 
-- summon start and maximum lifetime D pinned;
-- t − D not before the pull;
-- SUMMONS COMPLETE over [t − D, t] for the owner and every mapped actor, via
-  the shared `gateAbsenceClaim`;
-- no owner-sourced summon in the window to an actor without a gameID;
-- no unstated-owner candidate;
-- no past cast contradicting D (`LIFETIME_BOUND_CONTRADICTED`).
-
-Then a key with no summon in [t − D, t] is NOT_PRESENT. Otherwise no key is
-NOT_PRESENT, and `instancesAt` reports `unobservedKeysPossible`. A later
-summon is never used to prove an earlier absence. A non-monotonic order
-refuses every surface.
-
-**Counts.** EXACT, BOUNDED with a ceiling (undecided window keys), or BOUNDED
-without one (an unobserved instance is possible, or one key has two summons
-in the window). As atoms they become KNOWN_NUMBER, ONE_OF_NUMBERS and
-BOUNDED_NUMBER. An undecided presence binds no truth, so the evaluator
-enumerates it, and it is never false.
-
-**Layering.** `pet-atoms.ts` takes structural inputs, so `src/simc` still
-imports nothing from `src/engine`. The specializations bridge the two, as
-they already do for cooldowns.
-
-## Retained evidence (test profiles; the lifetimes are not game data)
-
-b1PmaKrd6CDfzngc fight 48, focus 15:
-
-- Ghoul 47: three instances, one summon each. Another player's Ghoul (41) is
-  not mapped. With test lifetimes of 30 s minimum and 61 s maximum, at
-  one-second samples:
-  - 90 PRESENT;
-  - 159 NOT_PRESENT;
-  - 65 undecided;
-  - 31 pre-pull blocked.
-- Blood Beast 45: four instances, each ending in a death. Unstated owner
-  actor 142 blocks every absence claim: 20 PRESENT, 325 UNKNOWN.
-- Rune Weapon 44: AMBIGUOUS throughout. Warband Bank Convergence 224:
-  unclassified.
+- **No plan:** AUTHORITY_NOT_AVAILABLE. ASSIGNMENT is NO_AUTHORITY_AVAILABLE
+  with no assignment finding. COOLDOWN is OBSERVED and COMPLETE, with four
+  facts (Ascendance 7,469,039 and 7,666,386; SLT 7,543,726 and 7,776,617).
+  The evaluation equals the evaluator's under a preflight identity.
+- **A test plan with the roster declared:**
+  - `slt-1` is MET, with cast evidence and positive actionability;
+  - `slt-200s` is UNKNOWN READINESS_NOT_ESTABLISHED;
+  - `after-kill` is ASSIGNMENT_NOT_ACTIONABLE, with actionability
+    NOT_EVALUATED and no evidence;
+  - the Chain Heal entry is UNKNOWN ABILITY_NOT_REGISTERED;
+  - one entry is another player's.
 
 ## Files
 
-- `src/engine/game-state/pets/pet-state.ts`: new.
-- `src/simc/expression/pet-atoms.ts`: new.
-- `tests/unit/onb-s6-pet-state.test.ts`: new, 49 tests.
-- `agent/architecture.md` (new section "ONB-S6"), `agent/follow-ups.md`
-  ("After ONB-S6", and a pointer in "After M11-G3-1"), `agent/testing.md`
-  (index block), `agent/spec-onboarding-inventory.md` (notes),
-  `agent/autopilot-queue.md`.
+- **New:**
+  - `src/findings/healer-finding.ts`
+  - `src/specs/shaman/restoration/registration.ts` and `healer-findings.ts`
+  - `tests/unit/healer-finding.test.ts`
+  - `tests/unit/specs/restoration-shaman-registration.test.ts`
+  - `tests/support/corpus/executors/spec-restoration-shaman.ts`
+- **Changed source:**
+  - `src/findings/authority-domain.ts`, `analysis-envelope.ts` and
+    `spec-id.ts`
+  - `src/services/analyzer-registry.ts`, `analysis-service.ts` (plan
+    pass-through) and `raid-cooldown-plan-disclosure.ts` (comment)
+  - `src/specs/shaman/restoration/evaluator.ts`, `spec.ts` and `README.md`
+- **Pins:** registry and partition tests, call maps, corpus contract,
+  executors, manifest generator, `manifest.json`, `report.json`, corpus
+  README.
+- **Docs:** `agent/architecture.md`, `follow-ups.md`, `testing.md`,
+  `spec-onboarding-inventory.md` and `autopilot-queue.md`.
 
 ## Validation
 
-- `npx tsc --noEmit`: clean. `npx prettier --check` on every changed source
-  and test file: clean.
-- `tests/unit/onb-s6-pet-state.test.ts`: 49/49. This includes the engine
-  vocabulary and layering contracts that sweep `src/engine` and `src/simc`.
-- Rerun after the cycle 2 rework: `onb-s6-pet-state`, `m4-state-vocabulary` and`n  `m5-boundary-and-vocabulary`: 130/130. The rework touched only the new`n  files, which nothing else imports.
-- Full `npx vitest run` before the rework (default parallelism): 12089 passed and 20 failed, in
-  13 heavy files. All 20 are timeouts under load (simulation runner service,
-  public projections, corpus harness, raid night). None imports the new
-  modules.
-- Those 13 files rerun serially: 209/210. The one remaining failure is
-  `tests/regression/m8g-encounter-context-composition.test.ts` (workers
-  project), which took 5.9 s against a 5 s timeout. ONB-S5 recorded the same
-  failure on the untouched main tree on this machine.
+- `npx tsc --noEmit` and `npx prettier --check .` are clean.
+- The new and changed Restoration tests pass (68/68 on the first run).
+- The node project: 10923 passed and 12 failed. All 12 are timeouts under
+  full parallel load.
+  - Of those files, the simulation runner tests, `m11a4-retribution-evaluator`
+    and `m10c5b-final-audit` time out on an untouched main worktree on this
+    machine too.
+  - `m10d-protection-public-projection`, `m11g2-comparison-evidence` and
+    `m9b-corpus-harness` pass when run alone.
+- `node scripts/corpus/gate.mjs`: PASSED. Two workerd runs gave
+  byte-identical reports (187/782), and the report is committed.
+- `node scripts/corpus/gate.mjs --root evidence`: 16 cases and 42 assertions
+  passed in both runs.
 
 ## Questions for the reviewer
 
-1. Is a pinned minimum lifetime, with a single summon strictly before t, the
-   right past-only basis for PRESENT under O2?
-2. Is cast-contradiction of the maximum lifetime (`LIFETIME_BOUND_CONTRADICTED`)
-   a sufficient guard for an absence claim that rests on D?
+1. Is AUTHORITY_NOT_AVAILABLE ("no pinned decision authority") the right
+   internal envelope status when assignment findings were judged against a
+   supplied plan, with the public meaning left to HEAL-AP?
+2. Is the nullable subject name, which widens "may be this player", the right
+   fail-closed rule for a facade that has no preflight name?

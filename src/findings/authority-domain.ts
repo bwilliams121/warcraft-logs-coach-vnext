@@ -95,16 +95,38 @@ export const AUTHORITY_DOMAINS = Object.freeze([
  * analyzer is asked about its own play"); support targeting and timing are
  * questions about the play of a supporter, and are not added to every other
  * specialization's results.
+ *
+ * HEAL-A added the three healer families (CLAUDE.md "Healer Cooldown
+ * Assignments", "Healer Model Limits"), for the same reason:
+ *
+ * - COOLDOWN_ASSIGNMENT has a standard only when the CALLER supplies one: a
+ *   raid cooldown plan, per request (M12-E). That is request input, never a
+ *   pinned provider artifact, so nothing binds the domain and it resolves
+ *   NO_PINNED_AUTHORITY_FOR_DOMAIN; the specialization reads the plan from its
+ *   input and records it as the authority of each assignment finding
+ *   (`healer-finding.ts`). No plan is NO_AUTHORITY_AVAILABLE, never an
+ *   inferred assignment.
+ * - HEALING_COOLDOWN is observational: Warcraft Logs facts, no verdict.
+ * - HEALING_DECISION has no approved per-cast healer model.
  */
 export type ProviderlessDomain =
   /** Who received a support buff. No approved recipient-quality model exists. */
   | "SUPPORT_TARGETING"
   /** When a support ability was used. No approved support-timing standard exists. */
-  | "SUPPORT_TIMING";
+  | "SUPPORT_TIMING"
+  /** Execution of an assigned raid cooldown. Its only standard is a caller-supplied plan. */
+  | "COOLDOWN_ASSIGNMENT"
+  /** Use of a healer's own healing cooldowns. Observed facts only, no standard. */
+  | "HEALING_COOLDOWN"
+  /** Per-cast healing spell choice. No approved per-cast healer model exists. */
+  | "HEALING_DECISION";
 
 export const PROVIDERLESS_DOMAINS = Object.freeze([
   "SUPPORT_TARGETING",
   "SUPPORT_TIMING",
+  "COOLDOWN_ASSIGNMENT",
+  "HEALING_COOLDOWN",
+  "HEALING_DECISION",
 ] as const satisfies readonly ProviderlessDomain[]);
 
 /** Every family a capability may declare: the bindable ones and the provider-less ones. */

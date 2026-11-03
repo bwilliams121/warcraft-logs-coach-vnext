@@ -433,6 +433,36 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After HEAL-A: what the Restoration Shaman registration does not establish
+
+**Raised:** HEAL-A (2026-11-03).
+
+- **No public shape and no healer gate.** The healer finding set reaches no
+  projector, and a public request for a Restoration Shaman is still
+  SPEC_NOT_SUPPORTED. HEAL-AP defines the public result shape and the healer
+  promotion gate.
+- **The envelope status for a plan-evaluated result.** Internally it is
+  `AUTHORITY_NOT_AVAILABLE` ("no pinned decision authority") even when
+  assignment findings were judged against a supplied plan. What a public
+  reader sees for that case is a public-meaning question for HEAL-AP; a
+  consumer must read the finding set, never the status alone.
+- **The plan reaches every selected analyzer.** `SpecAnalysisInput` carries
+  the request's plan to whichever public analyzer runs; none reads it. The
+  disclosure stays `NO_PUBLIC_ASSIGNMENT_EVALUATOR` until a public healer
+  consumes it.
+- **Raid-night cells carry no plan.** A raid-night request has no plan field,
+  so a future public healer cell would be ASSIGNMENT NO_AUTHORITY_AVAILABLE.
+- **Real coverage is unchanged.** The real M12-D subject still has
+  PLAYER_CONTEXT cast-only evidence: no overlap claim and no name resolution
+  without a declared roster (test plans only). MISSED, EARLY and LATE remain
+  unreachable ("After M12-D").
+- **Name matching uses the actor catalog's name.** The facade has no
+  preflight identity, so it reads `CombatActor.name`, the same Warcraft Logs
+  master-data name. A missing name widens "may be this player" rather than
+  narrowing it.
+
+---
+
 ## After M13-E: what the Augmentation registration does not establish
 
 **Raised:** M13-E (2026-11-02).
@@ -445,10 +475,8 @@ current total (5,748,495 bytes), with what each row buys.
 - **Production fights carry no certified coverage** (After M13-D), so over a
   production FULL_RAID ingestion the facts' listings and continuity rest on
   category coverage alone.
-- **Restoration Shaman is still unregistered.** The provider-less domain
-  mechanism would serve it too (ASSIGNMENT, COOLDOWN, HEALING_DECISION), but
-  its declared families and result shape are its own tranche; its
-  unregistered-tree exception stands.
+- **Restoration Shaman is still unregistered.** Resolved by HEAL-A, through
+  the same provider-less mechanism (see "After HEAL-A").
 - **Envelope status is a summary.** `AUTHORITY_NOT_AVAILABLE` says "no support
   decision has a standard", not "nothing was observed". A consumer reading
   the status alone, without the payload, must not treat it as an empty
@@ -597,17 +625,12 @@ current total (5,748,495 bytes), with what each row buys.
 
 **Raised:** M12-D (2026-10-31).
 
-- **Not registered, not published.** Nothing in production calls it, and no
-  public field carries its results. Registering it needs a registration shape
-  for an evaluator with no SimulationCraft authority, the FULL_RAID scope
-  derived from `RESTORATION_SHAMAN_REQUIRED_INPUTS`, and a shared finding
-  shape for the ASSIGNMENT, COOLDOWN and HEALING_DECISION categories
-  (`src/findings/authority.ts` knows only ROTATION). Until then the
-  unregistered-tree exceptions in `m11a2-cross-spec-isolation` and
-  `m10a-cross-spec-isolation` stand.
+- **Not registered, not published.** Registration resolved by HEAL-A
+  (INTERNAL_ONLY, FULL_RAID derived, the shared healer finding shape; see
+  "After HEAL-A"). Publication is HEAL-AP's.
 - **No plan input.** Superseded by M12-E: the evaluator consumes the shared
-  normalized `RaidCooldownPlan`, which a request can supply. It still runs
-  only when called directly, because it is not registered.
+  normalized `RaidCooldownPlan`, which a request can supply. Since HEAL-A the
+  registration reads it from `SpecAnalysisInput.raidCooldownPlan`.
 - **MISSED, EARLY and LATE are unreachable.** A miss needs positive proof
   the ability was ready in the window. That needs Restoration cooldowns
   pinned the way M10-C5 pins them (`extract-simc-ability-cooldowns.mjs`:

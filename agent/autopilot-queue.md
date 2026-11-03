@@ -1187,11 +1187,13 @@ intervals.
 ### ONB-S6: Shared pet actor mapping for pet-driven APL state
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: none
 branch: autopilot/onb-s6
 wcl: NONE
 publicContract: NONE
+pr: 44
+mergeSha: 03d967dd1a6399d5777e6d5c914a51073c51b427
 ```
 
 **Direction.** `agent/follow-ups.md` "After M11-G3-1" (pets are not mapped
@@ -1224,8 +1226,9 @@ them.
 ### HEAL-A: Restoration Shaman registration and healer finding shape (internal)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: none
+branch: autopilot/heal-a
 wcl: NONE
 publicContract: NONE
 ```

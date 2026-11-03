@@ -43,7 +43,8 @@
  * M11-A5, Blood Death Knight from M11-B2 until M11-B12, and Brewmaster Monk
  * from M11-C2 until M11-C4j. From M11-C4j every registration was PUBLIC and
  * the internal-only machinery dormant, until Augmentation Evoker arrived
- * through it in M13-E.
+ * through it in M13-E (public since M13-F). Restoration Shaman arrived through
+ * it in HEAL-A.
  *
  * INJECTED CATALOGS MUST BE COMPLETE. The public-set equality below applies to
  * an injected catalog exactly as to the production one: a test that wants to
@@ -76,6 +77,7 @@ import { BREWMASTER_MONK_REGISTRATION } from "../specs/monk/brewmaster/registrat
 import { PROTECTION_PALADIN_REGISTRATION } from "../specs/paladin/protection/registration.js";
 import { RETRIBUTION_PALADIN_REGISTRATION } from "../specs/paladin/retribution/registration.js";
 import { ASSASSINATION_REGISTRATION } from "../specs/rogue/assassination/registration.js";
+import { RESTORATION_SHAMAN_REGISTRATION } from "../specs/shaman/restoration/registration.js";
 import type { AnalyzerRequirement } from "./ingestion-scope.js";
 import { SUPPORTED_SPEC_IDENTITIES } from "./spec-identity.js";
 
@@ -426,8 +428,9 @@ export function requireValidatedCatalog(
 /**
  * Every registration this build carries, as written by the specializations.
  *
- * Six rows, all PUBLIC since M13-F (Augmentation Evoker was INTERNAL_ONLY in
- * M13-E). A publicly unsupported
+ * Seven rows: six PUBLIC (all PUBLIC from M13-F until HEAL-A; Augmentation
+ * Evoker was INTERNAL_ONLY in M13-E) and, since HEAL-A, Restoration Shaman
+ * INTERNAL_ONLY. A publicly unsupported
  * specialization is represented by ABSENCE from the PUBLIC set — an
  * INTERNAL_ONLY row, when one exists, is in the catalog and reachable by
  * internal lookup and tests, and is never selected for a public request —
@@ -446,6 +449,8 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   BREWMASTER_MONK_REGISTRATION,
   // INTERNAL_ONLY from M13-E; PUBLIC since M13-F. Binds no authority: never ANALYZED, publishes support observations.
   AUGMENTATION_EVOKER_REGISTRATION,
+  // INTERNAL_ONLY since HEAL-A: the first healer row. Binds no pinned authority; no public shape yet (HEAL-AP).
+  RESTORATION_SHAMAN_REGISTRATION,
 ]);
 
 /**

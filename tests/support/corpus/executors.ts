@@ -29,6 +29,7 @@ import * as retribution from "./executors/spec-retribution-paladin.js";
 import * as blood from "./executors/spec-blood-death-knight.js";
 import * as brewmaster from "./executors/spec-brewmaster-monk.js";
 import * as augmentation from "./executors/spec-augmentation-evoker.js";
+import * as restoration from "./executors/spec-restoration-shaman.js";
 import * as sharedEngine from "./executors/shared-decision-engine.js";
 import * as transport from "./executors/wcl-transport.js";
 
@@ -625,6 +626,8 @@ export async function executeAssertion(
       return brewmaster.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_AUGMENTATION_EVOKER.REGISTRATION_RESULT":
       return augmentation.registrationResult(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_RESTORATION_SHAMAN.REGISTRATION_RESULT":
+      return restoration.registrationResult(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "APPLICATION_SERVICE.INTERNAL_REGISTRATION":
       return applicationService.internalRegistration(params as ParamsOf<typeof assertion.kind>);
     case "PUBLIC_CONTRACT.REST_MCP_PARITY":
@@ -739,6 +742,7 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_BREWMASTER_MONK.NON_DOMAIN_ENTRIES",
   "SPEC_BREWMASTER_MONK.SPEC_GATE",
   "SPEC_AUGMENTATION_EVOKER.REGISTRATION_RESULT",
+  "SPEC_RESTORATION_SHAMAN.REGISTRATION_RESULT",
   "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
   "PUBLIC_CONTRACT.REST_MCP_PARITY",
 ];

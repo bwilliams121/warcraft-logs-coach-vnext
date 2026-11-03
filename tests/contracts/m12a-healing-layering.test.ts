@@ -184,8 +184,10 @@ describe("there is nowhere to branch on a specialization or write a judgement", 
  * under its own review.
  *
  * M12-D names the first: the Restoration Shaman evaluator, which owns the
- * verdicts these facts feed. It is itself unregistered, so nothing in the
- * analysis service, the contracts, the API or MCP reaches the healing domain.
+ * verdicts these facts feed. Since HEAL-A it is registered INTERNAL_ONLY, and
+ * still nothing in the analysis service, the contracts, the API or MCP
+ * imports the healing domain: the registration reaches it only through the
+ * evaluator.
  */
 const HEALING_CONSUMERS = ["src/specs/shaman/restoration/evaluator.ts"];
 

@@ -182,7 +182,7 @@ describe("cross-spec authority access is refused structurally", () => {
     expect(Object.isFrozen(PROTECTION_PALADIN_REGISTRATION.authority)).toBe(true);
   });
 
-  it("the production catalog holds the six registrations, each citing only its own authority (Augmentation none)", () => {
+  it("the production catalog holds the seven registrations, each citing only its own authority (Augmentation and Restoration Shaman none)", () => {
     const cited = PRODUCTION_CATALOG.registrations.map((registration) => [
       registration.specId,
       registration.authorityBindings.map((binding) => binding.authorityId),
@@ -198,6 +198,8 @@ describe("cross-spec authority access is refused structurally", () => {
       ["monk/brewmaster", ["SIMC_APL_MONK_BREWMASTER"]],
       // M13-E: binds no decision authority; its families are provider-less.
       ["evoker/augmentation", []],
+      // HEAL-A: binds no pinned decision authority; its healer families are provider-less.
+      ["shaman/restoration", []],
     ]);
   });
 });

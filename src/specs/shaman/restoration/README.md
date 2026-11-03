@@ -1,13 +1,29 @@
-# Restoration Shaman (M12-D, internal)
+# Restoration Shaman (M12-D; registered INTERNAL_ONLY in HEAL-A)
 
 The first healer specialization evaluator. Owner decision 2026-10-31
 (`agent/autopilot-queue.md` "M12-D").
 
-It is **not registered** with the analysis service and has no public
-surface. Nothing in production calls it. It is not an APL specialization:
-there is no SimulationCraft authority, no `SpecId`, no registration and no
-APL artifact (`tests/contracts/m11a2-cross-spec-isolation.test.ts` names it
-as the one unregistered evaluator tree).
+It is **registered INTERNAL_ONLY** since HEAL-A (`registration.ts`,
+`shaman/restoration` in `INTERNAL_ONLY_SPEC_IDS`) and has no public surface:
+the public lookup never selects it, and a public request for a Restoration
+Shaman is still `SPEC_NOT_SUPPORTED`. It is not an APL specialization: there
+is no SimulationCraft authority and no APL artifact.
+
+## Registration (HEAL-A)
+
+- Three provider-less families, declared from
+  `RESTORATION_SHAMAN_REQUIRED_INPUTS`: COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN,
+  HEALING_DECISION. Each resolves `NO_PINNED_AUTHORITY_FOR_DOMAIN`; nothing is
+  bound. The derived requirement is FULL_RAID.
+- The plan is read from `SpecAnalysisInput.raidCooldownPlan`; absent is no
+  plan.
+- The result is never ANALYZED. `AUTHORITY_NOT_AVAILABLE` when the evaluator
+  ran (no PINNED decision authority; plan-backed assignment findings cite the
+  plan), `INSUFFICIENT_EVIDENCE` when the identity is not established or the
+  data is unusable.
+- The payload carries the evaluation and its healer finding set
+  (`healer-findings.ts`, in the shared `src/findings/healer-finding.ts`
+  shape), or why no set was built.
 
 ## Supported decision surface (v1)
 
@@ -23,7 +39,8 @@ as the one unregistered evaluator tree).
   entries are `notEvaluated` (`ABILITY_NOT_REGISTERED`). An entry that may
   name this player but is not uniquely resolved is `PLAYER_NOT_RESOLVED`; a
   phase-relative time is `PLANNED_TIME_UNRESOLVED` (no reviewed phase-label
-  map).
+  map). When the player's own name is not known, every unresolved entry may
+  be this player's.
 - **MET** needs the player's own completed cast of the planned ability in
   `[planned - tolerance, planned + tolerance]`. That cast is the
   actionability proof.

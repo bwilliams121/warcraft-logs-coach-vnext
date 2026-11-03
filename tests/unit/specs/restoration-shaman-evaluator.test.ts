@@ -319,7 +319,7 @@ describe("identity is validated before any evaluation", () => {
     ],
   ] as const)("%s is refused, with nothing evaluated", (_label, identity, reason) => {
     const result = evaluateRestorationShaman({ fight, identity, plan: null });
-    expect(result).toEqual({ revision: "restoration-shaman-evaluator/1", state: "IDENTITY_REFUSED", reason });
+    expect(result).toEqual({ revision: "restoration-shaman-evaluator/2", state: "IDENTITY_REFUSED", reason });
   });
 });
 

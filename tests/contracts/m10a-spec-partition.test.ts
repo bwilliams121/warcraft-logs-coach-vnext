@@ -66,15 +66,19 @@ describe("the known specialization ids are exactly partitioned", () => {
     expect(isSpecId("deathknight/blood")).toBe(true);
   });
 
-  it("the internal-only set is empty again since M13-F promoted Augmentation Evoker", () => {
+  it("the internal-only set holds Restoration Shaman since HEAL-A", () => {
     // Deliberate and pinned. The set was empty from M10-D to M11-A3, held
     // Retribution Paladin from M11-A4, was empty again from M11-A5, held the
     // Blood Death Knight measurement slice from M11-B2, was empty again from
     // M11-B12, held the Brewmaster Monk measurement slice from M11-C2, was
     // empty again from M11-C4j, held Augmentation Evoker in M13-E (the first
-    // registration with no decision authority), and is empty again since
-    // M13-F, which published its support observations.
-    expect(INTERNAL_ONLY_SPEC_IDS).toEqual([]);
+    // registration with no decision authority), was empty again from M13-F,
+    // which published its support observations, and holds Restoration Shaman
+    // (the first healer registration) since HEAL-A.
+    expect(INTERNAL_ONLY_SPEC_IDS).toEqual(["shaman/restoration"]);
+    expect(isSpecId("shaman/restoration")).toBe(true);
+    expect(isPublicSpecId("shaman/restoration")).toBe(false);
+    expect(() => requirePublicSpecId("shaman/restoration")).toThrow(InternalSpecExposureError);
     expect(isSpecId("evoker/augmentation")).toBe(true);
     expect(requirePublicSpecId("evoker/augmentation")).toBe("evoker/augmentation");
     // The narrowing boundary still refuses a name that is no specialization at all.

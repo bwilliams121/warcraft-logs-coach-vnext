@@ -569,13 +569,22 @@
       "passed": 1
     },
     {
-      "assertions": 16,
-      "cases": 12,
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_RESTORATION_SHAMAN.REGISTRATION_RESULT"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_RESTORATION_SHAMAN",
+      "passed": 1
+    },
+    {
+      "assertions": 17,
+      "cases": 13,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 16
+      "passed": 17
     },
     {
       "assertions": 14,
@@ -712,6 +721,20 @@
       ],
       "authority": null,
       "caseId": "application-service.protection-paladin-subject-is-analyzed-under-player-context",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.restoration-shaman-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -6116,6 +6139,20 @@
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_RESTORATION_SHAMAN.REGISTRATION_RESULT",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-restoration-shaman.unstated-subject-yields-no-healer-finding",
+      "owningLayer": "SPEC_RESTORATION_SHAMAN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
       "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
       "assertions": [
         {
@@ -6949,13 +6986,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 780,
-    "cases": 185,
+    "assertions": 782,
+    "cases": 187,
     "declared": 0,
-    "executable": 780,
+    "executable": 782,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 780
+    "passed": 782
   }
 }

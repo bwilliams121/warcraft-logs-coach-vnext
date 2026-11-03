@@ -29,6 +29,7 @@
  */
 
 import type { CombatState } from "../engine/state/combat-state.js";
+import type { RaidCooldownPlan } from "../raid-plan/raid-cooldown-plan.js";
 import type { SpecId } from "./spec-id.js";
 
 export type AnalysisStatus =
@@ -114,4 +115,12 @@ export interface SpecAnalysisInput {
   readonly specId: string;
   /** The enemy the decisions are about, where the caller established one. */
   readonly targetActorId: number | null;
+  /**
+   * The caller's normalized raid cooldown plan (M12-E), when the request
+   * supplied one. Absent or `null`: no plan was supplied, so an analyzer that
+   * judges assignment execution has no authority for it (HEAL-A). Request
+   * input passed through untouched; analyzers that judge no assignment ignore
+   * it.
+   */
+  readonly raidCooldownPlan?: RaidCooldownPlan | null;
 }

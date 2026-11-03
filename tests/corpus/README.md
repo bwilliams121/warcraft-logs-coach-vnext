@@ -125,7 +125,9 @@ Capture timestamps are corpus metadata. They never appear in analyzer output.
   `SPEC_PROTECTION_PALADIN` (M10-C; `src/specs/paladin/protection/`), the
   later specialization layers (`SPEC_AUGMENTATION_EVOKER`, M13-E, is the
   first whose registration binds no decision authority; its one kind,
-  `SPEC_AUGMENTATION_EVOKER.REGISTRATION_RESULT`, is NO_AUTHORITY_AVAILABLE),
+  `SPEC_AUGMENTATION_EVOKER.REGISTRATION_RESULT`, is NO_AUTHORITY_AVAILABLE;
+  `SPEC_RESTORATION_SHAMAN`, HEAL-A, the first healer layer, follows the same
+  shape with `SPEC_RESTORATION_SHAMAN.REGISTRATION_RESULT`),
   `APPLICATION_SERVICE`, `PUBLIC_CONTRACT`. Specialization layers are rooted
   at the SPEC tree since M11-A2, and `SPEC_LAYER_OF` in `contract.ts` is the
   test-owned, total, injective join from every `SpecId` to its layer.

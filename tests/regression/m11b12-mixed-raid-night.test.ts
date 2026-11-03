@@ -186,6 +186,7 @@ describe("a Blood Death Knight alone", () => {
       [BLOOD_DEATH_KNIGHT_ANALYZER_ID]: 1,
       "monk-brewmaster-observed-decisions": 0,
       "evoker-augmentation-support-observations": 0,
+      "shaman-restoration-healer-findings": 0,
     });
     expectBloodCell(cellOf(run.aggregate.cells, BLOOD_DK));
     expect(run.aggregate.coverage).toMatchObject({
@@ -220,6 +221,7 @@ describe("a mixed roster — all four supported specializations plus Arms — ov
       [BLOOD_DEATH_KNIGHT_ANALYZER_ID]: 1,
       "monk-brewmaster-observed-decisions": 0,
       "evoker-augmentation-support-observations": 0,
+      "shaman-restoration-healer-findings": 0,
     });
   });
 

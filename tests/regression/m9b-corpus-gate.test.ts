@@ -151,9 +151,11 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // consumable status through the application service (one each).
     // M12-A added one case and three assertions: the normalization census of
     // the real death slice the shared death-timeline primitive reads.
-    expect(result.summary.cases).toBe(185);
-    expect(result.summary.assertions).toBe(780);
-    expect(result.summary.passed).toBe(780);
+    // HEAL-A added two cases and two assertions: the INTERNAL_ONLY Restoration
+    // Shaman registration's result and its internal-only reachability.
+    expect(result.summary.cases).toBe(187);
+    expect(result.summary.assertions).toBe(782);
+    expect(result.summary.passed).toBe(782);
   });
 
   it("covers every layer", async () => {

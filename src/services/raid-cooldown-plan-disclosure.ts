@@ -6,8 +6,8 @@
  * assignments it holds and which note lines were not imported.
  *
  * `assignmentEvaluation` is NOT_EVALUATED on every result of this build. No
- * registered analyzer consumes a plan: the one evaluator that does
- * (Restoration Shaman, M12-D) is internal and unregistered. Saying so keeps a
+ * PUBLIC analyzer consumes a plan: the one evaluator that does (Restoration
+ * Shaman, M12-D) is registered INTERNAL_ONLY since HEAL-A. Saying so keeps a
  * supplied plan from reading as "every assignment was met". The reason names
  * the first thing that stopped evaluation, in this order: the plan is for
  * another fight, its binding is unknown, or no public evaluator consumes it.
