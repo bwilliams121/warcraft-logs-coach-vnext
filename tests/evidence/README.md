@@ -142,6 +142,18 @@ M12-D's.
 - Ordinary archive growth, pinned in the same test. No new Warcraft Logs
   request was made.
 
+**HEAL-B2P evidence.** `wcl-b1pm-fight-48-holy-priest-2-casts.seg-*` is two
+compact `--actor-slice` segments (137,685 bytes) of the same capture, cut
+exactly as HEAL-B1P's.
+
+- Together they cover the whole fight: every `cast` and `begincast` sourced
+  by or targeting actor 2, the canonical Holy Priest.
+- They grant CASTS for actor 2 only. Its pet's own casts are not retained.
+- The bundle, with the committed fight context as its catalog, is the healer
+  promotion gate's Holy Priest subject.
+- Ordinary archive growth, pinned in `tests/unit/m11c4e-evidence-archive.test.ts`.
+  No new Warcraft Logs request was made.
+
 ## Server-filtered event streams (M13-A)
 
 A source query may be `FILTERED_EVENT_STREAMS`: several event streams of one

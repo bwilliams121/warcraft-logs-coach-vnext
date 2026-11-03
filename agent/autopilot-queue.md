@@ -1316,11 +1316,13 @@ evidence gap is ONB-EV's (rule 4).
 ### HEAL-B2: Holy Priest (internal)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: HEAL-B1
 branch: autopilot/heal-b2
 wcl: NONE
 publicContract: NONE
+pr: 49
+mergeSha: b2658f252ae3616f19cafd4e36ab33b134fc06ad
 ```
 
 **Outcome.** Holy Priest is registered INTERNAL_ONLY on the HEAL-B1 healer
@@ -1333,11 +1335,18 @@ the fight-48 Holy Priest's whole-fight casts, not yet committed
 ### HEAL-B2P: Holy Priest (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: HEAL-B2, HEAL-AP
+branch: autopilot/heal-b2p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** Holy Priest passed the HEAL-AP healer promotion gate on its
+whole-fight casts in b1PmaKrd6CDfzngc fight 48 (actor 2: three Apotheosis and
+three Divine Hymn casts), cut from the retained M11-E2 capture (no new
+request), and is PUBLIC. Restoration Druid is the one INTERNAL_ONLY healer
+left (ONB-EV).
 
 ### HEAL-B3: Discipline Priest (internal, own representative)
 

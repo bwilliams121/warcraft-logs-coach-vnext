@@ -65,8 +65,9 @@ describe("the five sites agree", () => {
       "shaman/restoration",
       "paladin/holy",
       "monk/mistweaver",
+      "priest/holy",
     ]);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration", "priest/holy"]);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration"]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
 
@@ -85,6 +86,7 @@ describe("the five sites agree", () => {
       ["shaman/restoration", "shaman/restoration"],
       ["paladin/holy", "paladin/holy"],
       ["monk/mistweaver", "monk/mistweaver"],
+      ["priest/holy", "priest/holy"],
     ]);
   });
 
@@ -130,7 +132,7 @@ describe("the five sites agree", () => {
       ["paladin/holy", "PUBLIC"],
       ["druid/restoration", "INTERNAL_ONLY"],
       ["monk/mistweaver", "PUBLIC"],
-      ["priest/holy", "INTERNAL_ONLY"],
+      ["priest/holy", "PUBLIC"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -142,6 +144,7 @@ describe("the five sites agree", () => {
       "shaman-restoration-healer-findings",
       "paladin-holy-healer-findings",
       "monk-mistweaver-healer-findings",
+      "priest-holy-healer-findings",
     ]);
     expect(ENABLED_ANALYSIS_REQUIREMENTS.map((requirement) => requirement.analyzerId)).toEqual(
       ENABLED_ANALYZERS.map((row) => row.analyzerId),

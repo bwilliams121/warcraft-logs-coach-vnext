@@ -751,7 +751,7 @@
         }
       ],
       "authority": null,
-      "caseId": "application-service.holy-priest-registration-is-internal-only",
+      "caseId": "application-service.holy-priest-registration-is-public-since-heal-b2p",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },

@@ -6699,13 +6699,13 @@ const BREWMASTER_CASES = [
       ],
     },
   ),
-  // ---- SPEC_HOLY_PRIEST (HEAL-B2, INTERNAL_ONLY) ---------------------------------
+  // ---- SPEC_HOLY_PRIEST (HEAL-B2; PUBLIC since HEAL-B2P) ----------------------------
   kase(
     "spec-holy-priest.unstated-subject-yields-no-healer-finding",
     PP,
     "SPEC_HOLY_PRIEST",
     "src/specs/priest/holy/registration.ts (facade, capabilities, bindings); src/services/analyzer-registry.ts internalAnalyzerForSpec, runAnalyzer",
-    "Through the production catalog's internal lookup, the INTERNAL_ONLY Holy Priest registration derives FULL_RAID from its declared healer capabilities, resolves COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and HEALING_DECISION to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER, no evaluator result and no healer finding set: nothing is evaluated for a subject whose identity is not established, and nothing is ANALYZED. The public lookup finds nothing.",
+    "Through the production catalog (both lookups find the same row since HEAL-B2P), the Holy Priest registration derives FULL_RAID from its declared healer capabilities, resolves COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and HEALING_DECISION to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER, no evaluator result and no healer finding set: nothing is evaluated for a subject whose identity is not established, and nothing is ANALYZED.",
     [
       a("SPEC_HOLY_PRIEST.REGISTRATION_RESULT", {
         actorId: TANK,
@@ -6736,24 +6736,24 @@ const BREWMASTER_CASES = [
     },
   ),
   kase(
-    "application-service.holy-priest-registration-is-internal-only",
+    "application-service.holy-priest-registration-is-public-since-heal-b2p",
     PP,
     "APPLICATION_SERVICE",
     "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
-    "The validated production catalog carries the Holy Priest registration for the INTERNAL lookup only, INTERNAL_ONLY, in either catalog order; the public lookup finds nothing and the public identity table does not resolve Priest/Holy, so no public request can select it.",
+    "RE-PINNED AT HEAL-B2P, INVERTING THE HEAL-B2 CASE. The validated production catalog carries the Holy Priest registration PUBLIC, in either catalog order: both lookups find the same row, and the public identity table resolves Priest/Holy to priest/holy, so a public request selects it. The five public sites moved together in one reviewed edit (the partition, the public contract's specId enum, the identity table, the `satisfies PublicSpecId` on spec.ts, and the registration's exposure), with the registration's healer view, after the healer promotion gate passed on the canonical fight's Holy Priest.",
     [
       a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
         specId: "priest/holy",
         expected: {
           internalAnalyzerId: "priest-holy-healer-findings",
-          publicAnalyzerId: null,
-          exposure: "INTERNAL_ONLY",
-          identityResolvesPublicly: false,
+          publicAnalyzerId: "priest-holy-healer-findings",
+          exposure: "PUBLIC",
+          identityResolvesPublicly: true,
         },
       }),
     ],
     ["OWNED_CONTRACT"],
-    "Holy Priest is registered INTERNAL_ONLY in HEAL-B2 and its public promotion is HEAL-B2P's: registration changes what internal evaluation derives, not what a public request can reach.",
+    "Promotion changed reachability, not analysis: the registration still binds no pinned authority and is never ANALYZED; what a public request now receives is its healer findings (healerFindings), never an HPS ranking, an inferred assignment or a cooldown-quality verdict.",
     {
       related: [
         "tests/contracts/m10a-registry-integrity.test.ts",
@@ -12278,7 +12278,9 @@ const M12D_EVIDENCE_CASES = M12D_SEGMENTS.map(([fromS, toS, , , count]) =>
 // Paladin and Mistweaver Monk. Every cast and begincast sourced by or
 // targeting fight 48's Holy Paladin (actor 1) and Mistweaver Monk (actor 9)
 // over the whole fight, cut from the same M11-E2 capture exactly as M12-D cut
-// actor 122's. No new Warcraft Logs request was made.
+// actor 122's. No new Warcraft Logs request was made. HEAL-B2P (2026-11-03)
+// added the fight's Holy Priest (actor 2), cut identically from the same
+// capture, again with no new request.
 // --------------------------------------------------------------------------
 
 const HEALB1P_SUBJECTS = [
@@ -12301,6 +12303,18 @@ const HEALB1P_SUBJECTS = [
     segments: [
       [0, 180, B1PM_START - 1, B1PM_START + 180000, 282, 241, 41, 267],
       [180, 345, B1PM_START + 180000, B1PM_END, 276, 221, 55, 263],
+    ],
+  },
+  // HEAL-B2P: the fight's Holy Priest, cut identically.
+  {
+    actorId: 2,
+    slug: "holy-priest",
+    label: "Holy Priest",
+    tranche: "HEAL-B2P",
+    cooldowns: "three Divine Hymn and three Apotheosis casts",
+    segments: [
+      [0, 180, B1PM_START - 1, B1PM_START + 180000, 265, 175, 90, 252],
+      [180, 345, B1PM_START + 180000, B1PM_END, 214, 147, 67, 203],
     ],
   },
 ];
@@ -12331,7 +12345,7 @@ function healb1p_segment(subject, [fromS, toS, fromMs, toMs, count, casts, begin
       },
     ],
     coverageBasis: `CASTS is complete for actor ${actor} over [${(fromMs + 1).toLocaleString("en-US")} .. ${toMs.toLocaleString("en-US")}] by the predicate 'every cast or begincast actor ${actor} sources or is targeted by, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). No other category is granted: auras, healing, damage, absorbs, resources, summons and deaths are excluded families, and nothing is granted to any other actor, pets included. The segment is one part of a two-part bundle, joined by adjacency, that spans the whole fight.`,
-    retainedFor: `HEAL-B1P: the ${subject.label}'s real casts over the whole canonical fight, so the healer promotion gate's observations (${subject.cooldowns}) and the COMPLETE coverage behind 'these are all of them' are proven on Warcraft Logs bytes, alongside the committed fight context that establishes the player's class and specialization.`,
+    retainedFor: `${subject.tranche ?? "HEAL-B1P"}: the ${subject.label}'s real casts over the whole canonical fight, so the healer promotion gate's observations (${subject.cooldowns}) and the COMPLETE coverage behind 'these are all of them' are proven on Warcraft Logs bytes, alongside the committed fight context that establishes the player's class and specialization.`,
     limitations: [
       "One segment of the whole fight: on its own it grants no coverage outside its range; only the composed bundle covers the fight.",
       "Casts and begincasts only: no aura, heal, damage, absorb, summon, resource or death event is retained, so nothing here says when an aura was active, what a cast healed, or whether the player was alive.",

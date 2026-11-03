@@ -433,12 +433,41 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After HEAL-B2P: what the public Holy Priest does not establish
+
+**Raised:** HEAL-B2P (2026-11-03).
+
+- **Real healing context is never COMPLETE for it.** As for the other public
+  healers ("After HEAL-AP", "After HEAL-B1P"): the committed subject is
+  cast-only, so the overlap listing with the roster declared is UNKNOWN.
+  Unchanged.
+- **Its pet's casts are not retained.** The cut grants CASTS for actor 2
+  only. A use is the player's own completed cast, so the listing is
+  unaffected; the healing it overlaps still counts the stated pet (94) as a
+  source, which only matters once healing evidence is committed.
+- **The pseudonym is re-labelled for the public plan** (`Subjectpriest`),
+  exactly as HEAL-AP's and HEAL-B1P's; actor id and events untouched.
+- **The registration facade is now copied in four public healers.** HEAL-B2P
+  added Holy Priest's view adapter and limits prose by the same copy as
+  HEAL-B1P (the identity strings and listed abilities differ, nothing else).
+  The shared healer registration helper "After HEAL-B2" describes was not
+  done here: it rewrites four already-reviewed registrations, three of them
+  PUBLIC before this tranche, inside a tranche that declares one
+  specialization's promotion. It should be its own reviewed refactor before
+  any further healer registration copies the shape (Restoration Druid's
+  eventual promotion; HEAL-B3 and HEAL-B4 are their own representatives and
+  may not share it).
+
+---
+
 ## After HEAL-B2: what the internal Holy Priest registration does not establish
 
 **Raised:** HEAL-B2 (2026-11-03).
 
 - **It cannot pass the healer promotion gate on committed evidence yet
-  (HEAL-B2P).** The gate needs a real subject with a COMPLETE use listing, at
+  (HEAL-B2P).** Resolved by HEAL-B2P: the fight-48 Holy Priest's (actor 2)
+  whole-fight casts were cut from the retained M11-E2 capture (no new
+  request), and it passed every gate check. The gate needs a real subject with a COMPLETE use listing, at
   least one use, and a met and a not-met plan entry over those uses. The M13-A
   Holy Priest's three uses sit in a filtered capture whose listing is
   UNKNOWN, and no committed capture holds the fight-48 Holy Priest's (actor 2)

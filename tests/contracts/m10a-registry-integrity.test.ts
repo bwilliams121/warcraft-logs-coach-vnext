@@ -54,6 +54,7 @@ import { AUGMENTATION_EVOKER_REGISTRATION } from "../../src/specs/evoker/augment
 import { RESTORATION_SHAMAN_REGISTRATION } from "../../src/specs/shaman/restoration/registration.js";
 import { MISTWEAVER_MONK_REGISTRATION } from "../../src/specs/monk/mistweaver/registration.js";
 import { HOLY_PALADIN_REGISTRATION } from "../../src/specs/paladin/holy/registration.js";
+import { HOLY_PRIEST_REGISTRATION } from "../../src/specs/priest/holy/registration.js";
 import { RETRIBUTION_PALADIN_ANALYZER_ID } from "../../src/specs/paladin/retribution/spec.js";
 import { MCP_TEST_ENV } from "../support/analysis-transports.js";
 import { analyzedFightAnalysis } from "../support/aggregation-fixture.js";
@@ -88,7 +89,7 @@ describe("the production catalog", () => {
     expect(validateAnalyzerCatalog(ANALYZER_REGISTRATIONS).ok).toBe(true);
   });
 
-  it("carries nine PUBLIC registrations — Assassination, both Paladins, Blood Death Knight (since M11-B12), Brewmaster Monk (since M11-C4j), Augmentation Evoker (INTERNAL_ONLY in M13-E, PUBLIC since M13-F) and Restoration Shaman (INTERNAL_ONLY in HEAL-A, PUBLIC since HEAL-AP), Holy Paladin and Mistweaver Monk (INTERNAL_ONLY in HEAL-B1, PUBLIC since HEAL-B1P), plus Restoration Druid and Holy Priest (since HEAL-B2) INTERNAL_ONLY", () => {
+  it("carries ten PUBLIC registrations — Assassination, both Paladins, Blood Death Knight (since M11-B12), Brewmaster Monk (since M11-C4j), Augmentation Evoker (INTERNAL_ONLY in M13-E, PUBLIC since M13-F) and Restoration Shaman (INTERNAL_ONLY in HEAL-A, PUBLIC since HEAL-AP), Holy Paladin and Mistweaver Monk (INTERNAL_ONLY in HEAL-B1, PUBLIC since HEAL-B1P) and Holy Priest (INTERNAL_ONLY in HEAL-B2, PUBLIC since HEAL-B2P), plus Restoration Druid INTERNAL_ONLY", () => {
     expect(
       PRODUCTION_CATALOG.registrations.map((registration) => [
         registration.analyzerId,
@@ -107,14 +108,15 @@ describe("the production catalog", () => {
       ["paladin-holy-healer-findings", "paladin/holy", "PUBLIC"],
       ["druid-restoration-healer-findings", "druid/restoration", "INTERNAL_ONLY"],
       ["monk-mistweaver-healer-findings", "monk/mistweaver", "PUBLIC"],
-      // HEAL-B2: a fourth healer row on the same architecture, INTERNAL_ONLY.
-      ["priest-holy-healer-findings", "priest/holy", "INTERNAL_ONLY"],
+      // HEAL-B2: a fourth healer row on the same architecture; PUBLIC since HEAL-B2P.
+      ["priest-holy-healer-findings", "priest/holy", "PUBLIC"],
     ]);
     // The public set is DERIVED from the rows' exposure, never hand-listed:
     // six of seven rows in HEAL-A (Restoration Shaman was INTERNAL_ONLY), all
-    // seven from HEAL-AP, seven of ten in HEAL-B1, and nine of ten since HEAL-B1P.
+    // seven from HEAL-AP, seven of ten in HEAL-B1, nine of ten in HEAL-B1P, nine of eleven in HEAL-B2, and ten of
+    // eleven since HEAL-B2P.
     expect(ENABLED_ANALYZERS).toEqual(publicAnalyzers(PRODUCTION_CATALOG));
-    expect(ENABLED_ANALYZERS).toHaveLength(9);
+    expect(ENABLED_ANALYZERS).toHaveLength(10);
     expect(ENABLED_ANALYZERS.map((analyzer) => analyzer.specId)).toEqual([
       "rogue/assassination",
       "paladin/protection",
@@ -125,6 +127,7 @@ describe("the production catalog", () => {
       "shaman/restoration",
       "paladin/holy",
       "monk/mistweaver",
+      "priest/holy",
     ]);
   });
 
@@ -238,6 +241,7 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
       RESTORATION_SHAMAN_REGISTRATION,
       HOLY_PALADIN_REGISTRATION,
       MISTWEAVER_MONK_REGISTRATION,
+      HOLY_PRIEST_REGISTRATION,
     ];
     const validated = requireValidatedCatalog(rows);
 
@@ -249,7 +253,7 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
     expect(analyzerForSpec("paladin/protection", validated)?.exposure).toBe("PUBLIC");
     expect(analyzerForSpec("paladin/protection", validated)?.requirement.includeResources).toBe(true);
     expect(analyzerForSpec("paladin/protection", validated)?.authorityBindings).toHaveLength(1);
-    expect(validated.registrations).toHaveLength(9);
+    expect(validated.registrations).toHaveLength(10);
     // And re-validating the mutated rows now refuses them: a duplicate, and a
     // demoted Protection row that leaves the public set incomplete.
     const defects = defectsOf(rows);
@@ -288,6 +292,7 @@ describe("every lookup requires a validated catalog", () => {
     RESTORATION_SHAMAN_REGISTRATION,
     HOLY_PALADIN_REGISTRATION,
     MISTWEAVER_MONK_REGISTRATION,
+    HOLY_PRIEST_REGISTRATION,
   ];
   const DUPLICATE_ANALYZER = [
     ASSASSINATION_REGISTRATION,
@@ -305,6 +310,7 @@ describe("every lookup requires a validated catalog", () => {
     RESTORATION_SHAMAN_REGISTRATION,
     HOLY_PALADIN_REGISTRATION,
     MISTWEAVER_MONK_REGISTRATION,
+    HOLY_PRIEST_REGISTRATION,
   ];
   const AUTHORITY_MISMATCH = [
     {
@@ -396,6 +402,7 @@ describe("the public set is one promise across the partition, the identity table
         RESTORATION_SHAMAN_REGISTRATION,
         HOLY_PALADIN_REGISTRATION,
         MISTWEAVER_MONK_REGISTRATION,
+        HOLY_PRIEST_REGISTRATION,
       ],
       [
         ASSASSINATION_REGISTRATION,
@@ -407,6 +414,7 @@ describe("the public set is one promise across the partition, the identity table
         RESTORATION_SHAMAN_REGISTRATION,
         HOLY_PALADIN_REGISTRATION,
         MISTWEAVER_MONK_REGISTRATION,
+        HOLY_PRIEST_REGISTRATION,
       ],
       [
         ASSASSINATION_REGISTRATION,
@@ -418,6 +426,7 @@ describe("the public set is one promise across the partition, the identity table
         RESTORATION_SHAMAN_REGISTRATION,
         HOLY_PALADIN_REGISTRATION,
         MISTWEAVER_MONK_REGISTRATION,
+        HOLY_PRIEST_REGISTRATION,
       ],
       [
         ASSASSINATION_REGISTRATION,
@@ -429,6 +438,7 @@ describe("the public set is one promise across the partition, the identity table
         RESTORATION_SHAMAN_REGISTRATION,
         HOLY_PALADIN_REGISTRATION,
         MISTWEAVER_MONK_REGISTRATION,
+        HOLY_PRIEST_REGISTRATION,
       ],
       [
         ASSASSINATION_REGISTRATION,
@@ -448,6 +458,7 @@ describe("the public set is one promise across the partition, the identity table
         RESTORATION_SHAMAN_REGISTRATION,
         HOLY_PALADIN_REGISTRATION,
         MISTWEAVER_MONK_REGISTRATION,
+        HOLY_PRIEST_REGISTRATION,
       ],
       [
         ASSASSINATION_REGISTRATION,
@@ -459,6 +470,7 @@ describe("the public set is one promise across the partition, the identity table
         { ...RESTORATION_SHAMAN_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
         HOLY_PALADIN_REGISTRATION,
         MISTWEAVER_MONK_REGISTRATION,
+        HOLY_PRIEST_REGISTRATION,
       ],
       [
         ASSASSINATION_REGISTRATION,
@@ -470,6 +482,7 @@ describe("the public set is one promise across the partition, the identity table
         RESTORATION_SHAMAN_REGISTRATION,
         { ...HOLY_PALADIN_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
         MISTWEAVER_MONK_REGISTRATION,
+        HOLY_PRIEST_REGISTRATION,
       ],
       [
         ASSASSINATION_REGISTRATION,
@@ -481,6 +494,19 @@ describe("the public set is one promise across the partition, the identity table
         RESTORATION_SHAMAN_REGISTRATION,
         HOLY_PALADIN_REGISTRATION,
         { ...MISTWEAVER_MONK_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
+        HOLY_PRIEST_REGISTRATION,
+      ],
+      [
+        ASSASSINATION_REGISTRATION,
+        PROTECTION_PALADIN_REGISTRATION,
+        RETRIBUTION_PALADIN_REGISTRATION,
+        BLOOD_DEATH_KNIGHT_REGISTRATION,
+        BREWMASTER_MONK_REGISTRATION,
+        AUGMENTATION_EVOKER_REGISTRATION,
+        RESTORATION_SHAMAN_REGISTRATION,
+        HOLY_PALADIN_REGISTRATION,
+        MISTWEAVER_MONK_REGISTRATION,
+        { ...HOLY_PRIEST_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
       ],
     ]) {
       const defects = defectsOf(demoted);
@@ -494,6 +520,7 @@ describe("the public set is one promise across the partition, the identity table
       RESTORATION_SHAMAN_REGISTRATION,
       HOLY_PALADIN_REGISTRATION,
       MISTWEAVER_MONK_REGISTRATION,
+      HOLY_PRIEST_REGISTRATION,
       AUGMENTATION_EVOKER_REGISTRATION,
       BREWMASTER_MONK_REGISTRATION,
       BLOOD_DEATH_KNIGHT_REGISTRATION,
@@ -527,6 +554,7 @@ describe("the public set is one promise across the partition, the identity table
         "shaman/restoration",
         "paladin/holy",
         "monk/mistweaver",
+        "priest/holy",
       ].sort(),
     );
     expect(analyzerForSpec("evoker/augmentation", reversed)?.analyzerId).toBe(

@@ -163,6 +163,17 @@ const HEALB1P_EVIDENCE: Readonly<Record<string, number>> = {
 };
 const HEALB1P_BYTES = Object.values(HEALB1P_EVIDENCE).reduce((sum, bytes) => sum + bytes, 0);
 /**
+ * HEAL-B2P: the canonical Holy Priest's (actor 2) casts and begincasts over
+ * the whole fight, two compact segments of the same capture, cut exactly as
+ * HEAL-B1P's, for the healer promotion gate. Ordinary archive growth (137,685
+ * bytes), named and pinned like HEAL-B1P.
+ */
+const HEALB2P_EVIDENCE: Readonly<Record<string, number>> = {
+  "wcl-b1pm-fight-48-holy-priest-2-casts.seg-0-180": 75396,
+  "wcl-b1pm-fight-48-holy-priest-2-casts.seg-180-345": 62289,
+};
+const HEALB2P_BYTES = Object.values(HEALB2P_EVIDENCE).reduce((sum, bytes) => sum + bytes, 0);
+/**
  * M13-A: the one bounded Augmentation Evoker capture (owner grant
  * 2026-11-01): the sanitized fight context and the two merged segments of its
  * three server-filtered streams, which grant nothing. Ordinary archive growth
@@ -234,6 +245,8 @@ describe("the committed evidence archive", () => {
       // HEAL-B1P: the Holy Paladin's cast segments (code-point order: "h" < "m" < "r").
       "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-0-180",
       "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-180-345",
+      // HEAL-B2P: the Holy Priest's cast segments ("holy-pa" < "holy-pr").
+      ...Object.keys(HEALB2P_EVIDENCE),
       // HEAL-B1P: the Mistweaver Monk's cast segments.
       "wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-0-180",
       "wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-180-345",
@@ -265,8 +278,8 @@ describe("the committed evidence archive", () => {
       ...Object.keys(M13D_EVIDENCE),
     ]);
     // M12-B added one normalization census per raid damage segment, M12-D one per cast
-    // segment, M13-A one per merged support segment, HEAL-B1P one per cast segment.
-    expect(loaded.archive.cases).toHaveLength(20);
+    // segment, M13-A one per merged support segment, HEAL-B1P and HEAL-B2P one per cast segment.
+    expect(loaded.archive.cases).toHaveLength(22);
     // Accounting is per root: the archive counts its own bytes only.
     expect(loaded.archive.totalArtifactBytes).toBe(
       308961 +
@@ -279,6 +292,7 @@ describe("the committed evidence archive", () => {
         M12B_BYTES +
         M12D_BYTES +
         HEALB1P_BYTES +
+        HEALB2P_BYTES +
         M13A_BYTES +
         M13D_BYTES,
     );
@@ -290,6 +304,7 @@ describe("the committed evidence archive", () => {
       ...M12B_EVIDENCE,
       ...M12D_EVIDENCE,
       ...HEALB1P_EVIDENCE,
+      ...HEALB2P_EVIDENCE,
       ...M13A_EVIDENCE,
       ...M13D_EVIDENCE,
     })) {
@@ -326,7 +341,8 @@ describe("the committed evidence archive", () => {
     // bytes of ordinary Augmentation Evoker evidence: 18,662,226. M13-D adds
     // 62,316 bytes of ordinary certification tables: 18,724,542. HEAL-B1P adds
     // 403,697 bytes of ordinary Holy Paladin and Mistweaver Monk cast evidence:
-    // 19,128,239.
+    // 19,128,239. HEAL-B2P adds 137,685 bytes of ordinary Holy Priest cast
+    // evidence: 19,265,924.
     expect(M11G1_BYTES).toBe(364631);
     expect(M11G2_BYTES).toBe(12162150);
     expect(M11G4_BYTES).toBe(206);
@@ -335,6 +351,7 @@ describe("the committed evidence archive", () => {
     expect(M13A_BYTES).toBe(504031);
     expect(M13D_BYTES).toBe(62316);
     expect(HEALB1P_BYTES).toBe(403697);
+    expect(HEALB2P_BYTES).toBe(137685);
     expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(
       4537019 +
         M11G1_BYTES +
@@ -343,10 +360,11 @@ describe("the committed evidence archive", () => {
         M12B_BYTES +
         M12D_BYTES +
         HEALB1P_BYTES +
+        HEALB2P_BYTES +
         M13A_BYTES +
         M13D_BYTES,
     );
-    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(19128239);
+    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(19265924);
     expect(loaded.archive.totalArtifactBytes + frameBytes).toBeGreaterThan(EVIDENCE_ARCHIVE_NOTICE_BYTES);
     // The regression corpus's own ceiling is untouched by the archive.
     expect(MAX_CORPUS_BYTES).toBe(6 * 1024 * 1024);

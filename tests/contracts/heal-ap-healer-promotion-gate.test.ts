@@ -47,7 +47,8 @@
  * none meets a weakened one. HEAL-B1P added Holy Paladin and Mistweaver Monk,
  * each on its own whole-fight casts in the same canonical fight, driven by the
  * same checks; Restoration Druid has no retained evidence and stays
- * INTERNAL_ONLY.
+ * INTERNAL_ONLY. HEAL-B2P added Holy Priest the same way (actor 2, cut from
+ * the same capture).
  */
 
 import { beforeAll, describe, expect, it } from "vitest";
@@ -61,14 +62,19 @@ import { projectAnalysisResult } from "../../src/contracts/analysis-projection.j
 import type { CombatFight } from "../../src/engine/normalization/combat-fight.js";
 import { PRODUCTION_CATALOG } from "../../src/services/analyzer-registry.js";
 import {
+  APOTHEOSIS,
   ASCENDANCE,
   AURA_MASTERY,
   AVENGING_WRATH,
   CHAIN_HEAL,
+  DIVINE_HYMN,
+  FLASH_HEAL,
   HOLY_PALADIN_SUBJECT_ACTOR,
+  HOLY_PRIEST_SUBJECT_ACTOR,
   HOLY_SHOCK,
   INVOKE_YULON,
   loadHolyPaladinSubject,
+  loadHolyPriestSubject,
   loadMistweaverSubject,
   loadRestorationSubject,
   MISTWEAVER_SUBJECT_ACTOR,
@@ -172,6 +178,29 @@ const HEALER_GATE_SUBJECTS: readonly HealerGateSubject[] = [
           { name: subject.name, abilityId: RESTORAL, atReportTimeMs: 7_790_000, toleranceMs: 2_000 },
           // An ability the specialization does not identify.
           { name: subject.name, abilityId: VIVIFY, atReportTimeMs: 7_500_000, toleranceMs: 2_000 },
+        ],
+      };
+    },
+  },
+  {
+    specId: "priest/holy",
+    className: "Priest",
+    specName: "Holy",
+    actorId: HOLY_PRIEST_SUBJECT_ACTOR,
+    identified: [DIVINE_HYMN, APOTHEOSIS],
+    load: async () => {
+      const subject: RestorationSubject = await loadHolyPriestSubject();
+      return {
+        ...subject,
+        entries: [
+          // Around the real Divine Hymn cast at 7,509,640.
+          { name: subject.name, abilityId: DIVINE_HYMN, atReportTimeMs: 7_509_000, toleranceMs: 2_000 },
+          // Apotheosis, where the subject did not cast it (its casts: 7,470,226, 7,595,502 and 7,721,342).
+          { name: subject.name, abilityId: APOTHEOSIS, atReportTimeMs: 7_650_000, toleranceMs: 3_000 },
+          // After the completed encounter's end (7,781,469).
+          { name: subject.name, abilityId: DIVINE_HYMN, atReportTimeMs: 7_790_000, toleranceMs: 2_000 },
+          // An ability the specialization does not identify.
+          { name: subject.name, abilityId: FLASH_HEAL, atReportTimeMs: 7_500_000, toleranceMs: 2_000 },
         ],
       };
     },

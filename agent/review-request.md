@@ -4,97 +4,104 @@ Rolling file: overwritten for each review cycle.
 
 ## Change
 
-HEAL-B2: Holy Priest (internal). Branch `autopilot/heal-b2`, from main at
-f066fd3.
+HEAL-B2P: Holy Priest (public). Branch `autopilot/heal-b2p`, from main at
+b2658f2.
 
-- **Warcraft Logs: NONE.** No request, probe or capture. Real evidence is the
-  committed M13-A capture and the committed fight-48 friendly-players window;
-  the identity data is read from the pinned SimulationCraft `trait_data.inc`
-  already used by HEAL-B1 (local copy `.probe/simc-33622e9d/`, sha256 as
-  recorded in the artifact provenance).
-- **Public contract: NONE.** Nothing under `src/contracts/`, `src/api/` or
-  `src/mcp/` changes. `priest/holy` is INTERNAL_ONLY; a public Priest/Holy
-  request stays SPEC_NOT_SUPPORTED with no dispatch.
-- **Queue bookkeeping:** HEAL-B1P is recorded MERGED (PR #48, f066fd39…);
-  HEAL-B2 is set PR_OPEN with its outcome. Every other merged tranche the
-  supervisor listed was already recorded MERGED with its pr and mergeSha.
+- **Warcraft Logs: NONE.** No request, probe or capture. The new evidence is
+  two segments cut offline by `scripts/sanitize-probe.mjs` from the retained,
+  authorized M11-E2 raw capture (`.probe/m11e2/pages.json`, b1PmaKrd6CDfzngc
+  fight 48), exactly as HEAL-B1P cut actors 1 and 9.
+- **Public contract: EXPECTED, additive under `analysis/1`.** Precisely:
+  - `PUBLIC_SPEC_IDS` in `src/contracts/analysis-contract.ts` (the public
+    `specId` enum) gains `"priest/holy"`, appended last; no existing value
+    moves or changes.
+  - A public request whose subject Warcraft Logs states as Priest/Holy now
+    resolves (identity table) and dispatches the Holy Priest row instead of
+    `SPEC_NOT_SUPPORTED`. It publishes `healerFindings` in the existing HEAL-AP
+    shape (no schema change): `AUTHORITY_NOT_AVAILABLE` when evaluated,
+    `INSUFFICIENT_EVIDENCE` otherwise, never `ANALYZED`.
+  - The derived supported-specializations sentence (REST/MCP tool
+    description) gains "Holy Priest" (code-point order, after Holy Paladin),
+    and `PUBLIC_SPECIALIZATION_DESCRIPTIONS` gains Holy Priest's limits prose
+    (analysis and raid night), copied from HEAL-B1P's wording.
+  - Raid-night cells for a Holy Priest become `AUTHORITY_NOT_AVAILABLE` (or
+    `INSUFFICIENT_EVIDENCE`) with no healer findings and no plan, as for the
+    other public healers. Discipline and Shadow stay `SPEC_NOT_SUPPORTED`.
+- **Queue bookkeeping:** HEAL-B2 recorded MERGED (PR #49, b2658f25…);
+  HEAL-B2P set PR_OPEN with branch and outcome. Every other merged tranche
+  the supervisor listed was already recorded MERGED with its pr and mergeSha.
+
+## The gate (unchanged in substance)
+
+`tests/contracts/heal-ap-healer-promotion-gate.test.ts` gains one pinned
+subject; every check passes through the public service:
+
+| Check | Holy Priest, fight 48 actor 2 |
+| --- | --- |
+| OBSERVATIONS | 3 Apotheosis (7,470,226, 7,595,502, 7,721,342) + 3 Divine Hymn (7,509,640, 7,640,275, 7,761,154); listing COMPLETE |
+| ASSIGNMENT | MET Divine Hymn 7,509,000 ± 2 s; not-met Apotheosis 7,650,000 ± 3 s; one after the encounter's end; Flash Heal (unidentified) |
+| MISSING PLAN / IDENTITY / COMPLETENESS / NEGATIVE CONTROLS | pass, same checks as the three other public healers |
+
+Its fifteen Divine Hymn pulse casts (64844) are never uses, pinned on the
+real bytes in `tests/unit/specs/heal-b2-holy-priest.test.ts`.
 
 ## Code
 
-- **`src/specs/priest/holy/`** (`spec.ts`, `evaluator.ts`, `registration.ts`,
-  `README.md`), revision `holy-priest-evaluator/1`. A copy of the Restoration
-  Druid internal shape (HEAL-B1) with its own identity strings and data
-  loader; the shared healer modules (`src/healing/cooldown-use-context.ts`,
-  `src/findings/healer-assignment-execution.ts`,
-  `src/findings/healer-finding-projection.ts`, the artifact reader) are
-  consumed unchanged. Identity gate: stated Priest/Holy and a Priest player in
-  the master data, else IDENTITY_REFUSED. Three provider-less families from
-  `HOLY_PRIEST_REQUIRED_INPUTS` (FULL_RAID derived), no binding, never
-  ANALYZED; HEALING_DECISION is NO_AUTHORITY_AVAILABLE; ASSIGNMENT is
-  NO_AUTHORITY_AVAILABLE without a plan; COOLDOWN is observational.
-- **`src/data/game/priest-holy-healing-cooldowns.{json,ts}`**: class 5, spec
-  257, two verbatim spec-tree rows, both NORMAL, no `id_override_spell`:
-  Divine Hymn 64843 and Apotheosis 200183. The pinned Holy tree has no Holy
-  Word: Salvation row. Guardian Spirit (external), Symbol of Hope and hero-tree
-  spells are not identified (a plan entry for one is ABILITY_NOT_REGISTERED).
-  No cooldown, charge or duration claimed.
-- **Divine Hymn's channel shape**: the committed capture records the 64843
-  `cast` then 64844 pulse `cast`s. 64844 is not identified, so a pulse is never
-  a use and a plan window holding only pulses is not MET (tested).
-- **Registration**: `src/findings/spec-id.ts` (`SpecId`, `SPEC_IDS`,
-  `INTERNAL_ONLY_SPEC_IDS` = `druid/restoration`, `priest/holy`) and the
-  catalog row in `src/services/analyzer-registry.ts` (eleven rows). No
-  identity-table, contract or exposure change.
+- Five-site promotion, one edit: `src/findings/spec-id.ts`
+  (`INTERNAL_ONLY_SPEC_IDS` = `druid/restoration` alone), the contract enum,
+  `src/services/spec-identity.ts`, `satisfies PublicSpecId` in
+  `src/specs/priest/holy/spec.ts`, `exposure: "PUBLIC"` in
+  `src/specs/priest/holy/registration.ts`.
+- The registration gains `holyPriestHealerViewOf` (delegating to the shared
+  `healerViewOfEvaluation`) and `HOLY_PRIEST_LIMITS`, both copies of HEAL-B1P's
+  shape. Evaluator, data and revision (`holy-priest-evaluator/1`) unchanged.
 
-## Real evidence (committed, raw-checked)
+## Evidence
 
-| Subject | Result |
-| --- | --- |
-| M13-A Holy Priest, actor 2 | Apotheosis 168,785; Divine Hymn 249,326; Apotheosis 289,544 (the only identified casts by actor 2 in both raw segments, asserted byte-for-byte). Filtered capture: listing UNKNOWN (INSUFFICIENT_COVERAGE), overlap ROSTER_NOT_IN_SCOPE |
-| M13-A Discipline (9) and Shadow (10) Priests | IDENTITY_REFUSED NOT_THIS_SPECIALIZATION, NOT_ASSESSED |
-| fight 48 Holy Priest, actor 2 | no cast in the committed window: no use, listing UNKNOWN, never "none used"; sources 2 and stated pet 94 |
+`tests/evidence/artifacts/wcl-events/wcl-b1pm-fight-48-holy-priest-2-casts.seg-{0-180,180-345}.json`
+(265 + 214 events, 137,685 bytes): every cast/begincast sourced by or
+targeting actor 2, whole fight, `--actor-slice 2 --families cast,begincast
+--compact`. Grants CASTS for actor 2 only (its pet is not retained). Manifest
+records added as a third subject in the HEAL-B1P block of
+`scripts/corpus/build-manifest.mjs`, with two normalization census cases.
+Ordinary archive growth (19,265,924 bytes with frames), pinned; the archive
+without the two owner exceptions stays under its 4 MiB line.
 
 ## Tests
 
-- New `tests/unit/specs/heal-b2-holy-priest.test.ts` (artifact contents,
-  Divine Hymn pulses, the real-evidence rows above).
-- Holy Priest added as a fourth case to the parametrized
-  `heal-b1-healer-evaluators` and `heal-b1-healer-registrations` files (every
-  shared healer case: identity refusals, no-plan NO_AUTHORITY_AVAILABLE, plan
-  outcomes, CASTS gap UNKNOWN, roster scope, INTERNAL_ONLY reachability). The
-  "another class" case now takes a per-case class (Priest for the three HEAL-B1
-  healers, as before; Paladin for Holy Priest).
-- `healing-cooldown-identity-artifact`: five artifacts; Discipline/Shadow spec
-  ids refused; an entry claiming 64844 refused as PINNED_ROW_MISMATCH.
-- Corpus: layer `SPEC_HOLY_PRIEST`, executor `spec-holy-priest.ts`, two cases
-  (unstated subject INSUFFICIENT_EVIDENCE; INTERNAL_ONLY reachability).
-- Pin ripple: registration counts and lists (ten to eleven rows, internal-only
-  set, module and discovery snapshots, cross-spec trees and imports,
-  authority-free trees, roster unregistered 30 to 29, m12a healing consumers,
-  m11a2 identity evidence actor = b1pm fight 48 actor 2, counted-catalog maps
-  in transport and raid-night tests). No assertion was weakened.
+- Gate subject (above); new whole-fight real-evidence test in
+  `heal-b2-holy-priest.test.ts`; Holy Priest flips to PUBLIC in
+  `heal-b1-healer-registrations` (public lookup, identity table, prose, view,
+  dispatch).
+- Corpus: `application-service.holy-priest-registration-is-internal-only`
+  re-pinned as `…-is-public-since-heal-b2p` (inverted expectation, as
+  HEAL-B1P did); the `SPEC_HOLY_PRIEST` executor now requires the public
+  lookup to find the same row.
+- Pin ripple (no assertion weakened): public id lists, enabled analyzers and
+  requirements (nine to ten), supported sentence, catalog arrays in test-built
+  catalogs (now including Holy Priest, plus a demoted-Holy-Priest refusal
+  case), internal-only set, identity tests (Priest/Holy resolves; Shaman/Holy
+  and Druid/Holy added as unsupported nearest misses), healer exemption lists
+  in the rotational gate, archive and report counts.
 
 ## Validation
 
-- `npm run typecheck`: clean. `npm run format:check`: clean.
-- `npm test` full run (node + workers): 12,592 passed, 20 failed, all 5 s
-  timeouts in load-sensitive suites (simulation runner, Protection
-  projection, m7f raid night, m9b harness, m11g2, m10c5b, m11a4 evaluator,
-  m10d invariance). Rerun of those 14 files at two workers: 223 passed, 1
-  failed: `m8g-encounter-context-composition` "byte-identical across…", which
-  times out alone too and identically on a clean origin/main worktree on this
-  machine. Not a regression.
-- Focused: heal-b2 (8), heal-b1 evaluators/registrations and artifact reader,
-  all pass.
-- `npm run test:corpus -- --write-report`, then `npm run test:corpus`: PASSED
-  (two byte-identical workerd runs, 195 cases, 790 assertions).
-- `npm run test:evidence`: PASSED (20 cases, 54 assertions; unchanged).
+- `npm run typecheck`, `npm run format:check`: clean.
+- Full `npx vitest run`: 12,598 passed, 22 failed, 21 of them 5-60 s timeouts
+  in load-sensitive suites and one simulation-queue cleanup check. Rerun of
+  all 28 affected files at two workers: 357/357 passed. The remaining
+  `m8g-encounter-context-composition` "byte-identical…" times out alone too,
+  identically on main with this change stashed.
+- `node scripts/corpus/gate.mjs --write-report` and `--root evidence
+  --write-report`: PASSED (both double-run workerd byte-identical); reports
+  regenerated from execution.
+- Focused: the gate (25), heal-b2 (9), heal-b1 registrations, archive tests:
+  pass.
 
-## Not established (follow-ups "After HEAL-B2")
+## Not established (follow-ups "After HEAL-B2P")
 
-HEAL-B2P's gate needs the fight-48 Holy Priest's whole-fight casts, not yet
-committed; the selection is narrow by design; the registration facade is
-copied a fifth time. That copy was reconsidered as "After HEAL-B1" asked: a shared
-helper would rewrite four reviewed registrations (two PUBLIC) in a
-one-specialization internal tranche, so it is recorded as the change to make
-before the next healer copies the shape.
+Healing context stays UNKNOWN (cast-only subject); the pet's casts are not
+retained; the pseudonym is re-labelled for the plan. The shared healer
+registration helper ("After HEAL-B2") is not done here: it would rewrite four
+reviewed registrations inside a one-specialization promotion, so it is
+recorded as its own refactor before any further healer copies the shape.

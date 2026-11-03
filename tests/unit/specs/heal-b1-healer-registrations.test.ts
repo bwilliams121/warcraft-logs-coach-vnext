@@ -1,13 +1,14 @@
 /**
  * HEAL-B1: the Holy Paladin, Restoration Druid and Mistweaver Monk
  * registrations, INTERNAL_ONLY; Holy Paladin and Mistweaver Monk PUBLIC since
- * HEAL-B1P; and, since HEAL-B2, the INTERNAL_ONLY Holy Priest registration
- * (its real-evidence checks are tests/unit/specs/heal-b2-holy-priest.test.ts).
+ * HEAL-B1P; and the Holy Priest registration, INTERNAL_ONLY from HEAL-B2 and
+ * PUBLIC since HEAL-B2P (its real-evidence checks are
+ * tests/unit/specs/heal-b2-holy-priest.test.ts).
  *
  * What is pinned per registration:
- * - Restoration Druid and Holy Priest are listed INTERNAL_ONLY rows; the public lookup, the
- *   public identity table and a public request never reach it. Holy Paladin
- *   and Mistweaver Monk are listed PUBLIC rows: both lookups find the same
+ * - Restoration Druid is a listed INTERNAL_ONLY row; the public lookup, the
+ *   public identity table and a public request never reach it. Holy Paladin,
+ *   Mistweaver Monk and Holy Priest are listed PUBLIC rows: both lookups find the same
  *   row, the identity table resolves them, a public request dispatches them
  *   once, and they carry public prose and a healer view;
  * - it declares the three provider-less healer families from its own
@@ -138,7 +139,7 @@ const CASES: readonly Case[] = [
     className: "Priest",
     specName: "Holy",
     required: HOLY_PRIEST_REQUIRED_INPUTS,
-    exposure: "INTERNAL_ONLY",
+    exposure: "PUBLIC",
   },
 ];
 
