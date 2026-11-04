@@ -5546,3 +5546,13 @@ snapshot; ids the pinned module does not build have no token.
 
 Six corpus cases (`application-service.*-registration-is-internal-only`, `spec-*.the-facade-refuses-every-other-specialization`).
 The conformance suite gains the three modules, with Fury and Protection Warrior's identity proof held by `IDENTITY_RETAINED_ONLY`.
+
+# ONB-A2P: Subtlety Rogue, Fury Warrior and Protection Warrior, not promoted
+
+No production code changed. `tests/contracts/m11-promotion-evidence-gate.test.ts` gains the gate search over all three: no
+qualifying assertion, `evidenceReady` false. `tests/unit/analysis-composition-refusals.test.ts` adds Warrior/Fury and
+Warrior/Protection beside Rogue/Subtlety: SPEC_NOT_SUPPORTED, one retrieval for preparation alone, no dispatch. The existing pins
+carry the rest (`m10d-public-registration`, `m10a-spec-partition`, `onb-a2-cohort-a-followers`).
+
+Offline only, not committed: the signature-ability census of retained and committed events (`.probe/onba2p/`). Mortal Strike and
+Mutilate are its positive controls, because a first version of the scan found nothing for a reason of its own.

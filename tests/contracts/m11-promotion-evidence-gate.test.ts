@@ -747,6 +747,21 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     const internal = PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY");
     expect(internal.map((row) => row.specId)).toEqual([...INTERNAL_ONLY_SPEC_IDS]);
   });
+
+  it("ONB-A2P: the gate search finds nothing for Cohort A's three followers, so none is promoted", async () => {
+    // Why they stay INTERNAL_ONLY, measured rather than asserted: no real decision of theirs
+    // resolves, so nothing here qualifies. A real capture that changed this would fail this pin
+    // and prompt a new public entry; it would not promote anything by itself.
+    const tiers = await tiersPromise;
+    for (const specId of ["rogue/subtlety", "warrior/fury", "warrior/protection"] as const) {
+      const module = MODULES.find((candidate) => candidate.identity.specId === specId);
+      if (module === undefined) throw new Error(`no module for ${specId}`);
+      const readiness = evaluate(tiers, specId, "INTERNAL_ONLY", internalPairing(module));
+      expect(readiness.qualifyingAssertions, specId).toEqual([]);
+      expect(readiness.evidenceReady, specId).toBe(false);
+    }
+  });
+
   it("the internal pairing finds nothing for Brewmaster Monk now that the identity table resolves it (M11-C4j)", async () => {
     // The mirror of the Blood and Retribution cases: the internal pairing
     // REQUIRES the public table to refuse the identity, and the table now
