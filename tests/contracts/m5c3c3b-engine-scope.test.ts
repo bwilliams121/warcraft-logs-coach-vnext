@@ -123,6 +123,7 @@ describe("the Rogue adapter lives in the spec layer, and only there", () => {
   const PROTECTION_WARRIOR_ADAPTER_PATH = "src/specs/warrior/protection/first-gcd-adapter.ts";
   const ARMS_WARRIOR_ADAPTER_PATH = "src/specs/warrior/arms/first-gcd-adapter.ts";
   const FROST_DEATH_KNIGHT_ADAPTER_PATH = "src/specs/deathknight/frost/first-gcd-adapter.ts";
+  const DEVOURER_DEMON_HUNTER_ADAPTER_PATH = "src/specs/demonhunter/devourer/first-gcd-adapter.ts";
   const ENHANCEMENT_SHAMAN_ADAPTER_PATH = "src/specs/shaman/enhancement/first-gcd-adapter.ts";
 
   it("wires the engine into exactly one adapter module per specialization tree", () => {
@@ -141,6 +142,7 @@ describe("the Rogue adapter lives in the spec layer, and only there", () => {
         PROTECTION_WARRIOR_ADAPTER_PATH,
         ARMS_WARRIOR_ADAPTER_PATH,
         FROST_DEATH_KNIGHT_ADAPTER_PATH,
+        DEVOURER_DEMON_HUNTER_ADAPTER_PATH,
         ENHANCEMENT_SHAMAN_ADAPTER_PATH,
         ADAPTER_PATH,
       ].sort(),

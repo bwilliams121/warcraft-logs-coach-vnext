@@ -7049,6 +7049,44 @@ const BREWMASTER_CASES = [
     "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Frost Death Knight list.",
     { related: ["tests/unit/specs/onb-b1-frost-death-knight.test.ts"] },
   ),
+  // ---- SPEC_DEVOURER_DEMON_HUNTER (ONB-B3, INTERNAL_ONLY) ---
+  kase(
+    "application-service.devourer-demon-hunter-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Devourer Demon Hunter registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "demonhunter/devourer",
+        expected: {
+          internalAnalyzerId: "demonhunter-devourer-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Devourer Demon Hunter is registered INTERNAL_ONLY in ONB-B3. No decision of its retained subjects resolves: its list reaches voidscarred_melee and stops on the enemy count, the ONB-S3 owner decision. So a public request must keep receiving SPEC_NOT_SUPPORTED.",
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-devourer-demon-hunter.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_DEVOURER_DEMON_HUNTER",
+    "src/specs/demonhunter/devourer/observed-analysis.ts analyzeObservedDevourerDemonHunterDecisions (the spec gate)",
+    "The Devourer Demon Hunter facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_DEVOURER_DEMON_HUNTER.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Devourer Demon Hunter list.",
+    { related: ["tests/unit/specs/onb-b1-devourer-demon-hunter.test.ts"] },
+  ),
   // ---- SPEC_ENHANCEMENT_SHAMAN (ONB-B2, INTERNAL_ONLY) ---
   kase(
     "application-service.enhancement-shaman-registration-is-internal-only",

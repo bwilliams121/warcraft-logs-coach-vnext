@@ -689,19 +689,28 @@
       "assertions": 1,
       "cases": 1,
       "failed": 0,
+      "kindsExercised": ["SPEC_DEVOURER_DEMON_HUNTER.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_DEVOURER_DEMON_HUNTER",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
       "kindsExercised": ["SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE"],
       "notExecuted": 0,
       "owningLayer": "SPEC_ENHANCEMENT_SHAMAN",
       "passed": 1
     },
     {
-      "assertions": 30,
-      "cases": 26,
+      "assertions": 31,
+      "cases": 27,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 30
+      "passed": 31
     },
     {
       "assertions": 14,
@@ -793,6 +802,20 @@
       "caseId": "application-service.derives-player-context-scope-and-selects-the-assassination-analyzer",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.devourer-demon-hunter-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
       "artifactId": "wcl-protection-paladin-a7r6-opener",
@@ -5438,6 +5461,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_DEVOURER_DEMON_HUNTER.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-devourer-demon-hunter.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_DEVOURER_DEMON_HUNTER",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_DISCIPLINE_PRIEST.REGISTRATION_RESULT",
           "ordinal": 0,
           "status": "PASSED"
@@ -7456,6 +7493,7 @@
   "pinnedAuthorities": {
     "SIMC_APL_DEATHKNIGHT_BLOOD": "simc-33622e9d-1",
     "SIMC_APL_DEATHKNIGHT_FROST": "simc-33622e9d-1",
+    "SIMC_APL_DEMONHUNTER_DEVOURER": "simc-33622e9d-1",
     "SIMC_APL_DEMONHUNTER_HAVOC": "simc-33622e9d-1",
     "SIMC_APL_MONK_BREWMASTER": "simc-33622e9d-1",
     "SIMC_APL_PALADIN_PROTECTION": "simc-33622e9d-1",
@@ -7474,13 +7512,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 808,
-    "cases": 213,
+    "assertions": 810,
+    "cases": 215,
     "declared": 0,
-    "executable": 808,
+    "executable": 810,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 808
+    "passed": 810
   }
 }

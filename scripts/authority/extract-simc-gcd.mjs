@@ -3714,6 +3714,266 @@ const ROGUE_SUBTLETY_FACTS = {
   ],
 };
 
+/**
+ * The Devourer Demon Hunter facts (ONB-B3).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every spell a token of the
+ * pinned Devourer list (apl_demon_hunter.cpp `devourer`) can execute. Facts a reader
+ * should not have to rediscover (all read off the pinned DBC and the retained wire):
+ *
+ *   - VOID METAMORPHOSIS HAS TWO RECORDS AND ONLY ONE IS THE ACTION. The action is built on
+ *     1217605 (`_gcd` 1500). The log never reports it: the wire holds the aura 1217607.
+ *   - VOIDBLADE'S 1245414 AND THE HUNT'S 1246169 ARE IMPACTS, `_gcd` 0, logged beside the
+ *     press. Both are recorded with no token binding.
+ *   - SOUL FRAGMENT 1223412 is logged as a cast, 243 to 385 times a fight, with `_gcd` 0. No
+ *     action of the list is built on it. It is recorded with no token binding.
+ *   - PICK_UP_FRAGMENT IS NO SPELL. It is built on spell_data_t::nil(), and has no log event.
+ */
+const DEMONHUNTER_DEVOURER_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    // ---- class/spec actions the pinned Devourer list names ----
+    { abilityGameId: 1217605, displayNameEn: "Void Metamorphosis", baseGcdMs: 1500 },
+    { abilityGameId: 1246167, displayNameEn: "The Hunt", baseGcdMs: 1500 },
+    { abilityGameId: 1259431, displayNameEn: "Predator's Wake", baseGcdMs: 1500 },
+    { abilityGameId: 1217610, displayNameEn: "Devour", baseGcdMs: 1500 },
+    { abilityGameId: 473662, displayNameEn: "Consume", baseGcdMs: 1500 },
+    { abilityGameId: 1245412, displayNameEn: "Voidblade", baseGcdMs: 500 },
+    { abilityGameId: 1245483, displayNameEn: "Pierce the Veil", baseGcdMs: 500 },
+    { abilityGameId: 1241937, displayNameEn: "Soul Immolation", baseGcdMs: 1500 },
+    { abilityGameId: 1225826, displayNameEn: "Eradicate", baseGcdMs: 1500 },
+    { abilityGameId: 1245453, displayNameEn: "Cull", baseGcdMs: 1500 },
+    { abilityGameId: 1226019, displayNameEn: "Reap", baseGcdMs: 1500 },
+    { abilityGameId: 473728, displayNameEn: "Void Ray", baseGcdMs: 1500 },
+    { abilityGameId: 1221150, displayNameEn: "Collapsing Star", baseGcdMs: 1500 },
+    { abilityGameId: 1239123, displayNameEn: "Hungering Slash", baseGcdMs: 1500 },
+    { abilityGameId: 1245470, displayNameEn: "Reaper's Toll", baseGcdMs: 1500 },
+    { abilityGameId: 198793, displayNameEn: "Vengeful Retreat", baseGcdMs: 0 },
+    // ---- NOT execution candidates: what the log reports beside the press ----
+    { abilityGameId: 1245414, displayNameEn: "Voidblade", baseGcdMs: 0 },
+    { abilityGameId: 1246169, displayNameEn: "The Hunt", baseGcdMs: 0 },
+    { abilityGameId: 1223412, displayNameEn: "Soul Fragment", baseGcdMs: 0 },
+    // ---- the one racial token of the list, as a Demon Hunter resolves it ----
+    { abilityGameId: 202719, displayNameEn: "Arcane Torrent", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "metamorphosis",
+      candidateAbilityGameIds: [1217605],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / metamorphosis_t",
+      startLine: 9749,
+      endLine: 9750,
+      sourceNote:
+        'create_action dispatches "metamorphosis" to metamorphosis_t, built on p->spec.metamorphosis (:4902-4903); for Devourer spec.metamorphosis = find_specialization_spell( "Void Metamorphosis" ) at :10811, class_spells.inc row { 12, 1480, 1217605 }. action_ready is false below max stacks (:5057). The log never reports 1217605: the three retained subjects log only the aura 1217607, so this binding names the action, not the wire id.',
+    },
+    {
+      simcToken: "the_hunt",
+      candidateAbilityGameIds: [1246167],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / the_hunt_t",
+      startLine: 9759,
+      endLine: 9760,
+      sourceNote:
+        'create_action dispatches "the_hunt" to the_hunt_t, built on p->spec.the_hunt (:5612); for Devourer spec.the_hunt = talent.devourer.the_hunt at :11285, find_talent_spell( SPECIALIZATION, "The Hunt" ) at :10973, whose Devourer trait row carries spell 1246167. The log also reports the impact 1246169, which is recorded with no token.',
+    },
+    {
+      simcToken: "predators_wake",
+      candidateAbilityGameIds: [1259431],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / predators_wake_t",
+      startLine: 9761,
+      endLine: 9762,
+      sourceNote:
+        'create_action dispatches "predators_wake" to predators_wake_t, built on p->hero_spec.predators_wake (:5594); hero_spec.predators_wake = conditional_spell_lookup( Devourer && the_hunt && demonic_intensity, 1259431 ) at :11380-11383.',
+    },
+    {
+      simcToken: "devour",
+      candidateAbilityGameIds: [1217610],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / devour_t",
+      startLine: 9763,
+      endLine: 9764,
+      sourceNote:
+        'create_action dispatches "devour" to devour_t, built on p->spec.devour (:5792); spec.devour = find_spell( 1217610, DEMON_HUNTER_DEVOURER ) at :10824. action_ready is false outside buff.metamorphosis (:5813-5820).',
+    },
+    {
+      simcToken: "consume",
+      candidateAbilityGameIds: [473662],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / consume_t",
+      startLine: 9765,
+      endLine: 9766,
+      sourceNote:
+        'create_action dispatches "consume" to consume_t, built on p->spec.consume (:5825); spec.consume = find_spell( 473662, DEMON_HUNTER_DEVOURER ) at :10822, class_spells.inc row { 12, 1480, 473662 }.',
+    },
+    {
+      simcToken: "voidblade",
+      candidateAbilityGameIds: [1245412],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / voidblade_t",
+      startLine: 9767,
+      endLine: 9768,
+      sourceNote:
+        'create_action dispatches "voidblade" to voidblade_t, built on p->talent.demon_hunter.voidblade (:5913); find_talent_spell( CLASS, "Voidblade" ) at :10870, trait row spell 1245412, _gcd 500. The log also reports 1245414, _gcd 0, after every Voidblade and Pierce the Veil; it is recorded with no token.',
+    },
+    {
+      simcToken: "pierce_the_veil",
+      candidateAbilityGameIds: [1245483],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / pierce_the_veil_t",
+      startLine: 9769,
+      endLine: 9770,
+      sourceNote:
+        'create_action dispatches "pierce_the_veil" to pierce_the_veil_t, built on p->hero_spec.pierce_the_veil (:5895); spec_talent_spell_lookup( Devourer, talent.scarred.demonsurge, 1245483 ) at :11384, where talent.scarred.demonsurge is the HERO talent "Voidsurge" for a Devourer (:11158).',
+    },
+    {
+      simcToken: "soul_immolation",
+      candidateAbilityGameIds: [1241937],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / soul_immolation_heal_t",
+      startLine: 9771,
+      endLine: 9772,
+      sourceNote:
+        'create_action dispatches "soul_immolation" to soul_immolation_heal_t, built on p->talent.devourer.soul_immolation (:5951); find_talent_spell( SPECIALIZATION, "Soul Immolation" ) at :10930, trait row spell 1241937.',
+    },
+    {
+      simcToken: "eradicate",
+      candidateAbilityGameIds: [1225826],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / eradicate_t",
+      startLine: 9773,
+      endLine: 9774,
+      sourceNote:
+        'create_action dispatches "eradicate" to eradicate_t, built on p->spec.eradicate (:6143); spec.eradicate = talent_spell_lookup( talent.devourer.eradicate, 1225826 ) at :11196. The trait row itself carries 1226033, _gcd 0, which is not the action.',
+    },
+    {
+      simcToken: "cull",
+      candidateAbilityGameIds: [1245453],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / cull_t",
+      startLine: 9775,
+      endLine: 9776,
+      sourceNote:
+        'create_action dispatches "cull" to cull_t, built on p->spec.cull (:6286); spec.cull = find_spell( 1245453, DEMON_HUNTER_DEVOURER ) at :10831. action_ready is false outside buff.metamorphosis (:6290-6298).',
+    },
+    {
+      simcToken: "reap",
+      candidateAbilityGameIds: [1226019],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / reap_t",
+      startLine: 9777,
+      endLine: 9778,
+      sourceNote:
+        'create_action dispatches "reap" to reap_t, built on p->spec.reap (:6304); spec.reap = find_spell( 1226019, DEMON_HUNTER_DEVOURER ) at :10828, class_spells.inc row { 12, 1480, 1226019 }. action_ready is false inside buff.metamorphosis (:6308-6316).',
+    },
+    {
+      simcToken: "void_ray",
+      candidateAbilityGameIds: [473728],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / void_ray_t",
+      startLine: 9779,
+      endLine: 9780,
+      sourceNote:
+        'create_action dispatches "void_ray" to void_ray_t, built on p->talent.devourer.void_ray (:6373); find_talent_spell( SPECIALIZATION, "Void Ray" ) at :10928, trait row spell 473728. It is channeled. The wire reports its cast with no begincast, and every tick of the 26 casts of a whole-fight subject follows that cast, so the cast is the start of the channel.',
+    },
+    {
+      simcToken: "collapsing_star",
+      candidateAbilityGameIds: [1221150],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / collapsing_star_t",
+      startLine: 9781,
+      endLine: 9782,
+      sourceNote:
+        'create_action dispatches "collapsing_star" to collapsing_star_t, built on p->spec.collapsing_star_spell (:6548); conditional_spell_lookup( talent.devourer.collapsing_star || talent.devourer.midnight3, 1221150 ) at :11208-11209. Not observed on a retained subject.',
+    },
+    {
+      simcToken: "hungering_slash",
+      candidateAbilityGameIds: [1239123],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / hungering_slash_t",
+      startLine: 9783,
+      endLine: 9784,
+      sourceNote:
+        'create_action dispatches "hungering_slash" to hungering_slash_t, built on p->spec.hungering_slash (:6808); spec.hungering_slash = talent_spell_lookup( talent.devourer.hungering_slash, 1239123 ) at :11216. The trait row itself carries 1239519, _gcd 0, which is not the action.',
+    },
+    {
+      simcToken: "reapers_toll",
+      candidateAbilityGameIds: [1245470],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / reapers_toll_t",
+      startLine: 9785,
+      endLine: 9786,
+      sourceNote:
+        'create_action dispatches "reapers_toll" to reapers_toll_t, built on p->hero_spec.reapers_toll (:6783); spec_talent_spell_lookup( Devourer, talent.scarred.demonsurge, 1245470 ) at :11385, where talent.scarred.demonsurge is the HERO talent "Voidsurge" for a Devourer (:11158).',
+    },
+    {
+      simcToken: "vengeful_retreat",
+      candidateAbilityGameIds: [198793],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / vengeful_retreat_t",
+      startLine: 9812,
+      endLine: 9813,
+      sourceNote:
+        'create_action dispatches "vengeful_retreat" to vengeful_retreat_t, built on p->talent.demon_hunter.vengeful_retreat at sc_demon_hunter.cpp:8588-8589; talent.demon_hunter.vengeful_retreat = find_talent_spell( CLASS, "Vengeful Retreat" ) at :10868, trait row spell 198793. The DBC record carries _gcd 0.',
+    },
+    {
+      simcToken: "arcane_torrent",
+      candidateAbilityGameIds: [202719],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / arcane_torrent_t",
+      startLine: 11056,
+      endLine: 11057,
+      sourceNote:
+        'player_t::create_action dispatches "arcane_torrent" to arcane_torrent_t, built on p->find_racial_spell( ' +
+        '"Arcane Torrent" ) at player.cpp:9051. racial_spells.inc row { 0x0200 (Blood Elf), 0x00000800 (Demon Hunter), ' +
+        "202719 } is the only row a Demon Hunter can resolve. OUTSIDE the rotational decision domain (racial action).",
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "pick_up_fragment",
+      triggerGcdMs: 0,
+      sourcePath: DEMON_HUNTER,
+      symbol: "pick_up_fragment_t::pick_up_fragment_t",
+      line: 5146,
+      sourceNote:
+        "pick_up_fragment_t is built on spell_data_t::nil() (sc_demon_hunter.cpp:5133-5134) and its constructor assigns " +
+        "trigger_gcd = timespan_t::zero() at :5146. It is simulated movement and has no spell or log event of its own.",
+    },
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
 export const TARGETS = {
   "rogue-assassination": {
     datasetId: DATASET_ID,
@@ -3803,6 +4063,21 @@ export const TARGETS = {
     ],
     requiredFacts: DEMONHUNTER_HAVOC_FACTS,
     defaultOut: "src/data/game/demonhunter-havoc-gcd-semantics.json",
+  },
+  "demonhunter-devourer": {
+    datasetId: "SIMC_DBC_DEMONHUNTER_DEVOURER_GCD_SEMANTICS",
+    classId: 12,
+    className: "Demon Hunter",
+    sources: DEMONHUNTER_HAVOC_SOURCES,
+    classModulePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+    handReviewedPaths: [
+      DEMONHUNTER_HAVOC_SOURCES.classModule,
+      DEMONHUNTER_HAVOC_SOURCES.racialSpells,
+      DEMONHUNTER_HAVOC_SOURCES.playerModule,
+      DEMONHUNTER_HAVOC_SOURCES.consumableModule,
+    ],
+    requiredFacts: DEMONHUNTER_DEVOURER_FACTS,
+    defaultOut: "src/data/game/demonhunter-devourer-gcd-semantics.json",
   },
   "deathknight-frost": {
     datasetId: "SIMC_DBC_DEATHKNIGHT_FROST_GCD_SEMANTICS",

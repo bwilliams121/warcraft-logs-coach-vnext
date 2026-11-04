@@ -29,6 +29,37 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After ONB-B3: what the Devourer Demon Hunter slice does not establish
+
+**Raised:** ONB-B3 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.
+
+**ONB-S3 gates it too.** All three retained subjects are Void-Scarred with The Hunt, so every scan reaches `voidscarred_melee` and stops on its first line, `run_action_list,name=vsm_st,if=active_enemies=1`: 251 eligible decisions, 0 MATCH, 0 REJECTED. So ONB-B3P should expect "not promoted" unless ONB-S3 lands first. The queue kept it out of Cohort B, and its stop is the same one.
+
+**What ONB-S3 alone would not unlock.** With the count settled, a Void-Scarred decision would still meet:
+
+- **The pick-up lines.** `vsm_st[0]`, `vsm_meta[1]` and `vsm_out[0]` (`annihilator_ranged[0]` on the other tree) are `line_cd` lines on a token with no spell and no log event. A selection is in no log, so each timer can only be UNKNOWN, and lifting that needs SELECTION evidence that does not exist (agent/follow-ups.md "After M11-D3-C3"). Their execution also needs a contract: Havoc's names the writes (a soul consumed, Fury possibly granted), and Devourer's would have to name Void Metamorphosis stacks too (`buff.void_metamorphosis_stack` at :3689).
+- **`void_ray_count`.** It is a reset, then an `op=add` over `action.void_ray.last_used`, read through `variable.last_ray_mark`. Inside Metamorphosis the add reads the unknown incoming value, so the count stays unknown even with auras bound. The logged Void Ray casts could bound it, but no reader of that is reviewed, and it is what the pick-up and wait lines of `vsm_meta` read.
+- **`action.reap.souls_consumed` and `soul_fragments`.** The pinned read is `min( active soul fragments, souls_to_consume() )` (sc_demon_hunter.cpp:6091-6094), so it needs the live fragment count, which has no log event. Nothing here identifies what the log's Soul Fragment 1223412 records: its count (243 to 385 a fight) does not name a generation or a consumption, and no action of the pinned module names it.
+- **`void_metamorphosis_base_drain_ps`.** The module's own drain state (`devourer_fury_state`, :10340), and the list reads it 13 times. `fury` is the cast's own value only, and known at about one decision in six.
+- **Auras and cooldowns.** None is bound. `buff.voidfall_spending.react` is the M11-D1 numeric reading, and it stays open for that reason.
+
+**The cast-time tokens stay unjudged.** Consume, Devour, The Hunt and Predator's Wake have begincasts on every subject, so they are `OUTSIDE_FIRST_SLICE`: that is 69, 50 and 42 of the three subjects' casts. ONB-S4's anchor could answer this later, and a promotion should measure it first. Devour's smallest cast-to-cast gap is 716 ms and Consume's 1,124 ms, on 1,500 ms records, and nobody has told those apart from a wire skew or a logged copy.
+
+**The wire, for whoever binds next.** Measured on all three subjects, read once and not pinned. A floor from the pin would be false for each of these:
+
+- Cull's smallest gap is 730 ms and Reap's 1,692 ms against an 8 s shared charge (`cooldown.reap`, adjusted by Devour at :5810).
+- Soul Immolation reaches 1,643 ms against a 60 s charge on actor 79, and 10.8 s and 11.0 s on the others.
+- Predator's Wake reaches 41.1 s against 90 s, and Vengeful Retreat 10.7 s against 25 s. The Hunt itself sits at or above 90 s.
+- Void Metamorphosis is never logged as a cast, so its press cannot be judged by a logged id. Its aura 1217607 is on the wire six times on the whole-fight subject.
+
+**Three subjects, one build family.** All are Void-Scarred with The Hunt, Voidsurge and Demonic Intensity, and all from one encounter (Sszorak), though two different reports. Annihilator and `voidscarred_ranged` are known only from synthetic tests, so a promotion must measure each or refuse it, as Havoc refuses Fel-Scarred. Two of the subjects are prefixes: the rXAf pages end at 165.0 s of 271.8 s.
+
+**The tiered Midnight node is not modelled.** `apex.1` is declared and unbound, and `talent.devourer.midnight3` also opens Collapsing Star (:11208-11209), so an absent Collapsing Star never closes that line. Brewmaster's apex table is the precedent if a later tranche needs it.
+
+**`reap-soul-threshold` stays unanswered.** It needs the fragment count above. The inventory now names the pinned read.
+
+**The archive's notice line still has 5,212 bytes left.** Devourer's first seconds were not committed, because nothing would resolve on them and the room is better kept for a tranche that does.
+
 ## After ONB-B2: what Frost Death Knight and Enhancement Shaman do not establish
 
 **Raised:** ONB-B2 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.
@@ -2448,8 +2479,9 @@ both stay refused as unsupported options.
 (its `if=fight_style.dungeonroute` is unsupported) before the timer matters,
 and would need target identity anyway. Devourer's four
 `pick_up_fragment,…,line_cd=` lines share one token across five entries and
-are never observed casts, so their timers can only be UNKNOWN; its scans stop
-earlier, at `cooldowns[0]`. Enhancement's `bloodlust,line_cd=600` is its
+are never observed casts, so their timers can only be UNKNOWN; since ONB-B3 its
+adapter supplies the history, and its real scans stop before those lines, at
+`voidscarred_melee[0]` on the enemy count. Enhancement's `bloodlust,line_cd=600` is its
 sole Bloodlust entry, so an observed cast attributes; since ONB-B2 its adapter
 supplies that history, and the readiness stays UNKNOWN.
 

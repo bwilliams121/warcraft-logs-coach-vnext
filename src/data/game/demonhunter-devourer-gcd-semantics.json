@@ -1,0 +1,429 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_DEMONHUNTER_DEVOURER_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/sc_demon_hunter.cpp",
+        "sha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "byteLength": 459885
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 198793,
+      "baseGcdMs": 0,
+      "displayNameEn": "Vengeful Retreat"
+    },
+    {
+      "abilityGameId": 202719,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Arcane Torrent"
+    },
+    {
+      "abilityGameId": 473662,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Consume"
+    },
+    {
+      "abilityGameId": 473728,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Void Ray"
+    },
+    {
+      "abilityGameId": 1217605,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Void Metamorphosis"
+    },
+    {
+      "abilityGameId": 1217610,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Devour"
+    },
+    {
+      "abilityGameId": 1221150,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Collapsing Star"
+    },
+    {
+      "abilityGameId": 1223412,
+      "baseGcdMs": 0,
+      "displayNameEn": "Soul Fragment"
+    },
+    {
+      "abilityGameId": 1225826,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Eradicate"
+    },
+    {
+      "abilityGameId": 1226019,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Reap"
+    },
+    {
+      "abilityGameId": 1239123,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Hungering Slash"
+    },
+    {
+      "abilityGameId": 1241937,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Soul Immolation"
+    },
+    {
+      "abilityGameId": 1245412,
+      "baseGcdMs": 500,
+      "displayNameEn": "Voidblade"
+    },
+    {
+      "abilityGameId": 1245414,
+      "baseGcdMs": 0,
+      "displayNameEn": "Voidblade"
+    },
+    {
+      "abilityGameId": 1245453,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Cull"
+    },
+    {
+      "abilityGameId": 1245470,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Reaper's Toll"
+    },
+    {
+      "abilityGameId": 1245483,
+      "baseGcdMs": 500,
+      "displayNameEn": "Pierce the Veil"
+    },
+    {
+      "abilityGameId": 1246167,
+      "baseGcdMs": 1500,
+      "displayNameEn": "The Hunt"
+    },
+    {
+      "abilityGameId": 1246169,
+      "baseGcdMs": 0,
+      "displayNameEn": "The Hunt"
+    },
+    {
+      "abilityGameId": 1259431,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Predator's Wake"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "metamorphosis",
+      "candidateAbilityGameIds": [1217605],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / metamorphosis_t",
+        "startLine": 9749,
+        "endLine": 9750,
+        "sourceNote": "create_action dispatches \"metamorphosis\" to metamorphosis_t, built on p->spec.metamorphosis (:4902-4903); for Devourer spec.metamorphosis = find_specialization_spell( \"Void Metamorphosis\" ) at :10811, class_spells.inc row { 12, 1480, 1217605 }. action_ready is false below max stacks (:5057). The log never reports 1217605: the three retained subjects log only the aura 1217607, so this binding names the action, not the wire id.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "the_hunt",
+      "candidateAbilityGameIds": [1246167],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / the_hunt_t",
+        "startLine": 9759,
+        "endLine": 9760,
+        "sourceNote": "create_action dispatches \"the_hunt\" to the_hunt_t, built on p->spec.the_hunt (:5612); for Devourer spec.the_hunt = talent.devourer.the_hunt at :11285, find_talent_spell( SPECIALIZATION, \"The Hunt\" ) at :10973, whose Devourer trait row carries spell 1246167. The log also reports the impact 1246169, which is recorded with no token.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "predators_wake",
+      "candidateAbilityGameIds": [1259431],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / predators_wake_t",
+        "startLine": 9761,
+        "endLine": 9762,
+        "sourceNote": "create_action dispatches \"predators_wake\" to predators_wake_t, built on p->hero_spec.predators_wake (:5594); hero_spec.predators_wake = conditional_spell_lookup( Devourer && the_hunt && demonic_intensity, 1259431 ) at :11380-11383.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "devour",
+      "candidateAbilityGameIds": [1217610],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / devour_t",
+        "startLine": 9763,
+        "endLine": 9764,
+        "sourceNote": "create_action dispatches \"devour\" to devour_t, built on p->spec.devour (:5792); spec.devour = find_spell( 1217610, DEMON_HUNTER_DEVOURER ) at :10824. action_ready is false outside buff.metamorphosis (:5813-5820).",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "consume",
+      "candidateAbilityGameIds": [473662],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / consume_t",
+        "startLine": 9765,
+        "endLine": 9766,
+        "sourceNote": "create_action dispatches \"consume\" to consume_t, built on p->spec.consume (:5825); spec.consume = find_spell( 473662, DEMON_HUNTER_DEVOURER ) at :10822, class_spells.inc row { 12, 1480, 473662 }.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "voidblade",
+      "candidateAbilityGameIds": [1245412],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / voidblade_t",
+        "startLine": 9767,
+        "endLine": 9768,
+        "sourceNote": "create_action dispatches \"voidblade\" to voidblade_t, built on p->talent.demon_hunter.voidblade (:5913); find_talent_spell( CLASS, \"Voidblade\" ) at :10870, trait row spell 1245412, _gcd 500. The log also reports 1245414, _gcd 0, after every Voidblade and Pierce the Veil; it is recorded with no token.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "pierce_the_veil",
+      "candidateAbilityGameIds": [1245483],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / pierce_the_veil_t",
+        "startLine": 9769,
+        "endLine": 9770,
+        "sourceNote": "create_action dispatches \"pierce_the_veil\" to pierce_the_veil_t, built on p->hero_spec.pierce_the_veil (:5895); spec_talent_spell_lookup( Devourer, talent.scarred.demonsurge, 1245483 ) at :11384, where talent.scarred.demonsurge is the HERO talent \"Voidsurge\" for a Devourer (:11158).",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "soul_immolation",
+      "candidateAbilityGameIds": [1241937],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / soul_immolation_heal_t",
+        "startLine": 9771,
+        "endLine": 9772,
+        "sourceNote": "create_action dispatches \"soul_immolation\" to soul_immolation_heal_t, built on p->talent.devourer.soul_immolation (:5951); find_talent_spell( SPECIALIZATION, \"Soul Immolation\" ) at :10930, trait row spell 1241937.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "eradicate",
+      "candidateAbilityGameIds": [1225826],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / eradicate_t",
+        "startLine": 9773,
+        "endLine": 9774,
+        "sourceNote": "create_action dispatches \"eradicate\" to eradicate_t, built on p->spec.eradicate (:6143); spec.eradicate = talent_spell_lookup( talent.devourer.eradicate, 1225826 ) at :11196. The trait row itself carries 1226033, _gcd 0, which is not the action.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "cull",
+      "candidateAbilityGameIds": [1245453],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / cull_t",
+        "startLine": 9775,
+        "endLine": 9776,
+        "sourceNote": "create_action dispatches \"cull\" to cull_t, built on p->spec.cull (:6286); spec.cull = find_spell( 1245453, DEMON_HUNTER_DEVOURER ) at :10831. action_ready is false outside buff.metamorphosis (:6290-6298).",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "reap",
+      "candidateAbilityGameIds": [1226019],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / reap_t",
+        "startLine": 9777,
+        "endLine": 9778,
+        "sourceNote": "create_action dispatches \"reap\" to reap_t, built on p->spec.reap (:6304); spec.reap = find_spell( 1226019, DEMON_HUNTER_DEVOURER ) at :10828, class_spells.inc row { 12, 1480, 1226019 }. action_ready is false inside buff.metamorphosis (:6308-6316).",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "void_ray",
+      "candidateAbilityGameIds": [473728],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / void_ray_t",
+        "startLine": 9779,
+        "endLine": 9780,
+        "sourceNote": "create_action dispatches \"void_ray\" to void_ray_t, built on p->talent.devourer.void_ray (:6373); find_talent_spell( SPECIALIZATION, \"Void Ray\" ) at :10928, trait row spell 473728. It is channeled. The wire reports its cast with no begincast, and every tick of the 26 casts of a whole-fight subject follows that cast, so the cast is the start of the channel.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "collapsing_star",
+      "candidateAbilityGameIds": [1221150],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / collapsing_star_t",
+        "startLine": 9781,
+        "endLine": 9782,
+        "sourceNote": "create_action dispatches \"collapsing_star\" to collapsing_star_t, built on p->spec.collapsing_star_spell (:6548); conditional_spell_lookup( talent.devourer.collapsing_star || talent.devourer.midnight3, 1221150 ) at :11208-11209. Not observed on a retained subject.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "hungering_slash",
+      "candidateAbilityGameIds": [1239123],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / hungering_slash_t",
+        "startLine": 9783,
+        "endLine": 9784,
+        "sourceNote": "create_action dispatches \"hungering_slash\" to hungering_slash_t, built on p->spec.hungering_slash (:6808); spec.hungering_slash = talent_spell_lookup( talent.devourer.hungering_slash, 1239123 ) at :11216. The trait row itself carries 1239519, _gcd 0, which is not the action.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "reapers_toll",
+      "candidateAbilityGameIds": [1245470],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / reapers_toll_t",
+        "startLine": 9785,
+        "endLine": 9786,
+        "sourceNote": "create_action dispatches \"reapers_toll\" to reapers_toll_t, built on p->hero_spec.reapers_toll (:6783); spec_talent_spell_lookup( Devourer, talent.scarred.demonsurge, 1245470 ) at :11385, where talent.scarred.demonsurge is the HERO talent \"Voidsurge\" for a Devourer (:11158).",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "vengeful_retreat",
+      "candidateAbilityGameIds": [198793],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / vengeful_retreat_t",
+        "startLine": 9812,
+        "endLine": 9813,
+        "sourceNote": "create_action dispatches \"vengeful_retreat\" to vengeful_retreat_t, built on p->talent.demon_hunter.vengeful_retreat at sc_demon_hunter.cpp:8588-8589; talent.demon_hunter.vengeful_retreat = find_talent_spell( CLASS, \"Vengeful Retreat\" ) at :10868, trait row spell 198793. The DBC record carries _gcd 0.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "arcane_torrent",
+      "candidateAbilityGameIds": [202719],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/player/player.cpp",
+        "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "symbol": "player_t::create_action / arcane_torrent_t",
+        "startLine": 11056,
+        "endLine": 11057,
+        "sourceNote": "player_t::create_action dispatches \"arcane_torrent\" to arcane_torrent_t, built on p->find_racial_spell( \"Arcane Torrent\" ) at player.cpp:9051. racial_spells.inc row { 0x0200 (Blood Elf), 0x00000800 (Demon Hunter), 202719 } is the only row a Demon Hunter can resolve. OUTSIDE the rotational decision domain (racial action).",
+        "crossCheck": "NONE_RACE_BOUND"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "pick_up_fragment",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "pick_up_fragment_t::pick_up_fragment_t",
+        "line": 5146,
+        "sourceNote": "pick_up_fragment_t is built on spell_data_t::nil() (sc_demon_hunter.cpp:5133-5134) and its constructor assigns trigger_gcd = timespan_t::zero() at :5146. It is simulated movement and has no spell or log event of its own."
+      }
+    },
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

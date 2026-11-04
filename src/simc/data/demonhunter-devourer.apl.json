@@ -1,0 +1,1021 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_DEMONHUNTER_DEVOURER",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "demonhunter",
+    "specName": "devourer"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "UNKNOWN",
+    "sourcePath": "engine/class_modules/apl/apl_demon_hunter.cpp",
+    "sourceSha256": "c95ab0af6cfce46c64304903a7e8c65417beb01ff69f661beb727b9e23b4b389",
+    "sourceByteLength": 56505,
+    "regionStartMarker": "//devourer_apl_start",
+    "regionEndMarker": "//devourer_apl_end",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "regionSha256": "7ea8913291909f2060a752d391cd7c1360c3795276db28203893bc871e54e48e",
+    "livePtrPolicy": "PTR_MARKERS_EMPTY",
+    "dispatchSource": {
+      "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+      "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0"
+    }
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "call_action_list,name=variables",
+          "comment": null,
+          "sourceLine": 106
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "call_action_list,name=cooldowns",
+          "comment": null,
+          "sourceLine": 107
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "run_action_list,name=annihilator_melee,if=hero_tree.annihilator&talent.the_hunt",
+          "comment": null,
+          "sourceLine": 108
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "run_action_list,name=annihilator_ranged,if=hero_tree.annihilator",
+          "comment": null,
+          "sourceLine": 109
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "run_action_list,name=voidscarred_ranged,if=hero_tree.voidscarred&!talent.the_hunt",
+          "comment": null,
+          "sourceLine": 110
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "run_action_list,name=voidscarred_melee,if=hero_tree.voidscarred&talent.the_hunt",
+          "comment": null,
+          "sourceLine": 111
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": null,
+          "sourceLine": 91
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "variable,name=trinket_1_buffs,value=trinket.1.has_buff.intellect|trinket.1.has_buff.mastery|trinket.1.has_buff.versatility|trinket.1.has_buff.haste|trinket.1.has_buff.crit",
+          "comment": null,
+          "sourceLine": 92
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=trinket_2_buffs,value=trinket.2.has_buff.intellect|trinket.2.has_buff.mastery|trinket.2.has_buff.versatility|trinket.2.has_buff.haste|trinket.2.has_buff.crit",
+          "comment": null,
+          "sourceLine": 93
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=trinket_1_manual,value=trinket.1.is.font_of_venomous_rage",
+          "comment": null,
+          "sourceLine": 94
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=trinket_2_manual,value=trinket.2.is.font_of_venomous_rage",
+          "comment": null,
+          "sourceLine": 95
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "variable,name=trinket_1_ogcd_cast,value=0",
+          "comment": null,
+          "sourceLine": 96
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "variable,name=trinket_2_ogcd_cast,value=0",
+          "comment": null,
+          "sourceLine": 97
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "variable,name=trinket_1_exclude,value=0",
+          "comment": null,
+          "sourceLine": 98
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "variable,name=trinket_2_exclude,value=0",
+          "comment": null,
+          "sourceLine": 99
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "variable,name=trinket_priority,op=setif,value=2,value_else=1,condition=!variable.trinket_1_buffs&variable.trinket_2_buffs|variable.trinket_2_buffs&((trinket.2.proc.any_dps.duration)*trinket.2.proc.any_dps.default_value)>((trinket.1.proc.any_dps.duration)*trinket.1.proc.any_dps.default_value)",
+          "comment": null,
+          "sourceLine": 100
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "variable,name=damage_trinket_priority,op=setif,value=2,value_else=1,condition=!variable.trinket_1_buffs&!variable.trinket_2_buffs&trinket.2.ilvl>=trinket.1.ilvl",
+          "comment": null,
+          "sourceLine": 101
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "arcane_torrent",
+          "comment": null,
+          "sourceLine": 102
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "soul_immolation",
+          "comment": null,
+          "sourceLine": 103
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "consume",
+          "comment": null,
+          "sourceLine": 104
+        }
+      ]
+    },
+    {
+      "listName": "annihilator_ranged",
+      "receiverIdentifier": "annihilator_ranged",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "pick_up_fragment,mode=nearest,type=all,use_off_gcd=1,line_cd=0.6,if=!buff.metamorphosis.up&!buff.void_metamorphosis_stack.at_max_stacks&buff.void_metamorphosis_stack.stack>=buff.void_metamorphosis_stack.max_stack-1-(active_enemies>1)",
+          "comment": null,
+          "sourceLine": 113
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "pick_up_fragment,use_off_gcd=1,if=buff.metamorphosis.up&cooldown.reap.remains&soul_fragments+buff.collapsing_star_stacking.stack>=30&fury<void_metamorphosis_base_drain_ps&buff.collapsing_star_stacking.stack<30",
+          "comment": null,
+          "sourceLine": 114
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "metamorphosis",
+          "comment": null,
+          "sourceLine": 115
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "devour,if=buff.soulburst.up&active_enemies=1",
+          "comment": null,
+          "sourceLine": 116
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "consume,if=buff.soulburst.up",
+          "comment": null,
+          "sourceLine": 117
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "void_ray,if=talent.eradicate&active_enemies>1&!buff.eradicate.up",
+          "comment": null,
+          "sourceLine": 118
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "collapsing_star,if=active_enemies>1&buff.collapsing_star_stacking.stack>=30",
+          "comment": null,
+          "sourceLine": 119
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "call_action_list,name=reaps,if=active_enemies=1&!buff.metamorphosis.up&action.reap.souls_consumed>=4&variable.wont_drop_meta",
+          "comment": null,
+          "sourceLine": 120
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "collapsing_star,if=active_enemies=1",
+          "comment": null,
+          "sourceLine": 121
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "call_action_list,name=reaps,if=active_enemies=1&action.reap.souls_consumed>=4",
+          "comment": null,
+          "sourceLine": 122
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "call_action_list,name=reaps,if=fight_remains<=6&action.reap.souls_consumed>=1",
+          "comment": null,
+          "sourceLine": 123
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "call_action_list,name=reaps,if=active_enemies>1&buff.eradicate.up&action.reap.souls_consumed>=4+6*buff.moment_of_craving.up",
+          "comment": null,
+          "sourceLine": 124
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "void_ray,if=!buff.eradicate.up|!buff.moment_of_craving.up|!set_bonus.midnight_season_2_4pc",
+          "comment": null,
+          "sourceLine": 125
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "call_action_list,name=reaps,if=(!buff.eradicate.up|active_enemies=1)&(buff.voidfall_spending.stack>=3&prev_gcd.1.void_ray|buff.voidfall_spending.react>=3)",
+          "comment": null,
+          "sourceLine": 126
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "call_action_list,name=reaps,if=buff.metamorphosis.up&talent.collapsing_star&buff.collapsing_star_stacking.stack+action.reap.souls_consumed>=30&variable.wont_overcap_cstar&void_metamorphosis_base_drain_ps>35&action.reap.souls_consumed>=4&variable.wont_drop_meta",
+          "comment": null,
+          "sourceLine": 127
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "soul_immolation,if=active_dot.soul_immolation=0&(!buff.metamorphosis.up|fury<void_metamorphosis_base_drain_ps)",
+          "comment": null,
+          "sourceLine": 128
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "devour",
+          "comment": null,
+          "sourceLine": 129
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "consume",
+          "comment": null,
+          "sourceLine": 130
+        }
+      ]
+    },
+    {
+      "listName": "annihilator_melee",
+      "receiverIdentifier": "annihilator_melee",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "metamorphosis,if=(buff.eradicate.up|!talent.eradicate|active_enemies=1|talent.voidfall)&(active_enemies>1|buff.moment_of_craving.up|cooldown.void_ray.remains>6)",
+          "comment": null,
+          "sourceLine": 132
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "devour,if=buff.soulburst.up",
+          "comment": null,
+          "sourceLine": 133
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "consume,if=buff.soulburst.up",
+          "comment": null,
+          "sourceLine": 134
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "void_ray,if=talent.eradicate&active_enemies>1&!buff.eradicate.up",
+          "comment": null,
+          "sourceLine": 135
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "collapsing_star,if=active_enemies=1&(apex.1|buff.dark_matter.up|talent.star_fragments)",
+          "comment": null,
+          "sourceLine": 136
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "the_hunt,if=buff.metamorphosis.up",
+          "comment": null,
+          "sourceLine": 137
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "hungering_slash,if=!buff.metamorphosis.up&soul_fragments<=8",
+          "comment": null,
+          "sourceLine": 138
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "reapers_toll,if=!buff.metamorphosis.up&soul_fragments<=8",
+          "comment": null,
+          "sourceLine": 139
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "vengeful_retreat,if=talent.devourers_bite&buff.voidstep.up",
+          "comment": null,
+          "sourceLine": 140
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "hungering_slash,if=active_enemies>1",
+          "comment": null,
+          "sourceLine": 141
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "reapers_toll,if=talent.devourers_bite&(buff.voidsurge_reapers_toll.up|active_enemies>1)",
+          "comment": null,
+          "sourceLine": 142
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "voidblade,if=buff.metamorphosis.up",
+          "comment": null,
+          "sourceLine": 143
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "voidblade,if=!buff.metamorphosis.up&(active_enemies=1|!talent.eradicate&active_enemies<4)",
+          "comment": null,
+          "sourceLine": 144
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "call_action_list,name=reaps,if=active_enemies=1&action.reap.souls_consumed>=4",
+          "comment": null,
+          "sourceLine": 145
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "call_action_list,name=reaps,if=!talent.eradicate&(active_enemies>1&variable.wont_overcap_cstar&set_bonus.midnight_season_2_4pc&(buff.voidfall_spending.stack>=3&prev_gcd.1.void_ray|buff.voidfall_spending.react>=3))",
+          "comment": null,
+          "sourceLine": 146
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "call_action_list,name=reaps,if=action.reap.souls_consumed>=4&active_enemies<5&(active_enemies>1|!buff.metamorphosis.up|buff.moment_of_craving.up|buff.collapsing_star_stacking.stack+action.reap.souls_consumed>=30|void_metamorphosis_base_drain_ps>35)",
+          "comment": null,
+          "sourceLine": 147
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "call_action_list,name=reaps,if=fight_remains<=6&action.reap.souls_consumed>=1",
+          "comment": null,
+          "sourceLine": 148
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "call_action_list,name=reaps,if=talent.eradicate&active_enemies>1&buff.eradicate.up&action.reap.souls_consumed>=1",
+          "comment": null,
+          "sourceLine": 149
+        },
+        {
+          "priorityOrdinal": 18,
+          "actionStringVerbatim": "void_ray,if=!buff.eradicate.up|!buff.moment_of_craving.up|set_bonus.midnight_season_2_4pc",
+          "comment": null,
+          "sourceLine": 150
+        },
+        {
+          "priorityOrdinal": 19,
+          "actionStringVerbatim": "collapsing_star,if=active_enemies>1",
+          "comment": null,
+          "sourceLine": 151
+        },
+        {
+          "priorityOrdinal": 20,
+          "actionStringVerbatim": "call_action_list,name=reaps,if=buff.eradicate.up&active_enemies>1&action.reap.souls_consumed>=4+6*buff.moment_of_craving.up",
+          "comment": null,
+          "sourceLine": 152
+        },
+        {
+          "priorityOrdinal": 21,
+          "actionStringVerbatim": "call_action_list,name=reaps,if=!talent.eradicate&(active_enemies>1&!buff.metamorphosis.up&buff.moment_of_craving.up&talent.voidfall&(buff.voidfall_building.react<2|variable.ray_after_reap))",
+          "comment": null,
+          "sourceLine": 153
+        },
+        {
+          "priorityOrdinal": 22,
+          "actionStringVerbatim": "call_action_list,name=reaps,if=!talent.eradicate&(active_enemies>1&(buff.voidfall_spending.stack>=3&prev_gcd.1.void_ray|buff.voidfall_spending.react>=3))",
+          "comment": null,
+          "sourceLine": 154
+        },
+        {
+          "priorityOrdinal": 23,
+          "actionStringVerbatim": "call_action_list,name=reaps,if=active_enemies>1&buff.metamorphosis.up&talent.collapsing_star&(active_enemies>1|apex.1|buff.dark_matter.up|talent.star_fragments)&buff.collapsing_star_stacking.stack+action.reap.souls_consumed>=30&variable.wont_overcap_cstar&void_metamorphosis_base_drain_ps>35",
+          "comment": null,
+          "sourceLine": 155
+        },
+        {
+          "priorityOrdinal": 24,
+          "actionStringVerbatim": "soul_immolation,if=active_dot.soul_immolation=0&(!buff.metamorphosis.up|fury<void_metamorphosis_base_drain_ps)",
+          "comment": null,
+          "sourceLine": 156
+        },
+        {
+          "priorityOrdinal": 25,
+          "actionStringVerbatim": "devour",
+          "comment": null,
+          "sourceLine": 157
+        },
+        {
+          "priorityOrdinal": 26,
+          "actionStringVerbatim": "consume",
+          "comment": null,
+          "sourceLine": 158
+        }
+      ]
+    },
+    {
+      "listName": "voidscarred_ranged",
+      "receiverIdentifier": "voidscarred_ranged",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "voidblade,if=buff.void_metamorphosis_stack.at_max_stacks&talent.devourers_bite",
+          "comment": null,
+          "sourceLine": 160
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "metamorphosis,if=buff.eradicate.up|!talent.eradicate|active_enemies=1",
+          "comment": null,
+          "sourceLine": 161
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "devour,if=buff.soulburst.up&active_enemies=1",
+          "comment": null,
+          "sourceLine": 162
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "consume,if=buff.soulburst.up",
+          "comment": null,
+          "sourceLine": 163
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "collapsing_star,if=active_enemies=1&buff.collapsing_star_stacking.stack>=35",
+          "comment": null,
+          "sourceLine": 164
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "call_action_list,name=reaps,if=action.reap.souls_consumed>=4",
+          "comment": null,
+          "sourceLine": 165
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "call_action_list,name=reaps,if=fight_remains<=6&action.reap.souls_consumed>=1",
+          "comment": null,
+          "sourceLine": 166
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "void_ray,if=!buff.eradicate.up|!buff.moment_of_craving.up|set_bonus.midnight_season_2_4pc",
+          "comment": null,
+          "sourceLine": 167
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "collapsing_star,if=active_enemies>1",
+          "comment": null,
+          "sourceLine": 168
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "vengeful_retreat,if=buff.voidstep.up",
+          "comment": null,
+          "sourceLine": 169
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "reapers_toll,if=buff.voidsurge_reapers_toll.up",
+          "comment": null,
+          "sourceLine": 170
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "pierce_the_veil,if=buff.voidsurge_pierce_the_veil.up",
+          "comment": null,
+          "sourceLine": 171
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "soul_immolation,if=active_dot.soul_immolation=0&(!buff.metamorphosis.up|fury<void_metamorphosis_base_drain_ps)",
+          "comment": null,
+          "sourceLine": 172
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "devour",
+          "comment": null,
+          "sourceLine": 173
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "consume",
+          "comment": null,
+          "sourceLine": 174
+        }
+      ]
+    },
+    {
+      "listName": "voidscarred_melee",
+      "receiverIdentifier": "voidscarred_melee",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "run_action_list,name=vsm_st,if=active_enemies=1",
+          "comment": null,
+          "sourceLine": 176
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "run_action_list,name=vsm_meta,if=buff.metamorphosis.up",
+          "comment": null,
+          "sourceLine": 177
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "run_action_list,name=vsm_out",
+          "comment": null,
+          "sourceLine": 178
+        }
+      ]
+    },
+    {
+      "listName": "vsm_st",
+      "receiverIdentifier": "vsm_st",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "pick_up_fragment,mode=nearest,type=all,use_off_gcd=1,line_cd=0.75,if=!buff.metamorphosis.up&!buff.void_metamorphosis_stack.at_max_stacks&buff.void_metamorphosis_stack.stack>=buff.void_metamorphosis_stack.max_stack-1",
+          "comment": null,
+          "sourceLine": 180
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "soul_immolation,if=active_dot.soul_immolation=0&fury<void_metamorphosis_base_drain_ps",
+          "comment": null,
+          "sourceLine": 181
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "devour,if=buff.soulburst.up",
+          "comment": null,
+          "sourceLine": 182
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "consume,if=buff.soulburst.up",
+          "comment": null,
+          "sourceLine": 183
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "voidblade,if=buff.void_metamorphosis_stack.at_max_stacks",
+          "comment": null,
+          "sourceLine": 184
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "vengeful_retreat,if=buff.void_metamorphosis_stack.at_max_stacks&cooldown.the_hunt.ready&!buff.metamorphosis.up",
+          "comment": null,
+          "sourceLine": 185
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "the_hunt,if=buff.void_metamorphosis_stack.at_max_stacks&buff.vengeful_retreat_movement.up",
+          "comment": null,
+          "sourceLine": 186
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "metamorphosis",
+          "comment": null,
+          "sourceLine": 187
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "the_hunt,if=!buff.metamorphosis.up&(fight_remains<15|buff.void_metamorphosis_stack.stack<buff.void_metamorphosis_stack.max_stack*0.25)",
+          "comment": null,
+          "sourceLine": 188
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "wait,sec=0.05,if=!buff.metamorphosis.up&!buff.void_metamorphosis_stack.at_max_stacks&buff.void_metamorphosis_stack.stack>=buff.void_metamorphosis_stack.max_stack-1&soul_fragments>=1",
+          "comment": null,
+          "sourceLine": 189
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "hungering_slash",
+          "comment": null,
+          "sourceLine": 190
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "reapers_toll,if=soul_fragments<=8",
+          "comment": null,
+          "sourceLine": 191
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "vengeful_retreat,if=buff.voidstep.up",
+          "comment": null,
+          "sourceLine": 192
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "pierce_the_veil",
+          "comment": null,
+          "sourceLine": 193
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "call_action_list,name=reaps,if=action.reap.souls_consumed>=4",
+          "comment": null,
+          "sourceLine": 194
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "predators_wake",
+          "comment": null,
+          "sourceLine": 195
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "void_ray,if=!buff.eradicate.up|!buff.moment_of_craving.up|set_bonus.midnight_season_2_4pc",
+          "comment": null,
+          "sourceLine": 196
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "soul_immolation,if=active_dot.soul_immolation=0&!buff.metamorphosis.up",
+          "comment": null,
+          "sourceLine": 197
+        },
+        {
+          "priorityOrdinal": 18,
+          "actionStringVerbatim": "devour",
+          "comment": null,
+          "sourceLine": 198
+        },
+        {
+          "priorityOrdinal": 19,
+          "actionStringVerbatim": "consume",
+          "comment": null,
+          "sourceLine": 199
+        }
+      ]
+    },
+    {
+      "listName": "vsm_meta",
+      "receiverIdentifier": "vsm_meta",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "soul_immolation,if=variable.void_ray_count>=2&active_dot.soul_immolation=0&fury<=gcd.max*(void_metamorphosis_base_drain_ps-6)-6",
+          "comment": null,
+          "sourceLine": 201
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "pick_up_fragment,mode=nearest,type=all,use_off_gcd=1,line_cd=0.35,if=variable.void_ray_count=1&cooldown.void_ray.remains<gcd.max*2&fury<void_metamorphosis_base_drain_ps*cooldown.void_ray.remains",
+          "comment": null,
+          "sourceLine": 202
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "wait,sec=0.05,if=variable.void_ray_count>=2",
+          "comment": null,
+          "sourceLine": 203
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "vengeful_retreat,use_off_gcd=1,if=buff.voidstep.up",
+          "comment": null,
+          "sourceLine": 204
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "void_ray,if=variable.void_ray_count=0&!talent.eradicate",
+          "comment": null,
+          "sourceLine": 205
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "eradicate,if=(buff.moment_of_craving.remains<gcd.max|cooldown.void_ray.remains<gcd.max)&!buff.soulburst.up",
+          "comment": null,
+          "sourceLine": 206
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "void_ray,if=talent.eradicate&!buff.eradicate.up",
+          "comment": null,
+          "sourceLine": 207
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "reapers_toll,if=buff.hungering_slash.remains<gcd.max*2",
+          "comment": null,
+          "sourceLine": 208
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "devour,if=buff.soulburst.up",
+          "comment": null,
+          "sourceLine": 209
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "reapers_toll,if=soul_fragments<=8",
+          "comment": null,
+          "sourceLine": 210
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "pierce_the_veil,if=!buff.hungering_slash.up",
+          "comment": null,
+          "sourceLine": 211
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "predators_wake,if=!buff.hungering_slash.up",
+          "comment": null,
+          "sourceLine": 212
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "eradicate,if=action.reap.souls_consumed>=8&!buff.soulburst.up",
+          "comment": null,
+          "sourceLine": 213
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "cull,if=action.reap.souls_consumed>=4&!buff.soulburst.up",
+          "comment": null,
+          "sourceLine": 214
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "void_ray",
+          "comment": null,
+          "sourceLine": 215
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "soul_immolation,if=active_dot.soul_immolation=0&fury<=gcd.max*(void_metamorphosis_base_drain_ps-6)-6&cooldown.void_ray.remains>gcd.max",
+          "comment": null,
+          "sourceLine": 216
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "devour,if=fury<void_metamorphosis_base_drain_ps*(cooldown.void_ray.remains+3)",
+          "comment": null,
+          "sourceLine": 217
+        }
+      ]
+    },
+    {
+      "listName": "vsm_out",
+      "receiverIdentifier": "vsm_out",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "pick_up_fragment,mode=nearest,type=all,use_off_gcd=1,line_cd=0.3,if=!buff.void_metamorphosis_stack.at_max_stacks&buff.void_metamorphosis_stack.stack>=buff.void_metamorphosis_stack.max_stack-3",
+          "comment": null,
+          "sourceLine": 219
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "wait,sec=0.05,if=!buff.void_metamorphosis_stack.at_max_stacks&buff.void_metamorphosis_stack.stack>=buff.void_metamorphosis_stack.max_stack-1&time-action.pick_up_fragment.last_used<1.5",
+          "comment": null,
+          "sourceLine": 220
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "vengeful_retreat,use_off_gcd=1,if=buff.voidstep.up",
+          "comment": null,
+          "sourceLine": 221
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "voidblade,if=prev_gcd.1.void_ray",
+          "comment": null,
+          "sourceLine": 222
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "metamorphosis,if=buff.eradicate.up|!talent.eradicate|fight_remains<15",
+          "comment": null,
+          "sourceLine": 223
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "the_hunt",
+          "comment": null,
+          "sourceLine": 224
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "consume,if=buff.soulburst.up&buff.soulburst.remains<gcd.max",
+          "comment": null,
+          "sourceLine": 225
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "void_ray,if=talent.eradicate&!buff.eradicate.up",
+          "comment": null,
+          "sourceLine": 226
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "hungering_slash",
+          "comment": null,
+          "sourceLine": 227
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "soul_immolation,if=active_dot.soul_immolation=0",
+          "comment": null,
+          "sourceLine": 228
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "reap,if=action.reap.souls_consumed>=4&!buff.soulburst.up",
+          "comment": null,
+          "sourceLine": 229
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "eradicate,if=action.reap.souls_consumed>=4&!buff.soulburst.up",
+          "comment": null,
+          "sourceLine": 230
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "void_ray",
+          "comment": null,
+          "sourceLine": 231
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "consume",
+          "comment": null,
+          "sourceLine": 232
+        }
+      ]
+    },
+    {
+      "listName": "variables",
+      "receiverIdentifier": "variables",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "variable,name=wont_overcap_cstar,op=set,value=!buff.metamorphosis.up|((buff.collapsing_star_stacking.stack+action.reap.souls_consumed)<=buff.collapsing_star_stacking.max_stack|!(talent.collapsing_star&(active_enemies>1|apex.1|buff.dark_matter.up|talent.star_fragments)))",
+          "comment": null,
+          "sourceLine": 234
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "variable,name=wont_drop_meta,op=set,value=!buff.metamorphosis.up|!buff.moment_of_craving.up|(fury>void_metamorphosis_base_drain_ps+4*action.reap.souls_consumed+10*talent.scythes_embrace&buff.collapsing_star_stacking.stack+action.reap.souls_consumed>=30|!(talent.collapsing_star&(active_enemies>1|apex.1|buff.dark_matter.up|talent.star_fragments)))",
+          "comment": null,
+          "sourceLine": 235
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=ray_after_reap,op=set,value=fury+4*action.reap.souls_consumed+10*talent.scythes_embrace>=100",
+          "comment": null,
+          "sourceLine": 236
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=void_ray_count,op=reset,if=!buff.metamorphosis.up",
+          "comment": null,
+          "sourceLine": 237
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=void_ray_count,op=add,value=1,if=buff.metamorphosis.up&action.void_ray.last_used>variable.last_ray_mark",
+          "comment": null,
+          "sourceLine": 238
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "variable,name=last_ray_mark,op=set,value=action.void_ray.last_used",
+          "comment": null,
+          "sourceLine": 239
+        }
+      ]
+    },
+    {
+      "listName": "cooldowns",
+      "receiverIdentifier": "cooldowns",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "invoke_external_buff,name=power_infusion,if=buff.metamorphosis.up&!buff.power_infusion.up",
+          "comment": null,
+          "sourceLine": 241
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "potion,if=buff.metamorphosis.up|fight_remains<=30",
+          "comment": null,
+          "sourceLine": 242
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_item,slot=trinket1,if=buff.metamorphosis.up&(variable.void_ray_count=0|hero_tree.annihilator)&(!trinket.2.has_cooldown|trinket.2.cooldown.remains|variable.trinket_priority=1|variable.trinket_2_exclude)&!variable.trinket_1_manual|trinket.1.proc.any_dps.duration>=fight_remains|fight_remains<=trinket.1.buff.any_dps.duration",
+          "comment": null,
+          "sourceLine": 243
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "use_item,slot=trinket2,if=buff.metamorphosis.up&(variable.void_ray_count=0|hero_tree.annihilator)&(!trinket.1.has_cooldown|trinket.1.cooldown.remains|variable.trinket_priority=2|variable.trinket_1_exclude)&!variable.trinket_2_manual|trinket.2.proc.any_dps.duration>=fight_remains|fight_remains<=trinket.2.buff.any_dps.duration",
+          "comment": null,
+          "sourceLine": 244
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "use_item,use_off_gcd=1,slot=trinket1,if=!variable.trinket_1_buffs&!variable.trinket_1_manual&(variable.damage_trinket_priority=1|trinket.2.cooldown.remains|trinket.2.is.spymasters_web|trinket.2.cooldown.duration=0)&gcd.remains>0.1",
+          "comment": null,
+          "sourceLine": 245
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "use_item,use_off_gcd=1,slot=trinket2,if=!variable.trinket_2_buffs&!variable.trinket_2_manual&(variable.damage_trinket_priority=2|trinket.1.cooldown.remains|trinket.1.is.spymasters_web|trinket.1.cooldown.duration=0)&gcd.remains>0.1",
+          "comment": null,
+          "sourceLine": 246
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "use_item,use_off_gcd=1,slot=trinket1,if=trinket.1.is.font_of_venomous_rage&!buff.metamorphosis.up&buff.rolling_torment.up&gcd.remains>0.1",
+          "comment": null,
+          "sourceLine": 247
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "use_item,use_off_gcd=1,slot=trinket2,if=trinket.2.is.font_of_venomous_rage&!buff.metamorphosis.up&buff.rolling_torment.up&gcd.remains>0.1",
+          "comment": null,
+          "sourceLine": 248
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "use_item,slot=trinket1,if=!variable.trinket_1_buffs&!variable.trinket_1_manual&(variable.damage_trinket_priority=1|trinket.2.cooldown.remains|trinket.2.is.spymasters_web|trinket.2.cooldown.duration=0)&!variable.trinket_1_ogcd_cast",
+          "comment": null,
+          "sourceLine": 249
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "use_item,slot=trinket2,if=!variable.trinket_2_buffs&!variable.trinket_2_manual&(variable.damage_trinket_priority=2|trinket.1.cooldown.remains|trinket.1.is.spymasters_web|trinket.1.cooldown.duration=0)&!variable.trinket_2_ogcd_cast",
+          "comment": null,
+          "sourceLine": 250
+        }
+      ]
+    },
+    {
+      "listName": "reaps",
+      "receiverIdentifier": "reaps",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "eradicate",
+          "comment": null,
+          "sourceLine": 252
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "cull",
+          "comment": null,
+          "sourceLine": 253
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "reap",
+          "comment": null,
+          "sourceLine": 254
+        }
+      ]
+    }
+  ]
+}

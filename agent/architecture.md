@@ -13467,6 +13467,47 @@ for preparation alone and no dispatch (`analysis-composition-refusals`, which no
 
 **What a later promotion must do.** The owner decides ONB-S3 and, for Enhancement, ONB-EV. Each specialization then binds what ONB-B2 left open and measures its failure modes on real subjects (agent/follow-ups.md "After ONB-B2"), and a new public entry promotes it through the unchanged gates by the five-site promotion. No such entry is queued.
 
+## ONB-B3 — Devourer Demon Hunter (internal, own representative)
+
+Autopilot queue entry ONB-B3. Public contract: NONE. No Warcraft Logs request. `src/specs/demonhunter/devourer/README.md` is the slice in detail.
+
+**What it is.** Devourer Demon Hunter is registered INTERNAL_ONLY on the observed-decision pattern, with its own pinned list, GCD and talent data, resolver, facade and registration. No shared analyzer was introduced. The queue asked that it not be forced into Cohort B, and nothing of Cohort B was reused but the file shape. Its stop turned out to be the same one, on its own line, so no decision resolves.
+
+**Measured, offline, by replaying retained captures through production ingestion.** A census of every retained JSON file over 500 bytes (5,647 parsed), by signature ability, with Mortal Strike as its positive control, finds three subjects:
+
+| Subject | Hero tree | Span | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| gtKb2xHn87pNcFfW fight 22 actor 32 | Void-Scarred | whole, 284.8 s | 98 | 0 | 0 | 98 | 602 |
+| rXAfw9t1q8YpmkKD fight 13 actor 20 | Void-Scarred | first 165.0 s of 271.8 s | 81 | 0 | 0 | 81 | 394 |
+| rXAfw9t1q8YpmkKD fight 13 actor 79 | Void-Scarred | first 165.0 s of 271.8 s | 72 | 0 | 0 | 72 | 377 |
+
+All 251 root scans stop at `voidscarred_melee[0] run_action_list` on `active_enemies`. The dispatch before it is the part the entry was unsure of, and it works: `variables` and `cooldowns` return no action, the tree closes `default[2..3]`, The Hunt closes `default[4]` and opens `default[5]`. A census reading casts only would not see a subject with no signature cast in a retained span.
+
+**Requirement C is not met, and why this is not an owner stop.** As for Arms (ONB-B1). The queue asks for real MATCH, discrimination and negative-control evidence, and none can exist while the enemy count stands, which is already queued as the owner's (ONB-S3). The entry asks for an internal registration, and the fail-closed result is correct.
+
+**Decisions.**
+
+1. **Pseudo-action timers stay UNKNOWN, as the entry says.** `pick_up_fragment` has no spell and no log event, so no id binds it and nothing attributes to any of its lines. The adapter still supplies `lineCooldownFor` from the shared rule, so the answer is the shared one, `LINE_CD:SELECTION_COVERAGE_NOT_PROVEN`. No real scan gets there. A test gives the query an enemy count only a test can have, to show that `vsm_st[0]` reads as that, and that nothing falls through.
+2. **No transition contract exists.** Havoc has one for `pick_up_fragment`. Devourer's would have to name more, because a soul consumed here builds Void Metamorphosis stacks too, and no contract could move a decision past the count. So every off-GCD line refuses.
+3. **`void_ray_count` is executed by the shared rule and read as it falls.** Reset then `op=add` (ONB-S2): KNOWN 0 only where Metamorphosis is proven down, and otherwise unknown, never zero. No aura is bound, so it is unknown here. A test shows `vsm_meta[0]` staying open on it with Metamorphosis given.
+4. **Bind what the action is, and let the rest be excluded.**
+   - **Void Metamorphosis** binds 1217605, the class row `find_specialization_spell` returns. The wire never logs it as a cast and holds only the aura 1217607.
+   - **Voidblade** binds its class talent 1245412. 1245414 follows every Voidblade and Pierce the Veil, at `_gcd` 0, and **The Hunt's** 1246169 follows every The Hunt and Predator's Wake. Each is recorded with no token, so each is excluded as off-GCD and never judged.
+   - **Soul Fragment** 1223412 is logged 243 to 385 times a fight at `_gcd` 0, with no token. Nothing here identifies what it records.
+   - **Eradicate** binds 1225826 and **Hungering Slash** 1239123, not their trait rows' 1226033 and 1239519, each `_gcd` 0 and neither the action.
+5. **A cast-time action is excluded, and a channel is not.** Consume, Devour, The Hunt and Predator's Wake have begincasts on every subject, so reading them at the `cast` asks the wrong moment. Void Ray has no begincast, and on the whole-fight subject every tick of its 26 casts follows the `cast`, none before it, so the `cast` is the channel's start, as ONB-S4 found for Arcane Missiles. It stays eligible.
+6. **Collapsing Star's talent does not close its line.** `spec.collapsing_star_spell` also opens on the tiered `midnight3` (:11208-11209), which is not modelled. A lone node is never proven absent, so the rule already reads UNKNOWN; a test pins it, so a later hero-tree proof does not close it by accident.
+7. **The talent extractor needed two rules, and neither changes another artifact.**
+   - A hero row scoped to no specialization is class-wide (player.cpp:2778, :2898). All 16 of Annihilator's rows are held that way, so the old filter found none. `resolveTalent` already read it so.
+   - Demonic Intensity is one name in two hero sub-trees open to Devourer, so its target names the tree (`subTreeId: 126`), as the module's `HT_FS` does (:11160-11162).
+
+   I regenerated the other 12 targets' talent artifacts through the changed extractor, and each is byte-identical to the committed file.
+8. **Bind no aura or cooldown.** No binding would reach the gates, because every rotation list sits behind the count. The pins also fail: Cull 730 ms and Reap 1,692 ms against an 8 s charge, Soul Immolation 1,643 ms against 60 s, Predator's Wake 41.1 s against 90 s, Vengeful Retreat 10.7 s against 25 s. `fury` is bound from the cast's own PRE_COST observation only, known at 41 of 251 decisions, and unknown otherwise, never zero.
+
+**Evidence.** Nothing new is committed. The archive's notice line has 5,212 bytes left, and these decisions would pin nothing the synthetic tests do not (agent/follow-ups.md "After ONB-B3"). No Warcraft Logs request was made, and every pinned source read was already on disk, matched to the committed hashes.
+
+**No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse the row. A public Demon Hunter/Devourer request is SPEC_NOT_SUPPORTED, exactly as before.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

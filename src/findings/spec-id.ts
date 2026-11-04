@@ -84,7 +84,8 @@ export type SpecId =
   | "warrior/protection"
   | "warrior/arms"
   | "deathknight/frost"
-  | "shaman/enhancement";
+  | "shaman/enhancement"
+  | "demonhunter/devourer";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -107,6 +108,7 @@ export const SPEC_IDS = Object.freeze([
   "warrior/arms",
   "deathknight/frost",
   "shaman/enhancement",
+  "demonhunter/devourer",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -243,6 +245,10 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * Frost Death Knight and Enhancement Shaman arrived here in ONB-B2, Cohort B's followers. No decision of
  * either resolves: Frost stops on a cooldown line this slice cannot read, Enhancement on Bloodlust and the
  * enemy count, and every rotation list of both sits behind that count, the ONB-S3 owner decision.
+ *
+ * Devourer Demon Hunter arrived here in ONB-B3, its own representative. No decision of it resolves: on a
+ * Void-Scarred build with The Hunt the list reaches `voidscarred_melee` and stops on the enemy count, the
+ * ONB-S3 owner decision.
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
@@ -253,6 +259,7 @@ export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "warrior/arms",
   "deathknight/frost",
   "shaman/enhancement",
+  "demonhunter/devourer",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

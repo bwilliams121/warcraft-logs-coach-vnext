@@ -746,6 +746,7 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
       "warrior/arms",
       "deathknight/frost",
       "shaman/enhancement",
+      "demonhunter/devourer",
     ]);
     const internal = PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY");
     expect(internal.map((row) => row.specId)).toEqual([...INTERNAL_ONLY_SPEC_IDS]);
@@ -763,6 +764,17 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
       expect(readiness.qualifyingAssertions, specId).toEqual([]);
       expect(readiness.evidenceReady, specId).toBe(false);
     }
+  });
+
+  it("ONB-B3: the gate search finds nothing for Devourer Demon Hunter", async () => {
+    // Its three retained subjects resolve no decision (agent/architecture.md "ONB-B3"). A later change
+    // that resolved one would fail this pin and prompt a public entry; it would not promote anything by itself.
+    const tiers = await tiersPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "demonhunter/devourer");
+    if (module === undefined) throw new Error("no module for demonhunter/devourer");
+    const readiness = evaluate(tiers, "demonhunter/devourer", "INTERNAL_ONLY", internalPairing(module));
+    expect(readiness.qualifyingAssertions).toEqual([]);
+    expect(readiness.evidenceReady).toBe(false);
   });
 
   it("ONB-B2: the gate search finds nothing for Frost Death Knight or Enhancement Shaman", async () => {

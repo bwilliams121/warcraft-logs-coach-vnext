@@ -1655,9 +1655,144 @@ const WARRIOR_ARMS_TARGET = {
   ],
 };
 
+/**
+ * Devourer Demon Hunter (ONB-B3). The hero sub-trees are Annihilator (124) and Void-Scarred (126).
+ * The three-entry tiered "Midnight" node is left out: `apex.1` stays unmodelled and UNKNOWN.
+ */
+const DEMONHUNTER_DEVOURER_TARGET = {
+  datasetId: "SIMC_TRAIT_DEMONHUNTER_DEVOURER_TALENTS",
+  classId: 12,
+  specId: 1480,
+  defaultOut: "src/data/game/demonhunter-devourer-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. That `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node is corroborated for Devourer on three real subjects: gtKb2xHn87pNcFfW fight 22 actor 32 and rXAfw9t1q8YpmkKD fight 13 actors 20 and 79. All 229 of their entries are pinned rows of class 12.",
+  requiredTalents: [
+    {
+      simcName: "the_hunt",
+      displayNameEn: "The Hunt",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:10973 talent.devourer.the_hunt = find_talent_spell( SPECIALIZATION, "The Hunt" ); the pinned list dispatches on talent.the_hunt, and the_hunt_t is built on it (:5612, :11285)',
+    },
+    {
+      simcName: "eradicate",
+      displayNameEn: "Eradicate",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:10976 talent.devourer.eradicate = find_talent_spell( SPECIALIZATION, "Eradicate" ); the pinned list reads talent.eradicate, and eradicate_t is built on spec.eradicate = talent_spell_lookup( talent.devourer.eradicate, 1225826 ) (:6143, :11196)',
+    },
+    {
+      simcName: "collapsing_star",
+      displayNameEn: "Collapsing Star",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:10940 talent.devourer.collapsing_star = find_talent_spell( SPECIALIZATION, "Collapsing Star" ); the pinned list reads talent.collapsing_star. Alone it does not prove the action unbuilt: spec.collapsing_star_spell also opens on talent.devourer.midnight3 (:11208-11209)',
+    },
+    {
+      simcName: "star_fragments",
+      displayNameEn: "Star Fragments",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:10971 talent.devourer.star_fragments = find_talent_spell( SPECIALIZATION, "Star Fragments" ); the pinned list reads talent.star_fragments',
+    },
+    {
+      simcName: "devourers_bite",
+      displayNameEn: "Devourer's Bite",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:10968 talent.devourer.devourers_bite = find_talent_spell( SPECIALIZATION, "Devourer\'s Bite" ); the pinned list reads talent.devourers_bite',
+    },
+    {
+      simcName: "scythes_embrace",
+      displayNameEn: "Scythe's Embrace",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:10938 talent.devourer.scythes_embrace = find_talent_spell( SPECIALIZATION, "Scythe\'s Embrace" ); the pinned list reads talent.scythes_embrace. A CHOICE node with Duty Eternal',
+    },
+    {
+      simcName: "duty_eternal",
+      displayNameEn: "Duty Eternal",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:10939 talent.devourer.duty_eternal = find_talent_spell( SPECIALIZATION, "Duty Eternal" ); a CHOICE node with Scythe\'s Embrace, pinned so that node resolves',
+    },
+    {
+      simcName: "void_ray",
+      displayNameEn: "Void Ray",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:10928 talent.devourer.void_ray = find_talent_spell( SPECIALIZATION, "Void Ray" ); void_ray_t is built on it (:6373)',
+    },
+    {
+      simcName: "soul_immolation",
+      displayNameEn: "Soul Immolation",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:10930 talent.devourer.soul_immolation = find_talent_spell( SPECIALIZATION, "Soul Immolation" ); soul_immolation_heal_t is built on it (:5951)',
+    },
+    {
+      simcName: "hungering_slash",
+      displayNameEn: "Hungering Slash",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:10956 talent.devourer.hungering_slash = find_talent_spell( SPECIALIZATION, "Hungering Slash" ); hungering_slash_t is built on spec.hungering_slash = talent_spell_lookup( talent.devourer.hungering_slash, 1239123 ) (:6808, :11216)',
+    },
+    {
+      simcName: "voidblade",
+      displayNameEn: "Voidblade",
+      tree: "CLASS",
+      binding:
+        'sc_demon_hunter.cpp:10870 talent.demon_hunter.voidblade = find_talent_spell( CLASS, "Voidblade" ); voidblade_t is built on it (:5913)',
+    },
+    {
+      simcName: "vengeful_retreat",
+      displayNameEn: "Vengeful Retreat",
+      tree: "CLASS",
+      binding:
+        'sc_demon_hunter.cpp:10868 talent.demon_hunter.vengeful_retreat = find_talent_spell( CLASS, "Vengeful Retreat" ); vengeful_retreat_t is built on it (:8588-8589)',
+    },
+    {
+      simcName: "voidfall",
+      displayNameEn: "Voidfall",
+      tree: "HERO",
+      binding:
+        'sc_demon_hunter.cpp:11133 talent.annihilator.voidfall = find_talent_spell( HERO, "Voidfall" ); the pinned list reads talent.voidfall',
+    },
+    {
+      simcName: "dark_matter",
+      displayNameEn: "Dark Matter",
+      tree: "HERO",
+      binding:
+        'sc_demon_hunter.cpp:11149 talent.annihilator.dark_matter = find_talent_spell( HERO, "Dark Matter" ); an Annihilator talent, pinned so the tree resolves from more than one entry',
+    },
+    {
+      simcName: "voidsurge",
+      displayNameEn: "Voidsurge",
+      tree: "HERO",
+      binding:
+        'sc_demon_hunter.cpp:11158 talent.scarred.demonsurge = find_talent_spell( HERO, "Voidsurge" ) for a Devourer; pierce_the_veil_t and reapers_toll_t are built on lookups of it (:11384-11385)',
+    },
+    {
+      simcName: "demonic_intensity",
+      displayNameEn: "Demonic Intensity",
+      tree: "HERO",
+      subTreeId: 126,
+      binding:
+        'sc_demon_hunter.cpp:11184 talent.scarred.demonic_intensity = HT_FS( "Demonic Intensity" ), the Void-Scarred tree for a Devourer (:11160-11162); predators_wake_t is built on a lookup of it (:11380-11383)',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data` (trait_data.inc:4430, :4431).
+    { simcName: "annihilator", subTreeId: 124 },
+    { simcName: "voidscarred", subTreeId: 126 },
+  ],
+};
+
 export const TARGETS = {
   "deathknight-blood": DEATHKNIGHT_BLOOD_TARGET,
   "demonhunter-havoc": DEMONHUNTER_HAVOC_TARGET,
+  "demonhunter-devourer": DEMONHUNTER_DEVOURER_TARGET,
   "deathknight-frost": DEATHKNIGHT_FROST_TARGET,
   "shaman-enhancement": SHAMAN_ENHANCEMENT_TARGET,
   "warrior-arms": WARRIOR_ARMS_TARGET,
@@ -1816,7 +1951,10 @@ export function resolveTalent(rows, required, target = ROGUE_ASSASSINATION_TARGE
       row.classId === target.classId &&
       row.treeIndex === treeIndex &&
       row.displayNameEn === required.displayNameEn &&
-      (row.specIds.length === 0 || row.specIds.includes(target.specId)),
+      (row.specIds.length === 0 || row.specIds.includes(target.specId)) &&
+      // Devourer: two hero sub-trees can each hold a row of one name, both open to the spec (Demonic Intensity
+      // in Fel-Scarred and Void-Scarred). The module names the tree (`HT_FS`, sc_demon_hunter.cpp:11160-11162), so the target does too.
+      (required.subTreeId === undefined || row.idSubTree === required.subTreeId),
   );
   if (matches.length === 0) {
     return { ok: false, error: `talent '${required.displayNameEn}' not found in the ${required.tree} tree` };
@@ -1895,7 +2033,9 @@ export function resolveHeroTree(rows, declared, target) {
         row.classId === target.classId &&
         row.treeIndex === TREE_INDEX.HERO &&
         row.idSubTree === declared.subTreeId &&
-        row.specIds.includes(target.specId),
+        // A row scoped to no specialization is class-wide (player.cpp:2778, :2898), which is how the
+        // pinned table holds all of Annihilator's rows, exactly as `resolveTalent` reads it.
+        (row.specIds.length === 0 || row.specIds.includes(target.specId)),
     )
     .map((row) => ({
       traitEntryId: row.traitEntryId,
