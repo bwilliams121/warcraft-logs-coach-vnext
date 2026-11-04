@@ -17,7 +17,7 @@
  *     raid-night-mixed-ret.public.json  the same roster with the Retribution
  *                               actor over the Protection opener (M11-A4+)
  *     raid-night-mixed-ret-45s.public.json  all three supported specs plus
- *                               Arms over the Retribution 45 s slice (M11-A5+)
+ *                               Fire over the Retribution 45 s slice (M11-A5+)
  *     timings.json              wall-clock and CPU per request, invocation
  *                               counts — REPORT ONLY, nothing is asserted
  *
@@ -102,8 +102,8 @@ const SUBJECTS: readonly Subject[] = [
   { label: "gtkb", artifactId: GTKB, actorId: 25, className: "Rogue", specName: "Assassination" },
   { label: "prot-opener", artifactId: PROT_OPENER, actorId: 7, className: "Paladin", specName: "Protection" },
   { label: "prot-45s", artifactId: PROT_45S, actorId: 7, className: "Paladin", specName: "Protection" },
-  // A7R6 fight 7 actor 4, per the committed fight-context artifact.
-  { label: "arms", artifactId: PROT_OPENER, actorId: 4, className: "Warrior", specName: "Arms" },
+  // A7R6 fight 7 actor 17, per the committed fight-context artifact.
+  { label: "fire", artifactId: PROT_OPENER, actorId: 17, className: "Mage", specName: "Fire" },
   // A7R6 fight 7 actor 6 (Paladin/Retribution), per the committed fight-context
   // artifact, over the PROTECTION opener slice (which holds none of actor 6's
   // evidence). Added at M11-A4 as the public-unsupported baseline
@@ -315,7 +315,7 @@ describe(`M10-D invariance capture -> ${CAPTURE_DIR}`, () => {
   });
 
   it("raid-night: the mixed A7R6 roster over the opener served as one core (M10-D)", async () => {
-    // Actors 7 (Paladin/Protection), 19 (Rogue/Assassination), 4 (Warrior/Arms)
+    // Actors 7 (Paladin/Protection), 19 (Rogue/Assassination), 17 (Mage/Fire)
     // and 14 (Death Knight/Blood, absent), per the committed fight-context
     // artifact. Not present in a pre-M10-D baseline: the composition needs the
     // public Protection registration, so compare this file across post-M10-D
@@ -323,20 +323,20 @@ describe(`M10-D invariance capture -> ${CAPTURE_DIR}`, () => {
     const CLASS_OF: Readonly<Record<number, string>> = {
       7: "Paladin",
       19: "Rogue",
-      4: "Warrior",
+      17: "Mage",
       14: "DeathKnight",
     };
     const SPEC_OF: Readonly<Record<number, string>> = {
       7: "Protection",
       19: "Assassination",
-      4: "Arms",
+      17: "Fire",
       14: "Blood",
     };
     const catalog = countingCatalog();
     const ports = fakePorts({
       snapshot: assassinationSnapshot({
         fightIds: [7],
-        sourceIds: [7, 19, 4, 14],
+        sourceIds: [7, 19, 17, 14],
         classNameFor: (sourceId) => CLASS_OF[sourceId] ?? "Rogue",
         specNameFor: (_fightId, sourceId) => SPEC_OF[sourceId] ?? null,
         absentOn: new Map([[7, [14]]]),
@@ -397,30 +397,30 @@ describe(`M10-D invariance capture -> ${CAPTURE_DIR}`, () => {
     write("raid-night-mixed-ret.public.json", projectRaidNightResult(run.aggregate));
   });
 
-  it("raid-night: all three supported specializations plus Arms over the Retribution 45 s slice (M11-A5)", async () => {
+  it("raid-night: all three supported specializations plus Fire over the Retribution 45 s slice (M11-A5)", async () => {
     // Actors 6 (Paladin/Retribution), 7 (Paladin/Protection), 19
-    // (Rogue/Assassination) and 4 (Warrior/Arms) per the committed
+    // (Rogue/Assassination) and 17 (Mage/Fire) per the committed
     // fight-context artifact, over the slice that describes actor 6 only: the
     // Retribution cell is ANALYZED, the other two supported players answer
-    // PROFILE_NOT_RESOLVED truthfully, Arms is SPEC_NOT_SUPPORTED. Not
+    // PROFILE_NOT_RESOLVED truthfully, Fire is SPEC_NOT_SUPPORTED. Not
     // present in a pre-M11-A5 baseline.
     const CLASS_OF: Readonly<Record<number, string>> = {
       6: "Paladin",
       7: "Paladin",
       19: "Rogue",
-      4: "Warrior",
+      17: "Mage",
     };
     const SPEC_OF: Readonly<Record<number, string>> = {
       6: "Retribution",
       7: "Protection",
       19: "Assassination",
-      4: "Arms",
+      17: "Fire",
     };
     const catalog = countingCatalog();
     const ports = fakePorts({
       snapshot: assassinationSnapshot({
         fightIds: [7],
-        sourceIds: [6, 7, 19, 4],
+        sourceIds: [6, 7, 19, 17],
         classNameFor: (sourceId) => CLASS_OF[sourceId] ?? "Rogue",
         specNameFor: (_fightId, sourceId) => SPEC_OF[sourceId] ?? null,
       }),

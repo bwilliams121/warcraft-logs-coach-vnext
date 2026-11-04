@@ -803,7 +803,13 @@ describe("the registry", () => {
 
   it("no D2-C artifact is committed, except those an onboarding tranche has since extracted", () => {
     // ONB-A1 extracted demonhunter-havoc through this very path, and ONB-A2 its three followers.
-    const EXTRACTED = ["demonhunter-havoc", "rogue-subtlety", "warrior-fury", "warrior-protection"];
+    const EXTRACTED = [
+      "demonhunter-havoc",
+      "rogue-subtlety",
+      "warrior-arms",
+      "warrior-fury",
+      "warrior-protection",
+    ];
     for (const name of Object.keys(D2C))
       expect(existsSync(`src/simc/data/${name}.apl.json`), name).toBe(EXTRACTED.includes(name));
   });

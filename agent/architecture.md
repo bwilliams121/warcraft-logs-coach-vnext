@@ -13273,6 +13273,65 @@ alone and no dispatch (`analysis-composition-refusals`, which did not list eithe
 follower binds what ONB-A2 left open, measuring its failure modes on the real events first (agent/follow-ups.md "After
 ONB-A2"). A new public entry then promotes through the unchanged gates by the five-site promotion.
 
+## ONB-B1 — Arms Warrior (internal, Cohort B representative)
+
+Autopilot queue entry ONB-B1. Public contract: NONE. No Warcraft Logs request. `src/specs/warrior/arms/README.md` is the slice in detail.
+
+**What it is.** Arms Warrior is registered INTERNAL_ONLY, on the observed-decision pattern, with its own pinned list, GCD and talent
+data, resolver, facade and registration. No shared analyzer was introduced. It is Cohort B's representative, and the finding is
+that the cohort's description does not hold: **`run_action_list` is not the obstacle. The enemy count is.**
+
+**Measured, offline, by replaying the retained capture through production ingestion** (b1PmaKrd6CDfzngc fight 48, actor 5, Slayer):
+
+| Window | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | --- | --- | --- |
+| first 6 s (committed, pinned in the archive) | 6 | 0 | 0 | 6 | 8 |
+| whole fight (retained raw capture, offline) | 324 | 0 | 0 | 324 | 225 |
+
+Every query refuses at `default[0] charge`, and every root scan stops at `default[17] run_action_list` on `active_enemies`. The shared
+engine handled the dispatch as designed: `default[14..16]` are closed by the Slayer tree, `variables` and `trinkets` are scanned, and
+the undecided gate is explored and collapsed. Nothing here needed a shared change.
+
+**Requirement C is not met, and why this is not an owner stop.** The queue asks for real MATCH, discrimination and negative-control
+evidence. None can exist while the enemy count stands, and that decision is already queued as the owner's (ONB-S3), as it was for
+Fury and Protection Warrior (ONB-A2). The entry asks for an internal registration, the fail-closed result is correct, and ONB-B1P
+applies onboarding rule 4 to what it finds. Real evidence was read, and the fail-closed result is pinned on real bytes.
+
+**Decisions.**
+
+1. **Bind no aura or cooldown.** Before deciding this, the tranche asked whether binding them could produce a decision over the
+   open dispatch: worlds converge only if `slayer_aoe`, `slayer_execute` and `slayer_st` all select one action. Two tokens could.
+   - **Heroic Strike** sits behind `!talent.fervor_of_battle` in `slayer_aoe`, a lone-node talent the subject did not take, which
+     resolves UNKNOWN (agent/follow-ups.md "After ONB-A1", A Fire Inside).
+   - **Colossus Smash** needs Sweeping Strikes, Avatar, Bladestorm and Cleave each proven on cooldown or closed, at 10 decisions at
+     most. The wire contradicts the pin for all but one of them: the smallest gaps are Colossus Smash 27.1 s against 45 s, Bladestorm
+     26.1 s against 90 s, Avatar 50.6 s against 90 s and Cleave 4.2 s against 4.5 s, because talents reset or shorten them in combat.
+     A floor from the pin would produce false verdicts.
+
+   So no binding would reach the gates, which need several tokens and a discriminating REJECTED. The state would be machinery with
+   no decision behind it.
+2. **`colossus-smash-window-fill` is an observation, not a decision.** The inventory's question does not need the dispatch, so it is
+   answered: per Colossus Smash window, which of the hero tree's single-target lines gated on `debuff.colossus_smash.up` were logged.
+   It sits in the payload, reaches no public surface and carries no verdict, severity or expected value. A missing edge, a transition M4's
+   `presenceAt` will not prove ACTIVE from the one before it, CASTS coverage short of COMPLETE (decode-degraded included), an unreadable
+   cast that could be a gated one, or a gated cast in an edge's own millisecond is NOT_ESTABLISHED with presses `null`, never zero. Direction and class come from M4's observation: the log also reports 208086
+   as a BUFF on the actor, and that is not a window. It is spec-owned, because which lines it asks about is Arms' meaning.
+3. **Execute binds 163201 and 281000.** The pinned effect row 738985 of Massacre (281001) is an action override of 163201 onto
+   281000, and the subject logs 79 of 281000 and none of 163201. An unbound id would have excluded a quarter of the decisions.
+4. **Sweeping Strikes consumes a GCD.** Its record is 750 ms, so its lane is GCD_CONSUMING, unlike Avatar, Charge and Pummel.
+5. **The unsupported subject moved.** The guard in `tests/contracts/m11a2-unsupported-subject.test.ts` demands a migration the day
+   `warrior/arms` joins `SpecId`, so the canonical subject is now A7R6 fight 7 actor 17, a Fire Mage (ONB-X1, among the last to
+   onboard). That renames two corpus cases, which pin it by coordinates. gtKb fight 22's actor 12 stays a Warrior / Arms in
+   `m11c4j-mixed-raid-night`, because that is what the capture holds and a public request still refuses it.
+
+**Evidence.** One archive segment, the first 6 s (20,265 bytes), with every aura transition and resourcechange of actor 5 so its AURAS
+and RESOURCES grants are whole over the range. It leaves 5,212 bytes under the notice line. The whole fight's decision families are
+about 1.1 MB, and committing them would change nothing this tranche pins, so no measured proposal is raised here
+(agent/follow-ups.md "After ONB-B1"). No Warcraft Logs request was made.
+
+**No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse
+the row. A public Warrior/Arms request is SPEC_NOT_SUPPORTED, exactly as before.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

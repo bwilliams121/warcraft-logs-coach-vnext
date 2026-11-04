@@ -2242,8 +2242,8 @@ const PP = "wcl-protection-paladin-a7r6-opener";
 const PP_GAP = "wcl-protection-paladin-a7r6-opener.gap-before-2010000";
 const A7R6_CONTEXT = "wcl-fight-context-a7r6-fight-7";
 const TANK = 7;
-/** A7R6 fight 7 actor 4 — Warrior/Arms per the committed fight-context artifact: the canonical UNSUPPORTED identity since M10-D. */
-const ARMS = 4;
+/** A7R6 fight 7 actor 17 — Mage/Fire per the committed fight-context artifact: the canonical UNSUPPORTED identity since ONB-B1. */
+const FIRE_MAGE = 17;
 const PROT_ANALYZER = "paladin-protection-observed-decisions";
 const PROT_ANALYZED_ENVELOPE = {
   status: "ANALYZED",
@@ -6973,6 +6973,44 @@ const BREWMASTER_CASES = [
     "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Protection Warrior list.",
     { related: ["tests/unit/specs/onb-a2-cohort-a-followers.test.ts"] },
   ),
+  // ---- SPEC_ARMS_WARRIOR (ONB-B1, INTERNAL_ONLY) ---
+  kase(
+    "application-service.arms-warrior-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Arms Warrior registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "warrior/arms",
+        expected: {
+          internalAnalyzerId: "warrior-arms-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Arms Warrior is registered INTERNAL_ONLY in ONB-B1. Every GCD action of its pinned list sits behind a dispatch on the enemy count, which is the ONB-S3 owner decision, so a public request must keep receiving SPEC_NOT_SUPPORTED.",
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-arms-warrior.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_ARMS_WARRIOR",
+    "src/specs/warrior/arms/observed-analysis.ts analyzeObservedArmsWarriorDecisions (the spec gate)",
+    "The Arms Warrior facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_ARMS_WARRIOR.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Arms Warrior list.",
+    { related: ["tests/unit/specs/onb-b1-arms-warrior.test.ts"] },
+  ),
   // ---- SPEC_PRESERVATION_EVOKER (HEAL-B4; PUBLIC since HEAL-B4P) --------------------
   kase(
     "spec-preservation-evoker.unstated-subject-yields-no-healer-finding",
@@ -7775,7 +7813,7 @@ const RET_CASES = [
     RET45,
     "PUBLIC_CONTRACT",
     "src/contracts/raid-night-contract.ts; src/services/raid-night-service.ts; /v1/raid-night; analyze_raid_night",
-    "One raid-night request over the Retribution 45 s slice served as ONE core, with a roster of four real participants of A7R6 fight 7: the Retribution Paladin (actor 6) is ANALYZED under paladin/retribution; the Protection Paladin (actor 7) and the Assassination Rogue (actor 19) have none of their evidence in the slice and their analyzers answer PROFILE_NOT_RESOLVED; the Arms Warrior (actor 4) is SPEC_NOT_SUPPORTED. One document on REST and MCP, one ingestion per transport.",
+    "One raid-night request over the Retribution 45 s slice served as ONE core, with a roster of four real participants of A7R6 fight 7: the Retribution Paladin (actor 6) is ANALYZED under paladin/retribution; the Protection Paladin (actor 7) and the Assassination Rogue (actor 19) have none of their evidence in the slice and their analyzers answer PROFILE_NOT_RESOLVED; the Fire Mage (actor 17) is SPEC_NOT_SUPPORTED. One document on REST and MCP, one ingestion per transport.",
     [
       a("PUBLIC_CONTRACT.REST_MCP_PARITY", {
         document: "RAID_NIGHT",
@@ -7786,7 +7824,7 @@ const RET_CASES = [
             { sourceId: RET, className: "Paladin", specName: "Retribution", absent: false },
             { sourceId: TANK, className: "Paladin", specName: "Protection", absent: false },
             { sourceId: 19, className: "Rogue", specName: "Assassination", absent: false },
-            { sourceId: ARMS, className: "Warrior", specName: "Arms", absent: false },
+            { sourceId: FIRE_MAGE, className: "Mage", specName: "Fire", absent: false },
           ],
         },
         expected: {
@@ -7795,7 +7833,7 @@ const RET_CASES = [
             { sourceId: RET, kind: "ANALYZED", specId: "paladin/retribution" },
             { sourceId: TANK, kind: "NOT_ANALYZED", status: "PROFILE_NOT_RESOLVED" },
             { sourceId: 19, kind: "NOT_ANALYZED", status: "PROFILE_NOT_RESOLVED" },
-            { sourceId: ARMS, kind: "NOT_ANALYZED", status: "SPEC_NOT_SUPPORTED" },
+            { sourceId: FIRE_MAGE, kind: "NOT_ANALYZED", status: "SPEC_NOT_SUPPORTED" },
           ],
         },
       }),
@@ -9324,11 +9362,11 @@ const CASES = [
     D2,
     "PUBLIC_CONTRACT",
     "src/contracts/analysis-contract.ts (SPEC_NOT_SUPPORTED variant); src/services/analysis-service.ts",
-    "Identified as an Arms Warrior, the same actor over the same artifact yields SPEC_NOT_SUPPORTED on both transports — a well-formed document with specialization.specId null and analyzerId null that says gameplay analysis was not attempted, identical on REST and MCP.",
+    "Identified as a Fire Mage, the same actor over the same artifact yields SPEC_NOT_SUPPORTED on both transports — a well-formed document with specialization.specId null and analyzerId null that says gameplay analysis was not attempted, identical on REST and MCP.",
     [
       a("PUBLIC_CONTRACT.REST_MCP_PARITY", {
         document: "ANALYSIS",
-        subject: { actorId: 19, className: "Warrior", specName: "Arms" },
+        subject: { actorId: 19, className: "Mage", specName: "Fire" },
         expected: { status: "SPEC_NOT_SUPPORTED", specId: null, analyzerId: null },
       }),
     ],
@@ -10181,10 +10219,10 @@ const CASES = [
     D2,
     "APPLICATION_SERVICE",
     "src/services/analysis-service.ts unsupportedSpec; spec-identity.ts",
-    "The same actor identified as Warrior/Arms — the canonical unsupported identity, a real participant of the same A7R6 kill — yields SPEC_NOT_SUPPORTED from the service with no spec and no analyzer. The fight is retrieved once, for the shared preparation producer alone (PREP-2), so the scope is PLAYER_CONTEXT: the report still carries consumable status, and the status is explicit rather than an empty report.",
+    "The same actor identified as Mage/Fire — the canonical unsupported identity, a real participant of the same A7R6 kill — yields SPEC_NOT_SUPPORTED from the service with no spec and no analyzer. The fight is retrieved once, for the shared preparation producer alone (PREP-2), so the scope is PLAYER_CONTEXT: the report still carries consumable status, and the status is explicit rather than an empty report.",
     [
       a("APPLICATION_SERVICE.FIGHT_ANALYSIS", {
-        subject: { actorId: 19, className: "Warrior", specName: "Arms" },
+        subject: { actorId: 19, className: "Mage", specName: "Fire" },
         expected: { status: "SPEC_NOT_SUPPORTED", specId: null, analyzerId: null, scope: "PLAYER_CONTEXT" },
       }),
     ],
@@ -10308,12 +10346,12 @@ const CASES = [
       // M10-D: the canonical UNSUPPORTED identity, machine-pinned from the same capture.
       a("WCL_TRANSPORT.FIGHT_IDENTITY", {
         fightId: 7,
-        sourceId: ARMS,
+        sourceId: FIRE_MAGE,
         expected: {
           ok: true,
-          className: "Warrior",
-          specName: "Arms",
-          playerName: "Actor4",
+          className: "Mage",
+          specName: "Fire",
+          playerName: "Actor17",
           reportRevision: 30,
           logVersion: 17,
           gameVersion: 1,
@@ -10321,7 +10359,7 @@ const CASES = [
       }),
     ],
     ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
-    "Identity is read from masterData subType and friendlySpecs at the roster index and from nothing else. A Protection Paladin and a Retribution Paladin in one kill resolve to different specializations from one class, and the tank's own pet is refused as a subject. Actor 4 is the Arms Warrior every unsupported-path case names since M10-D: a real participant of this kill, not an invented pair.",
+    "Identity is read from masterData subType and friendlySpecs at the roster index and from nothing else. A Protection Paladin and a Retribution Paladin in one kill resolve to different specializations from one class, and the tank's own pet is refused as a subject. Actor 17 is the Fire Mage every unsupported-path case names since M10-D: a real participant of this kill, not an invented pair.",
     { related: ["tests/unit/wcl-identity.test.ts", "tests/unit/spec-identity.test.ts"] },
   ),
   kase(
@@ -10774,14 +10812,14 @@ const CASES = [
     },
   ),
   kase(
-    "application-service.arms-warrior-subject-is-unsupported-on-the-same-evidence",
+    "application-service.fire-mage-subject-is-unsupported-on-the-same-evidence",
     PP,
     "APPLICATION_SERVICE",
     "src/services/analysis-service.ts unsupportedSpec; spec-identity.ts",
-    "Actor 4 of the same fight, the Arms Warrior the committed context proves, yields SPEC_NOT_SUPPORTED from the service with no spec and no analyzer. The fight is retrieved for the shared preparation producer alone (PREP-2), so the scope is PLAYER_CONTEXT; the slice holds none of actor 4's events, which leaves its consumable status UNKNOWN rather than zero.",
+    "Actor 17 of the same fight, the Fire Mage the committed context proves, yields SPEC_NOT_SUPPORTED from the service with no spec and no analyzer. The fight is retrieved for the shared preparation producer alone (PREP-2), so the scope is PLAYER_CONTEXT; the slice holds none of actor 17's events, which leaves its consumable status UNKNOWN rather than zero.",
     [
       a("APPLICATION_SERVICE.FIGHT_ANALYSIS", {
-        subject: { actorId: ARMS, className: "Warrior", specName: "Arms" },
+        subject: { actorId: FIRE_MAGE, className: "Mage", specName: "Fire" },
         expected: { status: "SPEC_NOT_SUPPORTED", specId: null, analyzerId: null, scope: "PLAYER_CONTEXT" },
       }),
     ],
@@ -10817,15 +10855,15 @@ const CASES = [
     },
   ),
   kase(
-    "public-contract.analysis-parity-for-the-arms-warrior-subject",
+    "public-contract.analysis-parity-for-the-fire-mage-subject",
     PP,
     "PUBLIC_CONTRACT",
     "src/contracts/analysis-contract.ts (SPEC_NOT_SUPPORTED variant); src/api/worker.ts; src/mcp/tools/analyze-warcraft-log.ts",
-    "Actor 4 of the same fight, the Arms Warrior, yields SPEC_NOT_SUPPORTED on both transports — one well-formed document with specialization.specId null and analyzerId null, identical on REST and MCP, schema-valid under warcraft-logs-coach.analysis/1.",
+    "Actor 17 of the same fight, the Fire Mage, yields SPEC_NOT_SUPPORTED on both transports — one well-formed document with specialization.specId null and analyzerId null, identical on REST and MCP, schema-valid under warcraft-logs-coach.analysis/1.",
     [
       a("PUBLIC_CONTRACT.REST_MCP_PARITY", {
         document: "ANALYSIS",
-        subject: { actorId: ARMS, className: "Warrior", specName: "Arms" },
+        subject: { actorId: FIRE_MAGE, className: "Mage", specName: "Fire" },
         expected: { status: "SPEC_NOT_SUPPORTED", specId: null, analyzerId: null },
       }),
     ],
@@ -10843,7 +10881,7 @@ const CASES = [
     PP,
     "PUBLIC_CONTRACT",
     "src/contracts/raid-night-contract.ts; src/services/raid-night-service.ts; /v1/raid-night; analyze_raid_night",
-    "One raid-night request over the A7R6 opener served as ONE core, with a roster of four real participants of that fight: the Protection Paladin (actor 7) is ANALYZED under paladin/protection; the Assassination Rogue (actor 19) has none of its evidence in the slice and its analyzer answers PROFILE_NOT_RESOLVED; the Arms Warrior (actor 4) is SPEC_NOT_SUPPORTED; the Blood Death Knight (actor 14) is ABSENT. One document on REST and MCP, one ingestion.",
+    "One raid-night request over the A7R6 opener served as ONE core, with a roster of four real participants of that fight: the Protection Paladin (actor 7) is ANALYZED under paladin/protection; the Assassination Rogue (actor 19) has none of its evidence in the slice and its analyzer answers PROFILE_NOT_RESOLVED; the Fire Mage (actor 17) is SPEC_NOT_SUPPORTED; the Blood Death Knight (actor 14) is ABSENT. One document on REST and MCP, one ingestion.",
     [
       a("PUBLIC_CONTRACT.REST_MCP_PARITY", {
         document: "RAID_NIGHT",
@@ -10853,7 +10891,7 @@ const CASES = [
           participants: [
             { sourceId: TANK, className: "Paladin", specName: "Protection", absent: false },
             { sourceId: 19, className: "Rogue", specName: "Assassination", absent: false },
-            { sourceId: ARMS, className: "Warrior", specName: "Arms", absent: false },
+            { sourceId: FIRE_MAGE, className: "Mage", specName: "Fire", absent: false },
             { sourceId: 14, className: "DeathKnight", specName: "Blood", absent: true },
           ],
         },
@@ -10862,7 +10900,7 @@ const CASES = [
           cells: [
             { sourceId: TANK, kind: "ANALYZED", specId: "paladin/protection" },
             { sourceId: 19, kind: "NOT_ANALYZED", status: "PROFILE_NOT_RESOLVED" },
-            { sourceId: ARMS, kind: "NOT_ANALYZED", status: "SPEC_NOT_SUPPORTED" },
+            { sourceId: FIRE_MAGE, kind: "NOT_ANALYZED", status: "SPEC_NOT_SUPPORTED" },
             { sourceId: 14, kind: "ABSENT" },
           ],
         },
@@ -12983,6 +13021,125 @@ const HEALB4P_EVIDENCE_CASES = HEALB4P_SEGMENTS.map(([fromS, toS, , , count]) =>
 );
 
 // --------------------------------------------------------------------------
+// ONB-B1 (2026-11-03): Arms Warrior's first 6 s. Every cast, begincast, combatantinfo, aura
+// transition and resourcechange sourced by or targeting fight 48's Arms Warrior (actor 5), cut from
+// the same M11-E2 capture, so every category it grants is whole over the range. No new Warcraft Logs
+// request was made. It is all that fits under the archive's notice line, which is not raised silently
+// (agent/follow-ups.md "After ONB-B1"), and it is enough: no decision resolves on any window.
+// --------------------------------------------------------------------------
+
+const ONBB1_ACTOR = 5;
+const ONBB1_SEGMENT = (from, to) =>
+  `wcl-b1pm-fight-48-arms-warrior-5-decisions.seg-${String(from)}-${String(to)}`;
+const ONBB1_AUTHORITY = {
+  authorityId: "SIMC_APL_WARRIOR_ARMS",
+  artifactRevision: "simc-33622e9d-1",
+  requiredStateEvidence: [
+    "the combatantinfo at 7,436,292 for actor 5",
+    "every COMPLETE cast by actor 5 in the segment, in canonical order",
+    "every 208086 debuff transition sourced by actor 5 in the segment, in canonical order",
+  ],
+};
+// [seconds from, to, exclusive --from, inclusive bound, events]
+const ONBB1_SEGMENTS = [[0, 6, B1PM_START - 1, B1PM_START + 6000, 66]];
+const ONBB1_RELATED = ["tests/unit/specs/onb-b1-arms-warrior.test.ts"];
+
+function onbb1_segment([fromS, toS, fromMs, toMs]) {
+  const file = ONBB1_SEGMENT(fromS, toS);
+  return artifact(file, wcl(file), {
+    root: "EVIDENCE",
+    kind: "SANITIZED_CAPTURE",
+    source: B1PM_EVENTS_SOURCE,
+    transformations: [
+      selection(
+        `node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/${file}.json --actor-slice ${String(ONBB1_ACTOR)} ${String(toMs)} --from ${String(fromMs)} --families ${ONBA1_FAMILIES} --compact`,
+        `The twenty-eight page records concatenated in page order, then the --actor-slice predicate for actor ${String(ONBB1_ACTOR)}: every event whose sourceID or targetID is ${String(ONBB1_ACTOR)}, with --from ${String(fromMs)} (exclusive), the inclusive bound ${String(toMs)} and the families ${ONBA1_FAMILIES}.`,
+        ACTOR_SLICE_INVALIDATIONS,
+      ).with_revision(SLICER_REVISION_8),
+      credential_scan(SLICER_REVISION_8),
+    ],
+    grants: [
+      {
+        categories: ["CASTS", "AURAS", "RESOURCES", "COMBATANT_INFO"],
+        actorScope: [ONBB1_ACTOR],
+        ranges: [{ fromReportTimeMs: fromMs + 1, toReportTimeMs: toMs }],
+      },
+    ],
+    coverageBasis: `The retained families are complete for actor ${String(ONBB1_ACTOR)} over [${(fromMs + 1).toLocaleString("en-US")} .. ${toMs.toLocaleString("en-US")}]: the capture was retrieved COMPLETE with no actor filter, and the slice keeps every event of those families that names the actor on either side.`,
+    retainedFor:
+      "ONB-B1: the Arms Warrior's real build and first decisions: the talents that prove its Slayer tree, the wire ids its casts report, where every decision stops, and an open Colossus Smash window that the observation refuses to count.",
+    limitations: [
+      "The fight's first 6 s of 345 s: it grants no coverage outside its range, and the whole-fight measurement in agent/architecture.md is reproduced from the retained capture, not from these bytes.",
+      "Resources are the snapshot on each retained cast and every resourcechange of actor 5; nothing here replays Rage between casts, and the analyzer reads only the decision cast's own snapshot.",
+      "No damage, heal or absorb event is retained, so nothing here says whether a target was hit or what a cast did.",
+      "Actor 5 only. No targetability, phase or enemy state is retained, so nothing here proves an action was actionable in the encounter.",
+      "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+      NO_NAMES,
+      VERSION_SCOPE,
+    ],
+  });
+}
+
+const ONBB1_EVIDENCE_ARTIFACTS = ONBB1_SEGMENTS.map(onbb1_segment);
+const ONBB1_EVIDENCE_CASES = [
+  ...ONBB1_SEGMENTS.map(([fromS, toS, , , count]) =>
+    kase(
+      `normalization.b1pm-arms-warrior-5-decisions-seg-${String(fromS)}-${String(toS)}-normalizes-whole-and-in-order`,
+      ONBB1_SEGMENT(fromS, toS),
+      "NORMALIZATION",
+      "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from --families",
+      `The ${String(count)}-event segment of actor 5 (fight +${String(fromS)} s .. +${String(toS)} s) normalizes with every raw type recognised and its input order preserved.`,
+      [
+        a("NORMALIZATION.EVENT_COUNT_PRESERVED", { expectedEventCount: count }),
+        a("NORMALIZATION.INPUT_ORDER_PRESERVED", {}),
+        a("NORMALIZATION.ALL_TYPES_RECOGNISED", {}),
+      ],
+      ["VALIDATED_EVIDENCE"],
+      "The census is of the segment, never of the fight: exactly the retained families sourced by or targeting actor 5 in its range.",
+      { related: ONBB1_RELATED },
+    ),
+  ),
+  kase(
+    "spec-arms-warrior.no-real-decision-resolves-and-an-open-window-is-not-counted",
+    ONBB1_SEGMENT(0, 6),
+    "SPEC_ARMS_WARRIOR",
+    "src/specs/warrior/arms/observed-analysis.ts; first-gcd-adapter.ts; colossus-smash-windows.ts",
+    "Over the retained first 6 s: the real talents resolve a Slayer tree, 6 eligible decisions over six tokens (Execute under its logged Massacre id 281000, Bladestorm under 446035), none resolved, every root scan stopping at the enemy-count dispatch default[17]. The one Colossus Smash application in the segment has no removal in it, so its window is NOT_ESTABLISHED rather than an empty one.",
+    [
+      a("SPEC_ARMS_WARRIOR.COVERAGE_SUMMARY", {
+        actorId: ONBB1_ACTOR,
+        expected: {
+          heroTree: "slayer",
+          eligibleDecisions: 6,
+          match: 0,
+          rejected: 0,
+          unknown: 6,
+          exclusions: { MELEE_SWING: 3, NON_GCD_ACTION: 2, EXECUTION_LANE_NOT_ESTABLISHED: 3 },
+          eligibleTokens: {
+            cleave: 1,
+            colossus_smash: 1,
+            execute: 1,
+            overpower: 1,
+            mortal_strike: 1,
+            bladestorm: 1,
+          },
+          unresolvedAt: { "ONE_SCAN_BLOCKED/NO_DEFINITE_WINNER @ default[0] charge": 6 },
+          stoppingAtoms: { "default[17] run_action_list | active_enemies": 6 },
+          colossusSmashWindows: {
+            status: "OBSERVED",
+            established: 0,
+            notEstablished: { NO_REMOVAL_OBSERVED: 1 },
+          },
+        },
+      }),
+    ],
+    ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    "An open enemy count must never fall through to a lower list, and a capture that ends inside a debuff window must never read as a window nobody pressed in. Real bytes, because the wire ids and the Slayer tree are what the synthetic tests assume.",
+    { authority: ONBB1_AUTHORITY, related: ONBB1_RELATED },
+  ),
+];
+
+// --------------------------------------------------------------------------
 // M13-A (2026-11-02): the ONE bounded Augmentation Evoker capture (owner grant
 // 2026-11-01, agent/autopilot-queue.md "M13-A"). Subject chosen by a fixed
 // neutral order recorded before looking (.probe/m13a/capture-plan.md): the
@@ -14046,6 +14203,7 @@ const manifest = EVIDENCE_ROOT
         ...HEALB1P_EVIDENCE_ARTIFACTS,
         ...HEALB4P_EVIDENCE_ARTIFACTS,
         ...ONBA1_EVIDENCE_ARTIFACTS,
+        ...ONBB1_EVIDENCE_ARTIFACTS,
         ...M13A_EVIDENCE_ARTIFACTS,
         ...M13D_EVIDENCE_ARTIFACTS,
       ].sort(byId("artifactId")),
@@ -14056,6 +14214,7 @@ const manifest = EVIDENCE_ROOT
         ...HEALB1P_EVIDENCE_CASES,
         ...HEALB4P_EVIDENCE_CASES,
         ...ONBA1_EVIDENCE_CASES,
+        ...ONBB1_EVIDENCE_CASES,
         ...M13A_EVIDENCE_CASES,
       ].sort(byId("caseId")),
     }

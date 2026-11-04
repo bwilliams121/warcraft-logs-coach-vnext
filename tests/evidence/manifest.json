@@ -3,6 +3,101 @@
   "corpusId": "warcraft-logs-coach-vnext.evidence-archive",
   "artifacts": [
     {
+      "artifactId": "wcl-b1pm-fight-48-arms-warrior-5-decisions.seg-0-6",
+      "path": "artifacts/wcl-events/wcl-b1pm-fight-48-arms-warrior-5-decisions.seg-0-6.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "ce78ae0e3f4238ac764b47293435bee65d05e18362161fec55b5c84c8617443a",
+      "byteLength": 20265,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 7436292,
+            "endTimeMs": 7781469
+          },
+          "completeness": {
+            "eventsReturned": 271011,
+            "pagesRetrieved": 28,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twenty-eight pages (twenty-seven of 10,000–10,048 events and a terminal 781), the last with nextPageTimestamp null: the whole fight was retrieved inside the 100-page cap. Each page's requestedStartTime equals the previous page's nextPageTimestamp. The first event is the encounterstart at 7,436,292 = the fight start and the last the encounterend at 7,781,469 = the fight end. The context request read revision 51 before page 1 and REPORT_REVISION_QUERY after the last page read 51 (.probe/m11e2/request-count.json). An offline replay of these bytes through production ingestFightCore reported every observable category COMPLETE with no decode degradation."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R29 whole-fight window: EVENTS_QUERY over [7,436,292 .. 7,781,469] (fight start .. fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 100 pages in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/wcl-b1pm-fight-48-arms-warrior-5-decisions.seg-0-6.json --actor-slice 5 7442292 --from 7436291 --families cast,begincast,combatantinfo,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,resourcechange --compact"
+            },
+            "detail": "The twenty-eight page records concatenated in page order, then the --actor-slice predicate for actor 5: every event whose sourceID or targetID is 5, with --from 7436291 (exclusive), the inclusive bound 7442292 and the families cast,begincast,combatantinfo,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,resourcechange.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "AURAS", "RESOURCES", "COMBATANT_INFO"],
+              "actorScope": [5],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 7436292,
+                  "toReportTimeMs": 7442292
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actor 5 over [7,436,292 .. 7,442,292]: the capture was retrieved COMPLETE with no actor filter, and the slice keeps every event of those families that names the actor on either side."
+        },
+        "retainedFor": "ONB-B1: the Arms Warrior's real build and first decisions: the talents that prove its Slayer tree, the wire ids its casts report, where every decision stops, and an open Colossus Smash window that the observation refuses to count.",
+        "limitations": [
+          "The fight's first 6 s of 345 s: it grants no coverage outside its range, and the whole-fight measurement in agent/architecture.md is reproduced from the retained capture, not from these bytes.",
+          "Resources are the snapshot on each retained cast and every resourcechange of actor 5; nothing here replays Rage between casts, and the analyzer reads only the decision cast's own snapshot.",
+          "No damage, heal or absorb event is retained, so nothing here says whether a target was hit or what a cast did.",
+          "Actor 5 only. No targetability, phase or enemy state is retained, so nothing here proves an action was actionable in the encounter.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ]
+      }
+    },
+    {
       "artifactId": "wcl-b1pm-fight-48-friendly-players.seg-69500-72500",
       "path": "artifacts/wcl-events/wcl-b1pm-fight-48-friendly-players.seg-69500-72500.json",
       "encoding": "JSON",
@@ -7625,6 +7720,36 @@
   ],
   "cases": [
     {
+      "caseId": "normalization.b1pm-arms-warrior-5-decisions-seg-0-6-normalizes-whole-and-in-order",
+      "artifactId": "wcl-b1pm-fight-48-arms-warrior-5-decisions.seg-0-6",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from --families",
+      "purpose": "The 66-event segment of actor 5 (fight +0 s .. +6 s) normalizes with every raw type recognised and its input order preserved.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 66
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the retained families sourced by or targeting actor 5 in its range."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-b1-arms-warrior.test.ts"]
+    },
+    {
       "caseId": "normalization.b1pm-friendly-players-seg-69500-72500-normalizes-whole-and-in-order",
       "artifactId": "wcl-b1pm-fight-48-friendly-players.seg-69500-72500",
       "owningLayer": "NORMALIZATION",
@@ -8335,6 +8460,69 @@
       "authority": null,
       "limitations": [],
       "relatedTests": ["tests/unit/specs/augmentation-evoker-evaluator.test.ts"]
+    },
+    {
+      "caseId": "spec-arms-warrior.no-real-decision-resolves-and-an-open-window-is-not-counted",
+      "artifactId": "wcl-b1pm-fight-48-arms-warrior-5-decisions.seg-0-6",
+      "owningLayer": "SPEC_ARMS_WARRIOR",
+      "contractUnderTest": "src/specs/warrior/arms/observed-analysis.ts; first-gcd-adapter.ts; colossus-smash-windows.ts",
+      "purpose": "Over the retained first 6 s: the real talents resolve a Slayer tree, 6 eligible decisions over six tokens (Execute under its logged Massacre id 281000, Bladestorm under 446035), none resolved, every root scan stopping at the enemy-count dispatch default[17]. The one Colossus Smash application in the segment has no removal in it, so its window is NOT_ESTABLISHED rather than an empty one.",
+      "assertions": [
+        {
+          "kind": "SPEC_ARMS_WARRIOR.COVERAGE_SUMMARY",
+          "params": {
+            "actorId": 5,
+            "expected": {
+              "heroTree": "slayer",
+              "eligibleDecisions": 6,
+              "match": 0,
+              "rejected": 0,
+              "unknown": 6,
+              "exclusions": {
+                "MELEE_SWING": 3,
+                "NON_GCD_ACTION": 2,
+                "EXECUTION_LANE_NOT_ESTABLISHED": 3
+              },
+              "eligibleTokens": {
+                "cleave": 1,
+                "colossus_smash": 1,
+                "execute": 1,
+                "overpower": 1,
+                "mortal_strike": 1,
+                "bladestorm": 1
+              },
+              "unresolvedAt": {
+                "ONE_SCAN_BLOCKED/NO_DEFINITE_WINNER @ default[0] charge": 6
+              },
+              "stoppingAtoms": {
+                "default[17] run_action_list | active_enemies": 6
+              },
+              "colossusSmashWindows": {
+                "status": "OBSERVED",
+                "established": 0,
+                "notEstablished": {
+                  "NO_REMOVAL_OBSERVED": 1
+                }
+              }
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "An open enemy count must never fall through to a lower list, and a capture that ends inside a debuff window must never read as a window nobody pressed in. Real bytes, because the wire ids and the Slayer tree are what the synthetic tests assume."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_WARRIOR_ARMS",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 7,436,292 for actor 5",
+          "every COMPLETE cast by actor 5 in the segment, in canonical order",
+          "every 208086 debuff transition sourced by actor 5 in the segment, in canonical order"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-b1-arms-warrior.test.ts"]
     },
     {
       "caseId": "spec-brewmaster-monk.the-first-full-fight-segment-match-resolves-over-the-cross-tier-bundle",

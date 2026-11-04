@@ -710,6 +710,11 @@ Expect 200 and confirm all of:
 
 ## M10-5. REST single fight — unsupported (Arms Warrior)
 
+**Since ONB-B1 the current unsupported subject is actor 17, Mage / Fire, in the same fight**
+(`tests/support/unsupported-subject.ts`). Use it wherever this checklist says the canonical subject.
+Actor 4 stays `SPEC_NOT_SUPPORTED` publicly while Arms is INTERNAL_ONLY, so the steps below still
+hold as written until ONB-B1P decides otherwise.
+
 Costs **1** unit. Same report and fight, actor **4** — Warrior/Arms per the
 same committed context artifact. Since M11-A2 this is the CURRENT
 UNSUPPORTED SUBJECT centralized in `tests/support/unsupported-subject.ts`

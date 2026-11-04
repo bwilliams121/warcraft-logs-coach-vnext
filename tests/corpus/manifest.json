@@ -5009,38 +5009,34 @@
   ],
   "cases": [
     {
-      "caseId": "application-service.arms-warrior-subject-is-unsupported-on-the-same-evidence",
+      "caseId": "application-service.arms-warrior-registration-is-internal-only",
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "APPLICATION_SERVICE",
-      "contractUnderTest": "src/services/analysis-service.ts unsupportedSpec; spec-identity.ts",
-      "purpose": "Actor 4 of the same fight, the Arms Warrior the committed context proves, yields SPEC_NOT_SUPPORTED from the service with no spec and no analyzer. The fight is retrieved for the shared preparation producer alone (PREP-2), so the scope is PLAYER_CONTEXT; the slice holds none of actor 4's events, which leaves its consumable status UNKNOWN rather than zero.",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Arms Warrior registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
       "assertions": [
         {
-          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
           "params": {
-            "subject": {
-              "actorId": 4,
-              "className": "Warrior",
-              "specName": "Arms"
-            },
+            "specId": "warrior/arms",
             "expected": {
-              "status": "SPEC_NOT_SUPPORTED",
-              "specId": null,
-              "analyzerId": null,
-              "scope": "PLAYER_CONTEXT"
+              "internalAnalyzerId": "warrior-arms-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
             }
           }
         }
       ],
       "rationale": {
         "basis": ["OWNED_CONTRACT"],
-        "text": "The unsupported path Protection Paladin used to prove, kept by a real captured identity that remains unsupported. Neither registered analyzer runs; the only retrieval is for preparation (PREP-2)."
+        "text": "Arms Warrior is registered INTERNAL_ONLY in ONB-B1. Every GCD action of its pinned list sits behind a dispatch on the enemy count, which is the ONB-S3 owner decision, so a public request must keep receiving SPEC_NOT_SUPPORTED."
       },
       "authority": null,
       "limitations": [],
       "relatedTests": [
-        "tests/regression/m10d-public-second-registration-invariance.test.ts",
-        "tests/unit/analysis-composition-refusals.test.ts"
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
       ]
     },
     {
@@ -5233,6 +5229,41 @@
       "relatedTests": [
         "tests/contracts/m10a-registry-integrity.test.ts",
         "tests/contracts/m10d-public-registration.test.ts"
+      ]
+    },
+    {
+      "caseId": "application-service.fire-mage-subject-is-unsupported-on-the-same-evidence",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analysis-service.ts unsupportedSpec; spec-identity.ts",
+      "purpose": "Actor 17 of the same fight, the Fire Mage the committed context proves, yields SPEC_NOT_SUPPORTED from the service with no spec and no analyzer. The fight is retrieved for the shared preparation producer alone (PREP-2), so the scope is PLAYER_CONTEXT; the slice holds none of actor 17's events, which leaves its consumable status UNKNOWN rather than zero.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "params": {
+            "subject": {
+              "actorId": 17,
+              "className": "Mage",
+              "specName": "Fire"
+            },
+            "expected": {
+              "status": "SPEC_NOT_SUPPORTED",
+              "specId": null,
+              "analyzerId": null,
+              "scope": "PLAYER_CONTEXT"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "The unsupported path Protection Paladin used to prove, kept by a real captured identity that remains unsupported. Neither registered analyzer runs; the only retrieval is for preparation (PREP-2)."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/regression/m10d-public-second-registration-invariance.test.ts",
+        "tests/unit/analysis-composition-refusals.test.ts"
       ]
     },
     {
@@ -5828,15 +5859,15 @@
       "artifactId": "wcl-assassination-d2-decision-corpus",
       "owningLayer": "APPLICATION_SERVICE",
       "contractUnderTest": "src/services/analysis-service.ts unsupportedSpec; spec-identity.ts",
-      "purpose": "The same actor identified as Warrior/Arms — the canonical unsupported identity, a real participant of the same A7R6 kill — yields SPEC_NOT_SUPPORTED from the service with no spec and no analyzer. The fight is retrieved once, for the shared preparation producer alone (PREP-2), so the scope is PLAYER_CONTEXT: the report still carries consumable status, and the status is explicit rather than an empty report.",
+      "purpose": "The same actor identified as Mage/Fire — the canonical unsupported identity, a real participant of the same A7R6 kill — yields SPEC_NOT_SUPPORTED from the service with no spec and no analyzer. The fight is retrieved once, for the shared preparation producer alone (PREP-2), so the scope is PLAYER_CONTEXT: the report still carries consumable status, and the status is explicit rather than an empty report.",
       "assertions": [
         {
           "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
           "params": {
             "subject": {
               "actorId": 19,
-              "className": "Warrior",
-              "specName": "Arms"
+              "className": "Mage",
+              "specName": "Fire"
             },
             "expected": {
               "status": "SPEC_NOT_SUPPORTED",
@@ -10026,7 +10057,7 @@
       "artifactId": "wcl-assassination-d2-decision-corpus",
       "owningLayer": "PUBLIC_CONTRACT",
       "contractUnderTest": "src/contracts/analysis-contract.ts (SPEC_NOT_SUPPORTED variant); src/services/analysis-service.ts",
-      "purpose": "Identified as an Arms Warrior, the same actor over the same artifact yields SPEC_NOT_SUPPORTED on both transports — a well-formed document with specialization.specId null and analyzerId null that says gameplay analysis was not attempted, identical on REST and MCP.",
+      "purpose": "Identified as a Fire Mage, the same actor over the same artifact yields SPEC_NOT_SUPPORTED on both transports — a well-formed document with specialization.specId null and analyzerId null that says gameplay analysis was not attempted, identical on REST and MCP.",
       "assertions": [
         {
           "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
@@ -10034,8 +10065,8 @@
             "document": "ANALYSIS",
             "subject": {
               "actorId": 19,
-              "className": "Warrior",
-              "specName": "Arms"
+              "className": "Mage",
+              "specName": "Fire"
             },
             "expected": {
               "status": "SPEC_NOT_SUPPORTED",
@@ -10054,41 +10085,6 @@
       "relatedTests": [
         "tests/integration/transport-consistency.test.ts",
         "tests/contracts/m6c-analysis-contract.test.ts"
-      ]
-    },
-    {
-      "caseId": "public-contract.analysis-parity-for-the-arms-warrior-subject",
-      "artifactId": "wcl-protection-paladin-a7r6-opener",
-      "owningLayer": "PUBLIC_CONTRACT",
-      "contractUnderTest": "src/contracts/analysis-contract.ts (SPEC_NOT_SUPPORTED variant); src/api/worker.ts; src/mcp/tools/analyze-warcraft-log.ts",
-      "purpose": "Actor 4 of the same fight, the Arms Warrior, yields SPEC_NOT_SUPPORTED on both transports — one well-formed document with specialization.specId null and analyzerId null, identical on REST and MCP, schema-valid under warcraft-logs-coach.analysis/1.",
-      "assertions": [
-        {
-          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
-          "params": {
-            "document": "ANALYSIS",
-            "subject": {
-              "actorId": 4,
-              "className": "Warrior",
-              "specName": "Arms"
-            },
-            "expected": {
-              "status": "SPEC_NOT_SUPPORTED",
-              "specId": null,
-              "analyzerId": null
-            }
-          }
-        }
-      ],
-      "rationale": {
-        "basis": ["OWNED_CONTRACT"],
-        "text": "The genuine unsupported article since M10-D: a real captured identity with no analyzer. An unsupported specialization must not produce an empty report that reads as clean play, and both transports say so identically."
-      },
-      "authority": null,
-      "limitations": [],
-      "relatedTests": [
-        "tests/regression/m10d-public-second-registration-invariance.test.ts",
-        "tests/integration/transport-consistency.test.ts"
       ]
     },
     {
@@ -10161,6 +10157,41 @@
         "tests/integration/m11c4j-brewmaster-public-transports.test.ts",
         "tests/contracts/m11c4j-brewmaster-public-projection.test.ts",
         "tests/contracts/m10a-spec-partition.test.ts"
+      ]
+    },
+    {
+      "caseId": "public-contract.analysis-parity-for-the-fire-mage-subject",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "contractUnderTest": "src/contracts/analysis-contract.ts (SPEC_NOT_SUPPORTED variant); src/api/worker.ts; src/mcp/tools/analyze-warcraft-log.ts",
+      "purpose": "Actor 17 of the same fight, the Fire Mage, yields SPEC_NOT_SUPPORTED on both transports — one well-formed document with specialization.specId null and analyzerId null, identical on REST and MCP, schema-valid under warcraft-logs-coach.analysis/1.",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "params": {
+            "document": "ANALYSIS",
+            "subject": {
+              "actorId": 17,
+              "className": "Mage",
+              "specName": "Fire"
+            },
+            "expected": {
+              "status": "SPEC_NOT_SUPPORTED",
+              "specId": null,
+              "analyzerId": null
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "The genuine unsupported article since M10-D: a real captured identity with no analyzer. An unsupported specialization must not produce an empty report that reads as clean play, and both transports say so identically."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/regression/m10d-public-second-registration-invariance.test.ts",
+        "tests/integration/transport-consistency.test.ts"
       ]
     },
     {
@@ -10426,7 +10457,7 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "PUBLIC_CONTRACT",
       "contractUnderTest": "src/contracts/raid-night-contract.ts; src/services/raid-night-service.ts; /v1/raid-night; analyze_raid_night",
-      "purpose": "One raid-night request over the A7R6 opener served as ONE core, with a roster of four real participants of that fight: the Protection Paladin (actor 7) is ANALYZED under paladin/protection; the Assassination Rogue (actor 19) has none of its evidence in the slice and its analyzer answers PROFILE_NOT_RESOLVED; the Arms Warrior (actor 4) is SPEC_NOT_SUPPORTED; the Blood Death Knight (actor 14) is ABSENT. One document on REST and MCP, one ingestion.",
+      "purpose": "One raid-night request over the A7R6 opener served as ONE core, with a roster of four real participants of that fight: the Protection Paladin (actor 7) is ANALYZED under paladin/protection; the Assassination Rogue (actor 19) has none of its evidence in the slice and its analyzer answers PROFILE_NOT_RESOLVED; the Fire Mage (actor 17) is SPEC_NOT_SUPPORTED; the Blood Death Knight (actor 14) is ABSENT. One document on REST and MCP, one ingestion.",
       "assertions": [
         {
           "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
@@ -10451,9 +10482,9 @@
                   "absent": false
                 },
                 {
-                  "sourceId": 4,
-                  "className": "Warrior",
-                  "specName": "Arms",
+                  "sourceId": 17,
+                  "className": "Mage",
+                  "specName": "Fire",
                   "absent": false
                 },
                 {
@@ -10478,7 +10509,7 @@
                   "status": "PROFILE_NOT_RESOLVED"
                 },
                 {
-                  "sourceId": 4,
+                  "sourceId": 17,
                   "kind": "NOT_ANALYZED",
                   "status": "SPEC_NOT_SUPPORTED"
                 },
@@ -10506,7 +10537,7 @@
       "artifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
       "owningLayer": "PUBLIC_CONTRACT",
       "contractUnderTest": "src/contracts/raid-night-contract.ts; src/services/raid-night-service.ts; /v1/raid-night; analyze_raid_night",
-      "purpose": "One raid-night request over the Retribution 45 s slice served as ONE core, with a roster of four real participants of A7R6 fight 7: the Retribution Paladin (actor 6) is ANALYZED under paladin/retribution; the Protection Paladin (actor 7) and the Assassination Rogue (actor 19) have none of their evidence in the slice and their analyzers answer PROFILE_NOT_RESOLVED; the Arms Warrior (actor 4) is SPEC_NOT_SUPPORTED. One document on REST and MCP, one ingestion per transport.",
+      "purpose": "One raid-night request over the Retribution 45 s slice served as ONE core, with a roster of four real participants of A7R6 fight 7: the Retribution Paladin (actor 6) is ANALYZED under paladin/retribution; the Protection Paladin (actor 7) and the Assassination Rogue (actor 19) have none of their evidence in the slice and their analyzers answer PROFILE_NOT_RESOLVED; the Fire Mage (actor 17) is SPEC_NOT_SUPPORTED. One document on REST and MCP, one ingestion per transport.",
       "assertions": [
         {
           "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
@@ -10537,9 +10568,9 @@
                   "absent": false
                 },
                 {
-                  "sourceId": 4,
-                  "className": "Warrior",
-                  "specName": "Arms",
+                  "sourceId": 17,
+                  "className": "Mage",
+                  "specName": "Fire",
                   "absent": false
                 }
               ]
@@ -10563,7 +10594,7 @@
                   "status": "PROFILE_NOT_RESOLVED"
                 },
                 {
-                  "sourceId": 4,
+                  "sourceId": 17,
                   "kind": "NOT_ANALYZED",
                   "status": "SPEC_NOT_SUPPORTED"
                 }
@@ -11070,6 +11101,29 @@
         "tests/contracts/m5c3c3b-engine-scope.test.ts",
         "tests/contracts/m10c-cross-spec-isolation.test.ts"
       ]
+    },
+    {
+      "caseId": "spec-arms-warrior.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_ARMS_WARRIOR",
+      "contractUnderTest": "src/specs/warrior/arms/observed-analysis.ts analyzeObservedArmsWarriorDecisions (the spec gate)",
+      "purpose": "The Arms Warrior facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_ARMS_WARRIOR.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Arms Warrior list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-b1-arms-warrior.test.ts"]
     },
     {
       "caseId": "spec-assassination.deathmark-stays-unknown-on-predictive-state",
@@ -25430,12 +25484,12 @@
           "kind": "WCL_TRANSPORT.FIGHT_IDENTITY",
           "params": {
             "fightId": 7,
-            "sourceId": 4,
+            "sourceId": 17,
             "expected": {
               "ok": true,
-              "className": "Warrior",
-              "specName": "Arms",
-              "playerName": "Actor4",
+              "className": "Mage",
+              "specName": "Fire",
+              "playerName": "Actor17",
               "reportRevision": 30,
               "logVersion": 17,
               "gameVersion": 1
@@ -25445,7 +25499,7 @@
       ],
       "rationale": {
         "basis": ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
-        "text": "Identity is read from masterData subType and friendlySpecs at the roster index and from nothing else. A Protection Paladin and a Retribution Paladin in one kill resolve to different specializations from one class, and the tank's own pet is refused as a subject. Actor 4 is the Arms Warrior every unsupported-path case names since M10-D: a real participant of this kill, not an invented pair."
+        "text": "Identity is read from masterData subType and friendlySpecs at the roster index and from nothing else. A Protection Paladin and a Retribution Paladin in one kill resolve to different specializations from one class, and the tank's own pet is refused as a subject. Actor 17 is the Fire Mage every unsupported-path case names since M10-D: a real participant of this kill, not an invented pair."
       },
       "authority": null,
       "limitations": [],

@@ -56,6 +56,7 @@ import pinnedHavocApl from "../../../src/simc/data/demonhunter-havoc.apl.json";
 import pinnedSubtletyApl from "../../../src/simc/data/rogue-subtlety.apl.json";
 import pinnedFuryApl from "../../../src/simc/data/warrior-fury.apl.json";
 import pinnedProtectionWarriorApl from "../../../src/simc/data/warrior-protection.apl.json";
+import pinnedArmsWarriorApl from "../../../src/simc/data/warrior-arms.apl.json";
 import { AUTHORITY_DOMAINS, AUTHORITY_RESOLUTION_OUTCOMES } from "../../../src/findings/authority-domain.js";
 import { SPEC_IDS, type SpecId } from "../../../src/findings/spec-id.js";
 import {
@@ -400,6 +401,7 @@ export const OWNING_LAYERS = {
   SPEC_SUBTLETY_ROGUE: ["src/specs/rogue/subtlety/"],
   SPEC_FURY_WARRIOR: ["src/specs/warrior/fury/"],
   SPEC_PROTECTION_WARRIOR: ["src/specs/warrior/protection/"],
+  SPEC_ARMS_WARRIOR: ["src/specs/warrior/arms/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
   PUBLIC_CONTRACT: ["src/contracts/", "src/api/", "src/mcp/"],
 } as const;
@@ -441,6 +443,7 @@ export const SPEC_LAYER_OF = {
   "rogue/subtlety": "SPEC_SUBTLETY_ROGUE",
   "warrior/fury": "SPEC_FURY_WARRIOR",
   "warrior/protection": "SPEC_PROTECTION_WARRIOR",
+  "warrior/arms": "SPEC_ARMS_WARRIOR",
 } as const satisfies Record<SpecId, OwningLayer>;
 
 /** The specialization-owned layers: exactly those a `SpecId` maps to. */
@@ -3277,6 +3280,54 @@ export const ASSERTION_KINDS = {
       "The Protection Warrior facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
   },
 
+  // ---- SPEC_ARMS_WARRIOR (ONB-B1, INTERNAL_ONLY) ---
+  "SPEC_ARMS_WARRIOR.COVERAGE_SUMMARY": {
+    owningLayer: "SPEC_ARMS_WARRIOR",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        expected: z
+          .object({
+            heroTree: z.string().min(1),
+            eligibleDecisions: z.number().int().nonnegative(),
+            match: z.number().int().nonnegative(),
+            rejected: z.number().int().nonnegative(),
+            unknown: z.number().int().nonnegative(),
+            exclusions: z.record(z.string(), z.number().int().positive()),
+            eligibleTokens: z.record(z.string(), z.number().int().positive()),
+            unresolvedAt: z.record(z.string(), z.number().int().positive()),
+            stoppingAtoms: z.record(z.string(), z.number().int().positive()),
+            colossusSmashWindows: z
+              .object({
+                status: z.string().min(1),
+                established: z.number().int().nonnegative(),
+                notEstablished: z.record(z.string(), z.number().int().positive()),
+              })
+              .strict(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The evaluator's coverage disclosure over this actor's every completed cast, where each decision stopped, and how many Colossus Smash windows the observation could establish.",
+  },
+  "SPEC_ARMS_WARRIOR.SPEC_GATE": {
+    owningLayer: "SPEC_ARMS_WARRIOR",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Arms Warrior facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
+  },
+
   // ---- SPEC_AUGMENTATION_EVOKER (M13-E, INTERNAL_ONLY) ---------------------
   //
   // The first registration that binds no decision authority. Driven through
@@ -4083,6 +4134,7 @@ export const PINNED_AUTHORITY_REVISIONS: Readonly<Record<string, string>> = {
   [pinnedSubtletyApl.authorityId]: pinnedSubtletyApl.artifactRevision,
   [pinnedFuryApl.authorityId]: pinnedFuryApl.artifactRevision,
   [pinnedProtectionWarriorApl.authorityId]: pinnedProtectionWarriorApl.artifactRevision,
+  [pinnedArmsWarriorApl.authorityId]: pinnedArmsWarriorApl.artifactRevision,
 };
 
 // --------------------------------------------------------------------------

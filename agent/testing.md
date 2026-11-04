@@ -5556,3 +5556,22 @@ carry the rest (`m10d-public-registration`, `m10a-spec-partition`, `onb-a2-cohor
 
 Offline only, not committed: the signature-ability census of retained and committed events (`.probe/onba2p/`). Mortal Strike and
 Mutilate are its positive controls, because a first version of the scan found nothing for a reason of its own.
+
+# ONB-B1: Arms Warrior
+
+`tests/unit/specs/onb-b1-arms-warrior.test.ts`, synthetic: the row is internal only and refused publicly; another specialization is
+refused first; a capture with no combatant info refuses; an open enemy count never falls through to a lower list, and no decision is a
+confident verdict; each hero tree closes the other's lists, and an unresolved one closes nothing; known Rage decides nothing past the
+dispatch, and absent Rage is unknown, never zero; a lone-node talent stays UNKNOWN; Execute binds its logged Massacre id; Charge's logged
+impact has no token. The window observation has its own negatives: a missing removal or application is NOT_ESTABLISHED with presses
+`null`, partial or decode-degraded coverage refuses, an unreadable cast that could be a gated one refuses, a gated cast in an edge's
+millisecond refuses, a refresh opens nothing, the self-buff and another player's debuff are not windows, a press outside a
+window is not counted, and an empty window is an established zero that produces no comparison.
+
+Two corpus cases (`application-service.arms-warrior-registration-is-internal-only`, `spec-arms-warrior.the-facade-refuses-every-other-specialization`)
+and one archive case over the real first 6 s (`spec-arms-warrior.no-real-decision-resolves-and-an-open-window-is-not-counted`), with its
+census. `tests/contracts/m11-promotion-evidence-gate.test.ts` pins that the gate search finds nothing for Arms, so a later change that
+resolved a decision prompts ONB-B1P to look again. The unsupported subject's guard tests moved to Mage/Fire with the fixture.
+
+Offline only, not committed: the whole-fight replay (`.probe/onbb1/m/`) gives the numbers agent/architecture.md "ONB-B1" reports, and
+`.probe/onbb1/wire.cjs` the wire measurements. Not run: no window-counting rule was mutated beyond what the negatives above exercise.

@@ -69,7 +69,7 @@ row).
 | `rogue/subtlety` | B — INTERNAL_ONLY since ONB-A2 | committed filtered casts only (M13-A actor 17), cannot validate | audited | UNASSESSED | — |
 | `shaman/enhancement` | B | none | not yet | UNASSESSED | — |
 | `druid/guardian` | B | none | not yet | UNASSESSED | — |
-| `warrior/arms` | C | local raw | blocked | PARTIAL | `colossus-smash-window-fill` |
+| `warrior/arms` | C — INTERNAL_ONLY since ONB-B1 | committed (first 6 s of fight 48, actor 5); whole fight local raw | audited | PARTIAL | `colossus-smash-window-fill` |
 | `warrior/fury` | C — INTERNAL_ONLY since ONB-A2 | uncommitted contexts only | audited | UNASSESSED | — |
 | `warrior/protection` | C — INTERNAL_ONLY since ONB-A2 | uncommitted context only | audited | UNASSESSED | — |
 | `deathknight/blood` | C — INTERNAL_ONLY measurement slice at M11-B2, PUBLIC since M11-B12 (San'layn-validated) | committed sanitized (A7R6 actor 14, 165 s; gtKb actor 14, 20 s) | audited (M11-B2: the 12.1.0 list extracted with its client-version guards evaluated; Coagulopathy line absent at this pin) | SPECIFIC_QUESTIONS_IDENTIFIED | `coagulopathy-maintenance-clip` (SUPERSEDED — no pinned line at 12.1.0), `bone-shield-stack-maintenance` (IMPLEMENTED_PUBLIC since M11-B12: the count is exact at 114 of 123 decisions, a finite set of exact counts at 7 more inside the pre-decision window, and `buff.bone_shield.remains` is the M11-B8 order-invariant floor; the whole observed offensive slice is 42 MATCH / 9 REJECTED / 72 UNKNOWN) |

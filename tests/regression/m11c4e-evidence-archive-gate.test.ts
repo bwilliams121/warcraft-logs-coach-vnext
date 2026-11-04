@@ -74,9 +74,10 @@ describe("the committed evidence archive executes clean under workerd", { timeou
     // segment (three cases, three assertions each).
     // ONB-A1: plus one normalization census of the Havoc Demon Hunter segment (three
     // assertions), its coverage disclosure, its first MATCH and its first two REJECTEDs.
-    expect(result.summary.cases).toBe(30);
-    expect(result.summary.assertions).toBe(76);
-    expect(result.summary.passed).toBe(76);
+    // ONB-B1: plus one census of the Arms Warrior segment (three assertions) and its disclosure.
+    expect(result.summary.cases).toBe(32);
+    expect(result.summary.assertions).toBe(80);
+    expect(result.summary.passed).toBe(80);
   });
 
   it("is deterministic across runs", async () => {

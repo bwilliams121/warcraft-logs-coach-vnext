@@ -43,7 +43,7 @@ const fight = rosterFightFor({
   fightId: 1,
   participants: [
     { sourceId: 1, specName: "Assassination" },
-    { sourceId: 2, specName: "Arms" },
+    { sourceId: 2, specName: "Fire" },
   ],
 });
 
@@ -53,7 +53,7 @@ function nightOf(cells: readonly PlayerFightResult[]): RaidNightAnalysis {
 
 const ANALYZED_ONLY_MATCH = nightOf([
   analyzedCell({ fightId: 1, sourceId: 1 }),
-  notAnalyzedCell({ fightId: 1, sourceId: 2, status: "SPEC_NOT_SUPPORTED", specName: "Arms" }),
+  notAnalyzedCell({ fightId: 1, sourceId: 2, status: "SPEC_NOT_SUPPORTED", specName: "Fire" }),
 ]);
 
 const WITH_UNKNOWN = nightOf([
@@ -71,12 +71,12 @@ const WITH_UNKNOWN = nightOf([
     ],
     excluded: [excludedCast({ ordinal: 0, reason: "EXECUTION_LANE_NOT_ESTABLISHED", abilityGameId: 1000 })],
   }),
-  notAnalyzedCell({ fightId: 1, sourceId: 2, status: "AUTHORITY_NOT_AVAILABLE", specName: "Arms" }),
+  notAnalyzedCell({ fightId: 1, sourceId: 2, status: "AUTHORITY_NOT_AVAILABLE", specName: "Fire" }),
 ]);
 
 const NONE_ANALYZED = nightOf([
   notAnalyzedCell({ fightId: 1, sourceId: 1, status: "SPEC_NOT_SUPPORTED" }),
-  notAnalyzedCell({ fightId: 1, sourceId: 2, status: "SPEC_NOT_SUPPORTED", specName: "Arms" }),
+  notAnalyzedCell({ fightId: 1, sourceId: 2, status: "SPEC_NOT_SUPPORTED", specName: "Fire" }),
 ]);
 
 /** The same night, with one present cell's healthstone count UNKNOWN. */

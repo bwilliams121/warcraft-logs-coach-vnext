@@ -1175,9 +1175,179 @@ const ROGUE_SUBTLETY_TARGET = {
   ],
 };
 
+/**
+ * The Arms Warrior profile (ONB-B1): (a) the talents the pinned Arms list reads as
+ * `talent.<name>`, and (b) the talents an action of that list is built on (an action on
+ * `not_found()` is background, action.cpp:541-549).
+ */
+const WARRIOR_ARMS_TARGET = {
+  datasetId: "SIMC_TRAIT_WARRIOR_ARMS_TALENTS",
+  classId: 1,
+  specId: 71,
+  defaultOut: "src/data/game/warrior-arms-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. That `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node is corroborated for Arms Warrior on one real subject: every entry of b1PmaKrd6CDfzngc fight 48 actor 5's combatantinfo names a pinned row.",
+  requiredTalents: [
+    {
+      simcName: "mortal_strike",
+      displayNameEn: "Mortal Strike",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warrior.cpp:7593 talents.arms.mortal_strike = find_talent_spell( SPECIALIZATION, "Mortal Strike" ); mortal_strike_t is built on it (:3024-3025)',
+    },
+    {
+      simcName: "overpower",
+      displayNameEn: "Overpower",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warrior.cpp:7595 talents.arms.overpower = find_talent_spell( SPECIALIZATION, "Overpower" ); overpower_t is built on it (:5430-5431)',
+    },
+    {
+      simcName: "colossus_smash",
+      displayNameEn: "Colossus Smash",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warrior.cpp:7608 talents.arms.colossus_smash = find_talent_spell( SPECIALIZATION, "Colossus Smash" ); colossus_smash_t is built on it (:3735-3736)',
+    },
+    {
+      simcName: "cleave",
+      displayNameEn: "Cleave",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warrior.cpp:7618 talents.arms.cleave = find_talent_spell( SPECIALIZATION, "Cleave" ); cleave_t is built on it (:3620-3621), and the pinned list reads talent.cleave',
+    },
+    {
+      simcName: "avatar",
+      displayNameEn: "Avatar",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warrior.cpp:7643 talents.arms.avatar = find_talent_spell( SPECIALIZATION, "Avatar", WARRIOR_ARMS ); avatar_t is built on talents.shared.avatar (:7304, :7928), and precombat reads talent.avatar',
+    },
+    {
+      simcName: "bladestorm",
+      displayNameEn: "Bladestorm",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warrior.cpp:7632 talents.arms.bladestorm = find_talent_spell( SPECIALIZATION, "Bladestorm", WARRIOR_ARMS ); bladestorm_t is built on talents.shared.bladestorm (:7316, :7929). A CHOICE node with Ravager',
+    },
+    {
+      simcName: "ravager",
+      displayNameEn: "Ravager",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warrior.cpp:7633 talents.arms.ravager = find_talent_spell( SPECIALIZATION, "Ravager", WARRIOR_ARMS ); ravager_t is built on talents.shared.ravager (:5867-5868, :7931). A CHOICE node with Bladestorm',
+    },
+    {
+      simcName: "massacre",
+      displayNameEn: "Massacre",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warrior.cpp:7626 talents.arms.massacre = find_talent_spell( SPECIALIZATION, "Massacre", WARRIOR_ARMS ); the pinned list reads talent.massacre.enabled',
+    },
+    {
+      simcName: "bloodletting",
+      displayNameEn: "Bloodletting",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warrior.cpp:7637 talents.arms.bloodletting = find_talent_spell( SPECIALIZATION, "Bloodletting" ); the pinned list reads talent.bloodletting',
+    },
+    {
+      simcName: "dreadnaught",
+      displayNameEn: "Dreadnaught",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warrior.cpp:7622 talents.arms.dreadnaught = find_talent_spell( SPECIALIZATION, "Dreadnaught" ); the pinned list reads talent.dreadnaught',
+    },
+    {
+      simcName: "fervor_of_battle",
+      displayNameEn: "Fervor of Battle",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warrior.cpp:7605 talents.arms.fervor_of_battle = find_talent_spell( SPECIALIZATION, "Fervor of Battle" ); the pinned list reads talent.fervor_of_battle',
+    },
+    {
+      simcName: "tactical_edge",
+      displayNameEn: "Tactical Edge",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warrior.cpp:7624 talents.arms.tactical_edge = find_talent_spell( SPECIALIZATION, "Tactical Edge" ); the pinned list reads talent.tactical_edge. A CHOICE node with Crushing Combo',
+    },
+    {
+      simcName: "deep_wounds",
+      displayNameEn: "Deep Wounds",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warrior.cpp:7623 talents.arms.deep_wounds = find_talent_spell( SPECIALIZATION, "Deep Wounds", WARRIOR_ARMS ); the pinned list reads talent.deep_wounds',
+    },
+    {
+      simcName: "rend",
+      displayNameEn: "Rend",
+      tree: "CLASS",
+      binding:
+        'sc_warrior.cpp:7546 talents.warrior.rend = find_talent_spell( CLASS, "Rend" ); rend_t is built on it (:2291-2292), and the pinned list reads talent.rend',
+    },
+    {
+      simcName: "champions_spear",
+      displayNameEn: "Champion's Spear",
+      tree: "CLASS",
+      binding:
+        'sc_warrior.cpp:7587 talents.warrior.champions_spear = find_talent_spell( CLASS, "Champion\'s Spear" ); champions_spear_t is built on it (:6846-6847)',
+    },
+    {
+      simcName: "wrecking_throw",
+      displayNameEn: "Wrecking Throw",
+      tree: "CLASS",
+      binding:
+        'sc_warrior.cpp:7562 talents.warrior.wrecking_throw = find_talent_spell( CLASS, "Wrecking Throw" ); wrecking_throw_t is built on it (:6783-6784). A CHOICE node with Shattering Throw',
+    },
+    {
+      simcName: "shattering_throw",
+      displayNameEn: "Shattering Throw",
+      tree: "CLASS",
+      binding:
+        'sc_warrior.cpp:7563 talents.warrior.shattering_throw = find_talent_spell( CLASS, "Shattering Throw" ); a CHOICE node with Wrecking Throw, pinned so that node resolves',
+    },
+    {
+      simcName: "storm_bolt",
+      displayNameEn: "Storm Bolt",
+      tree: "CLASS",
+      binding:
+        'sc_warrior.cpp:7544 talents.warrior.storm_bolt = find_talent_spell( CLASS, "Storm Bolt" ); storm_bolt_t is built on it (:6403-6404)',
+    },
+    {
+      simcName: "demolish",
+      displayNameEn: "Demolish",
+      tree: "HERO",
+      binding:
+        'sc_warrior.cpp:7766 talents.colossus.demolish = find_talent_spell( HERO, "Demolish" ); demolish_t is built on it (:3857-3858), and the pinned list reads talent.demolish',
+    },
+    {
+      simcName: "slayers_dominance",
+      displayNameEn: "Slayer's Dominance",
+      tree: "HERO",
+      binding:
+        'sc_warrior.cpp:7785 talents.slayer.slayers_dominance = find_talent_spell( HERO, "Slayer\'s Dominance" ); the pinned list reads talent.slayers_dominance',
+    },
+    {
+      simcName: "opportunist",
+      displayNameEn: "Opportunist",
+      tree: "HERO",
+      binding:
+        'sc_warrior.cpp:7795 talents.slayer.opportunist = find_talent_spell( HERO, "Opportunist" ); the pinned list reads talent.opportunist. A CHOICE node with Fierce Followthrough',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data` (trait_data.inc:4424, :4426).
+    { simcName: "slayer", subTreeId: 60 },
+    { simcName: "colossus", subTreeId: 62 },
+  ],
+};
+
 export const TARGETS = {
   "deathknight-blood": DEATHKNIGHT_BLOOD_TARGET,
   "demonhunter-havoc": DEMONHUNTER_HAVOC_TARGET,
+  "warrior-arms": WARRIOR_ARMS_TARGET,
   "warrior-fury": WARRIOR_FURY_TARGET,
   "warrior-protection": WARRIOR_PROTECTION_TARGET,
   "rogue-subtlety": ROGUE_SUBTLETY_TARGET,

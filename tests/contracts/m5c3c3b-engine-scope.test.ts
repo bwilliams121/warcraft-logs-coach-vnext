@@ -121,6 +121,7 @@ describe("the Rogue adapter lives in the spec layer, and only there", () => {
   const SUBTLETY_ADAPTER_PATH = "src/specs/rogue/subtlety/first-gcd-adapter.ts";
   const FURY_WARRIOR_ADAPTER_PATH = "src/specs/warrior/fury/first-gcd-adapter.ts";
   const PROTECTION_WARRIOR_ADAPTER_PATH = "src/specs/warrior/protection/first-gcd-adapter.ts";
+  const ARMS_WARRIOR_ADAPTER_PATH = "src/specs/warrior/arms/first-gcd-adapter.ts";
 
   it("wires the engine into exactly one adapter module per specialization tree", () => {
     const wiring = filesUnder("src/specs").filter((path) =>
@@ -136,6 +137,7 @@ describe("the Rogue adapter lives in the spec layer, and only there", () => {
         SUBTLETY_ADAPTER_PATH,
         FURY_WARRIOR_ADAPTER_PATH,
         PROTECTION_WARRIOR_ADAPTER_PATH,
+        ARMS_WARRIOR_ADAPTER_PATH,
         ADAPTER_PATH,
       ].sort(),
     );

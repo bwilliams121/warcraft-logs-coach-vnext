@@ -65,6 +65,7 @@ describe("every Node-executable layer of the corpus executes clean", () => {
       "SPEC_SUBTLETY_ROGUE",
       "SPEC_FURY_WARRIOR",
       "SPEC_PROTECTION_WARRIOR",
+      "SPEC_ARMS_WARRIOR",
       "APPLICATION_SERVICE",
     ]);
   });

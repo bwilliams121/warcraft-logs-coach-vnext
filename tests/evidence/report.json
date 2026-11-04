@@ -1,6 +1,13 @@
 {
   "artifacts": [
     {
+      "artifactId": "wcl-b1pm-fight-48-arms-warrior-5-decisions.seg-0-6",
+      "byteLength": 20265,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "ce78ae0e3f4238ac764b47293435bee65d05e18362161fec55b5c84c8617443a"
+    },
+    {
       "artifactId": "wcl-b1pm-fight-48-friendly-players.seg-69500-72500",
       "byteLength": 363527,
       "payloadKind": "WCL_EVENT_ARRAY",
@@ -493,8 +500,8 @@
   ],
   "byLayer": [
     {
-      "assertions": 63,
-      "cases": 21,
+      "assertions": 66,
+      "cases": 22,
       "failed": 0,
       "kindsExercised": [
         "NORMALIZATION.ACTOR_EVENT_CENSUS",
@@ -505,7 +512,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "NORMALIZATION",
-      "passed": 63
+      "passed": 66
     },
     {
       "assertions": 9,
@@ -532,9 +539,42 @@
       "notExecuted": 0,
       "owningLayer": "SPEC_HAVOC_DEMON_HUNTER",
       "passed": 4
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_ARMS_WARRIOR.COVERAGE_SUMMARY"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_ARMS_WARRIOR",
+      "passed": 1
     }
   ],
   "cases": [
+    {
+      "artifactId": "wcl-b1pm-fight-48-arms-warrior-5-decisions.seg-0-6",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.b1pm-arms-warrior-5-decisions-seg-0-6-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-arms-warrior-5-decisions.seg-0-6"]
+    },
     {
       "artifactId": "wcl-b1pm-fight-48-friendly-players.seg-69500-72500",
       "assertions": [
@@ -1047,6 +1087,28 @@
       "referencedArtifactIds": ["wcl-m13a-aug1-fight-1-support.seg-75-151"]
     },
     {
+      "artifactId": "wcl-b1pm-fight-48-arms-warrior-5-decisions.seg-0-6",
+      "assertions": [
+        {
+          "kind": "SPEC_ARMS_WARRIOR.COVERAGE_SUMMARY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_WARRIOR_ARMS",
+        "requiredStateEvidence": [
+          "the combatantinfo at 7,436,292 for actor 5",
+          "every COMPLETE cast by actor 5 in the segment, in canonical order",
+          "every 208086 debuff transition sourced by actor 5 in the segment, in canonical order"
+        ]
+      },
+      "caseId": "spec-arms-warrior.no-real-decision-resolves-and-an-open-window-is-not-counted",
+      "owningLayer": "SPEC_ARMS_WARRIOR",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-arms-warrior-5-decisions.seg-0-6"]
+    },
+    {
       "artifactId": "wcl-brewmaster-monk-gtkb-full-fight.seg-165-285",
       "assertions": [
         {
@@ -1293,6 +1355,7 @@
     "SIMC_APL_PALADIN_RETRIBUTION": "simc-33622e9d-1",
     "SIMC_APL_ROGUE_ASSASSINATION": "simc-33622e9d-1",
     "SIMC_APL_ROGUE_SUBTLETY": "simc-33622e9d-1",
+    "SIMC_APL_WARRIOR_ARMS": "simc-33622e9d-1",
     "SIMC_APL_WARRIOR_FURY": "simc-33622e9d-1",
     "SIMC_APL_WARRIOR_PROTECTION": "simc-33622e9d-1",
     "SIMC_DBC_ROGUE_DOT_DURATIONS": "simc-33622e9d-1"
@@ -1301,15 +1364,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 19724135,
-    "artifacts": 70,
-    "assertions": 76,
-    "cases": 30,
+    "artifactBytes": 19744400,
+    "artifacts": 71,
+    "assertions": 80,
+    "cases": 32,
     "declared": 0,
-    "executable": 76,
+    "executable": 80,
     "failed": 0,
     "largestArtifactBytes": 499916,
     "notExecuted": 0,
-    "passed": 76
+    "passed": 80
   }
 }

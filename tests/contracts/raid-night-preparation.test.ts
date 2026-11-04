@@ -36,9 +36,9 @@ import {
   syntheticFight,
 } from "../support/synthetic-fight.js";
 
-const ARMS = 4;
+const FIRE_MAGE = 17;
 const ABSENT_ROGUE = 23;
-const classNameFor = (sourceId: number): string => (sourceId === ARMS ? "Warrior" : "Rogue");
+const classNameFor = (sourceId: number): string => (sourceId === FIRE_MAGE ? "Mage" : "Rogue");
 
 function aggregateOf(run: RaidNightRunResult): RaidNightAnalysis {
   if (!run.ok) throw new Error(`expected success, got ${run.error.code}: ${run.error.message}`);
@@ -69,9 +69,9 @@ function recordingPorts(options: Parameters<typeof fakePorts>[0]) {
 describe("an all-unanalyzable fight is retrieved for preparation alone", () => {
   const snapshot = assassinationSnapshot({
     fightIds: [1],
-    sourceIds: [ARMS, ABSENT_ROGUE],
+    sourceIds: [FIRE_MAGE, ABSENT_ROGUE],
     classNameFor,
-    specNameFor: () => "Arms",
+    specNameFor: () => "Fire",
     absentOn: new Map([[1, [ABSENT_ROGUE]]]),
   });
 
@@ -83,11 +83,11 @@ describe("an all-unanalyzable fight is retrieved for preparation alone", () => {
     expect(ports.requests[0]).toMatchObject({
       fightId: 1,
       includeResources: false,
-      talentImportActorId: ARMS,
+      talentImportActorId: FIRE_MAGE,
     });
     expect(aggregate.fights[0]?.processingOutcome).toBe("INGESTED");
 
-    const present = aggregate.cells.find((cell) => cell.sourceId === ARMS);
+    const present = aggregate.cells.find((cell) => cell.sourceId === FIRE_MAGE);
     expect(present?.kind).toBe("NOT_ANALYZED");
     if (present?.kind !== "NOT_ANALYZED") return;
     expect(present.status).toBe("SPEC_NOT_SUPPORTED");
@@ -103,7 +103,7 @@ describe("an all-unanalyzable fight is retrieved for preparation alone", () => {
     expect(PublicRaidNightResultSchema.safeParse(projected).success).toBe(true);
 
     const cells = JSON.parse(JSON.stringify(projected)).cells as Record<string, unknown>[];
-    const present = cells.find((cell) => cell["sourceId"] === ARMS) as Record<string, any>;
+    const present = cells.find((cell) => cell["sourceId"] === FIRE_MAGE) as Record<string, any>;
     expect(present["preparation"]["assessment"]).toBe("ASSESSED");
     expect(Object.keys(present["preparation"]["statuses"]).sort()).toEqual([
       "combatPotion",
@@ -120,7 +120,7 @@ describe("an all-unanalyzable fight is retrieved for preparation alone", () => {
     const ports = recordingPorts({ snapshot, ingestionFailures: new Map([[1, "UPSTREAM_DATA_INVALID"]]) });
     const aggregate = aggregateOf(await runNight({ reportCode: REPORT_CODE, fightIds: [1] }, ports));
     expect(aggregate.fights[0]?.processingOutcome).toBe("INGESTION_FAILED");
-    const present = aggregate.cells.find((cell) => cell.sourceId === ARMS);
+    const present = aggregate.cells.find((cell) => cell.sourceId === FIRE_MAGE);
     expect(present?.kind).toBe("ANALYSIS_UNAVAILABLE");
     if (present?.kind !== "ANALYSIS_UNAVAILABLE") return;
     expect(present.reason).toBe("FIGHT_INGESTION_FAILED");
@@ -132,9 +132,9 @@ describe("every present cell kind carries consumable status", () => {
   it("an analyzed and an unsupported player in one fight both carry it", async () => {
     const snapshot = assassinationSnapshot({
       fightIds: [1],
-      sourceIds: [ARMS, M5D2_ACTOR],
+      sourceIds: [FIRE_MAGE, M5D2_ACTOR],
       classNameFor,
-      specNameFor: (_fightId, sourceId) => (sourceId === ARMS ? "Arms" : "Assassination"),
+      specNameFor: (_fightId, sourceId) => (sourceId === FIRE_MAGE ? "Fire" : "Assassination"),
     });
     const aggregate = aggregateOf(
       await runNight({ reportCode: REPORT_CODE, fightIds: [1] }, fakePorts({ snapshot })),

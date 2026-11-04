@@ -1,0 +1,519 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_TRAIT_WARRIOR_ARMS_TALENTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
+    "extractedOn": "2026-11-03",
+    "extractorVersion": 1,
+    "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. That `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals trait_data_t::id_node is corroborated for Arms Warrior on one real subject: every entry of b1PmaKrd6CDfzngc fight 48 actor 5's combatantinfo names a pinned row.",
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "talents": [
+    {
+      "simcName": "avatar",
+      "displayNameEn": "Avatar",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 110176,
+      "traitEntryId": 136703,
+      "talentSpellId": 107574,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7643 talents.arms.avatar = find_talent_spell( SPECIALIZATION, \"Avatar\", WARRIOR_ARMS ); avatar_t is built on talents.shared.avatar (:7304, :7928), and precombat reads talent.avatar"
+    },
+    {
+      "simcName": "bladestorm",
+      "displayNameEn": "Bladestorm",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90441,
+      "traitEntryId": 112314,
+      "talentSpellId": 227847,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 136702,
+          "displayNameEn": "Ravager",
+          "talentSpellId": 228920
+        }
+      ],
+      "binding": "sc_warrior.cpp:7632 talents.arms.bladestorm = find_talent_spell( SPECIALIZATION, \"Bladestorm\", WARRIOR_ARMS ); bladestorm_t is built on talents.shared.bladestorm (:7316, :7929). A CHOICE node with Ravager"
+    },
+    {
+      "simcName": "bloodletting",
+      "displayNameEn": "Bloodletting",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90438,
+      "traitEntryId": 112310,
+      "talentSpellId": 383154,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7637 talents.arms.bloodletting = find_talent_spell( SPECIALIZATION, \"Bloodletting\" ); the pinned list reads talent.bloodletting"
+    },
+    {
+      "simcName": "champions_spear",
+      "displayNameEn": "Champion's Spear",
+      "tree": "CLASS",
+      "traitNodeId": 90380,
+      "traitEntryId": 112247,
+      "talentSpellId": 376079,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7587 talents.warrior.champions_spear = find_talent_spell( CLASS, \"Champion's Spear\" ); champions_spear_t is built on it (:6846-6847)"
+    },
+    {
+      "simcName": "cleave",
+      "displayNameEn": "Cleave",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90293,
+      "traitEntryId": 112147,
+      "talentSpellId": 845,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7618 talents.arms.cleave = find_talent_spell( SPECIALIZATION, \"Cleave\" ); cleave_t is built on it (:3620-3621), and the pinned list reads talent.cleave"
+    },
+    {
+      "simcName": "colossus_smash",
+      "displayNameEn": "Colossus Smash",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90290,
+      "traitEntryId": 112144,
+      "talentSpellId": 167105,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7608 talents.arms.colossus_smash = find_talent_spell( SPECIALIZATION, \"Colossus Smash\" ); colossus_smash_t is built on it (:3735-3736)"
+    },
+    {
+      "simcName": "deep_wounds",
+      "displayNameEn": "Deep Wounds",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 109684,
+      "traitEntryId": 135940,
+      "talentSpellId": 1261060,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7623 talents.arms.deep_wounds = find_talent_spell( SPECIALIZATION, \"Deep Wounds\", WARRIOR_ARMS ); the pinned list reads talent.deep_wounds"
+    },
+    {
+      "simcName": "demolish",
+      "displayNameEn": "Demolish",
+      "tree": "HERO",
+      "traitNodeId": 94818,
+      "traitEntryId": 117415,
+      "talentSpellId": 436358,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7766 talents.colossus.demolish = find_talent_spell( HERO, \"Demolish\" ); demolish_t is built on it (:3857-3858), and the pinned list reads talent.demolish"
+    },
+    {
+      "simcName": "dreadnaught",
+      "displayNameEn": "Dreadnaught",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90285,
+      "traitEntryId": 112137,
+      "talentSpellId": 262150,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7622 talents.arms.dreadnaught = find_talent_spell( SPECIALIZATION, \"Dreadnaught\" ); the pinned list reads talent.dreadnaught"
+    },
+    {
+      "simcName": "fervor_of_battle",
+      "displayNameEn": "Fervor of Battle",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90267,
+      "traitEntryId": 135932,
+      "talentSpellId": 202316,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7605 talents.arms.fervor_of_battle = find_talent_spell( SPECIALIZATION, \"Fervor of Battle\" ); the pinned list reads talent.fervor_of_battle"
+    },
+    {
+      "simcName": "massacre",
+      "displayNameEn": "Massacre",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90291,
+      "traitEntryId": 112145,
+      "talentSpellId": 281001,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7626 talents.arms.massacre = find_talent_spell( SPECIALIZATION, \"Massacre\", WARRIOR_ARMS ); the pinned list reads talent.massacre.enabled"
+    },
+    {
+      "simcName": "mortal_strike",
+      "displayNameEn": "Mortal Strike",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90270,
+      "traitEntryId": 112122,
+      "talentSpellId": 12294,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7593 talents.arms.mortal_strike = find_talent_spell( SPECIALIZATION, \"Mortal Strike\" ); mortal_strike_t is built on it (:3024-3025)"
+    },
+    {
+      "simcName": "opportunist",
+      "displayNameEn": "Opportunist",
+      "tree": "HERO",
+      "traitNodeId": 94787,
+      "traitEntryId": 123770,
+      "talentSpellId": 444774,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 117384,
+          "displayNameEn": "Fierce Followthrough",
+          "talentSpellId": 444773
+        }
+      ],
+      "binding": "sc_warrior.cpp:7795 talents.slayer.opportunist = find_talent_spell( HERO, \"Opportunist\" ); the pinned list reads talent.opportunist. A CHOICE node with Fierce Followthrough"
+    },
+    {
+      "simcName": "overpower",
+      "displayNameEn": "Overpower",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90271,
+      "traitEntryId": 112123,
+      "talentSpellId": 7384,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7595 talents.arms.overpower = find_talent_spell( SPECIALIZATION, \"Overpower\" ); overpower_t is built on it (:5430-5431)"
+    },
+    {
+      "simcName": "ravager",
+      "displayNameEn": "Ravager",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90441,
+      "traitEntryId": 136702,
+      "talentSpellId": 228920,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 112314,
+          "displayNameEn": "Bladestorm",
+          "talentSpellId": 227847
+        }
+      ],
+      "binding": "sc_warrior.cpp:7633 talents.arms.ravager = find_talent_spell( SPECIALIZATION, \"Ravager\", WARRIOR_ARMS ); ravager_t is built on talents.shared.ravager (:5867-5868, :7931). A CHOICE node with Bladestorm"
+    },
+    {
+      "simcName": "rend",
+      "displayNameEn": "Rend",
+      "tree": "CLASS",
+      "traitNodeId": 109391,
+      "traitEntryId": 135597,
+      "talentSpellId": 772,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7546 talents.warrior.rend = find_talent_spell( CLASS, \"Rend\" ); rend_t is built on it (:2291-2292), and the pinned list reads talent.rend"
+    },
+    {
+      "simcName": "shattering_throw",
+      "displayNameEn": "Shattering Throw",
+      "tree": "CLASS",
+      "traitNodeId": 90351,
+      "traitEntryId": 112214,
+      "talentSpellId": 64382,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 112215,
+          "displayNameEn": "Wrecking Throw",
+          "talentSpellId": 384110
+        }
+      ],
+      "binding": "sc_warrior.cpp:7563 talents.warrior.shattering_throw = find_talent_spell( CLASS, \"Shattering Throw\" ); a CHOICE node with Wrecking Throw, pinned so that node resolves"
+    },
+    {
+      "simcName": "slayers_dominance",
+      "displayNameEn": "Slayer's Dominance",
+      "tree": "HERO",
+      "traitNodeId": 94814,
+      "traitEntryId": 117411,
+      "talentSpellId": 444767,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7785 talents.slayer.slayers_dominance = find_talent_spell( HERO, \"Slayer's Dominance\" ); the pinned list reads talent.slayers_dominance"
+    },
+    {
+      "simcName": "storm_bolt",
+      "displayNameEn": "Storm Bolt",
+      "tree": "CLASS",
+      "traitNodeId": 90337,
+      "traitEntryId": 112198,
+      "talentSpellId": 107570,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7544 talents.warrior.storm_bolt = find_talent_spell( CLASS, \"Storm Bolt\" ); storm_bolt_t is built on it (:6403-6404)"
+    },
+    {
+      "simcName": "tactical_edge",
+      "displayNameEn": "Tactical Edge",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 109683,
+      "traitEntryId": 135939,
+      "talentSpellId": 1261051,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 135938,
+          "displayNameEn": "Crushing Combo",
+          "talentSpellId": 1261056
+        }
+      ],
+      "binding": "sc_warrior.cpp:7624 talents.arms.tactical_edge = find_talent_spell( SPECIALIZATION, \"Tactical Edge\" ); the pinned list reads talent.tactical_edge. A CHOICE node with Crushing Combo"
+    },
+    {
+      "simcName": "wrecking_throw",
+      "displayNameEn": "Wrecking Throw",
+      "tree": "CLASS",
+      "traitNodeId": 90351,
+      "traitEntryId": 112215,
+      "talentSpellId": 384110,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 112214,
+          "displayNameEn": "Shattering Throw",
+          "talentSpellId": 64382
+        }
+      ],
+      "binding": "sc_warrior.cpp:7562 talents.warrior.wrecking_throw = find_talent_spell( CLASS, \"Wrecking Throw\" ); wrecking_throw_t is built on it (:6783-6784). A CHOICE node with Shattering Throw"
+    }
+  ],
+  "heroTrees": [
+    {
+      "simcName": "slayer",
+      "subTreeId": 60,
+      "entries": [
+        {
+          "traitEntryId": 117381,
+          "traitNodeId": 94784,
+          "displayNameEn": "Show No Mercy",
+          "talentSpellId": 444771
+        },
+        {
+          "traitEntryId": 117383,
+          "traitNodeId": 94786,
+          "displayNameEn": "Culling Cyclone",
+          "talentSpellId": 444778
+        },
+        {
+          "traitEntryId": 117384,
+          "traitNodeId": 94787,
+          "displayNameEn": "Fierce Followthrough",
+          "talentSpellId": 444773
+        },
+        {
+          "traitEntryId": 117385,
+          "traitNodeId": 94788,
+          "displayNameEn": "Imminent Demise",
+          "talentSpellId": 444769
+        },
+        {
+          "traitEntryId": 117392,
+          "traitNodeId": 94795,
+          "displayNameEn": "Relentless Pursuit",
+          "talentSpellId": 444776
+        },
+        {
+          "traitEntryId": 117398,
+          "traitNodeId": 94801,
+          "displayNameEn": "Slayer's Malice",
+          "talentSpellId": 444779
+        },
+        {
+          "traitEntryId": 117406,
+          "traitNodeId": 94809,
+          "displayNameEn": "Reap the Storm",
+          "talentSpellId": 444775
+        },
+        {
+          "traitEntryId": 117407,
+          "traitNodeId": 94810,
+          "displayNameEn": "Overwhelming Blades",
+          "talentSpellId": 444772
+        },
+        {
+          "traitEntryId": 117410,
+          "traitNodeId": 94813,
+          "displayNameEn": "Death Drive",
+          "talentSpellId": 444770
+        },
+        {
+          "traitEntryId": 117411,
+          "traitNodeId": 94814,
+          "displayNameEn": "Slayer's Dominance",
+          "talentSpellId": 444767
+        },
+        {
+          "traitEntryId": 117417,
+          "traitNodeId": 94820,
+          "displayNameEn": "Unrelenting Onslaught",
+          "talentSpellId": 444780
+        },
+        {
+          "traitEntryId": 123408,
+          "traitNodeId": 94795,
+          "displayNameEn": "Vicious Agility",
+          "talentSpellId": 444777
+        },
+        {
+          "traitEntryId": 123409,
+          "traitNodeId": 94786,
+          "displayNameEn": "Brutal Finish",
+          "talentSpellId": 446085
+        },
+        {
+          "traitEntryId": 123770,
+          "traitNodeId": 94787,
+          "displayNameEn": "Opportunist",
+          "talentSpellId": 444774
+        },
+        {
+          "traitEntryId": 136074,
+          "traitNodeId": 109815,
+          "displayNameEn": "Unhinged",
+          "talentSpellId": 386628
+        },
+        {
+          "traitEntryId": 136075,
+          "traitNodeId": 109816,
+          "displayNameEn": "Deadly Focus",
+          "talentSpellId": 1270718
+        },
+        {
+          "traitEntryId": 136076,
+          "traitNodeId": 109817,
+          "displayNameEn": "Violent Euphoria",
+          "talentSpellId": 1270717
+        }
+      ]
+    },
+    {
+      "simcName": "colossus",
+      "subTreeId": 62,
+      "entries": [
+        {
+          "traitEntryId": 117386,
+          "traitNodeId": 94789,
+          "displayNameEn": "Boneshaker",
+          "talentSpellId": 429639
+        },
+        {
+          "traitEntryId": 117390,
+          "traitNodeId": 94793,
+          "displayNameEn": "Dominance of the Colossus",
+          "talentSpellId": 429636
+        },
+        {
+          "traitEntryId": 117391,
+          "traitNodeId": 94794,
+          "displayNameEn": "Precise Might",
+          "talentSpellId": 431548
+        },
+        {
+          "traitEntryId": 117393,
+          "traitNodeId": 94796,
+          "displayNameEn": "Practiced Strikes",
+          "talentSpellId": 429647
+        },
+        {
+          "traitEntryId": 117396,
+          "traitNodeId": 94799,
+          "displayNameEn": "One Against Many",
+          "talentSpellId": 429637
+        },
+        {
+          "traitEntryId": 117403,
+          "traitNodeId": 94806,
+          "displayNameEn": "Mountain of Muscle and Scars",
+          "talentSpellId": 429642
+        },
+        {
+          "traitEntryId": 117408,
+          "traitNodeId": 94811,
+          "displayNameEn": "Tide of Battle",
+          "talentSpellId": 429641
+        },
+        {
+          "traitEntryId": 117409,
+          "traitNodeId": 94812,
+          "displayNameEn": "Martial Expert",
+          "talentSpellId": 429638
+        },
+        {
+          "traitEntryId": 117412,
+          "traitNodeId": 94815,
+          "displayNameEn": "No Stranger to Pain",
+          "talentSpellId": 429644
+        },
+        {
+          "traitEntryId": 117415,
+          "traitNodeId": 94818,
+          "displayNameEn": "Demolish",
+          "talentSpellId": 436358
+        },
+        {
+          "traitEntryId": 117416,
+          "traitNodeId": 94819,
+          "displayNameEn": "Colossal Might",
+          "talentSpellId": 429634
+        },
+        {
+          "traitEntryId": 119856,
+          "traitNodeId": 94799,
+          "displayNameEn": "Arterial Bleed",
+          "talentSpellId": 440995
+        },
+        {
+          "traitEntryId": 119857,
+          "traitNodeId": 94815,
+          "displayNameEn": "Veteran Vitality",
+          "talentSpellId": 440993
+        },
+        {
+          "traitEntryId": 119858,
+          "traitNodeId": 94789,
+          "displayNameEn": "Earthquaker",
+          "talentSpellId": 440992
+        },
+        {
+          "traitEntryId": 136071,
+          "traitNodeId": 109812,
+          "displayNameEn": "Celeritous Conclusion",
+          "talentSpellId": 1270710
+        },
+        {
+          "traitEntryId": 136072,
+          "traitNodeId": 109813,
+          "displayNameEn": "Cut to the Bone",
+          "talentSpellId": 1270709
+        },
+        {
+          "traitEntryId": 136073,
+          "traitNodeId": 109814,
+          "displayNameEn": "Decimator",
+          "talentSpellId": 1270704
+        }
+      ]
+    }
+  ]
+}

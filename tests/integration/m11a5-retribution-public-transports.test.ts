@@ -14,7 +14,7 @@
  *             to the REST body (the established parity definition), and the
  *             tool's description communicates the narrow scope.
  *   BEFORE    until M11-A5 the same request answered SPEC_NOT_SUPPORTED on
- *             both transports; the Arms Warrior still does, unchanged.
+ *             both transports; the Fire Mage still does, unchanged.
  */
 
 import { describe, expect, it } from "vitest";
@@ -177,6 +177,7 @@ describe("REST: a real Retribution Paladin identity resolves publicly", () => {
       "rogue-subtlety-observed-decisions": 0,
       "warrior-fury-observed-decisions": 0,
       "warrior-protection-observed-decisions": 0,
+      "warrior-arms-observed-decisions": 0,
     });
     const parsed = PublicAnalysisResultSchema.safeParse(rest.body);
     expect(parsed.success).toBe(true);
@@ -237,7 +238,7 @@ describe("REST: a real Retribution Paladin identity resolves publicly", () => {
     }
   });
 
-  it("the Arms Warrior over the same evidence is still SPEC_NOT_SUPPORTED, and runs no analyzer", async () => {
+  it("the Fire Mage over the same evidence is still SPEC_NOT_SUPPORTED, and runs no analyzer", async () => {
     const runner = localRunner({
       sourceId: CURRENT_UNSUPPORTED_SUBJECT.sourceId,
       className: CURRENT_UNSUPPORTED_SUBJECT.expectedClassName,

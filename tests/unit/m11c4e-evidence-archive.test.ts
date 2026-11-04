@@ -196,6 +196,16 @@ const ONBA1_EVIDENCE: Readonly<Record<string, number>> = {
 };
 const ONBA1_BYTES = Object.values(ONBA1_EVIDENCE).reduce((sum, bytes) => sum + bytes, 0);
 /**
+ * ONB-B1: the canonical Arms Warrior's (actor 5) casts, begincasts, combatantinfo, aura
+ * transitions and resourcechanges over the fight's first 6 s, one compact segment of the same
+ * capture. Ordinary archive growth (20,265 bytes), named and pinned like HEAL-B1P. It leaves
+ * 5,212 bytes under the notice line, so the next tranche with evidence needs a measured proposal.
+ */
+const ONBB1_EVIDENCE: Readonly<Record<string, number>> = {
+  "wcl-b1pm-fight-48-arms-warrior-5-decisions.seg-0-6": 20265,
+};
+const ONBB1_BYTES = Object.values(ONBB1_EVIDENCE).reduce((sum, bytes) => sum + bytes, 0);
+/**
  * M13-A: the one bounded Augmentation Evoker capture (owner grant
  * 2026-11-01): the sanitized fight context and the two merged segments of its
  * three server-filtered streams, which grant nothing. Ordinary archive growth
@@ -262,7 +272,9 @@ describe("the committed evidence archive", () => {
     expect(loaded.archive.rootId).toBe("EVIDENCE_ARCHIVE");
     expect(loaded.corpus.rootId).toBe("REGRESSION_CORPUS");
     expect(loaded.archive.artifacts.map((entry) => entry.record.artifactId)).toEqual([
-      // M12-B: the friendly-players raid damage segments (code-point order puts them first).
+      // ONB-B1: the Arms Warrior's decision segment ("a" < "f").
+      ...Object.keys(ONBB1_EVIDENCE),
+      // M12-B: the friendly-players raid damage segments.
       ...Object.keys(M12B_EVIDENCE),
       // ONB-A1: the Havoc Demon Hunter's decision segment ("ha" < "ho").
       ...Object.keys(ONBA1_EVIDENCE),
@@ -305,7 +317,7 @@ describe("the committed evidence archive", () => {
     ]);
     // M12-B added one normalization census per raid damage segment, M12-D one per cast
     // segment, M13-A one per merged support segment, HEAL-B1P, HEAL-B2P and HEAL-B4P one per cast segment.
-    expect(loaded.archive.cases).toHaveLength(30);
+    expect(loaded.archive.cases).toHaveLength(32);
     // Accounting is per root: the archive counts its own bytes only.
     expect(loaded.archive.totalArtifactBytes).toBe(
       308961 +
@@ -321,6 +333,7 @@ describe("the committed evidence archive", () => {
         HEALB2P_BYTES +
         HEALB4P_BYTES +
         ONBA1_BYTES +
+        ONBB1_BYTES +
         M13A_BYTES +
         M13D_BYTES,
     );
@@ -335,6 +348,7 @@ describe("the committed evidence archive", () => {
       ...HEALB2P_EVIDENCE,
       ...HEALB4P_EVIDENCE,
       ...ONBA1_EVIDENCE,
+      ...ONBB1_EVIDENCE,
       ...M13A_EVIDENCE,
       ...M13D_EVIDENCE,
     })) {
@@ -385,6 +399,7 @@ describe("the committed evidence archive", () => {
     expect(HEALB2P_BYTES).toBe(137685);
     expect(HEALB4P_BYTES).toBe(123153);
     expect(ONBA1_BYTES).toBe(364068);
+    expect(ONBB1_BYTES).toBe(20265);
     expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(
       4537019 +
         M11G1_BYTES +
@@ -396,10 +411,11 @@ describe("the committed evidence archive", () => {
         HEALB2P_BYTES +
         HEALB4P_BYTES +
         ONBA1_BYTES +
+        ONBB1_BYTES +
         M13A_BYTES +
         M13D_BYTES,
     );
-    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(19753145);
+    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(19773410);
     expect(loaded.archive.totalArtifactBytes + frameBytes).toBeGreaterThan(EVIDENCE_ARCHIVE_NOTICE_BYTES);
     // The regression corpus's own ceiling is untouched by the archive.
     expect(MAX_CORPUS_BYTES).toBe(6 * 1024 * 1024);
@@ -596,6 +612,7 @@ describe("the archive's assertion families are pinned", () => {
       "NORMALIZATION.BUNDLE_COMPOSITION",
       "NORMALIZATION.EVENT_COUNT_PRESERVED",
       "NORMALIZATION.INPUT_ORDER_PRESERVED",
+      "SPEC_ARMS_WARRIOR.COVERAGE_SUMMARY",
       "SPEC_ASSASSINATION.DECISION_COVERAGE",
       "SPEC_BLOOD_DEATH_KNIGHT.COVERAGE_SUMMARY",
       "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",

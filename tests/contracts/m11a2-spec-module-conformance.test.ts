@@ -167,6 +167,8 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
     sourceId: 17,
     archive: true,
   },
+  // ONB-B1: actor 4 of the committed A7R6 fight 7 context, an Arms Warrior.
+  "warrior/arms": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 4 },
   // HEAL-B3: actor 9 of the M13-A fight context, the Discipline Priest the
   // committed evidence archive context reports (also actor 88 of the G2
   // cohort246 fight 33 context).
@@ -465,6 +467,8 @@ describe("what the tree exports today", () => {
       ["SUBTLETY_ROGUE_MODULE", "rogue/subtlety", "INTERNAL_ONLY", 0],
       // HEAL-A: the first healer, INTERNAL_ONLY, binding no pinned decision authority; PUBLIC since HEAL-AP.
       ["RESTORATION_SHAMAN_MODULE", "shaman/restoration", "PUBLIC", 0],
+      // ONB-B1: Cohort B's representative, INTERNAL_ONLY.
+      ["ARMS_WARRIOR_MODULE", "warrior/arms", "INTERNAL_ONLY", 0],
       // ONB-A2: Cohort A's followers, INTERNAL_ONLY.
       ["FURY_WARRIOR_MODULE", "warrior/fury", "INTERNAL_ONLY", 0],
       ["PROTECTION_WARRIOR_MODULE", "warrior/protection", "INTERNAL_ONLY", 0],
