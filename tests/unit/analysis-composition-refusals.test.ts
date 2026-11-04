@@ -194,6 +194,9 @@ describe("an unsupported specialization", () => {
       // the one that resolves Death Knight/Blood; another spelling would pass here for the wrong reason.
       ["DeathKnight", "Frost"],
       ["Shaman", "Enhancement"],
+      // Registered INTERNAL_ONLY in ONB-B3, not promoted by ONB-B3P. "DemonHunter" is the wire's class token,
+      // the one that resolves Demon Hunter/Havoc; another spelling would pass here for the wrong reason.
+      ["DemonHunter", "Devourer"],
       ["Druid", "Restoration"],
       ["Priest", "Discipline"],
     ]) {

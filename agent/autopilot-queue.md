@@ -1655,11 +1655,13 @@ mergeSha: 548330bd6a2d2f92ab6ed569f5be9445c42a25f3
 ### ONB-B3: Devourer Demon Hunter (internal, own representative)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-S1, ONB-S2
 branch: autopilot/onb-b3
 wcl: NONE
 publicContract: NONE
+pr: 63
+mergeSha: 1608df155c28920a0adc3af8d68c1aeab92c2870
 ```
 
 **Scope.** Devourer is the newest specialization and is unusual: four
@@ -1676,11 +1678,15 @@ every root scan stopping at `voidscarred_melee[0] run_action_list` on `active_en
 ### ONB-B3P: Devourer Demon Hunter (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-B3
+branch: autopilot/onb-b3p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** Devourer does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Its three retained subjects, replayed offline, give 251 eligible decisions,
+0 MATCH, 0 REJECTED and 251 UNKNOWN, every root scan stopping at `voidscarred_melee[0] run_action_list` on `active_enemies`. A wider census found no other subject. Evidence is not its gap, so it is not on ONB-EV; it waits on ONB-S3. A promotion after that is a new public entry through the unchanged gates (agent/architecture.md "ONB-B3P"; agent/follow-ups.md "After ONB-B3").
 
 ### ONB-C1: Feral Druid (internal, Cohort C representative)
 

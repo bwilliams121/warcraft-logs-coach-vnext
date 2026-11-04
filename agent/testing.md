@@ -5619,3 +5619,9 @@ No production code changed. `tests/unit/analysis-composition-refusals.test.ts` h
 on a misspelling. `tests/contracts/m11-promotion-evidence-gate.test.ts` keeps its ONB-B2 gate search (no qualifying assertion, `evidenceReady` false), its comment now naming the outcome. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, `onb-b2-cohort-b-followers`).
 
 Offline only, not committed: the census (`.probe/onbb2p/census.cjs`, Mortal Strike and Mutilate as positive controls) and the replay of all three subjects (`.probe/onbb2p/m/`). They give the table in agent/architecture.md "ONB-B2P".
+
+# ONB-B3P: Devourer Demon Hunter, not promoted
+
+No production code changed. `tests/unit/analysis-composition-refusals.test.ts` holds DemonHunter/Devourer: SPEC_NOT_SUPPORTED, one retrieval for preparation alone, no dispatch. The class token is the wire's `DemonHunter`, the one Havoc's registration names, so the row reaches the identity table's real lookup rather than failing on a misspelling. `tests/contracts/m11-promotion-evidence-gate.test.ts` keeps its ONB-B3 gate search (no qualifying assertion, `evidenceReady` false), its comment now naming the outcome. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, `onb-b3-devourer-demon-hunter`).
+
+Offline only, not committed: the census (`.probe/onbb3p/census.cjs`, Mortal Strike as its positive control) and the replay of all three subjects (`.probe/onbb3p/m/`). They give the table in agent/architecture.md "ONB-B3P". The replay is a measurement, so the two prefix subjects report only their retained span.

@@ -767,8 +767,9 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
   });
 
   it("ONB-B3: the gate search finds nothing for Devourer Demon Hunter", async () => {
-    // Its three retained subjects resolve no decision (agent/architecture.md "ONB-B3"). A later change
-    // that resolved one would fail this pin and prompt a public entry; it would not promote anything by itself.
+    // Its three retained subjects resolve no decision (agent/architecture.md "ONB-B3P"), so it was not promoted.
+    // A later change that resolved one would fail this pin and prompt a new public entry; it would not promote
+    // anything by itself.
     const tiers = await tiersPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "demonhunter/devourer");
     if (module === undefined) throw new Error("no module for demonhunter/devourer");
