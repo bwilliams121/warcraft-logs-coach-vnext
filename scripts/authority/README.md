@@ -590,6 +590,30 @@ npx prettier --write src/data/game/warrior-arms-*.json src/simc/data/warrior-arm
 Execute binds 163201 and Massacre's override 281000 (the pinned effect row 738985 of 281001). Talent `id` and `nodeID` are corroborated on
 one real subject, b1PmaKrd6CDfzngc fight 48 actor 5.
 
+## ONB-B2 — Frost Death Knight and Enhancement Shaman
+
+`deathknight-frost` and `shaman-enhancement` targets on the GCD and talent extractors, and both APL artifacts through the pinned batch path. No cooldown, usability or aura artifact: nothing resolves past the enemy count (ONB-S3).
+
+```bash
+node scripts/authority/extract-simc-apl.mjs --targets deathknight-frost,shaman-enhancement \
+  --source-root <root> --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 \
+  --out-dir <dir> --extracted-on 2026-11-04
+node scripts/authority/extract-simc-gcd.mjs --target <target> \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-11-04   # --file-<key> for each source
+node scripts/authority/extract-simc-talents.mjs --target <target> \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-11-04   # --file-<key> for each source
+npx prettier --write src/data/game/deathknight-frost-*.json src/data/game/shaman-enhancement-*.json src/simc/data/deathknight-frost.apl.json src/simc/data/shaman-enhancement.apl.json
+```
+
+The source root also needs, for Enhancement's proofs: `engine/class_modules/sc_shaman.cpp`, `engine/player/action_priority_list.cpp`, `engine/dbc/sc_const_data.cpp`, and `class_spells.inc` and `specialization_spells.inc` under `engine/dbc/generated/`.
+
+Two class-neutral extractor additions, changing no earlier target's output:
+
+- **A `CLASS_METHOD` selector.** Enhancement's list is `shaman_t::init_action_list_enhancement`: an unindented header occurring once, its lists declared on the implicit `this`, a description argument nothing reads. It records `enclosingClass` and `functionHeader`, and no marker.
+- **A declared prologue and spell-gated statements, each by exact text.** The prologue is recorded with the condition its lists exist under. Each `add_action( this, "<Spell>", ... )` is declared with what it emits, and that rests on proofs of hash-pinned bytes: `action_priority_list.cpp` for the form, `sc_const_data.cpp` for the tables it reads, and each spell's row or its absence. Any other `this` statement refuses.
+
+Bloodlust emits `bloodlust,line_cd=600` (`class_spells.inc` row `{ 7, 0, 2825 }`). Wind Shear emits nothing, because it has no class or specialization row. Frost's talent `id` and `nodeID` are corroborated on two real subjects, b1PmaKrd6CDfzngc fight 48 actor 19 and gtKb2xHn87pNcFfW fight 22 actor 26, 77 of 77 entries each. Enhancement's are not corroborated.
+
 ## M11-D2-C — pinned batch preflight for eight Cohort A/B targets
 
 Extraction infrastructure only. No artifact for these targets is committed,
@@ -685,9 +709,9 @@ fields — `regionSha256`, `livePtrPolicy`, `dispatchSource`,
 Every artifact committed before M11-D2-C carries none and validates exactly
 as before.
 
-Enhancement is not a target: its APL is a class method in `sc_shaman.cpp`
-with a C++ prologue and `add_action( this, … )` forms whose meaning depends
-on `action_priority_list.cpp`. It needs its own audit.
+Enhancement was not one of these targets: its APL is a class method in
+`sc_shaman.cpp` with a C++ prologue and `add_action( this, … )` forms whose
+meaning depends on `action_priority_list.cpp`. ONB-B2 did that audit, above.
 
 ## What the extractor guarantees
 

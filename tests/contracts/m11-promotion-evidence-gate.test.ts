@@ -744,6 +744,8 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
       "warrior/fury",
       "warrior/protection",
       "warrior/arms",
+      "deathknight/frost",
+      "shaman/enhancement",
     ]);
     const internal = PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY");
     expect(internal.map((row) => row.specId)).toEqual([...INTERNAL_ONLY_SPEC_IDS]);
@@ -755,6 +757,20 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     // and prompt a new public entry; it would not promote anything by itself.
     const tiers = await tiersPromise;
     for (const specId of ["rogue/subtlety", "warrior/fury", "warrior/protection"] as const) {
+      const module = MODULES.find((candidate) => candidate.identity.specId === specId);
+      if (module === undefined) throw new Error(`no module for ${specId}`);
+      const readiness = evaluate(tiers, specId, "INTERNAL_ONLY", internalPairing(module));
+      expect(readiness.qualifyingAssertions, specId).toEqual([]);
+      expect(readiness.evidenceReady, specId).toBe(false);
+    }
+  });
+
+  it("ONB-B2: the gate search finds nothing for Frost Death Knight or Enhancement Shaman", async () => {
+    // Frost's two retained subjects resolve no decision, and no capture can validate Enhancement
+    // (agent/architecture.md "ONB-B2"). A later change that resolved one would fail this pin and
+    // prompt a new public entry; it would not promote anything by itself.
+    const tiers = await tiersPromise;
+    for (const specId of ["deathknight/frost", "shaman/enhancement"] as const) {
       const module = MODULES.find((candidate) => candidate.identity.specId === specId);
       if (module === undefined) throw new Error(`no module for ${specId}`);
       const readiness = evaluate(tiers, specId, "INTERNAL_ONLY", internalPairing(module));

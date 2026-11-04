@@ -110,6 +110,7 @@ describe("the sweep has something to sweep", () => {
     const trees = new Set(SPEC_FILES.map(specTreeOf).filter((tree): tree is string => tree !== null));
     expect([...trees].sort()).toEqual([
       "src/specs/deathknight/blood",
+      "src/specs/deathknight/frost",
       "src/specs/demonhunter/havoc",
       "src/specs/druid/restoration",
       "src/specs/evoker/augmentation",
@@ -123,6 +124,7 @@ describe("the sweep has something to sweep", () => {
       "src/specs/priest/holy",
       "src/specs/rogue/assassination",
       "src/specs/rogue/subtlety",
+      "src/specs/shaman/enhancement",
       "src/specs/shaman/restoration",
       "src/specs/warrior/arms",
       "src/specs/warrior/fury",
@@ -142,6 +144,8 @@ describe("the sweep has something to sweep", () => {
     expect(existsSync("src/specs/warrior/fury/registration.ts")).toBe(true);
     expect(existsSync("src/specs/warrior/protection/registration.ts")).toBe(true);
     expect(existsSync("src/specs/warrior/arms/registration.ts")).toBe(true);
+    expect(existsSync("src/specs/deathknight/frost/registration.ts")).toBe(true);
+    expect(existsSync("src/specs/shaman/enhancement/registration.ts")).toBe(true);
     expect(existsSync("src/specs/paladin/retribution/registration.ts")).toBe(true);
   });
 
@@ -208,6 +212,7 @@ describe("shared code reaches specializations only through the registration boun
       .sort();
     expect(specImports).toEqual([
       "src/specs/deathknight/blood/registration.js",
+      "src/specs/deathknight/frost/registration.js",
       "src/specs/demonhunter/havoc/registration.js",
       "src/specs/druid/restoration/registration.js",
       "src/specs/evoker/augmentation/registration.js",
@@ -221,6 +226,7 @@ describe("shared code reaches specializations only through the registration boun
       "src/specs/priest/holy/registration.js",
       "src/specs/rogue/assassination/registration.js",
       "src/specs/rogue/subtlety/registration.js",
+      "src/specs/shaman/enhancement/registration.js",
       "src/specs/shaman/restoration/registration.js",
       "src/specs/warrior/arms/registration.js",
       "src/specs/warrior/fury/registration.js",

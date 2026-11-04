@@ -758,9 +758,11 @@ const EARLIER = [
 ];
 
 describe("the registry", () => {
-  it("holds exactly the five earlier targets and the eight D2-C targets, and no Enhancement", () => {
-    expect(Object.keys(TARGETS).sort()).toEqual([...EARLIER, ...Object.keys(D2C)].sort());
-    expect(JSON.stringify(TARGETS)).not.toMatch(/shaman|enhancement/i);
+  it("holds exactly the five earlier targets, the eight D2-C targets and ONB-B2's Enhancement", () => {
+    // ONB-B2 is the audit this entry waited for: its list is a class method (onb-b2-class-method-extraction).
+    expect(Object.keys(TARGETS).sort()).toEqual(
+      [...EARLIER, ...Object.keys(D2C), "shaman-enhancement"].sort(),
+    );
   });
 
   it.each(Object.entries(D2C))(
@@ -786,7 +788,7 @@ describe("the registry", () => {
 
   it("no two targets share a region or an output path", () => {
     const regions = Object.values(TARGETS).map(
-      (t) => `${t.sourcePath}#${t.regionStart ?? t.enclosingNamespace}`,
+      (t) => `${t.sourcePath}#${t.regionStart ?? t.enclosingNamespace ?? t.functionHeader}`,
     );
     expect(new Set(regions).size).toBe(regions.length);
     const outputs = Object.values(TARGETS).map((t) => t.defaultOut);
@@ -804,6 +806,7 @@ describe("the registry", () => {
   it("no D2-C artifact is committed, except those an onboarding tranche has since extracted", () => {
     // ONB-A1 extracted demonhunter-havoc through this very path, and ONB-A2 its three followers.
     const EXTRACTED = [
+      "deathknight-frost",
       "demonhunter-havoc",
       "rogue-subtlety",
       "warrior-arms",

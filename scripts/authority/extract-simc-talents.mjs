@@ -1176,6 +1176,317 @@ const ROGUE_SUBTLETY_TARGET = {
 };
 
 /**
+ * The Frost Death Knight profile (ONB-B2): (a) the talents the pinned Frost list reads as
+ * `talent.<name>`, and (b) the talents an action of that list is built on (an action on
+ * `not_found()` is background, action.cpp:541-549). `chosen_of_frostbrood` is NOT here: it is a
+ * three-entry tiered node, and a talent with no row of its own resolves UNKNOWN, never false.
+ */
+const DEATHKNIGHT_FROST_TARGET = {
+  datasetId: "SIMC_TRAIT_DEATHKNIGHT_FROST_TALENTS",
+  classId: 6,
+  specId: 251,
+  defaultOut: "src/data/game/deathknight-frost-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. That `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node is corroborated for Frost Death Knight on two real subjects: b1PmaKrd6CDfzngc fight 48 actor 19 and gtKb2xHn87pNcFfW fight 22 actor 26.",
+  requiredTalents: [
+    {
+      simcName: "obliterate",
+      displayNameEn: "Obliterate",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:14958 talent.frost.obliterate = find_talent_spell( talent_tree::SPECIALIZATION, "Obliterate" ); obliterate_t is built on it (:11855-11856)',
+    },
+    {
+      simcName: "howling_blast",
+      displayNameEn: "Howling Blast",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:14959 talent.frost.howling_blast = find_talent_spell( talent_tree::SPECIALIZATION, "Howling Blast" ); howling_blast_t is built on it (:11460-11461)',
+    },
+    {
+      simcName: "frost_strike",
+      displayNameEn: "Frost Strike",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:14956 talent.frost.frost_strike = find_talent_spell( talent_tree::SPECIALIZATION, "Frost Strike" ); frost_strike_t is built on it (:10933-10934)',
+    },
+    {
+      simcName: "frostscythe",
+      displayNameEn: "Frostscythe",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:14963 talent.frost.frostscythe = find_talent_spell( talent_tree::SPECIALIZATION, "Frostscythe" ); frostscythe_t is built on it (:10535-10536)',
+    },
+    {
+      simcName: "pillar_of_frost",
+      displayNameEn: "Pillar of Frost",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:14972 talent.frost.pillar_of_frost = find_talent_spell( talent_tree::SPECIALIZATION, "Pillar of Frost" ); pillar_of_frost_t is built on it (:12008-12009), and the pinned Frost list reads it',
+    },
+    {
+      simcName: "breath_of_sindragosa",
+      displayNameEn: "Breath of Sindragosa",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:15003 talent.frost.breath_of_sindragosa = find_talent_spell( talent_tree::SPECIALIZATION, "Breath of Sindragosa" ); breath_of_sindragosa_t is built on it (:9235-9236), and the pinned Frost list reads it',
+    },
+    {
+      simcName: "frostwyrms_fury",
+      displayNameEn: "Frostwyrm's Fury",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:14979 talent.frost.frostwyrms_fury = find_talent_spell( talent_tree::SPECIALIZATION, "Frostwyrm\'s Fury" ); frostwyrms_fury_t is built on it (:10697-10698)',
+    },
+    {
+      simcName: "empower_rune_weapon",
+      displayNameEn: "Empower Rune Weapon",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:14962 talent.frost.empower_rune_weapon = find_talent_spell( talent_tree::SPECIALIZATION, "Empower Rune Weapon" ); empower_rune_weapon_t is built on it (:10148-10149)',
+    },
+    {
+      simcName: "shattering_blade",
+      displayNameEn: "Shattering Blade",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:14997 talent.frost.shattering_blade = find_talent_spell( talent_tree::SPECIALIZATION, "Shattering Blade" ); the pinned Frost list reads it',
+    },
+    {
+      simcName: "frostbound_will",
+      displayNameEn: "Frostbound Will",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:14967 talent.frost.frostbound_will = find_talent_spell( talent_tree::SPECIALIZATION, "Frostbound Will" ); the pinned Frost list reads it',
+    },
+    {
+      simcName: "frostbane",
+      displayNameEn: "Frostbane",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:15002 talent.frost.frostbane = find_talent_spell( talent_tree::SPECIALIZATION, "Frostbane" ); the pinned Frost list reads it',
+    },
+    {
+      simcName: "obliteration",
+      displayNameEn: "Obliteration",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:14995 talent.frost.obliteration = find_talent_spell( talent_tree::SPECIALIZATION, "Obliteration" ); the pinned Frost list reads it',
+    },
+    {
+      simcName: "gathering_storm",
+      displayNameEn: "Gathering Storm",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:14974 talent.frost.gathering_storm = find_talent_spell( talent_tree::SPECIALIZATION, "Gathering Storm" ); the pinned Frost list reads it',
+    },
+    {
+      simcName: "icy_onslaught",
+      displayNameEn: "Icy Onslaught",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:14973 talent.frost.icy_onslaught = find_talent_spell( talent_tree::SPECIALIZATION, "Icy Onslaught" ); the pinned Frost list reads it',
+    },
+    {
+      simcName: "killing_streak",
+      displayNameEn: "Killing Streak",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:15000 talent.frost.killing_streak = find_talent_spell( talent_tree::SPECIALIZATION, "Killing Streak" ); the pinned Frost list reads it',
+    },
+    {
+      simcName: "bonegrinder",
+      displayNameEn: "Bonegrinder",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:14990 talent.frost.bonegrinder = find_talent_spell( talent_tree::SPECIALIZATION, "Bonegrinder" ); the pinned Frost list reads it',
+    },
+    {
+      simcName: "raise_dead",
+      displayNameEn: "Raise Dead",
+      tree: "CLASS",
+      binding:
+        'sc_death_knight.cpp:14844 talent.raise_dead = find_talent_spell( talent_tree::CLASS, "Raise Dead" ); raise_dead_t is built on it for Frost, which has no spec.raise_dead (:12218-12220)',
+    },
+    {
+      simcName: "reapers_mark",
+      displayNameEn: "Reaper's Mark",
+      tree: "HERO",
+      binding:
+        'sc_death_knight.cpp:15083 talent.deathbringer.reapers_mark = find_talent_spell( talent_tree::HERO, "Reaper\'s Mark" ); reapers_mark_t is built on it (:8490-8491)',
+    },
+    {
+      simcName: "deathly_blows",
+      displayNameEn: "Deathly Blows",
+      tree: "HERO",
+      binding:
+        'sc_death_knight.cpp:15092 talent.deathbringer.deathly_blows = find_talent_spell( talent_tree::HERO, "Deathly Blows" ); the pinned Frost list reads it',
+    },
+    {
+      simcName: "apocalypse_now",
+      displayNameEn: "Apocalypse Now",
+      tree: "HERO",
+      binding:
+        'sc_death_knight.cpp:15080 talent.rider.apocalypse_now = find_talent_spell( talent_tree::HERO, "Apocalypse Now" ); the pinned Frost list reads it',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data` (trait_data.inc:4399, :4400).
+    { simcName: "rider_of_the_apocalypse", subTreeId: 32 },
+    { simcName: "deathbringer", subTreeId: 33 },
+  ],
+};
+
+/**
+ * The Enhancement Shaman profile (ONB-B2): the talents the pinned list reads and the talents an
+ * action is built on. `storm_unleashed` is NOT here, for the reason Frost leaves out
+ * `chosen_of_frostbrood`. No retained capture holds an Enhancement combatantinfo, so the id-space
+ * claim is not corroborated for this specialization.
+ */
+const SHAMAN_ENHANCEMENT_TARGET = {
+  datasetId: "SIMC_TRAIT_SHAMAN_ENHANCEMENT_TALENTS",
+  classId: 7,
+  specId: 263,
+  defaultOut: "src/data/game/shaman-enhancement-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. That `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node is NOT corroborated for Enhancement Shaman: no retained capture holds one of its combatantinfo events. It is corroborated for other specializations of the same parser version.",
+  requiredTalents: [
+    {
+      simcName: "voltaic_blaze",
+      displayNameEn: "Voltaic Blaze",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_shaman.cpp:11237 { talent.voltaic_blaze, "Voltaic Blaze" }; voltaic_blaze_t is built on it (:10111-10112)',
+    },
+    {
+      simcName: "sundering",
+      displayNameEn: "Sundering",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_shaman.cpp:11251 { talent.sundering, "Sundering" }; sundering_t is built on it (:5708-5709), and the pinned Enhancement list reads it',
+    },
+    {
+      simcName: "doom_winds",
+      displayNameEn: "Doom Winds",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_shaman.cpp:11250 { talent.doom_winds, "Doom Winds" }; doom_winds_t is built on it (:8795-8796), and the pinned Enhancement list reads it',
+    },
+    {
+      simcName: "crash_lightning",
+      displayNameEn: "Crash Lightning",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_shaman.cpp:11224 { talent.crash_lightning, "Crash Lightning" }; crash_lightning_t is built on it (:5926-5927)',
+    },
+    {
+      simcName: "ascendance",
+      displayNameEn: "Ascendance",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_shaman.cpp:11202 { talent.ascendance, "Ascendance" }; the pinned Enhancement list reads it; ascendance_t is not built on it, but its ready() reads it (:8686-8691). A CHOICE node with Deeply Rooted Elements',
+    },
+    {
+      simcName: "primordial_storm",
+      displayNameEn: "Primordial Storm",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_shaman.cpp:11262 { talent.primordial_storm, "Primordial Storm" }; the pinned list names the action; primordial_storm_t is not built on it',
+    },
+    {
+      simcName: "surging_elements",
+      displayNameEn: "Surging Elements",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_shaman.cpp:11257 { talent.surging_elements, "Surging Elements" }; the pinned Enhancement list reads it',
+    },
+    {
+      simcName: "feral_spirit",
+      displayNameEn: "Feral Spirit",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_shaman.cpp:11256 { talent.feral_spirit, "Feral Spirit" }; the pinned Enhancement list reads it',
+    },
+    {
+      simcName: "fire_nova",
+      displayNameEn: "Fire Nova",
+      tree: "SPECIALIZATION",
+      binding: 'sc_shaman.cpp:11246 { talent.fire_nova, "Fire Nova" }; the pinned Enhancement list reads it',
+    },
+    {
+      simcName: "thorims_invocation",
+      displayNameEn: "Thorim's Invocation",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_shaman.cpp:11261 { talent.thorims_invocation, "Thorim\'s Invocation" }; the pinned Enhancement list reads it',
+    },
+    {
+      simcName: "lashing_flames",
+      displayNameEn: "Lashing Flames",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_shaman.cpp:11247 { talent.lashing_flames, "Lashing Flames" }; the pinned Enhancement list reads it',
+    },
+    {
+      simcName: "elemental_tempo",
+      displayNameEn: "Elemental Tempo",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_shaman.cpp:11238 { talent.elemental_tempo, "Elemental Tempo" }; the pinned Enhancement list reads it',
+    },
+    {
+      simcName: "deeply_rooted_elements",
+      displayNameEn: "Deeply Rooted Elements",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_shaman.cpp:11260 { talent.deeply_rooted_elements, "Deeply Rooted Elements" }; the pinned Enhancement list reads it. A CHOICE node with Ascendance',
+    },
+    {
+      simcName: "lava_lash",
+      displayNameEn: "Lava Lash",
+      tree: "CLASS",
+      binding:
+        'sc_shaman.cpp:11153 talent.lava_lash = _CT( "Lava Lash" ); lava_lash_t is built on it (:5167-5168)',
+    },
+    {
+      simcName: "chain_lightning",
+      displayNameEn: "Chain Lightning",
+      tree: "CLASS",
+      binding:
+        'sc_shaman.cpp:11154 talent.chain_lightning = _CT( "Chain Lightning" ); chain_lightning_t is built on it (:6463-6464)',
+    },
+    {
+      simcName: "surging_totem",
+      displayNameEn: "Surging Totem",
+      tree: "HERO",
+      binding:
+        'sc_shaman.cpp:11292 { talent.surging_totem, "Surging Totem" }; the pinned Enhancement list reads it, and it picks the single-target list',
+    },
+    {
+      simcName: "splitstream",
+      displayNameEn: "Splitstream",
+      tree: "HERO",
+      binding:
+        'sc_shaman.cpp:11300 { talent.splitstream, "Splitstream" }; the pinned Enhancement list reads it',
+    },
+    {
+      simcName: "tempest",
+      displayNameEn: "Tempest",
+      tree: "HERO",
+      binding:
+        'sc_shaman.cpp:11268 { talent.tempest, "Tempest" }; a Stormbringer talent the hero tree resolves against, and tempest_t is not built on it',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data` (trait_data.inc:4418, :4419).
+    { simcName: "totemic", subTreeId: 54 },
+    { simcName: "stormbringer", subTreeId: 55 },
+  ],
+};
+
+/**
  * The Arms Warrior profile (ONB-B1): (a) the talents the pinned Arms list reads as
  * `talent.<name>`, and (b) the talents an action of that list is built on (an action on
  * `not_found()` is background, action.cpp:541-549).
@@ -1347,6 +1658,8 @@ const WARRIOR_ARMS_TARGET = {
 export const TARGETS = {
   "deathknight-blood": DEATHKNIGHT_BLOOD_TARGET,
   "demonhunter-havoc": DEMONHUNTER_HAVOC_TARGET,
+  "deathknight-frost": DEATHKNIGHT_FROST_TARGET,
+  "shaman-enhancement": SHAMAN_ENHANCEMENT_TARGET,
   "warrior-arms": WARRIOR_ARMS_TARGET,
   "warrior-fury": WARRIOR_FURY_TARGET,
   "warrior-protection": WARRIOR_PROTECTION_TARGET,

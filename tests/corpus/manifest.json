@@ -5232,6 +5232,37 @@
       ]
     },
     {
+      "caseId": "application-service.enhancement-shaman-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Enhancement Shaman registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "shaman/enhancement",
+            "expected": {
+              "internalAnalyzerId": "shaman-enhancement-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Enhancement Shaman is registered INTERNAL_ONLY in ONB-B2. Its list stops on Bloodlust and behind that on the enemy count, the ONB-S3 owner decision, and no retained capture holds its combatant info. So a public request must keep receiving SPEC_NOT_SUPPORTED."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
+      ]
+    },
+    {
       "caseId": "application-service.fire-mage-subject-is-unsupported-on-the-same-evidence",
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "APPLICATION_SERVICE",
@@ -5264,6 +5295,37 @@
       "relatedTests": [
         "tests/regression/m10d-public-second-registration-invariance.test.ts",
         "tests/unit/analysis-composition-refusals.test.ts"
+      ]
+    },
+    {
+      "caseId": "application-service.frost-death-knight-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Frost Death Knight registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "deathknight/frost",
+            "expected": {
+              "internalAnalyzerId": "deathknight-frost-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Frost Death Knight is registered INTERNAL_ONLY in ONB-B2. No decision of its two retained subjects resolves: each stops on Reaper's Mark's target_if, and behind that every rotation list sits on the enemy count, the ONB-S3 owner decision. So a public request must keep receiving SPEC_NOT_SUPPORTED."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
       ]
     },
     {
@@ -20299,6 +20361,52 @@
         "tests/unit/specs/heal-b3-discipline-priest.test.ts",
         "tests/contracts/m11a2-cross-spec-isolation.test.ts"
       ]
+    },
+    {
+      "caseId": "spec-enhancement-shaman.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_ENHANCEMENT_SHAMAN",
+      "contractUnderTest": "src/specs/shaman/enhancement/observed-analysis.ts analyzeObservedEnhancementShamanDecisions (the spec gate)",
+      "purpose": "The Enhancement Shaman facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Enhancement Shaman list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-b1-enhancement-shaman.test.ts"]
+    },
+    {
+      "caseId": "spec-frost-death-knight.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_FROST_DEATH_KNIGHT",
+      "contractUnderTest": "src/specs/deathknight/frost/observed-analysis.ts analyzeObservedFrostDeathKnightDecisions (the spec gate)",
+      "purpose": "The Frost Death Knight facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_FROST_DEATH_KNIGHT.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Frost Death Knight list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-b1-frost-death-knight.test.ts"]
     },
     {
       "caseId": "spec-fury-warrior.the-facade-refuses-every-other-specialization",

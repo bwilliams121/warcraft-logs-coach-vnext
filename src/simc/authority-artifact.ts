@@ -49,10 +49,22 @@ export interface AuthorityNamespaceFunctionSelector {
   readonly playerIdentifier: string;
 }
 
+/**
+ * A list built by a CLASS METHOD rather than by a free function (ONB-B2): the one definition
+ * of `functionHeader` at file scope. It reads lists on its own `this`, so no player identifier
+ * is recorded, and no marker line exists.
+ */
+export interface AuthorityClassMethodSelector {
+  readonly kind: "CLASS_METHOD";
+  readonly enclosingClass: string;
+  readonly functionHeader: string;
+}
+
 /** Every selector kind this build accepts. A marker-selected artifact carries NO selector. */
 export const AUTHORITY_REGION_SELECTOR_KINDS = [
   "NAMESPACE_FUNCTION",
-] as const satisfies readonly AuthorityNamespaceFunctionSelector["kind"][];
+  "CLASS_METHOD",
+] as const satisfies readonly (AuthorityNamespaceFunctionSelector | AuthorityClassMethodSelector)["kind"][];
 
 /**
  * The region's provenance, in exactly ONE of two forms (M11-C1a):
@@ -74,7 +86,7 @@ export type AuthorityRegionProvenance =
       readonly regionSelector?: never;
     }
   | {
-      readonly regionSelector: AuthorityNamespaceFunctionSelector;
+      readonly regionSelector: AuthorityNamespaceFunctionSelector | AuthorityClassMethodSelector;
       readonly regionStartMarker?: never;
       readonly regionEndMarker?: never;
     };
@@ -112,6 +124,32 @@ interface AuthorityArtifactProvenanceCommon {
   readonly livePtrPolicy?: AuthorityLivePtrPolicy;
   readonly dispatchSource?: { readonly sourcePath: string; readonly sourceSha256: string };
   readonly inertStatements?: readonly AuthorityInertStatement[];
+  /**
+   * The guard a class method opens on (ONB-B2), when it has one: the lists below it exist only
+   * when `appliesWhen` holds, and the artifact is the list of a player it holds for.
+   */
+  readonly methodPrologue?: AuthorityMethodPrologue;
+  /**
+   * What the extractor DECIDED about each `add_action( this, "<Name>", ... )` statement (ONB-B2).
+   * That form emits only under the player's own spell data, so `emitted` null means the line
+   * does not exist at this pin, never that it was missed.
+   */
+  readonly spellGatedActions?: readonly AuthoritySpellGatedAction[];
+}
+
+/** The lines of a method's opening guard, and what must hold for the lists to exist. */
+export interface AuthorityMethodPrologue {
+  readonly startLine: number;
+  readonly endLine: number;
+  readonly appliesWhen: string;
+}
+
+/** One spell-gated statement and the list line it produces, or `null` for none. */
+export interface AuthoritySpellGatedAction {
+  readonly sourceLine: number;
+  readonly statement: string;
+  readonly spellName: string;
+  readonly emitted: string | null;
 }
 
 /** How a pinned target's live region relates to a PTR region at the pin (M11-D2-C). */
@@ -257,7 +295,14 @@ function validateProvenance(value: unknown): AuthorityArtifactProvenance | null 
   };
 }
 
-const PINNED_EXTRACTION_KEYS = ["regionSha256", "livePtrPolicy", "dispatchSource", "inertStatements"];
+const PINNED_EXTRACTION_KEYS = [
+  "regionSha256",
+  "livePtrPolicy",
+  "dispatchSource",
+  "inertStatements",
+  "methodPrologue",
+  "spellGatedActions",
+];
 const SHA256_HEX = /^[0-9a-f]{64}$/;
 
 /**
@@ -272,6 +317,8 @@ function validatePinnedExtraction(value: Record<string, unknown>):
       readonly livePtrPolicy: AuthorityLivePtrPolicy;
       readonly dispatchSource: { readonly sourcePath: string; readonly sourceSha256: string };
       readonly inertStatements?: readonly AuthorityInertStatement[];
+      readonly methodPrologue?: AuthorityMethodPrologue;
+      readonly spellGatedActions?: readonly AuthoritySpellGatedAction[];
     }
   | null
   | undefined {
@@ -286,7 +333,14 @@ function validatePinnedExtraction(value: Record<string, unknown>):
   const dispatchSha256 = str(dispatchRaw, "sourceSha256");
   if (dispatchPath === null || dispatchSha256 === null || !SHA256_HEX.test(dispatchSha256)) return undefined;
   const dispatchSource = { sourcePath: dispatchPath, sourceSha256: dispatchSha256 };
-  if (!("inertStatements" in value)) return { regionSha256, livePtrPolicy, dispatchSource };
+  const methodPrologue = validateMethodPrologue(value["methodPrologue"]);
+  const spellGatedActions = validateSpellGatedActions(value["spellGatedActions"]);
+  if (methodPrologue === undefined || spellGatedActions === undefined) return undefined;
+  const methodForms = {
+    ...(methodPrologue === null ? {} : { methodPrologue }),
+    ...(spellGatedActions === null ? {} : { spellGatedActions }),
+  };
+  if (!("inertStatements" in value)) return { regionSha256, livePtrPolicy, dispatchSource, ...methodForms };
   const inertRaw = value["inertStatements"];
   if (!Array.isArray(inertRaw) || inertRaw.length === 0) return undefined;
   const inertStatements: AuthorityInertStatement[] = [];
@@ -300,10 +354,45 @@ function validatePinnedExtraction(value: Record<string, unknown>):
     if (!statement.includes(identifier)) return undefined;
     inertStatements.push({ sourceLine, statement, identifier });
   }
-  return { regionSha256, livePtrPolicy, dispatchSource, inertStatements };
+  return { regionSha256, livePtrPolicy, dispatchSource, inertStatements, ...methodForms };
+}
+
+/** The prologue record: `null` when absent, `undefined` when present and malformed. */
+function validateMethodPrologue(value: unknown): AuthorityMethodPrologue | null | undefined {
+  if (value === undefined) return null;
+  if (!isRecord(value)) return undefined;
+  const startLine = num(value, "startLine");
+  const endLine = num(value, "endLine");
+  const appliesWhen = str(value, "appliesWhen");
+  if (startLine === null || endLine === null || appliesWhen === null || appliesWhen.length === 0)
+    return undefined;
+  if (!Number.isInteger(startLine) || !Number.isInteger(endLine) || startLine < 1 || endLine < startLine) {
+    return undefined;
+  }
+  return { startLine, endLine, appliesWhen };
+}
+
+/** The spell-gated records: `null` when absent, `undefined` when present and malformed. */
+function validateSpellGatedActions(value: unknown): readonly AuthoritySpellGatedAction[] | null | undefined {
+  if (value === undefined) return null;
+  if (!Array.isArray(value) || value.length === 0) return undefined;
+  const actions: AuthoritySpellGatedAction[] = [];
+  for (const raw of value) {
+    if (!isRecord(raw)) return undefined;
+    const sourceLine = num(raw, "sourceLine");
+    const statement = str(raw, "statement");
+    const spellName = str(raw, "spellName");
+    const emitted = raw["emitted"];
+    if (sourceLine === null || !Number.isInteger(sourceLine) || sourceLine < 1) return undefined;
+    if (statement === null || spellName === null || !statement.includes(spellName)) return undefined;
+    if (!(emitted === null || (typeof emitted === "string" && emitted.length > 0))) return undefined;
+    actions.push({ sourceLine, statement, spellName, emitted });
+  }
+  return actions;
 }
 
 const NAMESPACE_FUNCTION_SELECTOR_KEYS = ["kind", "enclosingNamespace", "functionHeader", "playerIdentifier"];
+const CLASS_METHOD_SELECTOR_KEYS = ["kind", "enclosingClass", "functionHeader"];
 const CPP_IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
 /**
@@ -325,6 +414,14 @@ function validateRegionProvenance(value: Record<string, unknown>): AuthorityRegi
   if ("regionStartMarker" in value || "regionEndMarker" in value) return null;
   const selector = value["regionSelector"];
   if (!isRecord(selector)) return null;
+  if (selector["kind"] === "CLASS_METHOD") {
+    if (Object.keys(selector).some((key) => !CLASS_METHOD_SELECTOR_KEYS.includes(key))) return null;
+    const enclosingClass = str(selector, "enclosingClass");
+    const methodHeader = str(selector, "functionHeader");
+    if (enclosingClass === null || methodHeader === null || !CPP_IDENTIFIER.test(enclosingClass)) return null;
+    if (methodHeader.trim() !== methodHeader || !methodHeader.includes(`${enclosingClass}::`)) return null;
+    return { regionSelector: { kind: "CLASS_METHOD", enclosingClass, functionHeader: methodHeader } };
+  }
   if (Object.keys(selector).some((key) => !NAMESPACE_FUNCTION_SELECTOR_KEYS.includes(key))) return null;
   if (selector["kind"] !== "NAMESPACE_FUNCTION") return null;
   const enclosingNamespace = str(selector, "enclosingNamespace");

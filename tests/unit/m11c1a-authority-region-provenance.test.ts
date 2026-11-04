@@ -112,8 +112,9 @@ function withProvenance(patch: (provenance: Record<string, unknown>) => void): R
 }
 
 describe("the namespace/function selector provenance", () => {
-  it("is the one selector kind this build accepts", () => {
-    expect(AUTHORITY_REGION_SELECTOR_KINDS).toEqual(["NAMESPACE_FUNCTION"]);
+  it("is one of the two selector kinds this build accepts", () => {
+    // ONB-B2 added CLASS_METHOD, proven in onb-b2-class-method-extraction.
+    expect(AUTHORITY_REGION_SELECTOR_KINDS).toEqual(["NAMESPACE_FUNCTION", "CLASS_METHOD"]);
   });
 
   it("an artifact built for the Brewmaster target validates and names its source coordinates", () => {

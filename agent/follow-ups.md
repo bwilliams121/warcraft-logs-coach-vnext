@@ -29,13 +29,46 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After ONB-B2: what Frost Death Knight and Enhancement Shaman do not establish
+
+**Raised:** ONB-B2 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.
+
+**ONB-S3 gates both, and it is not their first stop.** Every rotation list of both sits behind the enemy count. Frost's real subjects stop earlier, at Reaper's Mark's `target_if=first:`, and that also needs the
+enemy set, so ONB-S3 has to cover FIRST mode for Frost. Past both, Frost still needs reviewed contracts for `antimagic_shell`, `pillar_of_frost`, `breath_of_sindragosa`, `raise_dead` and `empower_rune_weapon`, the
+Rider branch needs a readable `cooldowns[5]`, and Enhancement needs one for Bloodlust and for `doom_winds`.
+
+**Enhancement is on ONB-EV.** ONB-S3 alone would not unlock it: no capture holds its combatant info, so its talents never resolve. Flame Shock, Bloodlust, Heroism, Sundering, Surging Totem and Primordial Storm have never been
+observed, so their ids are unchecked readings of the pinned module. The first capture must check them, starting with which id a Flame Shock cast logs.
+
+**A Bloodlust line_cd cannot be read from a log, and that stops the list on its own.** Attribution proves nothing about the timer (agent/follow-ups.md "After M11-D3-C3"). Even with a contract, `default[4]` stays open unless
+selection evidence exists, which today it does not. Lifting this is a shared question, not an Enhancement one.
+
+**Heroism is excluded on any Alliance subject.** 32182 has no action in the pinned module, so a real Heroism press would be excluded rather than attributed. It does not matter while no decision resolves. A later tranche must decide
+whether 32182 is the same line, with wire evidence.
+
+**A no-weapon actor would get no list in SimulationCraft.** The artifact records the guard, and nothing reads a character's main hand. A real Enhancement subject has one, so this is a recorded assumption, not a hazard.
+
+**Tiered talents.** `chosen_of_frostbrood` and `storm_unleashed` resolve UNKNOWN on every build, because the talent extractor refuses a three-entry tiered node as ambiguous. Frost's real subjects will need them read before
+`cooldowns[5..7]` can close, which is an extractor change with its own review.
+
+**The Frost wire, for whoever binds next.** Measured on both real subjects, read once and not pinned:
+
+- Obliterate's smallest gap is 745 ms and 740 ms, below the 750 ms GCD floor, and Frost Strike's is 746 ms. Each could be a wire skew or a logged copy. Nobody has told them apart, and a resolving decision must.
+- Raise Dead reaches 90.3 s against a pinned 120 s, and Anti-Magic Shell 51.0 s against 60 s, so a floor from the pin would be false. Pillar of Frost, Reaper's Mark, Breath of Sindragosa and Frostwyrm's Fury sit at or above theirs.
+- `rune` is known at 116 of 308 and 101 of 259 decisions, and `runic_power` at 89 and 76. The wire reports a pool only on a cast that costs it.
+- Both are Deathbringer, so no Rider subject is retained: a promotion must measure that branch or refuse it, as Havoc refuses Fel-Scarred.
+
+**`rune-and-runic-power-pooling` stays unanswered.** The inventory's question needs a rune regeneration model and bound cooldowns, and neither exists. Its other prerequisite, generic variable execution, landed.
+
+**The archive's notice line still has 5,212 bytes left.** Frost's first seconds were not committed, because nothing would resolve on them and the room is better kept for a tranche that does. A proposal should be sized when something does.
+
 ## After ONB-B1: what the Arms Warrior slice does not establish
 
 **Raised:** ONB-B1 (2026-11-03). Coverage, not soundness: every decision is UNKNOWN.
 
 **ONB-S3 gates Cohort B, not only Cohort T.** Every Arms GCD action sits behind `active_enemies`, and `slayer_execute` also has a
 `target_if` over enemies nothing enumerates. Cohort B's followers read the same way: Frost Death Knight's list dispatches on
-`active_enemies>=2` and Enhancement's on `spell_targets.chain_lightning>=3` (read from the pinned lists, not measured). So ONB-B2 and
+`active_enemies>=2` and Enhancement's on `active_enemies=1` and `active_enemies>1` (ONB-B2 read both pinned lists and corrected the second). So ONB-B2 and
 its public entry should expect what ONB-A2 and ONB-B1 found, unless ONB-S3 lands first. This does not reorder the queue: each entry
 can still register internally and fail closed. The owner should know that **the queue's next rotational promotions wait on that one
 decision**.
@@ -2415,8 +2448,8 @@ and would need target identity anyway. Devourer's four
 `pick_up_fragment,…,line_cd=` lines share one token across five entries and
 are never observed casts, so their timers can only be UNKNOWN; its scans stop
 earlier, at `cooldowns[0]`. Enhancement's `bloodlust,line_cd=600` is its
-sole Bloodlust entry, so an observed cast would attribute; Enhancement has no
-analyzer.
+sole Bloodlust entry, so an observed cast attributes; since ONB-B2 its adapter
+supplies that history, and the readiness stays UNKNOWN.
 
 ## After M11-D3-C2: what generic variable execution does not reach
 

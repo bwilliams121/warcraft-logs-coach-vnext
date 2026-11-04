@@ -5576,6 +5576,24 @@ resolved a decision prompts a new public entry. The unsupported subject's guard 
 Offline only, not committed: the whole-fight replay (`.probe/onbb1/m/`) gives the numbers agent/architecture.md "ONB-B1" reports, and
 `.probe/onbb1/wire.cjs` the wire measurements. Not run: no window-counting rule was mutated beyond what the negatives above exercise.
 
+# ONB-B2: Frost Death Knight and Enhancement Shaman
+
+`tests/unit/specs/onb-b2-cohort-b-followers.test.ts`, synthetic: each row is internal only and refused publicly; each refuses the other specialization first; a capture with no combatant info refuses; no decision resolves
+over a whole build of any hero tree, and none is a confident verdict; an unresolved tree closes nothing. Frost: a Deathbringer scan stops on Reaper's Mark's `target_if`, a Rider tree closes it and stops on the next line, no rotation list
+is reached; Mind Freeze's line is background on every build and a logged one is excluded; Runes and Runic Power are exact in SimulationCraft's units on the cast's own observation, and unknown, never zero, without one; ids no action builds
+are excluded. Enhancement: no Wind Shear line, Bloodlust's options kept; a logged Bloodlust attributes to its sole entry and the timer stays UNKNOWN; the open count is never single target; a choice-node sibling proves the other not taken, a lone-node
+talent stays UNKNOWN; a logged Doom Winds child and Heroism are excluded; cast-time actions are `OUTSIDE_FIRST_SLICE`; Flame Shock binds the class row that gives it a GCD.
+
+`tests/unit/onb-b2-class-method-extraction.test.ts`, synthetic source because CI has no pinned checkout: the class-method selector, the prologue and the spell-gated form extract the lines the spell data leaves, and the artifact validates. Its negatives: an undeclared or
+repeated statement, a broken prologue, another condition in the method, a duplicate or indented header, a spell gaining or losing its table row, stale proof bytes, a redirected dispatch, a PTR method, another class's header, two selectors, and every malformed record, in the
+extractor and in the runtime validator.
+
+Four corpus cases (`application-service.*-registration-is-internal-only`, `spec-*.the-facade-refuses-every-other-specialization`). `tests/contracts/m11-promotion-evidence-gate.test.ts` pins that the gate search finds nothing for either, so a later change that resolved a decision prompts a
+new public entry. The conformance suite gains both modules, each with committed identity proof.
+
+Offline only, not committed: the census of retained pages (`.probe/onbb2/census.cjs`, Mortal Strike as its positive control), the wire measurements (`.probe/onbb2/wire.cjs`) and the whole-fight replay (`.probe/onbb2/m/`). They give the numbers in agent/architecture.md "ONB-B2". Not run:
+the real extractor preflight runs only against a local pinned source root, as for every pinned target.
+
 # ONB-B1P: Arms Warrior, not promoted
 
 No production code changed. `tests/unit/analysis-composition-refusals.test.ts` holds Warrior/Arms again: SPEC_NOT_SUPPORTED, one retrieval for

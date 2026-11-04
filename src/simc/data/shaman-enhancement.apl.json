@@ -1,0 +1,767 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_SHAMAN_ENHANCEMENT",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "shaman",
+    "specName": "enhancement"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "UNKNOWN",
+    "sourcePath": "engine/class_modules/sc_shaman.cpp",
+    "sourceSha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+    "sourceByteLength": 450570,
+    "regionSelector": {
+      "kind": "CLASS_METHOD",
+      "enclosingClass": "shaman_t",
+      "functionHeader": "void shaman_t::init_action_list_enhancement()"
+    },
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "regionSha256": "352db0baac97b2733ba57d3945c83e9ef3c079749cf9c7da2eea93883c6bb4d8",
+    "livePtrPolicy": "NO_PTR_REGION",
+    "dispatchSource": {
+      "sourcePath": "engine/class_modules/sc_shaman.cpp",
+      "sourceSha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0"
+    },
+    "methodPrologue": {
+      "startLine": 13381,
+      "endLine": 13387,
+      "appliesWhen": "main_hand_weapon.type != WEAPON_NONE"
+    },
+    "spellGatedActions": [
+      {
+        "sourceLine": 13414,
+        "statement": "def->add_action( this, \"Bloodlust\", \"line_cd=600\" );",
+        "spellName": "Bloodlust",
+        "emitted": "bloodlust,line_cd=600"
+      },
+      {
+        "sourceLine": 13415,
+        "statement": "def->add_action( this, \"Wind Shear\", \"\", \"Interrupt of casts.\" );",
+        "spellName": "Wind Shear",
+        "emitted": null
+      }
+    ]
+  },
+  "lists": [
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "windfury_weapon",
+          "comment": null,
+          "sourceLine": 13397
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "flametongue_weapon",
+          "comment": null,
+          "sourceLine": 13398
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "lightning_shield",
+          "comment": null,
+          "sourceLine": 13399
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=trinket1_is_weird,value=trinket.1.is.algethar_puzzle_box|trinket.1.is.unyielding_netherprism|trinket.1.is.font_of_venomous_rage",
+          "comment": null,
+          "sourceLine": 13400
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=trinket2_is_weird,value=trinket.2.is.algethar_puzzle_box|trinket.2.is.unyielding_netherprism|trinket.2.is.font_of_venomous_rage",
+          "comment": null,
+          "sourceLine": 13401
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": "Snapshot raid buffed stats before combat begins and pre-potting is done.",
+          "sourceLine": 13402
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "use_item,name=algethar_puzzle_box",
+          "comment": null,
+          "sourceLine": 13403
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "potion,if=!potion.liquid_luster",
+          "comment": null,
+          "sourceLine": 13404
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "potion,pre_pot_time=12,if=potion.liquid_luster",
+          "comment": null,
+          "sourceLine": 13405
+        }
+      ]
+    },
+    {
+      "listName": "default",
+      "receiverIdentifier": "def",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "variable,name=target_nature_mod,value=(1+debuff.chaos_brand.up*debuff.chaos_brand.value)*(1+(debuff.hunters_mark.up*target.health.pct>=80)*debuff.hunters_mark.value)",
+          "comment": null,
+          "sourceLine": 13408
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "variable,name=expected_lb_funnel,value=action.lightning_bolt.damage*(1+debuff.lightning_rod.up*variable.target_nature_mod*(1+active_dot.flame_shock)*debuff.lightning_rod.value)",
+          "comment": null,
+          "sourceLine": 13409
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=expected_cl_funnel,value=action.chain_lightning.damage*(1+debuff.lightning_rod.up*variable.target_nature_mod*active_enemies*debuff.lightning_rod.value)",
+          "comment": null,
+          "sourceLine": 13410
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=flame_shock_saturated,value=((active_dot.flame_shock=active_enemies)|(active_dot.flame_shock=6))",
+          "comment": null,
+          "sourceLine": 13411
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "bloodlust,line_cd=600",
+          "comment": null,
+          "sourceLine": 13414
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "auto_attack",
+          "comment": null,
+          "sourceLine": 13416
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "call_action_list,name=single_sb,if=active_enemies=1&!talent.surging_totem.enabled",
+          "comment": null,
+          "sourceLine": 13417
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "call_action_list,name=single_totemic,if=active_enemies=1&talent.surging_totem.enabled",
+          "comment": null,
+          "sourceLine": 13418
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "call_action_list,name=aoe,if=active_enemies>1",
+          "comment": null,
+          "sourceLine": 13419
+        }
+      ]
+    },
+    {
+      "listName": "single_sb",
+      "receiverIdentifier": "single_sb",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "primordial_storm,if=(buff.maelstrom_weapon.stack>=9|buff.primordial_storm.remains<=4&buff.maelstrom_weapon.stack>=5)",
+          "comment": null,
+          "sourceLine": 13471
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "voltaic_blaze,if=dot.flame_shock.remains=0&time<5",
+          "comment": null,
+          "sourceLine": 13472
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "flame_shock,if=!ticking",
+          "comment": null,
+          "sourceLine": 13473
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "lava_lash,if=!debuff.lashing_flames.up&time<5",
+          "comment": null,
+          "sourceLine": 13474
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "stormstrike,if=time<1",
+          "comment": null,
+          "sourceLine": 13475
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "call_action_list,name=cooldowns",
+          "comment": null,
+          "sourceLine": 13476
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "sundering,if=talent.surging_elements.enabled|talent.feral_spirit.enabled",
+          "comment": null,
+          "sourceLine": 13477
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "doom_winds",
+          "comment": null,
+          "sourceLine": 13478
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "voltaic_blaze,if=set_bonus.midnight_season_2_2pc",
+          "comment": null,
+          "sourceLine": 13479
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "crash_lightning,if=!buff.crash_lightning.up|talent.storm_unleashed.enabled",
+          "comment": null,
+          "sourceLine": 13480
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "voltaic_blaze,if=(buff.doom_winds.up&buff.maelstrom_weapon.stack>=10-(1+2*talent.fire_nova.enabled)&!buff.maelstrom_weapon.stack=10)&talent.thorims_invocation.enabled",
+          "comment": null,
+          "sourceLine": 13481
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "windstrike,if=buff.maelstrom_weapon.stack>0&talent.thorims_invocation.enabled",
+          "comment": null,
+          "sourceLine": 13482
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "ascendance",
+          "comment": null,
+          "sourceLine": 13483
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "stormstrike,if=buff.doom_winds.up&talent.thorims_invocation.enabled",
+          "comment": null,
+          "sourceLine": 13484
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "crash_lightning,if=buff.doom_winds.up&talent.thorims_invocation.enabled",
+          "comment": null,
+          "sourceLine": 13485
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "tempest,if=buff.maelstrom_weapon.stack=10",
+          "comment": null,
+          "sourceLine": 13486
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "lightning_bolt,if=buff.maelstrom_weapon.stack=10",
+          "comment": null,
+          "sourceLine": 13487
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "stormstrike,if=charges_fractional>=1.8",
+          "comment": null,
+          "sourceLine": 13488
+        },
+        {
+          "priorityOrdinal": 18,
+          "actionStringVerbatim": "lava_lash,if=talent.lashing_flames.enabled",
+          "comment": null,
+          "sourceLine": 13489
+        },
+        {
+          "priorityOrdinal": 19,
+          "actionStringVerbatim": "stormstrike",
+          "comment": null,
+          "sourceLine": 13490
+        },
+        {
+          "priorityOrdinal": 20,
+          "actionStringVerbatim": "voltaic_blaze",
+          "comment": null,
+          "sourceLine": 13491
+        },
+        {
+          "priorityOrdinal": 21,
+          "actionStringVerbatim": "sundering",
+          "comment": null,
+          "sourceLine": 13492
+        },
+        {
+          "priorityOrdinal": 22,
+          "actionStringVerbatim": "lava_lash",
+          "comment": null,
+          "sourceLine": 13493
+        },
+        {
+          "priorityOrdinal": 23,
+          "actionStringVerbatim": "lightning_bolt,if=buff.maelstrom_weapon.stack>=8",
+          "comment": null,
+          "sourceLine": 13494
+        },
+        {
+          "priorityOrdinal": 24,
+          "actionStringVerbatim": "crash_lightning",
+          "comment": null,
+          "sourceLine": 13495
+        },
+        {
+          "priorityOrdinal": 25,
+          "actionStringVerbatim": "lightning_bolt,if=buff.maelstrom_weapon.stack>=5",
+          "comment": null,
+          "sourceLine": 13496
+        },
+        {
+          "priorityOrdinal": 26,
+          "actionStringVerbatim": "flame_shock",
+          "comment": null,
+          "sourceLine": 13497
+        }
+      ]
+    },
+    {
+      "listName": "single_totemic",
+      "receiverIdentifier": "single_totemic",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "voltaic_blaze,if=dot.flame_shock.remains=0",
+          "comment": null,
+          "sourceLine": 13500
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "flame_shock,if=!ticking",
+          "comment": null,
+          "sourceLine": 13501
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "surging_totem",
+          "comment": null,
+          "sourceLine": 13502
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "call_action_list,name=cooldowns",
+          "comment": null,
+          "sourceLine": 13503
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "sundering,if=talent.surging_elements.enabled|buff.whirling_earth.up|talent.feral_spirit.enabled",
+          "comment": null,
+          "sourceLine": 13504
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "lava_lash,if=buff.whirling_fire.up|buff.hot_hand.up",
+          "comment": null,
+          "sourceLine": 13505
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "doom_winds",
+          "comment": null,
+          "sourceLine": 13506
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "voltaic_blaze,if=set_bonus.midnight_season_2_2pc",
+          "comment": null,
+          "sourceLine": 13507
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "crash_lightning,if=!buff.crash_lightning.up|talent.storm_unleashed.enabled",
+          "comment": null,
+          "sourceLine": 13508
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "primordial_storm,if=(buff.maelstrom_weapon.stack>=10|buff.primordial_storm.remains<3.5&buff.maelstrom_weapon.stack>=5)",
+          "comment": null,
+          "sourceLine": 13509
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "windstrike,if=talent.thorims_invocation.enabled&buff.ascendance.up",
+          "comment": null,
+          "sourceLine": 13510
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "ascendance,if=ti_lightning_bolt",
+          "comment": null,
+          "sourceLine": 13511
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "crash_lightning,if=talent.thorims_invocation.enabled&buff.doom_winds.up|buff.ascendance.up",
+          "comment": null,
+          "sourceLine": 13512
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "stormstrike,if=talent.thorims_invocation.enabled&buff.doom_winds.up",
+          "comment": null,
+          "sourceLine": 13513
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "lightning_bolt,if=talent.elemental_tempo.enabled&(buff.maelstrom_weapon.stack>=5&(cooldown.lava_lash.remains>gcd.max)&(cooldown.lava_lash.remains<=buff.maelstrom_weapon.stack*0.3)|buff.maelstrom_weapon.stack>=10)",
+          "comment": null,
+          "sourceLine": 13514
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "crash_lightning,if=!buff.crash_lightning.up",
+          "comment": null,
+          "sourceLine": 13515
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "lava_lash",
+          "comment": null,
+          "sourceLine": 13516
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "sundering,if=cooldown.surging_totem.remains>25",
+          "comment": null,
+          "sourceLine": 13517
+        },
+        {
+          "priorityOrdinal": 18,
+          "actionStringVerbatim": "stormstrike",
+          "comment": null,
+          "sourceLine": 13518
+        },
+        {
+          "priorityOrdinal": 19,
+          "actionStringVerbatim": "voltaic_blaze",
+          "comment": null,
+          "sourceLine": 13519
+        },
+        {
+          "priorityOrdinal": 20,
+          "actionStringVerbatim": "crash_lightning",
+          "comment": null,
+          "sourceLine": 13520
+        },
+        {
+          "priorityOrdinal": 21,
+          "actionStringVerbatim": "lightning_bolt,if=buff.maelstrom_weapon.stack>=5",
+          "comment": null,
+          "sourceLine": 13521
+        },
+        {
+          "priorityOrdinal": 22,
+          "actionStringVerbatim": "flame_shock",
+          "comment": null,
+          "sourceLine": 13522
+        }
+      ]
+    },
+    {
+      "listName": "aoe",
+      "receiverIdentifier": "aoe",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "voltaic_blaze,if=talent.surging_totem.enabled&dot.flame_shock.remains=0",
+          "comment": null,
+          "sourceLine": 13422
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "flame_shock,if=!ticking",
+          "comment": null,
+          "sourceLine": 13423
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "surging_totem",
+          "comment": null,
+          "sourceLine": 13424
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "ascendance,if=ti_chain_lightning",
+          "comment": null,
+          "sourceLine": 13425
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "call_action_list,name=cooldowns",
+          "comment": null,
+          "sourceLine": 13426
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "sundering,if=talent.surging_elements.enabled|buff.whirling_earth.up",
+          "comment": null,
+          "sourceLine": 13427
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "lava_lash,if=buff.whirling_fire.up",
+          "comment": null,
+          "sourceLine": 13428
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "doom_winds",
+          "comment": null,
+          "sourceLine": 13429
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "crash_lightning,if=talent.thorims_invocation.enabled&buff.whirling_air.up&(buff.doom_winds.up|buff.ascendance.up)",
+          "comment": null,
+          "sourceLine": 13430
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "windstrike,if=talent.thorims_invocation.enabled&buff.whirling_air.up",
+          "comment": null,
+          "sourceLine": 13431
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "stormstrike,if=talent.thorims_invocation.enabled&buff.doom_winds.up&buff.whirling_air.up",
+          "comment": null,
+          "sourceLine": 13432
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "lava_lash,if=talent.splitstream.enabled&buff.hot_hand.up",
+          "comment": null,
+          "sourceLine": 13433
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "tempest,if=buff.maelstrom_weapon.stack>=10&(!buff.ascendance.up|!buff.doom_winds.up)",
+          "comment": null,
+          "sourceLine": 13434
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "primordial_storm,if=buff.maelstrom_weapon.stack>=10",
+          "comment": null,
+          "sourceLine": 13435
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "crash_lightning,if=talent.thorims_invocation.enabled&(buff.doom_winds.up|buff.ascendance.up)&talent.splitstream.enabled&buff.hot_hand.up",
+          "comment": null,
+          "sourceLine": 13436
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "windstrike,if=talent.thorims_invocation.enabled&talent.splitstream.enabled&buff.hot_hand.up",
+          "comment": null,
+          "sourceLine": 13437
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "stormstrike,if=talent.thorims_invocation.enabled&buff.doom_winds.up&talent.splitstream.enabled&buff.hot_hand.up",
+          "comment": null,
+          "sourceLine": 13438
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "chain_lightning,if=buff.maelstrom_weapon.stack>=(9+1*talent.surging_totem.enabled)&talent.splitstream.enabled&buff.hot_hand.up",
+          "comment": null,
+          "sourceLine": 13439
+        },
+        {
+          "priorityOrdinal": 18,
+          "actionStringVerbatim": "voltaic_blaze,if=talent.fire_nova.enabled|set_bonus.midnight_season_2_2pc",
+          "comment": null,
+          "sourceLine": 13440
+        },
+        {
+          "priorityOrdinal": 19,
+          "actionStringVerbatim": "crash_lightning",
+          "comment": null,
+          "sourceLine": 13441
+        },
+        {
+          "priorityOrdinal": 20,
+          "actionStringVerbatim": "windstrike,if=talent.thorims_invocation.enabled",
+          "comment": null,
+          "sourceLine": 13442
+        },
+        {
+          "priorityOrdinal": 21,
+          "actionStringVerbatim": "stormstrike,if=talent.thorims_invocation.enabled&buff.doom_winds.up",
+          "comment": null,
+          "sourceLine": 13443
+        },
+        {
+          "priorityOrdinal": 22,
+          "actionStringVerbatim": "chain_lightning,if=buff.maelstrom_weapon.stack>=(9+1*talent.surging_totem.enabled)",
+          "comment": null,
+          "sourceLine": 13444
+        },
+        {
+          "priorityOrdinal": 23,
+          "actionStringVerbatim": "sundering,if=talent.feral_spirit.enabled",
+          "comment": null,
+          "sourceLine": 13445
+        },
+        {
+          "priorityOrdinal": 24,
+          "actionStringVerbatim": "voltaic_blaze",
+          "comment": null,
+          "sourceLine": 13446
+        },
+        {
+          "priorityOrdinal": 25,
+          "actionStringVerbatim": "lava_lash,if=pet.searing_totem.active",
+          "comment": null,
+          "sourceLine": 13447
+        },
+        {
+          "priorityOrdinal": 26,
+          "actionStringVerbatim": "windstrike",
+          "comment": null,
+          "sourceLine": 13448
+        },
+        {
+          "priorityOrdinal": 27,
+          "actionStringVerbatim": "stormstrike,if=charges_fractional>=1.8|buff.converging_storms.stack=buff.converging_storms.max_stack",
+          "comment": null,
+          "sourceLine": 13449
+        },
+        {
+          "priorityOrdinal": 28,
+          "actionStringVerbatim": "sundering,if=cooldown.surging_totem.remains>25",
+          "comment": null,
+          "sourceLine": 13450
+        },
+        {
+          "priorityOrdinal": 29,
+          "actionStringVerbatim": "stormstrike,if=!talent.surging_totem.enabled",
+          "comment": null,
+          "sourceLine": 13451
+        },
+        {
+          "priorityOrdinal": 30,
+          "actionStringVerbatim": "lava_lash",
+          "comment": null,
+          "sourceLine": 13452
+        },
+        {
+          "priorityOrdinal": 31,
+          "actionStringVerbatim": "stormstrike",
+          "comment": null,
+          "sourceLine": 13453
+        },
+        {
+          "priorityOrdinal": 32,
+          "actionStringVerbatim": "chain_lightning,if=buff.maelstrom_weapon.stack>=5",
+          "comment": null,
+          "sourceLine": 13454
+        },
+        {
+          "priorityOrdinal": 33,
+          "actionStringVerbatim": "flame_shock",
+          "comment": null,
+          "sourceLine": 13455
+        }
+      ]
+    },
+    {
+      "listName": "cooldowns",
+      "receiverIdentifier": "cooldowns",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "use_item,name=algethar_puzzle_box,if=(talent.ascendance.enabled&(cooldown.ascendance.remains<2*gcd.max))|(talent.doom_winds.enabled&!talent.ascendance.enabled&(cooldown.doom_winds.remains<2*gcd.max))|(fight_remains%%120<=20)",
+          "comment": null,
+          "sourceLine": 13458
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "use_item,name=unyielding_netherprism,if=(talent.ascendance.enabled&(cooldown.ascendance.remains<2*gcd.max))|(talent.doom_winds.enabled&!talent.ascendance.enabled&(cooldown.doom_winds.remains<2*gcd.max))|fight_remains<=20",
+          "comment": null,
+          "sourceLine": 13459
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_item,slot=trinket1,if=!variable.trinket1_is_weird&((buff.ascendance.up|buff.doom_winds.up|pet.surging_totem.active|(fight_remains<=20)|(!talent.ascendance.enabled&!talent.doom_winds.enabled&!talent.surging_totem.enabled))|!trinket.1.has_use_buff)",
+          "comment": null,
+          "sourceLine": 13460
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "use_item,slot=trinket2,if=!variable.trinket2_is_weird&((buff.ascendance.up|buff.doom_winds.up|pet.surging_totem.active|(fight_remains<=20)|(!talent.ascendance.enabled&!talent.doom_winds.enabled&!talent.surging_totem.enabled))|!trinket.2.has_use_buff)",
+          "comment": null,
+          "sourceLine": 13461
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "use_item,name=font_of_venomous_rage,if=!buff.ascendance.up&((!trinket.1.has_use_buff&!trinket.2.has_use_buff)|time>=20)",
+          "comment": null,
+          "sourceLine": 13462
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "potion,if=(buff.ascendance.up|buff.doom_winds.up|pet.surging_totem.active|(fight_remains%%300<=30)|(!talent.ascendance.enabled&!talent.doom_winds.enabled&!talent.surging_totem.enabled))",
+          "comment": null,
+          "sourceLine": 13463
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "blood_fury,if=(buff.ascendance.up|buff.doom_winds.up|pet.surging_totem.active|(fight_remains%%action.blood_fury.cooldown<=action.blood_fury.duration)|(!talent.ascendance.enabled&!talent.doom_winds.enabled&!talent.surging_totem.enabled))",
+          "comment": null,
+          "sourceLine": 13464
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "berserking,if=(buff.ascendance.up|buff.doom_winds.up|pet.surging_totem.active|(fight_remains%%action.berserking.cooldown<=action.berserking.duration)|(!talent.ascendance.enabled&!talent.doom_winds.enabled&!talent.surging_totem.enabled))",
+          "comment": null,
+          "sourceLine": 13465
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "fireblood,if=(buff.ascendance.up|buff.doom_winds.up|pet.surging_totem.active|(fight_remains%%action.fireblood.cooldown<=action.fireblood.duration)|(!talent.ascendance.enabled&!talent.doom_winds.enabled&!talent.surging_totem.enabled))",
+          "comment": null,
+          "sourceLine": 13466
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "ancestral_call,if=(buff.ascendance.up|buff.doom_winds.up|pet.surging_totem.active|(fight_remains%%action.ancestral_call.cooldown<=action.ancestral_call.duration)|(!talent.ascendance.enabled&!talent.doom_winds.enabled&!talent.surging_totem.enabled))",
+          "comment": null,
+          "sourceLine": 13467
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "invoke_external_buff,name=power_infusion,if=((talent.deeply_rooted_elements.enabled&buff.ascendance.remains>7.5)|(!talent.deeply_rooted_elements.enabled&(buff.ascendance.up|buff.doom_winds.up|pet.surging_totem.active))|(fight_remains%%120<=20)|(!talent.ascendance.enabled&!talent.doom_winds.enabled&!talent.surging_totem.enabled)|cooldown.ascendance.remains<gcd.max)",
+          "comment": null,
+          "sourceLine": 13468
+        }
+      ]
+    }
+  ]
+}

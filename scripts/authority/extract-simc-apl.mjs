@@ -167,6 +167,37 @@ const PINNED_SOURCES = Object.freeze({
     sha256: "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
     byteLength: 309166,
   },
+  SHAMAN_MODULE: {
+    sourcePath: "engine/class_modules/sc_shaman.cpp",
+    commitSha: PINNED_SIMC_COMMIT,
+    sha256: "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+    byteLength: 450570,
+  },
+  SHAMAN_DISPATCH: {
+    sourcePath: "engine/class_modules/sc_shaman.cpp",
+    sha256: "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+    byteLength: 450570,
+  },
+  ACTION_PRIORITY_LIST_CPP: {
+    sourcePath: "engine/player/action_priority_list.cpp",
+    sha256: "2e6774efb1cf8926b0e28806164d52cd64b2a2d30cbff48277272579632ff495",
+    byteLength: 4969,
+  },
+  CONST_DATA_CPP: {
+    sourcePath: "engine/dbc/sc_const_data.cpp",
+    sha256: "cf54989f52842087b67add28d9cd7ef4b721a746cf95dc597ca6a07a4a2cb2bd",
+    byteLength: 58452,
+  },
+  CLASS_SPELLS_INC: {
+    sourcePath: "engine/dbc/generated/class_spells.inc",
+    sha256: "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+    byteLength: 36917,
+  },
+  SPECIALIZATION_SPELLS_INC: {
+    sourcePath: "engine/dbc/generated/specialization_spells.inc",
+    sha256: "514d7a509a3b95f130aadccb6a6f1a28c6f5f2568f211cd5139bb567b712e4fc",
+    byteLength: 45852,
+  },
   PLAYER_CPP: {
     sourcePath: "engine/player/player.cpp",
     sha256: "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
@@ -255,6 +286,50 @@ function racialActionsInert(regionName) {
     ],
   });
 }
+
+/**
+ * What `add_action( this, "<Name>", "<options>", ... )` means at the pin (ONB-B2): the
+ * lines that make it conditional on the player's own spell data. Pinned files, so "the form
+ * emits nothing without a row" is checked rather than remembered:
+ *
+ *   action_priority_list.cpp  the name is looked up with find_class_spell, then with
+ *                             find_specialization_spell; a spell that is not ok() returns
+ *                             nullptr and emits nothing; otherwise the token is the
+ *                             tokenized spell name and the options follow a comma.
+ *   sc_const_data.cpp         those lookups read the class and specialization tables and
+ *                             nothing else (dbc_t::class_ability_id and
+ *                             dbc_t::specialization_ability_id).
+ */
+const SPELL_GATED_FORM_PROOFS = Object.freeze([
+  {
+    ...PINNED_SOURCES.ACTION_PRIORITY_LIST_CPP,
+    checks: [
+      { kind: "LINE_EXACTLY_ONCE", line: "const spell_data_t* s = p->find_class_spell( name );" },
+      { kind: "LINE_EXACTLY_ONCE", line: "s = p->find_specialization_spell( name );" },
+      {
+        kind: "LINE_EXACTLY_ONCE",
+        line: "return add_action( p, s, util::tokenize_fn( s->name_cstr() ), action_options, comment );",
+      },
+      {
+        kind: "LINE_EXACTLY_ONCE",
+        line: 'return add_action( fmt::format( "{},{}", action_name, action_options ), comment );',
+      },
+    ],
+  },
+  {
+    ...PINNED_SOURCES.CONST_DATA_CPP,
+    checks: [
+      {
+        kind: "LINE_EXACTLY_ONCE",
+        line: "active_spell = &active_class_spell_t::find( spell_name, spec_id, ptr, name_tokenized );",
+      },
+      {
+        kind: "LINE_EXACTLY_ONCE",
+        line: "unsigned dbc_t::specialization_ability_id( specialization_e  spec_id,",
+      },
+    ],
+  },
+]);
 
 /**
  * Facts this extractor REQUIRES the pinned source to exhibit, per target.
@@ -767,6 +842,112 @@ export const TARGETS = {
         { from: "default", ordinal: 5, kind: "CALL", to: "racials", condition: null },
         { from: "default", ordinal: 6, kind: "RUN", to: "aoe", condition: "active_enemies>=2" },
         { from: "default", ordinal: 7, kind: "RUN", to: "single_target", condition: null },
+      ],
+      forbiddenTokens: ["swap_action_list"],
+    },
+  },
+  // ONB-B2: the one target whose list is a CLASS METHOD, not a marked APL region. The
+  // method opens on a guard that returns before any list exists, and two of its lines are
+  // the spell-gated add_action form, each decided here against the pinned class and
+  // specialization tables. Wind Shear is talent-only at the pin, so its line emits nothing.
+  "shaman-enhancement": {
+    sourcePath: PINNED_SOURCES.SHAMAN_MODULE.sourcePath,
+    enclosingClass: "shaman_t",
+    functionHeader: "void shaman_t::init_action_list_enhancement()",
+    regionName: "enhancement",
+    authorityId: "SIMC_APL_SHAMAN_ENHANCEMENT",
+    spec: { className: "shaman", specName: "enhancement" },
+    defaultOut: "src/simc/data/shaman-enhancement.apl.json",
+    pinnedSource: {
+      ...PINNED_SOURCES.SHAMAN_MODULE,
+      regionSha256: "352db0baac97b2733ba57d3945c83e9ef3c079749cf9c7da2eea93883c6bb4d8",
+    },
+    livePtrPolicy: {
+      kind: "NO_PTR_REGION",
+      ptrRegionStart: "//init_action_list_enhancement_ptr_apl_start",
+      ptrRegionEnd: "//init_action_list_enhancement_ptr_apl_end",
+      ptrFunctionHeader: "void shaman_t::init_action_list_enhancement_ptr()",
+    },
+    dispatch: {
+      ...PINNED_SOURCES.SHAMAN_DISPATCH,
+      functionHeader: "void shaman_t::init_action_list()",
+      sequence: ["case SHAMAN_ENHANCEMENT:", "init_action_list_enhancement();", "break;"],
+    },
+    methodPrologue: {
+      lines: [
+        "if ( main_hand_weapon.type == WEAPON_NONE )",
+        "{",
+        "if ( !quiet )",
+        'sim->errorf( "Player %s has no weapon equipped at the Main-Hand slot.", name() );',
+        "quiet = true;",
+        "return;",
+        "}",
+      ],
+      appliesWhen: "main_hand_weapon.type != WEAPON_NONE",
+    },
+    spellGatedActions: [
+      {
+        statement: 'def->add_action( this, "Bloodlust", "line_cd=600" );',
+        spellName: "Bloodlust",
+        emitted: "bloodlust,line_cd=600",
+        proofs: [
+          ...SPELL_GATED_FORM_PROOFS,
+          {
+            ...PINNED_SOURCES.CLASS_SPELLS_INC,
+            checks: [
+              {
+                kind: "LINE_EXACTLY_ONCE",
+                line: '{  7,    0,    2825,       0, "Bloodlust"                          },',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        statement: 'def->add_action( this, "Wind Shear", "", "Interrupt of casts." );',
+        spellName: "Wind Shear",
+        emitted: null,
+        proofs: [
+          ...SPELL_GATED_FORM_PROOFS,
+          { ...PINNED_SOURCES.CLASS_SPELLS_INC, checks: [{ kind: "TOKEN_ABSENT", token: "Wind Shear" }] },
+          {
+            ...PINNED_SOURCES.SPECIALIZATION_SPELLS_INC,
+            checks: [{ kind: "TOKEN_ABSENT", token: "Wind Shear" }],
+          },
+        ],
+      },
+    ],
+    requiredFacts: {
+      kind: "DISPATCH_GRAPH",
+      entryListName: "default",
+      requiredLists: ["default", "precombat", "single_sb", "single_totemic", "aoe", "cooldowns"],
+      listSizes: {
+        default: 9,
+        precombat: 9,
+        single_sb: 27,
+        single_totemic: 23,
+        aoe: 34,
+        cooldowns: 11,
+      },
+      edges: [
+        {
+          from: "default",
+          ordinal: 6,
+          kind: "CALL",
+          to: "single_sb",
+          condition: "active_enemies=1&!talent.surging_totem.enabled",
+        },
+        {
+          from: "default",
+          ordinal: 7,
+          kind: "CALL",
+          to: "single_totemic",
+          condition: "active_enemies=1&talent.surging_totem.enabled",
+        },
+        { from: "default", ordinal: 8, kind: "CALL", to: "aoe", condition: "active_enemies>1" },
+        { from: "single_sb", ordinal: 5, kind: "CALL", to: "cooldowns", condition: null },
+        { from: "single_totemic", ordinal: 3, kind: "CALL", to: "cooldowns", condition: null },
+        { from: "aoe", ordinal: 4, kind: "CALL", to: "cooldowns", condition: null },
       ],
       forbiddenTokens: ["swap_action_list"],
     },
@@ -1397,10 +1578,49 @@ function braceSpan(lines, openIndex) {
 export function locateRegion(lines, target) {
   const hasMarkers = target.regionStart !== undefined || target.regionEnd !== undefined;
   const hasNamespace = target.enclosingNamespace !== undefined;
-  if (hasMarkers === hasNamespace) {
+  const hasClass = target.enclosingClass !== undefined;
+  if (Number(hasMarkers) + Number(hasNamespace) + Number(hasClass) !== 1) {
     fail(
-      `target '${target.regionName}' must declare exactly one region selector: regionStart/regionEnd markers, or an enclosingNamespace`,
+      `target '${target.regionName}' must declare exactly one region selector: regionStart/regionEnd markers, an enclosingNamespace, or an enclosingClass`,
     );
+  }
+
+  if (hasClass) {
+    // ONB-B2: a class method defined at file scope. The header must name that class, and the
+    // line must be unindented and occur exactly once, so a declaration or a nested copy cannot
+    // be selected.
+    if (!target.functionHeader.startsWith(`void ${target.enclosingClass}::`)) {
+      fail(`'${target.functionHeader}' does not define a method of ${target.enclosingClass}`);
+    }
+    const headers = lines.flatMap((line, index) => (line.trim() === target.functionHeader ? [index] : []));
+    if (headers.length !== 1) {
+      fail(`'${target.functionHeader}' occurs ${String(headers.length)} times; exactly one is required`);
+    }
+    const headerIndex = headers[0];
+    if (lines[headerIndex] !== target.functionHeader) {
+      fail(`line ${headerIndex + 1}: '${target.functionHeader}' is not at file scope`);
+    }
+    const methodBrace = nextCodeLine(lines, headerIndex + 1);
+    if (methodBrace < 0 || lines[methodBrace].trim() !== "{") {
+      fail(`line ${headerIndex + 1}: the ${target.regionName} method header is not followed by '{'`);
+    }
+    const methodSpan = braceSpan(lines, methodBrace);
+    if (lines[methodSpan.closeIndex].trim() !== "}") {
+      fail(
+        `line ${methodSpan.closeIndex + 1}: the ${target.regionName} method must close with '}' on its own line`,
+      );
+    }
+    return {
+      startIndex: headerIndex - 1,
+      endIndex: methodSpan.closeIndex + 1,
+      provenance: {
+        regionSelector: {
+          kind: "CLASS_METHOD",
+          enclosingClass: target.enclosingClass,
+          functionHeader: target.functionHeader,
+        },
+      },
+    };
   }
 
   if (hasMarkers) {
@@ -1480,7 +1700,10 @@ export function extract(sourceText, target) {
   if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(playerIdentifier)) {
     fail(`playerIdentifier '${playerIdentifier}' is not a C++ identifier`);
   }
-  if (!new RegExp(`[\\s*&]${playerIdentifier}\\s*\\)$`).test(target.functionHeader)) {
+  if (
+    target.enclosingClass === undefined &&
+    !new RegExp(`[\\s*&]${playerIdentifier}\\s*\\)$`).test(target.functionHeader)
+  ) {
     fail(
       `the ${target.regionName} function header does not take '${playerIdentifier}' as its parameter: ${target.functionHeader}`,
     );
@@ -1495,8 +1718,11 @@ export function extract(sourceText, target) {
   const actionsByList = new Map();
   const listOrder = [];
 
+  // A class method calls its own member, and may give the list a description nothing reads.
   const declaration = new RegExp(
-    `^action_priority_list_t\\*\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*=\\s*${playerIdentifier}->get_action_priority_list\\(\\s*"([^"]+)"\\s*\\)\\s*;$`,
+    target.enclosingClass === undefined
+      ? `^action_priority_list_t\\*\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*=\\s*${playerIdentifier}->get_action_priority_list\\(\\s*"([^"]+)"\\s*\\)\\s*;$`
+      : `^action_priority_list_t\\*\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*=\\s*get_action_priority_list\\(\\s*"([^"]+)"(?:\\s*,\\s*"[^"]*")?\\s*\\)\\s*;$`,
   );
   const addActionHead = /^([A-Za-z_][A-Za-z0-9_]*)->add_action\s*\(/;
 
@@ -1504,6 +1730,10 @@ export function extract(sourceText, target) {
   let braceDepth = 0;
   const inertDeclared = TARGET.inertStatements ?? [];
   const inertSeen = [];
+  const prologueDeclared = TARGET.methodPrologue ?? null;
+  let prologueSeen = null;
+  const spellGatedDeclared = TARGET.spellGatedActions ?? [];
+  const spellGatedSeen = [];
 
   // ---- version guards (M11-B2) ----
   //
@@ -1533,6 +1763,28 @@ export function extract(sourceText, target) {
       fail(
         `line ${lineNumber}: unexpected construct before the ${TARGET.regionName} function header: ${line}`,
       );
+    }
+
+    // ONB-B2: the guard a class method opens on, by exact text and before anything else. Any
+    // other `if`, or this one anywhere later, is still an unsupported construct below.
+    if (
+      prologueDeclared !== null &&
+      prologueSeen === null &&
+      braceDepth === 1 &&
+      listOrder.length === 0 &&
+      line === prologueDeclared.lines[0]
+    ) {
+      const span = prologueDeclared.lines.length;
+      for (let offset = 0; offset < span; offset += 1) {
+        if ((lines[i + offset] ?? "").trim() !== prologueDeclared.lines[offset]) {
+          fail(
+            `line ${lineNumber + offset}: the declared method prologue does not match: ${lines[i + offset]}`,
+          );
+        }
+      }
+      prologueSeen = { startLine: lineNumber, endLine: lineNumber + span - 1 };
+      i += span - 1;
+      continue;
     }
 
     const guard = VERSION_GUARD.exec(line);
@@ -1618,6 +1870,32 @@ export function extract(sourceText, target) {
         fail(`line ${lineNumber}: add_action on undeclared receiver '${receiver}'`);
       }
       const openParen = line.indexOf("(", added[0].length - 1);
+      // ONB-B2: the spell-gated form emits only under the player's own spell data. It is
+      // never parsed as a list line: each statement is declared by exact text, and its
+      // outcome is decided by the proofs the pinned preflight checks.
+      if (/^\s*this\s*,/.test(line.slice(openParen + 1))) {
+        const declaredForm = spellGatedDeclared.find((form) => form.statement === line);
+        if (declaredForm === undefined) {
+          fail(`line ${lineNumber}: undeclared spell-gated add_action: ${line}`);
+        }
+        if (governing !== null) fail(`line ${lineNumber}: a spell-gated add_action under a version guard`);
+        spellGatedSeen.push({
+          sourceLine: lineNumber,
+          statement: line,
+          spellName: declaredForm.spellName,
+          emitted: declaredForm.emitted,
+        });
+        if (declaredForm.emitted !== null) {
+          const gatedBucket = actionsByList.get(listName);
+          gatedBucket.push({
+            priorityOrdinal: gatedBucket.length,
+            actionStringVerbatim: declaredForm.emitted,
+            comment: null,
+            sourceLine: lineNumber,
+          });
+        }
+        continue;
+      }
       const parsed = parseAddActionArguments(line, openParen, lineNumber);
       if (governing !== null && !governing.holds) {
         // Well-formed, parsed, and NOT the authority at this client version.
@@ -1658,6 +1936,15 @@ export function extract(sourceText, target) {
   if (!sawFunctionHeader) fail(`${TARGET.regionName} function header not found inside the region`);
   if (braceDepth !== 0) fail(`unbalanced braces inside the ${TARGET.regionName} region`);
   if (pending !== null || active !== null) fail(`a version guard is left open at the end of the region`);
+  if (prologueDeclared !== null && prologueSeen === null) {
+    fail(`the declared method prologue does not open the ${TARGET.regionName} method`);
+  }
+  for (const form of spellGatedDeclared) {
+    const count = spellGatedSeen.filter((seen) => seen.statement === form.statement).length;
+    if (count !== 1) {
+      fail(`spell-gated statement occurs ${String(count)} times; exactly one is required: ${form.statement}`);
+    }
+  }
 
   // Each declared inert statement: exactly once in THIS region, and its
   // identifier on no other region line — a later read, however indirect,
@@ -1697,6 +1984,10 @@ export function extract(sourceText, target) {
     // The region's own bytes, marker lines included, LF-joined (M11-D2-C).
     regionSha256: sha256Of(lines.slice(startIndex, endIndex + 1).join("\n")),
     ...(inertDeclared.length === 0 ? {} : { inertStatements }),
+    ...(prologueSeen === null
+      ? {}
+      : { methodPrologue: { ...prologueSeen, appliesWhen: prologueDeclared.appliesWhen } }),
+    ...(spellGatedSeen.length === 0 ? {} : { spellGatedActions: spellGatedSeen }),
   };
 }
 
@@ -2056,6 +2347,10 @@ export function buildArtifact({
             ...(extracted.inertStatements === undefined
               ? {}
               : { inertStatements: extracted.inertStatements }),
+            ...(extracted.methodPrologue === undefined ? {} : { methodPrologue: extracted.methodPrologue }),
+            ...(extracted.spellGatedActions === undefined
+              ? {}
+              : { spellGatedActions: extracted.spellGatedActions }),
           }),
     },
     lists: extracted.lists,
@@ -2083,6 +2378,14 @@ const MARKER_LINE = /^\/\/[a-z][a-z0-9_]*_apl_(?:start|end)$/;
 const SHA256_HEX = /^[0-9a-f]{64}$/;
 const COMMIT_HEX = /^[0-9a-f]{40}$/;
 const LIVE_FUNCTION_HEADER = /^void ([A-Za-z_][A-Za-z0-9_]*)\( player_t\* p \)$/;
+const CLASS_METHOD_HEADER = /^void [A-Za-z_][A-Za-z0-9_]*::([A-Za-z_][A-Za-z0-9_]*)\(\)$/;
+
+/** The function a pinned target's region defines: `[, name]`, or `null` when the header is neither form. */
+function liveFunctionOf(target) {
+  return (target.enclosingClass === undefined ? LIVE_FUNCTION_HEADER : CLASS_METHOD_HEADER).exec(
+    target.functionHeader ?? "",
+  );
+}
 const PROOF_CHECK_KINDS = ["FUNCTION_BODY_SHA256", "LINE_EXACTLY_ONCE", "TOKEN_ABSENT"];
 
 /**
@@ -2162,10 +2465,14 @@ export function validatePinnedRecord(targetName, target) {
       );
     }
   }
-  for (const [field, marker, suffix] of [
-    ["regionStart", target.regionStart, "_start"],
-    ["regionEnd", target.regionEnd, "_end"],
-  ]) {
+  const markerFields =
+    target.enclosingClass === undefined
+      ? [
+          ["regionStart", target.regionStart, "_start"],
+          ["regionEnd", target.regionEnd, "_end"],
+        ]
+      : [];
+  for (const [field, marker, suffix] of markerFields) {
     if (typeof marker !== "string" || !MARKER_LINE.test(marker) || !marker.endsWith(suffix)) {
       problems.push(
         `MALFORMED_MARKER: '${targetName}' ${field} '${String(marker)}' is not a //<name>_apl${suffix} line`,
@@ -2179,9 +2486,14 @@ export function validatePinnedRecord(targetName, target) {
   ) {
     problems.push(`MALFORMED_MARKER: '${targetName}' start and end markers name different regions`);
   }
-  const live = LIVE_FUNCTION_HEADER.exec(target.functionHeader ?? "");
-  if (live === null)
-    problems.push(`MALFORMED_RECORD: '${targetName}' functionHeader is not 'void <name>( player_t* p )'`);
+  const live = liveFunctionOf(target);
+  if (live === null) {
+    problems.push(
+      target.enclosingClass === undefined
+        ? `MALFORMED_RECORD: '${targetName}' functionHeader is not 'void <name>( player_t* p )'`
+        : `MALFORMED_RECORD: '${targetName}' functionHeader is not 'void <class>::<name>()'`,
+    );
+  }
   const policy = target.livePtrPolicy;
   if (policy === undefined || !LIVE_PTR_POLICIES.includes(policy.kind)) {
     problems.push(`MALFORMED_POLICY: '${targetName}' declares no known live/PTR policy`);
@@ -2192,7 +2504,11 @@ export function validatePinnedRecord(targetName, target) {
     ) {
       problems.push(`MALFORMED_POLICY: '${targetName}' PTR markers do not name the ${live[1]}_ptr region`);
     }
-    if (policy.ptrFunctionHeader !== `void ${live[1]}_ptr( player_t* p )`) {
+    const expectedPtrHeader =
+      target.enclosingClass === undefined
+        ? `void ${live[1]}_ptr( player_t* p )`
+        : `void ${target.enclosingClass}::${live[1]}_ptr()`;
+    if (policy.ptrFunctionHeader !== expectedPtrHeader) {
       problems.push(`MALFORMED_POLICY: '${targetName}' PTR function header does not name ${live[1]}_ptr`);
     }
   }
@@ -2206,7 +2522,10 @@ export function validatePinnedRecord(targetName, target) {
   ) {
     problems.push(`MALFORMED_DISPATCH: '${targetName}' dispatch record is incomplete`);
   } else if (live !== null) {
-    const call = new RegExp(`^[A-Za-z_][A-Za-z0-9_]*::${live[1]}\\( this \\);$`);
+    const call =
+      target.enclosingClass === undefined
+        ? new RegExp(`^[A-Za-z_][A-Za-z0-9_]*::${live[1]}\\( this \\);$`)
+        : new RegExp(`^${live[1]}\\(\\);$`);
     if (dispatch.sequence.filter((line) => call.test(line)).length !== 1) {
       problems.push(
         `MALFORMED_DISPATCH: '${targetName}' dispatch sequence does not call ${live[1]}( this ) exactly once`,
@@ -2231,6 +2550,27 @@ export function validatePinnedRecord(targetName, target) {
     ) {
       problems.push(
         `MALFORMED_INERT: '${targetName}' declares an inert statement without a complete pinned proof`,
+      );
+    }
+  }
+  for (const form of target.spellGatedActions ?? []) {
+    if (
+      typeof form.statement !== "string" ||
+      typeof form.spellName !== "string" ||
+      !form.statement.includes(`"${form.spellName}"`) ||
+      !(form.emitted === null || typeof form.emitted === "string") ||
+      !Array.isArray(form.proofs) ||
+      form.proofs.length === 0 ||
+      form.proofs.some(
+        (proof) =>
+          !isPinnedFile(proof) ||
+          !Array.isArray(proof.checks) ||
+          proof.checks.length === 0 ||
+          proof.checks.some((check) => !PROOF_CHECK_KINDS.includes(check.kind)),
+      )
+    ) {
+      problems.push(
+        `MALFORMED_SPELL_GATED: '${targetName}' declares a spell-gated statement without a complete pinned proof`,
       );
     }
   }
@@ -2278,11 +2618,14 @@ function countLines(lines, text) {
 /** The live/PTR relationship the target declares, checked against the module and its dispatch. */
 export function verifyLivePtrPolicy(lines, dispatchText, target) {
   const policy = target.livePtrPolicy;
-  const name = LIVE_FUNCTION_HEADER.exec(target.functionHeader)[1];
+  const name = liveFunctionOf(target)[1];
   const starts = countLines(lines, policy.ptrRegionStart);
   const ends = countLines(lines, policy.ptrRegionEnd);
-  const ptrDefinitions = lines.filter((line) => line.trim().startsWith(`void ${name}_ptr(`)).length;
-  const ptrDispatches = dispatchText.split(`::${name}_ptr(`).length - 1;
+  const ptrDefinitions = lines.filter((line) =>
+    line.trim().startsWith(`${policy.ptrFunctionHeader.split("(")[0]}(`),
+  ).length;
+  const ptrDispatches =
+    dispatchText.split(target.enclosingClass === undefined ? `::${name}_ptr(` : `${name}_ptr(`).length - 1;
 
   if (policy.kind === "NO_PTR_REGION") {
     if (starts !== 0 || ends !== 0 || ptrDefinitions !== 0 || ptrDispatches !== 0) {
@@ -2357,8 +2700,12 @@ export function verifyDispatch(dispatchText, target) {
       `DISPATCH_UNVERIFIED: the sequence [${sequence.join(" | ")}] occurs ${String(occurrences)} times in ${functionHeader}; exactly one is required`,
     );
   }
-  const name = LIVE_FUNCTION_HEADER.exec(target.functionHeader)[1];
-  const call = sequence.find((line) => new RegExp(`::${name}\\( this \\);$`).test(line));
+  const name = liveFunctionOf(target)[1];
+  const call = sequence.find((line) =>
+    target.enclosingClass === undefined
+      ? new RegExp(`::${name}\\( this \\);$`).test(line)
+      : line === `${name}();`,
+  );
   if (countLines(lines, call) !== 1)
     fail(`DISPATCH_UNVERIFIED: '${call}' must occur exactly once in the module`);
 }
@@ -2434,8 +2781,9 @@ export function preflightTarget({ targetName, target, read, sha, extractedOn, co
 
   const module = readPinned(read, target.pinnedSource, "module", problems);
   const dispatchBytes = readPinned(read, target.dispatch, "dispatch", problems);
-  const proofBytes = (target.inertStatements ?? []).flatMap((inert) =>
-    inert.proofs.map((proof) => ({ proof, bytes: readPinned(read, proof, "inert proof", problems) })),
+  const proofBytes = [...(target.inertStatements ?? []), ...(target.spellGatedActions ?? [])].flatMap(
+    (inert) =>
+      inert.proofs.map((proof) => ({ proof, bytes: readPinned(read, proof, "inert proof", problems) })),
   );
   if (problems.length > 0 || module === null || dispatchBytes === null) return result;
   result.sourceSha256 = target.pinnedSource.sha256;
@@ -2449,7 +2797,7 @@ export function preflightTarget({ targetName, target, read, sha, extractedOn, co
     result.regionSha256 = extracted.regionSha256;
     if (extracted.regionSha256 !== target.pinnedSource.regionSha256) {
       problems.push(
-        `REGION_SHA256_MISMATCH: region ${target.regionStart} is ${extracted.regionSha256}, pinned ${target.pinnedSource.regionSha256}`,
+        `REGION_SHA256_MISMATCH: region ${target.regionStart ?? target.functionHeader} is ${extracted.regionSha256}, pinned ${target.pinnedSource.regionSha256}`,
       );
     }
   }
@@ -2513,7 +2861,7 @@ export function preflightBatch({
   for (const name of unique) {
     const target = Object.hasOwn(targets, name) ? targets[name] : undefined;
     if (target === undefined) continue;
-    const region = `${target.sourcePath}#${target.regionStart ?? target.enclosingNamespace}`;
+    const region = `${target.sourcePath}#${target.regionStart ?? target.enclosingNamespace ?? target.functionHeader}`;
     if (byRegion.has(region))
       problems.push(`DUPLICATE_REGION: '${byRegion.get(region)}' and '${name}' select ${region}`);
     else byRegion.set(region, name);
