@@ -1809,11 +1809,13 @@ publicContract: EXPECTED
 ### ONB-D1: Destruction Warlock (internal, Cohort D representative)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-S4
 branch: autopilot/onb-d1
 wcl: NONE
 publicContract: NONE
+pr: 69
+mergeSha: 6cdf7c74d6ded165adf139b4339ba7481693d097
 ```
 
 **Scope.** Cohort D representative on the ONB-S4 cast and channel anchor.
@@ -1826,11 +1828,14 @@ it is a deep-dive question, not a blocker for the rotational slice.
 ### ONB-D1P: Destruction Warlock (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-D1
+branch: autopilot/onb-d1p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** Destruction does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Its two retained subjects, replayed offline, give 220 eligible decisions, 0 MATCH, 0 REJECTED and 220 UNKNOWN, all behind the enemy count, and a census of 5,683 retained files finds no third subject. Evidence is not its gap, so it is not on ONB-EV; it waits on ONB-S3 and the inputs behind it. A promotion after those is a new public entry through the unchanged gates (agent/architecture.md "ONB-D1P"; agent/follow-ups.md "After ONB-D1").
 
 ### ONB-D2: Elemental Shaman, Balance Druid and Shadow Priest (internal, Cohort D)
 

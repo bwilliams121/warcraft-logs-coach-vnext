@@ -770,8 +770,8 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
   });
 
   it("ONB-D1: the gate search finds nothing for Destruction Warlock", async () => {
-    // Its retained subjects' events are uncommitted, and all 220 of their decisions stay UNKNOWN (agent/architecture.md
-    // "ONB-D1"). A later capture that changed this would fail this pin and prompt a new public entry; it would not
+    // All 220 decisions of its two retained subjects stay UNKNOWN, so it was not promoted (agent/architecture.md
+    // "ONB-D1P"). A later change that resolved one would fail this pin and prompt a new public entry; it would not
     // promote anything by itself.
     const tiers = await tiersPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "warlock/destruction");
