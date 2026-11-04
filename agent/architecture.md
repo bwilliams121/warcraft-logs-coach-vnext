@@ -13332,6 +13332,49 @@ about 1.1 MB, and committing them would change nothing this tranche pins, so no 
 **No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse
 the row. A public Warrior/Arms request is SPEC_NOT_SUPPORTED, exactly as before.
 
+## ONB-B1P — Arms Warrior public promotion: not promoted
+
+Autopilot queue entry ONB-B1P. Public contract: declared EXPECTED; actual change NONE, because nothing passes. No Warcraft Logs request and
+no new evidence.
+
+**The outcome.** Arms Warrior does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4). The gates are not
+weakened and gain no subject. This is not an owner stop: rule 4 decides it, and the decision that could change it (ONB-S3) is already queued as
+the owner's.
+
+**Why it cannot pass.** OBSERVATION needs a real MATCH and real resolved decisions over several distinct action tokens, and DISCRIMINATION
+needs a real REJECTED or a control that flips a real MATCH. Both start from a real resolved decision, and Arms has none on any retained subject.
+ONB-B1 measured one subject and left the others unread (agent/follow-ups.md "After ONB-B1"). This tranche read them, by replaying retained
+pages through production ingestion and the Arms facade over a fake transport:
+
+| Subject | Hero tree | Retained span | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| b1PmaKrd6CDfzngc fight 48 actor 5 (ONB-B1) | Slayer | whole fight | 324 | 0 | 0 | 324 | 225 |
+| gtKb2xHn87pNcFfW fight 22 actor 5 | Slayer | whole fight, 284.8 s | 295 | 0 | 0 | 295 | 193 |
+| gtKb2xHn87pNcFfW fight 22 actor 12 | Slayer | whole fight, 284.8 s | 273 | 0 | 0 | 273 | 177 |
+| rXAfw9t1q8YpmkKD fight 13 actor 10 | Slayer | first 165.0 s of 271.8 s | 166 | 0 | 0 | 166 | 96 |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 4 | Slayer | first 165.0 s of 424.5 s | 149 | 0 | 0 | 149 | 99 |
+
+All 1,207 decisions stop on the same atom: `default[17] run_action_list | active_enemies`. So the result is a property of the pinned list and
+the missing enemy-count authority, not of one player or of one fight. Each subject's identity is its committed context's `friendlySpecs` entry,
+aligned to `friendlyPlayers`, and each resolves its Slayer tree from its own combatant info.
+
+**How far this reaches.** The two 165 s rows are prefixes: the replay ended the event stream at the last retained page, so they say nothing about
+the rest of those fights. Every subject is Slayer, so the Colossus branch has no real subject. A synthetic test pins that a Colossus build stops at
+`default[14]` on the same count, and that is all that is known of it. A later promotion must measure Colossus or refuse it, as Havoc refuses
+Fel-Scarred. The census read retained page files by parsing them for Mortal Strike casts, with fight 48 as the positive control. The filtered M13-A
+capture also holds Mortal Strike casts; it was not replayed, because ONB-A2P found it has no combatant info.
+
+**How it differs from ONB-A2P.** There, no capture existed. Here, evidence is not the gap, so nothing is added to ONB-EV. ONB-EV is the owner's
+campaign for specializations with no retained events, and it would not move a single Arms decision.
+
+**What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists Arms; the gate search over it finds no qualifying assertion and
+`evidenceReady` false (`m11-promotion-evidence-gate`, from ONB-B1, its comment updated); and a public request is SPEC_NOT_SUPPORTED, with one
+retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which dropped Warrior/Arms when ONB-B1 moved the canonical subject
+to Mage/Fire, and which holds it again here). The replay is offline and not committed.
+
+**What a later promotion must do.** The owner decides ONB-S3. Arms then binds what ONB-B1 left open and measures its failure modes on these subjects
+(agent/follow-ups.md "After ONB-B1"), and a new public entry promotes it through the unchanged gates by the five-site promotion. No such entry is queued.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

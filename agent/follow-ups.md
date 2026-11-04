@@ -40,8 +40,9 @@ its public entry should expect what ONB-A2 and ONB-B1 found, unless ONB-S3 lands
 can still register internally and fail closed. The owner should know that **the queue's next rotational promotions wait on that one
 decision**.
 
-**ONB-B1P should expect "not promoted".** The gate search over Arms finds nothing today (`m11-promotion-evidence-gate`). Its evidence is
-not the gap, so ONB-EV does not apply. ONB-S3 does.
+**ONB-B1P (2026-11-03): not promoted.** The gate search over Arms finds nothing (`m11-promotion-evidence-gate`). Its evidence is not the gap, so
+ONB-EV does not apply. ONB-S3 does. A new public entry must follow that decision and the list below, and no such entry is queued
+(agent/architecture.md "ONB-B1P").
 
 **What ONB-S3 alone would not unlock.** With the enemy count settled, a single-target decision would still meet:
 
@@ -65,9 +66,13 @@ not a finding, and nobody has reviewed why they are empty.
 None is raised here: Arms' whole fight is about 1.1 MB of decision families and would change nothing pinned today. A proposal should be
 sized when something would resolve on those bytes.
 
-**Other Arms subjects are retained and unmeasured.** A7R6 fight 7 actor 4 and gtKb fight 22 actor 12 are Arms Warriors in committed
-contexts, with events in the retained captures of those fights. Their hero trees and windows were not read. A promotion would measure
-them, for the reason Brewmaster needed a second subject.
+**Other Arms subjects: measured by ONB-B1P, and none resolves.** gtKb fight 22 actors 5 and 12 (whole fight), rXAf fight 13 actor 10 and A7R6 fight 7
+actor 4 (the first 165 s of each) are Arms Warriors, and they add 883 eligible decisions, all UNKNOWN, all stopping on the same `active_enemies`
+atom. Only the decision outcome, the hero tree and the window count were read. The cooldown gaps and logged-cast copies measured on fight 48 are
+still unread on them, and a promotion would measure them, for the reason Brewmaster needed a second subject.
+
+**No Colossus subject is retained.** All five Arms subjects are Slayer. The Colossus branch is known only from synthetic tests, so a promotion
+must measure it or refuse it, as Havoc refuses Fel-Scarred.
 
 **Timing and fidelity.** The window edges are the log's. The first Colossus Smash is logged 549 ms before its debuff, so a cast at the
 start of a window can fall just outside it. No tolerance was chosen, because no verdict reads it.

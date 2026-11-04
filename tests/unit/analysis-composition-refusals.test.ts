@@ -174,7 +174,7 @@ describe("an unsupported specialization", () => {
 
   it("refuses every unsupported specialization the same way", async () => {
     // Mage/Fire is the canonical captured unsupported identity (A7R6 fight 7,
-    // actor 4); the others are stated names. Paladin/Protection is NOT in this
+    // actor 17); the others are stated names. Paladin/Protection is NOT in this
     // list: it has been supported since M10-D. Paladin/Retribution is NOT in
     // it either, since M11-A5, and Paladin/Holy is not since HEAL-B1P: every Paladin
     // specialization is supported. Druid/Restoration, registered INTERNAL_ONLY,
@@ -188,6 +188,8 @@ describe("an unsupported specialization", () => {
       // Registered INTERNAL_ONLY in ONB-A2, not promoted by ONB-A2P, like Rogue/Subtlety above.
       ["Warrior", "Fury"],
       ["Warrior", "Protection"],
+      // Registered INTERNAL_ONLY in ONB-B1, not promoted by ONB-B1P.
+      ["Warrior", "Arms"],
       ["Druid", "Restoration"],
       ["Priest", "Discipline"],
     ]) {
