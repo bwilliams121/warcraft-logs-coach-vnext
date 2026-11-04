@@ -1726,11 +1726,13 @@ mergeSha: d8d00563c76e504502ad77d67e792d5699b6996e
 ### ONB-C2: Outlaw Rogue (internal, Cohort C)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-C1
 branch: autopilot/onb-c2
 wcl: NONE
 publicContract: NONE
+pr: 67
+mergeSha: d41df35b245a5997d4acba77eeba57c4f0053e23
 ```
 
 **Scope.** Cohort C follower. No retained evidence is known, so it is
@@ -1741,11 +1743,14 @@ recorded for ONB-EV if real-evidence validation cannot be met.
 ### ONB-C2P: Outlaw Rogue (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-C2
+branch: autopilot/onb-c2p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** Outlaw does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. A census of 5,679 retained files finds no event, of any type, of its signature abilities, so there is nothing to replay and it stays on ONB-EV. A capture alone would resolve nothing either: every decision stops at Stealth, and Kick and the `cds` list follow. A promotion is a new public entry through the unchanged gates (agent/architecture.md "ONB-C2P"; agent/follow-ups.md "After ONB-C2").
 
 ### ONB-T1: Windwalker Monk (internal, Cohort T representative)
 

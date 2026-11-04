@@ -769,9 +769,9 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
   });
 
   it("ONB-C2: the gate search finds nothing for Outlaw Rogue", async () => {
-    // No retained capture holds one of its events, so nothing qualifies (agent/architecture.md "ONB-C2"). A later
-    // capture that changed this would fail this pin and prompt a new public entry; it would not promote anything
-    // by itself.
+    // No retained capture holds one of its events, so nothing qualifies and it was not promoted (agent/architecture.md
+    // "ONB-C2P"). A later capture that changed this would fail this pin and prompt a new public entry; it would not
+    // promote anything by itself.
     const tiers = await tiersPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "rogue/outlaw");
     if (module === undefined) throw new Error("no module for rogue/outlaw");

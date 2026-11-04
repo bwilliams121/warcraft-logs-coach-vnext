@@ -13615,6 +13615,23 @@ Autopilot queue entry ONB-C2. Public contract: NONE. No Warcraft Logs request. `
 
 **No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse the row. A public Rogue/Outlaw request is SPEC_NOT_SUPPORTED, exactly as before.
 
+## ONB-C2P — Outlaw Rogue public promotion: not promoted
+
+Autopilot queue entry ONB-C2P. Public contract: declared EXPECTED; actual change NONE, because nothing passes. No Warcraft Logs request and no new evidence.
+
+**The outcome.** Outlaw does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4), with its evidence gap on ONB-EV. The gates are not weakened and gain no subject. This is not an owner stop: rule 4 decides it, rule 7 records missing evidence rather than fetching it, and the decisions that could change it (ONB-EV and, later in its list, ONB-S3) are already queued as the owner's.
+
+**Why it cannot pass, twice over.** OBSERVATION needs a real MATCH and real resolved decisions over several distinct action tokens, and DISCRIMINATION needs a real REJECTED or a control that flips a real MATCH. Both start from a real resolved decision.
+
+1. **There is nothing to replay.** The census at this tranche's base parsed every JSON file over 500 bytes under `.probe/` and `tests/`, skipping tool output and worktree copies (5,679 parsed of 5,680). It looked for any event, of any type and any source, of Sinister Strike, Pistol Shot, Dispatch, Between the Eyes, Roll the Bones, Blade Flurry, Adrenaline Rush, Blade Rush, Keep It Rolling and Killing Spree, each id checked against the pinned `rogue-outlaw-gcd-semantics.json`. It found none. Mortal Strike, the positive control, has 985 events, 559 of them casts. ONB-C2's census read casts only, so this one is wider. It does not read files under 500 bytes or logs and text output.
+2. **A capture alone would resolve nothing.** Over synthetic builds, ONB-C2 pinned that every decision stops at `default[0] stealth`, and that a root scan on a whole tree stops at `default[7] run_action_list`, on `variable.finish_condition` (agent/architecture.md "ONB-C2").
+
+**The one report naming an Outlaw.** g34mvXTKLMJ2Nfwr fights 1, 6 and 7, actor 17. Only `.probe/m13a/discovery.json` and `.probe/m13a/candidates.json` name that report, and neither holds an event. The M13-A capture's own actor 17 is a Subtlety Rogue in another report, so it supplies no subject here.
+
+**What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists it; the gate search finds no qualifying assertion and `evidenceReady` false (`m11-promotion-evidence-gate`, from ONB-C2); and a public request is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which already held this row). Both tests only have their comments changed, to name the outcome. A public request still runs preparation and reports partial coverage. Nothing reads as clean play.
+
+**What a later promotion must do.** ONB-EV supplies a capture, Outlaw binds or answers what stands in scan order (agent/follow-ups.md "After ONB-C2"), and it measures the wire hazards listed there before binding anything that could resolve a decision. The `cds` list reads the enemy count, so ONB-S3 is necessary too, and it is not the first gate: Stealth and Kick stand first. A new public entry then promotes it through the unchanged gates by the five-site promotion, and must first commit identity proof, because a PUBLIC module cannot use the retained-only exception. No such entry is queued.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and
