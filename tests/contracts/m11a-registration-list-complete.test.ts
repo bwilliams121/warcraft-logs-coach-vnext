@@ -256,7 +256,8 @@ describe("what the tree registers today", () => {
     // healer gate and stays INTERNAL_ONLY; Holy Priest arrived INTERNAL_ONLY
     // at HEAL-B2 on the same architecture (PUBLIC since HEAL-B2P); Discipline
     // Priest arrived INTERNAL_ONLY at HEAL-B3, and Preservation Evoker at
-    // HEAL-B4.
+    // HEAL-B4. Subtlety Rogue, Fury Warrior and Protection Warrior arrived INTERNAL_ONLY at
+    // ONB-A2 as Cohort A's followers.
     expect(DISCOVERED.map((found) => [found.path, found.exportName, found.registration.exposure])).toEqual([
       ["src/specs/deathknight/blood/registration.ts", "BLOOD_DEATH_KNIGHT_REGISTRATION", "PUBLIC"],
       ["src/specs/demonhunter/havoc/registration.ts", "HAVOC_DEMON_HUNTER_REGISTRATION", "PUBLIC"],
@@ -271,7 +272,10 @@ describe("what the tree registers today", () => {
       ["src/specs/priest/discipline/registration.ts", "DISCIPLINE_PRIEST_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/priest/holy/registration.ts", "HOLY_PRIEST_REGISTRATION", "PUBLIC"],
       ["src/specs/rogue/assassination/registration.ts", "ASSASSINATION_REGISTRATION", "PUBLIC"],
+      ["src/specs/rogue/subtlety/registration.ts", "SUBTLETY_ROGUE_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/shaman/restoration/registration.ts", "RESTORATION_SHAMAN_REGISTRATION", "PUBLIC"],
+      ["src/specs/warrior/fury/registration.ts", "FURY_WARRIOR_REGISTRATION", "INTERNAL_ONLY"],
+      ["src/specs/warrior/protection/registration.ts", "PROTECTION_WARRIOR_REGISTRATION", "INTERNAL_ONLY"],
     ]);
   });
 });

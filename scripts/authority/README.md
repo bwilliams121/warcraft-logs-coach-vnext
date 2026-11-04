@@ -552,6 +552,25 @@ may name its own class module and declare a source absent (`sourceOverrides`), a
 class-module cost claims do not hold (`classCostClaimsDoNotHold`), so the artifact records none and a
 base-cost bound is refused.
 
+## ONB-A2 — Subtlety Rogue, Fury Warrior and Protection Warrior
+
+`rogue-subtlety`, `warrior-fury` and `warrior-protection` targets on the GCD and talent extractors, and the three APL artifacts
+through the M11-D2-C batch path. No cooldown, usability or aura artifact: no retained capture could check one.
+
+```bash
+node scripts/authority/extract-simc-apl.mjs --targets rogue-subtlety,warrior-fury,warrior-protection \
+  --source-root <root> --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 \
+  --out-dir <dir> --extracted-on 2026-11-03
+node scripts/authority/extract-simc-gcd.mjs --target <target> \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-11-03   # --file-<key> for each source
+node scripts/authority/extract-simc-talents.mjs --target <target> \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-11-03   # --file-<key> for each source
+npx prettier --write src/data/game/rogue-subtlety-*.json src/data/game/warrior-*.json src/simc/data/rogue-subtlety.apl.json src/simc/data/warrior-*.apl.json
+```
+
+One class-neutral extractor change, changing no earlier target's output: a sanity-anchor id a target names as an ability stays in
+its runtime slice (Backstab, for Subtlety).
+
 ## M11-D2-C — pinned batch preflight for eight Cohort A/B targets
 
 Extraction infrastructure only. No artifact for these targets is committed,

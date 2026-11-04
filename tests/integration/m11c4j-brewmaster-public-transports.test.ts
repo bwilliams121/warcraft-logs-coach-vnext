@@ -83,6 +83,9 @@ const EVERY_ANALYZER = [
   "priest-holy-healer-findings",
   "evoker-preservation-healer-findings",
   "demonhunter-havoc-observed-decisions",
+  "rogue-subtlety-observed-decisions",
+  "warrior-fury-observed-decisions",
+  "warrior-protection-observed-decisions",
   // HEAL-B3: Discipline Priest INTERNAL_ONLY.
   "priest-discipline-healer-findings",
   // HEAL-B4: Preservation Evoker INTERNAL_ONLY.

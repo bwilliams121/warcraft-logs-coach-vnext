@@ -53,6 +53,9 @@ import pinnedRetributionApl from "../../../src/simc/data/paladin-retribution.apl
 import pinnedBloodApl from "../../../src/simc/data/deathknight-blood.apl.json";
 import pinnedBrewmasterApl from "../../../src/simc/data/monk-brewmaster.apl.json";
 import pinnedHavocApl from "../../../src/simc/data/demonhunter-havoc.apl.json";
+import pinnedSubtletyApl from "../../../src/simc/data/rogue-subtlety.apl.json";
+import pinnedFuryApl from "../../../src/simc/data/warrior-fury.apl.json";
+import pinnedProtectionWarriorApl from "../../../src/simc/data/warrior-protection.apl.json";
 import { AUTHORITY_DOMAINS, AUTHORITY_RESOLUTION_OUTCOMES } from "../../../src/findings/authority-domain.js";
 import { SPEC_IDS, type SpecId } from "../../../src/findings/spec-id.js";
 import {
@@ -394,6 +397,9 @@ export const OWNING_LAYERS = {
   /** HEAL-B4; PUBLIC since HEAL-B4P. The Preservation Evoker healer evaluator and nothing else. */
   SPEC_PRESERVATION_EVOKER: ["src/specs/evoker/preservation/"],
   SPEC_HAVOC_DEMON_HUNTER: ["src/specs/demonhunter/havoc/"],
+  SPEC_SUBTLETY_ROGUE: ["src/specs/rogue/subtlety/"],
+  SPEC_FURY_WARRIOR: ["src/specs/warrior/fury/"],
+  SPEC_PROTECTION_WARRIOR: ["src/specs/warrior/protection/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
   PUBLIC_CONTRACT: ["src/contracts/", "src/api/", "src/mcp/"],
 } as const;
@@ -432,6 +438,9 @@ export const SPEC_LAYER_OF = {
   "priest/discipline": "SPEC_DISCIPLINE_PRIEST",
   "evoker/preservation": "SPEC_PRESERVATION_EVOKER",
   "demonhunter/havoc": "SPEC_HAVOC_DEMON_HUNTER",
+  "rogue/subtlety": "SPEC_SUBTLETY_ROGUE",
+  "warrior/fury": "SPEC_FURY_WARRIOR",
+  "warrior/protection": "SPEC_PROTECTION_WARRIOR",
 } as const satisfies Record<SpecId, OwningLayer>;
 
 /** The specialization-owned layers: exactly those a `SpecId` maps to. */
@@ -3233,6 +3242,41 @@ export const ASSERTION_KINDS = {
       "The Havoc facade refuses this specialization with SPEC_NOT_SUPPORTED before any Havoc rule runs.",
   },
 
+  // ---- SPEC_SUBTLETY_ROGUE, SPEC_FURY_WARRIOR, SPEC_PROTECTION_WARRIOR (ONB-A2, INTERNAL_ONLY) ---
+  "SPEC_SUBTLETY_ROGUE.SPEC_GATE": {
+    owningLayer: "SPEC_SUBTLETY_ROGUE",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Subtlety Rogue facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
+  },
+  "SPEC_FURY_WARRIOR.SPEC_GATE": {
+    owningLayer: "SPEC_FURY_WARRIOR",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Fury Warrior facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
+  },
+  "SPEC_PROTECTION_WARRIOR.SPEC_GATE": {
+    owningLayer: "SPEC_PROTECTION_WARRIOR",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Protection Warrior facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
+  },
+
   // ---- SPEC_AUGMENTATION_EVOKER (M13-E, INTERNAL_ONLY) ---------------------
   //
   // The first registration that binds no decision authority. Driven through
@@ -4036,6 +4080,9 @@ export const PINNED_AUTHORITY_REVISIONS: Readonly<Record<string, string>> = {
   [pinnedBloodApl.authorityId]: pinnedBloodApl.artifactRevision,
   [pinnedBrewmasterApl.authorityId]: pinnedBrewmasterApl.artifactRevision,
   [pinnedHavocApl.authorityId]: pinnedHavocApl.artifactRevision,
+  [pinnedSubtletyApl.authorityId]: pinnedSubtletyApl.artifactRevision,
+  [pinnedFuryApl.authorityId]: pinnedFuryApl.artifactRevision,
+  [pinnedProtectionWarriorApl.authorityId]: pinnedProtectionWarriorApl.artifactRevision,
 };
 
 // --------------------------------------------------------------------------

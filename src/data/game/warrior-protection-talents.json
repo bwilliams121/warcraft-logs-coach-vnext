@@ -1,0 +1,480 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_TRAIT_WARRIOR_PROTECTION_TALENTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
+    "extractedOn": "2026-11-03",
+    "extractorVersion": 1,
+    "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. The same equivalence every earlier target recorded, that `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals trait_data_t::id_node, is ASSUMED for Protection Warrior: no retained capture holds one of its combatantinfo events, so this target has no corroboration of its own.",
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "talents": [
+    {
+      "simcName": "avatar",
+      "displayNameEn": "Avatar",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90433,
+      "traitEntryId": 112305,
+      "talentSpellId": 107574,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7748 talents.protection.avatar = find_talent_spell( SPECIALIZATION, \"Avatar\", WARRIOR_PROTECTION ); avatar_t is built on talents.shared.avatar (:7304, :7928)"
+    },
+    {
+      "simcName": "booming_voice",
+      "displayNameEn": "Booming Voice",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90314,
+      "traitEntryId": 112170,
+      "talentSpellId": 202743,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7751 talents.protection.booming_voice = find_talent_spell( SPECIALIZATION, \"Booming Voice\" ); the pinned list reads talent.booming_voice.enabled"
+    },
+    {
+      "simcName": "champions_spear",
+      "displayNameEn": "Champion's Spear",
+      "tree": "CLASS",
+      "traitNodeId": 90380,
+      "traitEntryId": 112247,
+      "talentSpellId": 376079,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7587 talents.warrior.champions_spear = find_talent_spell( CLASS, \"Champion's Spear\" ); champions_spear_t is built on it (:6846-6847)"
+    },
+    {
+      "simcName": "demolish",
+      "displayNameEn": "Demolish",
+      "tree": "HERO",
+      "traitNodeId": 94818,
+      "traitEntryId": 117415,
+      "talentSpellId": 436358,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7766 talents.colossus.demolish = find_talent_spell( HERO, \"Demolish\" ); demolish_t is built on it (:3857-3858), and the pinned list reads talent.demolish"
+    },
+    {
+      "simcName": "demoralizing_shout",
+      "displayNameEn": "Demoralizing Shout",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90305,
+      "traitEntryId": 112159,
+      "talentSpellId": 1160,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7709 talents.protection.demoralizing_shout = find_talent_spell( SPECIALIZATION, \"Demoralizing Shout\" ); demoralizing_shout_t is built on it (:3909-3910)"
+    },
+    {
+      "simcName": "heavy_handed",
+      "displayNameEn": "Heavy Handed",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90313,
+      "traitEntryId": 112169,
+      "talentSpellId": 1235088,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7754 talents.protection.heavy_handed = find_talent_spell( SPECIALIZATION, \"Heavy Handed\", WARRIOR_PROTECTION ); the pinned list reads talent.heavy_handed.enabled"
+    },
+    {
+      "simcName": "ignore_pain",
+      "displayNameEn": "Ignore Pain",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90295,
+      "traitEntryId": 112149,
+      "talentSpellId": 190456,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7707 talents.protection.ignore_pain = find_talent_spell( SPECIALIZATION, \"Ignore Pain\", WARRIOR_PROTECTION ); ignore_pain_t is built on talents.shared.ignore_pain (:2475-2476, :7935)"
+    },
+    {
+      "simcName": "javelineer",
+      "displayNameEn": "Javelineer",
+      "tree": "CLASS",
+      "traitNodeId": 110118,
+      "traitEntryId": 136625,
+      "talentSpellId": 1271948,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7576 talents.warrior.javelineer = find_talent_spell( CLASS, \"Javelineer\" ); the pinned list reads talent.javelineer.enabled"
+    },
+    {
+      "simcName": "lightning_strikes",
+      "displayNameEn": "Lightning Strikes",
+      "tree": "HERO",
+      "traitNodeId": 94803,
+      "traitEntryId": 117400,
+      "talentSpellId": 434969,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7804 talents.mountain_thane.lightning_strikes = find_talent_spell( HERO, \"Lightning Strikes\" ); the pinned list reads talent.lightning_strikes"
+    },
+    {
+      "simcName": "massacre",
+      "displayNameEn": "Massacre",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 107575,
+      "traitEntryId": 132878,
+      "talentSpellId": 281001,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7750 talents.protection.massacre = find_talent_spell( SPECIALIZATION, \"Massacre\", WARRIOR_PROTECTION ); the pinned list reads talent.massacre.enabled"
+    },
+    {
+      "simcName": "ravager",
+      "displayNameEn": "Ravager",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90432,
+      "traitEntryId": 132880,
+      "talentSpellId": 228920,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 112304,
+          "displayNameEn": "Whirling Blade",
+          "talentSpellId": 1235113
+        }
+      ],
+      "binding": "sc_warrior.cpp:7759 talents.protection.ravager = find_talent_spell( SPECIALIZATION, \"Ravager\", WARRIOR_PROTECTION ); ravager_t is built on talents.shared.ravager (:5867-5868, :7931). A CHOICE node with Whirling Blade"
+    },
+    {
+      "simcName": "revenge",
+      "displayNameEn": "Revenge",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90298,
+      "traitEntryId": 112152,
+      "talentSpellId": 6572,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7710 talents.protection.revenge = find_talent_spell( SPECIALIZATION, \"Revenge\" ); revenge_t is built on it (:5996-5997)"
+    },
+    {
+      "simcName": "shattering_throw",
+      "displayNameEn": "Shattering Throw",
+      "tree": "CLASS",
+      "traitNodeId": 90351,
+      "traitEntryId": 112214,
+      "talentSpellId": 64382,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 112215,
+          "displayNameEn": "Wrecking Throw",
+          "talentSpellId": 384110
+        }
+      ],
+      "binding": "sc_warrior.cpp:7563 talents.warrior.shattering_throw = find_talent_spell( CLASS, \"Shattering Throw\" ); shattering_throw_t is built on it (:5263-5264). A CHOICE node with Wrecking Throw"
+    },
+    {
+      "simcName": "shield_charge",
+      "displayNameEn": "Shield Charge",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90317,
+      "traitEntryId": 112173,
+      "talentSpellId": 385952,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7756 talents.protection.shield_charge = find_talent_spell( SPECIALIZATION, \"Shield Charge\" ); shield_charge_t is built on it (:6153-6154)"
+    },
+    {
+      "simcName": "shield_wall",
+      "displayNameEn": "Shield Wall",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90302,
+      "traitEntryId": 112156,
+      "talentSpellId": 871,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7723 talents.protection.shield_wall = find_talent_spell( SPECIALIZATION, \"Shield Wall\" ); shield_wall_t is built on it (:7215-7216)"
+    },
+    {
+      "simcName": "snap_induction",
+      "displayNameEn": "Snap Induction",
+      "tree": "HERO",
+      "traitNodeId": 94797,
+      "traitEntryId": 118833,
+      "talentSpellId": 456270,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 117394,
+          "displayNameEn": "Flashing Skies",
+          "talentSpellId": 437079
+        }
+      ],
+      "binding": "sc_warrior.cpp:7816 talents.mountain_thane.snap_induction = find_talent_spell( HERO, \"Snap Induction\" ); the pinned list reads talent.snap_induction.enabled. A CHOICE node with Flashing Skies"
+    },
+    {
+      "simcName": "thunder_clap",
+      "displayNameEn": "Thunder Clap",
+      "tree": "CLASS",
+      "traitNodeId": 90343,
+      "traitEntryId": 112205,
+      "talentSpellId": 6343,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warrior.cpp:7538 talents.warrior.thunder_clap = find_talent_spell( CLASS, \"Thunder Clap\", specialization() ); thunder_clap_t is built on it (:4085-4086)"
+    },
+    {
+      "simcName": "wrecking_throw",
+      "displayNameEn": "Wrecking Throw",
+      "tree": "CLASS",
+      "traitNodeId": 90351,
+      "traitEntryId": 112215,
+      "talentSpellId": 384110,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 112214,
+          "displayNameEn": "Shattering Throw",
+          "talentSpellId": 64382
+        }
+      ],
+      "binding": "sc_warrior.cpp:7562 talents.warrior.wrecking_throw = find_talent_spell( CLASS, \"Wrecking Throw\" ); wrecking_throw_t is built on it (:6783-6784). A CHOICE node with Shattering Throw"
+    }
+  ],
+  "heroTrees": [
+    {
+      "simcName": "mountain_thane",
+      "subTreeId": 61,
+      "entries": [
+        {
+          "traitEntryId": 117382,
+          "traitNodeId": 94785,
+          "displayNameEn": "Thunder Blast",
+          "talentSpellId": 435607
+        },
+        {
+          "traitEntryId": 117389,
+          "traitNodeId": 94792,
+          "displayNameEn": "Gathering Clouds",
+          "talentSpellId": 436201
+        },
+        {
+          "traitEntryId": 117394,
+          "traitNodeId": 94797,
+          "displayNameEn": "Flashing Skies",
+          "talentSpellId": 437079
+        },
+        {
+          "traitEntryId": 117395,
+          "traitNodeId": 94798,
+          "displayNameEn": "Keep Your Feet on the Ground",
+          "talentSpellId": 438590
+        },
+        {
+          "traitEntryId": 117397,
+          "traitNodeId": 94800,
+          "displayNameEn": "Ground Current",
+          "talentSpellId": 436148
+        },
+        {
+          "traitEntryId": 117400,
+          "traitNodeId": 94803,
+          "displayNameEn": "Lightning Strikes",
+          "talentSpellId": 434969
+        },
+        {
+          "traitEntryId": 117402,
+          "traitNodeId": 94805,
+          "displayNameEn": "Avatar of the Storm",
+          "talentSpellId": 437134
+        },
+        {
+          "traitEntryId": 117404,
+          "traitNodeId": 94807,
+          "displayNameEn": "Burst of Power",
+          "talentSpellId": 437118
+        },
+        {
+          "traitEntryId": 117405,
+          "traitNodeId": 94808,
+          "displayNameEn": "Strength of the Mountain",
+          "talentSpellId": 437068
+        },
+        {
+          "traitEntryId": 117413,
+          "traitNodeId": 94816,
+          "displayNameEn": "Crashing Thunder",
+          "talentSpellId": 436707
+        },
+        {
+          "traitEntryId": 117414,
+          "traitNodeId": 94817,
+          "displayNameEn": "Storm Bolts",
+          "talentSpellId": 436162
+        },
+        {
+          "traitEntryId": 118833,
+          "traitNodeId": 94797,
+          "displayNameEn": "Snap Induction",
+          "talentSpellId": 456270
+        },
+        {
+          "traitEntryId": 118834,
+          "traitNodeId": 94792,
+          "displayNameEn": "Thorim's Might",
+          "talentSpellId": 436152
+        },
+        {
+          "traitEntryId": 118835,
+          "traitNodeId": 94817,
+          "displayNameEn": "Storm Shield",
+          "talentSpellId": 438597
+        },
+        {
+          "traitEntryId": 118836,
+          "traitNodeId": 94798,
+          "displayNameEn": "Steadfast as the Peaks",
+          "talentSpellId": 434970
+        },
+        {
+          "traitEntryId": 136068,
+          "traitNodeId": 109809,
+          "displayNameEn": "Capacitance",
+          "talentSpellId": 1270724
+        },
+        {
+          "traitEntryId": 136069,
+          "traitNodeId": 109810,
+          "displayNameEn": "Conductivity",
+          "talentSpellId": 1270723
+        },
+        {
+          "traitEntryId": 136070,
+          "traitNodeId": 109811,
+          "displayNameEn": "Storm Surge",
+          "talentSpellId": 275336
+        }
+      ]
+    },
+    {
+      "simcName": "colossus",
+      "subTreeId": 62,
+      "entries": [
+        {
+          "traitEntryId": 117386,
+          "traitNodeId": 94789,
+          "displayNameEn": "Boneshaker",
+          "talentSpellId": 429639
+        },
+        {
+          "traitEntryId": 117390,
+          "traitNodeId": 94793,
+          "displayNameEn": "Dominance of the Colossus",
+          "talentSpellId": 429636
+        },
+        {
+          "traitEntryId": 117391,
+          "traitNodeId": 94794,
+          "displayNameEn": "Precise Might",
+          "talentSpellId": 431548
+        },
+        {
+          "traitEntryId": 117393,
+          "traitNodeId": 94796,
+          "displayNameEn": "Practiced Strikes",
+          "talentSpellId": 429647
+        },
+        {
+          "traitEntryId": 117396,
+          "traitNodeId": 94799,
+          "displayNameEn": "One Against Many",
+          "talentSpellId": 429637
+        },
+        {
+          "traitEntryId": 117403,
+          "traitNodeId": 94806,
+          "displayNameEn": "Mountain of Muscle and Scars",
+          "talentSpellId": 429642
+        },
+        {
+          "traitEntryId": 117408,
+          "traitNodeId": 94811,
+          "displayNameEn": "Tide of Battle",
+          "talentSpellId": 429641
+        },
+        {
+          "traitEntryId": 117409,
+          "traitNodeId": 94812,
+          "displayNameEn": "Martial Expert",
+          "talentSpellId": 429638
+        },
+        {
+          "traitEntryId": 117412,
+          "traitNodeId": 94815,
+          "displayNameEn": "No Stranger to Pain",
+          "talentSpellId": 429644
+        },
+        {
+          "traitEntryId": 117415,
+          "traitNodeId": 94818,
+          "displayNameEn": "Demolish",
+          "talentSpellId": 436358
+        },
+        {
+          "traitEntryId": 117416,
+          "traitNodeId": 94819,
+          "displayNameEn": "Colossal Might",
+          "talentSpellId": 429634
+        },
+        {
+          "traitEntryId": 119856,
+          "traitNodeId": 94799,
+          "displayNameEn": "Arterial Bleed",
+          "talentSpellId": 440995
+        },
+        {
+          "traitEntryId": 119857,
+          "traitNodeId": 94815,
+          "displayNameEn": "Veteran Vitality",
+          "talentSpellId": 440993
+        },
+        {
+          "traitEntryId": 119858,
+          "traitNodeId": 94789,
+          "displayNameEn": "Earthquaker",
+          "talentSpellId": 440992
+        },
+        {
+          "traitEntryId": 136071,
+          "traitNodeId": 109812,
+          "displayNameEn": "Celeritous Conclusion",
+          "talentSpellId": 1270710
+        },
+        {
+          "traitEntryId": 136072,
+          "traitNodeId": 109813,
+          "displayNameEn": "Cut to the Bone",
+          "talentSpellId": 1270709
+        },
+        {
+          "traitEntryId": 136073,
+          "traitNodeId": 109814,
+          "displayNameEn": "Decimator",
+          "talentSpellId": 1270704
+        }
+      ]
+    }
+  ]
+}

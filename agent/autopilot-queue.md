@@ -1134,7 +1134,7 @@ status: OWNER_DECISION_REQUIRED
 dependsOn: none
 wcl: NONE
 publicContract: NONE
-ownerDecision: Whether, and on what evidence, the analyzer may model the enemy set and target count that SimulationCraft conditions read (active_enemies, spell_targets, target_if FIRST mode and target-dependent if=). TARGET_COUNT is currently declared a permanent blocker in src/simc/decision-coverage.ts. Lifting it changes evidence semantics (which enemies count as present, targetable and in range) and gates the target-selection cohort (Windwalker, Guardian, Beast Mastery, Survival).
+ownerDecision: Whether, and on what evidence, the analyzer may model the enemy set and target count that SimulationCraft conditions read (active_enemies, spell_targets, target_if FIRST mode and target-dependent if=). TARGET_COUNT is currently declared a permanent blocker in src/simc/decision-coverage.ts. Lifting it changes evidence semantics (which enemies count as present, targetable and in range) and gates the target-selection cohort (Windwalker, Guardian, Beast Mastery, Survival). ONB-A2 found it also gates Fury and Protection Warrior, whose hero-talent list dispatches read the enemy count, and much of Subtlety, through variable.targets.
 ```
 
 **Direction.** The M11-D0 census (pinned `target_if` semantics), CLAUDE.md
@@ -1216,7 +1216,7 @@ status: OWNER_DECISION_REQUIRED
 dependsOn: none
 wcl: NONE
 publicContract: NONE
-ownerDecision: Authorize one bounded, neutral, deterministic Warcraft Logs evidence campaign for the specializations that have no retained, already-authorized real evidence. Known today: Fury Warrior, Protection Warrior, Outlaw Rogue, Survival Hunter and Vengeance Demon Hunter appear in no committed fight context, and onboarding tranches append any further spec whose review finds its evidence inadequate. Appended by HEAL-B1P, and corrected by HEAL-B4P: Restoration Druid needs no campaign (its whole-fight events in gtKb2xHn87pNcFfW fight 22, actor 2, are in the retained M9-C2, M11-C4 and M11-C4b captures, which HEAL-B1P's census did not read; agent/follow-ups.md "After HEAL-B4P"). Appended by HEAL-B3: Discipline Priest (committed evidence is a filtered M13-A cast capture, actor 9, and Atonement applications by the G2 cohort246 fight 33 actor 88 onto another player; no committed or retained capture holds its whole-fight casts or any Atonement heal event, and fight 48 has no Discipline Priest, so HEAL-B3P cannot meet the healer promotion gate). (Preservation Evoker, appended by HEAL-B4, was removed by HEAL-B4P: it passed the gate on retained evidence.) The proposal is the smallest campaign: per spec, the first public raid fight in a fixed order containing it, with its actor slice (casts, auras, resources, combatant info), and no ranking or comparison data.
+ownerDecision: Authorize one bounded, neutral, deterministic Warcraft Logs evidence campaign for the specializations that have no retained, already-authorized real evidence. Known today: Fury Warrior, Protection Warrior, Outlaw Rogue, Survival Hunter and Vengeance Demon Hunter appear in no committed fight context, and onboarding tranches append any further spec whose review finds its evidence inadequate. Appended by HEAL-B1P, and corrected by HEAL-B4P: Restoration Druid needs no campaign (its whole-fight events in gtKb2xHn87pNcFfW fight 22, actor 2, are in the retained M9-C2, M11-C4 and M11-C4b captures, which HEAL-B1P's census did not read; agent/follow-ups.md "After HEAL-B4P"). Appended by HEAL-B3: Discipline Priest (committed evidence is a filtered M13-A cast capture, actor 9, and Atonement applications by the G2 cohort246 fight 33 actor 88 onto another player; no committed or retained capture holds its whole-fight casts or any Atonement heal event, and fight 48 has no Discipline Priest, so HEAL-B3P cannot meet the healer promotion gate). (Preservation Evoker, appended by HEAL-B4, was removed by HEAL-B4P: it passed the gate on retained evidence.) Appended by ONB-A2: Subtlety Rogue (committed evidence is 150 filtered M13-A casts of actor 17, with no combatant info, auras or resources, so its talents never resolve); its census also found Fury and Protection Warrior only in retained fight contexts, with no event. The proposal is the smallest campaign: per spec, the first public raid fight in a fixed order containing it, with its actor slice (casts, auras, resources, combatant info), and no ranking or comparison data.
 ```
 
 **Direction.** The owner's onboarding evidence policy: neutral,
@@ -1496,11 +1496,13 @@ The Hunt's pinned cooldown is contradicted by the wire and is never bounded, whi
 ### ONB-A1P: Havoc Demon Hunter (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-A1
 branch: autopilot/onb-a1p
 wcl: NONE
 publicContract: EXPECTED
+pr: 56
+mergeSha: 7938617e8cde3c90088d203f9de81e9a9c7352fb
 ```
 
 **Outcome.** Havoc Demon Hunter passed both rotational gates (observation and
@@ -1515,8 +1517,9 @@ fight's decisions are UNKNOWN and every resolved one names the Reaver's Glaive p
 ### ONB-A2: Subtlety Rogue, Fury Warrior and Protection Warrior (internal, Cohort A)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-A1
+branch: autopilot/onb-a2
 wcl: NONE
 publicContract: NONE
 ```
@@ -1527,6 +1530,13 @@ publicContract: NONE
   mitigation) stays its own.
 - Fury and Protection Warrior have no known retained evidence: record them
   for ONB-EV if real-evidence validation cannot be met.
+
+**Outcome.** All three are registered INTERNAL_ONLY, each with its own pinned list, data and
+evaluator, and no decision of any of them resolves today: an off-GCD action with no reviewed
+contract precedes every GCD action, and most of each list reads the enemy count. No retained
+capture can validate any of them, so requirement C is not met and all three are on ONB-EV.
+Fury and Protection Warrior's lists also need ONB-S3, which the M11-D0 census's Cohort A
+description missed (agent/architecture.md "ONB-A2"; agent/follow-ups.md "After ONB-A2").
 
 ### ONB-A2P: Subtlety Rogue, Fury Warrior and Protection Warrior (public)
 

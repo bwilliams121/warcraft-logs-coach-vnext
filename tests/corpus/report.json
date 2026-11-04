@@ -641,13 +641,40 @@
       "passed": 1
     },
     {
-      "assertions": 24,
-      "cases": 20,
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_SUBTLETY_ROGUE.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_SUBTLETY_ROGUE",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_FURY_WARRIOR.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_FURY_WARRIOR",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_PROTECTION_WARRIOR.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_PROTECTION_WARRIOR",
+      "passed": 1
+    },
+    {
+      "assertions": 27,
+      "cases": 23,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 24
+      "passed": 27
     },
     {
       "assertions": 14,
@@ -751,6 +778,20 @@
       ],
       "authority": null,
       "caseId": "application-service.discipline-priest-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.fury-warrior-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -881,6 +922,20 @@
         }
       ],
       "authority": null,
+      "caseId": "application-service.protection-warrior-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
       "caseId": "application-service.restoration-druid-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
@@ -931,6 +986,20 @@
       "caseId": "application-service.retribution-paladin-subject-is-analyzed-under-player-context",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-45s"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.subtlety-rogue-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
       "artifactId": "wcl-b1pm-fight-48-mage-121-prepull-65s",
@@ -5300,6 +5369,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_FURY_WARRIOR.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-fury-warrior.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_FURY_WARRIOR",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_HAVOC_DEMON_HUNTER.SPEC_GATE",
           "ordinal": 0,
           "status": "PASSED"
@@ -6387,6 +6470,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_PROTECTION_WARRIOR.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-protection-warrior.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_PROTECTION_WARRIOR",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_RESTORATION_DRUID.REGISTRATION_RESULT",
           "ordinal": 0,
           "status": "PASSED"
@@ -6903,6 +7000,20 @@
       "referencedArtifactIds": ["wcl-retribution-paladin-gtkb-opener"]
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_SUBTLETY_ROGUE.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-subtlety-rogue.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_SUBTLETY_ROGUE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
       "artifactId": "synthetic.graphql-page-sequence-two-pages",
       "assertions": [
         {
@@ -7238,6 +7349,9 @@
     "SIMC_APL_PALADIN_PROTECTION": "simc-33622e9d-1",
     "SIMC_APL_PALADIN_RETRIBUTION": "simc-33622e9d-1",
     "SIMC_APL_ROGUE_ASSASSINATION": "simc-33622e9d-1",
+    "SIMC_APL_ROGUE_SUBTLETY": "simc-33622e9d-1",
+    "SIMC_APL_WARRIOR_FURY": "simc-33622e9d-1",
+    "SIMC_APL_WARRIOR_PROTECTION": "simc-33622e9d-1",
     "SIMC_DBC_ROGUE_DOT_DURATIONS": "simc-33622e9d-1"
   },
   "reportVersion": 1,
@@ -7246,13 +7360,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 796,
-    "cases": 201,
+    "assertions": 802,
+    "cases": 207,
     "declared": 0,
-    "executable": 796,
+    "executable": 802,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 796
+    "passed": 802
   }
 }

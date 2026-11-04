@@ -159,6 +159,14 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
     sourceId: 18,
     archive: true,
   },
+  // ONB-A2: actor 17 of the M13-A fight context, the Subtlety Rogue the committed
+  // evidence archive context reports (also actor 70 of the G2 cohort261 fight 31 context).
+  "rogue/subtlety": {
+    artifactId: "wcl-m13a-fight-context-aug1-fight-1",
+    fightId: 1,
+    sourceId: 17,
+    archive: true,
+  },
   // HEAL-B3: actor 9 of the M13-A fight context, the Discipline Priest the
   // committed evidence archive context reports (also actor 88 of the G2
   // cohort246 fight 33 context).
@@ -177,6 +185,24 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
     sourceId: 8,
     archive: true,
   },
+};
+
+/**
+ * ONB-A2: the two INTERNAL_ONLY modules no committed context holds. Each one's strings were read
+ * offline from a retained, uncommitted context, named here. The exception cannot reach a public
+ * row: the test below refuses it for a PUBLIC module, so ONB-A2P needs committed bytes first. The
+ * class string is still proven from committed bytes, through a Warrior actor of another spec.
+ */
+const IDENTITY_RETAINED_ONLY: Readonly<Record<string, string>> = {
+  "warrior/fury": "m11c4f context-2, FPp6xjkNC9R4LrVh fight 10, actor 3: Warrior / Fury",
+  "warrior/protection": "m11c4f context-1, 2xptYq89Tb631Hmg fight 17, actor 5: Warrior / Protection",
+};
+
+/** A committed Warrior of another specialization: actor 4 of A7R6 fight 7, an Arms Warrior. */
+const COMMITTED_WARRIOR: IdentityEvidence = {
+  artifactId: "wcl-fight-context-a7r6-fight-7",
+  fightId: 7,
+  sourceId: 4,
 };
 
 const ARCHIVE_GRAPHQL: Record<string, string> = import.meta.glob("../evidence/artifacts/wcl-graphql/*.json", {
@@ -285,6 +311,12 @@ for (const { path, exportName, module } of MODULES) {
     });
 
     it("WCL identity strings are exactly what the committed capture reports for the module's evidence actor", () => {
+      if (IDENTITY_RETAINED_ONLY[identity.specId] !== undefined) {
+        expect(module.exposure).toBe("INTERNAL_ONLY");
+        expect(IDENTITY_EVIDENCE[identity.specId]).toBeUndefined();
+        expect(identity.wclClassName).toBe(wclIdentityOf(COMMITTED_WARRIOR).className);
+        return;
+      }
       const evidence = IDENTITY_EVIDENCE[identity.specId];
       expect(evidence, `no committed identity evidence recorded for ${identity.specId}`).toBeDefined();
       if (evidence === undefined) return;
@@ -429,8 +461,13 @@ describe("what the tree exports today", () => {
       ["DISCIPLINE_PRIEST_MODULE", "priest/discipline", "INTERNAL_ONLY", 0],
       ["HOLY_PRIEST_MODULE", "priest/holy", "PUBLIC", 0],
       ["ASSASSINATION_MODULE", "rogue/assassination", "PUBLIC", 0],
+      // ONB-A2: Cohort A's followers, INTERNAL_ONLY.
+      ["SUBTLETY_ROGUE_MODULE", "rogue/subtlety", "INTERNAL_ONLY", 0],
       // HEAL-A: the first healer, INTERNAL_ONLY, binding no pinned decision authority; PUBLIC since HEAL-AP.
       ["RESTORATION_SHAMAN_MODULE", "shaman/restoration", "PUBLIC", 0],
+      // ONB-A2: Cohort A's followers, INTERNAL_ONLY.
+      ["FURY_WARRIOR_MODULE", "warrior/fury", "INTERNAL_ONLY", 0],
+      ["PROTECTION_WARRIOR_MODULE", "warrior/protection", "INTERNAL_ONLY", 0],
     ]);
   });
 

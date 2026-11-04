@@ -37,6 +37,9 @@ import * as holyPriest from "./executors/spec-holy-priest.js";
 import * as disciplinePriest from "./executors/spec-discipline-priest.js";
 import * as preservationEvoker from "./executors/spec-preservation-evoker.js";
 import * as havocDemonHunter from "./executors/spec-havoc-demon-hunter.js";
+import * as subtletyRogue from "./executors/spec-subtlety-rogue.js";
+import * as furyWarrior from "./executors/spec-fury-warrior.js";
+import * as protectionWarrior from "./executors/spec-protection-warrior.js";
 import * as sharedEngine from "./executors/shared-decision-engine.js";
 import * as transport from "./executors/wcl-transport.js";
 
@@ -663,6 +666,12 @@ export async function executeAssertion(
       );
     case "SPEC_HAVOC_DEMON_HUNTER.SPEC_GATE":
       return havocDemonHunter.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_SUBTLETY_ROGUE.SPEC_GATE":
+      return subtletyRogue.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_FURY_WARRIOR.SPEC_GATE":
+      return furyWarrior.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_PROTECTION_WARRIOR.SPEC_GATE":
+      return protectionWarrior.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_PRESERVATION_EVOKER.REGISTRATION_RESULT":
       return preservationEvoker.registrationResult(
         corpus,
@@ -792,6 +801,9 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_HAVOC_DEMON_HUNTER.DECISION_COVERAGE",
   "SPEC_HAVOC_DEMON_HUNTER.COVERAGE_SUMMARY",
   "SPEC_HAVOC_DEMON_HUNTER.SPEC_GATE",
+  "SPEC_SUBTLETY_ROGUE.SPEC_GATE",
+  "SPEC_FURY_WARRIOR.SPEC_GATE",
+  "SPEC_PROTECTION_WARRIOR.SPEC_GATE",
   "SPEC_PRESERVATION_EVOKER.REGISTRATION_RESULT",
   "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
   "PUBLIC_CONTRACT.REST_MCP_PARITY",

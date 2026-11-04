@@ -1,0 +1,397 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_ROGUE_SUBTLETY",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "rogue",
+    "specName": "subtlety"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "UNKNOWN",
+    "sourcePath": "engine/class_modules/apl/apl_rogue.cpp",
+    "sourceSha256": "a74e4daa8376197d94f8449555035b3fd67634db450d2f7cb16bf84233939eb3",
+    "sourceByteLength": 26074,
+    "regionStartMarker": "//subtlety_apl_start",
+    "regionEndMarker": "//subtlety_apl_end",
+    "extractedOn": "2026-11-03",
+    "extractorVersion": 1,
+    "regionSha256": "065f1a57d8d63fc5a7fff496c054daf37ff9c5ea13bbbfdb8e8c57dae4da3aee",
+    "livePtrPolicy": "NO_PTR_REGION",
+    "dispatchSource": {
+      "sourcePath": "engine/class_modules/sc_rogue.cpp",
+      "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e"
+    }
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "variable,name=stealth,value=buff.shadow_dance.up|buff.stealth.up|buff.vanish.up",
+          "comment": null,
+          "sourceLine": 216
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "variable,name=targets,value=spell_targets.shuriken_storm",
+          "comment": null,
+          "sourceLine": 217
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=racial_sync,value=(buff.shadow_blades.up&buff.shadow_dance.up)|fight_remains<20",
+          "comment": null,
+          "sourceLine": 218
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=dance_condition,value=!variable.stealth&energy>=30&buff.slice_and_dice.up&(combo_points<=2&talent.deathstalkers_mark|combo_points>=6)",
+          "comment": null,
+          "sourceLine": 219
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=build_at_max_for_apex,value=talent.ancient_arts_3&!buff.ancient_arts.up&buff.shadow_techniques.stack>=5",
+          "comment": null,
+          "sourceLine": 220
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "stealth",
+          "comment": null,
+          "sourceLine": 221
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "call_action_list,name=race",
+          "comment": null,
+          "sourceLine": 222
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "call_action_list,name=item",
+          "comment": null,
+          "sourceLine": 223
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "call_action_list,name=cds",
+          "comment": null,
+          "sourceLine": 224
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "shuriken_storm,if=variable.build_at_max_for_apex&variable.targets>=3&(buff.supercharge_1.up|cooldown.secret_technique.ready)",
+          "comment": null,
+          "sourceLine": 225
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "gloomblade,if=variable.build_at_max_for_apex&variable.targets<=2&(buff.darkest_night.up|(talent.unseen_blade&buff.supercharge_1.up)|cooldown.secret_technique.ready)&buff.lingering_shadow.stack>=35",
+          "comment": null,
+          "sourceLine": 226
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "shadowstrike,if=variable.build_at_max_for_apex&variable.targets<=2&(buff.darkest_night.up|(talent.unseen_blade&buff.supercharge_1.up)|cooldown.secret_technique.ready)",
+          "comment": null,
+          "sourceLine": 227
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "call_action_list,name=finish,if=combo_points>=cp_max_spend-!buff.darkest_night.up",
+          "comment": null,
+          "sourceLine": 228
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "call_action_list,name=build,if=variable.stealth|energy>60",
+          "comment": null,
+          "sourceLine": 229
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "call_action_list,name=fill,if=!variable.stealth",
+          "comment": null,
+          "sourceLine": 230
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "apply_poison",
+          "comment": null,
+          "sourceLine": 209
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": null,
+          "sourceLine": 210
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=priority_rotation,value=priority_rotation",
+          "comment": null,
+          "sourceLine": 211
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=trinket_sync_slot,value=1,if=trinket.1.has_use_buff&(!trinket.2.has_use_buff|trinket.1.cooldown.duration>=trinket.2.cooldown.duration)",
+          "comment": "Check for on-use stat trinkets and which slot has the most powerful effect (ie longest cooldown).",
+          "sourceLine": 212
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=trinket_sync_slot,value=2,if=trinket.2.has_use_buff&(!trinket.1.has_use_buff|trinket.2.cooldown.duration>trinket.1.cooldown.duration)",
+          "comment": null,
+          "sourceLine": 213
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "stealth",
+          "comment": null,
+          "sourceLine": 214
+        }
+      ]
+    },
+    {
+      "listName": "cds",
+      "receiverIdentifier": "cds",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "goremaws_bite,if=buff.shadow_dance.up&!buff.ancient_arts.up|fight_remains<=14",
+          "comment": "Cooldowns",
+          "sourceLine": 232
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "shadow_blades,if=variable.dance_condition&cooldown.shadow_dance.charges_fractional>=1+0.8*talent.deathstalkers_mark&(buff.ancient_arts.up|!talent.unseen_blade)|(fight_remains<=20|target.time_to_die.remains<=20)",
+          "comment": null,
+          "sourceLine": 233
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "shadow_dance,if=variable.dance_condition&talent.deathstalkers_mark&(variable.targets<=3&(buff.darkest_night.up|cooldown.secret_technique.ready&debuff.deathstalkers_mark.stack<=1)|variable.targets>3&debuff.deathstalkers_mark.stack>=2)&(cooldown.shadow_blades.remains>=35-cooldown.secret_technique.duration)|(fight_remains<=10|target.time_to_die-remains<=9)",
+          "comment": "Deathstalker: Send Shadow Dance when Darkest Night is up on ST and when its not up on AoE.",
+          "sourceLine": 234
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "shadow_dance,if=variable.dance_condition&talent.unseen_blade&(cooldown.secret_technique.ready&(cooldown.shadow_blades.remains>=25-cooldown.secret_technique.duration))|(fight_remains<=10|target.time_to_die-remains<=9)",
+          "comment": "Trickster: Send Shadow Dance whenever Secret Technique is ready",
+          "sourceLine": 235
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "shadow_dance,if=buff.shadow_blades.up&(talent.unseen_blade|variable.targets>=3)",
+          "comment": "Trickster: Second Shadow Dance later during Shadow Blades for better alignment.",
+          "sourceLine": 236
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "vanish,if=!variable.stealth&energy>=50&!buff.subterfuge.up&combo_points<=2",
+          "comment": "Vanish whenever outside of CDs.",
+          "sourceLine": 237
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "shadowmeld,if=energy>=50&!variable.stealth&combo_points.deficit>=2",
+          "comment": null,
+          "sourceLine": 238
+        }
+      ]
+    },
+    {
+      "listName": "race",
+      "receiverIdentifier": "race",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "blood_fury,if=variable.racial_sync",
+          "comment": "Race Cooldowns",
+          "sourceLine": 240
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "berserking,if=variable.racial_sync",
+          "comment": null,
+          "sourceLine": 241
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "fireblood,if=variable.racial_sync",
+          "comment": null,
+          "sourceLine": 242
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "ancestral_call,if=buff.shadow_blades.up",
+          "comment": null,
+          "sourceLine": 243
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "invoke_external_buff,name=power_infusion,if=variable.racial_sync",
+          "comment": null,
+          "sourceLine": 244
+        }
+      ]
+    },
+    {
+      "listName": "item",
+      "receiverIdentifier": "item",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "potion,if=buff.shadow_blades.up|fight_remains<30",
+          "comment": "Trinket and Items",
+          "sourceLine": 246
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "use_item,name=algethar_puzzle_box,if=cooldown.shadow_blades.ready&cooldown.secret_technique.remains<=2&combo_points>=6",
+          "comment": null,
+          "sourceLine": 247
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_items,slots=trinket1,if=(variable.trinket_sync_slot=1&(buff.shadow_blades.up|fight_remains<=20)|(variable.trinket_sync_slot=2&(!trinket.2.cooldown.ready&cooldown.shadow_blades.remains>20))|!variable.trinket_sync_slot)",
+          "comment": null,
+          "sourceLine": 248
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "use_items,slots=trinket2,if=(variable.trinket_sync_slot=2&(buff.shadow_blades.up|fight_remains<=20)|(variable.trinket_sync_slot=1&(!trinket.1.cooldown.ready&cooldown.shadow_blades.remains>20))|!variable.trinket_sync_slot)",
+          "comment": null,
+          "sourceLine": 249
+        }
+      ]
+    },
+    {
+      "listName": "finish",
+      "receiverIdentifier": "finish",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "eviscerate,if=buff.darkest_night.up|!buff.slice_and_dice.up",
+          "comment": null,
+          "sourceLine": 251
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "secret_technique,if=buff.shadow_dance.up",
+          "comment": null,
+          "sourceLine": 252
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "secret_technique,if=talent.unseen_blade&cooldown.secret_technique.duration<18&!cooldown.shadow_dance.ready",
+          "comment": "Cast Secret Technique on cooldown as trickster if Shadow Dance is not ready",
+          "sourceLine": 253
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "coup_de_grace,if=cooldown.secret_technique.remains>=3|buff.shadow_dance.up",
+          "comment": null,
+          "sourceLine": 254
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "black_powder,if=talent.unseen_blade&variable.targets>=(3-talent.potent_powder)&(cooldown.secret_technique.remains>=3|buff.shadow_dance.up|buff.shadow_blades.up)",
+          "comment": "Pool some Shadow Technique Stacks as Trickster before entering Shadow Dance by not finishing right before.",
+          "sourceLine": 255
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "black_powder,if=talent.deathstalkers_mark&variable.targets>=2",
+          "comment": "As Deathstalker just press BP",
+          "sourceLine": 256
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "eviscerate,if=cooldown.secret_technique.remains>=3&talent.unseen_blade|buff.shadow_dance.up|buff.shadow_blades.up|debuff.deathstalkers_mark.stack>1|debuff.deathstalkers_mark.stack=1&buff.shadow_techniques.stack>=5",
+          "comment": "Pool some Shadow Technique Stacks as Trickster before entering Shadow Dance by not finishing right before.",
+          "sourceLine": 257
+        }
+      ]
+    },
+    {
+      "listName": "build",
+      "receiverIdentifier": "build",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "shuriken_storm,if=buff.shadow_dance.up&buff.premeditation.up&(debuff.deathstalkers_mark.up|buff.darkest_night.up|!talent.deathstalkers_mark)",
+          "comment": null,
+          "sourceLine": 259
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "shadowstrike,if=!debuff.deathstalkers_mark.up&talent.deathstalkers_mark&!buff.darkest_night.up|variable.targets<=2-set_bonus.midnight_season_2_2pc|variable.priority_rotation",
+          "comment": null,
+          "sourceLine": 260
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "shuriken_storm,if=variable.targets>1",
+          "comment": null,
+          "sourceLine": 261
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "gloomblade,if=variable.targets<2&!variable.stealth",
+          "comment": null,
+          "sourceLine": 262
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "backstab,if=variable.targets<2&!variable.stealth",
+          "comment": null,
+          "sourceLine": 263
+        }
+      ]
+    },
+    {
+      "listName": "fill",
+      "receiverIdentifier": "fill",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "arcane_torrent,if=energy.deficit>=15+energy.regen",
+          "comment": "This list usually contains Cooldowns with negligible impact that causes global cooldowns",
+          "sourceLine": 265
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "arcane_pulse",
+          "comment": null,
+          "sourceLine": 266
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "lights_judgment",
+          "comment": null,
+          "sourceLine": 267
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "bag_of_tricks",
+          "comment": null,
+          "sourceLine": 268
+        }
+      ]
+    }
+  ]
+}

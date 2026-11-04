@@ -66,12 +66,12 @@ row).
 | `druid/feral` | B | local raw | blocked | PARTIAL | `rip-rake-snapshot-refresh` |
 | `hunter/survival` | B | none | not yet | UNASSESSED | — |
 | `monk/windwalker` | B | none | not yet | UNASSESSED | — |
-| `rogue/subtlety` | B | none | not yet | UNASSESSED | — |
+| `rogue/subtlety` | B — INTERNAL_ONLY since ONB-A2 | committed filtered casts only (M13-A actor 17), cannot validate | audited | UNASSESSED | — |
 | `shaman/enhancement` | B | none | not yet | UNASSESSED | — |
 | `druid/guardian` | B | none | not yet | UNASSESSED | — |
 | `warrior/arms` | C | local raw | blocked | PARTIAL | `colossus-smash-window-fill` |
-| `warrior/fury` | C | none | not yet | UNASSESSED | — |
-| `warrior/protection` | C | none | not yet | UNASSESSED | — |
+| `warrior/fury` | C — INTERNAL_ONLY since ONB-A2 | uncommitted contexts only | audited | UNASSESSED | — |
+| `warrior/protection` | C — INTERNAL_ONLY since ONB-A2 | uncommitted context only | audited | UNASSESSED | — |
 | `deathknight/blood` | C — INTERNAL_ONLY measurement slice at M11-B2, PUBLIC since M11-B12 (San'layn-validated) | committed sanitized (A7R6 actor 14, 165 s; gtKb actor 14, 20 s) | audited (M11-B2: the 12.1.0 list extracted with its client-version guards evaluated; Coagulopathy line absent at this pin) | SPECIFIC_QUESTIONS_IDENTIFIED | `coagulopathy-maintenance-clip` (SUPERSEDED — no pinned line at 12.1.0), `bone-shield-stack-maintenance` (IMPLEMENTED_PUBLIC since M11-B12: the count is exact at 114 of 123 decisions, a finite set of exact counts at 7 more inside the pre-decision window, and `buff.bone_shield.remains` is the M11-B8 order-invariant floor; the whole observed offensive slice is 42 MATCH / 9 REJECTED / 72 UNKNOWN) |
 | `deathknight/frost` | C | local raw | blocked | PARTIAL | `rune-and-runic-power-pooling` |
 | `monk/brewmaster` | C — INTERNAL_ONLY measurement slice at M11-C2, PUBLIC since M11-C4j (Shado-Pan-validated) | committed sanitized (gtKb actor 4, full fight; rXAf actor 11, 165 s; both Shado-Pan) | audited (M11-C0/C1: the namespace-selected 12.1.0 list, six lists and sixty-two actions) | PARTIAL | `celestial-brew-charge-capping` (charge state declared, UNKNOWN; the observed offensive slice measures 109 MATCH / 10 REJECTED / 70 UNKNOWN over subject 1's full fight and 47 / 1 / 91 over subject 2's 165 s window) |

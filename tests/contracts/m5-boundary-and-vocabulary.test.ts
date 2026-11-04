@@ -459,6 +459,13 @@ describe("M5 forms no unearned verdict", () => {
       // ONB-A1: the specialization's facade and domain vocabulary.
       "src/specs/demonhunter/havoc/observed-analysis.ts",
       "src/specs/demonhunter/havoc/domains.ts",
+      // ONB-A2: Cohort A's followers, the same two modules each.
+      "src/specs/rogue/subtlety/observed-analysis.ts",
+      "src/specs/rogue/subtlety/domains.ts",
+      "src/specs/warrior/fury/observed-analysis.ts",
+      "src/specs/warrior/fury/domains.ts",
+      "src/specs/warrior/protection/observed-analysis.ts",
+      "src/specs/warrior/protection/domains.ts",
     ];
     for (const path of M5_FILES) {
       const code = codeOf(path);

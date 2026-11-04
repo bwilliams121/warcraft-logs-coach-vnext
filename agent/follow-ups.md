@@ -29,6 +29,52 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After ONB-A2: what Cohort A's followers do not establish
+
+**Raised:** ONB-A2 (2026-11-03). Coverage, not soundness: every decision is UNKNOWN.
+
+**No real-evidence validation exists for any of the three, and ONB-A2P cannot promote them.** The queue's requirement C
+could not be met. Retained material, from a census of every capture:
+
+| Specialization | What is retained | Why it cannot validate |
+| --- | --- | --- |
+| `rogue/subtlety` | M13-A `Gw2kXrTfLWcDdhFY` fight 1 actor 17: 150 filtered casts, committed. Contexts only: G2 cohort261 fight 31 actor 70, m11c4f context-1 fight 17 actor 3 | no combatant info, aura or resource events, so its talents never resolve |
+| `warrior/fury` | m11c4f context-2 fight 10 actor 3 and context-4 fight 23 actor 21, contexts only and uncommitted | no event |
+| `warrior/protection` | m11c4f context-1 fight 17 actor 5, context only and uncommitted | no event |
+
+All three are appended to ONB-EV. ONB-A2P should record them as not promoted, as HEAL-B3P did, until that campaign runs.
+
+**Fury and Protection Warrior are in the wrong cohort.** Each pinned list dispatches on the enemy count, so ONB-S3 gates them.
+The M11-D0 census's "no `run_action_list`" description of Cohort A does not hold for either. ONB-S3's owner decision now names
+them, and this does not reorder the queue. Subtlety reads the enemy count too, through `variable.targets`.
+
+**What a follower with real evidence must measure before it binds anything**, the failure modes Havoc found:
+
+- **A logged cast may not be a press.** Fury's Rampage and Whirlwind execute child attacks, Thunder Blast replaces Thunder Clap,
+  and Subtlety's Secret Technique and Coup de Grace run clones. Nothing here is corroborated against a real `cast` event.
+- **A pinned id may not be the wire's.** Fury binds Execute to 5308 alone, as `execute_fury_t` is built. A log reporting Massacre's
+  280735 is excluded `EXECUTION_LANE_NOT_ESTABLISHED`, and the same goes for any other replacement id.
+- **A cooldown may contradict the wire.** Nothing is derived, so The Hunt's lesson has not been tested on these.
+- **The own-cast Rage reading is unproven on these.** `ownCastResourceAt` was proven on other specializations. Rage's scale comes
+  from the shared contract and no Fury or Protection event has been read through it.
+
+**State not bound.** Auras, cooldowns (with charges), the target's health and casts, `cp_max_spend`, `set_bonus.*`, and the
+`ancient_arts` tiers: one node with three rows, which the talent extractor does not pick between.
+
+**Transition contracts not reviewed.** Only `auto_attack`. Charge, Heroic Leap, Pummel, Recklessness, Avatar, Shield Block, Ignore
+Pain, Shield Wall, Champion's Leap, Stealth, Shadow Blades, Shadow Dance and Vanish all refuse. Most write resources or a buff a
+condition reads.
+
+**`arcane_pulse` is a racial the shared non-domain table omits.** `player_t::get_racial_actions()` does not list it, though
+`arcane_pulse_t` is a `racial_spell_t` (player.cpp:9299). Subtlety's `fill[1]` refuses if a scan reaches it, which is fail-closed.
+Moving it into the table is a shared decision for every list that names it, and no decision reaches it today.
+
+**Protection's Ignore Pain condition refuses as TOO_MANY_UNRESOLVED_ATOMS.** Binding more of it would not make it a mitigation
+judgment, only let a scan continue. It needs a reviewed reason before anyone does that.
+
+**Identity proof for a Warrior spec string.** `IDENTITY_RETAINED_ONLY` in the conformance test holds Fury and Protection Warrior.
+It is refused on a PUBLIC module, so a committed context is a precondition of promotion.
+
 ## After ONB-A1: what the Havoc slice does not establish
 
 **Raised:** ONB-A1 (2026-11-03). Coverage, not soundness: each is UNKNOWN or refused.

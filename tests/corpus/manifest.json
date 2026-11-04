@@ -5236,6 +5236,37 @@
       ]
     },
     {
+      "caseId": "application-service.fury-warrior-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Fury Warrior registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "warrior/fury",
+            "expected": {
+              "internalAnalyzerId": "warrior-fury-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Fury Warrior is registered INTERNAL_ONLY in ONB-A2. No retained capture can validate it, so a public request must keep receiving SPEC_NOT_SUPPORTED until ONB-A2P can promote it on real evidence."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
+      ]
+    },
+    {
       "caseId": "application-service.havoc-demon-hunter-registration-is-public-since-onb-a1p",
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "APPLICATION_SERVICE",
@@ -5504,6 +5535,37 @@
       ]
     },
     {
+      "caseId": "application-service.protection-warrior-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Protection Warrior registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "warrior/protection",
+            "expected": {
+              "internalAnalyzerId": "warrior-protection-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Protection Warrior is registered INTERNAL_ONLY in ONB-A2. No retained capture can validate it, so a public request must keep receiving SPEC_NOT_SUPPORTED until ONB-A2P can promote it on real evidence."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
+      ]
+    },
+    {
       "caseId": "application-service.restoration-druid-registration-is-internal-only",
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "APPLICATION_SERVICE",
@@ -5671,6 +5733,37 @@
         "tests/contracts/m11a4-retribution-registration.test.ts",
         "tests/contracts/m11-promotion-evidence-gate.test.ts",
         "tests/contracts/m11a5-retribution-public-projection.test.ts"
+      ]
+    },
+    {
+      "caseId": "application-service.subtlety-rogue-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Subtlety Rogue registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "rogue/subtlety",
+            "expected": {
+              "internalAnalyzerId": "rogue-subtlety-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Subtlety Rogue is registered INTERNAL_ONLY in ONB-A2. No retained capture can validate it, so a public request must keep receiving SPEC_NOT_SUPPORTED until ONB-A2P can promote it on real evidence."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
       ]
     },
     {
@@ -20154,6 +20247,29 @@
       ]
     },
     {
+      "caseId": "spec-fury-warrior.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_FURY_WARRIOR",
+      "contractUnderTest": "src/specs/warrior/fury/observed-analysis.ts analyzeObservedFuryWarriorDecisions (the spec gate)",
+      "purpose": "The Fury Warrior facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_FURY_WARRIOR.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Fury Warrior list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-a2-cohort-a-followers.test.ts"]
+    },
+    {
       "caseId": "spec-havoc-demon-hunter.the-facade-refuses-every-other-specialization",
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "SPEC_HAVOC_DEMON_HUNTER",
@@ -23453,6 +23569,29 @@
       ]
     },
     {
+      "caseId": "spec-protection-warrior.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_PROTECTION_WARRIOR",
+      "contractUnderTest": "src/specs/warrior/protection/observed-analysis.ts analyzeObservedProtectionWarriorDecisions (the spec gate)",
+      "purpose": "The Protection Warrior facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_WARRIOR.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Protection Warrior list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-a2-cohort-a-followers.test.ts"]
+    },
+    {
       "caseId": "spec-restoration-druid.unstated-subject-yields-no-healer-finding",
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "SPEC_RESTORATION_DRUID",
@@ -25002,6 +25141,29 @@
         "tests/unit/m11a4-retribution-bindings.test.ts",
         "tests/contracts/m11a4-known-buff-stacks.test.ts"
       ]
+    },
+    {
+      "caseId": "spec-subtlety-rogue.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_SUBTLETY_ROGUE",
+      "contractUnderTest": "src/specs/rogue/subtlety/observed-analysis.ts analyzeObservedSubtletyRogueDecisions (the spec gate)",
+      "purpose": "The Subtlety Rogue facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_SUBTLETY_ROGUE.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Subtlety Rogue list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-a2-cohort-a-followers.test.ts"]
     },
     {
       "caseId": "wcl-transport.cursor-is-passed-verbatim-and-nothing-is-deduplicated",

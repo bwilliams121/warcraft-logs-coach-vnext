@@ -235,9 +235,9 @@ describe("a mismatched result cannot reach observedDecisionViewOf", () => {
   it("an analysis owned by no registration in the catalog throws before any adapter runs", () => {
     const real = realAssassinationAnalysis();
     if (real.status !== "ANALYZED") throw new Error("expected ANALYZED");
-    // No registration carries this id. (Since M10-C `paladin/protection` DOES,
-    // so the unregistered case needs an id outside the build's vocabulary.)
-    const foreign = { ...real, specId: "warrior/protection" as unknown as "rogue/assassination" };
+    // No registration carries this id. (Since M10-C `paladin/protection` DOES, and since
+    // ONB-A2 `warrior/protection` does, so the unregistered case uses an id no roster has.)
+    const foreign = { ...real, specId: "notaclass/notaspec" as unknown as "rogue/assassination" };
     expect(() => observedDecisionViewOf(PRODUCTION_CATALOG, foreign)).toThrow(AnalyzerCatalogIntegrityError);
   });
 

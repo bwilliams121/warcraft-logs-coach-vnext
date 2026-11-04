@@ -1,0 +1,499 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_WARRIOR_PROTECTION",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "warrior",
+    "specName": "protection"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "UNKNOWN",
+    "sourcePath": "engine/class_modules/apl/apl_warrior.cpp",
+    "sourceSha256": "bc9473e51e3d4d233793d6d165eb0165183f61eebde5c119ddd8aaa7b1202ec1",
+    "sourceByteLength": 30516,
+    "regionStartMarker": "//protection_apl_start",
+    "regionEndMarker": "//protection_apl_end",
+    "extractedOn": "2026-11-03",
+    "extractorVersion": 1,
+    "regionSha256": "d545e36d629c3dd693cbfa2a901ff6d4ee73d70f89af2ec432815fbf6f2af7cb",
+    "livePtrPolicy": "NO_PTR_REGION",
+    "dispatchSource": {
+      "sourcePath": "engine/class_modules/sc_warrior.cpp",
+      "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e"
+    }
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "auto_attack",
+          "comment": null,
+          "sourceLine": 346
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "call_action_list,name=variables",
+          "comment": null,
+          "sourceLine": 347
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "charge,if=time=0",
+          "comment": null,
+          "sourceLine": 348
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "use_item,name=tome_of_lights_devotion,if=buff.inner_resilience.up",
+          "comment": null,
+          "sourceLine": 349
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "use_items",
+          "comment": null,
+          "sourceLine": 350
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "avatar,if=buff.thunder_blast.down|buff.thunder_blast.stack<=2",
+          "comment": null,
+          "sourceLine": 351
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "shield_wall",
+          "comment": null,
+          "sourceLine": 352
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "blood_fury",
+          "comment": null,
+          "sourceLine": 353
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "berserking",
+          "comment": null,
+          "sourceLine": 354
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "arcane_torrent",
+          "comment": null,
+          "sourceLine": 355
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "lights_judgment",
+          "comment": null,
+          "sourceLine": 356
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "fireblood",
+          "comment": null,
+          "sourceLine": 357
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "ancestral_call",
+          "comment": null,
+          "sourceLine": 358
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "bag_of_tricks",
+          "comment": null,
+          "sourceLine": 359
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "potion,if=buff.avatar.up|buff.avatar.up&target.health.pct<=20",
+          "comment": null,
+          "sourceLine": 360
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "ignore_pain,if=target.health.pct>=20&(rage.deficit<=15&cooldown.shield_slam.ready|rage.deficit<=20&cooldown.shield_charge.ready|rage.deficit<=20&cooldown.demoralizing_shout.ready&talent.booming_voice.enabled|rage.deficit<=15|rage.deficit<=40&cooldown.shield_slam.ready&buff.violent_outburst.up&talent.heavy_repercussions.enabled&talent.practiced_strikes.enabled|rage.deficit<=17&cooldown.shield_slam.ready&talent.heavy_repercussions.enabled|rage.deficit<=18&cooldown.shield_slam.ready&talent.practiced_strikes.enabled)|(rage>=70|buff.seeing_red.stack=7&rage>=35)&cooldown.shield_slam.remains<=1&buff.shield_block.remains,use_off_gcd=1",
+          "comment": null,
+          "sourceLine": 361
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "ravager",
+          "comment": null,
+          "sourceLine": 362
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "thunder_blast,if=talent.booming_voice.enabled&buff.thunder_blast.stack=2&talent.snap_induction.enabled",
+          "comment": null,
+          "sourceLine": 363
+        },
+        {
+          "priorityOrdinal": 18,
+          "actionStringVerbatim": "demoralizing_shout,if=talent.booming_voice.enabled",
+          "comment": null,
+          "sourceLine": 364
+        },
+        {
+          "priorityOrdinal": 19,
+          "actionStringVerbatim": "champions_leap",
+          "comment": null,
+          "sourceLine": 365
+        },
+        {
+          "priorityOrdinal": 20,
+          "actionStringVerbatim": "champions_spear",
+          "comment": null,
+          "sourceLine": 366
+        },
+        {
+          "priorityOrdinal": 21,
+          "actionStringVerbatim": "thunder_blast,if=spell_targets.thunder_blast>=2&buff.thunder_blast.stack=2",
+          "comment": null,
+          "sourceLine": 367
+        },
+        {
+          "priorityOrdinal": 22,
+          "actionStringVerbatim": "demolish,if=buff.colossal_might.stack>=3",
+          "comment": null,
+          "sourceLine": 368
+        },
+        {
+          "priorityOrdinal": 23,
+          "actionStringVerbatim": "shield_charge",
+          "comment": null,
+          "sourceLine": 369
+        },
+        {
+          "priorityOrdinal": 24,
+          "actionStringVerbatim": "shield_block,if=buff.shield_block.remains<=10",
+          "comment": null,
+          "sourceLine": 370
+        },
+        {
+          "priorityOrdinal": 25,
+          "actionStringVerbatim": "run_action_list,name=colossus_aoe,if=hero_tree.colossus&spell_targets.thunder_clap>=3",
+          "comment": null,
+          "sourceLine": 371
+        },
+        {
+          "priorityOrdinal": 26,
+          "actionStringVerbatim": "run_action_list,name=thane_aoe,if=hero_tree.mountain_thane&spell_targets.thunder_clap>=3",
+          "comment": null,
+          "sourceLine": 372
+        },
+        {
+          "priorityOrdinal": 27,
+          "actionStringVerbatim": "run_action_list,name=colossus_st,if=talent.demolish",
+          "comment": null,
+          "sourceLine": 373
+        },
+        {
+          "priorityOrdinal": 28,
+          "actionStringVerbatim": "run_action_list,name=thane_st,if=talent.lightning_strikes",
+          "comment": null,
+          "sourceLine": 374
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": null,
+          "sourceLine": 342
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "battle_stance,toggle=on",
+          "comment": null,
+          "sourceLine": 343
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_item,name=algethar_puzzle_box",
+          "comment": null,
+          "sourceLine": 344
+        }
+      ]
+    },
+    {
+      "listName": "colossus_aoe",
+      "receiverIdentifier": "colossus_aoe",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "thunder_clap,if=buff.ravager.up&!dot.rend_dot.ticking",
+          "comment": null,
+          "sourceLine": 376
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "revenge,if=buff.revenge.up",
+          "comment": null,
+          "sourceLine": 377
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "shield_slam,if=buff.phalanx.up&(buff.violent_outburst.up|rage<30)",
+          "comment": null,
+          "sourceLine": 378
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "thunder_clap,if=rage<30",
+          "comment": null,
+          "sourceLine": 379
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "revenge,if=spell_targets.revenge>=3",
+          "comment": null,
+          "sourceLine": 380
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "shield_slam",
+          "comment": null,
+          "sourceLine": 381
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "thunder_clap",
+          "comment": null,
+          "sourceLine": 382
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "revenge,if=rage>=30",
+          "comment": null,
+          "sourceLine": 383
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "execute,if=spell_targets.execute>=2&(rage>=50|buff.sudden_death.up)&talent.heavy_handed.enabled",
+          "comment": null,
+          "sourceLine": 384
+        }
+      ]
+    },
+    {
+      "listName": "colossus_st",
+      "receiverIdentifier": "colossus_st",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "shield_slam",
+          "comment": null,
+          "sourceLine": 386
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "thunder_clap,if=!buff.phalanx.up",
+          "comment": null,
+          "sourceLine": 387
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "execute",
+          "comment": null,
+          "sourceLine": 388
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "revenge,if=buff.revenge.up",
+          "comment": null,
+          "sourceLine": 389
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "thunder_clap",
+          "comment": null,
+          "sourceLine": 390
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "revenge",
+          "comment": null,
+          "sourceLine": 391
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "thunder_clap,if=(spell_targets.thunder_clap>=1|cooldown.shield_slam.remains)&hero_tree.mountain_thane&rage<=80",
+          "comment": null,
+          "sourceLine": 392
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "revenge,if=rage>=80&!variable.execute_phase|buff.revenge.up&variable.execute_phase&rage<=18&cooldown.shield_slam.remains|buff.revenge.up&!variable.execute_phase",
+          "comment": null,
+          "sourceLine": 393
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "wrecking_throw,if=talent.javelineer.enabled",
+          "comment": null,
+          "sourceLine": 394
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "shattering_throw,if=talent.javelineer.enabled",
+          "comment": null,
+          "sourceLine": 395
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "devastate",
+          "comment": null,
+          "sourceLine": 396
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "thunder_clap,if=!buff.phalanx.up",
+          "comment": null,
+          "sourceLine": 410
+        }
+      ]
+    },
+    {
+      "listName": "thane_aoe",
+      "receiverIdentifier": "thane_aoe",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "thunder_blast",
+          "comment": null,
+          "sourceLine": 398
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "shield_slam,if=buff.phalanx.up",
+          "comment": null,
+          "sourceLine": 399
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "thunder_clap",
+          "comment": null,
+          "sourceLine": 400
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "revenge,if=buff.revenge.up",
+          "comment": null,
+          "sourceLine": 401
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "shield_slam",
+          "comment": null,
+          "sourceLine": 402
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "revenge",
+          "comment": null,
+          "sourceLine": 403
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "execute,if=spell_targets.execute=3&(rage>=50|buff.sudden_death.up)&talent.heavy_handed.enabled",
+          "comment": null,
+          "sourceLine": 404
+        }
+      ]
+    },
+    {
+      "listName": "thane_st",
+      "receiverIdentifier": "thane_st",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "thunder_blast",
+          "comment": null,
+          "sourceLine": 406
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "shield_slam",
+          "comment": null,
+          "sourceLine": 407
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "execute",
+          "comment": null,
+          "sourceLine": 408
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "revenge,if=buff.revenge.up",
+          "comment": null,
+          "sourceLine": 412
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "thunder_clap",
+          "comment": null,
+          "sourceLine": 413
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "thunder_blast,if=(spell_targets.thunder_clap>=1|cooldown.shield_slam.remains)",
+          "comment": null,
+          "sourceLine": 414
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "wrecking_throw,if=talent.javelineer.enabled",
+          "comment": null,
+          "sourceLine": 415
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "shattering_throw,if=talent.javelineer.enabled",
+          "comment": null,
+          "sourceLine": 416
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "revenge",
+          "comment": null,
+          "sourceLine": 417
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "devastate",
+          "comment": null,
+          "sourceLine": 418
+        }
+      ]
+    },
+    {
+      "listName": "variables",
+      "receiverIdentifier": "variables",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "variable,name=execute_phase,value=(talent.massacre.enabled&target.health.pct<35)|target.health.pct<20",
+          "comment": null,
+          "sourceLine": 420
+        }
+      ]
+    }
+  ]
+}
