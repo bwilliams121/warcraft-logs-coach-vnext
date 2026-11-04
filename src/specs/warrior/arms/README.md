@@ -3,6 +3,8 @@
 **Exposure: `INTERNAL_ONLY`.** The registration (`warrior-arms-observed-decisions`, `warrior/arms`) is in the production
 catalog for the internal lookup only. The public lookup and the identity table refuse it.
 
+**Not promoted by ONB-B1P.** It cannot pass the rotational gates, and it waits on ONB-S3 rather than on evidence: see "Other subjects" below.
+
 **Cohort B's representative, and it resolves nothing today.** No decision of this specialization reaches MATCH or REJECTED:
 every GCD action of the pinned list sits behind a `run_action_list` gated on the enemy count, which is the ONB-S3 owner
 decision. That is a measured property of the pinned list and the missing inputs below, not a claim about any player. What it
@@ -81,6 +83,17 @@ Colossus Smash windows over the whole fight: 35, on the boss (10) and two other 
 established, lasting 1.5 to 10.0 s. In them the log shows 9 Avatar and 33 Bladestorm casts counted per window, and 2 windows hold
 neither. The committed 6 s holds one application
 and no removal, so that window is `NO_REMOVAL_OBSERVED`.
+
+**Other subjects** (ONB-B1P, offline replay, not committed). All Slayer, all UNKNOWN, all stopping on `active_enemies` at `default[17]`:
+
+| Subject | Retained span | Eligible | Excluded |
+| --- | --- | ---: | ---: |
+| gtKb2xHn87pNcFfW fight 22 actor 5 | whole fight | 295 | 193 |
+| gtKb2xHn87pNcFfW fight 22 actor 12 | whole fight | 273 | 177 |
+| rXAfw9t1q8YpmkKD fight 13 actor 10 | first 165 s | 166 | 96 |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 4 | first 165 s | 149 | 99 |
+
+No Colossus subject is retained. What follows was read on fight 48 only.
 
 **What the wire showed**, offline, and why none of it was bound:
 

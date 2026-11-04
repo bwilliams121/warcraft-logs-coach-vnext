@@ -1573,11 +1573,13 @@ bindings ONB-A2 left open. A promotion after that is a new public entry through 
 ### ONB-B1: Arms Warrior (internal, Cohort B representative)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-S1
 branch: autopilot/onb-b1
 wcl: NONE
 publicContract: NONE
+pr: 59
+mergeSha: 1abcb7d79d174e6bdb1dc6d00389abf79eb686e0
 ```
 
 **Scope.** Cohort B representative: `run_action_list` dispatch with
@@ -1593,11 +1595,18 @@ windows, all established. The first 6 s are committed and the unsupported subjec
 ### ONB-B1P: Arms Warrior (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-B1
+branch: autopilot/onb-b1p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** Arms Warrior cannot pass the rotational promotion gates and stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and
+the public contract is unchanged. Unlike ONB-A2P, evidence is not the gap, so ONB-EV does not apply. Five Arms subjects are retained, and
+replayed offline they give 1,207 eligible decisions, 0 MATCH, 0 REJECTED and 1,207 UNKNOWN, every root scan stopping at
+`default[17] run_action_list` on `active_enemies`. The gates need a real MATCH, so the next step is the owner's ONB-S3 decision, then what
+ONB-B1 left open, then a new public entry through the unchanged gates (agent/architecture.md "ONB-B1P"; agent/follow-ups.md "After ONB-B1").
 
 ### ONB-B2: Frost Death Knight and Enhancement Shaman (internal, Cohort B)
 

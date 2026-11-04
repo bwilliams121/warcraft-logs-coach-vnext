@@ -5571,7 +5571,18 @@ window is not counted, and an empty window is an established zero that produces 
 Two corpus cases (`application-service.arms-warrior-registration-is-internal-only`, `spec-arms-warrior.the-facade-refuses-every-other-specialization`)
 and one archive case over the real first 6 s (`spec-arms-warrior.no-real-decision-resolves-and-an-open-window-is-not-counted`), with its
 census. `tests/contracts/m11-promotion-evidence-gate.test.ts` pins that the gate search finds nothing for Arms, so a later change that
-resolved a decision prompts ONB-B1P to look again. The unsupported subject's guard tests moved to Mage/Fire with the fixture.
+resolved a decision prompts a new public entry. The unsupported subject's guard tests moved to Mage/Fire with the fixture.
 
 Offline only, not committed: the whole-fight replay (`.probe/onbb1/m/`) gives the numbers agent/architecture.md "ONB-B1" reports, and
 `.probe/onbb1/wire.cjs` the wire measurements. Not run: no window-counting rule was mutated beyond what the negatives above exercise.
+
+# ONB-B1P: Arms Warrior, not promoted
+
+No production code changed. `tests/unit/analysis-composition-refusals.test.ts` holds Warrior/Arms again: SPEC_NOT_SUPPORTED, one retrieval for
+preparation alone, no dispatch. ONB-B1 had dropped it when the canonical subject moved to Mage/Fire, so nothing there exercised Arms' public refusal
+through the composition. `tests/contracts/m11-promotion-evidence-gate.test.ts` keeps its ONB-B1 gate search (no qualifying assertion, `evidenceReady`
+false), its comment now naming the outcome. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, `onb-b1-arms-warrior`).
+
+Offline only, not committed: the replay of the four other retained Arms subjects (`.probe/onbb1p/m/`) and the census that found them
+(`.probe/onbb1p/census.cjs`, fight 48's Mortal Strikes as its positive control). They give the table in agent/architecture.md "ONB-B1P". The replay is
+a measurement, so the two prefix subjects report only their retained span.

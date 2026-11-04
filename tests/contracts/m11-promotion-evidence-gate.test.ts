@@ -764,9 +764,9 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
   });
 
   it("ONB-B1: the gate search finds nothing for Arms Warrior, whose decisions all stop at the enemy count", async () => {
-    // The retained capture holds this subject, and it does not help: no decision resolves on it
-    // (agent/architecture.md "ONB-B1"). A later change that resolved one would fail this pin and
-    // prompt ONB-B1P to look again; it would not promote anything by itself.
+    // Retained captures hold five subjects, and they do not help: no decision resolves on any
+    // (agent/architecture.md "ONB-B1P"), so Arms was not promoted. A later change that resolved one
+    // would fail this pin and prompt a new public entry; it would not promote anything by itself.
     const tiers = await tiersPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "warrior/arms");
     if (module === undefined) throw new Error("no module for warrior/arms");
