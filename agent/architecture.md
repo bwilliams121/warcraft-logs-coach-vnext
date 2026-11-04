@@ -13569,6 +13569,33 @@ Where the first-GCD query refuses, across the 372: `default[3] auto_attack` 199,
 
 **No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse the row. A public Druid/Feral request is SPEC_NOT_SUPPORTED, exactly as before.
 
+## ONB-C1P — Feral Druid public promotion: not promoted
+
+Autopilot queue entry ONB-C1P. Public contract: declared EXPECTED; actual change NONE, because nothing passes. No Warcraft Logs request and no new evidence.
+
+**The outcome.** Feral does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4). The gates are not weakened and gain no subject. This is not an owner stop: rule 4 decides it, and the decision the list reaches last (ONB-S3) is already queued as the owner's.
+
+**Why it cannot pass.** OBSERVATION needs a real MATCH and real resolved decisions over several distinct action tokens, and DISCRIMINATION needs a real REJECTED or a control that flips a real MATCH. Both start from a real resolved decision. Replaying the retained pages through production ingestion and the facade over a fake transport, at this tranche's base commit:
+
+| Subject | Build | Retained span | Result | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| b1PmaKrd6CDfzngc fight 48 actor 170 | Wildstalker, Incarnation | whole fight, 345.2 s | ANALYZED | 258 | 0 | 0 | 258 | 581 |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 1 | Wildstalker, Berserk and Convoke | first 165.0 s of 424.5 s | ANALYZED | 114 | 0 | 0 | 114 | 238 |
+
+The first-GCD query refuses at `default[3] auto_attack` 199, `default[0] prowl` 164, `default[1] cat_form` 5 and `default[4] tigers_fury` 4. Root scans go further: actor 170's 256 stop at `default[6] chomp` on its applicability, actor 1's 112 at `cooldown[13] convoke_the_spirits` on too many unresolved atoms, and the other 4 have no stopping point but stay UNKNOWN behind the open first-GCD lines. Each subject's identity is its context's `friendlySpecs` entry, aligned to `friendlyPlayers`. The numbers equal ONB-C1's.
+
+**No real pooling evidence.** No real scan reaches `finisher[1]`, the pool line. Past it, none would pool: all 86 costed Bites read at least 60 Energy (actor 170: 58 of 58, lowest 60; actor 1: 28 of 32, lowest 64), and 4 of actor 1's report no cost. So the pool stays proven on synthetic decisions only.
+
+**The census found nothing more.** It parsed every JSON file over 500 bytes under `.probe/` and `tests/`, skipping tool output and worktree copies (5,649 parsed), by signature abilities named in the contexts' master data, with Mortal Strike as a positive control. Signature casts come from these two actors, plus actor 2 of gtKb fight 22, whose only signature cast is Convoke the Spirits and who is the Restoration Druid. Contexts in three other reports name a Feral (2xpt fight 17 actor 14, g34m actor 20, qJ1p fight 6), and no parsed file holds a signature cast of theirs. The census reads casts only, so a subject with no signature cast in a retained span would not appear.
+
+**Evidence is not its gap.** A whole-fight subject with combatant info is retained, so it is not added to ONB-EV. ONB-S3 is necessary and is not the first gate: Prowl on an Incarnation build, `auto_attack`, Tiger's Fury, Chomp's choice node and `convoke_the_spirits` all stand before the enemy count (agent/follow-ups.md "After ONB-C1").
+
+**How far this reaches.** Both subjects are Wildstalker, and one is a prefix. Druid of the Claw has no real subject, so a later promotion must measure it or refuse it, as Havoc refuses Fel-Scarred.
+
+**What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists it; the gate search finds no qualifying assertion and `evidenceReady` false (`m11-promotion-evidence-gate`, a pin ONB-C1 did not add and this tranche does); and a public request is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which now holds it). The replay is offline and not committed.
+
+**What a later promotion must do.** Feral binds or answers what stands before the count, the owner decides ONB-S3, and Feral then binds what stands behind it and measures its failure modes on real subjects. A new public entry promotes it through the unchanged gates by the five-site promotion, and must find a real Bite below the pool line or say it has none. No such entry is queued.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

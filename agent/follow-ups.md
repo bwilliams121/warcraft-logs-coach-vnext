@@ -33,6 +33,8 @@ current total (5,748,495 bytes), with what each row buys.
 
 **Raised:** ONB-C1 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.
 
+**ONB-C1P (2026-11-04): not promoted.** The gate search finds nothing (`m11-promotion-evidence-gate`). A census of retained JSON files of any name finds no third subject, and a replay at that base gives the same 372 UNKNOWN. Its gap is the list below and ONB-S3, not evidence, so it is not on ONB-EV. A new public entry must follow them, and no such entry is queued (agent/architecture.md "ONB-C1P").
+
 **ONB-S3 gates it too, and it is not the first gate.** All four finisher and builder dispatches read `spell_targets`, and no real scan reaches them. Over 372 eligible decisions, 0 MATCH, 0 REJECTED. So ONB-C1P should expect "not promoted" unless ONB-S3 and the items below land first.
 
 **The pool is proven on synthetic decisions only.** No real scan reaches `finisher[1]`, and every costed Bite on both subjects has at least 60 Energy, so even past the count none would pool. ONB-C1P cannot claim real pooling evidence, and a promotion would have to find a Bite below the line, or say it has none.
