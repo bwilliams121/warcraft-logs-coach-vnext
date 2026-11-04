@@ -1,0 +1,363 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_DEMONHUNTER_HAVOC_ABILITY_COOLDOWNS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/specialization_spells.inc",
+        "sha256": "514d7a509a3b95f130aadccb6a6f1a28c6f5f2568f211cd5139bb567b712e4fc",
+        "byteLength": 45852
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/data_enums.hh",
+        "sha256": "25a88c629f3d4ebb4ac966f3927307b28f756cf9cef9482dc77a79b197873ea4",
+        "byteLength": 75791
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/action/action.cpp",
+        "sha256": "b04a5f1e942c21ac7db3125f23247d3aecf6fc6701eb6d6c1350f0bb7a762e92",
+        "byteLength": 175059
+      },
+      {
+        "path": "engine/class_modules/sc_demon_hunter.cpp",
+        "sha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "byteLength": 459885
+      },
+      {
+        "path": "engine/player/ground_aoe.hpp",
+        "sha256": "5e509dc80c9e6c91e11020990f204ebf3088001aa6b6e98b10d7f70b06a0145b",
+        "byteLength": 5816
+      },
+      {
+        "path": "engine/player/ground_aoe.cpp",
+        "sha256": "546f7eca57112d9faf3c0692cb1f1dc4059a2ae80d37915791c1c5f58e1e754c",
+        "byteLength": 10049
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "cooldownFieldUnits": "MILLISECONDS",
+    "classId": 12,
+    "className": "Demon Hunter",
+    "specId": 577,
+    "extractedOn": "2026-11-03",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime, for the same reason as the other pinned datasets: CombatFight exposes no client-build key. The build is recorded for traceability."
+  },
+  "aliasGroups": {},
+  "abilities": [
+    {
+      "simcToken": "metamorphosis",
+      "abilityGameId": 191427,
+      "displayNameEn": "Metamorphosis",
+      "aliasGroup": null,
+      "baseCooldownMs": 120000,
+      "charges": 0,
+      "chargeCooldownMs": 0,
+      "internalCooldownMs": 0,
+      "category": 1577,
+      "categoryCooldownMs": 120000,
+      "categoryTypeMask": 0,
+      "baseGcdMs": 1500,
+      "classFamily": 107,
+      "classFlags": [32768, 1, 0, 0],
+      "labels": [16, 66, 292, 690, 3595],
+      "knownDynamicMutations": [
+        {
+          "member": "adjust",
+          "site": "world_killer_t::impact, in its DEMON_HUNTER_VENGEANCE case (sc_demon_hunter.cpp:6646-6648)",
+          "effect": "RESET_TO_READY",
+          "observableSignature": {
+            "kind": "CAST_BY_ACTOR",
+            "abilityGameIds": [1221150],
+            "basis": "A Vengeance branch of an Annihilator meteor. A Havoc Demon Hunter never reaches it. The Annihilator's Collapsing Star 1221150 is carried as the cast that would withdraw the bound if an Annihilator action were ever observed on this actor."
+          }
+        },
+        {
+          "member": "adjust_max_charges",
+          "site": "buff.untethered_rage stack change callback (sc_demon_hunter.cpp:10096-10099)",
+          "effect": "RESET_TO_READY",
+          "observableSignature": {
+            "kind": "AURA_APPLICATION_ON_ACTOR",
+            "abilityGameId": 1270476,
+            "basis": "Untethered Rage is looked up through talent.vengeance.untethered_rage_1 (:11279): a Vengeance talent a Havoc Demon Hunter cannot take. An application of 1270476 on this actor would withdraw the bound."
+          }
+        }
+      ],
+      "binding": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "sourcePath": "engine/dbc/generated/sc_spell_data.inc",
+        "createAction": "sc_demon_hunter.cpp:9749-9750 if ( name == \"metamorphosis\" ) return new metamorphosis_t( this, options_str )",
+        "specBinding": "sc_demon_hunter.cpp:4902-4903 metamorphosis_t : base_t( \"metamorphosis\", p, p->spec.metamorphosis ); :10787 for Havoc spec.metamorphosis = find_class_spell( \"Metamorphosis\" )"
+      },
+      "passiveModifierCensus": {
+        "method": "MACHINE_CENSUS_OF_PASSIVE_TRAIT_EFFECTS",
+        "classId": 12,
+        "traitRowsExamined": 259,
+        "traitSpellsExamined": 233,
+        "specPassiveSpellsExamined": 15,
+        "classPassiveSpellsExamined": 6,
+        "effectRowsExamined": 1103,
+        "subtypesChecked": [
+          "107:A_ADD_FLAT_MODIFIER",
+          "108:A_ADD_PCT_MODIFIER",
+          "173:A_MOD_RECHARGE_TIME_PCT_CATEGORY_MASK",
+          "205:A_MOD_RECHARGE_TIME_CATEGORY_MASK",
+          "218:A_ADD_PCT_LABEL_MODIFIER",
+          "219:A_ADD_FLAT_LABEL_MODIFIER",
+          "341:A_MODIFY_CATEGORY_COOLDOWN",
+          "411:A_MOD_MAX_CHARGES",
+          "416:A_HASTED_COOLDOWN",
+          "453:A_MOD_RECHARGE_TIME_CATEGORY",
+          "454:A_MOD_RECHARGE_TIME_PCT_CATEGORY",
+          "457:A_HASTED_CATEGORY"
+        ],
+        "rule": "player.cpp parse_all_class_passives (class passives from class_spells.inc __passive_spells_data; specialization spells with SX_PASSIVE from specialization_spells.inc) and parse_all_passive_talents -> parse_passive_effects (SX_PASSIVE spells; E_APPLY_AURA effects) -> register_passive_effect: A_ADD_FLAT/PCT_MODIFIER with misc_value1 == P_COOLDOWN (11) match by class family flags; the LABEL variants match by misc_value2 against __spelllabel_data; category subtypes match the spell's _category; category-mask subtypes match the spell's _category_type mask; A_HASTED_COOLDOWN matches by family flags. A matched flat value is added to the DBC cooldown field and a matched pct value scales it BEFORE action_t::init reads spell_data.cooldown() (dbc_override_->register_spell( id, \"cooldown\", value )).",
+        "modifiers": []
+      },
+      "dynamicModifierPolicy": {
+        "method": "HAND_REVIEWED_CPP_ABSENCE_PROOF",
+        "appliesTo": "metamorphosis",
+        "sourcePaths": ["engine/class_modules/sc_demon_hunter.cpp"],
+        "sourceSha256": {
+          "classModule": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0"
+        },
+        "reviewedOn": "2026-11-03",
+        "checks": [
+          {
+            "claim": "EVERY_DYNAMIC_MUTATION_IS_DECLARED",
+            "search": "every 'cooldown.metamorphosis-><member>' in sc_demon_hunter.cpp",
+            "finding": "2 use(s): ->adjust(), ->adjust_max_charges(); the mutation(s) ->adjust() in world_killer_t::impact, in its DEMON_HUNTER_VENGEANCE case (sc_demon_hunter.cpp:6646-6648) [RESET_TO_READY]; ->adjust_max_charges() in buff.untethered_rage stack change callback (sc_demon_hunter.cpp:10096-10099) [RESET_TO_READY] are declared and nothing else mutates it"
+          },
+          {
+            "claim": "NO_MUTATION_THROUGH_A_NAMED_COOLDOWN_OBJECT",
+            "search": "every 'get_cooldown( \"metamorphosis\" )' site",
+            "finding": "1 site(s): the constructor assignment to the handle and/or a read-only expression member initialiser (`<x>_cd( p.get_cooldown(...) )`, consulted through remains() only)"
+          },
+          {
+            "claim": "ONLY_DECLARED_ADJUST_RESET_OR_START_NAMES_THIS_COOLDOWN",
+            "search": "every '->adjust(', '->reset(', '->start(' and '->adjust_recharge_multiplier(' receiver in the module",
+            "finding": "41 mutation site(s) in the module; receivers: cooldown.demon_spikes, this->cooldown, cooldown.essence_break, cooldown.fel_devastation, cooldown.reap, cooldown.voidblade, cooldown.metamorphosis, cooldown.eye_beam, cooldown.spirit_bomb, internal_cooldown, cooldown.soul_immolation, cooldown.predators_wake, cooldown.blade_dance, cooldown.immolation_aura, cooldown.sigil_of_flame, cooldown.the_hunt, cooldown, cooldown.felblade, cooldown.void_ray, p.cooldown.wounded_quarry_trigger_icd, cooldown.wounded_quarry_trigger_icd, cooldown.volatile_flameblood_icd, icd, tcd, cooldown.relentless_onslaught_icd, cooldown.chaos_strike_refund_icd, cooldown.fel_rush_vengeful_retreat_movement_shared, cooldown.explosion_of_the_soul_icd, cooldown.felblade_vengeful_retreat_movement_shared, cooldown.art_of_the_glaive_consumption_icd, cooldown.soul_splitter_icd; exactly 2 name(s) this cooldown, each declared: adjust() in world_killer_t::impact, in its DEMON_HUNTER_VENGEANCE case (sc_demon_hunter.cpp:6646-6648); adjust_max_charges() in buff.untethered_rage stack change callback (sc_demon_hunter.cpp:10096-10099)"
+          },
+          {
+            "claim": "NO_RECHARGE_RATE_MULTIPLIER_MECHANISM_ACTIVE",
+            "search": "'adjust_recharge_multiplier' sites in the module",
+            "finding": "no '->adjust_recharge_multiplier(' site exists in sc_demon_hunter.cpp"
+          },
+          {
+            "claim": "NO_ACTION_LEVEL_COOLDOWN_OVERRIDE",
+            "search": "the body of metamorphosis_t for 'cooldown->', 'update_ready' and 'cooldown_duration'",
+            "finding": "metamorphosis_t (lines 4887-5086) declares no cooldown override and no update_ready; the base action_t::update_ready path applies unchanged (5 declared cooldown reference(s): update_ready named four times in the Untethered Rage path a Havoc Demon Hunter never takes (:4963, :5064, :5067, :5074) and cooldown->charges re-read from the DBC in reset() (:5082))"
+          },
+          {
+            "claim": "NO_MODULE_HASTED_COOLDOWN_FLAG",
+            "search": "'cooldown->hasted' sites and their enclosing structs; any 'hasted_cd' member",
+            "finding": "3 site(s): classModule:4172 in fel_devastation_t; classModule:6397 in void_ray_t; classModule:7174 in blade_dance_base_t; none is this ability's struct; no 'hasted_cd' member exists in sc_demon_hunter.cpp (0 mention(s))"
+          },
+          {
+            "claim": "NO_MODULE_AFFECT_LIST_NAMES_THIS_SPELL",
+            "search": "'register_passive_affect_list(' calls and the spell ids they add",
+            "finding": "3 call(s): register_passive_affect_list( talent.havoc.demon_hide, affect_list_t( 1, 3 ).add_spell( hero_spec.wounded_quarry_damage->id() ) ); | register_passive_affect_list( talent.annihilator.celestial_echoes, affect_list_t( 2 ).remove_spell( spec.rolling_torment_energize->id() ) ); | register_passive_affect_list( spec.devourer_demon_hunter, affect_list_t( 6 ) .remove_spell( spec.reap->id() ); none adds 191427"
+          }
+        ]
+      },
+      "cooldownStart": {
+        "anchor": "ACTION_EXECUTE",
+        "evidence": [
+          "action.cpp:1914 action_t::execute() calls update_ready()",
+          "action.cpp:2333-2372 action_t::update_ready() calls cooldown->start( this, cd_duration, delay )",
+          "action.cpp:2342-2358 the only start-time adjustment is a non-negative world-lag delay, which can only move the ready time LATER, never earlier"
+        ],
+        "note": "For an instant, non-channelled ability, execution coincides with the observed cast. Divine Toll, Sentinel and Avenging Wrath are instant in the pinned data."
+      }
+    },
+    {
+      "simcToken": "the_hunt",
+      "abilityGameId": 370965,
+      "displayNameEn": "The Hunt",
+      "aliasGroup": null,
+      "baseCooldownMs": 90000,
+      "charges": 0,
+      "chargeCooldownMs": 0,
+      "internalCooldownMs": 0,
+      "category": 2427,
+      "categoryCooldownMs": 90000,
+      "categoryTypeMask": 0,
+      "baseGcdMs": 1500,
+      "classFamily": 107,
+      "classFlags": [0, 1, 262144, 0],
+      "labels": [16, 66, 292],
+      "knownDynamicMutations": [
+        {
+          "member": "reset",
+          "site": "collapsing_star_t::execute under Demonic Intensity at 12.1.5 or later (sc_demon_hunter.cpp:6572-6575)",
+          "effect": "RESET_TO_READY",
+          "observableSignature": {
+            "kind": "CAST_BY_ACTOR",
+            "abilityGameIds": [1221150],
+            "basis": "collapsing_star_t is a Devourer action a Havoc Demon Hunter is never granted, and the pinned client is 12.1.0. A completed 1221150 by the actor would withdraw the bound."
+          }
+        }
+      ],
+      "binding": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "sourcePath": "engine/dbc/generated/sc_spell_data.inc",
+        "createAction": "sc_demon_hunter.cpp:9759-9760 if ( name == \"the_hunt\" ) return new the_hunt_t( this, options_str )",
+        "specBinding": "sc_demon_hunter.cpp:5612 the_hunt_t : the_hunt_base_t( \"the_hunt\", p, p->spec.the_hunt, o ); :11290 for Havoc spec.the_hunt = talent.havoc.the_hunt"
+      },
+      "passiveModifierCensus": {
+        "method": "MACHINE_CENSUS_OF_PASSIVE_TRAIT_EFFECTS",
+        "classId": 12,
+        "traitRowsExamined": 259,
+        "traitSpellsExamined": 233,
+        "specPassiveSpellsExamined": 15,
+        "classPassiveSpellsExamined": 6,
+        "effectRowsExamined": 1103,
+        "subtypesChecked": [
+          "107:A_ADD_FLAT_MODIFIER",
+          "108:A_ADD_PCT_MODIFIER",
+          "173:A_MOD_RECHARGE_TIME_PCT_CATEGORY_MASK",
+          "205:A_MOD_RECHARGE_TIME_CATEGORY_MASK",
+          "218:A_ADD_PCT_LABEL_MODIFIER",
+          "219:A_ADD_FLAT_LABEL_MODIFIER",
+          "341:A_MODIFY_CATEGORY_COOLDOWN",
+          "411:A_MOD_MAX_CHARGES",
+          "416:A_HASTED_COOLDOWN",
+          "453:A_MOD_RECHARGE_TIME_CATEGORY",
+          "454:A_MOD_RECHARGE_TIME_PCT_CATEGORY",
+          "457:A_HASTED_CATEGORY"
+        ],
+        "rule": "player.cpp parse_all_class_passives (class passives from class_spells.inc __passive_spells_data; specialization spells with SX_PASSIVE from specialization_spells.inc) and parse_all_passive_talents -> parse_passive_effects (SX_PASSIVE spells; E_APPLY_AURA effects) -> register_passive_effect: A_ADD_FLAT/PCT_MODIFIER with misc_value1 == P_COOLDOWN (11) match by class family flags; the LABEL variants match by misc_value2 against __spelllabel_data; category subtypes match the spell's _category; category-mask subtypes match the spell's _category_type mask; A_HASTED_COOLDOWN matches by family flags. A matched flat value is added to the DBC cooldown field and a matched pct value scales it BEFORE action_t::init reads spell_data.cooldown() (dbc_override_->register_spell( id, \"cooldown\", value )).",
+        "modifiers": [
+          {
+            "origin": "TRAIT",
+            "talentSpellId": 1270900,
+            "displayNameEn": "Eternal Hunt",
+            "tree": "SPECIALIZATION",
+            "specIds": [577],
+            "traitNodeId": 110427,
+            "traitEntryId": 137048,
+            "nodeType": "NORMAL",
+            "alternativeEntries": [
+              {
+                "traitEntryId": 137049,
+                "displayNameEn": "Eternal Hunt",
+                "talentSpellId": 1270898
+              },
+              {
+                "traitEntryId": 137047,
+                "displayNameEn": "Eternal Hunt",
+                "talentSpellId": 1270901
+              }
+            ],
+            "effectId": 1283315,
+            "effectIndex": 1,
+            "subtype": 341,
+            "subtypeName": "A_MODIFY_CATEGORY_COOLDOWN",
+            "miscValue1": 2427,
+            "miscValue2": 0,
+            "matchedBy": "CATEGORY:2427",
+            "kind": "FLAT_MS",
+            "value": -15000,
+            "direction": "SHORTENS"
+          }
+        ]
+      },
+      "dynamicModifierPolicy": {
+        "method": "HAND_REVIEWED_CPP_ABSENCE_PROOF",
+        "appliesTo": "the_hunt",
+        "sourcePaths": ["engine/class_modules/sc_demon_hunter.cpp"],
+        "sourceSha256": {
+          "classModule": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0"
+        },
+        "reviewedOn": "2026-11-03",
+        "checks": [
+          {
+            "claim": "EVERY_DYNAMIC_MUTATION_IS_DECLARED",
+            "search": "every 'cooldown.the_hunt-><member>' in sc_demon_hunter.cpp",
+            "finding": "1 use(s): ->reset(); the mutation(s) ->reset() in collapsing_star_t::execute under Demonic Intensity at 12.1.5 or later (sc_demon_hunter.cpp:6572-6575) [RESET_TO_READY] are declared and nothing else mutates it"
+          },
+          {
+            "claim": "NO_MUTATION_THROUGH_A_NAMED_COOLDOWN_OBJECT",
+            "search": "every 'get_cooldown( \"the_hunt\" )' site",
+            "finding": "1 site(s): the constructor assignment to the handle and/or a read-only expression member initialiser (`<x>_cd( p.get_cooldown(...) )`, consulted through remains() only)"
+          },
+          {
+            "claim": "ONLY_DECLARED_ADJUST_RESET_OR_START_NAMES_THIS_COOLDOWN",
+            "search": "every '->adjust(', '->reset(', '->start(' and '->adjust_recharge_multiplier(' receiver in the module",
+            "finding": "41 mutation site(s) in the module; receivers: cooldown.demon_spikes, this->cooldown, cooldown.essence_break, cooldown.fel_devastation, cooldown.reap, cooldown.voidblade, cooldown.metamorphosis, cooldown.eye_beam, cooldown.spirit_bomb, internal_cooldown, cooldown.soul_immolation, cooldown.predators_wake, cooldown.blade_dance, cooldown.immolation_aura, cooldown.sigil_of_flame, cooldown.the_hunt, cooldown, cooldown.felblade, cooldown.void_ray, p.cooldown.wounded_quarry_trigger_icd, cooldown.wounded_quarry_trigger_icd, cooldown.volatile_flameblood_icd, icd, tcd, cooldown.relentless_onslaught_icd, cooldown.chaos_strike_refund_icd, cooldown.fel_rush_vengeful_retreat_movement_shared, cooldown.explosion_of_the_soul_icd, cooldown.felblade_vengeful_retreat_movement_shared, cooldown.art_of_the_glaive_consumption_icd, cooldown.soul_splitter_icd; exactly 1 name(s) this cooldown, each declared: reset() in collapsing_star_t::execute under Demonic Intensity at 12.1.5 or later (sc_demon_hunter.cpp:6572-6575)"
+          },
+          {
+            "claim": "NO_RECHARGE_RATE_MULTIPLIER_MECHANISM_ACTIVE",
+            "search": "'adjust_recharge_multiplier' sites in the module",
+            "finding": "no '->adjust_recharge_multiplier(' site exists in sc_demon_hunter.cpp"
+          },
+          {
+            "claim": "NO_ACTION_LEVEL_COOLDOWN_OVERRIDE",
+            "search": "the body of the_hunt_t for 'cooldown->', 'update_ready' and 'cooldown_duration'",
+            "finding": "the_hunt_t (lines 5610-5625) declares no cooldown override and no update_ready; the base action_t::update_ready path applies unchanged"
+          },
+          {
+            "claim": "NO_MODULE_HASTED_COOLDOWN_FLAG",
+            "search": "'cooldown->hasted' sites and their enclosing structs; any 'hasted_cd' member",
+            "finding": "3 site(s): classModule:4172 in fel_devastation_t; classModule:6397 in void_ray_t; classModule:7174 in blade_dance_base_t; none is this ability's struct; no 'hasted_cd' member exists in sc_demon_hunter.cpp (0 mention(s))"
+          },
+          {
+            "claim": "NO_MODULE_AFFECT_LIST_NAMES_THIS_SPELL",
+            "search": "'register_passive_affect_list(' calls and the spell ids they add",
+            "finding": "3 call(s): register_passive_affect_list( talent.havoc.demon_hide, affect_list_t( 1, 3 ).add_spell( hero_spec.wounded_quarry_damage->id() ) ); | register_passive_affect_list( talent.annihilator.celestial_echoes, affect_list_t( 2 ).remove_spell( spec.rolling_torment_energize->id() ) ); | register_passive_affect_list( spec.devourer_demon_hunter, affect_list_t( 6 ) .remove_spell( spec.reap->id() ); none adds 370965"
+          }
+        ]
+      },
+      "cooldownStart": {
+        "anchor": "ACTION_EXECUTE",
+        "evidence": [
+          "action.cpp:1914 action_t::execute() calls update_ready()",
+          "action.cpp:2333-2372 action_t::update_ready() calls cooldown->start( this, cd_duration, delay )",
+          "action.cpp:2342-2358 the only start-time adjustment is a non-negative world-lag delay, which can only move the ready time LATER, never earlier"
+        ],
+        "note": "For an instant, non-channelled ability, execution coincides with the observed cast. Divine Toll, Sentinel and Avenging Wrath are instant in the pinned data."
+      }
+    }
+  ]
+}

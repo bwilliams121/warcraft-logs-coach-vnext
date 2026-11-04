@@ -13075,6 +13075,65 @@ INSUFFICIENT_EVIDENCE otherwise, never ANALYZED. Roster role stays UNKNOWN, and
 nothing reads it. Devastation stays SPEC_NOT_SUPPORTED: the class alone never
 selects a row.
 
+## ONB-A1 — Havoc Demon Hunter (internal, Cohort A representative)
+
+**What it is.** Havoc Demon Hunter is registered INTERNAL_ONLY on the observed-decision
+pattern (Retribution, Blood, Brewmaster), the first rotational specialization of full
+onboarding. `src/specs/demonhunter/havoc/README.md` is the slice in detail.
+
+**The surface, measured.** Over b1PmaKrd6CDfzngc fight 48, actor 18 (Aldrachi Reaver):
+
+| Window | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | --- | --- | --- |
+| first 90 s (committed, pinned in the archive) | 76 | 7 | 4 | 65 | 252 |
+| whole fight (retained raw capture, offline) | 279 | 24 | 23 | 232 | 902 |
+
+Every resolved decision names `default[9]` (Reaver's Glaive). That is what the evidence can
+decide, and the docs say so rather than calling this a rotation review.
+
+**Decisions.**
+
+1. **Metamorphosis is anchored on what the log reports.** The action runs on 191427 and the log
+   reports only the leap's impact, 200166, after the press. The pinned 120,000 ms is shortened
+   by a 2,000 ms margin, and a bound stands only when the buff the leap gains at its start
+   (162264) has an observed application inside that margin before the impact, so the delay is
+   established per leap rather than assumed. Without one, no bound is claimed. The wire id has a
+   NON_GCD lane record and no token, so the press is never judged.
+2. **The Hunt's record is pinned and never used.** The census's 75,000 ms is contradicted by
+   real gaps of 61,219 ms. The disagreement is pinned in a test rather than resolved by a chosen
+   floor, and it stops most decisions.
+3. **A resolved hero tree proves the other tree's talents absent.** One hero tree is active, so
+   an Aldrachi Reaver build has no `talent.scarred.*`: Demonsurge and Violent Transformation are
+   not taken. The three-way rule still answers every other talent. It is the only proof beyond
+   that rule, it is spec-owned, and it runs in one direction per tree.
+4. **Aura edges inside 2 ms of a decision prove nothing by themselves.** The log places a cast's
+   own effect 0 or 1 ms before the cast. The first measurement rejected 27 of 27 Reaver's Glaives
+   for seeing the buffs their own cast applied. The one edge the decision's own action is pinned
+   to write, in the direction it writes it, is read from before the edge. An opposite-direction
+   edge, an unpinned one, or a second edge in the window leaves the atom unbound.
+5. **Reaver's Glaive's positive proof carries a reaction tolerance.** A buff younger than
+   1,000 ms is never held against a press. The first version counted a press 469 ms after the
+   buff, which no human could have reacted to.
+6. **Two observed tokens are excluded rather than judged.** A logged Throw Glaive may be
+   Screaming Brutality's background copy (all 48 on this subject sit on a Blade Dance or Death
+   Sweep), and The Hunt is decided at its `begincast`.
+7. **`type` and `mode` are token-scoped options.** `pick_up_fragment` reads them to choose a
+   fragment, so they change no condition's target. They are scoped to that token in
+   `TOKEN_SCOPED_ACTION_OPTION_KEYS` and stay UNRECOGNISED on every other action. No committed
+   public authority names either.
+8. **The usability extractor declares when cost claims do not hold.** `sc_demon_hunter.cpp`
+   overrides `cost()`, so the Havoc artifact records none of the class-module claims and
+   `costCannotExceedBase` refuses for every Havoc spell. Reaver's Glaive has no power row.
+
+**Evidence.** One archive segment, the first 90 s, with every aura transition and resourcechange of
+actor 18 so its AURAS and RESOURCES grants are whole over the range, because the whole fight does not
+fit under the archive's notice line (agent/follow-ups.md "After ONB-A1"). No Warcraft Logs request was made. The
+readiness report (`tests/contracts/onb-a1-havoc-promotion-readiness.test.ts`) passes the observation
+and discrimination gates with three tokens and no control. It authorizes nothing.
+
+**No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the
+public lookup and identity table refuse the row.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

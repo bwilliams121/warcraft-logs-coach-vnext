@@ -186,6 +186,16 @@ const HEALB4P_EVIDENCE: Readonly<Record<string, number>> = {
 };
 const HEALB4P_BYTES = Object.values(HEALB4P_EVIDENCE).reduce((sum, bytes) => sum + bytes, 0);
 /**
+ * ONB-A1: the canonical Havoc Demon Hunter's (actor 18) casts, begincasts,
+ * combatantinfo, aura transitions and resourcechanges over the fight's first 90 s, one
+ * compact segment of the same capture. Ordinary archive growth (364,068 bytes), named
+ * and pinned like HEAL-B1P. The whole fight would have crossed the notice line.
+ */
+const ONBA1_EVIDENCE: Readonly<Record<string, number>> = {
+  "wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90": 364068,
+};
+const ONBA1_BYTES = Object.values(ONBA1_EVIDENCE).reduce((sum, bytes) => sum + bytes, 0);
+/**
  * M13-A: the one bounded Augmentation Evoker capture (owner grant
  * 2026-11-01): the sanitized fight context and the two merged segments of its
  * three server-filtered streams, which grant nothing. Ordinary archive growth
@@ -254,6 +264,8 @@ describe("the committed evidence archive", () => {
     expect(loaded.archive.artifacts.map((entry) => entry.record.artifactId)).toEqual([
       // M12-B: the friendly-players raid damage segments (code-point order puts them first).
       ...Object.keys(M12B_EVIDENCE),
+      // ONB-A1: the Havoc Demon Hunter's decision segment ("ha" < "ho").
+      ...Object.keys(ONBA1_EVIDENCE),
       // HEAL-B1P: the Holy Paladin's cast segments (code-point order: "h" < "m" < "r").
       "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-0-180",
       "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-180-345",
@@ -293,7 +305,7 @@ describe("the committed evidence archive", () => {
     ]);
     // M12-B added one normalization census per raid damage segment, M12-D one per cast
     // segment, M13-A one per merged support segment, HEAL-B1P, HEAL-B2P and HEAL-B4P one per cast segment.
-    expect(loaded.archive.cases).toHaveLength(25);
+    expect(loaded.archive.cases).toHaveLength(30);
     // Accounting is per root: the archive counts its own bytes only.
     expect(loaded.archive.totalArtifactBytes).toBe(
       308961 +
@@ -308,6 +320,7 @@ describe("the committed evidence archive", () => {
         HEALB1P_BYTES +
         HEALB2P_BYTES +
         HEALB4P_BYTES +
+        ONBA1_BYTES +
         M13A_BYTES +
         M13D_BYTES,
     );
@@ -321,6 +334,7 @@ describe("the committed evidence archive", () => {
       ...HEALB1P_EVIDENCE,
       ...HEALB2P_EVIDENCE,
       ...HEALB4P_EVIDENCE,
+      ...ONBA1_EVIDENCE,
       ...M13A_EVIDENCE,
       ...M13D_EVIDENCE,
     })) {
@@ -370,6 +384,7 @@ describe("the committed evidence archive", () => {
     expect(HEALB1P_BYTES).toBe(403697);
     expect(HEALB2P_BYTES).toBe(137685);
     expect(HEALB4P_BYTES).toBe(123153);
+    expect(ONBA1_BYTES).toBe(364068);
     expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(
       4537019 +
         M11G1_BYTES +
@@ -380,10 +395,11 @@ describe("the committed evidence archive", () => {
         HEALB1P_BYTES +
         HEALB2P_BYTES +
         HEALB4P_BYTES +
+        ONBA1_BYTES +
         M13A_BYTES +
         M13D_BYTES,
     );
-    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(19389077);
+    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(19753145);
     expect(loaded.archive.totalArtifactBytes + frameBytes).toBeGreaterThan(EVIDENCE_ARCHIVE_NOTICE_BYTES);
     // The regression corpus's own ceiling is untouched by the archive.
     expect(MAX_CORPUS_BYTES).toBe(6 * 1024 * 1024);
@@ -587,6 +603,8 @@ describe("the archive's assertion families are pinned", () => {
       "SPEC_BREWMASTER_MONK.DECISION_COVERAGE",
       "SPEC_BREWMASTER_MONK.MEASUREMENT_DISTRIBUTION",
       "SPEC_BREWMASTER_MONK.STATE_EVIDENCE_CENSUS",
+      "SPEC_HAVOC_DEMON_HUNTER.COVERAGE_SUMMARY",
+      "SPEC_HAVOC_DEMON_HUNTER.DECISION_COVERAGE",
       "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
       "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
       "SPEC_RETRIBUTION_PALADIN.COVERAGE_SUMMARY",

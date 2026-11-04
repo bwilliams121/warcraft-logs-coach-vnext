@@ -30,8 +30,9 @@
  * (`src/services/spec-identity.ts`) does not resolve to it and no PUBLIC
  * analyzer is registered for it.
  *
- * THE INTERNAL-ONLY SET HOLDS TWO MEMBERS SINCE HEAL-B4P (Restoration Druid and
- * Discipline Priest), which promoted Preservation Evoker. It held those three
+ * THE INTERNAL-ONLY SET HOLDS THREE MEMBERS SINCE ONB-A1 (Restoration Druid,
+ * Discipline Priest and Havoc Demon Hunter). It held the first two from HEAL-B4P,
+ * which promoted Preservation Evoker. It held those three
  * from HEAL-B4, and the first two from HEAL-B3. It held Restoration Druid alone from HEAL-B2P, which
  * promoted Holy Priest. It held two from HEAL-B2 (Restoration Druid and
  * Holy Priest), and Restoration Druid alone from HEAL-B1P, which promoted
@@ -75,7 +76,8 @@ export type SpecId =
   | "monk/mistweaver"
   | "priest/holy"
   | "priest/discipline"
-  | "evoker/preservation";
+  | "evoker/preservation"
+  | "demonhunter/havoc";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -91,6 +93,7 @@ export const SPEC_IDS = Object.freeze([
   "priest/holy",
   "priest/discipline",
   "evoker/preservation",
+  "demonhunter/havoc",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -210,10 +213,15 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * view, after it passed the healer promotion gate on real evidence (its
  * whole-fight casts in gtKb2xHn87pNcFfW fight 22, cut from the retained
  * captures).
+ *
+ * Havoc Demon Hunter arrived here in ONB-A1, the first rotational specialization of
+ * full onboarding and Cohort A's representative. Its public shape and promotion are
+ * ONB-A1P's; until then the id stays here.
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
   "priest/discipline",
+  "demonhunter/havoc",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

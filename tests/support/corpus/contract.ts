@@ -52,6 +52,7 @@ import pinnedProtectionApl from "../../../src/simc/data/paladin-protection.apl.j
 import pinnedRetributionApl from "../../../src/simc/data/paladin-retribution.apl.json";
 import pinnedBloodApl from "../../../src/simc/data/deathknight-blood.apl.json";
 import pinnedBrewmasterApl from "../../../src/simc/data/monk-brewmaster.apl.json";
+import pinnedHavocApl from "../../../src/simc/data/demonhunter-havoc.apl.json";
 import { AUTHORITY_DOMAINS, AUTHORITY_RESOLUTION_OUTCOMES } from "../../../src/findings/authority-domain.js";
 import { SPEC_IDS, type SpecId } from "../../../src/findings/spec-id.js";
 import {
@@ -392,6 +393,7 @@ export const OWNING_LAYERS = {
   SPEC_DISCIPLINE_PRIEST: ["src/specs/priest/discipline/"],
   /** HEAL-B4; PUBLIC since HEAL-B4P. The Preservation Evoker healer evaluator and nothing else. */
   SPEC_PRESERVATION_EVOKER: ["src/specs/evoker/preservation/"],
+  SPEC_HAVOC_DEMON_HUNTER: ["src/specs/demonhunter/havoc/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
   PUBLIC_CONTRACT: ["src/contracts/", "src/api/", "src/mcp/"],
 } as const;
@@ -429,6 +431,7 @@ export const SPEC_LAYER_OF = {
   "priest/holy": "SPEC_HOLY_PRIEST",
   "priest/discipline": "SPEC_DISCIPLINE_PRIEST",
   "evoker/preservation": "SPEC_PRESERVATION_EVOKER",
+  "demonhunter/havoc": "SPEC_HAVOC_DEMON_HUNTER",
 } as const satisfies Record<SpecId, OwningLayer>;
 
 /** The specialization-owned layers: exactly those a `SpecId` maps to. */
@@ -3157,6 +3160,79 @@ export const ASSERTION_KINDS = {
       "The Brewmaster facade refuses this specialization with SPEC_NOT_SUPPORTED before any Brewmaster rule runs: no comparisons, no domains, no authority.",
   },
 
+  // ---- SPEC_HAVOC_DEMON_HUNTER (ONB-A1, INTERNAL_ONLY) ---------------------
+  "SPEC_HAVOC_DEMON_HUNTER.DECISION_COVERAGE": {
+    owningLayer: "SPEC_HAVOC_DEMON_HUNTER",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        targetActorId: z.number().int().nullable(),
+        ...BREWMASTER_BUNDLE_PARAMS,
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        expected: z
+          .object({
+            outcome: z.enum(COMPARISON_OUTCOMES),
+            basis: z.enum(COMPARISON_BASES),
+            authorityToken: z.string().nullable(),
+            selectionPrecision: z.enum(["EXACT_ENTRY", "TOKEN_CONVERGED"]).nullable(),
+            decisiveBlocker: z.enum(DECISION_BLOCKER_CLASSES).nullable(),
+            rawBlocker: z.string().nullable(),
+            /** The entry the first-GCD query names in its refusal, as `list[ordinal] token`, or null. */
+            unresolvedAt: z.string().nullable(),
+            /** The entry the query selected, as `list[ordinal] token`, or null. */
+            selectedEntry: z.string().nullable(),
+            unselectabilityProven: z.boolean(),
+            unselectabilityRefusal: z.string().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The internal Havoc Demon Hunter evaluator, under the committed pinned authority, compares this observed cast exactly as pinned, with the query's own refusal or selection and the unselectability outcome.",
+  },
+  "SPEC_HAVOC_DEMON_HUNTER.COVERAGE_SUMMARY": {
+    owningLayer: "SPEC_HAVOC_DEMON_HUNTER",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BREWMASTER_BUNDLE_PARAMS,
+        expected: z
+          .object({
+            eligibleDecisions: z.number().int().nonnegative(),
+            match: z.number().int().nonnegative(),
+            rejected: z.number().int().nonnegative(),
+            unknown: z.number().int().nonnegative(),
+            exclusions: z.record(z.string(), z.number().int().positive()),
+            unresolvedAt: z.record(z.string(), z.number().int().positive()),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The evaluator's coverage disclosure over this actor's every completed cast: the eligible decisions, the three outcomes that partition them, every exclusion by reason and every UNKNOWN by what stopped it.",
+  },
+  "SPEC_HAVOC_DEMON_HUNTER.SPEC_GATE": {
+    owningLayer: "SPEC_HAVOC_DEMON_HUNTER",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Havoc facade refuses this specialization with SPEC_NOT_SUPPORTED before any Havoc rule runs.",
+  },
+
   // ---- SPEC_AUGMENTATION_EVOKER (M13-E, INTERNAL_ONLY) ---------------------
   //
   // The first registration that binds no decision authority. Driven through
@@ -3959,6 +4035,7 @@ export const PINNED_AUTHORITY_REVISIONS: Readonly<Record<string, string>> = {
   [pinnedRetributionApl.authorityId]: pinnedRetributionApl.artifactRevision,
   [pinnedBloodApl.authorityId]: pinnedBloodApl.artifactRevision,
   [pinnedBrewmasterApl.authorityId]: pinnedBrewmasterApl.artifactRevision,
+  [pinnedHavocApl.authorityId]: pinnedHavocApl.artifactRevision,
 };
 
 // --------------------------------------------------------------------------

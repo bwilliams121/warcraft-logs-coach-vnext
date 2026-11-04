@@ -6823,6 +6823,44 @@ const BREWMASTER_CASES = [
       ],
     },
   ),
+  // ---- SPEC_HAVOC_DEMON_HUNTER (ONB-A1, INTERNAL_ONLY) ------------------------------
+  kase(
+    "spec-havoc-demon-hunter.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_HAVOC_DEMON_HUNTER",
+    "src/specs/demonhunter/havoc/observed-analysis.ts analyzeObservedHavocDemonHunterDecisions (the spec gate)",
+    "The Havoc facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any Havoc rule or authority is read.",
+    [a("SPEC_HAVOC_DEMON_HUNTER.SPEC_GATE", { actorId: TANK, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Havoc list.",
+    { related: ["tests/unit/specs/onb-a1-havoc-demon-hunter.test.ts"] },
+  ),
+  kase(
+    "application-service.havoc-demon-hunter-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Havoc Demon Hunter registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup finds nothing and the public identity table does not resolve it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "demonhunter/havoc",
+        expected: {
+          internalAnalyzerId: "demonhunter-havoc-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Havoc Demon Hunter is registered INTERNAL_ONLY in ONB-A1 and its public promotion is ONB-A1P's: registration changes what internal evaluation derives, not what a public request can reach.",
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
   // ---- SPEC_PRESERVATION_EVOKER (HEAL-B4; PUBLIC since HEAL-B4P) --------------------
   kase(
     "spec-preservation-evoker.unstated-subject-yields-no-healer-finding",
@@ -12505,6 +12543,199 @@ const HEALB1P_EVIDENCE_CASES = HEALB1P_SUBJECTS.flatMap((subject) =>
 );
 
 // --------------------------------------------------------------------------
+// ONB-A1 (2026-11-03): Havoc Demon Hunter's real decisions. Every cast, begincast,
+// combatantinfo, aura transition and resourcechange sourced by or targeting fight 48's
+// Havoc Demon Hunter (actor 18) over the fight's first 90 s, cut from the same M11-E2
+// capture as the other fight-48 subjects, so every category it grants is whole over the
+// range. No new Warcraft Logs request was made. The whole fight costs 1.3 MB and the
+// archive had 0.39 MB left under its notice line, which is not raised silently:
+// agent/follow-ups.md "After ONB-A1".
+// --------------------------------------------------------------------------
+
+const ONBA1_ACTOR = 18;
+const ONBA1_SEGMENT = (from, to) =>
+  `wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-${String(from)}-${String(to)}`;
+const ONBA1_FAMILIES =
+  "cast,begincast,combatantinfo,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,resourcechange";
+const ONBA1_SIMC = { authorityId: "SIMC_APL_DEMONHUNTER_HAVOC", artifactRevision: "simc-33622e9d-1" };
+const ONBA1_AUTHORITY = {
+  ...ONBA1_SIMC,
+  requiredStateEvidence: [
+    "the combatantinfo at 7,436,292 for actor 18 (specID 577)",
+    "every COMPLETE cast by actor 18 in the bundle, in canonical order",
+    "every buff transition on actor 18 sourced by actor 18, in canonical order",
+  ],
+};
+// [seconds from, to, exclusive --from, inclusive bound, events]
+const ONBA1_SEGMENTS = [[0, 90, B1PM_START - 1, B1PM_START + 90000, 1721]];
+
+function onba1_segment([fromS, toS, fromMs, toMs]) {
+  const file = ONBA1_SEGMENT(fromS, toS);
+  return artifact(file, wcl(file), {
+    root: "EVIDENCE",
+    kind: "SANITIZED_CAPTURE",
+    source: B1PM_EVENTS_SOURCE,
+    transformations: [
+      selection(
+        `node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/${file}.json --actor-slice ${String(ONBA1_ACTOR)} ${String(toMs)} --from ${String(fromMs)} --families ${ONBA1_FAMILIES} --compact`,
+        `The twenty-eight page records concatenated in page order, then the --actor-slice predicate for actor ${String(ONBA1_ACTOR)}: every event whose sourceID or targetID is ${String(ONBA1_ACTOR)}, with --from ${String(fromMs)} (exclusive), the inclusive bound ${String(toMs)} and the families ${ONBA1_FAMILIES}.`,
+        ACTOR_SLICE_INVALIDATIONS,
+      ).with_revision(SLICER_REVISION_8),
+      credential_scan(SLICER_REVISION_8),
+    ],
+    grants: [
+      {
+        categories: ["CASTS", "AURAS", "RESOURCES", "COMBATANT_INFO"],
+        actorScope: [ONBA1_ACTOR],
+        ranges: [{ fromReportTimeMs: fromMs + 1, toReportTimeMs: toMs }],
+      },
+    ],
+    coverageBasis: `The retained families are complete for actor ${String(ONBA1_ACTOR)} over [${(fromMs + 1).toLocaleString("en-US")} .. ${toMs.toLocaleString("en-US")}] by the predicate 'every event of a retained family whose sourceID or targetID is ${String(ONBA1_ACTOR)}' over a capture retrieved COMPLETE with no actor filter.`,
+    retainedFor:
+      "ONB-A1: the Havoc Demon Hunter's real decisions over the first 90 s of the canonical fight: the casts it judges, its own PRE_COST Fury, the aura transitions the Reaver's Glaive priority reads and the build they run under.",
+    limitations: [
+      "The fight's first 90 s of 345 s: it grants no coverage outside its range, and the whole-fight measurement in agent/architecture.md is reproduced from the retained capture, not from these bytes.",
+      "Resources are the snapshot on each retained cast and every resourcechange of actor 18; nothing here replays Fury between casts, and the analyzer reads only the decision cast's own snapshot.",
+      "No damage, heal or absorb event is retained, so nothing here says whether a target was hit or what a cast did.",
+      "Actor 18 only. No targetability, phase or enemy state is retained, so nothing here proves an action was actionable in the encounter.",
+      "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+      NO_NAMES,
+      VERSION_SCOPE,
+    ],
+  });
+}
+
+const ONBA1_EVIDENCE_ARTIFACTS = ONBA1_SEGMENTS.map(onba1_segment);
+const ONBA1_LAST = ONBA1_SEGMENT(0, 90);
+const ONBA1_ID = {
+  RG: 442294,
+  ANNIHILATION: 201427,
+  CHAOS_STRIKE: 162794,
+  FELBLADE: 232893,
+  EYE_BEAM: 198013,
+};
+const ONBA1_MATCH_RG = {
+  outcome: "MATCH",
+  basis: "AUTHORITY_SELECTION_MATCHED_OBSERVED_TOKEN",
+  authorityToken: "reavers_glaive",
+  selectionPrecision: "EXACT_ENTRY",
+  decisiveBlocker: null,
+  rawBlocker: null,
+  unresolvedAt: null,
+  selectedEntry: "default[9] reavers_glaive",
+  unselectabilityProven: false,
+  unselectabilityRefusal: "CONDITION_NOT_PROVEN_FALSE",
+};
+const ONBA1_REJECTED_FOR_RG = (refusal) => ({
+  outcome: "REJECTED",
+  basis: "AUTHORITY_SELECTED_DIFFERENT_TOKEN",
+  authorityToken: "reavers_glaive",
+  selectionPrecision: "EXACT_ENTRY",
+  decisiveBlocker: null,
+  rawBlocker: null,
+  unresolvedAt: null,
+  selectedEntry: "default[9] reavers_glaive",
+  unselectabilityProven: false,
+  unselectabilityRefusal: refusal,
+});
+const ONBA1_RELATED = ["tests/unit/specs/onb-a1-havoc-demon-hunter.test.ts"];
+const onba1_decision = (id, what, why, reportTimeMs, abilityGameId, expected) =>
+  kase(
+    `spec-havoc-demon-hunter.${id}`,
+    ONBA1_LAST,
+    "SPEC_HAVOC_DEMON_HUNTER",
+    "src/specs/demonhunter/havoc/observed-analysis.ts; first-gcd-adapter.ts; positive-usability.ts; aura-bindings.ts",
+    what,
+    [
+      a("SPEC_HAVOC_DEMON_HUNTER.DECISION_COVERAGE", {
+        actorId: ONBA1_ACTOR,
+        targetActorId: null,
+        observedCast: { reportTimeMs, abilityGameId },
+        expected,
+      }),
+    ],
+    ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    why,
+    { authority: ONBA1_AUTHORITY, related: ONBA1_RELATED },
+  );
+const ONBA1_EVIDENCE_CASES = [
+  ...ONBA1_SEGMENTS.map(([fromS, toS, , , count]) =>
+    kase(
+      `normalization.b1pm-havoc-demon-hunter-18-decisions-seg-${String(fromS)}-${String(toS)}-normalizes-whole-and-in-order`,
+      ONBA1_SEGMENT(fromS, toS),
+      "NORMALIZATION",
+      "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from --families",
+      `The ${String(count)}-event segment of actor 18 (fight +${String(fromS)} s .. +${String(toS)} s) normalizes with every raw type recognised and its input order preserved.`,
+      [
+        a("NORMALIZATION.EVENT_COUNT_PRESERVED", { expectedEventCount: count }),
+        a("NORMALIZATION.INPUT_ORDER_PRESERVED", {}),
+        a("NORMALIZATION.ALL_TYPES_RECOGNISED", {}),
+      ],
+      ["VALIDATED_EVIDENCE"],
+      "The census is of the segment, never of the fight: exactly the retained families sourced by or targeting actor 18 in its range.",
+      { related: ONBA1_RELATED },
+    ),
+  ),
+  kase(
+    "spec-havoc-demon-hunter.the-coverage-disclosure-over-the-retained-window",
+    ONBA1_LAST,
+    "SPEC_HAVOC_DEMON_HUNTER",
+    "src/specs/demonhunter/havoc/observed-analysis.ts summarizeHavocDemonHunterDecisions",
+    "Over the retained first 90 s: 76 eligible decisions, 7 MATCH, 4 REJECTED, 65 UNKNOWN, every UNKNOWN naming the entry that stopped it, and 252 casts excluded by name. Most UNKNOWNs stop at The Hunt (default[5]), whose pinned cooldown is contradicted by the wire and is therefore never bounded.",
+    [
+      a("SPEC_HAVOC_DEMON_HUNTER.COVERAGE_SUMMARY", {
+        actorId: ONBA1_ACTOR,
+        expected: {
+          eligibleDecisions: 76,
+          match: 7,
+          rejected: 4,
+          unknown: 65,
+          exclusions: {
+            MELEE_SWING: 103,
+            NON_GCD_ACTION: 12,
+            EXECUTION_LANE_NOT_ESTABLISHED: 121,
+            OUTSIDE_FIRST_SLICE: 16,
+          },
+          unresolvedAt: {
+            "DIVERGENT_GCD_OUTCOMES @ default[4] metamorphosis": 6,
+            "DIVERGENT_GCD_OUTCOMES @ default[5] the_hunt": 54,
+            "DIVERGENT_GCD_OUTCOMES @ default[9] reavers_glaive": 4,
+            "DIVERGENT_GCD_OUTCOMES @ default[10] annihilation": 1,
+          },
+        },
+      }),
+    ],
+    ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    "UNKNOWN coverage must be measured: every UNKNOWN names the entry that stopped it, so the narrow surface cannot be mistaken for a clean bill of health.",
+    { authority: ONBA1_AUTHORITY, related: ONBA1_RELATED },
+  ),
+  onba1_decision(
+    "the-first-resolved-reavers-glaive-matches",
+    "The FIRST resolved Reaver's Glaive in report-time order, chosen by that rule: the scan steps past Metamorphosis on its proven cooldown and past The Hunt's gate on the proven buff, and selects default[9], the entry the player pressed.",
+    "A real, identity-paired MATCH from SANITIZED_CAPTURE: the buffs its own cast applies in the same millisecond are read from before their edge, or every Reaver's Glaive would prove itself unselectable.",
+    7454441,
+    ONBA1_ID.RG,
+    ONBA1_MATCH_RG,
+  ),
+  onba1_decision(
+    "annihilation-with-reavers-glaive-proven-usable-is-rejected",
+    "The FIRST resolved Annihilation REJECTED in report-time order: Reaver's Glaive's buff has been up past the reaction tolerance, Rending Strike and Glaive Flurry are proven down, and the scan selects default[9] with every usability dimension proven.",
+    "A real REJECTED driven by state and authority: a positive proof that the higher-priority action was available, never the absence of one.",
+    7473830,
+    ONBA1_ID.ANNIHILATION,
+    ONBA1_REJECTED_FOR_RG("CONDITION_NOT_PROVEN_FALSE"),
+  ),
+  onba1_decision(
+    "chaos-strike-with-reavers-glaive-proven-usable-is-rejected",
+    "The FIRST resolved Chaos Strike REJECTED in report-time order: the same proof on a second token, so the discrimination does not rest on one action.",
+    "A second distinct observed token resolves REJECTED on the same rule.",
+    7513346,
+    ONBA1_ID.CHAOS_STRIKE,
+    ONBA1_REJECTED_FOR_RG("UNCONDITIONAL_ENTRY"),
+  ),
+];
+
+// --------------------------------------------------------------------------
 // HEAL-B4P (2026-11-03): the healer promotion gate's real subject for
 // Preservation Evoker. Every cast, begincast and empower envelope sourced by or
 // targeting gtKb fight 22's Preservation Evoker (actor 15) over the whole
@@ -13702,6 +13933,7 @@ const manifest = EVIDENCE_ROOT
         ...M12D_EVIDENCE_ARTIFACTS,
         ...HEALB1P_EVIDENCE_ARTIFACTS,
         ...HEALB4P_EVIDENCE_ARTIFACTS,
+        ...ONBA1_EVIDENCE_ARTIFACTS,
         ...M13A_EVIDENCE_ARTIFACTS,
         ...M13D_EVIDENCE_ARTIFACTS,
       ].sort(byId("artifactId")),
@@ -13711,6 +13943,7 @@ const manifest = EVIDENCE_ROOT
         ...M12D_EVIDENCE_CASES,
         ...HEALB1P_EVIDENCE_CASES,
         ...HEALB4P_EVIDENCE_CASES,
+        ...ONBA1_EVIDENCE_CASES,
         ...M13A_EVIDENCE_CASES,
       ].sort(byId("caseId")),
     }

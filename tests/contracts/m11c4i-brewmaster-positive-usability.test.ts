@@ -497,6 +497,11 @@ describe("scope", () => {
       .map(([path]) => path.replace(/^.*\/src\//, "src/"))
       .sort();
     expect(readers).toEqual([
+      // ONB-A1: INTERNAL_ONLY; only Reaver's Glaive ever receives a conclusion.
+      "src/specs/demonhunter/havoc/action-profile.ts",
+      "src/specs/demonhunter/havoc/first-gcd-adapter.ts",
+      "src/specs/demonhunter/havoc/observed-analysis.ts",
+      "src/specs/demonhunter/havoc/positive-usability.ts",
       "src/specs/monk/brewmaster/action-profile.ts",
       "src/specs/monk/brewmaster/first-gcd-adapter.ts",
       "src/specs/monk/brewmaster/observed-analysis.ts",

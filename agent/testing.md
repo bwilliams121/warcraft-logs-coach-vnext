@@ -5500,3 +5500,17 @@ Augmentation requires ally state when decisions depend on allies.
 Preparation findings exist independently of APL decisions.
 
 Regression tests protect everything we learn.
+
+---
+
+# ONB-A1: Havoc Demon Hunter
+
+`tests/unit/specs/onb-a1-havoc-demon-hunter.test.ts` pins the fail-closed rules: missing talents
+stay UNKNOWN, an undecided Metamorphosis or The Hunt never falls through to a lower action, an
+UNKNOWN condition is never unselectability, a logged impact is never a press, and a young buff or a
+cast that corroborates no range never proves Reaver's Glaive usable. The real decisions and the
+coverage disclosure are archive cases (`spec-havoc-demon-hunter.*`), and
+`tests/contracts/onb-a1-havoc-promotion-readiness.test.ts` reports the promotion gates.
+
+The whole-fight numbers in agent/architecture.md "ONB-A1" come from replaying the retained capture
+through production ingestion. They are not pinned, because those bytes are not committed.

@@ -181,6 +181,7 @@ describe("REST: a real Blood Death Knight identity resolves publicly", () => {
       "priest-holy-healer-findings": 0,
       "priest-discipline-healer-findings": 0,
       "evoker-preservation-healer-findings": 0,
+      "demonhunter-havoc-observed-decisions": 0,
     });
     const parsed = PublicAnalysisResultSchema.safeParse(rest.body);
     expect(parsed.success).toBe(true);

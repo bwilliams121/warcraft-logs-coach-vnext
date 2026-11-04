@@ -181,6 +181,7 @@ describe("a Retribution Paladin alone", () => {
       "priest-holy-healer-findings": 0,
       "priest-discipline-healer-findings": 0,
       "evoker-preservation-healer-findings": 0,
+      "demonhunter-havoc-observed-decisions": 0,
     });
     expectRetributionCell(cellOf(run.aggregate.cells, RETRIBUTION));
     expect(run.aggregate.coverage).toMatchObject({
@@ -222,6 +223,7 @@ describe("a mixed roster — Assassination, Protection, Retribution, Arms and an
       "priest-holy-healer-findings": 0,
       "priest-discipline-healer-findings": 0,
       "evoker-preservation-healer-findings": 0,
+      "demonhunter-havoc-observed-decisions": 0,
     });
   });
 

@@ -1929,6 +1929,295 @@ const MONK_BREWMASTER_FACTS = {
   ],
 };
 
+/**
+ * The Havoc Demon Hunter target's pinned inputs (ONB-A1).
+ *
+ * Demon Hunter keeps one class module; there is no spec module. The racial row
+ * and the player and consumable modules are the files every other target
+ * hashes.
+ */
+const DEMONHUNTER_HAVOC_SOURCES = {
+  spellData: "engine/dbc/generated/sc_spell_data.inc",
+  classSpells: "engine/dbc/generated/class_spells.inc",
+  clientDataVersion: "engine/dbc/generated/client_data_version.inc",
+  spellDataLayout: "engine/dbc/spell_data.hpp",
+  // HASHED, NEVER PARSED — the class module every token binding is a hand-reviewed reading of.
+  classModule: "engine/class_modules/sc_demon_hunter.cpp",
+  // HASHED, NEVER PARSED. The racial row is a class-mask reading of this table.
+  racialSpells: "engine/dbc/generated/racial_spells.inc",
+  playerModule: "engine/player/player.cpp",
+  consumableModule: "engine/player/consumable.cpp",
+};
+
+const DEMON_HUNTER = "engine/class_modules/sc_demon_hunter.cpp";
+
+/**
+ * The Havoc Demon Hunter facts (ONB-A1).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every spell a token
+ * of the pinned Havoc list (apl_demon_hunter.cpp `havoc`) can execute. Facts a
+ * reader should not have to rediscover (all read off the pinned DBC):
+ *
+ *   - FELBLADE IS `_gcd` 500, Vengeful Retreat `_gcd` 0, every other token 1500.
+ *   - METAMORPHOSIS HAS TWO RECORDS AND ONLY ONE IS THE ACTION. The action is
+ *     built on 191427 (`_gcd` 1500). The log reports the leap's IMPACT, 200166,
+ *     as a `cast` (`metamorphosis_impact_t`, sc_demon_hunter.cpp:4890-4896) and
+ *     never reports 191427. 200166 is recorded with no token binding: it is a
+ *     background impact, not the press.
+ *   - THE HUNT'S IMPACT 370966 AND FELBLADE'S CHARGE 213243 are logged as casts
+ *     too; both are recorded with no token binding, for the same reason.
+ *   - THROW GLAIVE IS NOT ALWAYS A PRESS. Screaming Brutality executes background
+ *     copies on the same spell (sc_demon_hunter.cpp:7354-7357, :7406-7409), which
+ *     log as 185123. The token still binds 185123; the analyzer owns what that
+ *     means.
+ */
+const DEMONHUNTER_HAVOC_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    // ---- class/spec actions the pinned Havoc list names ----
+    { abilityGameId: 258920, displayNameEn: "Immolation Aura", baseGcdMs: 1500 },
+    { abilityGameId: 191427, displayNameEn: "Metamorphosis", baseGcdMs: 1500 },
+    { abilityGameId: 370965, displayNameEn: "The Hunt", baseGcdMs: 1500 },
+    { abilityGameId: 198793, displayNameEn: "Vengeful Retreat", baseGcdMs: 0 },
+    { abilityGameId: 442294, displayNameEn: "Reaver's Glaive", baseGcdMs: 1500 },
+    { abilityGameId: 201427, displayNameEn: "Annihilation", baseGcdMs: 1500 },
+    { abilityGameId: 258860, displayNameEn: "Essence Break", baseGcdMs: 1500 },
+    { abilityGameId: 210152, displayNameEn: "Death Sweep", baseGcdMs: 1500 },
+    { abilityGameId: 185123, displayNameEn: "Throw Glaive", baseGcdMs: 1500 },
+    { abilityGameId: 198013, displayNameEn: "Eye Beam", baseGcdMs: 1500 },
+    { abilityGameId: 232893, displayNameEn: "Felblade", baseGcdMs: 500 },
+    { abilityGameId: 188499, displayNameEn: "Blade Dance", baseGcdMs: 1500 },
+    { abilityGameId: 162794, displayNameEn: "Chaos Strike", baseGcdMs: 1500 },
+    // ---- NOT execution candidates: what the log reports beside the press ----
+    { abilityGameId: 200166, displayNameEn: "Metamorphosis", baseGcdMs: 0 },
+    { abilityGameId: 370966, displayNameEn: "The Hunt", baseGcdMs: 0 },
+    { abilityGameId: 213243, displayNameEn: "Felblade", baseGcdMs: 0 },
+    // ---- the one racial token of the list, as a Demon Hunter resolves it ----
+    { abilityGameId: 202719, displayNameEn: "Arcane Torrent", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "immolation_aura",
+      candidateAbilityGameIds: [258920],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / immolation_aura_t",
+      startLine: 9747,
+      endLine: 9748,
+      sourceNote:
+        'create_action dispatches "immolation_aura" to immolation_aura_t, built on p->spell.immolation_aura at ' +
+        'sc_demon_hunter.cpp:4802-4803; spell.immolation_aura = find_class_spell( "Immolation Aura" ) at :10769. ' +
+        "class_spells.inc row { 12, 0, 258920 } confirms the id.",
+    },
+    {
+      simcToken: "metamorphosis",
+      candidateAbilityGameIds: [191427],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / metamorphosis_t",
+      startLine: 9749,
+      endLine: 9750,
+      sourceNote:
+        'create_action dispatches "metamorphosis" to metamorphosis_t, built on p->spec.metamorphosis at ' +
+        'sc_demon_hunter.cpp:4902-4903; for Havoc spec.metamorphosis = find_class_spell( "Metamorphosis" ) at ' +
+        ":10787, class_spells.inc row { 12, 0, 191427 }. The log reports the leap's impact 200166 as a cast and " +
+        "never 191427, so this binding names the action, not the wire id.",
+    },
+    {
+      simcToken: "the_hunt",
+      candidateAbilityGameIds: [370965],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / the_hunt_t",
+      startLine: 9759,
+      endLine: 9760,
+      sourceNote:
+        'create_action dispatches "the_hunt" to the_hunt_t, built on p->spec.the_hunt at sc_demon_hunter.cpp:5612; ' +
+        'for Havoc spec.the_hunt = talent.havoc.the_hunt at :11290, find_talent_spell( SPECIALIZATION, "The Hunt" ) ' +
+        "at :11024, whose Havoc trait row carries spell 370965.",
+    },
+    {
+      simcToken: "vengeful_retreat",
+      candidateAbilityGameIds: [198793],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / vengeful_retreat_t",
+      startLine: 9812,
+      endLine: 9813,
+      sourceNote:
+        'create_action dispatches "vengeful_retreat" to vengeful_retreat_t, built on ' +
+        "p->talent.demon_hunter.vengeful_retreat at sc_demon_hunter.cpp:8588-8589; talent.demon_hunter.vengeful_retreat = " +
+        'find_talent_spell( CLASS, "Vengeful Retreat" ) at :10868, trait row spell 198793. The DBC record carries _gcd 0.',
+    },
+    {
+      simcToken: "reavers_glaive",
+      candidateAbilityGameIds: [442294],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / reavers_glaive_t",
+      startLine: 9816,
+      endLine: 9817,
+      sourceNote:
+        'create_action dispatches "reavers_glaive" to reavers_glaive_t, built on p->hero_spec.reavers_glaive at ' +
+        "sc_demon_hunter.cpp:8431-8432; for Havoc hero_spec.reavers_glaive = talent_spell_lookup( " +
+        "talent.aldrachi_reaver.art_of_the_glaive, 442294 ) at :11317. ready() requires buff.reavers_glaive up (:8461-8464).",
+    },
+    {
+      simcToken: "annihilation",
+      candidateAbilityGameIds: [201427],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / annihilation_t",
+      startLine: 9792,
+      endLine: 9793,
+      sourceNote:
+        'create_action dispatches "annihilation" to annihilation_t, built on p->spec.annihilation at ' +
+        "sc_demon_hunter.cpp:7677-7678; spec.annihilation = find_spell( 201427, DEMON_HUNTER_HAVOC ) at :10837. ready() " +
+        "requires buff.metamorphosis up (:7699-7705).",
+    },
+    {
+      simcToken: "essence_break",
+      candidateAbilityGameIds: [258860],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / essence_break_t",
+      startLine: 9798,
+      endLine: 9799,
+      sourceNote:
+        'create_action dispatches "essence_break" to essence_break_t, built on p->talent.havoc.essence_break at ' +
+        'sc_demon_hunter.cpp:7804-7805; talent.havoc.essence_break = find_talent_spell( SPECIALIZATION, "Essence Break" ) ' +
+        "at :11034, trait row spell 258860.",
+    },
+    {
+      simcToken: "death_sweep",
+      candidateAbilityGameIds: [210152],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / death_sweep_t",
+      startLine: 9800,
+      endLine: 9801,
+      sourceNote:
+        'create_action dispatches "death_sweep" to death_sweep_t, built on p->spec.death_sweep at ' +
+        "sc_demon_hunter.cpp:7365-7366; spec.death_sweep = find_spell( 210152, DEMON_HUNTER_HAVOC ) at :10844. ready() " +
+        "requires buff.metamorphosis up (:7412-7418).",
+    },
+    {
+      simcToken: "throw_glaive",
+      candidateAbilityGameIds: [185123],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / throw_glaive_t",
+      startLine: 9810,
+      endLine: 9811,
+      sourceNote:
+        'create_action dispatches "throw_glaive" to throw_glaive_t, built on p->spell.throw_glaive at ' +
+        'sc_demon_hunter.cpp:8309-8311; for Havoc spell.throw_glaive = find_class_spell( "Throw Glaive" ) at :10781, ' +
+        "class_spells.inc row { 12, 0, 185123 }. Background copies under Screaming Brutality execute on the same spell " +
+        "(:7354-7357, :7406-7409), so a logged 185123 does not prove a press.",
+    },
+    {
+      simcToken: "eye_beam",
+      candidateAbilityGameIds: [198013],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / eye_beam_t",
+      startLine: 9739,
+      endLine: 9740,
+      sourceNote:
+        'create_action dispatches "eye_beam" to eye_beam_t, built on p->talent.havoc.eye_beam at ' +
+        'sc_demon_hunter.cpp:4095-4096; talent.havoc.eye_beam = find_talent_spell( SPECIALIZATION, "Eye Beam" ) at ' +
+        ":10985, trait row spell 198013.",
+    },
+    {
+      simcToken: "felblade",
+      candidateAbilityGameIds: [232893],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / felblade_t",
+      startLine: 9802,
+      endLine: 9803,
+      sourceNote:
+        'create_action dispatches "felblade" to felblade_t, built on p->talent.demon_hunter.felblade at ' +
+        'sc_demon_hunter.cpp:7875-7876; talent.demon_hunter.felblade = find_talent_spell( CLASS, "Felblade" ) at :10869, ' +
+        "the Havoc trait row carrying spell 232893.",
+    },
+    {
+      simcToken: "blade_dance",
+      candidateAbilityGameIds: [188499],
+      crossCheck: "NONE_SPECIALIZATION_SPELL",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / blade_dance_t",
+      startLine: 9794,
+      endLine: 9795,
+      sourceNote:
+        'create_action dispatches "blade_dance" to blade_dance_t, built on p->spec.blade_dance at ' +
+        'sc_demon_hunter.cpp:7315-7316; spec.blade_dance = find_specialization_spell( "Blade Dance" ) at :10838. ' +
+        "ready() is false while buff.metamorphosis is up (:7342-7347).",
+    },
+    {
+      simcToken: "chaos_strike",
+      candidateAbilityGameIds: [162794],
+      crossCheck: "NONE_SPECIALIZATION_SPELL",
+      sourcePath: DEMON_HUNTER,
+      symbol: "demon_hunter_t::create_action / chaos_strike_t",
+      startLine: 9796,
+      endLine: 9797,
+      sourceNote:
+        'create_action dispatches "chaos_strike" to chaos_strike_t, built on p->spec.chaos_strike at ' +
+        'sc_demon_hunter.cpp:7638-7640; spec.chaos_strike = find_specialization_spell( "Chaos Strike" ) at :10841. ' +
+        "ready() is false while buff.metamorphosis is up (:7662-7669).",
+    },
+    {
+      simcToken: "arcane_torrent",
+      candidateAbilityGameIds: [202719],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / arcane_torrent_t",
+      startLine: 11056,
+      endLine: 11057,
+      sourceNote:
+        'player_t::create_action dispatches "arcane_torrent" to arcane_torrent_t, built on p->find_racial_spell( ' +
+        '"Arcane Torrent" ) at player.cpp:9051. racial_spells.inc row { 0x0200 (Blood Elf), 0x00000800 (Demon Hunter), ' +
+        "202719 } is the only row a Demon Hunter can resolve. OUTSIDE the rotational decision domain (racial action).",
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "auto_attack",
+      triggerGcdMs: 0,
+      sourcePath: DEMON_HUNTER,
+      symbol: "auto_attack_t::auto_attack_t",
+      line: 7006,
+      sourceNote:
+        'auto_attack_t is built on the spell-less demon_hunter_attack_t( "auto_attack", p, spell_data_t::nil() ) base ' +
+        "(sc_demon_hunter.cpp:7002-7003) and its constructor assigns trigger_gcd = timespan_t::zero() at :7006.",
+    },
+    {
+      simcToken: "pick_up_fragment",
+      triggerGcdMs: 0,
+      sourcePath: DEMON_HUNTER,
+      symbol: "pick_up_fragment_t::pick_up_fragment_t",
+      line: 5146,
+      sourceNote:
+        "pick_up_fragment_t is built on spell_data_t::nil() (sc_demon_hunter.cpp:5133-5134) and its constructor assigns " +
+        "trigger_gcd = timespan_t::zero() at :5146. It is simulated movement and has no spell or log event of its own.",
+    },
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
 export const TARGETS = {
   "rogue-assassination": {
     datasetId: DATASET_ID,
@@ -2003,6 +2292,21 @@ export const TARGETS = {
     ],
     requiredFacts: MONK_BREWMASTER_FACTS,
     defaultOut: "src/data/game/monk-brewmaster-gcd-semantics.json",
+  },
+  "demonhunter-havoc": {
+    datasetId: "SIMC_DBC_DEMONHUNTER_HAVOC_GCD_SEMANTICS",
+    classId: 12,
+    className: "Demon Hunter",
+    sources: DEMONHUNTER_HAVOC_SOURCES,
+    classModulePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+    handReviewedPaths: [
+      DEMONHUNTER_HAVOC_SOURCES.classModule,
+      DEMONHUNTER_HAVOC_SOURCES.racialSpells,
+      DEMONHUNTER_HAVOC_SOURCES.playerModule,
+      DEMONHUNTER_HAVOC_SOURCES.consumableModule,
+    ],
+    requiredFacts: DEMONHUNTER_HAVOC_FACTS,
+    defaultOut: "src/data/game/demonhunter-havoc-gcd-semantics.json",
   },
 };
 

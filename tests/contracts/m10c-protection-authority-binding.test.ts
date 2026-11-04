@@ -182,7 +182,7 @@ describe("cross-spec authority access is refused structurally", () => {
     expect(Object.isFrozen(PROTECTION_PALADIN_REGISTRATION.authority)).toBe(true);
   });
 
-  it("the production catalog holds the thirteen registrations, each citing only its own authority (Augmentation and the seven healers none)", () => {
+  it("the production catalog holds the fourteen registrations, each citing only its own authority (Augmentation and the seven healers none)", () => {
     const cited = PRODUCTION_CATALOG.registrations.map((registration) => [
       registration.specId,
       registration.authorityBindings.map((binding) => binding.authorityId),
@@ -210,6 +210,8 @@ describe("cross-spec authority access is refused structurally", () => {
       ["priest/discipline", []],
       // HEAL-B4: Preservation Evoker binds nothing either.
       ["evoker/preservation", []],
+      // ONB-A1: Havoc Demon Hunter binds its own pinned list.
+      ["demonhunter/havoc", ["SIMC_APL_DEMONHUNTER_HAVOC"]],
     ]);
   });
 });

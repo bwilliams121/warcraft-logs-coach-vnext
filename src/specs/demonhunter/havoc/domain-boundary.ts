@@ -1,0 +1,40 @@
+/**
+ * The class/spec authority boundary of the Havoc analyzer (ONB-A1).
+ *
+ * The policy every rotational specialization applies: the analyzer evaluates
+ * class/spec/hero-talent ROTATIONAL gameplay, and an entry of the pinned list
+ * that is not a class/spec action cannot preempt one. In the pinned Havoc list
+ * those are `arcane_torrent` (default[28]), `potion` and the `use_item` entries
+ * (the whole `items` list). The tables are the shared class-neutral ones
+ * (`src/simc/non-domain-tokens.ts`); the verdict recorded on the scan step is
+ * Havoc's.
+ *
+ * A DOMAIN-BOUNDARY DECISION, not an availability claim: nothing here reads race,
+ * faction, gear or consumables. One Havoc consequence worth naming: the `items`
+ * call at default[7] dispatches into a list made entirely of non-domain entries,
+ * so it returns having selected nothing and its unparseable `trinket.*` gates are
+ * never read.
+ */
+
+import type { AplAction } from "../../../simc/apl-authority.js";
+import { notApplicable, type ActionApplicability } from "../../../simc/action-applicability.js";
+import { nonDomainCategoryOf } from "../../../simc/non-domain-tokens.js";
+
+export { nonDomainCategoryOf, type NonDomainCategory } from "../../../simc/non-domain-tokens.js";
+
+const POLICY =
+  "class/spec authority boundary, applied by the Havoc analyzer: it evaluates class/spec rotational gameplay, " +
+  "and an entry of this category cannot preempt a class/spec action. This is a domain-boundary decision, not an " +
+  "availability claim: the entry may have been usable, and nothing about race, faction, gear or consumables was " +
+  "read or inferred.";
+
+/** The applicability verdict for a non-domain entry, or `null` for a class/spec entry. */
+export function havocNonDomainApplicabilityFor(action: AplAction): ActionApplicability | null {
+  const category = nonDomainCategoryOf(action.actionToken);
+  if (category === null) return null;
+  return notApplicable("OUTSIDE_SUPPORTED_DECISION_DOMAIN", {
+    itemId: null,
+    slot: null,
+    pinnedBehaviour: `${category}: '${action.actionToken}' is outside the rotational decision domain. ${POLICY}`,
+  });
+}

@@ -1442,11 +1442,13 @@ HEAL-B4P.
 ### HEAL-B4P: Preservation Evoker (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: HEAL-B4, HEAL-AP
 branch: autopilot/heal-b4p
 wcl: NONE
 publicContract: EXPECTED
+pr: 54
+mergeSha: 93150b5c1e59638bc04af9d523535471c0f589f2
 ```
 
 **Outcome.** Preservation Evoker passed the HEAL-AP healer promotion gate on its
@@ -1462,8 +1464,9 @@ its ONB-EV entry is wrong and its promotion needs no new request
 ### ONB-A1: Havoc Demon Hunter (internal, Cohort A representative)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-S1
+branch: autopilot/onb-a1
 wcl: NONE
 publicContract: NONE
 ```
@@ -1476,6 +1479,17 @@ Known stops from the D3 probes:
 
 - `retarget_auto_attack,line_cd=1`;
 - `gcd.max` at `default[3]`.
+
+**Outcome.** Havoc Demon Hunter is registered INTERNAL_ONLY on the observed-decision
+pattern. Both known stops are passed on Aldrachi Reaver builds. What it can decide on
+current evidence is narrow: the Reaver's Glaive priority. On fight 48 actor 18 the
+whole fight resolves 47 of 279 eligible decisions (24 MATCH, 23 REJECTED), every
+resolved one naming `default[9]`, and the retained first 90 s, the only part that
+fits under the archive's notice line, resolves 11 of 76 (7 MATCH, 4 REJECTED) over
+three distinct tokens. The promotion readiness report passes both gates with no control.
+The Hunt's pinned cooldown is contradicted by the wire and is never bounded, which stops
+184 decisions. Whether this narrow surface should be promoted is ONB-A1P's question
+(agent/architecture.md "ONB-A1"; agent/follow-ups.md "After ONB-A1").
 
 ### ONB-A1P: Havoc Demon Hunter (public)
 

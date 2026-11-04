@@ -5236,6 +5236,37 @@
       ]
     },
     {
+      "caseId": "application-service.havoc-demon-hunter-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Havoc Demon Hunter registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup finds nothing and the public identity table does not resolve it.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "demonhunter/havoc",
+            "expected": {
+              "internalAnalyzerId": "demonhunter-havoc-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Havoc Demon Hunter is registered INTERNAL_ONLY in ONB-A1 and its public promotion is ONB-A1P's: registration changes what internal evaluation derives, not what a public request can reach."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
+      ]
+    },
+    {
       "caseId": "application-service.high-parse-subject-is-analyzed-under-player-context",
       "artifactId": "wcl-assassination-high-parse-opener",
       "owningLayer": "APPLICATION_SERVICE",
@@ -20121,6 +20152,29 @@
         "tests/unit/specs/heal-b3-discipline-priest.test.ts",
         "tests/contracts/m11a2-cross-spec-isolation.test.ts"
       ]
+    },
+    {
+      "caseId": "spec-havoc-demon-hunter.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_HAVOC_DEMON_HUNTER",
+      "contractUnderTest": "src/specs/demonhunter/havoc/observed-analysis.ts analyzeObservedHavocDemonHunterDecisions (the spec gate)",
+      "purpose": "The Havoc facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any Havoc rule or authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_HAVOC_DEMON_HUNTER.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Havoc list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-a1-havoc-demon-hunter.test.ts"]
     },
     {
       "caseId": "spec-holy-paladin.unstated-subject-yields-no-healer-finding",

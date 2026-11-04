@@ -22,6 +22,13 @@
       "sha256": "52454331935981afbc1d74ba1289470f9f43f513d90861365e7c2cbb9c97b3c3"
     },
     {
+      "artifactId": "wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90",
+      "byteLength": 364068,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "537cec3319f0815adbb359c33039d593397fbdf67ee72f3855b40aa3de5c78f0"
+    },
+    {
       "artifactId": "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-0-180",
       "byteLength": 114638,
       "payloadKind": "WCL_EVENT_ARRAY",
@@ -486,8 +493,8 @@
   ],
   "byLayer": [
     {
-      "assertions": 60,
-      "cases": 20,
+      "assertions": 63,
+      "cases": 21,
       "failed": 0,
       "kindsExercised": [
         "NORMALIZATION.ACTOR_EVENT_CENSUS",
@@ -498,7 +505,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "NORMALIZATION",
-      "passed": 60
+      "passed": 63
     },
     {
       "assertions": 9,
@@ -513,6 +520,18 @@
       "notExecuted": 0,
       "owningLayer": "SPEC_BREWMASTER_MONK",
       "passed": 9
+    },
+    {
+      "assertions": 4,
+      "cases": 4,
+      "failed": 0,
+      "kindsExercised": [
+        "SPEC_HAVOC_DEMON_HUNTER.COVERAGE_SUMMARY",
+        "SPEC_HAVOC_DEMON_HUNTER.DECISION_COVERAGE"
+      ],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_HAVOC_DEMON_HUNTER",
+      "passed": 4
     }
   ],
   "cases": [
@@ -587,6 +606,30 @@
       "caseId": "normalization.b1pm-friendly-players-seg-75500-77000-normalizes-whole-and-in-order",
       "owningLayer": "NORMALIZATION",
       "referencedArtifactIds": ["wcl-b1pm-fight-48-friendly-players.seg-75500-77000"]
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.b1pm-havoc-demon-hunter-18-decisions-seg-0-90-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90"]
     },
     {
       "artifactId": "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-0-180",
@@ -1149,6 +1192,94 @@
         "wcl-brewmaster-monk-rxaf-opener",
         "wcl-brewmaster-monk-rxaf-rotational-165s.seg-20-165"
       ]
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90",
+      "assertions": [
+        {
+          "kind": "SPEC_HAVOC_DEMON_HUNTER.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_DEMONHUNTER_HAVOC",
+        "requiredStateEvidence": [
+          "the combatantinfo at 7,436,292 for actor 18 (specID 577)",
+          "every COMPLETE cast by actor 18 in the bundle, in canonical order",
+          "every buff transition on actor 18 sourced by actor 18, in canonical order"
+        ]
+      },
+      "caseId": "spec-havoc-demon-hunter.annihilation-with-reavers-glaive-proven-usable-is-rejected",
+      "owningLayer": "SPEC_HAVOC_DEMON_HUNTER",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90"]
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90",
+      "assertions": [
+        {
+          "kind": "SPEC_HAVOC_DEMON_HUNTER.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_DEMONHUNTER_HAVOC",
+        "requiredStateEvidence": [
+          "the combatantinfo at 7,436,292 for actor 18 (specID 577)",
+          "every COMPLETE cast by actor 18 in the bundle, in canonical order",
+          "every buff transition on actor 18 sourced by actor 18, in canonical order"
+        ]
+      },
+      "caseId": "spec-havoc-demon-hunter.chaos-strike-with-reavers-glaive-proven-usable-is-rejected",
+      "owningLayer": "SPEC_HAVOC_DEMON_HUNTER",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90"]
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90",
+      "assertions": [
+        {
+          "kind": "SPEC_HAVOC_DEMON_HUNTER.COVERAGE_SUMMARY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_DEMONHUNTER_HAVOC",
+        "requiredStateEvidence": [
+          "the combatantinfo at 7,436,292 for actor 18 (specID 577)",
+          "every COMPLETE cast by actor 18 in the bundle, in canonical order",
+          "every buff transition on actor 18 sourced by actor 18, in canonical order"
+        ]
+      },
+      "caseId": "spec-havoc-demon-hunter.the-coverage-disclosure-over-the-retained-window",
+      "owningLayer": "SPEC_HAVOC_DEMON_HUNTER",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90"]
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90",
+      "assertions": [
+        {
+          "kind": "SPEC_HAVOC_DEMON_HUNTER.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_DEMONHUNTER_HAVOC",
+        "requiredStateEvidence": [
+          "the combatantinfo at 7,436,292 for actor 18 (specID 577)",
+          "every COMPLETE cast by actor 18 in the bundle, in canonical order",
+          "every buff transition on actor 18 sourced by actor 18, in canonical order"
+        ]
+      },
+      "caseId": "spec-havoc-demon-hunter.the-first-resolved-reavers-glaive-matches",
+      "owningLayer": "SPEC_HAVOC_DEMON_HUNTER",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90"]
     }
   ],
   "contractVersion": 2,
@@ -1156,6 +1287,7 @@
   "gaps": [],
   "pinnedAuthorities": {
     "SIMC_APL_DEATHKNIGHT_BLOOD": "simc-33622e9d-1",
+    "SIMC_APL_DEMONHUNTER_HAVOC": "simc-33622e9d-1",
     "SIMC_APL_MONK_BREWMASTER": "simc-33622e9d-1",
     "SIMC_APL_PALADIN_PROTECTION": "simc-33622e9d-1",
     "SIMC_APL_PALADIN_RETRIBUTION": "simc-33622e9d-1",
@@ -1166,15 +1298,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 19360067,
-    "artifacts": 69,
-    "assertions": 69,
-    "cases": 25,
+    "artifactBytes": 19724135,
+    "artifacts": 70,
+    "assertions": 76,
+    "cases": 30,
     "declared": 0,
-    "executable": 69,
+    "executable": 76,
     "failed": 0,
     "largestArtifactBytes": 499916,
     "notExecuted": 0,
-    "passed": 69
+    "passed": 76
   }
 }

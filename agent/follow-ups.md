@@ -29,6 +29,63 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After ONB-A1: what the Havoc slice does not establish
+
+**Raised:** ONB-A1 (2026-11-03). Coverage, not soundness: each is UNKNOWN or refused.
+
+**ONB-A1P: the promotion question.** The readiness report passes both gates, and the
+surface is one decision: the Reaver's Glaive priority on Aldrachi Reaver builds. A public
+report would read 83% UNKNOWN and every REJECTED would say the same thing. Whether that
+is worth publishing, and whether Felscarred is refused by a validated-profile gate as
+Brewmaster refuses Master of Harmony, is ONB-A1P's to decide.
+
+**The Hunt's cooldown stops most decisions.** The census gives 75,000 ms (90,000 less
+Eternal Hunt's 15,000), every pinned SimulationCraft commit agrees, and the retained
+subject casts it 61,219 ms apart. Gaps cluster at 61.2 s whatever the haste, so this is
+likely a 60 s cooldown the pinned data does not explain, not haste. Nothing derives from
+the record, so `default[5]` is open whenever Reaver's Glaive is down: 184 of 232 UNKNOWNs.
+Lifting it needs a source for the real value. A floor chosen from observed gaps would be
+a guess.
+
+**A Fire Inside stops everything below `default[15]`.** The subject did not take it and it
+is alone on its node, so it resolves UNKNOWN (absence is not NOT_SELECTED), the Immolation
+Aura entry stays possible and Eye Beam, Blade Dance, Annihilation and Chaos Strike are never
+selected. Burning Wound is the same. Proving a node unpurchased needs a contract that
+`combatantinfo.talentTree` is complete, or the focus actor's `talentImportCode`, which the
+retained context holds only for actor 15. That is an evidence-semantics decision, not an
+implementation detail, and it will recur on every specialization with a lone-node talent.
+
+**Cooldowns not derived.** Eye Beam, Blade Dance, Essence Break, Immolation Aura, Felblade and
+Vengeful Retreat are each shortened or reset in combat
+(scripts/authority/extract-simc-ability-cooldowns.mjs, DEMONHUNTER_HAVOC_TARGET).
+
+**Observed tokens not judged.** Throw Glaive: a logged 185123 may be Screaming Brutality's
+background copy, and a press cannot be told from it. The Hunt: decided at `begincast`; using
+the ONB-S4 anchor needs bindings evaluated at the anchor rather than the cast. Metamorphosis:
+the log reports only its impact, so its press has no observed moment.
+
+**State not bound.** `debuff.essence_break.up` and every debuff: not read, and the target is not modelled for it.
+`debuff.reavers_mark.stack`: M4 reconstructs no count. Demonsurge on a Felscarred build:
+runtime state on a quiet buff. `gcd.max`, `gcd.remains`: hasted. The enemy count: ONB-S3.
+
+**Felscarred has no measurement.** A7R6 fight 7 actor 18 (165 s, retained raw across the M10-B
+and M10-C5 captures) is Felscarred and was not measured.
+
+**`immolation_aura,,if=` at `default[17]`.** The pinned line has an empty option segment. It is
+never reached today, and it refuses as malformed when it is. Whether SimulationCraft ignores
+the empty segment was not read.
+
+**The evidence archive's notice line.** The whole-fight Havoc evidence is about 1.3 MB and the
+archive had 0.39 MB left, so only the first 90 s is committed (364,068 bytes), leaving about 25 KB.
+The next onboarding tranche with real decisions will not fit. The queue's rule is to raise a
+measured proposal rather than raise the line silently, so this needs an owner decision before
+ONB-A2 commits evidence. Cutting the retained families down to what the slice reads is not an
+option: a category grant is a machine-readable completeness claim, and it would falsify it.
+
+**Timing reviewed once.** The 1,000 ms reaction tolerance on Reaver's Glaive and the 2,000 ms
+impact margin on Metamorphosis are set from one fight. CLAUDE.md requires timing tolerances to be
+validated on real logs, and one subject is not many.
+
 ## After ONB-S6: what the shared pet mapping does not establish
 
 **Raised:** ONB-S6 (2026-11-03). Each item is UNKNOWN today, never guessed.

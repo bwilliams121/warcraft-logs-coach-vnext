@@ -151,6 +151,14 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
     sourceId: 2,
     archive: true,
   },
+  // ONB-A1: actor 18 of the canonical fight 48 context, the Havoc Demon Hunter the
+  // committed evidence archive context reports.
+  "demonhunter/havoc": {
+    artifactId: "wcl-fight-context-b1pm-fight-48",
+    fightId: 48,
+    sourceId: 18,
+    archive: true,
+  },
   // HEAL-B3: actor 9 of the M13-A fight context, the Discipline Priest the
   // committed evidence archive context reports (also actor 88 of the G2
   // cohort246 fight 33 context).
@@ -403,6 +411,8 @@ describe("what the tree exports today", () => {
       ]),
     ).toEqual([
       ["BLOOD_DEATH_KNIGHT_MODULE", "deathknight/blood", "PUBLIC", 0],
+      // ONB-A1: Cohort A's representative, INTERNAL_ONLY.
+      ["HAVOC_DEMON_HUNTER_MODULE", "demonhunter/havoc", "INTERNAL_ONLY", 0],
       // HEAL-B1: healers on Restoration Shaman's architecture, INTERNAL_ONLY; Holy Paladin and Mistweaver Monk PUBLIC since HEAL-B1P.
       ["RESTORATION_DRUID_MODULE", "druid/restoration", "INTERNAL_ONLY", 0],
       // M13-E: INTERNAL_ONLY, binding no decision authority; PUBLIC since M13-F.
