@@ -1842,11 +1842,13 @@ mergeSha: 5502bcad59748bacead8e25ccdf25d37b3c3f96e
 ### ONB-D2: Elemental Shaman, Balance Druid and Shadow Priest (internal, Cohort D)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-D1
 branch: autopilot/onb-d2
 wcl: NONE
 publicContract: NONE
+pr: 71
+mergeSha: 39801bb8f102e8c3af6f89f58939d05d123ff4d9
 ```
 
 **Scope.** Cohort D casters with DoT maintenance and builder resources
@@ -1858,11 +1860,14 @@ evidence is retained for all three.
 ### ONB-D2P: Elemental Shaman, Balance Druid and Shadow Priest (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-D2
+branch: autopilot/onb-d2p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** None of the three passes the rotational promotion gates, so each stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Their twelve retained subjects, replayed offline, give 1,210 Elemental, 287 Balance and 356 Shadow decisions, with 0 MATCH, 0 REJECTED and every decision UNKNOWN, and a census of 5,691 retained files finds no new subject. Evidence is not their gap, so none is on ONB-EV, and ONB-S3 alone moves none of them. A promotion after each one's own inputs is a new public entry through the unchanged gates (agent/architecture.md "ONB-D2P"; agent/follow-ups.md "After ONB-D2").
 
 ### ONB-D3: Arcane Mage and Frost Mage (internal, Cohort D)
 

@@ -205,6 +205,11 @@ describe("an unsupported specialization", () => {
       // Registered INTERNAL_ONLY in ONB-D1, not promoted by ONB-D1P. "Warlock" is the wire's class token, the one its
       // registration names; another spelling would pass here for the wrong reason.
       ["Warlock", "Destruction"],
+      // Registered INTERNAL_ONLY in ONB-D2, not promoted by ONB-D2P. Each class token is the one its registration names;
+      // another spelling would pass here for the wrong reason.
+      ["Shaman", "Elemental"],
+      ["Druid", "Balance"],
+      ["Priest", "Shadow"],
     ]) {
       const { analyze, ingest, deps } = spies(className, specName);
       const result = await analyzeFight(REQUEST, deps);
