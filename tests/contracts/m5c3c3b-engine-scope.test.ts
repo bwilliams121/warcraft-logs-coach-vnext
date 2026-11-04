@@ -117,6 +117,10 @@ describe("the Rogue adapter lives in the spec layer, and only there", () => {
   const BREWMASTER_ADAPTER_PATH = "src/specs/monk/brewmaster/first-gcd-adapter.ts";
   /** ONB-A1: the Havoc Demon Hunter adapter. */
   const HAVOC_ADAPTER_PATH = "src/specs/demonhunter/havoc/first-gcd-adapter.ts";
+  /** ONB-A2: Cohort A's followers. */
+  const SUBTLETY_ADAPTER_PATH = "src/specs/rogue/subtlety/first-gcd-adapter.ts";
+  const FURY_WARRIOR_ADAPTER_PATH = "src/specs/warrior/fury/first-gcd-adapter.ts";
+  const PROTECTION_WARRIOR_ADAPTER_PATH = "src/specs/warrior/protection/first-gcd-adapter.ts";
 
   it("wires the engine into exactly one adapter module per specialization tree", () => {
     const wiring = filesUnder("src/specs").filter((path) =>
@@ -129,6 +133,9 @@ describe("the Rogue adapter lives in the spec layer, and only there", () => {
         BLOOD_ADAPTER_PATH,
         BREWMASTER_ADAPTER_PATH,
         HAVOC_ADAPTER_PATH,
+        SUBTLETY_ADAPTER_PATH,
+        FURY_WARRIOR_ADAPTER_PATH,
+        PROTECTION_WARRIOR_ADAPTER_PATH,
         ADAPTER_PATH,
       ].sort(),
     );

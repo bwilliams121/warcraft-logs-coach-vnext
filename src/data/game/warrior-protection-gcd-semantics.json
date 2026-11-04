@@ -1,0 +1,452 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_WARRIOR_PROTECTION_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/sc_warrior.cpp",
+        "sha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "byteLength": 350723
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-03",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 100,
+      "baseGcdMs": 0,
+      "displayNameEn": "Charge"
+    },
+    {
+      "abilityGameId": 871,
+      "baseGcdMs": 0,
+      "displayNameEn": "Shield Wall"
+    },
+    {
+      "abilityGameId": 1160,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Demoralizing Shout"
+    },
+    {
+      "abilityGameId": 2565,
+      "baseGcdMs": 0,
+      "displayNameEn": "Shield Block"
+    },
+    {
+      "abilityGameId": 6343,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Thunder Clap"
+    },
+    {
+      "abilityGameId": 6572,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Revenge"
+    },
+    {
+      "abilityGameId": 20243,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Devastate"
+    },
+    {
+      "abilityGameId": 23922,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Shield Slam"
+    },
+    {
+      "abilityGameId": 64382,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Shattering Throw"
+    },
+    {
+      "abilityGameId": 107574,
+      "baseGcdMs": 0,
+      "displayNameEn": "Avatar"
+    },
+    {
+      "abilityGameId": 163201,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Execute"
+    },
+    {
+      "abilityGameId": 190456,
+      "baseGcdMs": 0,
+      "displayNameEn": "Ignore Pain"
+    },
+    {
+      "abilityGameId": 228920,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Ravager"
+    },
+    {
+      "abilityGameId": 376079,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Champion's Spear"
+    },
+    {
+      "abilityGameId": 384110,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Wrecking Throw"
+    },
+    {
+      "abilityGameId": 385952,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Shield Charge"
+    },
+    {
+      "abilityGameId": 435222,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Thunder Blast"
+    },
+    {
+      "abilityGameId": 436358,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Demolish"
+    },
+    {
+      "abilityGameId": 1271985,
+      "baseGcdMs": 0,
+      "displayNameEn": "Champion's Leap"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "charge",
+      "candidateAbilityGameIds": [100],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / charge_t",
+        "startLine": 7321,
+        "endLine": 7322,
+        "sourceNote": "create_action dispatches \"charge\" to charge_t, built on p->spell.charge (sc_warrior.cpp:3384); spell.charge = find_class_spell( \"Charge\" ) at :7449, class_spells.inc row { 1, 0, 100 }.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "avatar",
+      "candidateAbilityGameIds": [107574],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / avatar_t",
+        "startLine": 7303,
+        "endLine": 7304,
+        "sourceNote": "create_action dispatches \"avatar\" to avatar_t, built on talents.shared.avatar (:7304); for Protection talents.protection.avatar = find_talent_spell( SPECIALIZATION, \"Avatar\", WARRIOR_PROTECTION ) at :7748, shared at :7928, trait row spell 107574.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "shield_wall",
+      "candidateAbilityGameIds": [871],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / shield_wall_t",
+        "startLine": 7394,
+        "endLine": 7395,
+        "sourceNote": "create_action dispatches \"shield_wall\" to shield_wall_t, built on p->talents.protection.shield_wall (:7215-7216); find_talent_spell( SPECIALIZATION, \"Shield Wall\" ) at :7723, trait row spell 871. A defensive cooldown: the offensive authority only places it, it never judges it.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "ignore_pain",
+      "candidateAbilityGameIds": [190456],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / ignore_pain_t",
+        "startLine": 7418,
+        "endLine": 7419,
+        "sourceNote": "create_action dispatches \"ignore_pain\" to ignore_pain_t, built on p->talents.shared.ignore_pain (:2475-2476); talents.protection.ignore_pain = find_talent_spell( SPECIALIZATION, \"Ignore Pain\", WARRIOR_PROTECTION ) at :7707, shared at :7935, trait row spell 190456. Active mitigation: the offensive authority only places it, it never judges it.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "shield_block",
+      "candidateAbilityGameIds": [2565],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / shield_block_t",
+        "startLine": 7388,
+        "endLine": 7389,
+        "sourceNote": "create_action dispatches \"shield_block\" to shield_block_t, built on p->spell.shield_block (:7183-7184); spell.shield_block = find_class_spell( \"Shield Block\" ) at :7455, class_spells.inc row { 1, 0, 2565 }. Active mitigation: the offensive authority only places it, it never judges it.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "champions_leap",
+      "candidateAbilityGameIds": [1271985],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / champions_leap_t",
+        "startLine": 7400,
+        "endLine": 7401,
+        "sourceNote": "create_action dispatches \"champions_leap\" to champions_leap_t, built on p->find_spell( 1271985 ) (:6801-6802).",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "ravager",
+      "candidateAbilityGameIds": [228920],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / ravager_t",
+        "startLine": 7380,
+        "endLine": 7381,
+        "sourceNote": "create_action dispatches \"ravager\" to ravager_t, built on p->talents.shared.ravager (:5867-5868); talents.protection.ravager = find_talent_spell( SPECIALIZATION, \"Ravager\", WARRIOR_PROTECTION ) at :7759, shared at :7931, trait row spell 228920, a CHOICE node with Whirling Blade.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "thunder_blast",
+      "candidateAbilityGameIds": [435222],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / thunder_blast_t",
+        "startLine": 7414,
+        "endLine": 7415,
+        "sourceNote": "create_action dispatches \"thunder_blast\" to thunder_blast_t, built on p->find_spell( 435222 ) (:3949-3950). The talent record 435607 is not the action.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "demoralizing_shout",
+      "candidateAbilityGameIds": [1160],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / demoralizing_shout_t",
+        "startLine": 7329,
+        "endLine": 7330,
+        "sourceNote": "create_action dispatches \"demoralizing_shout\" to demoralizing_shout_t, built on p->talents.protection.demoralizing_shout (:3909-3910); find_talent_spell( SPECIALIZATION, \"Demoralizing Shout\" ) at :7709, trait row spell 1160.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "champions_spear",
+      "candidateAbilityGameIds": [376079],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / champions_spear_t",
+        "startLine": 7402,
+        "endLine": 7403,
+        "sourceNote": "create_action dispatches \"champions_spear\" to champions_spear_t, built on p->talents.warrior.champions_spear (:6846-6847); find_talent_spell( CLASS, \"Champion's Spear\" ) at :7587, trait row spell 376079.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "demolish",
+      "candidateAbilityGameIds": [436358],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / demolish_t",
+        "startLine": 7433,
+        "endLine": 7434,
+        "sourceNote": "create_action dispatches \"demolish\" to demolish_t, built on p->talents.colossus.demolish (:3857-3858), channeled (:3864); find_talent_spell( HERO, \"Demolish\" ) at :7766, trait row spell 436358.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "shield_charge",
+      "candidateAbilityGameIds": [385952],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / shield_charge_t",
+        "startLine": 7390,
+        "endLine": 7391,
+        "sourceNote": "create_action dispatches \"shield_charge\" to shield_charge_t, built on p->talents.protection.shield_charge (:6153-6154); find_talent_spell( SPECIALIZATION, \"Shield Charge\" ) at :7756, trait row spell 385952.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "thunder_clap",
+      "candidateAbilityGameIds": [6343],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / thunder_clap_t",
+        "startLine": 7412,
+        "endLine": 7413,
+        "sourceNote": "create_action dispatches \"thunder_clap\" to thunder_clap_t, built on p->talents.warrior.thunder_clap (:4085-4086); find_talent_spell( CLASS, \"Thunder Clap\", specialization() ) at :7538, trait row spell 6343.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "revenge",
+      "candidateAbilityGameIds": [6572],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / revenge_t",
+        "startLine": 7384,
+        "endLine": 7385,
+        "sourceNote": "create_action dispatches \"revenge\" to revenge_t, built on p->talents.protection.revenge (:5996-5997); find_talent_spell( SPECIALIZATION, \"Revenge\" ) at :7710, trait row spell 6572.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "shield_slam",
+      "candidateAbilityGameIds": [23922],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / shield_slam_t",
+        "startLine": 7392,
+        "endLine": 7393,
+        "sourceNote": "create_action dispatches \"shield_slam\" to shield_slam_t, built on p->spell.shield_slam (:6228-6229); spell.shield_slam = find_class_spell( \"Shield Slam\" ) at :7456, class_spells.inc row { 1, 0, 23922 }.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "execute",
+      "candidateAbilityGameIds": [163201],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / execute_arms_t",
+        "startLine": 7337,
+        "endLine": 7346,
+        "sourceNote": "create_action dispatches \"execute\" to execute_arms_t for every specialization but Fury (:7343-7345), built on p->spell.execute (:4272-4273); spell.execute = find_class_spell( \"Execute\" ) at :7450, class_spells.inc row { 1, 0, 163201 }.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "wrecking_throw",
+      "candidateAbilityGameIds": [384110],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / wrecking_throw_t",
+        "startLine": 7431,
+        "endLine": 7432,
+        "sourceNote": "create_action dispatches \"wrecking_throw\" to wrecking_throw_t, built on p->talents.warrior.wrecking_throw (:6783-6784); find_talent_spell( CLASS, \"Wrecking Throw\" ) at :7562, trait row spell 384110, a CHOICE node with Shattering Throw.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "shattering_throw",
+      "candidateAbilityGameIds": [64382],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / shattering_throw_t",
+        "startLine": 7386,
+        "endLine": 7387,
+        "sourceNote": "create_action dispatches \"shattering_throw\" to shattering_throw_t, built on p->talents.warrior.shattering_throw (:5263-5264); find_talent_spell( CLASS, \"Shattering Throw\" ) at :7563, trait row spell 64382, a CHOICE node with Wrecking Throw.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "devastate",
+      "candidateAbilityGameIds": [20243],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / devastate_t",
+        "startLine": 7331,
+        "endLine": 7332,
+        "sourceNote": "create_action dispatches \"devastate\" to devastate_t, built on p->spec.devastate (:1869-1870); spec.devastate = find_specialization_spell( \"Devastate\" ) at :7500, the Protection active spell row { 1, 73, 20243 } in class_spells.inc.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "auto_attack",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "auto_attack_t::auto_attack_t",
+        "line": 2208,
+        "sourceNote": "auto_attack_t is built on warrior_attack_t( \"auto_attack\", p ) with no spell data (sc_warrior.cpp:2181) and its constructor assigns trigger_gcd = timespan_t::zero() at :2208."
+      }
+    },
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

@@ -5532,3 +5532,17 @@ through production ingestion. They are not pinned, because those bytes are not c
 
 Offline only, not committed: the whole-fight replay (`.probe/onba1/m/`) gives the numbers
 agent/architecture.md "ONB-A1" reports, unchanged by the gate.
+
+# ONB-A2: Subtlety Rogue, Fury Warrior and Protection Warrior
+
+`tests/unit/specs/onb-a2-cohort-a-followers.test.ts`, synthetic only, because no retained capture holds these
+specializations' events: each row is internal only and refused publicly; another specialization is refused first; a capture
+with no combatant info refuses; every decision is UNKNOWN and explained, never a confident verdict; an off-GCD press and an
+unknown spell are excluded, never judged; a missing talent stays UNKNOWN; a choice-node talent is NOT_SELECTED only when its
+sibling is observed; a resolved hero tree disproves only the other tree's talents, an unresolved one nothing; each list's
+stop is pinned over a whole build, with no fall-through past an open enemy count; mitigation presses are excluded and no
+offensive authority governs them; a cast's own Rage is exact in SimulationCraft's units and unknown, never zero, without a
+snapshot; ids the pinned module does not build have no token.
+
+Six corpus cases (`application-service.*-registration-is-internal-only`, `spec-*.the-facade-refuses-every-other-specialization`).
+The conformance suite gains the three modules, with Fury and Protection Warrior's identity proof held by `IDENTITY_RETAINED_ONLY`.

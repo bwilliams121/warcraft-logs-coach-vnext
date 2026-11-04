@@ -725,7 +725,7 @@ describe("M13-F / HEAL-AP / HEAL-B1P / HEAL-B2P / HEAL-B4P: a PUBLIC registratio
 });
 
 describe("INTERNAL_ONLY mode — reported, never failed, paired against the module's own WCL identity", () => {
-  it("the production INTERNAL_ONLY registrations are exactly Restoration Druid and Discipline Priest, and the partition agrees", () => {
+  it("the production INTERNAL_ONLY registrations are exactly Restoration Druid, Discipline Priest and Cohort A's three followers, and the partition agrees", () => {
     // Blood Death Knight held this half from M11-B2 until M11-B12 promoted
     // it; Brewmaster Monk held it from M11-C2 until M11-C4j promoted it;
     // Augmentation Evoker held it in M13-E until M13-F promoted it; Restoration
@@ -736,7 +736,14 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     // promoted it through the healer gate. HEAL-B3 added Discipline Priest,
     // HEAL-B4 Preservation Evoker, and HEAL-B4P promoted that through the healer gate. ONB-A1 added Havoc Demon Hunter, and ONB-A1P promoted it through both gates.
     // The synthetic module below still exercises the branch.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration", "priest/discipline"]);
+    // ONB-A2 added Cohort A's three followers, which no retained capture can validate.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([
+      "druid/restoration",
+      "priest/discipline",
+      "rogue/subtlety",
+      "warrior/fury",
+      "warrior/protection",
+    ]);
     const internal = PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY");
     expect(internal.map((row) => row.specId)).toEqual([...INTERNAL_ONLY_SPEC_IDS]);
   });

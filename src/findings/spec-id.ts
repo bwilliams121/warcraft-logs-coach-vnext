@@ -78,7 +78,10 @@ export type SpecId =
   | "priest/holy"
   | "priest/discipline"
   | "evoker/preservation"
-  | "demonhunter/havoc";
+  | "demonhunter/havoc"
+  | "rogue/subtlety"
+  | "warrior/fury"
+  | "warrior/protection";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -95,6 +98,9 @@ export const SPEC_IDS = Object.freeze([
   "priest/discipline",
   "evoker/preservation",
   "demonhunter/havoc",
+  "rogue/subtlety",
+  "warrior/fury",
+  "warrior/protection",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -220,10 +226,17 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * full onboarding and Cohort A's representative. ONB-A1P moved it to
  * `PUBLIC_SPEC_IDS` by the same five-site edit, for Aldrachi Reaver builds only
  * (`supported-profile.ts`), after it passed both rotational gates on real evidence.
+ *
+ * Subtlety Rogue, Fury Warrior and Protection Warrior arrived here in ONB-A2, Cohort A's
+ * followers. No retained capture can validate any of them, and no decision of any of them
+ * resolves today, so their public shape waits on evidence (ONB-A2P, ONB-EV).
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
   "priest/discipline",
+  "rogue/subtlety",
+  "warrior/fury",
+  "warrior/protection",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

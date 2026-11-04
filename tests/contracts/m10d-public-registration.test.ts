@@ -69,7 +69,13 @@ describe("the five sites agree", () => {
       "evoker/preservation",
       "demonhunter/havoc",
     ]);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration", "priest/discipline"]);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([
+      "druid/restoration",
+      "priest/discipline",
+      "rogue/subtlety",
+      "warrior/fury",
+      "warrior/protection",
+    ]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
 
@@ -142,6 +148,10 @@ describe("the five sites agree", () => {
       ["priest/discipline", "INTERNAL_ONLY"],
       ["evoker/preservation", "PUBLIC"],
       ["demonhunter/havoc", "PUBLIC"],
+      // ONB-A2: Cohort A's followers, NOT among the enabled analyzers.
+      ["rogue/subtlety", "INTERNAL_ONLY"],
+      ["warrior/fury", "INTERNAL_ONLY"],
+      ["warrior/protection", "INTERNAL_ONLY"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -244,6 +254,9 @@ describe("the complete-catalog helper", () => {
       "priest-discipline-healer-findings": 0,
       "evoker-preservation-healer-findings": 0,
       "demonhunter-havoc-observed-decisions": 0,
+      "rogue-subtlety-observed-decisions": 0,
+      "warrior-fury-observed-decisions": 0,
+      "warrior-protection-observed-decisions": 0,
     });
   });
 });

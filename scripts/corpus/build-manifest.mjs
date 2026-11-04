@@ -6861,6 +6861,118 @@ const BREWMASTER_CASES = [
       ],
     },
   ),
+  // ---- SPEC_SUBTLETY_ROGUE, SPEC_FURY_WARRIOR, SPEC_PROTECTION_WARRIOR (ONB-A2, INTERNAL_ONLY) ---
+  kase(
+    "application-service.subtlety-rogue-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Subtlety Rogue registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "rogue/subtlety",
+        expected: {
+          internalAnalyzerId: "rogue-subtlety-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Subtlety Rogue is registered INTERNAL_ONLY in ONB-A2. No retained capture can validate it, so a public request must keep receiving SPEC_NOT_SUPPORTED until ONB-A2P can promote it on real evidence.",
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-subtlety-rogue.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_SUBTLETY_ROGUE",
+    "src/specs/rogue/subtlety/observed-analysis.ts analyzeObservedSubtletyRogueDecisions (the spec gate)",
+    "The Subtlety Rogue facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_SUBTLETY_ROGUE.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Subtlety Rogue list.",
+    { related: ["tests/unit/specs/onb-a2-cohort-a-followers.test.ts"] },
+  ),
+  kase(
+    "application-service.fury-warrior-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Fury Warrior registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "warrior/fury",
+        expected: {
+          internalAnalyzerId: "warrior-fury-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Fury Warrior is registered INTERNAL_ONLY in ONB-A2. No retained capture can validate it, so a public request must keep receiving SPEC_NOT_SUPPORTED until ONB-A2P can promote it on real evidence.",
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-fury-warrior.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_FURY_WARRIOR",
+    "src/specs/warrior/fury/observed-analysis.ts analyzeObservedFuryWarriorDecisions (the spec gate)",
+    "The Fury Warrior facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_FURY_WARRIOR.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Fury Warrior list.",
+    { related: ["tests/unit/specs/onb-a2-cohort-a-followers.test.ts"] },
+  ),
+  kase(
+    "application-service.protection-warrior-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Protection Warrior registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "warrior/protection",
+        expected: {
+          internalAnalyzerId: "warrior-protection-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Protection Warrior is registered INTERNAL_ONLY in ONB-A2. No retained capture can validate it, so a public request must keep receiving SPEC_NOT_SUPPORTED until ONB-A2P can promote it on real evidence.",
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-protection-warrior.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_PROTECTION_WARRIOR",
+    "src/specs/warrior/protection/observed-analysis.ts analyzeObservedProtectionWarriorDecisions (the spec gate)",
+    "The Protection Warrior facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_PROTECTION_WARRIOR.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Protection Warrior list.",
+    { related: ["tests/unit/specs/onb-a2-cohort-a-followers.test.ts"] },
+  ),
   // ---- SPEC_PRESERVATION_EVOKER (HEAL-B4; PUBLIC since HEAL-B4P) --------------------
   kase(
     "spec-preservation-evoker.unstated-subject-yields-no-healer-finding",

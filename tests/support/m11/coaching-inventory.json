@@ -357,7 +357,7 @@
     {
       "specId": "rogue/subtlety",
       "cohort": "B_INSTANT_TARGET_GATED",
-      "currentAnalyzerStatus": "UNREGISTERED",
+      "currentAnalyzerStatus": "INTERNAL_ONLY",
       "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
       "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
       "deepDiveInventoryStatus": "UNASSESSED",
@@ -412,7 +412,7 @@
     {
       "specId": "warrior/fury",
       "cohort": "C_RUN_ACTION_LIST_DISPATCH",
-      "currentAnalyzerStatus": "UNREGISTERED",
+      "currentAnalyzerStatus": "INTERNAL_ONLY",
       "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
       "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
       "deepDiveInventoryStatus": "UNASSESSED",
@@ -421,7 +421,7 @@
     {
       "specId": "warrior/protection",
       "cohort": "C_RUN_ACTION_LIST_DISPATCH",
-      "currentAnalyzerStatus": "UNREGISTERED",
+      "currentAnalyzerStatus": "INTERNAL_ONLY",
       "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
       "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
       "deepDiveInventoryStatus": "UNASSESSED",

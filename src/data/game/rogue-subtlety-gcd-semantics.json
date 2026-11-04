@@ -1,0 +1,326 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_ROGUE_SUBTLETY_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/sc_rogue.cpp",
+        "sha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "byteLength": 436673
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-03",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 53,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Backstab"
+    },
+    {
+      "abilityGameId": 1784,
+      "baseGcdMs": 0,
+      "displayNameEn": "Stealth"
+    },
+    {
+      "abilityGameId": 1856,
+      "baseGcdMs": 0,
+      "displayNameEn": "Vanish"
+    },
+    {
+      "abilityGameId": 121471,
+      "baseGcdMs": 0,
+      "displayNameEn": "Shadow Blades"
+    },
+    {
+      "abilityGameId": 185313,
+      "baseGcdMs": 0,
+      "displayNameEn": "Shadow Dance"
+    },
+    {
+      "abilityGameId": 185438,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Shadowstrike"
+    },
+    {
+      "abilityGameId": 196819,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Eviscerate"
+    },
+    {
+      "abilityGameId": 197835,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Shuriken Storm"
+    },
+    {
+      "abilityGameId": 200758,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Gloomblade"
+    },
+    {
+      "abilityGameId": 280719,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Secret Technique"
+    },
+    {
+      "abilityGameId": 319175,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Black Powder"
+    },
+    {
+      "abilityGameId": 426591,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Goremaw's Bite"
+    },
+    {
+      "abilityGameId": 441776,
+      "baseGcdMs": 1200,
+      "displayNameEn": "Coup de Grace"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "stealth",
+      "candidateAbilityGameIds": [1784],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / stealth_t",
+        "startLine": 9497,
+        "endLine": 9497,
+        "sourceNote": "create_action dispatches \"stealth\" to stealth_t, built on p->spell.stealth (sc_rogue.cpp:6061-6062); spell.stealth = find_class_spell( \"Stealth\" ) at :9919, class_spells.inc row { 4, 0, 1784 }.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "shadow_blades",
+      "candidateAbilityGameIds": [121471],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / shadow_blades_t",
+        "startLine": 9488,
+        "endLine": 9488,
+        "sourceNote": "create_action dispatches \"shadow_blades\" to shadow_blades_t, built on p->talent.subtlety.shadow_blades (:5451-5452); find_talent_spell( SPECIALIZATION, \"Shadow Blades\" ) at :10147, trait row spell 121471.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "shadow_dance",
+      "candidateAbilityGameIds": [185313],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / shadow_dance_t",
+        "startLine": 9489,
+        "endLine": 9489,
+        "sourceNote": "create_action dispatches \"shadow_dance\" to shadow_dance_t, built on p->spec.shadow_dance (:5486-5487); spec.shadow_dance = find_specialization_spell( \"Shadow Dance\" ) at :9955, the Subtlety active spell row { 4, 261, 185313 } in class_spells.inc.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "vanish",
+      "candidateAbilityGameIds": [1856],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / vanish_t",
+        "startLine": 9500,
+        "endLine": 9500,
+        "sourceNote": "create_action dispatches \"vanish\" to vanish_t, built on p->spell.vanish (:6031-6032); spell.vanish = find_class_spell( \"Vanish\" ) at :9920, class_spells.inc row { 4, 0, 1856 }.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "shuriken_storm",
+      "candidateAbilityGameIds": [197835],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / shuriken_storm_t",
+        "startLine": 9492,
+        "endLine": 9492,
+        "sourceNote": "create_action dispatches \"shuriken_storm\" to shuriken_storm_t, built on p->spec.shuriken_storm (:5768-5769); find_specialization_spell( \"Shuriken Storm\" ) at :9959, the Subtlety active spell row { 4, 261, 197835 } in class_spells.inc.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "gloomblade",
+      "candidateAbilityGameIds": [200758],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / gloomblade_t",
+        "startLine": 9475,
+        "endLine": 9475,
+        "sourceNote": "create_action dispatches \"gloomblade\" to gloomblade_t, built on p->talent.subtlety.gloomblade (:4562-4563); find_talent_spell( SPECIALIZATION, \"Gloomblade\" ) at :10131, trait row spell 200758.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "shadowstrike",
+      "candidateAbilityGameIds": [185438],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / shadowstrike_t",
+        "startLine": 9491,
+        "endLine": 9491,
+        "sourceNote": "create_action dispatches \"shadowstrike\" to shadowstrike_t, built on p->spec.shadowstrike (:5566-5567); find_specialization_spell( \"Shadowstrike\" ) at :9957, the Subtlety active spell row { 4, 261, 185438, 8676 } in class_spells.inc.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "goremaws_bite",
+      "candidateAbilityGameIds": [426591],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / goremaws_bite_t",
+        "startLine": 9473,
+        "endLine": 9473,
+        "sourceNote": "create_action dispatches \"goremaws_bite\" to goremaws_bite_t, built on p->talent.subtlety.goremaws_bite (:6462-6463); find_talent_spell( SPECIALIZATION, \"Goremaw's Bite\" ) at :10132, trait row spell 426591.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "eviscerate",
+      "candidateAbilityGameIds": [196819],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / eviscerate_t",
+        "startLine": 9469,
+        "endLine": 9469,
+        "sourceNote": "create_action dispatches \"eviscerate\" to eviscerate_t, built on p->spec.eviscerate (:4345-4346); spec.eviscerate = find_class_spell( \"Eviscerate\" ) at :9953, class_spells.inc row { 4, 0, 196819 }.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "secret_technique",
+      "candidateAbilityGameIds": [280719],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / secret_technique_t",
+        "startLine": 9487,
+        "endLine": 9487,
+        "sourceNote": "create_action dispatches \"secret_technique\" to secret_technique_t, built on p->spec.secret_technique (:5361-5362); find_specialization_spell( \"Secret Technique\" ) at :9954, the Subtlety active spell row { 4, 261, 280719 } in class_spells.inc.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "coup_de_grace",
+      "candidateAbilityGameIds": [441776],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / coup_de_grace_t",
+        "startLine": 9462,
+        "endLine": 9462,
+        "sourceNote": "create_action dispatches \"coup_de_grace\" to coup_de_grace_t, built on p->spell.coup_de_grace (:6781-6782); spell.coup_de_grace = talent.trickster.coup_de_grace->ok() ? find_spell( 441776 ) : not_found at :10265. Its record carries _gcd 1200.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "black_powder",
+      "candidateAbilityGameIds": [319175],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / black_powder_t",
+        "startLine": 9458,
+        "endLine": 9458,
+        "sourceNote": "create_action dispatches \"black_powder\" to black_powder_t, built on p->spec.black_powder (:5690-5691); find_specialization_spell( \"Black Powder\" ) at :9952, the Subtlety active spell row { 4, 261, 319175 } in class_spells.inc.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "backstab",
+      "candidateAbilityGameIds": [53],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / backstab_t",
+        "startLine": 9456,
+        "endLine": 9456,
+        "sourceNote": "create_action dispatches \"backstab\" to backstab_t, built on p->spec.backstab (:3691-3692); find_specialization_spell( \"Backstab\" ) at :9951, the Subtlety active spell row { 4, 261, 53, 1752 } in class_spells.inc.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

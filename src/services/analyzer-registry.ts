@@ -85,7 +85,10 @@ import { DISCIPLINE_PRIEST_REGISTRATION } from "../specs/priest/discipline/regis
 import { HAVOC_DEMON_HUNTER_REGISTRATION } from "../specs/demonhunter/havoc/registration.js";
 import { HOLY_PRIEST_REGISTRATION } from "../specs/priest/holy/registration.js";
 import { ASSASSINATION_REGISTRATION } from "../specs/rogue/assassination/registration.js";
+import { SUBTLETY_ROGUE_REGISTRATION } from "../specs/rogue/subtlety/registration.js";
 import { RESTORATION_SHAMAN_REGISTRATION } from "../specs/shaman/restoration/registration.js";
+import { FURY_WARRIOR_REGISTRATION } from "../specs/warrior/fury/registration.js";
+import { PROTECTION_WARRIOR_REGISTRATION } from "../specs/warrior/protection/registration.js";
 import type { AnalyzerRequirement } from "./ingestion-scope.js";
 import { SUPPORTED_SPEC_IDENTITIES } from "./spec-identity.js";
 
@@ -436,12 +439,13 @@ export function requireValidatedCatalog(
 /**
  * Every registration this build carries, as written by the specializations.
  *
- * Fourteen rows: twelve PUBLIC (Augmentation Evoker was INTERNAL_ONLY in M13-E,
+ * Seventeen rows: twelve PUBLIC (Augmentation Evoker was INTERNAL_ONLY in M13-E,
  * Restoration Shaman in HEAL-A, Holy Paladin and Mistweaver Monk in HEAL-B1,
  * Holy Priest in HEAL-B2, Preservation Evoker in HEAL-B4, Havoc Demon Hunter in
- * ONB-A1) and two INTERNAL_ONLY: since HEAL-B1, Restoration Druid, which HEAL-B1P
- * did not promote, and since HEAL-B3, Discipline Priest, which HEAL-B3P could not
- * promote.
+ * ONB-A1) and five INTERNAL_ONLY: since HEAL-B1, Restoration Druid, which HEAL-B1P
+ * did not promote, since HEAL-B3, Discipline Priest, which HEAL-B3P could not
+ * promote, and since ONB-A2, Subtlety Rogue, Fury Warrior and Protection Warrior,
+ * whose promotion waits on evidence.
  * A publicly unsupported
  * specialization is represented by ABSENCE from the PUBLIC set — an
  * INTERNAL_ONLY row, when one exists, is in the catalog and reachable by
@@ -479,6 +483,11 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   // INTERNAL_ONLY from ONB-A1; PUBLIC since ONB-A1P. Cohort A's representative, an observed-decision row bound to
   // the pinned Havoc list and validated for Aldrachi Reaver builds only.
   HAVOC_DEMON_HUNTER_REGISTRATION,
+  // INTERNAL_ONLY since ONB-A2: Cohort A's followers. Observed-decision rows bound to their own pinned lists, resolving
+  // nothing today and validated by no retained capture (ONB-A2P, ONB-EV).
+  SUBTLETY_ROGUE_REGISTRATION,
+  FURY_WARRIOR_REGISTRATION,
+  PROTECTION_WARRIOR_REGISTRATION,
 ]);
 
 /**

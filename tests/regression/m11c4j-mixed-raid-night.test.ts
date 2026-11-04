@@ -181,6 +181,9 @@ const NO_CALLS = {
   "priest-discipline-healer-findings": 0,
   "evoker-preservation-healer-findings": 0,
   "demonhunter-havoc-observed-decisions": 0,
+  "rogue-subtlety-observed-decisions": 0,
+  "warrior-fury-observed-decisions": 0,
+  "warrior-protection-observed-decisions": 0,
 };
 
 describe("a Brewmaster Monk alone", () => {

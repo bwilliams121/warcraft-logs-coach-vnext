@@ -13183,6 +13183,54 @@ cannot under-fetch), and publishes the same decisions the registration produced.
 SPEC_NOT_SUPPORTED: the class alone never selects a row. The committed evidence is the first 90 s,
 so the public pins are the 90 s numbers (76 eligible, 7 MATCH, 4 REJECTED, 65 UNKNOWN).
 
+## ONB-A2 — Subtlety Rogue, Fury Warrior and Protection Warrior (internal, Cohort A followers)
+
+Autopilot queue entry ONB-A2. Public contract: NONE. No Warcraft Logs request and no new evidence.
+
+**What it is.** The three specializations are registered INTERNAL_ONLY, each with its own pinned list, GCD
+and talent data, resolver, facade and registration, on Havoc's shape. Each tree's README is the slice in detail.
+No shared analyzer was introduced: `if spec === ...` appears nowhere in shared code.
+
+**The finding that shaped it: no decision of any of the three resolves, and none can today.**
+
+| Specialization | Where every decision stops | Why it cannot be closed |
+| --- | --- | --- |
+| Subtlety Rogue | `default[5] stealth`, `TRANSITION_UNSUPPORTED` | off the GCD, unconditional, and writes the state `variable.stealth` reads |
+| Fury Warrior | `default[1] charge` for the query; the root scan stops at the Slayer or Thane dispatch on `active_enemies` | `time` and `movement.distance` have no evidence, and every GCD action sits behind a dispatch gated on the enemy count |
+| Protection Warrior | `default[2] charge` for the query; the root scan stops at `default[15] ignore_pain` | its condition exceeds what the evaluator enumerates, and the single-target lists sit behind `spell_targets.thunder_clap` |
+
+The M11-D0 census put Fury and Protection Warrior in Cohort A, the "no `run_action_list`" cohort. Their pinned lists
+do dispatch with `run_action_list`, gated on the enemy count, so their real prerequisite is ONB-S3, which is an open
+owner decision. The inventory's cohort table now says so. That is why this tranche did not stop: the entry asks for an
+internal registration, the fail-closed result is correct, and ONB-S3 is already queued as the owner's.
+
+**Decisions.**
+
+1. **Bind only what can be defended without real evidence.** Own-cast PRE_COST resources, the three-way talent rule,
+   and the hero-tree proof Havoc established. No aura identity, no cooldown and no transition beyond `auto_attack`:
+   Havoc showed a wire id can differ from the module, a pinned cooldown can be contradicted by real gaps, and a logged
+   cast may not be a press. Without a capture none of those can be checked, so none is claimed. A follower with real
+   evidence adds them.
+2. **The unselectability proof is omitted, not stubbed.** The conditions it would need FALSE read state nothing here
+   binds, so every comparison passes `null` and no REJECTED path exists. It returns with the first aura or cooldown binding.
+3. **The tank's meaning stays Protection Warrior's own.** Ignore Pain, Shield Block and Shield Wall are NON_GCD: a logged
+   press is excluded and never judged, and each line can only stop a scan. ACTIVE_MITIGATION, DEFENSIVE_COOLDOWN and
+   SELF_HEALING resolve `NO_PINNED_AUTHORITY_FOR_DOMAIN`. Demolish is channelled, so it is excluded `OUTSIDE_FIRST_SLICE`.
+4. **A sanity anchor can also be a runtime ability.** The GCD extractor dropped every anchor id from the runtime slice,
+   which removed Backstab from Subtlety's dataset. An id a target names as an ability now stays. No earlier target names one,
+   so no earlier artifact changes.
+5. **The WCL identity proof has one INTERNAL_ONLY exception.** No committed context holds a Fury or Protection Warrior, and
+   the archive cannot take one. `IDENTITY_RETAINED_ONLY` names the retained context each string was read from, proves the
+   class string from a committed Warrior, and refuses the exception on a PUBLIC module, so ONB-A2P needs committed bytes first.
+
+**Evidence.** A census of every retained capture (`friendlySpecs` aligned to `friendlyPlayers`, then events by actor) found
+none that can validate these specializations. Fury and Protection Warrior have fight contexts and no events. Subtlety's M13-A
+capture holds 150 casts with no combatant info, auras or resources, and the facade refuses it `PROFILE_NOT_RESOLVED`. All
+three are on ONB-EV, and this tranche commits no evidence, so the archive's notice line is not touched.
+
+**No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table
+refuse all three rows.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

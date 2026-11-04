@@ -210,11 +210,14 @@ const EXECUTOR_RING = [
   "support/corpus/executors/spec-holy-priest.ts",
   "support/corpus/executors/spec-mistweaver-monk.ts",
   "support/corpus/executors/spec-preservation-evoker.ts",
+  "support/corpus/executors/spec-fury-warrior.ts",
   "support/corpus/executors/spec-havoc-demon-hunter.ts",
   "support/corpus/executors/spec-protection-paladin.ts",
+  "support/corpus/executors/spec-protection-warrior.ts",
   "support/corpus/executors/spec-restoration-druid.ts",
   "support/corpus/executors/spec-restoration-shaman.ts",
   "support/corpus/executors/spec-retribution-paladin.ts",
+  "support/corpus/executors/spec-subtlety-rogue.ts",
   "support/corpus/executors/wcl-transport.ts",
 ];
 

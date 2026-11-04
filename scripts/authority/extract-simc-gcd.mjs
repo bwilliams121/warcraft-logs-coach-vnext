@@ -2218,6 +2218,763 @@ const DEMONHUNTER_HAVOC_FACTS = {
   ],
 };
 
+/**
+ * The Warrior targets' pinned inputs (ONB-A2).
+ *
+ * One class module, shared by every Warrior specialization. Only the facts differ.
+ */
+const WARRIOR_SOURCES = {
+  spellData: "engine/dbc/generated/sc_spell_data.inc",
+  classSpells: "engine/dbc/generated/class_spells.inc",
+  clientDataVersion: "engine/dbc/generated/client_data_version.inc",
+  spellDataLayout: "engine/dbc/spell_data.hpp",
+  // HASHED, NEVER PARSED — the class module every token binding is a hand-reviewed reading of.
+  classModule: "engine/class_modules/sc_warrior.cpp",
+  // HASHED, NEVER PARSED. Present because every target hashes the same shared sources.
+  racialSpells: "engine/dbc/generated/racial_spells.inc",
+  playerModule: "engine/player/player.cpp",
+  consumableModule: "engine/player/consumable.cpp",
+};
+
+const WARRIOR_MODULE_PATH = "engine/class_modules/sc_warrior.cpp";
+
+/**
+ * The Fury Warrior facts (ONB-A2).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of
+ * the pinned Fury list (apl_warrior.cpp `fury`) executes. Facts a reader should not have to
+ * rediscover (all read off the pinned DBC):
+ *
+ *   - RECKLESSNESS, AVATAR, CHARGE, HEROIC LEAP AND PUMMEL ARE `_gcd` 0. Every other token is 1500.
+ *   - BLADESTORM BINDS TWO RECORDS. Unrelenting Onslaught swaps the action onto 446035
+ *     (sc_warrior.cpp:7316). Both are 1500, so the lane holds without deciding the talent.
+ *   - THE LIST'S RACIAL, POTION AND ITEM TOKENS ARE NOT BOUND. They are outside the rotational
+ *     domain, and the domain boundary refuses them before any lane is read.
+ */
+const WARRIOR_FURY_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 100, displayNameEn: "Charge", baseGcdMs: 0 },
+    { abilityGameId: 6544, displayNameEn: "Heroic Leap", baseGcdMs: 0 },
+    { abilityGameId: 6552, displayNameEn: "Pummel", baseGcdMs: 0 },
+    { abilityGameId: 1719, displayNameEn: "Recklessness", baseGcdMs: 0 },
+    { abilityGameId: 107574, displayNameEn: "Avatar", baseGcdMs: 0 },
+    { abilityGameId: 184367, displayNameEn: "Rampage", baseGcdMs: 1500 },
+    { abilityGameId: 227847, displayNameEn: "Bladestorm", baseGcdMs: 1500 },
+    { abilityGameId: 446035, displayNameEn: "Bladestorm", baseGcdMs: 1500 },
+    { abilityGameId: 5308, displayNameEn: "Execute", baseGcdMs: 1500 },
+    { abilityGameId: 335097, displayNameEn: "Crushing Blow", baseGcdMs: 1500 },
+    { abilityGameId: 385059, displayNameEn: "Odyn's Fury", baseGcdMs: 1500 },
+    { abilityGameId: 335096, displayNameEn: "Bloodbath", baseGcdMs: 1500 },
+    { abilityGameId: 85288, displayNameEn: "Raging Blow", baseGcdMs: 1500 },
+    { abilityGameId: 23881, displayNameEn: "Bloodthirst", baseGcdMs: 1500 },
+    { abilityGameId: 190411, displayNameEn: "Whirlwind", baseGcdMs: 1500 },
+    { abilityGameId: 107570, displayNameEn: "Storm Bolt", baseGcdMs: 1500 },
+    { abilityGameId: 435222, displayNameEn: "Thunder Blast", baseGcdMs: 1500 },
+    { abilityGameId: 6343, displayNameEn: "Thunder Clap", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "charge",
+      candidateAbilityGameIds: [100],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / charge_t",
+      startLine: 7321,
+      endLine: 7322,
+      sourceNote:
+        'create_action dispatches "charge" to charge_t, built on p->spell.charge (sc_warrior.cpp:3384); spell.charge = find_class_spell( "Charge" ) at :7449, class_spells.inc row { 1, 0, 100 }.',
+    },
+    {
+      simcToken: "heroic_leap",
+      candidateAbilityGameIds: [6544],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / heroic_leap_t",
+      startLine: 7352,
+      endLine: 7353,
+      sourceNote:
+        'create_action dispatches "heroic_leap" to heroic_leap_t, built on p->talents.warrior.heroic_leap (:4672-4673), the class trait row carrying spell 6544.',
+    },
+    {
+      simcToken: "pummel",
+      candidateAbilityGameIds: [6552],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / pummel_t",
+      startLine: 7370,
+      endLine: 7371,
+      sourceNote:
+        'create_action dispatches "pummel" to pummel_t, built on p->find_class_spell( "Pummel" ) (:4887-4888), class_spells.inc row { 1, 0, 6552 }. OUTSIDE offensive authority by domain: an interrupt.',
+    },
+    {
+      simcToken: "recklessness",
+      candidateAbilityGameIds: [1719],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / recklessness_t",
+      startLine: 7307,
+      endLine: 7308,
+      sourceNote:
+        'create_action dispatches "recklessness" to recklessness_t, built for Fury on talents.fury.recklessness (:7308); find_talent_spell( SPECIALIZATION, "Recklessness" ) at :7683, trait row spell 1719.',
+    },
+    {
+      simcToken: "avatar",
+      candidateAbilityGameIds: [107574],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / avatar_t",
+      startLine: 7303,
+      endLine: 7304,
+      sourceNote:
+        'create_action dispatches "avatar" to avatar_t, built on talents.shared.avatar (:7304); for Fury talents.fury.avatar = find_talent_spell( SPECIALIZATION, "Avatar", WARRIOR_FURY ) at :7698, shared at :7928, trait row spell 107574, a CHOICE node with Bladestorm.',
+    },
+    {
+      simcToken: "rampage",
+      candidateAbilityGameIds: [184367],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / rampage_parent_t",
+      startLine: 7378,
+      endLine: 7379,
+      sourceNote:
+        'create_action dispatches "rampage" to rampage_parent_t, built on p->talents.fury.rampage (:5697-5698); find_talent_spell( SPECIALIZATION, "Rampage" ) at :7668, trait row spell 184367.',
+    },
+    {
+      simcToken: "bladestorm",
+      candidateAbilityGameIds: [227847, 446035],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / bladestorm_t",
+      startLine: 7315,
+      endLine: 7316,
+      sourceNote:
+        'create_action dispatches "bladestorm" to bladestorm_t on find_spell( 446035 ) when talents.slayer.unrelenting_onslaught and talents.shared.bladestorm are both taken, and on talents.shared.bladestorm otherwise (:7316); for Fury the trait row carries spell 227847, a CHOICE node with Avatar. Both records are _gcd 1500, so the lane holds without deciding the talent.',
+    },
+    {
+      simcToken: "execute",
+      candidateAbilityGameIds: [5308],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / execute_fury_t",
+      startLine: 7337,
+      endLine: 7342,
+      sourceNote:
+        'create_action dispatches "execute" to execute_fury_t for Fury (:7339-7341), built on p->spec.execute (:4497); spec.execute = find_specialization_spell( "Execute" ) at :7487, the Fury active spell row { 1, 72, 5308, 163201 } in class_spells.inc. No other id is bound: a log reporting another Execute id has no lane here.',
+    },
+    {
+      simcToken: "crushing_blow",
+      candidateAbilityGameIds: [335097],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / crushing_blow_t",
+      startLine: 7374,
+      endLine: 7375,
+      sourceNote:
+        'create_action dispatches "crushing_blow" to crushing_blow_t, built on p->spec.crushing_blow (:5127-5128); spec.crushing_blow = find_spell( 335097 ) at :7490.',
+    },
+    {
+      simcToken: "odyns_fury",
+      candidateAbilityGameIds: [385059],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / odyns_fury_t",
+      startLine: 7364,
+      endLine: 7365,
+      sourceNote:
+        'create_action dispatches "odyns_fury" to odyns_fury_t on talents.fury.odyns_fury (:7365); find_talent_spell( SPECIALIZATION, "Odyn\'s Fury" ) at :7692, trait row spell 385059.',
+    },
+    {
+      simcToken: "bloodbath",
+      candidateAbilityGameIds: [335096],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / bloodbath_t",
+      startLine: 7319,
+      endLine: 7320,
+      sourceNote:
+        'create_action dispatches "bloodbath" to bloodbath_t, built on p->spec.bloodbath (:2799-2800); spec.bloodbath = find_spell(335096) at :7489.',
+    },
+    {
+      simcToken: "raging_blow",
+      candidateAbilityGameIds: [85288],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / raging_blow_t",
+      startLine: 7372,
+      endLine: 7373,
+      sourceNote:
+        'create_action dispatches "raging_blow" to raging_blow_t, built on p->talents.fury.raging_blow (:4960-4961); find_talent_spell( SPECIALIZATION, "Raging Blow" ) at :7653, trait row spell 85288.',
+    },
+    {
+      simcToken: "bloodthirst",
+      candidateAbilityGameIds: [23881],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / bloodthirst_t",
+      startLine: 7317,
+      endLine: 7318,
+      sourceNote:
+        'create_action dispatches "bloodthirst" to bloodthirst_t, built on p->talents.fury.bloodthirst (:2569-2570); find_talent_spell( SPECIALIZATION, "Bloodthirst" ) at :7651, trait row spell 23881.',
+    },
+    {
+      simcToken: "whirlwind",
+      candidateAbilityGameIds: [190411],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / fury_whirlwind_parent_t",
+      startLine: 7420,
+      endLine: 7425,
+      sourceNote:
+        'create_action dispatches "whirlwind" to fury_whirlwind_parent_t for Fury (:7422-7424), built on p->spec.whirlwind (:6566-6567); spec.whirlwind = find_specialization_spell( "Whirlwind" ) at :7488, the Fury active spell row { 1, 72, 190411, 1680 } in class_spells.inc.',
+    },
+    {
+      simcToken: "storm_bolt",
+      candidateAbilityGameIds: [107570],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / storm_bolt_t",
+      startLine: 7406,
+      endLine: 7407,
+      sourceNote:
+        'create_action dispatches "storm_bolt" to storm_bolt_t, built on p->talents.warrior.storm_bolt (:6403-6404); find_talent_spell( CLASS, "Storm Bolt" ) at :7544, trait row spell 107570.',
+    },
+    {
+      simcToken: "thunder_blast",
+      candidateAbilityGameIds: [435222],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / thunder_blast_t",
+      startLine: 7414,
+      endLine: 7415,
+      sourceNote:
+        'create_action dispatches "thunder_blast" to thunder_blast_t, built on p->find_spell( 435222 ) (:3949-3950). The talent record 435607 is not the action.',
+    },
+    {
+      simcToken: "thunder_clap",
+      candidateAbilityGameIds: [6343],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / thunder_clap_t",
+      startLine: 7412,
+      endLine: 7413,
+      sourceNote:
+        'create_action dispatches "thunder_clap" to thunder_clap_t, built on p->talents.warrior.thunder_clap (:4085-4086); find_talent_spell( CLASS, "Thunder Clap", specialization() ) at :7538, trait row spell 6343.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "auto_attack",
+      triggerGcdMs: 0,
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "auto_attack_t::auto_attack_t",
+      line: 2208,
+      sourceNote:
+        'auto_attack_t is built on warrior_attack_t( "auto_attack", p ) with no spell data ' +
+        "(sc_warrior.cpp:2181) and its constructor assigns trigger_gcd = timespan_t::zero() at :2208.",
+    },
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
+/**
+ * The Protection Warrior facts (ONB-A2).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of
+ * the pinned Protection list (apl_warrior.cpp `protection`) executes. Facts a reader should not
+ * have to rediscover (all read off the pinned DBC):
+ *
+ *   - SHIELD BLOCK, IGNORE PAIN, SHIELD WALL, AVATAR, CHARGE AND CHAMPION'S LEAP ARE `_gcd` 0. Every
+ *     other token is 1500.
+ *   - EXECUTE IS NOT FURY'S. Protection builds execute_arms_t on the class spell 163201
+ *     (sc_warrior.cpp:7343-7345), where Fury builds execute_fury_t on 5308.
+ *   - THE LIST ORDERS MITIGATION FOR DAMAGE. Its Ignore Pain, Shield Block and Shield Wall lines say
+ *     nothing about what a tank needed to survive: this data binds them so they can be placed, and
+ *     the specialization never judges them.
+ */
+const WARRIOR_PROTECTION_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 100, displayNameEn: "Charge", baseGcdMs: 0 },
+    { abilityGameId: 107574, displayNameEn: "Avatar", baseGcdMs: 0 },
+    { abilityGameId: 871, displayNameEn: "Shield Wall", baseGcdMs: 0 },
+    { abilityGameId: 190456, displayNameEn: "Ignore Pain", baseGcdMs: 0 },
+    { abilityGameId: 2565, displayNameEn: "Shield Block", baseGcdMs: 0 },
+    { abilityGameId: 1271985, displayNameEn: "Champion's Leap", baseGcdMs: 0 },
+    { abilityGameId: 228920, displayNameEn: "Ravager", baseGcdMs: 1500 },
+    { abilityGameId: 435222, displayNameEn: "Thunder Blast", baseGcdMs: 1500 },
+    { abilityGameId: 1160, displayNameEn: "Demoralizing Shout", baseGcdMs: 1500 },
+    { abilityGameId: 376079, displayNameEn: "Champion's Spear", baseGcdMs: 1500 },
+    { abilityGameId: 436358, displayNameEn: "Demolish", baseGcdMs: 1500 },
+    { abilityGameId: 385952, displayNameEn: "Shield Charge", baseGcdMs: 1500 },
+    { abilityGameId: 6343, displayNameEn: "Thunder Clap", baseGcdMs: 1500 },
+    { abilityGameId: 6572, displayNameEn: "Revenge", baseGcdMs: 1500 },
+    { abilityGameId: 23922, displayNameEn: "Shield Slam", baseGcdMs: 1500 },
+    { abilityGameId: 163201, displayNameEn: "Execute", baseGcdMs: 1500 },
+    { abilityGameId: 384110, displayNameEn: "Wrecking Throw", baseGcdMs: 1500 },
+    { abilityGameId: 64382, displayNameEn: "Shattering Throw", baseGcdMs: 1500 },
+    { abilityGameId: 20243, displayNameEn: "Devastate", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "charge",
+      candidateAbilityGameIds: [100],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / charge_t",
+      startLine: 7321,
+      endLine: 7322,
+      sourceNote:
+        'create_action dispatches "charge" to charge_t, built on p->spell.charge (sc_warrior.cpp:3384); spell.charge = find_class_spell( "Charge" ) at :7449, class_spells.inc row { 1, 0, 100 }.',
+    },
+    {
+      simcToken: "avatar",
+      candidateAbilityGameIds: [107574],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / avatar_t",
+      startLine: 7303,
+      endLine: 7304,
+      sourceNote:
+        'create_action dispatches "avatar" to avatar_t, built on talents.shared.avatar (:7304); for Protection talents.protection.avatar = find_talent_spell( SPECIALIZATION, "Avatar", WARRIOR_PROTECTION ) at :7748, shared at :7928, trait row spell 107574.',
+    },
+    {
+      simcToken: "shield_wall",
+      candidateAbilityGameIds: [871],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / shield_wall_t",
+      startLine: 7394,
+      endLine: 7395,
+      sourceNote:
+        'create_action dispatches "shield_wall" to shield_wall_t, built on p->talents.protection.shield_wall (:7215-7216); find_talent_spell( SPECIALIZATION, "Shield Wall" ) at :7723, trait row spell 871. A defensive cooldown: the offensive authority only places it, it never judges it.',
+    },
+    {
+      simcToken: "ignore_pain",
+      candidateAbilityGameIds: [190456],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / ignore_pain_t",
+      startLine: 7418,
+      endLine: 7419,
+      sourceNote:
+        'create_action dispatches "ignore_pain" to ignore_pain_t, built on p->talents.shared.ignore_pain (:2475-2476); talents.protection.ignore_pain = find_talent_spell( SPECIALIZATION, "Ignore Pain", WARRIOR_PROTECTION ) at :7707, shared at :7935, trait row spell 190456. Active mitigation: the offensive authority only places it, it never judges it.',
+    },
+    {
+      simcToken: "shield_block",
+      candidateAbilityGameIds: [2565],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / shield_block_t",
+      startLine: 7388,
+      endLine: 7389,
+      sourceNote:
+        'create_action dispatches "shield_block" to shield_block_t, built on p->spell.shield_block (:7183-7184); spell.shield_block = find_class_spell( "Shield Block" ) at :7455, class_spells.inc row { 1, 0, 2565 }. Active mitigation: the offensive authority only places it, it never judges it.',
+    },
+    {
+      simcToken: "champions_leap",
+      candidateAbilityGameIds: [1271985],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / champions_leap_t",
+      startLine: 7400,
+      endLine: 7401,
+      sourceNote:
+        'create_action dispatches "champions_leap" to champions_leap_t, built on p->find_spell( 1271985 ) (:6801-6802).',
+    },
+    {
+      simcToken: "ravager",
+      candidateAbilityGameIds: [228920],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / ravager_t",
+      startLine: 7380,
+      endLine: 7381,
+      sourceNote:
+        'create_action dispatches "ravager" to ravager_t, built on p->talents.shared.ravager (:5867-5868); talents.protection.ravager = find_talent_spell( SPECIALIZATION, "Ravager", WARRIOR_PROTECTION ) at :7759, shared at :7931, trait row spell 228920, a CHOICE node with Whirling Blade.',
+    },
+    {
+      simcToken: "thunder_blast",
+      candidateAbilityGameIds: [435222],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / thunder_blast_t",
+      startLine: 7414,
+      endLine: 7415,
+      sourceNote:
+        'create_action dispatches "thunder_blast" to thunder_blast_t, built on p->find_spell( 435222 ) (:3949-3950). The talent record 435607 is not the action.',
+    },
+    {
+      simcToken: "demoralizing_shout",
+      candidateAbilityGameIds: [1160],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / demoralizing_shout_t",
+      startLine: 7329,
+      endLine: 7330,
+      sourceNote:
+        'create_action dispatches "demoralizing_shout" to demoralizing_shout_t, built on p->talents.protection.demoralizing_shout (:3909-3910); find_talent_spell( SPECIALIZATION, "Demoralizing Shout" ) at :7709, trait row spell 1160.',
+    },
+    {
+      simcToken: "champions_spear",
+      candidateAbilityGameIds: [376079],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / champions_spear_t",
+      startLine: 7402,
+      endLine: 7403,
+      sourceNote:
+        'create_action dispatches "champions_spear" to champions_spear_t, built on p->talents.warrior.champions_spear (:6846-6847); find_talent_spell( CLASS, "Champion\'s Spear" ) at :7587, trait row spell 376079.',
+    },
+    {
+      simcToken: "demolish",
+      candidateAbilityGameIds: [436358],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / demolish_t",
+      startLine: 7433,
+      endLine: 7434,
+      sourceNote:
+        'create_action dispatches "demolish" to demolish_t, built on p->talents.colossus.demolish (:3857-3858), channeled (:3864); find_talent_spell( HERO, "Demolish" ) at :7766, trait row spell 436358.',
+    },
+    {
+      simcToken: "shield_charge",
+      candidateAbilityGameIds: [385952],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / shield_charge_t",
+      startLine: 7390,
+      endLine: 7391,
+      sourceNote:
+        'create_action dispatches "shield_charge" to shield_charge_t, built on p->talents.protection.shield_charge (:6153-6154); find_talent_spell( SPECIALIZATION, "Shield Charge" ) at :7756, trait row spell 385952.',
+    },
+    {
+      simcToken: "thunder_clap",
+      candidateAbilityGameIds: [6343],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / thunder_clap_t",
+      startLine: 7412,
+      endLine: 7413,
+      sourceNote:
+        'create_action dispatches "thunder_clap" to thunder_clap_t, built on p->talents.warrior.thunder_clap (:4085-4086); find_talent_spell( CLASS, "Thunder Clap", specialization() ) at :7538, trait row spell 6343.',
+    },
+    {
+      simcToken: "revenge",
+      candidateAbilityGameIds: [6572],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / revenge_t",
+      startLine: 7384,
+      endLine: 7385,
+      sourceNote:
+        'create_action dispatches "revenge" to revenge_t, built on p->talents.protection.revenge (:5996-5997); find_talent_spell( SPECIALIZATION, "Revenge" ) at :7710, trait row spell 6572.',
+    },
+    {
+      simcToken: "shield_slam",
+      candidateAbilityGameIds: [23922],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / shield_slam_t",
+      startLine: 7392,
+      endLine: 7393,
+      sourceNote:
+        'create_action dispatches "shield_slam" to shield_slam_t, built on p->spell.shield_slam (:6228-6229); spell.shield_slam = find_class_spell( "Shield Slam" ) at :7456, class_spells.inc row { 1, 0, 23922 }.',
+    },
+    {
+      simcToken: "execute",
+      candidateAbilityGameIds: [163201],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / execute_arms_t",
+      startLine: 7337,
+      endLine: 7346,
+      sourceNote:
+        'create_action dispatches "execute" to execute_arms_t for every specialization but Fury (:7343-7345), built on p->spell.execute (:4272-4273); spell.execute = find_class_spell( "Execute" ) at :7450, class_spells.inc row { 1, 0, 163201 }.',
+    },
+    {
+      simcToken: "wrecking_throw",
+      candidateAbilityGameIds: [384110],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / wrecking_throw_t",
+      startLine: 7431,
+      endLine: 7432,
+      sourceNote:
+        'create_action dispatches "wrecking_throw" to wrecking_throw_t, built on p->talents.warrior.wrecking_throw (:6783-6784); find_talent_spell( CLASS, "Wrecking Throw" ) at :7562, trait row spell 384110, a CHOICE node with Shattering Throw.',
+    },
+    {
+      simcToken: "shattering_throw",
+      candidateAbilityGameIds: [64382],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / shattering_throw_t",
+      startLine: 7386,
+      endLine: 7387,
+      sourceNote:
+        'create_action dispatches "shattering_throw" to shattering_throw_t, built on p->talents.warrior.shattering_throw (:5263-5264); find_talent_spell( CLASS, "Shattering Throw" ) at :7563, trait row spell 64382, a CHOICE node with Wrecking Throw.',
+    },
+    {
+      simcToken: "devastate",
+      candidateAbilityGameIds: [20243],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "warrior_t::create_action / devastate_t",
+      startLine: 7331,
+      endLine: 7332,
+      sourceNote:
+        'create_action dispatches "devastate" to devastate_t, built on p->spec.devastate (:1869-1870); spec.devastate = find_specialization_spell( "Devastate" ) at :7500, the Protection active spell row { 1, 73, 20243 } in class_spells.inc.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "auto_attack",
+      triggerGcdMs: 0,
+      sourcePath: WARRIOR_MODULE_PATH,
+      symbol: "auto_attack_t::auto_attack_t",
+      line: 2208,
+      sourceNote:
+        'auto_attack_t is built on warrior_attack_t( "auto_attack", p ) with no spell data ' +
+        "(sc_warrior.cpp:2181) and its constructor assigns trigger_gcd = timespan_t::zero() at :2208.",
+    },
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
+/**
+ * The Subtlety Rogue target's pinned inputs (ONB-A2).
+ */
+const ROGUE_SUBTLETY_SOURCES = {
+  spellData: "engine/dbc/generated/sc_spell_data.inc",
+  classSpells: "engine/dbc/generated/class_spells.inc",
+  clientDataVersion: "engine/dbc/generated/client_data_version.inc",
+  spellDataLayout: "engine/dbc/spell_data.hpp",
+  // HASHED, NEVER PARSED — the class module every token binding is a hand-reviewed reading of.
+  classModule: "engine/class_modules/sc_rogue.cpp",
+  // HASHED, NEVER PARSED. Present because every target hashes the same shared sources.
+  racialSpells: "engine/dbc/generated/racial_spells.inc",
+  playerModule: "engine/player/player.cpp",
+  consumableModule: "engine/player/consumable.cpp",
+};
+
+const ROGUE_SUBTLETY_MODULE_PATH = "engine/class_modules/sc_rogue.cpp";
+
+/**
+ * The Subtlety Rogue facts (ONB-A2).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of
+ * the pinned Subtlety list (apl_rogue.cpp `subtlety`) executes. Facts a reader should not have
+ * to rediscover (all read off the pinned DBC):
+ *
+ *   - STEALTH, SHADOW BLADES, SHADOW DANCE AND VANISH ARE `_gcd` 0. COUP DE GRACE IS 1200. Every other
+ *     token is 1000.
+ *   - COUP DE GRACE'S ACTION IS 441776, not its talent record 441423 (sc_rogue.cpp:10265).
+ *   - THE RACIALS, ITEMS AND `arcane_pulse` ARE NOT BOUND. `arcane_pulse` is a racial the shared
+ *     non-domain table does not list (player.cpp:9299), so an entry reaching it refuses.
+ */
+const ROGUE_SUBTLETY_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 1784, displayNameEn: "Stealth", baseGcdMs: 0 },
+    { abilityGameId: 121471, displayNameEn: "Shadow Blades", baseGcdMs: 0 },
+    { abilityGameId: 185313, displayNameEn: "Shadow Dance", baseGcdMs: 0 },
+    { abilityGameId: 1856, displayNameEn: "Vanish", baseGcdMs: 0 },
+    { abilityGameId: 197835, displayNameEn: "Shuriken Storm", baseGcdMs: 1000 },
+    { abilityGameId: 200758, displayNameEn: "Gloomblade", baseGcdMs: 1000 },
+    { abilityGameId: 185438, displayNameEn: "Shadowstrike", baseGcdMs: 1000 },
+    { abilityGameId: 426591, displayNameEn: "Goremaw's Bite", baseGcdMs: 1000 },
+    { abilityGameId: 196819, displayNameEn: "Eviscerate", baseGcdMs: 1000 },
+    { abilityGameId: 280719, displayNameEn: "Secret Technique", baseGcdMs: 1000 },
+    { abilityGameId: 441776, displayNameEn: "Coup de Grace", baseGcdMs: 1200 },
+    { abilityGameId: 319175, displayNameEn: "Black Powder", baseGcdMs: 1000 },
+    { abilityGameId: 53, displayNameEn: "Backstab", baseGcdMs: 1000 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "stealth",
+      candidateAbilityGameIds: [1784],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: ROGUE_SUBTLETY_MODULE_PATH,
+      symbol: "rogue_t::create_action / stealth_t",
+      startLine: 9497,
+      endLine: 9497,
+      sourceNote:
+        'create_action dispatches "stealth" to stealth_t, built on p->spell.stealth (sc_rogue.cpp:6061-6062); spell.stealth = find_class_spell( "Stealth" ) at :9919, class_spells.inc row { 4, 0, 1784 }.',
+    },
+    {
+      simcToken: "shadow_blades",
+      candidateAbilityGameIds: [121471],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: ROGUE_SUBTLETY_MODULE_PATH,
+      symbol: "rogue_t::create_action / shadow_blades_t",
+      startLine: 9488,
+      endLine: 9488,
+      sourceNote:
+        'create_action dispatches "shadow_blades" to shadow_blades_t, built on p->talent.subtlety.shadow_blades (:5451-5452); find_talent_spell( SPECIALIZATION, "Shadow Blades" ) at :10147, trait row spell 121471.',
+    },
+    {
+      simcToken: "shadow_dance",
+      candidateAbilityGameIds: [185313],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: ROGUE_SUBTLETY_MODULE_PATH,
+      symbol: "rogue_t::create_action / shadow_dance_t",
+      startLine: 9489,
+      endLine: 9489,
+      sourceNote:
+        'create_action dispatches "shadow_dance" to shadow_dance_t, built on p->spec.shadow_dance (:5486-5487); spec.shadow_dance = find_specialization_spell( "Shadow Dance" ) at :9955, the Subtlety active spell row { 4, 261, 185313 } in class_spells.inc.',
+    },
+    {
+      simcToken: "vanish",
+      candidateAbilityGameIds: [1856],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: ROGUE_SUBTLETY_MODULE_PATH,
+      symbol: "rogue_t::create_action / vanish_t",
+      startLine: 9500,
+      endLine: 9500,
+      sourceNote:
+        'create_action dispatches "vanish" to vanish_t, built on p->spell.vanish (:6031-6032); spell.vanish = find_class_spell( "Vanish" ) at :9920, class_spells.inc row { 4, 0, 1856 }.',
+    },
+    {
+      simcToken: "shuriken_storm",
+      candidateAbilityGameIds: [197835],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: ROGUE_SUBTLETY_MODULE_PATH,
+      symbol: "rogue_t::create_action / shuriken_storm_t",
+      startLine: 9492,
+      endLine: 9492,
+      sourceNote:
+        'create_action dispatches "shuriken_storm" to shuriken_storm_t, built on p->spec.shuriken_storm (:5768-5769); find_specialization_spell( "Shuriken Storm" ) at :9959, the Subtlety active spell row { 4, 261, 197835 } in class_spells.inc.',
+    },
+    {
+      simcToken: "gloomblade",
+      candidateAbilityGameIds: [200758],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: ROGUE_SUBTLETY_MODULE_PATH,
+      symbol: "rogue_t::create_action / gloomblade_t",
+      startLine: 9475,
+      endLine: 9475,
+      sourceNote:
+        'create_action dispatches "gloomblade" to gloomblade_t, built on p->talent.subtlety.gloomblade (:4562-4563); find_talent_spell( SPECIALIZATION, "Gloomblade" ) at :10131, trait row spell 200758.',
+    },
+    {
+      simcToken: "shadowstrike",
+      candidateAbilityGameIds: [185438],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: ROGUE_SUBTLETY_MODULE_PATH,
+      symbol: "rogue_t::create_action / shadowstrike_t",
+      startLine: 9491,
+      endLine: 9491,
+      sourceNote:
+        'create_action dispatches "shadowstrike" to shadowstrike_t, built on p->spec.shadowstrike (:5566-5567); find_specialization_spell( "Shadowstrike" ) at :9957, the Subtlety active spell row { 4, 261, 185438, 8676 } in class_spells.inc.',
+    },
+    {
+      simcToken: "goremaws_bite",
+      candidateAbilityGameIds: [426591],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: ROGUE_SUBTLETY_MODULE_PATH,
+      symbol: "rogue_t::create_action / goremaws_bite_t",
+      startLine: 9473,
+      endLine: 9473,
+      sourceNote:
+        'create_action dispatches "goremaws_bite" to goremaws_bite_t, built on p->talent.subtlety.goremaws_bite (:6462-6463); find_talent_spell( SPECIALIZATION, "Goremaw\'s Bite" ) at :10132, trait row spell 426591.',
+    },
+    {
+      simcToken: "eviscerate",
+      candidateAbilityGameIds: [196819],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: ROGUE_SUBTLETY_MODULE_PATH,
+      symbol: "rogue_t::create_action / eviscerate_t",
+      startLine: 9469,
+      endLine: 9469,
+      sourceNote:
+        'create_action dispatches "eviscerate" to eviscerate_t, built on p->spec.eviscerate (:4345-4346); spec.eviscerate = find_class_spell( "Eviscerate" ) at :9953, class_spells.inc row { 4, 0, 196819 }.',
+    },
+    {
+      simcToken: "secret_technique",
+      candidateAbilityGameIds: [280719],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: ROGUE_SUBTLETY_MODULE_PATH,
+      symbol: "rogue_t::create_action / secret_technique_t",
+      startLine: 9487,
+      endLine: 9487,
+      sourceNote:
+        'create_action dispatches "secret_technique" to secret_technique_t, built on p->spec.secret_technique (:5361-5362); find_specialization_spell( "Secret Technique" ) at :9954, the Subtlety active spell row { 4, 261, 280719 } in class_spells.inc.',
+    },
+    {
+      simcToken: "coup_de_grace",
+      candidateAbilityGameIds: [441776],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: ROGUE_SUBTLETY_MODULE_PATH,
+      symbol: "rogue_t::create_action / coup_de_grace_t",
+      startLine: 9462,
+      endLine: 9462,
+      sourceNote:
+        'create_action dispatches "coup_de_grace" to coup_de_grace_t, built on p->spell.coup_de_grace (:6781-6782); spell.coup_de_grace = talent.trickster.coup_de_grace->ok() ? find_spell( 441776 ) : not_found at :10265. Its record carries _gcd 1200.',
+    },
+    {
+      simcToken: "black_powder",
+      candidateAbilityGameIds: [319175],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: ROGUE_SUBTLETY_MODULE_PATH,
+      symbol: "rogue_t::create_action / black_powder_t",
+      startLine: 9458,
+      endLine: 9458,
+      sourceNote:
+        'create_action dispatches "black_powder" to black_powder_t, built on p->spec.black_powder (:5690-5691); find_specialization_spell( "Black Powder" ) at :9952, the Subtlety active spell row { 4, 261, 319175 } in class_spells.inc.',
+    },
+    {
+      simcToken: "backstab",
+      candidateAbilityGameIds: [53],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: ROGUE_SUBTLETY_MODULE_PATH,
+      symbol: "rogue_t::create_action / backstab_t",
+      startLine: 9456,
+      endLine: 9456,
+      sourceNote:
+        'create_action dispatches "backstab" to backstab_t, built on p->spec.backstab (:3691-3692); find_specialization_spell( "Backstab" ) at :9951, the Subtlety active spell row { 4, 261, 53, 1752 } in class_spells.inc.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
 export const TARGETS = {
   "rogue-assassination": {
     datasetId: DATASET_ID,
@@ -2307,6 +3064,51 @@ export const TARGETS = {
     ],
     requiredFacts: DEMONHUNTER_HAVOC_FACTS,
     defaultOut: "src/data/game/demonhunter-havoc-gcd-semantics.json",
+  },
+  "warrior-fury": {
+    datasetId: "SIMC_DBC_WARRIOR_FURY_GCD_SEMANTICS",
+    classId: 1,
+    className: "Warrior",
+    sources: WARRIOR_SOURCES,
+    classModulePath: WARRIOR_SOURCES.classModule,
+    handReviewedPaths: [
+      WARRIOR_SOURCES.classModule,
+      WARRIOR_SOURCES.racialSpells,
+      WARRIOR_SOURCES.playerModule,
+      WARRIOR_SOURCES.consumableModule,
+    ],
+    requiredFacts: WARRIOR_FURY_FACTS,
+    defaultOut: "src/data/game/warrior-fury-gcd-semantics.json",
+  },
+  "warrior-protection": {
+    datasetId: "SIMC_DBC_WARRIOR_PROTECTION_GCD_SEMANTICS",
+    classId: 1,
+    className: "Warrior",
+    sources: WARRIOR_SOURCES,
+    classModulePath: WARRIOR_SOURCES.classModule,
+    handReviewedPaths: [
+      WARRIOR_SOURCES.classModule,
+      WARRIOR_SOURCES.racialSpells,
+      WARRIOR_SOURCES.playerModule,
+      WARRIOR_SOURCES.consumableModule,
+    ],
+    requiredFacts: WARRIOR_PROTECTION_FACTS,
+    defaultOut: "src/data/game/warrior-protection-gcd-semantics.json",
+  },
+  "rogue-subtlety": {
+    datasetId: "SIMC_DBC_ROGUE_SUBTLETY_GCD_SEMANTICS",
+    classId: 4,
+    className: "Rogue",
+    sources: ROGUE_SUBTLETY_SOURCES,
+    classModulePath: ROGUE_SUBTLETY_SOURCES.classModule,
+    handReviewedPaths: [
+      ROGUE_SUBTLETY_SOURCES.classModule,
+      ROGUE_SUBTLETY_SOURCES.racialSpells,
+      ROGUE_SUBTLETY_SOURCES.playerModule,
+      ROGUE_SUBTLETY_SOURCES.consumableModule,
+    ],
+    requiredFacts: ROGUE_SUBTLETY_FACTS,
+    defaultOut: "src/data/game/rogue-subtlety-gcd-semantics.json",
   },
 };
 
@@ -3154,8 +3956,14 @@ async function main() {
     process.exit(1);
   }
 
-  // The sanity anchors prove the column; they are not part of the runtime slice.
-  const anchorIds = new Set(REQUIRED_FACTS.sanityAnchors.map((entry) => entry.abilityGameId));
+  // The sanity anchors prove the column; they are not part of the runtime slice, unless
+  // the target itself names one as an ability (Backstab, for Subtlety).
+  const namedByTarget = new Set(REQUIRED_FACTS.abilities.map((entry) => entry.abilityGameId));
+  const anchorIds = new Set(
+    REQUIRED_FACTS.sanityAnchors
+      .map((entry) => entry.abilityGameId)
+      .filter((abilityGameId) => !namedByTarget.has(abilityGameId)),
+  );
   const slice = new Map([...parsed.records].filter(([id]) => !anchorIds.has(id)));
 
   const artifact = buildArtifact({

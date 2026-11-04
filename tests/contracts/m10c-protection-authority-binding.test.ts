@@ -182,7 +182,7 @@ describe("cross-spec authority access is refused structurally", () => {
     expect(Object.isFrozen(PROTECTION_PALADIN_REGISTRATION.authority)).toBe(true);
   });
 
-  it("the production catalog holds the fourteen registrations, each citing only its own authority (Augmentation and the seven healers none)", () => {
+  it("the production catalog holds the seventeen registrations, each citing only its own authority (Augmentation and the seven healers none)", () => {
     const cited = PRODUCTION_CATALOG.registrations.map((registration) => [
       registration.specId,
       registration.authorityBindings.map((binding) => binding.authorityId),
@@ -212,6 +212,10 @@ describe("cross-spec authority access is refused structurally", () => {
       ["evoker/preservation", []],
       // ONB-A1: Havoc Demon Hunter binds its own pinned list.
       ["demonhunter/havoc", ["SIMC_APL_DEMONHUNTER_HAVOC"]],
+      // ONB-A2: Cohort A's followers each bind their own pinned list.
+      ["rogue/subtlety", ["SIMC_APL_ROGUE_SUBTLETY"]],
+      ["warrior/fury", ["SIMC_APL_WARRIOR_FURY"]],
+      ["warrior/protection", ["SIMC_APL_WARRIOR_PROTECTION"]],
     ]);
   });
 });

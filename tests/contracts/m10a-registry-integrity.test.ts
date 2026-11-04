@@ -118,11 +118,15 @@ describe("the production catalog", () => {
       ["evoker-preservation-healer-findings", "evoker/preservation", "PUBLIC"],
       // ONB-A1: Cohort A's representative, an observed-decision row bound to the pinned Havoc list, INTERNAL_ONLY.
       ["demonhunter-havoc-observed-decisions", "demonhunter/havoc", "PUBLIC"],
+      // ONB-A2: Cohort A's followers, observed-decision rows bound to their own pinned lists, INTERNAL_ONLY.
+      ["rogue-subtlety-observed-decisions", "rogue/subtlety", "INTERNAL_ONLY"],
+      ["warrior-fury-observed-decisions", "warrior/fury", "INTERNAL_ONLY"],
+      ["warrior-protection-observed-decisions", "warrior/protection", "INTERNAL_ONLY"],
     ]);
     // The public set is DERIVED from the rows' exposure, never hand-listed:
     // six of seven rows in HEAL-A (Restoration Shaman was INTERNAL_ONLY), all
     // seven from HEAL-AP, seven of ten in HEAL-B1, nine of ten in HEAL-B1P, nine of eleven in HEAL-B2, ten of
-    // eleven in HEAL-B2P, ten of twelve in HEAL-B3, ten of thirteen in HEAL-B4, eleven of thirteen in HEAL-B4P, and eleven of fourteen since ONB-A1.
+    // eleven in HEAL-B2P, ten of twelve in HEAL-B3, ten of thirteen in HEAL-B4, eleven of thirteen in HEAL-B4P, eleven of fourteen in ONB-A1, twelve of fourteen in ONB-A1P, and twelve of seventeen since ONB-A2.
     expect(ENABLED_ANALYZERS).toEqual(publicAnalyzers(PRODUCTION_CATALOG));
     expect(ENABLED_ANALYZERS).toHaveLength(12);
     expect(ENABLED_ANALYZERS.map((analyzer) => analyzer.specId)).toEqual([
@@ -185,7 +189,7 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
     const rows = catalog.registrations as AnalyzerRegistration[];
     expect(() => rows.push({ ...rogue, analyzerId: "second" })).toThrow(TypeError);
     expect(() => rows.push({ ...paladin, analyzerId: "third" })).toThrow(TypeError);
-    expect(catalog.registrations).toHaveLength(14);
+    expect(catalog.registrations).toHaveLength(17);
   });
 
   it("exposure cannot be flipped back to INTERNAL_ONLY", () => {
