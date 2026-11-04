@@ -33,6 +33,8 @@ current total (5,748,495 bytes), with what each row buys.
 
 **Raised:** ONB-B2 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.
 
+**ONB-B2P (2026-11-04): neither is promoted.** The gate search over each finds nothing (`m11-promotion-evidence-gate`). A wider census, reading retained JSON files of any name rather than the name-filtered subset, finds no third Frost subject and no second Enhancement one, and a replay at that base gives the same 567 UNKNOWN. Frost's gap is ONB-S3, not evidence, so it is not on ONB-EV. Enhancement needs both. A new public entry must follow those and the list below, and no such entry is queued (agent/architecture.md "ONB-B2P").
+
 **ONB-S3 gates both, and it is not their first stop.** Every rotation list of both sits behind the enemy count. Frost's real subjects stop earlier, at Reaper's Mark's `target_if=first:`, and that also needs the
 enemy set, so ONB-S3 has to cover FIRST mode for Frost. Past both, Frost still needs reviewed contracts for `antimagic_shell`, `pillar_of_frost`, `breath_of_sindragosa`, `raise_dead` and `empower_rune_weapon`, the
 Rider branch needs a readable `cooldowns[5]`, and Enhancement needs one for Bloodlust and for `doom_winds`.

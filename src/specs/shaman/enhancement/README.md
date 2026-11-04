@@ -3,6 +3,8 @@
 **Exposure: `INTERNAL_ONLY`.** The registration (`shaman-enhancement-observed-decisions`, `shaman/enhancement`) is in the production
 catalog for the internal lookup only. The public lookup and the identity table refuse it.
 
+**Not promoted by ONB-B2P.** It cannot pass the rotational gates: its only subject refuses for want of combatant info (ONB-EV), and its list also waits on ONB-S3 (agent/architecture.md "ONB-B2P").
+
 **A Cohort B follower of Arms' pattern, and it resolves nothing today.** No decision of this
 specialization reaches MATCH or REJECTED on the shared engine as it stands. Every decision is observed,
 classified and explained, and stays UNKNOWN. That is a measured property of the pinned list and the

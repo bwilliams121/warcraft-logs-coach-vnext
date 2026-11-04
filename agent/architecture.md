@@ -13434,6 +13434,39 @@ No Warcraft Logs request was made. Three pinned SimulationCraft files were fetch
 
 **No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse both rows. A public request for either is SPEC_NOT_SUPPORTED, exactly as before.
 
+## ONB-B2P — Frost Death Knight and Enhancement Shaman public promotion: not promoted
+
+Autopilot queue entry ONB-B2P. Public contract: declared EXPECTED; actual change NONE, because nothing passes. No Warcraft Logs request and no new evidence.
+
+**The outcome.** Neither specialization passes the rotational promotion gates, so both stay INTERNAL_ONLY (onboarding rule 4). The gates are not weakened and gain no subject. This is not an owner stop: rule 4 decides it, and the decisions that could
+change it (ONB-S3, ONB-EV) are already queued as the owner's.
+
+**Why neither can pass.** OBSERVATION needs a real MATCH and real resolved decisions over several distinct action tokens, and DISCRIMINATION needs a real REJECTED or a control that flips a real MATCH. Both start from a real resolved decision. Replaying the
+retained pages through production ingestion and each facade over a fake transport, at this tranche's base commit:
+
+| Subject | Spec | Hero tree | Retained span | Result | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| b1PmaKrd6CDfzngc fight 48 actor 19 | Frost | Deathbringer | whole fight | ANALYZED | 308 | 0 | 0 | 308 | 703 |
+| gtKb2xHn87pNcFfW fight 22 actor 26 | Frost | Deathbringer | whole fight | ANALYZED | 259 | 0 | 0 | 259 | 281 |
+| Gw2kXrTfLWcDdhFY fight 1 actor 7 | Enhancement | not resolved | filtered casts only | `PROFILE_NOT_RESOLVED` | none | none | none | none | none |
+
+All 567 Frost decisions stop on one atom: `cooldowns[4] reapers_mark | NOT_EVALUATED:UNSUPPORTED_TARGETING`. Each subject's identity is its context's `friendlySpecs` entry, aligned to `friendlyPlayers`, with Obliterate casts by the same actor as corroboration (a Frost Mage would have none).
+
+**The census found nothing more.** ONB-B2's census read only files named for pages, events or captures. This one parsed every JSON file over 500 bytes under `.probe/` and `tests/`, skipping tool output and worktree copies (5,638 parsed), by signature abilities, with Mortal Strike and Mutilate as positive controls, and it found the same subjects and no others.
+Every other Enhancement hit is a copy of the same M13-A capture. The census reads casts only, so a subject with no signature cast in a retained span would not appear.
+
+**The two gaps differ, and each goes where it belongs.**
+
+- **Frost: not evidence.** Both retained subjects have whole fights with combatant info, so it is not added to ONB-EV. Its next step is the owner's ONB-S3, which must cover `target_if=first:` for Frost, and then what ONB-B2 left open.
+- **Enhancement: both.** ONB-S3 alone moves nothing, because no retained capture resolves its talents. ONB-B2 already appended it to ONB-EV. A capture alone also moves nothing, because its root scans stop on the enemy count.
+
+**How far this reaches.** Both Frost subjects are Deathbringer, so the Rider branch has no real subject. A later promotion must measure it or refuse it, as Havoc refuses Fel-Scarred.
+
+**What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists both; the gate search over each finds no qualifying assertion and `evidenceReady` false (`m11-promotion-evidence-gate`, from ONB-B2, its comment updated); and a public request for each is SPEC_NOT_SUPPORTED, with one retrieval
+for preparation alone and no dispatch (`analysis-composition-refusals`, which now holds both). The replay is offline and not committed.
+
+**What a later promotion must do.** The owner decides ONB-S3 and, for Enhancement, ONB-EV. Each specialization then binds what ONB-B2 left open and measures its failure modes on real subjects (agent/follow-ups.md "After ONB-B2"), and a new public entry promotes it through the unchanged gates by the five-site promotion. No such entry is queued.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

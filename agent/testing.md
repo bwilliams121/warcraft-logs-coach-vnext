@@ -5604,3 +5604,10 @@ false), its comment now naming the outcome. The existing pins carry the rest (`m
 Offline only, not committed: the replay of the four other retained Arms subjects (`.probe/onbb1p/m/`) and the census that found them
 (`.probe/onbb1p/census.cjs`, fight 48's Mortal Strikes as its positive control). They give the table in agent/architecture.md "ONB-B1P". The replay is
 a measurement, so the two prefix subjects report only their retained span.
+
+# ONB-B2P: Frost Death Knight and Enhancement Shaman, not promoted
+
+No production code changed. `tests/unit/analysis-composition-refusals.test.ts` holds DeathKnight/Frost and Shaman/Enhancement: SPEC_NOT_SUPPORTED, one retrieval for preparation alone, no dispatch. The class token is the wire's `DeathKnight`, so the row reaches the identity table's real lookup rather than failing
+on a misspelling. `tests/contracts/m11-promotion-evidence-gate.test.ts` keeps its ONB-B2 gate search (no qualifying assertion, `evidenceReady` false), its comment now naming the outcome. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, `onb-b2-cohort-b-followers`).
+
+Offline only, not committed: the census (`.probe/onbb2p/census.cjs`, Mortal Strike and Mutilate as positive controls) and the replay of all three subjects (`.probe/onbb2p/m/`). They give the table in agent/architecture.md "ONB-B2P".
