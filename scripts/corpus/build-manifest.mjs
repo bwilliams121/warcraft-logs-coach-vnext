@@ -7125,6 +7125,44 @@ const BREWMASTER_CASES = [
     "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Feral Druid list.",
     { related: ["tests/unit/specs/onb-c1-feral-druid.test.ts"] },
   ),
+  // ---- SPEC_OUTLAW_ROGUE (ONB-C2, INTERNAL_ONLY) ---
+  kase(
+    "application-service.outlaw-rogue-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Outlaw Rogue registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "rogue/outlaw",
+        expected: {
+          internalAnalyzerId: "rogue-outlaw-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Outlaw Rogue is registered INTERNAL_ONLY in ONB-C2. No decision of it resolves: every scan meets Stealth first, and no retained capture holds one of its events, so its gap is on ONB-EV. So a public request must keep receiving SPEC_NOT_SUPPORTED.",
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-outlaw-rogue.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_OUTLAW_ROGUE",
+    "src/specs/rogue/outlaw/observed-analysis.ts analyzeObservedOutlawRogueDecisions (the spec gate)",
+    "The Outlaw Rogue facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_OUTLAW_ROGUE.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Outlaw Rogue list.",
+    { related: ["tests/unit/specs/onb-c2-outlaw-rogue.test.ts"] },
+  ),
   // ---- SPEC_ENHANCEMENT_SHAMAN (ONB-B2, INTERNAL_ONLY) ---
   kase(
     "application-service.enhancement-shaman-registration-is-internal-only",

@@ -212,14 +212,15 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
 };
 
 /**
- * ONB-A2: the two INTERNAL_ONLY modules no committed context holds. Each one's strings were read
+ * ONB-A2, ONB-C2: the INTERNAL_ONLY modules no committed context holds. Each one's strings were read
  * offline from a retained, uncommitted context, named here. The exception cannot reach a public
- * row: the test below refuses it for a PUBLIC module, so ONB-A2P needs committed bytes first. The
- * class string is still proven from committed bytes, through a Warrior actor of another spec.
+ * row: the test below refuses it for a PUBLIC module, so a promotion needs committed bytes first. The
+ * class string is still proven from committed bytes, through an actor of another spec of that class.
  */
 const IDENTITY_RETAINED_ONLY: Readonly<Record<string, string>> = {
   "warrior/fury": "m11c4f context-2, FPp6xjkNC9R4LrVh fight 10, actor 3: Warrior / Fury",
   "warrior/protection": "m11c4f context-1, 2xptYq89Tb631Hmg fight 17, actor 5: Warrior / Protection",
+  "rogue/outlaw": "m13a discovery, g34mvXTKLMJ2Nfwr fights 1, 6 and 7, actor 17: Outlaw",
 };
 
 /** A committed Warrior of another specialization: actor 4 of A7R6 fight 7, an Arms Warrior. */
@@ -227,6 +228,14 @@ const COMMITTED_WARRIOR: IdentityEvidence = {
   artifactId: "wcl-fight-context-a7r6-fight-7",
   fightId: 7,
   sourceId: 4,
+};
+
+/** A committed Rogue of another specialization: actor 17 of the M13-A fight context, a Subtlety Rogue. */
+const COMMITTED_ROGUE: IdentityEvidence = {
+  artifactId: "wcl-m13a-fight-context-aug1-fight-1",
+  fightId: 1,
+  sourceId: 17,
+  archive: true,
 };
 
 const ARCHIVE_GRAPHQL: Record<string, string> = import.meta.glob("../evidence/artifacts/wcl-graphql/*.json", {
@@ -338,7 +347,8 @@ for (const { path, exportName, module } of MODULES) {
       if (IDENTITY_RETAINED_ONLY[identity.specId] !== undefined) {
         expect(module.exposure).toBe("INTERNAL_ONLY");
         expect(IDENTITY_EVIDENCE[identity.specId]).toBeUndefined();
-        expect(identity.wclClassName).toBe(wclIdentityOf(COMMITTED_WARRIOR).className);
+        const sameClass = identity.specId === "rogue/outlaw" ? COMMITTED_ROGUE : COMMITTED_WARRIOR;
+        expect(identity.wclClassName).toBe(wclIdentityOf(sameClass).className);
         return;
       }
       const evidence = IDENTITY_EVIDENCE[identity.specId];
@@ -491,6 +501,8 @@ describe("what the tree exports today", () => {
       ["DISCIPLINE_PRIEST_MODULE", "priest/discipline", "INTERNAL_ONLY", 0],
       ["HOLY_PRIEST_MODULE", "priest/holy", "PUBLIC", 0],
       ["ASSASSINATION_MODULE", "rogue/assassination", "PUBLIC", 0],
+      // ONB-C2: a Cohort C follower, INTERNAL_ONLY. No committed context names it.
+      ["OUTLAW_ROGUE_MODULE", "rogue/outlaw", "INTERNAL_ONLY", 0],
       // ONB-A2: Cohort A's followers, INTERNAL_ONLY.
       ["SUBTLETY_ROGUE_MODULE", "rogue/subtlety", "INTERNAL_ONLY", 0],
       // ONB-B2: a Cohort B follower, INTERNAL_ONLY.

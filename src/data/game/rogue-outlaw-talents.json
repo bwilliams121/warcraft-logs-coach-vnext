@@ -1,0 +1,429 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_TRAIT_ROGUE_OUTLAW_TALENTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. The same equivalence every earlier target recorded, that `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals trait_data_t::id_node, is ASSUMED for Outlaw Rogue: no retained capture holds one of its combatantinfo events, so this target has no corroboration of its own.",
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "talents": [
+    {
+      "simcName": "adrenaline_rush",
+      "displayNameEn": "Adrenaline Rush",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90659,
+      "traitEntryId": 112545,
+      "talentSpellId": 13750,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_rogue.cpp:10074 talent.outlaw.adrenaline_rush = find_talent_spell( SPECIALIZATION, \"Adrenaline Rush\" ); ; adrenaline_rush_t is built on it"
+    },
+    {
+      "simcName": "audacity",
+      "displayNameEn": "Audacity",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90641,
+      "traitEntryId": 112527,
+      "talentSpellId": 381845,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_rogue.cpp:10075 talent.outlaw.audacity = find_talent_spell( SPECIALIZATION, \"Audacity\" ); ; the pinned list reads talent.audacity"
+    },
+    {
+      "simcName": "blade_rush",
+      "displayNameEn": "Blade Rush",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90649,
+      "traitEntryId": 112535,
+      "talentSpellId": 271877,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_rogue.cpp:10076 talent.outlaw.blade_rush = find_talent_spell( SPECIALIZATION, \"Blade Rush\" ); ; blade_rush_t is built on it"
+    },
+    {
+      "simcName": "coup_de_grace",
+      "displayNameEn": "Coup de Grace",
+      "tree": "HERO",
+      "traitNodeId": 95115,
+      "traitEntryId": 117712,
+      "talentSpellId": 441423,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_rogue.cpp:10212 talent.trickster.coup_de_grace = find_talent_spell( HERO, \"Coup de Grace\" ); ; spell.coup_de_grace, which coup_de_grace_t is built on, is not_found without it (:10265)"
+    },
+    {
+      "simcName": "deal_fate",
+      "displayNameEn": "Deal Fate",
+      "tree": "HERO",
+      "traitNodeId": 95107,
+      "traitEntryId": 117704,
+      "talentSpellId": 454419,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_rogue.cpp:10193 talent.fatebound.deal_fate = find_talent_spell( HERO, \"Deal Fate\" ); ; the pinned list reads talent.deal_fate"
+    },
+    {
+      "simcName": "deft_maneuvers",
+      "displayNameEn": "Deft Maneuvers",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90647,
+      "traitEntryId": 112533,
+      "talentSpellId": 381878,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_rogue.cpp:10083 talent.outlaw.deft_maneuvers = find_talent_spell( SPECIALIZATION, \"Deft Maneuvers\" ); ; the pinned list reads talent.deft_maneuvers"
+    },
+    {
+      "simcName": "fan_the_hammer",
+      "displayNameEn": "Fan the Hammer",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90666,
+      "traitEntryId": 112553,
+      "talentSpellId": 381846,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_rogue.cpp:10087 talent.outlaw.fan_the_hammer = find_talent_spell( SPECIALIZATION, \"Fan the Hammer\" ); ; the pinned list reads talent.fan_the_hammer"
+    },
+    {
+      "simcName": "hidden_opportunity",
+      "displayNameEn": "Hidden Opportunity",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90675,
+      "traitEntryId": 112562,
+      "talentSpellId": 383281,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_rogue.cpp:10094 talent.outlaw.hidden_opportunity = find_talent_spell( SPECIALIZATION, \"Hidden Opportunity\" ); ; the pinned list reads talent.hidden_opportunity, which gates the guarded Ambush"
+    },
+    {
+      "simcName": "improved_adrenaline_rush",
+      "displayNameEn": "Improved Adrenaline Rush",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90654,
+      "traitEntryId": 112540,
+      "talentSpellId": 395422,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_rogue.cpp:10096 talent.outlaw.improved_adrenaline_rush = find_talent_spell( SPECIALIZATION, \"Improved Adrenaline Rush\" ); ; the pinned precombat list reads talent.improved_adrenaline_rush"
+    },
+    {
+      "simcName": "improved_ambush",
+      "displayNameEn": "Improved Ambush",
+      "tree": "CLASS",
+      "traitNodeId": 90692,
+      "traitEntryId": 112580,
+      "talentSpellId": 381620,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 117152,
+          "displayNameEn": "Tight Spender",
+          "talentSpellId": 381621
+        }
+      ],
+      "binding": "sc_rogue.cpp:9993 talent.rogue.improved_ambush = find_talent_spell( CLASS, \"Improved Ambush\" ); ; the pinned list reads talent.improved_ambush"
+    },
+    {
+      "simcName": "keep_it_rolling",
+      "displayNameEn": "Keep It Rolling",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90652,
+      "traitEntryId": 112538,
+      "talentSpellId": 381989,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_rogue.cpp:10098 talent.outlaw.keep_it_rolling = find_talent_spell( SPECIALIZATION, \"Keep it Rolling\" ); ; keep_it_rolling_t is built on it"
+    },
+    {
+      "simcName": "killing_spree",
+      "displayNameEn": "Killing Spree",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 94565,
+      "traitEntryId": 117148,
+      "talentSpellId": 51690,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_rogue.cpp:10099 talent.outlaw.killing_spree = find_talent_spell( SPECIALIZATION, \"Killing Spree\" ); ; killing_spree_t is built on it"
+    },
+    {
+      "simcName": "preparation",
+      "displayNameEn": "Preparation",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90665,
+      "traitEntryId": 112552,
+      "talentSpellId": 1277933,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_rogue.cpp:10104 talent.outlaw.preparation = find_talent_spell( SPECIALIZATION, \"Preparation\" ); ; preparation_t is built on it"
+    },
+    {
+      "simcName": "quick_draw",
+      "displayNameEn": "Quick Draw",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 90663,
+      "traitEntryId": 112549,
+      "talentSpellId": 196938,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_rogue.cpp:10105 talent.outlaw.quick_draw = find_talent_spell( SPECIALIZATION, \"Quick Draw\" ); ; the pinned list reads talent.quick_draw"
+    },
+    {
+      "simcName": "supercharger",
+      "displayNameEn": "Supercharger",
+      "tree": "CLASS",
+      "traitNodeId": 90639,
+      "traitEntryId": 112525,
+      "talentSpellId": 470347,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_rogue.cpp:10009 talent.rogue.supercharger = find_talent_spell( CLASS, \"Supercharger\" ); ; the pinned list reads talent.supercharger"
+    }
+  ],
+  "heroTrees": [
+    {
+      "simcName": "trickster",
+      "subTreeId": 51,
+      "entries": [
+        {
+          "traitEntryId": 117708,
+          "traitNodeId": 95111,
+          "displayNameEn": "Flawless Form",
+          "talentSpellId": 441321
+        },
+        {
+          "traitEntryId": 117712,
+          "traitNodeId": 95115,
+          "displayNameEn": "Coup de Grace",
+          "talentSpellId": 441423
+        },
+        {
+          "traitEntryId": 117713,
+          "traitNodeId": 95116,
+          "displayNameEn": "Cloud Cover",
+          "talentSpellId": 441429
+        },
+        {
+          "traitEntryId": 117715,
+          "traitNodeId": 95118,
+          "displayNameEn": "Disorienting Strikes",
+          "talentSpellId": 441274
+        },
+        {
+          "traitEntryId": 117718,
+          "traitNodeId": 95121,
+          "displayNameEn": "Surprising Strikes",
+          "talentSpellId": 441273
+        },
+        {
+          "traitEntryId": 117725,
+          "traitNodeId": 95128,
+          "displayNameEn": "Nimble Flurry",
+          "talentSpellId": 441367
+        },
+        {
+          "traitEntryId": 117730,
+          "traitNodeId": 95133,
+          "displayNameEn": "Devious Distractions",
+          "talentSpellId": 441263
+        },
+        {
+          "traitEntryId": 117731,
+          "traitNodeId": 95134,
+          "displayNameEn": "So Tricky",
+          "talentSpellId": 441403
+        },
+        {
+          "traitEntryId": 117734,
+          "traitNodeId": 95137,
+          "displayNameEn": "Thousand Cuts",
+          "talentSpellId": 441346
+        },
+        {
+          "traitEntryId": 117737,
+          "traitNodeId": 95140,
+          "displayNameEn": "Unseen Blade",
+          "talentSpellId": 441146
+        },
+        {
+          "traitEntryId": 117738,
+          "traitNodeId": 95141,
+          "displayNameEn": "Smoke",
+          "talentSpellId": 441247
+        },
+        {
+          "traitEntryId": 120130,
+          "traitNodeId": 95141,
+          "displayNameEn": "Mirrors",
+          "talentSpellId": 441250
+        },
+        {
+          "traitEntryId": 120131,
+          "traitNodeId": 95137,
+          "displayNameEn": "Flickerstrike",
+          "talentSpellId": 441359
+        },
+        {
+          "traitEntryId": 120132,
+          "traitNodeId": 95116,
+          "displayNameEn": "No Scruples",
+          "talentSpellId": 441398
+        },
+        {
+          "traitEntryId": 120133,
+          "traitNodeId": 95134,
+          "displayNameEn": "Don't Be Suspicious",
+          "talentSpellId": 441415
+        },
+        {
+          "traitEntryId": 136021,
+          "traitNodeId": 109763,
+          "displayNameEn": "Clever Combatant",
+          "talentSpellId": 1276679
+        },
+        {
+          "traitEntryId": 136022,
+          "traitNodeId": 109764,
+          "displayNameEn": "Flashing Steel",
+          "talentSpellId": 1276630
+        },
+        {
+          "traitEntryId": 136023,
+          "traitNodeId": 109765,
+          "displayNameEn": "Hoodwink",
+          "talentSpellId": 1276626
+        }
+      ]
+    },
+    {
+      "simcName": "fatebound",
+      "subTreeId": 52,
+      "entries": [
+        {
+          "traitEntryId": 117704,
+          "traitNodeId": 95107,
+          "displayNameEn": "Deal Fate",
+          "talentSpellId": 454419
+        },
+        {
+          "traitEntryId": 117711,
+          "traitNodeId": 95114,
+          "displayNameEn": "Overflowing Purse",
+          "talentSpellId": 1249190
+        },
+        {
+          "traitEntryId": 117716,
+          "traitNodeId": 95119,
+          "displayNameEn": "Delivered Doom",
+          "talentSpellId": 1249194
+        },
+        {
+          "traitEntryId": 117717,
+          "traitNodeId": 95120,
+          "displayNameEn": "Edge Case",
+          "talentSpellId": 453457
+        },
+        {
+          "traitEntryId": 117719,
+          "traitNodeId": 95122,
+          "displayNameEn": "Mean Streak",
+          "talentSpellId": 453428
+        },
+        {
+          "traitEntryId": 117722,
+          "traitNodeId": 95125,
+          "displayNameEn": "Hand of Fate",
+          "talentSpellId": 452536
+        },
+        {
+          "traitEntryId": 117724,
+          "traitNodeId": 95127,
+          "displayNameEn": "Lucky Coin",
+          "talentSpellId": 1248970
+        },
+        {
+          "traitEntryId": 117726,
+          "traitNodeId": 95129,
+          "displayNameEn": "Rush to the Inevitable",
+          "talentSpellId": 1249204
+        },
+        {
+          "traitEntryId": 117727,
+          "traitNodeId": 95130,
+          "displayNameEn": "Inexorable March",
+          "talentSpellId": 454432
+        },
+        {
+          "traitEntryId": 117735,
+          "traitNodeId": 95138,
+          "displayNameEn": "Chosen's Revelry",
+          "talentSpellId": 1249201
+        },
+        {
+          "traitEntryId": 117736,
+          "traitNodeId": 95139,
+          "displayNameEn": "Fate Intertwined",
+          "talentSpellId": 1249215
+        },
+        {
+          "traitEntryId": 125132,
+          "traitNodeId": 95138,
+          "displayNameEn": "Tempted Fate",
+          "talentSpellId": 454286
+        },
+        {
+          "traitEntryId": 125139,
+          "traitNodeId": 95114,
+          "displayNameEn": "Destiny Defined",
+          "talentSpellId": 454435
+        },
+        {
+          "traitEntryId": 125140,
+          "traitNodeId": 95130,
+          "displayNameEn": "Death's Arrival",
+          "talentSpellId": 454433
+        },
+        {
+          "traitEntryId": 136024,
+          "traitNodeId": 109766,
+          "displayNameEn": "Ravenholdt Mint",
+          "talentSpellId": 1276809
+        },
+        {
+          "traitEntryId": 136025,
+          "traitNodeId": 109767,
+          "displayNameEn": "Sometimes Lucky",
+          "talentSpellId": 1277030
+        },
+        {
+          "traitEntryId": 136026,
+          "traitNodeId": 109768,
+          "displayNameEn": "Controlled Chaos",
+          "talentSpellId": 1276816
+        }
+      ]
+    }
+  ]
+}

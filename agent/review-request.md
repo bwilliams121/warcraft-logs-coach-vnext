@@ -4,59 +4,67 @@ Rolling file: overwritten for each review cycle.
 
 ## Change
 
-ONB-C1P: Feral Druid (public). Branch `autopilot/onb-c1p`, from main at 6c17d8f. **Outcome: not promoted. It stays INTERNAL_ONLY under onboarding rule 4.**
+ONB-C2: Outlaw Rogue (internal, Cohort C). Branch `autopilot/onb-c2`, from main at d8d0056. **Outcome: registered INTERNAL_ONLY. No decision resolves, and no retained capture holds one of its events.**
 
-- **Warcraft Logs: NONE.** No request or probe. The numbers replay retained pages through production ingestion over a fake transport, offline.
-- **Public contract: declared EXPECTED, actual change NONE.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed. A public Druid/Feral request is SPEC_NOT_SUPPORTED, as before. No production code changed.
-- **Queue bookkeeping:** ONB-C1 is recorded MERGED (PR #65, 6c17d8fb…). The supervisor's 47 merged tranches were compared by script: 0 mismatched. ONB-C1P is set to PR_OPEN.
+- **Warcraft Logs: NONE.** No request or probe. The census reads retained files offline.
+- **Public contract: NONE.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed. A public Rogue/Outlaw request is SPEC_NOT_SUPPORTED, as before.
+- **Queue bookkeeping:** ONB-C1P is recorded MERGED (PR #66, d8d00563…). The supervisor's other 47 merged tranches were compared by script: 0 mismatched. ONB-C2 is set to PR_OPEN.
 
-## The thing to check first: is "not promoted, not an owner stop" right?
+## The thing to check first: the pooling resolver
 
-This follows ONB-B1P, ONB-B2P and ONB-B3P. Rule 4 decides it, the gates are unchanged, and ONB-S3 is already queued as the owner's. Feral differs from those three in one way: ONB-S3 is necessary but is not its first gate, because other open lines stand before the enemy count. The docs say that rather than "waits on ONB-S3". Please check the wording.
+`src/specs/rogue/outlaw/pooling-model.ts`. Feral's pool can POOL, because `max_energy=1` is an extra Energy requirement, so a Bite pressed below the line proves the spell castable and the line not ready. Outlaw's two pools have no such option:
 
-Measured at this base, offline:
+    build[6]   pool_resource,for_next=1
+    build[7]   ambush,if=talent.hidden_opportunity
+    finish[1]  pool_resource,for_next=1
+    finish[2]  killing_spree,if=buff.supercharge_1.up|cooldown.adrenaline_rush.remains>120|!talent.supercharger
 
-| Subject | Build | Span | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
-| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| b1PmaKrd6CDfzngc fight 48 actor 170 | Wildstalker, Incarnation | whole, 345.2 s | 258 | 0 | 0 | 258 | 581 |
-| A7R6kxPJ1hC8YQ4w fight 7 actor 1 | Wildstalker, Berserk and Convoke | first 165.0 s of 424.5 s | 114 | 0 | 0 | 114 | 238 |
+Neither condition reads Energy. A press of the guarded action proves the line ready now, so `settlePendingPool` answers GUARDED_READY without asking the resolver. So the resolver is one-sided:
 
-First-GCD query refusals: `default[3] auto_attack` 199, `default[0] prowl` 164, `default[1] cat_form` 5, `default[4] tigers_fury` 4. Root scans: actor 170's 256 stop at `default[6] chomp` on applicability, actor 1's 112 at `cooldown[13] convoke_the_spirits` on too many unresolved atoms, and the other 4 have no stopping point but stay UNKNOWN behind the open first-GCD lines. These equal ONB-C1's numbers.
+- condition FALSE: NOT_READY_AT_MAX. The pool does not stop the scan, and a build without Hidden Opportunity can reach Sinister Strike.
+- anything else: UNKNOWN. It never says READY_AT_MAX, because that claims an unpressed Ambush or Killing Spree usable at full Energy, which needs stealth, Audacity, Blindside (`requires_stealth`, sc_rogue.cpp:2199-2208, :2783), a cooldown and Combo Points. None is bound.
 
-**Pooling.** ONB-C1 asked a promotion to find a Bite below the pool line or say it has none. It has none. No real scan reaches `finisher[1]`. All 86 costed Bites read at least 60 Energy (actor 170: 58 of 58, lowest 60; actor 1: 28 of 32, lowest 64), and 4 of actor 1's report no cost. Those 4 are unread, so "none" means none among the costed Bites.
+So **POOLS is unreachable in this slice**, and that is stated. It loses no verdict: POOLS is UNKNOWN against any observed cast (ONB-S5). Please check that a false condition really is resource-independent here, and that nothing else can make the two lines fire.
+
+## Why Requirement C cannot be met, and why this is not an owner stop
+
+The queue entry anticipates it: "No retained evidence is known, so it is recorded for ONB-EV if real-evidence validation cannot be met." Rule 7 says missing evidence is recorded, never fetched.
+
+Measured offline (`.probe/onbc2/census2.cjs`): 5,678 JSON files found, 5,677 parsed, over 500 bytes, under `.probe/` and `tests/`, skipping tool output and worktree copies. Casts of Sinister Strike, Pistol Shot, Dispatch, Between the Eyes, Roll the Bones, Blade Flurry, Adrenaline Rush, Blade Rush, Keep It Rolling and Killing Spree, by their pinned ids: none. Mortal Strike, the positive control: 559 casts. Contexts naming an Outlaw: g34mvXTKLMJ2Nfwr fights 1, 6 and 7, actor 17, only in the uncommitted `.probe/m13a/discovery.json`. An earlier name-based pass (`census.cjs`) found Coup de Grace and Killing Spree ids in master data, and 8 Coup de Grace casts by actor 17 of the M13-A capture. That actor is Gw2kXrTfLWcDdhFY's Subtlety Rogue, not g34m's Outlaw: Coup de Grace is shared by both specs, so it is not a signature here, and Ambush is not either.
+
+## Measured on synthetic builds, not on evidence
+
+Every decision stops at `default[0] stealth`. A tree that does not resolve a talent-built action has its root scan stop at `cds[0] adrenaline_rush` on applicability. A whole tree's root scan stops at `default[7] run_action_list` on `variable.finish_condition`, with the `cds` lines MAY_SELECT, and never enters `build` or `finish`.
 
 ## Decisions a reviewer might reject
 
-1. **A pin ONB-C1 did not add.** Earlier followers have a gate-search test in `m11-promotion-evidence-gate`, and Feral had none: only its row in the internal list. This tranche adds it, on the same shape as Devourer's.
-2. **The refusal row uses `Druid`.** Feral's registration names `wclClassName: "Druid"`, `wclSpecName: "Feral"`, and both subjects' actors read subType `Druid`, so the row fails for the right reason, not on a misspelling.
-3. **Not on ONB-EV.** A whole-fight subject with combatant info is retained, and more evidence would stop at the same lines.
-4. **No queue entry added** for the later public promotion, as with the earlier "not promoted" tranches.
-
-## Limits of the measurement
-
-- **Census scope.** It parsed every JSON file over 500 bytes under `.probe/` and `tests/`, skipping tool output and worktree copies (5,649 parsed), by signature ability with Mortal Strike as a positive control. It reads casts only, so a subject with no signature cast in a retained span would not appear.
-- **What it found.** Signature casts come from these two actors, plus gtKb fight 22 actor 2, whose only signature cast is Convoke the Spirits and whose context row reads Restoration Druid. Contexts in three other reports name a Feral (2xpt fight 17 actor 14, g34m actor 20, qJ1p fight 6), with no parsed signature cast of theirs.
-- **Chaining.** A7R6's two captures are joined by the first timestamp of the next file. That is a replay's join, not a coverage proof, and it is not committed.
-- **One is a prefix, one hero tree.** A7R6 ends at 165.0 s of 424.5 s. Both are Wildstalker, and Druid of the Claw has no real subject.
+1. **No transition contract, not even Kick.** Assassination has reviewed Stealth and Kick readings, and Outlaw could borrow the pattern. With no capture to check a reading against, none is bound here. This follows Subtlety.
+2. **Shadowmeld classified as a racial by this specialization**, as Feral does, and `arcane_pulse` left refused, as Subtlety does (it follows the unconditional Sinister Strike).
+3. **`talent.quick_draw.enabled` and `talent.audacity.enabled` bound by the three-way rule; `talent.fan_the_hammer.rank` unbound.**
+4. **The conformance exception.** `rogue/outlaw` joins `IDENTITY_RETAINED_ONLY`, refused on a PUBLIC module, with its class string proven through the committed Subtlety Rogue. That test's class proof gained one branch for this row.
+5. **Killing Spree stays eligible though channeled**, as Feral's Convoke does, with the unknown (does it log a begincast?) recorded. No decision resolves, so nothing depends on it yet.
+6. **The pool tests enter at the pool's own list**, through an authority view that answers `default` with `build` or `finish`, because only a test can get past Stealth. Production code has no entry parameter for it.
 
 ## What changed
 
-- `tests/contracts/m11-promotion-evidence-gate.test.ts`: the new Feral gate search. `tests/unit/analysis-composition-refusals.test.ts`: the Druid/Feral row.
-- `src/specs/druid/feral/README.md`: a one-paragraph note, no code.
-- Docs: `agent/architecture.md` "ONB-C1P", `agent/follow-ups.md` "After ONB-C1", `agent/testing.md`, `agent/spec-onboarding-inventory.md` (notes and row), `agent/autopilot-queue.md`.
+- `src/specs/rogue/outlaw/` (new), on Subtlety's shape, plus `pooling-model.ts`. `src/data/game/rogue-outlaw-*`, `src/simc/data/rogue-outlaw.apl.json` (48 actions in 5 lists, extracted through the pinned path).
+- `scripts/authority/`: three new targets; no extractor logic changed.
+- `src/findings/spec-id.ts`, `src/services/analyzer-registry.ts`: the row.
+- Pins, corpus cases, report and inventory files; `tests/unit/specs/onb-c2-outlaw-rogue.test.ts` (new).
+- `tests/contracts/m10a-spec-partition.test.ts`: its "unknown string" sample was `rogue/outlaw`, now a known id, so it became `hunter/survival`, still unregistered.
+- Docs: `agent/architecture.md` "ONB-C2", `agent/follow-ups.md` "After ONB-C2", `agent/testing.md`, `agent/spec-onboarding-inventory.md`, `agent/m11-spec-coaching-inventory.md`, `agent/autopilot-queue.md`, `scripts/authority/README.md`.
 
 ## Validation run
 
 - `npm run typecheck`: clean. `npm run format:check`: clean. `git diff --check`: clean.
-- `npm run test:corpus`: PASSED (217 cases, 812 assertions). `npm run test:evidence`: PASSED (32 cases, 80 assertions). Both ran in sequence, with no suite beside them.
-- Full suite, parallel, 60 s timeout: 15,057 tests, 15,056 passed, 1 failed: `m9b-corpus-harness` SPEC_PROTECTION_PALADIN, on the recorded list of parallel-load failures. This change touches none of its code. I infer interference; I did not prove it.
-- That file rerun alone: Tests 42 passed (42). The whole suite has not run clean in one pass.
-- Focused: `analysis-composition-refusals` and `m11-promotion-evidence-gate`, Tests 54 passed (54).
-- Queue compared by script with the supervisor's list: 47 compared, 0 mismatched.
-- Offline census and replay (`.probe/onbc1p/`, not committed): the table above. No network to Warcraft Logs.
+- `npm run test:corpus`: PASSED (219 cases, 814 assertions), report matching. `npm run test:evidence`: PASSED (32 cases, 80 assertions). Both ran in sequence, with no suite beside them.
+- Full suite, parallel, 60 s timeout, run before the corpus count pins moved: 15,301 tests, 15,298 passed, 3 failed. Two were `m9b-corpus-gate`, on those stale pins (217 cases, 812 assertions) and the stale report, which this change then moved; the corpus gate above runs both and passes. The third was `m9b-corpus-harness` SPEC_PROTECTION_PALADIN, on the recorded list of parallel-load failures. This change touches none of its code. I infer interference; I did not prove it.
+- `m9b-corpus-harness`, `onb-c2-outlaw-rogue`, `m11-promotion-evidence-gate` and `analysis-composition-refusals` rerun together: 136 passed (136). The whole suite has not run clean in one pass.
+- Queue compared by script with the supervisor's list: 47 compared, 0 mismatched; ONB-C1P's row was written from the supervisor's own values.
+- Real extractor runs against the local pinned sources, all three targets: required facts VERIFIED. CI has no pinned checkout. No network to Warcraft Logs.
 
 ## What is not here
 
-No promotion, no gate change, no production code, no public change, no new evidence, no binding of any open line, no new queue entry, no Warcraft Logs request.
+No promotion, no gate change, no public change, no new evidence, no shared-engine change, no Warcraft Logs request.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

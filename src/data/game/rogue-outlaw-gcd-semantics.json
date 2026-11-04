@@ -1,0 +1,383 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_ROGUE_OUTLAW_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/sc_rogue.cpp",
+        "sha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "byteLength": 436673
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 1766,
+      "baseGcdMs": 0,
+      "displayNameEn": "Kick"
+    },
+    {
+      "abilityGameId": 1784,
+      "baseGcdMs": 0,
+      "displayNameEn": "Stealth"
+    },
+    {
+      "abilityGameId": 1856,
+      "baseGcdMs": 0,
+      "displayNameEn": "Vanish"
+    },
+    {
+      "abilityGameId": 2098,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Dispatch"
+    },
+    {
+      "abilityGameId": 8676,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Ambush"
+    },
+    {
+      "abilityGameId": 13750,
+      "baseGcdMs": 0,
+      "displayNameEn": "Adrenaline Rush"
+    },
+    {
+      "abilityGameId": 13877,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Blade Flurry"
+    },
+    {
+      "abilityGameId": 51690,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Killing Spree"
+    },
+    {
+      "abilityGameId": 185763,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Pistol Shot"
+    },
+    {
+      "abilityGameId": 193315,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Sinister Strike"
+    },
+    {
+      "abilityGameId": 271877,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Blade Rush"
+    },
+    {
+      "abilityGameId": 315341,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Between the Eyes"
+    },
+    {
+      "abilityGameId": 381989,
+      "baseGcdMs": 0,
+      "displayNameEn": "Keep It Rolling"
+    },
+    {
+      "abilityGameId": 441776,
+      "baseGcdMs": 1200,
+      "displayNameEn": "Coup de Grace"
+    },
+    {
+      "abilityGameId": 1214909,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Roll the Bones"
+    },
+    {
+      "abilityGameId": 1277933,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Preparation"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "stealth",
+      "candidateAbilityGameIds": [1784],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / stealth_t",
+        "startLine": 9497,
+        "endLine": 9497,
+        "sourceNote": "create_action dispatches \"stealth\" to stealth_t, built on p->spell.stealth (:6062); spell.stealth = find_class_spell( \"Stealth\" ) at :9919, class_spells.inc row { 4, 0, 1784 }.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "kick",
+      "candidateAbilityGameIds": [1766],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / kick_t",
+        "startLine": 9477,
+        "endLine": 9477,
+        "sourceNote": "create_action dispatches \"kick\" to kick_t, built on p->spell.kick (:4603); spell.kick = find_class_spell( \"Kick\" ) at :9915, class_spells.inc row { 4, 0, 1766 }.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "vanish",
+      "candidateAbilityGameIds": [1856],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / vanish_t",
+        "startLine": 9500,
+        "endLine": 9500,
+        "sourceNote": "create_action dispatches \"vanish\" to vanish_t, built on p->spell.vanish (:6032); spell.vanish = find_class_spell( \"Vanish\" ) at :9920, class_spells.inc row { 4, 0, 1856 }.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "adrenaline_rush",
+      "candidateAbilityGameIds": [13750],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / adrenaline_rush_t",
+        "startLine": 9452,
+        "endLine": 9452,
+        "sourceNote": "create_action dispatches \"adrenaline_rush\" to adrenaline_rush_t, built on p->talent.outlaw.adrenaline_rush (:3545); find_talent_spell( SPECIALIZATION, \"Adrenaline Rush\" ) at :10074, trait row spell 13750.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "keep_it_rolling",
+      "candidateAbilityGameIds": [381989],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / keep_it_rolling_t",
+        "startLine": 9476,
+        "endLine": 9476,
+        "sourceNote": "create_action dispatches \"keep_it_rolling\" to keep_it_rolling_t, built on p->talent.outlaw.keep_it_rolling (:6330); find_talent_spell( SPECIALIZATION, \"Keep it Rolling\" ) at :10098, trait row spell 381989.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "preparation",
+      "candidateAbilityGameIds": [1277933],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / preparation_t",
+        "startLine": 9484,
+        "endLine": 9484,
+        "sourceNote": "create_action dispatches \"preparation\" to preparation_t, built on p->talent.outlaw.preparation (:6348); find_talent_spell( SPECIALIZATION, \"Preparation\" ) at :10104, trait row spell 1277933.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "blade_flurry",
+      "candidateAbilityGameIds": [13877],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / blade_flurry_t",
+        "startLine": 9459,
+        "endLine": 9459,
+        "sourceNote": "create_action dispatches \"blade_flurry\" to blade_flurry_t, built on p->spec.blade_flurry (:3948); find_specialization_spell( \"Blade Flurry\" ) at :9947, the Outlaw active spell row { 4, 260, 13877 } in class_spells.inc.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "roll_the_bones",
+      "candidateAbilityGameIds": [1214909],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / roll_the_bones_t",
+        "startLine": 9485,
+        "endLine": 9485,
+        "sourceNote": "create_action dispatches \"roll_the_bones\" to roll_the_bones_t, built on p->spec.roll_the_bones (:5129); find_specialization_spell( \"Roll the Bones\" ) at :9945, the Outlaw active spell row { 4, 260, 1214909 } in class_spells.inc.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "blade_rush",
+      "candidateAbilityGameIds": [271877],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / blade_rush_t",
+        "startLine": 9460,
+        "endLine": 9460,
+        "sourceNote": "create_action dispatches \"blade_rush\" to blade_rush_t, built on p->talent.outlaw.blade_rush (:4040); find_talent_spell( SPECIALIZATION, \"Blade Rush\" ) at :10076, trait row spell 271877.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "ambush",
+      "candidateAbilityGameIds": [8676],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / ambush_t",
+        "startLine": 9453,
+        "endLine": 9453,
+        "sourceNote": "create_action dispatches \"ambush\" to ambush_t, built on p->spell.ambush (:3582); spell.ambush = find_class_spell( \"Ambush\" ) at :9908, class_spells.inc row { 4, 0, 8676 }.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "pistol_shot",
+      "candidateAbilityGameIds": [185763],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / pistol_shot_t",
+        "startLine": 9482,
+        "endLine": 9482,
+        "sourceNote": "create_action dispatches \"pistol_shot\" to pistol_shot_t, built on p->spec.pistol_shot (:4910); find_specialization_spell( \"Pistol Shot\" ) at :9943, the Outlaw active spell row { 4, 260, 185763 } in class_spells.inc.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "sinister_strike",
+      "candidateAbilityGameIds": [193315],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / sinister_strike_t",
+        "startLine": 9494,
+        "endLine": 9494,
+        "sourceNote": "create_action dispatches \"sinister_strike\" to sinister_strike_t, built on p->spec.sinister_strike (:5895); find_specialization_spell( \"Sinister Strike\" ) at :9944, the Outlaw active spell row { 4, 260, 193315, 1752 } in class_spells.inc.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "between_the_eyes",
+      "candidateAbilityGameIds": [315341],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / between_the_eyes_t",
+        "startLine": 9457,
+        "endLine": 9457,
+        "sourceNote": "create_action dispatches \"between_the_eyes\" to between_the_eyes_t, built on p->spec.between_the_eyes (:3810); find_specialization_spell( \"Between the Eyes\" ) at :9941, the Outlaw active spell row { 4, 260, 315341 } in class_spells.inc.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "killing_spree",
+      "candidateAbilityGameIds": [51690],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / killing_spree_t",
+        "startLine": 9479,
+        "endLine": 9479,
+        "sourceNote": "create_action dispatches \"killing_spree\" to killing_spree_t, built on p->talent.outlaw.killing_spree (:4673); find_talent_spell( SPECIALIZATION, \"Killing Spree\" ) at :10099, trait row spell 51690.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "coup_de_grace",
+      "candidateAbilityGameIds": [441776],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / coup_de_grace_t",
+        "startLine": 9462,
+        "endLine": 9462,
+        "sourceNote": "create_action dispatches \"coup_de_grace\" to coup_de_grace_t, built on p->spell.coup_de_grace (:6782); spell.coup_de_grace = talent.trickster.coup_de_grace->ok() ? find_spell( 441776 ) : not_found at :10265. Its record carries _gcd 1200.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "dispatch",
+      "candidateAbilityGameIds": [2098],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / dispatch_t",
+        "startLine": 9467,
+        "endLine": 9467,
+        "sourceNote": "create_action dispatches \"dispatch\" to dispatch_t, built on p->spec.dispatch (:3752); find_specialization_spell( \"Dispatch\" ) at :9942, the Outlaw active spell row { 4, 260, 2098, 196819 } in class_spells.inc.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

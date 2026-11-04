@@ -12196,7 +12196,7 @@ ONB-S5").
 
 **No consumer yet, at this tranche.** No registered APL contained a waiting line, so no public
 decision changed. ONB-C1 (Feral) now supplies a resolver (agent/architecture.md "ONB-C1"), still
-INTERNAL_ONLY and unreached on real evidence. ONB-C2 (Outlaw) supplies its own for its resource.
+INTERNAL_ONLY and unreached on real evidence. ONB-C2 (Outlaw) supplies its own, which only ever says a false condition is not resource limited (agent/architecture.md "ONB-C2").
 
 ## ONB-S6 — Shared pet actor mapping for pet-driven APL state
 
@@ -13595,6 +13595,25 @@ The first-GCD query refuses at `default[3] auto_attack` 199, `default[0] prowl` 
 **What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists it; the gate search finds no qualifying assertion and `evidenceReady` false (`m11-promotion-evidence-gate`, a pin ONB-C1 did not add and this tranche does); and a public request is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which now holds it). The replay is offline and not committed.
 
 **What a later promotion must do.** Feral binds or answers what stands before the count, the owner decides ONB-S3, and Feral then binds what stands behind it and measures its failure modes on real subjects. A new public entry promotes it through the unchanged gates by the five-site promotion, and must find a real Bite below the pool line or say it has none. No such entry is queued.
+
+## ONB-C2 — Outlaw Rogue (internal, Cohort C)
+
+Autopilot queue entry ONB-C2. Public contract: NONE. No Warcraft Logs request. `src/specs/rogue/outlaw/README.md` is the slice in detail.
+
+**What it is.** Outlaw Rogue is registered INTERNAL_ONLY on the observed-decision pattern, with its own pinned list, GCD and talent data, resolver, facade and registration. It is the second specialization to give the ONB-S5 engine a `PoolingResolver`. No shared analyzer was introduced, and no decision resolves.
+
+**Evidence: none.** Every retained JSON file over 500 bytes was censused (5,677 parsed) for casts of ten Outlaw signature abilities, by their pinned ids, with Mortal Strike as the positive control (559 casts): no cast. The only context naming an Outlaw is g34mvXTKLMJ2Nfwr, fights 1, 6 and 7, actor 17, in the uncommitted M13-A discovery file, with no event retained. The M13-A capture's own actor 17 is a Subtlety Rogue in another report. So it stays on ONB-EV, and Requirement C cannot be met. This is not an owner stop: the entry says so, and rule 7 records the gap rather than fetching it.
+
+**Decisions.**
+
+1. **The pool's answer is one-sided, and that is the difference from Feral.** Two lines pool, `build[6]` for `ambush,if=talent.hidden_opportunity` and `finish[1]` for `killing_spree`. Neither condition reads Energy, and neither line carries `max_energy`, so a press of the guarded action proves it ready now and the scan answers that without asking the resolver (`settlePendingPool`). The resolver is asked only when the condition is false, and then says NOT_READY_AT_MAX, or with the condition open, and then says UNKNOWN. It never says READY_AT_MAX, because that would claim an unpressed Ambush or Killing Spree usable at full Energy, which reads stealth, Audacity, Blindside (sc_rogue.cpp:2199-2208, :2783), a cooldown and Combo Points. None is bound. This loses no verdict: POOLS is UNKNOWN against any observed cast (ONB-S5). So POOLS is unreachable in this slice, and the reachable gain is that a build without Hidden Opportunity does not stop at the pool.
+2. **No Energy maximum is read.** Since no answer depends on it, the resolver takes no input, unlike Feral's.
+3. **Shadowmeld is a racial the shared table does not list.** As for Feral, this specialization classifies `cds[7]`. `arcane_pulse` (`default[10]`) stays refused as for Subtlety: it sits after the unconditional Sinister Strike.
+4. **No transition contract.** Stealth and Vanish write the stealth state Ambush's readiness reads, Adrenaline Rush its buff and Energy, Keep It Rolling the Roll the Bones buffs, and Kick is declared under another domain. With no capture to check one against, none is contracted, so every decision stops at `default[0] stealth`.
+5. **`talent.quick_draw.enabled` and `talent.audacity.enabled` follow the three-way rule.** `talent.fan_the_hammer.rank` stays unbound, since that rule reads selection, not rank.
+6. **The identity pin takes its class from a committed Rogue.** No committed context names an Outlaw, so `rogue/outlaw` joins the conformance suite's retained-only exception, which a PUBLIC module cannot use. Its class string is proven through the committed Subtlety Rogue (M13-A fight context, actor 17).
+
+**No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse the row. A public Rogue/Outlaw request is SPEC_NOT_SUPPORTED, exactly as before.
 
 ## AUTOPILOT — the local project supervisor (tooling)
 

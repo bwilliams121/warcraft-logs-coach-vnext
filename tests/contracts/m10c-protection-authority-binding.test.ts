@@ -222,6 +222,7 @@ describe("cross-spec authority access is refused structurally", () => {
       ["shaman/enhancement", ["SIMC_APL_SHAMAN_ENHANCEMENT"]],
       ["demonhunter/devourer", ["SIMC_APL_DEMONHUNTER_DEVOURER"]],
       ["druid/feral", ["SIMC_APL_DRUID_FERAL"]],
+      ["rogue/outlaw", ["SIMC_APL_ROGUE_OUTLAW"]],
     ]);
   });
 });

@@ -716,6 +716,8 @@ as before.
 
 The pinned source root for this target adds `engine/class_modules/apl/druid/feral_apl.inc` (17,108 bytes), `engine/class_modules/apl/druid/druid.cpp` (926 bytes, both as the M11-A3 audit recorded them) and `engine/class_modules/sc_druid.cpp` (479,886 bytes, `59227a2f...`).
 
+`rogue-outlaw` was extracted in ONB-C2 (`src/simc/data/rogue-outlaw.apl.json`, 48 actions in 5 lists, region 133–195 of `apl_rogue.cpp`, `859365c9…5f725`, `NO_PTR_REGION`, `sc_rogue.cpp` `else if ( specialization() == ROGUE_OUTLAW )`). Its GCD and talent targets are in the two sibling extractors, with no extractor change of any other kind.
+
 `demonhunter-devourer` was extracted from this table in ONB-B3 (`src/simc/data/demonhunter-devourer.apl.json`, 153 actions in 12 lists). Its GCD and talent targets are in the two sibling extractors. The talent target
 is the first to need two rules: a hero row scoped to no specialization counts as class-wide (all 16 of Annihilator's), and `subTreeId` names the tree when two hero sub-trees hold one name (Demonic Intensity).
 

@@ -1221,7 +1221,7 @@ status: OWNER_DECISION_REQUIRED
 dependsOn: none
 wcl: NONE
 publicContract: NONE
-ownerDecision: Authorize one bounded, neutral, deterministic Warcraft Logs evidence campaign for the specializations that have no retained, already-authorized real evidence. Known today: Fury Warrior, Protection Warrior, Outlaw Rogue, Survival Hunter and Vengeance Demon Hunter appear in no committed fight context, and onboarding tranches append any further spec whose review finds its evidence inadequate. Appended by ONB-B2: Enhancement Shaman (the only retained events are the filtered M13-A casts of actor 7, with no combatant info, so its talents never resolve). Appended by HEAL-B1P, and corrected by HEAL-B4P: Restoration Druid needs no campaign (its whole-fight events in gtKb2xHn87pNcFfW fight 22, actor 2, are in the retained M9-C2, M11-C4 and M11-C4b captures, which HEAL-B1P's census did not read; agent/follow-ups.md "After HEAL-B4P"). Appended by HEAL-B3: Discipline Priest (committed evidence is a filtered M13-A cast capture, actor 9, and Atonement applications by the G2 cohort246 fight 33 actor 88 onto another player; no committed or retained capture holds its whole-fight casts or any Atonement heal event, and fight 48 has no Discipline Priest, so HEAL-B3P cannot meet the healer promotion gate). (Preservation Evoker, appended by HEAL-B4, was removed by HEAL-B4P: it passed the gate on retained evidence.) Appended by ONB-A2: Subtlety Rogue (committed evidence is 150 filtered M13-A casts of actor 17, with no combatant info, auras or resources, so its talents never resolve); its census also found Fury and Protection Warrior only in retained fight contexts, with no event. The proposal is the smallest campaign: per spec, the first public raid fight in a fixed order containing it, with its actor slice (casts, auras, resources, combatant info), and no ranking or comparison data.
+ownerDecision: Authorize one bounded, neutral, deterministic Warcraft Logs evidence campaign for the specializations that have no retained, already-authorized real evidence. Known today: Fury Warrior, Protection Warrior, Outlaw Rogue, Survival Hunter and Vengeance Demon Hunter appear in no committed fight context, and onboarding tranches append any further spec whose review finds its evidence inadequate. Appended by ONB-B2: Enhancement Shaman (the only retained events are the filtered M13-A casts of actor 7, with no combatant info, so its talents never resolve). Appended by HEAL-B1P, and corrected by HEAL-B4P: Restoration Druid needs no campaign (its whole-fight events in gtKb2xHn87pNcFfW fight 22, actor 2, are in the retained M9-C2, M11-C4 and M11-C4b captures, which HEAL-B1P's census did not read; agent/follow-ups.md "After HEAL-B4P"). Appended by HEAL-B3: Discipline Priest (committed evidence is a filtered M13-A cast capture, actor 9, and Atonement applications by the G2 cohort246 fight 33 actor 88 onto another player; no committed or retained capture holds its whole-fight casts or any Atonement heal event, and fight 48 has no Discipline Priest, so HEAL-B3P cannot meet the healer promotion gate). (Preservation Evoker, appended by HEAL-B4, was removed by HEAL-B4P: it passed the gate on retained evidence.) Appended by ONB-A2: Subtlety Rogue (committed evidence is 150 filtered M13-A casts of actor 17, with no combatant info, auras or resources, so its talents never resolve); its census also found Fury and Protection Warrior only in retained fight contexts, with no event. The proposal is the smallest campaign: per spec, the first public raid fight in a fixed order containing it, with its actor slice (casts, auras, resources, combatant info), and no ranking or comparison data. Confirmed by ONB-C2: Outlaw Rogue, whose only context is the uncommitted g34mvXTKLMJ2Nfwr fights 1, 6 and 7, actor 17, with no event retained.
 ```
 
 **Direction.** The owner's onboarding evidence policy: neutral,
@@ -1712,11 +1712,13 @@ for a later deep dive only.
 ### ONB-C1P: Feral Druid (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-C1
 branch: autopilot/onb-c1p
 wcl: NONE
 publicContract: EXPECTED
+pr: 66
+mergeSha: d8d00563c76e504502ad77d67e792d5699b6996e
 ```
 
 **Outcome.** Feral does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Its two retained subjects, replayed offline, give 372 eligible decisions, 0 MATCH, 0 REJECTED and 372 UNKNOWN, with no real scan reaching the enemy count or the pool line, and no real Bite below that line. A wider census found no other subject. Evidence is not its gap, so it is not on ONB-EV; it waits on the inputs before the enemy count and on ONB-S3. A promotion after those is a new public entry through the unchanged gates (agent/architecture.md "ONB-C1P"; agent/follow-ups.md "After ONB-C1").
@@ -1724,14 +1726,17 @@ publicContract: EXPECTED
 ### ONB-C2: Outlaw Rogue (internal, Cohort C)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-C1
+branch: autopilot/onb-c2
 wcl: NONE
 publicContract: NONE
 ```
 
 **Scope.** Cohort C follower. No retained evidence is known, so it is
 recorded for ONB-EV if real-evidence validation cannot be met.
+
+**Outcome.** Outlaw Rogue is registered INTERNAL_ONLY, and no decision of it resolves: every one stops at `default[0] stealth`. A census of 5,677 retained files finds no cast of its signature abilities, so it stays on ONB-EV and Requirement C cannot be met. Its pooling resolver is proven on synthetic decisions, and says only that a false guarded condition is not resource limited; anything else is UNKNOWN, so POOLS is unreachable (agent/architecture.md "ONB-C2"; agent/follow-ups.md "After ONB-C2").
 
 ### ONB-C2P: Outlaw Rogue (public)
 

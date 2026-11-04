@@ -707,19 +707,28 @@
       "assertions": 1,
       "cases": 1,
       "failed": 0,
+      "kindsExercised": ["SPEC_OUTLAW_ROGUE.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_OUTLAW_ROGUE",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
       "kindsExercised": ["SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE"],
       "notExecuted": 0,
       "owningLayer": "SPEC_ENHANCEMENT_SHAMAN",
       "passed": 1
     },
     {
-      "assertions": 32,
-      "cases": 28,
+      "assertions": 33,
+      "cases": 29,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 32
+      "passed": 33
     },
     {
       "assertions": 14,
@@ -977,6 +986,20 @@
       ],
       "authority": null,
       "caseId": "application-service.mistweaver-monk-registration-is-public-since-heal-b1p",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.outlaw-rogue-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -5624,6 +5647,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_OUTLAW_ROGUE.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-outlaw-rogue.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_OUTLAW_ROGUE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_PRESERVATION_EVOKER.REGISTRATION_RESULT",
           "ordinal": 0,
           "status": "PASSED"
@@ -7537,6 +7574,7 @@
     "SIMC_APL_PALADIN_PROTECTION": "simc-33622e9d-1",
     "SIMC_APL_PALADIN_RETRIBUTION": "simc-33622e9d-1",
     "SIMC_APL_ROGUE_ASSASSINATION": "simc-33622e9d-1",
+    "SIMC_APL_ROGUE_OUTLAW": "simc-33622e9d-1",
     "SIMC_APL_ROGUE_SUBTLETY": "simc-33622e9d-1",
     "SIMC_APL_SHAMAN_ENHANCEMENT": "simc-33622e9d-1",
     "SIMC_APL_WARRIOR_ARMS": "simc-33622e9d-1",
@@ -7550,13 +7588,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 812,
-    "cases": 217,
+    "assertions": 814,
+    "cases": 219,
     "declared": 0,
-    "executable": 812,
+    "executable": 814,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 812
+    "passed": 814
   }
 }
