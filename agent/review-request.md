@@ -4,79 +4,51 @@ Rolling file: overwritten for each review cycle.
 
 ## Change
 
-ONB-B2: Frost Death Knight and Enhancement Shaman, registered INTERNAL_ONLY. Branch `autopilot/onb-b2`, from main at 26eb557.
+ONB-B2P: Frost Death Knight and Enhancement Shaman public promotion: **not promoted**. Branch `autopilot/onb-b2p`, from main at 3fad83f.
 
-- **Warcraft Logs: NONE.** No request or probe. Numbers replay retained pages through production ingestion over a fake transport, offline. Three pinned SimulationCraft files were fetched from
-  GitHub at the pinned commit, each matched to its git blob id first.
-- **Public contract: NONE.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed. A public request for either is SPEC_NOT_SUPPORTED, as before.
-- **Queue bookkeeping:** ONB-B1P is recorded MERGED (PR #60, 26eb5572…), and ONB-B2 is PR_OPEN. Enhancement is appended to ONB-EV's decision text.
+- **Warcraft Logs: NONE.** No request or probe. The numbers replay retained pages through production ingestion over a fake transport, offline.
+- **Public contract: declared EXPECTED, actual change NONE.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed. A public request for either specialization is SPEC_NOT_SUPPORTED, as before, with one retrieval for preparation alone.
+- **No production code changed.** The only files under `src/` are the two specializations' READMEs.
+- **Queue bookkeeping:** ONB-B2 is recorded MERGED (PR #61, 3fad83fd…). The other 42 merged tranches the supervisor listed were compared by script and already match. ONB-B2P is set to PR_OPEN.
 
-## The things to check first
+## The thing to check first: is "not promoted" right, and is it not an owner stop?
 
-**1. Is the Enhancement list right? It is the one new thing in this tranche.** `sc_shaman.cpp` builds it in a class method, so the extractor gained a third selector and two declared forms:
+The entry declares a public contract change and I made none. The rotational gates need a real MATCH, real resolved decisions over several tokens, and a real REJECTED or a control flipping a real MATCH. I reran every retained subject at this base rather than copy ONB-B2's numbers:
 
-- **`def->add_action( this, "Wind Shear", "", ... )` emits nothing.** `action_priority_list.cpp` looks the name up with `find_class_spell`, then `find_specialization_spell`, and a spell that is not `ok()` returns nullptr. Neither table has a
-  Wind Shear row: the spell is talent-only. So the pinned `default` list is 9 entries, with `bloodlust` at ordinal 4 and no interrupt line. Please try to break this reading.
-- **`def->add_action( this, "Bloodlust", "line_cd=600" )` emits `bloodlust,line_cd=600`.** Class table row `{ 7, 0, 2825 }`.
-- **The prologue** returns before any list exists for an actor with no main-hand weapon. It is recorded in `provenance.methodPrologue`, and nothing reads a character's main hand.
+| Subject | Spec | Hero tree | Retained span | Result | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| b1Pm fight 48 actor 19 | Frost | Deathbringer | whole | ANALYZED | 308 | 0 | 0 | 308 | 703 |
+| gtKb fight 22 actor 26 | Frost | Deathbringer | whole | ANALYZED | 259 | 0 | 0 | 259 | 281 |
+| Gw2k fight 1 actor 7 | Enhancement | not resolved | filtered casts | `PROFILE_NOT_RESOLVED` | none | none | none | none | none |
 
-Each outcome rests on `LINE_EXACTLY_ONCE` and `TOKEN_ABSENT` checks against hash-pinned bytes. A class row appearing for Wind Shear, or disappearing for Bloodlust, refuses the extraction (`onb-b2-class-method-extraction`).
+All 567 Frost decisions stop on one atom: `cooldowns[4] reapers_mark | NOT_EVALUATED:UNSUPPORTED_TARGETING`. Onboarding rule 4 decides the outcome, as for ONB-A2P and ONB-B1P, and the decisions that could change it (ONB-S3, ONB-EV) are already queued as the owner's. I did not stop, because this tranche has no choice of its own to make.
 
-**2. Is registering these without requirement C right, and is it not an owner stop?** The queue asks for real MATCH, discrimination and negative-control evidence. None can exist while the enemy count stands, which is the owner's ONB-S3, the same
-reasoning ONB-B1 recorded. Frost's real subjects:
+**The two get different dispositions. Check that this is right.** Frost is not added to ONB-EV: it has two whole fights with combatant info, and a capture would not move a decision. Enhancement stays on ONB-EV, where ONB-B2 put it, and it needs ONB-S3 too.
 
-| Subject | Hero tree | Span | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
-| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| b1Pm fight 48 actor 19 | Deathbringer | whole, 345.2 s | 308 | 0 | 0 | 308 | 703 |
-| gtKb fight 22 actor 26 | Deathbringer | whole, 284.8 s | 259 | 0 | 0 | 259 | 281 |
+## Limits of the measurement
 
-All 567 root scans stop at `cooldowns[4] reapers_mark` on `target_if=first:`. Enhancement has only the filtered M13-A casts of actor 7, with no combatant info, so it refuses and goes on ONB-EV.
-
-**3. `Mind Freeze` is proven background on every build.** `mind_freeze_t` asks `find_class_spell( "Mind Freeze" )`, and the class table has no row (sc_death_knight.cpp:11728-11729; action.cpp:541-549). So its `high_prio_actions[0]` line cannot stop a scan. This is an
-applicability claim from pinned source, in Frost's own `action-profile.ts`. It closes a line rather than leaving it open, so it is the one place here that moves a scan forward. Check it.
-
-**4. Bindings that deliberately leave a logged id unbound.**
-
-- Doom Winds binds 384352, not the logged 469270 (`doom_winds_damage`, sc_shaman.cpp:8785, effect row 1183511 of 384352; ten in 151 s cannot be a 90 s press).
-- Frostwyrm's Fury binds 279302, not the logged 1265384 (once per 279302 on both subjects). Exterminate (441424, 441426) has no action in the list.
-- Bloodlust binds 2825. Heroism (32182) has no action in this module, so a logged Heroism is excluded. Recorded as a coverage gap.
-- Flame Shock binds the class row 470411, because `flame_shock_t` is built on 188389, `_gcd` 0, and takes `trigger_gcd` from that row (:8352-8353). No retained capture holds a Flame Shock cast, so which id logs it is unchecked.
-
-Each unbound id has no lane record, so it is excluded as `EXECUTION_LANE_NOT_ESTABLISHED`, never judged.
-
-## Bloodlust's `line_cd`
-
-The queue names this. Enhancement is the first adapter to supply `lineCooldownFor`, from the shared `lineSelectionHistoryFromObservedCasts`, and it forwards `linesStartedThisDecision`. A logged 2825 attributes to the sole in-combat entry, and the readiness stays UNKNOWN by the shared rule:
-a cast only bounds a selection from above. The stop reads `LINE_CD:SELECTION_COVERAGE_NOT_PROVEN`. Cast coverage is passed as null, because that rule never reads it. Nothing in the shared rule changed.
-
-## Limits
-
-- **Deathbringer only.** No Rider subject is retained. A synthetic Rider build stops at `cooldowns[5] frostwyrms_fury`. A promotion must measure it or refuse it.
-- **Nothing real is committed for Frost.** The archive has 5,212 bytes under its notice line, and nothing here would resolve on real bytes, so no measured proposal is raised. Frost's real numbers are an offline replay. Its identity proof is the committed fight 48 context row.
-- **Two tiered talents are not modelled** (`chosen_of_frostbrood`, `storm_unleashed`): UNKNOWN, never false.
-- **Cast-time actions** (`lightning_bolt`, `chain_lightning`, `tempest`) are `OUTSIDE_FIRST_SLICE`. Chain Lightning has no real begincast; it is excluded by the same reading, since Maelstrom Weapon shortens it too.
-- **Wire measurements** (cooldown gaps, Obliterate's 740 ms gap under the GCD floor) are read once and not pinned. They are in agent/follow-ups.md "After ONB-B2".
-- **The real extractor preflight** runs only against a local pinned source root. It passed for both targets; CI exercises synthetic source.
+- **Census scope.** ONB-B2's census read files named for pages, events or captures. This one parsed every JSON file over 500 bytes under `.probe/` and `tests/`, skipping tool output, worktree copies and directories deeper than the walk limit (5,638 parsed), for casts of signature abilities, with Mortal Strike and Mutilate as positive controls. It reads casts only, so a subject with no signature cast in a retained span would not appear. It does not read compressed files; a listing found none outside the tool directories.
+- **Chaining.** gtKb's three captures are joined by the first timestamp of the next file, as in ONB-B1P. That is a replay's join, not a coverage proof. It is not committed, and nothing resolves either way.
+- **Deathbringer only.** No Rider subject is retained. Follow-ups say a later promotion must measure it or refuse it.
+- **Identity:** each subject's `friendlySpecs` entry, aligned to `friendlyPlayers`, and `subType` from the context (`DeathKnight`, `Shaman`), read from retained copies. "Frost" alone is ambiguous with Mage, so the Death Knight subjects are also corroborated by the class token and by their Obliterate casts.
 
 ## What changed
 
-- `scripts/authority/`: both targets on the APL, GCD and talent extractors. The APL extractor gains `CLASS_METHOD`, `methodPrologue` and `spellGatedActions`, with `extract-simc-apl.d.mts` to match. No earlier target's output changes.
-- `src/simc/authority-artifact.ts`: admits the selector and the two provenance records, and refuses them when malformed or mixed.
-- `src/simc/data/`, `src/data/game/`: both pinned lists, GCD, talent and transition data.
-- `src/specs/deathknight/frost/`, `src/specs/shaman/enhancement/`: the two trees, each with its own stops in its README.
-- `src/findings/spec-id.ts`, `src/services/analyzer-registry.ts`: the two rows.
-- `tests/`: the two new test files, the pins for two rows, four corpus cases and regenerated reports. Three pins moved for a reason worth reading: `m11d2c` no longer asserts that no target names Enhancement (this tranche is the audit that entry waited for), `m11c1a` accepts the second selector kind, and `m10a-spec-partition` uses `deathknight/unholy` as its not-a-spec example.
-- `tests/support/corpus/executors/spec-brewmaster-monk.ts`: narrows the selector union, with no behaviour change.
-- Docs: architecture, follow-ups (including a correction of ONB-B1's reading of Enhancement's dispatch), testing, the authority README and both inventories.
+- `tests/unit/analysis-composition-refusals.test.ts`: DeathKnight/Frost and Shaman/Enhancement join the refusal list. The token `DeathKnight` is the one the identity table resolves for Blood (`spec-identity.test.ts` pins that `Death Knight` does not), so the rows reach the real lookup rather than failing on a spelling.
+- `tests/contracts/m11-promotion-evidence-gate.test.ts`: comment only. The gate search from ONB-B2 still pins no qualifying assertion and `evidenceReady` false.
+- Docs: `agent/architecture.md` "ONB-B2P", `agent/follow-ups.md` "After ONB-B2", `agent/testing.md`, `agent/spec-onboarding-inventory.md`, `agent/autopilot-queue.md`, and both READMEs. No percentage in the inventory changes.
 
 ## Validation run
 
 - `npm run typecheck`: clean. `npm run format:check`: clean. `git diff --check`: clean.
-- `npm run test:corpus` and `npm run test:evidence`: both gates PASSED (213 cases, 808 assertions; evidence 32 cases, 80 assertions), each matching its committed report.
-- Full suite, parallel, 60 s timeout: 14,493 tests, 14,491 passed, 2 failed: `m9b-corpus-harness` (SPEC_PROTECTION_PALADIN, a timeout-shaped error) and `runner-service-queue` W (a leftover job directory). Both passed serially, and both are known to fail under parallel load, as ONB-B1P recorded.
-- Real extractor preflight against a local pinned source root: both targets pass, each file matched to its git blob at the pinned commit.
-- Offline replay: the Frost table above. No network to Warcraft Logs.
+- `npm run test:corpus`: PASSED (213 cases, 808 assertions). `npm run test:evidence`: PASSED (32 cases, 80 assertions). Run in sequence, with no suite beside them.
+- Full suite, parallel, 60 s timeout: 14,493 tests, 14,490 passed, 3 failed: `m9b-corpus-harness` SPEC_PROTECTION_PALADIN (a timeout-shaped error), `runner-service-queue` W (a leftover job directory) and `runner-and-parser` U (a job-directory count, 173 against 174). The last two count one shared temp directory, and `runner-and-parser` U is not on the earlier known list. This change touches none of that code. I infer parallel interference; I did not prove it.
+- Those three files and the two touched test files rerun serially: 127 tests, all pass. The whole suite has not been rerun clean in one pass.
+- The machine's temp directory holds 173 leftover `wlc-simc-*` directories from earlier runs. I left them alone.
+- Offline replay (`.probe/onbb2p/m/`, not committed): the table above.
 
 ## What is not here
 
-No aura or cooldown binding, no transition contract beyond `auto_attack`, no resolving decision, no public row, no shared engine change, and no new archive evidence.
+No promotion, no gate change, no binding, no new evidence, no new queue entry. A later promotion needs the owner's ONB-S3 decision and, for Enhancement, ONB-EV, then what ONB-B2 left open, then a new public entry; the follow-ups say no such entry is queued.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

@@ -767,8 +767,8 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
 
   it("ONB-B2: the gate search finds nothing for Frost Death Knight or Enhancement Shaman", async () => {
     // Frost's two retained subjects resolve no decision, and no capture can validate Enhancement
-    // (agent/architecture.md "ONB-B2"). A later change that resolved one would fail this pin and
-    // prompt a new public entry; it would not promote anything by itself.
+    // (agent/architecture.md "ONB-B2P"), so neither was promoted. A later change that resolved one
+    // would fail this pin and prompt a new public entry; it would not promote anything by itself.
     const tiers = await tiersPromise;
     for (const specId of ["deathknight/frost", "shaman/enhancement"] as const) {
       const module = MODULES.find((candidate) => candidate.identity.specId === specId);

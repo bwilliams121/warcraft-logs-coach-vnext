@@ -1614,11 +1614,13 @@ ONB-B1 left open, then a new public entry through the unchanged gates (agent/arc
 ### ONB-B2: Frost Death Knight and Enhancement Shaman (internal, Cohort B)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-B1
 branch: autopilot/onb-b2
 wcl: NONE
 publicContract: NONE
+pr: 61
+mergeSha: 3fad83fd212c4a813d3c64385d404124d92bfb7a
 ```
 
 **Scope.** Cohort B followers on Arms' proven pattern.
@@ -1636,11 +1638,16 @@ form emits only under the player's spell data, so Wind Shear's line does not exi
 ### ONB-B2P: Frost Death Knight and Enhancement Shaman (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-B2
+branch: autopilot/onb-b2p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** Neither passes the rotational promotion gates, so both stay INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Frost's two retained subjects, replayed offline, give 567 eligible decisions,
+0 MATCH, 0 REJECTED and 567 UNKNOWN, every root scan stopping at `cooldowns[4] reapers_mark` on its `target_if`. Evidence is not Frost's gap, so it is not on ONB-EV; it waits on ONB-S3. Enhancement's only subject (the filtered M13-A casts) refuses as
+`PROFILE_NOT_RESOLVED`, so it needs ONB-EV, and its list also needs ONB-S3. A wider census found no other subject of either. A promotion after those is a new public entry through the unchanged gates (agent/architecture.md "ONB-B2P"; agent/follow-ups.md "After ONB-B2").
 
 ### ONB-B3: Devourer Demon Hunter (internal, own representative)
 
