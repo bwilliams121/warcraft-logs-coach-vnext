@@ -181,6 +181,7 @@ describe("REST: a real Retribution Paladin identity resolves publicly", () => {
       "deathknight-frost-observed-decisions": 0,
       "shaman-enhancement-observed-decisions": 0,
       "demonhunter-devourer-observed-decisions": 0,
+      "druid-feral-observed-decisions": 0,
     });
     const parsed = PublicAnalysisResultSchema.safeParse(rest.body);
     expect(parsed.success).toBe(true);

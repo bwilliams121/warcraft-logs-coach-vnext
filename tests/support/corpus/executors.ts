@@ -43,6 +43,7 @@ import * as protectionWarrior from "./executors/spec-protection-warrior.js";
 import * as armsWarrior from "./executors/spec-arms-warrior.js";
 import * as frostDeathKnight from "./executors/spec-frost-death-knight.js";
 import * as devourerDemonHunter from "./executors/spec-devourer-demon-hunter.js";
+import * as feralDruid from "./executors/spec-feral-druid.js";
 import * as enhancementShaman from "./executors/spec-enhancement-shaman.js";
 import * as sharedEngine from "./executors/shared-decision-engine.js";
 import * as transport from "./executors/wcl-transport.js";
@@ -684,6 +685,8 @@ export async function executeAssertion(
       return frostDeathKnight.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_DEVOURER_DEMON_HUNTER.SPEC_GATE":
       return devourerDemonHunter.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_FERAL_DRUID.SPEC_GATE":
+      return feralDruid.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE":
       return enhancementShaman.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_PRESERVATION_EVOKER.REGISTRATION_RESULT":
@@ -822,6 +825,7 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_ARMS_WARRIOR.SPEC_GATE",
   "SPEC_FROST_DEATH_KNIGHT.SPEC_GATE",
   "SPEC_DEVOURER_DEMON_HUNTER.SPEC_GATE",
+  "SPEC_FERAL_DRUID.SPEC_GATE",
   "SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE",
   "SPEC_PRESERVATION_EVOKER.REGISTRATION_RESULT",
   "APPLICATION_SERVICE.INTERNAL_REGISTRATION",

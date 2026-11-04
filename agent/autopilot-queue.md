@@ -1141,8 +1141,9 @@ ownerDecision: Whether, and on what evidence, the analyzer may model the enemy s
 "Multi-Target Support", and `agent/follow-ups.md` "After M11-D3-B". ONB-B1 measured
 that every Arms decision stops here. ONB-B2 found the same count behind every rotation list of Frost
 Death Knight and Enhancement Shaman, and that Frost also meets `target_if=first` before it.
-ONB-B3 measured that every Devourer decision stops on it too
-(`agent/follow-ups.md` "After ONB-B1", "After ONB-B2", "After ONB-B3").
+ONB-B3 measured that every Devourer decision stops on it too. ONB-C1 found all four of Feral's finisher
+and builder dispatches read it, behind other open lines
+(`agent/follow-ups.md` "After ONB-B1", "After ONB-B2", "After ONB-B3", "After ONB-C1").
 
 ### ONB-S4: Shared cast and channel decision anchor
 
@@ -1678,11 +1679,13 @@ every root scan stopping at `voidscarred_melee[0] run_action_list` on `active_en
 ### ONB-B3P: Devourer Demon Hunter (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-B3
 branch: autopilot/onb-b3p
 wcl: NONE
 publicContract: EXPECTED
+pr: 64
+mergeSha: a41a68bbe92c932132b3243ea5f348d4318e96f5
 ```
 
 **Outcome.** Devourer does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Its three retained subjects, replayed offline, give 251 eligible decisions,
@@ -1691,8 +1694,9 @@ publicContract: EXPECTED
 ### ONB-C1: Feral Druid (internal, Cohort C representative)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-S5
+branch: autopilot/onb-c1
 wcl: NONE
 publicContract: NONE
 ```
@@ -1700,6 +1704,8 @@ publicContract: NONE
 **Scope.** Cohort C representative: pooling, plus form state. Real evidence
 is retained (fight 48). `rip-rake-snapshot-refresh` is a recorded question,
 for a later deep dive only.
+
+**Outcome.** Feral Druid is registered INTERNAL_ONLY, and no decision of it resolves: its two retained subjects (fight 48 actor 170, whole fight; A7R6 fight 7 actor 1, first 165 s; both Wildstalker) give 372 eligible decisions, all UNKNOWN. Pooling is modelled and proven on synthetic decisions only: `max_energy=1` is read on its one line and the resolver answers the at-maximum question, but no real scan reaches the pool line, because Prowl on an Incarnation build, Tiger's Fury and the enemy count all stand before it. Form state is bound, with two new proofs, and no real cat ability contradicts it. Requirement C cannot be met until ONB-S3 is decided and the inputs listed are bound (agent/architecture.md "ONB-C1"; agent/follow-ups.md "After ONB-C1").
 
 ### ONB-C1P: Feral Druid (public)
 

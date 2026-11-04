@@ -1,0 +1,586 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_TRAIT_DRUID_FERAL_TALENTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. That `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals trait_data_t::id_node is corroborated for Feral on two real subjects: b1PmaKrd6CDfzngc fight 48 actor 170 and A7R6kxPJ1hC8YQ4w fight 7 actor 1. All 159 of their entries are pinned rows of class 11.",
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "talents": [
+    {
+      "simcName": "apex_predators_craving",
+      "displayNameEn": "Apex Predator's Craving",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82109,
+      "traitEntryId": 103172,
+      "talentSpellId": 391881,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_druid.cpp:10439 talent.apex_predators_craving = ST( \"Apex Predator's Craving\" ); it produces buff.apex_predators_craving, which the pinned list and maximum_energy() read"
+    },
+    {
+      "simcName": "ashamanes_guidance",
+      "displayNameEn": "Ashamane's Guidance",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82113,
+      "traitEntryId": 103176,
+      "talentSpellId": 391548,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_druid.cpp:10440 talent.ashamanes_guidance = ST( \"Ashamane's Guidance\" ); the pinned list reads talent.ashamanes_guidance"
+    },
+    {
+      "simcName": "berserk_cat",
+      "displayNameEn": "Berserk",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82101,
+      "traitEntryId": 103162,
+      "talentSpellId": 343223,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_druid.cpp:10441 talent.berserk_cat = ST( \"Berserk\", DRUID_FERAL ); berserk_cat_t is built on its override when Incarnation is not taken (:3937-3938, :10703)"
+    },
+    {
+      "simcName": "berserk_heart_of_the_lion",
+      "displayNameEn": "Berserk: Heart of the Lion",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82100,
+      "traitEntryId": 103161,
+      "talentSpellId": 391174,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_druid.cpp:10442 talent.berserk_heart_of_the_lion = ST( \"Berserk: Heart of the Lion\" ); the pinned list reads talent.berserk_heart_of_the_lion"
+    },
+    {
+      "simcName": "bursting_growth",
+      "displayNameEn": "Bursting Growth",
+      "tree": "HERO",
+      "traitNodeId": 109716,
+      "traitEntryId": 135974,
+      "talentSpellId": 440120,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "a Wildstalker talent, pinned so the tree resolves from more than one entry (sub-tree 22)"
+    },
+    {
+      "simcName": "chomp",
+      "displayNameEn": "Chomp",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82108,
+      "traitEntryId": 134212,
+      "talentSpellId": 1244258,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 103170,
+          "displayNameEn": "Lunar Inspiration",
+          "talentSpellId": 155580
+        }
+      ],
+      "binding": "sc_druid.cpp:10445 talent.chomp = ST( \"Chomp\" ); chomp_t is built on it (:4050). A CHOICE node with Lunar Inspiration"
+    },
+    {
+      "simcName": "convoke_the_spirits",
+      "displayNameEn": "Convoke the Spirits",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82114,
+      "traitEntryId": 103177,
+      "talentSpellId": 391528,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 103178,
+          "displayNameEn": "Incarnation: Avatar of Ashamane",
+          "talentSpellId": 102543
+        }
+      ],
+      "binding": "sc_druid.cpp:10383 talent.convoke_the_spirits = ST( \"Convoke the Spirits\" ); the pinned list reads it and convoke_the_spirits_t is built on it (:9256). A CHOICE node with Incarnation"
+    },
+    {
+      "simcName": "doubleclawed_rake",
+      "displayNameEn": "Double-Clawed Rake",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82086,
+      "traitEntryId": 103145,
+      "talentSpellId": 391700,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_druid.cpp:10448 talent.doubleclawed_rake = ST( \"Double-Clawed Rake\" ); the pinned list reads talent.doubleclawed_rake"
+    },
+    {
+      "simcName": "feral_frenzy",
+      "displayNameEn": "Feral Frenzy",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82112,
+      "traitEntryId": 103175,
+      "talentSpellId": 274837,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_druid.cpp:10450 talent.feral_frenzy = ST( \"Feral Frenzy\" ); feral_frenzy_t is built on it (:4134)"
+    },
+    {
+      "simcName": "fluid_form",
+      "displayNameEn": "Fluid Form",
+      "tree": "CLASS",
+      "traitNodeId": 82246,
+      "traitEntryId": 103326,
+      "talentSpellId": 449193,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_druid.cpp:10326 talent.fluid_form = CT( \"Fluid Form\" ); the pinned list reads talent.fluid_form"
+    },
+    {
+      "simcName": "focused_frenzy",
+      "displayNameEn": "Focused Frenzy",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82111,
+      "traitEntryId": 103174,
+      "talentSpellId": 1244544,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 134211,
+          "displayNameEn": "Frantic Frenzy",
+          "talentSpellId": 1243807
+        }
+      ],
+      "binding": "sc_druid.cpp:10451 talent.focused_frenzy = ST( \"Focused Frenzy\" ); a CHOICE node with Frantic Frenzy, pinned so that node resolves"
+    },
+    {
+      "simcName": "frantic_frenzy",
+      "displayNameEn": "Frantic Frenzy",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82111,
+      "traitEntryId": 134211,
+      "talentSpellId": 1243807,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 103174,
+          "displayNameEn": "Focused Frenzy",
+          "talentSpellId": 1244544
+        }
+      ],
+      "binding": "sc_druid.cpp:10452 talent.frantic_frenzy = ST( \"Frantic Frenzy\" ); the pinned list reads it and frantic_frenzy_t is built on it (:4084). A CHOICE node with Focused Frenzy"
+    },
+    {
+      "simcName": "incarnation_cat",
+      "displayNameEn": "Incarnation: Avatar of Ashamane",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82114,
+      "traitEntryId": 103178,
+      "talentSpellId": 102543,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 103177,
+          "displayNameEn": "Convoke the Spirits",
+          "talentSpellId": 391528
+        }
+      ],
+      "binding": "sc_druid.cpp:10455 talent.incarnation_cat = ST( \"Incarnation: Avatar of Ashamane\" ); the \"berserk\" token builds incarnation_cat_t on it (:10162-10163, :3946). A CHOICE node with Convoke the Spirits"
+    },
+    {
+      "simcName": "lunar_inspiration",
+      "displayNameEn": "Lunar Inspiration",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82108,
+      "traitEntryId": 103170,
+      "talentSpellId": 155580,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 134212,
+          "displayNameEn": "Chomp",
+          "talentSpellId": 1244258
+        }
+      ],
+      "binding": "sc_druid.cpp:10458 talent.lunar_inspiration = ST( \"Lunar Inspiration\" ); the pinned list reads it and lunar_inspiration_t opens on it (:4461-4462). A CHOICE node with Chomp"
+    },
+    {
+      "simcName": "merciless_claws",
+      "displayNameEn": "Merciless Claws",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82103,
+      "traitEntryId": 103164,
+      "talentSpellId": 231063,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_druid.cpp:10459 talent.merciless_claws = ST( \"Merciless Claws\" ); the precombat list reads talent.merciless_claws"
+    },
+    {
+      "simcName": "panthers_guile",
+      "displayNameEn": "Panther's Guile",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82117,
+      "traitEntryId": 103181,
+      "talentSpellId": 1280316,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_druid.cpp:10462 talent.panthers_guile = ST( \"Panther's Guile\" ); the pinned list reads talent.panthers_guile"
+    },
+    {
+      "simcName": "primal_wrath",
+      "displayNameEn": "Primal Wrath",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82120,
+      "traitEntryId": 103184,
+      "talentSpellId": 285381,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_druid.cpp:10464 talent.primal_wrath = ST( \"Primal Wrath\" ); the pinned list reads it and primal_wrath_t is built on it (:4743)"
+    },
+    {
+      "simcName": "rake",
+      "displayNameEn": "Rake",
+      "tree": "CLASS",
+      "traitNodeId": 82199,
+      "traitEntryId": 103277,
+      "talentSpellId": 1822,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_druid.cpp:10358 talent.rake = CT( \"Rake\" ); rake_t is built on it (:4551)"
+    },
+    {
+      "simcName": "rampant_ferocity",
+      "displayNameEn": "Rampant Ferocity",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82098,
+      "traitEntryId": 103159,
+      "talentSpellId": 391709,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_druid.cpp:10467 talent.rampant_ferocity = ST( \"Rampant Ferocity\" ); the pinned list reads talent.rampant_ferocity"
+    },
+    {
+      "simcName": "ravage",
+      "displayNameEn": "Ravage",
+      "tree": "HERO",
+      "traitNodeId": 94609,
+      "traitEntryId": 117206,
+      "talentSpellId": 441583,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "a Druid of the Claw talent, pinned so the tree resolves from an entry (trait_data.inc sub-tree 21)"
+    },
+    {
+      "simcName": "rip",
+      "displayNameEn": "Rip",
+      "tree": "CLASS",
+      "traitNodeId": 82222,
+      "traitEntryId": 103300,
+      "talentSpellId": 1079,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_druid.cpp:10361 talent.rip = CT( \"Rip\" ); rip_t is built on it (:4656)"
+    },
+    {
+      "simcName": "swipe",
+      "displayNameEn": "Swipe",
+      "tree": "CLASS",
+      "traitNodeId": 82223,
+      "traitEntryId": 103301,
+      "talentSpellId": 213764,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_druid.cpp:10369 talent.swipe = CT( \"Swipe\" ); swipe_cat_t is built on an override of it (:4839)"
+    },
+    {
+      "simcName": "thriving_growth",
+      "displayNameEn": "Thriving Growth",
+      "tree": "HERO",
+      "traitNodeId": 94626,
+      "traitEntryId": 117226,
+      "talentSpellId": 439528,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "a Wildstalker talent, pinned so the tree resolves from an entry (sub-tree 22)"
+    },
+    {
+      "simcName": "tigers_fury",
+      "displayNameEn": "Tiger's Fury",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82124,
+      "traitEntryId": 103188,
+      "talentSpellId": 5217,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_druid.cpp:10475 talent.tigers_fury = ST( \"Tiger's Fury\" ); tigers_fury_t is built on it (:4857)"
+    },
+    {
+      "simcName": "wild_slashes",
+      "displayNameEn": "Wild Slashes",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82105,
+      "traitEntryId": 103166,
+      "talentSpellId": 390864,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_druid.cpp:10482 talent.wild_slashes = ST( \"Wild Slashes\" ); the precombat list reads talent.wild_slashes"
+    },
+    {
+      "simcName": "wildpower_surge",
+      "displayNameEn": "Wildpower Surge",
+      "tree": "HERO",
+      "traitNodeId": 94612,
+      "traitEntryId": 117209,
+      "talentSpellId": 441691,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 117210,
+          "displayNameEn": "Empowered Shapeshifting",
+          "talentSpellId": 441689
+        }
+      ],
+      "binding": "a Druid of the Claw talent, pinned so the tree resolves from more than one entry (sub-tree 21)"
+    }
+  ],
+  "heroTrees": [
+    {
+      "simcName": "druid_of_the_claw",
+      "subTreeId": 21,
+      "entries": [
+        {
+          "traitEntryId": 117206,
+          "traitNodeId": 94609,
+          "displayNameEn": "Ravage",
+          "talentSpellId": 441583
+        },
+        {
+          "traitEntryId": 117207,
+          "traitNodeId": 94610,
+          "displayNameEn": "Wildshape Mastery",
+          "talentSpellId": 441678
+        },
+        {
+          "traitEntryId": 117208,
+          "traitNodeId": 94611,
+          "displayNameEn": "Bestial Strength",
+          "talentSpellId": 441841
+        },
+        {
+          "traitEntryId": 117209,
+          "traitNodeId": 94612,
+          "displayNameEn": "Wildpower Surge",
+          "talentSpellId": 441691
+        },
+        {
+          "traitEntryId": 117210,
+          "traitNodeId": 94612,
+          "displayNameEn": "Empowered Shapeshifting",
+          "talentSpellId": 441689
+        },
+        {
+          "traitEntryId": 117211,
+          "traitNodeId": 94613,
+          "displayNameEn": "Claw Rampage",
+          "talentSpellId": 441835
+        },
+        {
+          "traitEntryId": 117213,
+          "traitNodeId": 94614,
+          "displayNameEn": "Tear Down the Mighty",
+          "talentSpellId": 441846
+        },
+        {
+          "traitEntryId": 117214,
+          "traitNodeId": 94614,
+          "displayNameEn": "Strike for the Heart",
+          "talentSpellId": 441845
+        },
+        {
+          "traitEntryId": 117215,
+          "traitNodeId": 94615,
+          "displayNameEn": "Pack's Endurance",
+          "talentSpellId": 441844
+        },
+        {
+          "traitEntryId": 117216,
+          "traitNodeId": 94616,
+          "displayNameEn": "Aggravate Wounds",
+          "talentSpellId": 441829
+        },
+        {
+          "traitEntryId": 117218,
+          "traitNodeId": 94618,
+          "displayNameEn": "Fount of Strength",
+          "talentSpellId": 441675
+        },
+        {
+          "traitEntryId": 117219,
+          "traitNodeId": 94619,
+          "displayNameEn": "Exacerbating Wounds",
+          "talentSpellId": 1271839
+        },
+        {
+          "traitEntryId": 117220,
+          "traitNodeId": 94620,
+          "displayNameEn": "Dreadful Wound",
+          "talentSpellId": 441809
+        },
+        {
+          "traitEntryId": 135979,
+          "traitNodeId": 109721,
+          "displayNameEn": "Twin Claw",
+          "talentSpellId": 1271635
+        },
+        {
+          "traitEntryId": 135980,
+          "traitNodeId": 109722,
+          "displayNameEn": "Limb from Limb",
+          "talentSpellId": 1271540
+        },
+        {
+          "traitEntryId": 135981,
+          "traitNodeId": 109723,
+          "displayNameEn": "Ruthless Aggression",
+          "talentSpellId": 441814
+        },
+        {
+          "traitEntryId": 136624,
+          "traitNodeId": 109723,
+          "displayNameEn": "Killing Strikes",
+          "talentSpellId": 441824
+        }
+      ]
+    },
+    {
+      "simcName": "wildstalker",
+      "subTreeId": 22,
+      "entries": [
+        {
+          "traitEntryId": 117221,
+          "traitNodeId": 94621,
+          "displayNameEn": "Wildstalker's Power",
+          "talentSpellId": 439926
+        },
+        {
+          "traitEntryId": 117222,
+          "traitNodeId": 94622,
+          "displayNameEn": "Entangling Vortex",
+          "talentSpellId": 439895
+        },
+        {
+          "traitEntryId": 117223,
+          "traitNodeId": 94623,
+          "displayNameEn": "Strategic Infusion",
+          "talentSpellId": 439890
+        },
+        {
+          "traitEntryId": 117224,
+          "traitNodeId": 94624,
+          "displayNameEn": "Lethal Preservation",
+          "talentSpellId": 455461
+        },
+        {
+          "traitEntryId": 117225,
+          "traitNodeId": 94625,
+          "displayNameEn": "Bond with Nature",
+          "talentSpellId": 439929
+        },
+        {
+          "traitEntryId": 117226,
+          "traitNodeId": 94626,
+          "displayNameEn": "Thriving Growth",
+          "talentSpellId": 439528
+        },
+        {
+          "traitEntryId": 117227,
+          "traitNodeId": 94627,
+          "displayNameEn": "Vigorous Creepers",
+          "talentSpellId": 440119
+        },
+        {
+          "traitEntryId": 117229,
+          "traitNodeId": 94628,
+          "displayNameEn": "Implant",
+          "talentSpellId": 440118
+        },
+        {
+          "traitEntryId": 117230,
+          "traitNodeId": 94628,
+          "displayNameEn": "Twin Sprouts",
+          "talentSpellId": 440117
+        },
+        {
+          "traitEntryId": 117231,
+          "traitNodeId": 94629,
+          "displayNameEn": "Hunt Beneath the Open Skies",
+          "talentSpellId": 439868
+        },
+        {
+          "traitEntryId": 117232,
+          "traitNodeId": 94630,
+          "displayNameEn": "Patient Custodian",
+          "talentSpellId": 1270592
+        },
+        {
+          "traitEntryId": 117233,
+          "traitNodeId": 94631,
+          "displayNameEn": "Root Network",
+          "talentSpellId": 439882
+        },
+        {
+          "traitEntryId": 117234,
+          "traitNodeId": 94631,
+          "displayNameEn": "Resilient Flourishing",
+          "talentSpellId": 439880
+        },
+        {
+          "traitEntryId": 119854,
+          "traitNodeId": 94625,
+          "displayNameEn": "Harmonious Constitution",
+          "talentSpellId": 440116
+        },
+        {
+          "traitEntryId": 119855,
+          "traitNodeId": 94622,
+          "displayNameEn": "Flower Walk",
+          "talentSpellId": 439901
+        },
+        {
+          "traitEntryId": 135973,
+          "traitNodeId": 109715,
+          "displayNameEn": "Rampancy",
+          "talentSpellId": 1270586
+        },
+        {
+          "traitEntryId": 135974,
+          "traitNodeId": 109716,
+          "displayNameEn": "Bursting Growth",
+          "talentSpellId": 440120
+        },
+        {
+          "traitEntryId": 135975,
+          "traitNodeId": 109717,
+          "displayNameEn": "Green Thumb",
+          "talentSpellId": 1270565
+        }
+      ]
+    }
+  ]
+}

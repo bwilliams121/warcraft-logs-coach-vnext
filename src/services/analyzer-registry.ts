@@ -83,6 +83,7 @@ import { PROTECTION_PALADIN_REGISTRATION } from "../specs/paladin/protection/reg
 import { RETRIBUTION_PALADIN_REGISTRATION } from "../specs/paladin/retribution/registration.js";
 import { DISCIPLINE_PRIEST_REGISTRATION } from "../specs/priest/discipline/registration.js";
 import { DEVOURER_DEMON_HUNTER_REGISTRATION } from "../specs/demonhunter/devourer/registration.js";
+import { FERAL_DRUID_REGISTRATION } from "../specs/druid/feral/registration.js";
 import { HAVOC_DEMON_HUNTER_REGISTRATION } from "../specs/demonhunter/havoc/registration.js";
 import { HOLY_PRIEST_REGISTRATION } from "../specs/priest/holy/registration.js";
 import { ASSASSINATION_REGISTRATION } from "../specs/rogue/assassination/registration.js";
@@ -501,6 +502,9 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   // INTERNAL_ONLY since ONB-B3: its own representative. No decision resolves: the list stops on the enemy
   // count (ONB-S3), and its pick-up timers are UNKNOWN from any log.
   DEVOURER_DEMON_HUNTER_REGISTRATION,
+  // INTERNAL_ONLY since ONB-C1: Cohort C's representative. No decision resolves: real scans stop at Prowl,
+  // Tiger's Fury or the enemy count, and the pool line sits behind that count.
+  FERAL_DRUID_REGISTRATION,
 ]);
 
 /**

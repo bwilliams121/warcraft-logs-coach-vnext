@@ -90,6 +90,7 @@ const EVERY_ANALYZER = [
   "deathknight-frost-observed-decisions",
   "shaman-enhancement-observed-decisions",
   "demonhunter-devourer-observed-decisions",
+  "druid-feral-observed-decisions",
   // HEAL-B3: Discipline Priest INTERNAL_ONLY.
   "priest-discipline-healer-findings",
   // HEAL-B4: Preservation Evoker INTERNAL_ONLY.

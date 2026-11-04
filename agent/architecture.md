@@ -12194,9 +12194,9 @@ ONB-S5").
 
 **Single-list walker.** A waiting line is never its definite winner.
 
-**No consumer yet.** No registered APL contains a waiting line, so no public
-decision changes. ONB-C1 (Feral) and ONB-C2 (Outlaw) supply the resolver for
-their resource and own what pooling means for their findings.
+**No consumer yet, at this tranche.** No registered APL contained a waiting line, so no public
+decision changed. ONB-C1 (Feral) now supplies a resolver (agent/architecture.md "ONB-C1"), still
+INTERNAL_ONLY and unreached on real evidence. ONB-C2 (Outlaw) supplies its own for its resource.
 
 ## ONB-S6 — Shared pet actor mapping for pet-driven APL state
 
@@ -13533,6 +13533,41 @@ All 251 decisions stop on one atom: `voidscarred_melee[0] run_action_list | acti
 **What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists it; the gate search finds no qualifying assertion and `evidenceReady` false (`m11-promotion-evidence-gate`, from ONB-B3, its comment updated); and a public request is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which now holds it). The replay is offline and not committed.
 
 **What a later promotion must do.** The owner decides ONB-S3. Devourer then binds what ONB-B3 left open and measures its failure modes on real subjects, and a new public entry promotes it through the unchanged gates by the five-site promotion. No such entry is queued.
+
+## ONB-C1 — Feral Druid (internal, Cohort C representative)
+
+Autopilot queue entry ONB-C1. Public contract: NONE. No Warcraft Logs request. `src/specs/druid/feral/README.md` is the slice in detail.
+
+**What it is.** Feral Druid is registered INTERNAL_ONLY on the observed-decision pattern, with its own pinned list, GCD and talent data, aura identities, resolver, facade and registration. No shared analyzer was introduced. It is the first specialization to give the ONB-S5 engine a `PoolingResolver`, and the first whose form state matters. No decision resolves on real evidence.
+
+**Measured, offline, by replaying retained captures through production ingestion.** A census of every retained JSON file over 500 bytes (5,649 parsed), by signature ability, with Mortal Strike as its positive control, finds two subjects:
+
+| Subject | Build | Span | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| b1PmaKrd6CDfzngc fight 48 actor 170 | Wildstalker, Incarnation | whole, 345.2 s | 258 | 0 | 0 | 258 | 581 |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 1 | Wildstalker, Berserk and Convoke | first 165.0 s of 424.5 s | 114 | 0 | 0 | 114 | 238 |
+
+Where the first-GCD query refuses, across the 372: `default[3] auto_attack` 199, `default[0] prowl` 164, `default[1] cat_form` 5, `default[4] tigers_fury` 4. The root scans go further, where the engine's branching does not: actor 170's 256 stop at `default[6] chomp`, because neither entry of that choice node is in the tree, and actor 1's 112 at `cooldown[13] convoke_the_spirits`, on too many unresolved atoms. The other 4 root scans select the Rake from stealth, behind Tiger's Fury's open line. None reaches `default[9..12]`, the finisher and builder dispatches on `spell_targets` (ONB-S3).
+
+**Requirement C is not met, and why this is not an owner stop.** As for Arms (ONB-B1). The queue asks for real MATCH, discrimination and negative-control evidence, and none can exist while the enemy count stands, which is already queued as the owner's (ONB-S3). The entry asks for an internal registration, pooling and form state, and the fail-closed result is correct.
+
+**Decisions.**
+
+1. **An included-file selector and a separate-PTR policy.** Feral's list is `apl/druid/feral_apl.inc`: no markers, no header. The function is in `apl/druid/druid.cpp`, and the dispatch is one ternary on `is_ptr()`. So the extractor gained `includedBy`, which hash-checks the including file and requires the include to be the function's sole body, and `PTR_SEPARATE_INCLUDE`, which requires that one ternary and a different file for the PTR function. **The PTR file (`feral_apl_ptr.inc`) was never read**: no local copy is retained, and no target's rule needs it, because a live build takes the live branch. Unlike `PTR_BODY_IDENTICAL`, this makes no claim about it. A target of this kind is byte-checked against the same pins as the rest, and `src/simc/authority-artifact.ts` validates the new form.
+2. **`max_energy=1` is read by this specialization, on one line.** It is an option of `ferocious_bite_base_t` alone, adding one test to `ready()` (sc_druid.cpp:4267-4273), so it is usability, not targeting. `feralScanAuthority` removes that one key from that one line's refusal list. No other option and no other value is read past, and no shared parser changed.
+3. **`maximum_energy()` is read as bounds.** Cost 25 plus excess 25 is 50, 37.5 under Incarnation (effect 471804, `P_RESOURCE_COST_1`, -25%), and 0 under Apex Predator's Craving (effect 1029647, -100%). Every factor is at most 1, so at or above 50 is ready and below the lowest bound the state leaves is not. Anything between is not established.
+4. **The Energy test comes before the observed cast.** A Bite pressed below the line proves the spell castable, not the LINE ready, which is the case pooling exists for. The two bare Bite lines keep the plain observed proof.
+5. **The at-maximum answer is deliberately narrow.** A false `combo_points>=5` is NOT_READY_AT_MAX. A true one is READY_AT_MAX only with the Bite itself observed, because nothing else proves it usable at that instant. Anything else is UNKNOWN, and that loses nothing: a POOLS selection is UNKNOWN against any observed cast (ONB-S5). The resolver refuses any other pool shape, and an unobserved maximum.
+6. **Form state has four proofs, and two are new.** `OBSERVED` and `TALENT_NOT_SELECTED` are Havoc's. Feral plays in Cat Form from before the pull, and the normalized combatant snapshot carries no auras, so M4 has no answer until the first shift. `OWN_CAT_FORM_CAST`: all ten cat abilities have `_stance_mask` 0x1, and `ready()` is false in another form unless the action autoshifts, which needs Fluid Form (:1843, :2094-2105). So an observed cast of one proves Cat Form up, or Fluid Form taken, and either way the one in-combat reader, `default[1]`, is FALSE. A test pins that it has one reader. On real evidence the proof is never contradicted: across 372 decisions, no cat ability lands where M4 proves Cat Form down. `BROKEN_BY_OWN_ACTION`: every harmful token clears `SX_NO_STEALTH_BREAK`, and a foreground action without it expires both stealth buffs (:1874-1881). So where M4 is ambiguous only for want of a transition, an earlier harmful cast proves them down. Neither overrides an EXACT M4 answer.
+7. **Prowl's guard is proven only where its terms are.** `ready()` is false in combat without `buff.incarnation_cat_prowl` (:7990-7996). In combat comes from an earlier harmful cast (action.cpp:1841), and in an encounter nothing leaves it (:7986-7987, player.cpp:9038). The buff is the catch: spell 102547 has duration -1, Incarnation raises it and only Prowl's execute ends it (:3955, :7979), and the log never reports it. So it is closed only with Incarnation proven absent, or under COMPLETE cast coverage with a Prowl observed after the last press, or any Prowl where no press is observed. No press is not a proof: a press before the pull leaves no event, and the buff outlives its Incarnation. A cast with no source that could be Incarnation, or with no ability id, blocks the proof from then on, as Arms' cast reader does. That is why an Incarnation build stops here wherever its buff is down, for 163 of actor 170's decisions. Pinned, SimulationCraft would Prowl there, and no real subject does.
+8. **Shadowmeld is a racial the shared table does not list.** That table reads `get_racial_actions()`. Racials are excluded, so the specialization classifies it, and two list lines cannot preempt a class action. Its buff is still read as an observed fact, because the list's conditions ask.
+9. **`buff.bs_inc` is the build's alias**, resolved from the Incarnation choice node (:13607-13613), and unbound while it is unresolved. `buff.bs_inc.down` is a declared atom, because the shared parser has no `.down` form.
+10. **Bind what the slice needs and no more.** No cooldown is bound, since no binding could reach the gates. Tiger's Fury's wire gaps (30,008 and 30,578 ms) respect its 30 s pin, and are the first candidate later. Berserk (121.7 s), Incarnation (90.3 s) and Feral Frenzy (30.5 s) do not respect 180 s, 180 s and 45 s. `fight_style.*` is declared and unbound (agent/follow-ups.md "After M11-F"), and `auto_attack` has the one transition contract, as for Arms.
+11. **Regrowth is excluded as OUTSIDE_FIRST_SLICE.** Every hardcast logs a begincast, and this facade reads state at the `cast`. Convoke the Spirits has no begincast and stays eligible.
+
+**Evidence.** Nothing new is committed. The archive's notice line has 5,212 bytes left, and these decisions would pin nothing the synthetic tests do not (agent/follow-ups.md "After ONB-C1"). No Warcraft Logs request was made, and every pinned source read was already on disk, matched to hashes the M11-A3 audit recorded, except `sc_druid.cpp`, whose hash was taken from the retained copy at the pin and now stands in the extractor.
+
+**No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse the row. A public Druid/Feral request is SPEC_NOT_SUPPORTED, exactly as before.
 
 ## AUTOPILOT — the local project supervisor (tooling)
 
