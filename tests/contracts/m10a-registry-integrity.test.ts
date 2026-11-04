@@ -122,6 +122,7 @@ describe("the production catalog", () => {
       ["rogue-subtlety-observed-decisions", "rogue/subtlety", "INTERNAL_ONLY"],
       ["warrior-fury-observed-decisions", "warrior/fury", "INTERNAL_ONLY"],
       ["warrior-protection-observed-decisions", "warrior/protection", "INTERNAL_ONLY"],
+      ["warrior-arms-observed-decisions", "warrior/arms", "INTERNAL_ONLY"],
     ]);
     // The public set is DERIVED from the rows' exposure, never hand-listed:
     // six of seven rows in HEAL-A (Restoration Shaman was INTERNAL_ONLY), all
@@ -189,7 +190,7 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
     const rows = catalog.registrations as AnalyzerRegistration[];
     expect(() => rows.push({ ...rogue, analyzerId: "second" })).toThrow(TypeError);
     expect(() => rows.push({ ...paladin, analyzerId: "third" })).toThrow(TypeError);
-    expect(catalog.registrations).toHaveLength(17);
+    expect(catalog.registrations).toHaveLength(18);
   });
 
   it("exposure cannot be flipped back to INTERNAL_ONLY", () => {
@@ -647,7 +648,7 @@ describe("the public set is one promise across the partition, the identity table
     // whatever its exposure says.
     const unknown = {
       ...fixtureRegistration({ exposure: "PUBLIC" }),
-      specId: "warrior/arms" as AnalyzerRegistration["specId"],
+      specId: "mage/fire" as AnalyzerRegistration["specId"],
     };
     expect(defectsOf([...ANALYZER_REGISTRATIONS, unknown])).toContain("UNKNOWN_SPEC_ID");
   });

@@ -1,0 +1,462 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_WARRIOR_ARMS_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/sc_warrior.cpp",
+        "sha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "byteLength": 350723
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-03",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 100,
+      "baseGcdMs": 0,
+      "displayNameEn": "Charge"
+    },
+    {
+      "abilityGameId": 772,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Rend"
+    },
+    {
+      "abilityGameId": 845,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Cleave"
+    },
+    {
+      "abilityGameId": 1464,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Slam"
+    },
+    {
+      "abilityGameId": 1680,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Whirlwind"
+    },
+    {
+      "abilityGameId": 6552,
+      "baseGcdMs": 0,
+      "displayNameEn": "Pummel"
+    },
+    {
+      "abilityGameId": 7384,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Overpower"
+    },
+    {
+      "abilityGameId": 12294,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Mortal Strike"
+    },
+    {
+      "abilityGameId": 107570,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Storm Bolt"
+    },
+    {
+      "abilityGameId": 107574,
+      "baseGcdMs": 0,
+      "displayNameEn": "Avatar"
+    },
+    {
+      "abilityGameId": 163201,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Execute"
+    },
+    {
+      "abilityGameId": 167105,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Colossus Smash"
+    },
+    {
+      "abilityGameId": 227847,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Bladestorm"
+    },
+    {
+      "abilityGameId": 228920,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Ravager"
+    },
+    {
+      "abilityGameId": 260708,
+      "baseGcdMs": 750,
+      "displayNameEn": "Sweeping Strikes"
+    },
+    {
+      "abilityGameId": 281000,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Execute"
+    },
+    {
+      "abilityGameId": 376079,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Champion's Spear"
+    },
+    {
+      "abilityGameId": 384110,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Wrecking Throw"
+    },
+    {
+      "abilityGameId": 436358,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Demolish"
+    },
+    {
+      "abilityGameId": 446035,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Bladestorm"
+    },
+    {
+      "abilityGameId": 1269383,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Heroic Strike"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "charge",
+      "candidateAbilityGameIds": [100],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / charge_t",
+        "startLine": 7321,
+        "endLine": 7322,
+        "sourceNote": "create_action dispatches \"charge\" to charge_t, built on p->spell.charge (sc_warrior.cpp:3384); spell.charge = find_class_spell( \"Charge\" ) at :7449, class_spells.inc row { 1, 0, 100 }. The log also reports the impact 126664, which has no lane record here and no token.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "pummel",
+      "candidateAbilityGameIds": [6552],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / pummel_t",
+        "startLine": 7370,
+        "endLine": 7371,
+        "sourceNote": "create_action dispatches \"pummel\" to pummel_t, built on p->find_class_spell( \"Pummel\" ) (:4887-4888), class_spells.inc row { 1, 0, 6552 }. OUTSIDE offensive authority by domain: an interrupt.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "avatar",
+      "candidateAbilityGameIds": [107574],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / avatar_t",
+        "startLine": 7303,
+        "endLine": 7304,
+        "sourceNote": "create_action dispatches \"avatar\" to avatar_t, built on talents.shared.avatar (:7304); for Arms talents.arms.avatar = find_talent_spell( SPECIALIZATION, \"Avatar\", WARRIOR_ARMS ) at :7643, shared at :7928, trait row spell 107574.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "sweeping_strikes",
+      "candidateAbilityGameIds": [260708],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / sweeping_strikes_t",
+        "startLine": 7408,
+        "endLine": 7409,
+        "sourceNote": "create_action dispatches \"sweeping_strikes\" to sweeping_strikes_t, built on p->spec.sweeping_strikes (:5280-5281); spec.sweeping_strikes = find_specialization_spell( \"Sweeping Strikes\" ) at :7474, specialization_spells.inc row { 1, 71, 260708 }. Its _gcd is 750, so it consumes a GCD.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "mortal_strike",
+      "candidateAbilityGameIds": [12294],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / mortal_strike_t",
+        "startLine": 7362,
+        "endLine": 7363,
+        "sourceNote": "create_action dispatches \"mortal_strike\" to mortal_strike_t, built on p->talents.arms.mortal_strike (:3024-3025); find_talent_spell( SPECIALIZATION, \"Mortal Strike\" ) at :7593, trait row spell 12294. Unhinged runs background copies on the same spell (:3252-3254, :3324), so a logged 12294 is not always a press.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "overpower",
+      "candidateAbilityGameIds": [7384],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / overpower_t",
+        "startLine": 7366,
+        "endLine": 7367,
+        "sourceNote": "create_action dispatches \"overpower\" to overpower_t, built on p->talents.arms.overpower (:5430-5431); find_talent_spell( SPECIALIZATION, \"Overpower\" ) at :7595, trait row spell 7384.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "execute",
+      "candidateAbilityGameIds": [163201, 281000],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / execute_arms_t",
+        "startLine": 7337,
+        "endLine": 7345,
+        "sourceNote": "create_action dispatches \"execute\" to execute_arms_t for Arms (:7343-7345), built on p->spell.execute (:4272-4273); spell.execute = find_class_spell( \"Execute\" ) at :7450, class_spells.inc row { 1, 0, 163201 }. The sc_spell_data.inc effect row 738985 of Massacre (281001) is an action override of 163201 onto 281000, which is the id the log reports for a Massacre build (fight 48 actor 5: 79 of 281000, none of 163201). Both records are _gcd 1500, so the lane holds without deciding the talent.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "heroic_strike",
+      "candidateAbilityGameIds": [1269383],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / heroic_strike_t",
+        "startLine": 7354,
+        "endLine": 7355,
+        "sourceNote": "create_action dispatches \"heroic_strike\" to heroic_strike_t, built on p->spell.heroic_strike (:3553-3554); spell.heroic_strike = find_spell( 1269383 ) at :7478.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "cleave",
+      "candidateAbilityGameIds": [845],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / cleave_t",
+        "startLine": 7323,
+        "endLine": 7324,
+        "sourceNote": "create_action dispatches \"cleave\" to cleave_t, built on p->talents.arms.cleave (:3620-3621); find_talent_spell( SPECIALIZATION, \"Cleave\" ) at :7618, trait row spell 845.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "rend",
+      "candidateAbilityGameIds": [772],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / rend_t",
+        "startLine": 7382,
+        "endLine": 7383,
+        "sourceNote": "create_action dispatches \"rend\" to rend_t, built on p->talents.warrior.rend (:2291-2292); find_talent_spell( CLASS, \"Rend\" ) at :7546, trait row spell 772.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "colossus_smash",
+      "candidateAbilityGameIds": [167105],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / colossus_smash_t",
+        "startLine": 7325,
+        "endLine": 7326,
+        "sourceNote": "create_action dispatches \"colossus_smash\" to colossus_smash_t, built on p->talents.arms.colossus_smash (:3735-3736); find_talent_spell( SPECIALIZATION, \"Colossus Smash\" ) at :7608, trait row spell 167105.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "slam",
+      "candidateAbilityGameIds": [1464],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / slam_t",
+        "startLine": 7398,
+        "endLine": 7399,
+        "sourceNote": "create_action dispatches \"slam\" to slam_t, built on p->spell.slam (:3587-3588); spell.slam = find_class_spell( \"Slam\" ) at :7457, class_spells.inc row { 1, 0, 1464 }.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "whirlwind",
+      "candidateAbilityGameIds": [1680],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / arms_whirlwind_parent_t",
+        "startLine": 7420,
+        "endLine": 7429,
+        "sourceNote": "create_action dispatches \"whirlwind\" to arms_whirlwind_parent_t for Arms (:7426-7428), built on p->spell.whirlwind (:6707-6708); spell.whirlwind = find_class_spell( \"Whirlwind\" ) at :7460, class_spells.inc row { 1, 0, 1680 }.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "bladestorm",
+      "candidateAbilityGameIds": [227847, 446035],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / bladestorm_t",
+        "startLine": 7315,
+        "endLine": 7316,
+        "sourceNote": "create_action dispatches \"bladestorm\" to bladestorm_t on find_spell( 446035 ) when talents.slayer.unrelenting_onslaught and talents.shared.bladestorm are both taken, and on talents.shared.bladestorm otherwise (:7316); for Arms the trait row carries spell 227847, a CHOICE node with Ravager. Both records are _gcd 1500, so the lane holds without deciding the talent.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "ravager",
+      "candidateAbilityGameIds": [228920],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / ravager_t",
+        "startLine": 7380,
+        "endLine": 7381,
+        "sourceNote": "create_action dispatches \"ravager\" to ravager_t, built on talents.shared.ravager (:5867-5868, :7931); for Arms talents.arms.ravager = find_talent_spell( SPECIALIZATION, \"Ravager\", WARRIOR_ARMS ) at :7633, trait row spell 228920, a CHOICE node with Bladestorm.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "champions_spear",
+      "candidateAbilityGameIds": [376079],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / champions_spear_t",
+        "startLine": 7402,
+        "endLine": 7403,
+        "sourceNote": "create_action dispatches \"champions_spear\" to champions_spear_t, built on p->talents.warrior.champions_spear (:6846-6847); find_talent_spell( CLASS, \"Champion's Spear\" ) at :7587, trait row spell 376079.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "demolish",
+      "candidateAbilityGameIds": [436358],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / demolish_t",
+        "startLine": 7433,
+        "endLine": 7434,
+        "sourceNote": "create_action dispatches \"demolish\" to demolish_t, built on p->talents.colossus.demolish (:3857-3858); find_talent_spell( HERO, \"Demolish\" ) at :7766, trait row spell 436358.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "wrecking_throw",
+      "candidateAbilityGameIds": [384110],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / wrecking_throw_t",
+        "startLine": 7431,
+        "endLine": 7432,
+        "sourceNote": "create_action dispatches \"wrecking_throw\" to wrecking_throw_t, built on p->talents.warrior.wrecking_throw (:6783-6784); find_talent_spell( CLASS, \"Wrecking Throw\" ) at :7562, trait row spell 384110, a CHOICE node with Shattering Throw.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "storm_bolt",
+      "candidateAbilityGameIds": [107570],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "warrior_t::create_action / storm_bolt_t",
+        "startLine": 7406,
+        "endLine": 7407,
+        "sourceNote": "create_action dispatches \"storm_bolt\" to storm_bolt_t, built on p->talents.warrior.storm_bolt (:6403-6404); find_talent_spell( CLASS, \"Storm Bolt\" ) at :7544, trait row spell 107570.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "auto_attack",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/class_modules/sc_warrior.cpp",
+        "sourceSha256": "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+        "symbol": "auto_attack_t::auto_attack_t",
+        "line": 2208,
+        "sourceNote": "auto_attack_t is built on warrior_attack_t( \"auto_attack\", p ) with no spell data (sc_warrior.cpp:2181) and its constructor assigns trigger_gcd = timespan_t::zero() at :2208."
+      }
+    },
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

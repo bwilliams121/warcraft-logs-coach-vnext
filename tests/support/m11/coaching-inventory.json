@@ -384,9 +384,9 @@
     {
       "specId": "warrior/arms",
       "cohort": "C_RUN_ACTION_LIST_DISPATCH",
-      "currentAnalyzerStatus": "UNREGISTERED",
-      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
-      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "currentAnalyzerStatus": "INTERNAL_ONLY",
+      "realEvidenceStatus": "REAL_SANITIZED_EVIDENCE_AVAILABLE",
+      "authorityAuditStatus": "AUTHORITY_AUDITED",
       "deepDiveInventoryStatus": "PARTIAL",
       "questions": [
         {
@@ -405,7 +405,7 @@
             "variable.execute_phase and target.health.pct"
           ],
           "outputNeed": "EXISTING_INTERNAL_FINDINGS",
-          "notes": "Arms is the current unsupported sentinel; the sentinel must migrate before warrior/arms can become a SpecId."
+          "notes": "Answered as an internal observation since ONB-B1 (colossus-smash-windows.ts): it reports what the log shows and carries no verdict. The pinned lines stay behind the enemy count (ONB-S3)."
         }
       ]
     },

@@ -743,6 +743,7 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
       "rogue/subtlety",
       "warrior/fury",
       "warrior/protection",
+      "warrior/arms",
     ]);
     const internal = PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY");
     expect(internal.map((row) => row.specId)).toEqual([...INTERNAL_ONLY_SPEC_IDS]);
@@ -760,6 +761,18 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
       expect(readiness.qualifyingAssertions, specId).toEqual([]);
       expect(readiness.evidenceReady, specId).toBe(false);
     }
+  });
+
+  it("ONB-B1: the gate search finds nothing for Arms Warrior, whose decisions all stop at the enemy count", async () => {
+    // The retained capture holds this subject, and it does not help: no decision resolves on it
+    // (agent/architecture.md "ONB-B1"). A later change that resolved one would fail this pin and
+    // prompt ONB-B1P to look again; it would not promote anything by itself.
+    const tiers = await tiersPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "warrior/arms");
+    if (module === undefined) throw new Error("no module for warrior/arms");
+    const readiness = evaluate(tiers, "warrior/arms", "INTERNAL_ONLY", internalPairing(module));
+    expect(readiness.qualifyingAssertions).toEqual([]);
+    expect(readiness.evidenceReady).toBe(false);
   });
 
   it("the internal pairing finds nothing for Brewmaster Monk now that the identity table resolves it (M11-C4j)", async () => {

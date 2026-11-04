@@ -13,7 +13,7 @@
  *     7   Paladin / Protection    ANALYZED — the real M10-C evidence
  *     19  Rogue / Assassination   the analyzer runs and must answer for the
  *                                 absence of its own evidence TRUTHFULLY
- *     4   Warrior / Arms          SPEC_NOT_SUPPORTED — no analyzer exists
+ *     17  Mage / Fire             SPEC_NOT_SUPPORTED — no analyzer exists
  *     14  Death Knight / Blood    absent from the pull
  *
  * Nothing is relabelled and no Rogue event is manufactured. Actor 19's cell is
@@ -26,7 +26,7 @@
  *
  * Roster discovery once, ingestion once for the one fight, revision confirmed
  * once, each supported player's analyzer exactly once and the right one, no
- * analyzer for Arms, every cell's kind/status/spec preserved, the Protection
+ * analyzer for Fire, every cell's kind/status/spec preserved, the Protection
  * cell carrying the same totals the single-fight service publishes for the
  * same evidence, and encounter/comparison context changing none of it.
  */
@@ -59,20 +59,20 @@ const PROT_OPENER = "wcl-protection-paladin-a7r6-opener";
 const FIGHT_ID = 7;
 const PALADIN = 7;
 const ROGUE = 19;
-const ARMS = CURRENT_UNSUPPORTED_SUBJECT.sourceId;
+const FIRE_MAGE = CURRENT_UNSUPPORTED_SUBJECT.sourceId;
 const BLOOD_DK = 14;
-const ROSTER = [PALADIN, ROGUE, ARMS, BLOOD_DK] as const;
+const ROSTER = [PALADIN, ROGUE, FIRE_MAGE, BLOOD_DK] as const;
 
 const CLASS_OF: Readonly<Record<number, string>> = {
   [PALADIN]: "Paladin",
   [ROGUE]: "Rogue",
-  [ARMS]: CURRENT_UNSUPPORTED_SUBJECT.expectedClassName,
+  [FIRE_MAGE]: CURRENT_UNSUPPORTED_SUBJECT.expectedClassName,
   [BLOOD_DK]: "DeathKnight",
 };
 const SPEC_OF: Readonly<Record<number, string>> = {
   [PALADIN]: "Protection",
   [ROGUE]: "Assassination",
-  [ARMS]: CURRENT_UNSUPPORTED_SUBJECT.expectedSpecName,
+  [FIRE_MAGE]: CURRENT_UNSUPPORTED_SUBJECT.expectedSpecName,
   [BLOOD_DK]: "Blood",
 };
 
@@ -171,12 +171,12 @@ describe("a mixed roster over the real A7R6 opener", () => {
     expect(rogue.specName).toBe("Assassination");
     expect(rogue.status).toBe("PROFILE_NOT_RESOLVED");
 
-    const arms = cellOf(cells, ARMS);
-    expect(arms.kind).toBe("NOT_ANALYZED");
-    if (arms.kind !== "NOT_ANALYZED") return;
-    expect(arms.specName).toBe(CURRENT_UNSUPPORTED_SUBJECT.expectedSpecName);
-    expect(arms.status).toBe("SPEC_NOT_SUPPORTED");
-    expect(arms.detail).toContain("no gameplay analysis was attempted");
+    const fire = cellOf(cells, FIRE_MAGE);
+    expect(fire.kind).toBe("NOT_ANALYZED");
+    if (fire.kind !== "NOT_ANALYZED") return;
+    expect(fire.specName).toBe(CURRENT_UNSUPPORTED_SUBJECT.expectedSpecName);
+    expect(fire.status).toBe("SPEC_NOT_SUPPORTED");
+    expect(fire.detail).toContain("no gameplay analysis was attempted");
 
     expect(cellOf(cells, BLOOD_DK).kind).toBe("ABSENT");
 

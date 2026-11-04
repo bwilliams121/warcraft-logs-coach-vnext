@@ -165,6 +165,15 @@ exactly as HEAL-B1P's.
   its notice line. The line is not raised silently (agent/follow-ups.md "After ONB-A1").
 - Ordinary archive growth, pinned in the same test. No new Warcraft Logs request was made.
 
+**ONB-B1 evidence.** `wcl-b1pm-fight-48-arms-warrior-5-decisions.seg-0-6` is one compact `--actor-slice` segment (20,265 bytes) of the
+M11-E2 capture.
+
+- Every `cast`, `begincast`, `combatantinfo`, aura transition and `resourcechange` sourced by or targeting actor 5, the fight's Arms Warrior,
+  over the fight's first 6 s of 345 s.
+- It grants CASTS, AURAS, RESOURCES and COMBATANT_INFO for actor 5 over that range, and each grant is whole.
+- Only that window is committed: it is what fits, it leaves 5,212 bytes under the notice line, and no decision resolves on more
+  (agent/follow-ups.md "After ONB-B1"). No new Warcraft Logs request was made.
+
 **HEAL-B4P evidence.** `wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-*` is
 three compact `--actor-slice` segments (123,153 bytes) of the three adjoining
 retained captures of gtKb fight 22 (M9-C2 opener, M11-C4, M11-C4b), each

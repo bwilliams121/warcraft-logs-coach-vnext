@@ -201,6 +201,7 @@ const EXECUTOR_RING = [
   "support/corpus/executors/params.ts",
   "support/corpus/executors/public-contract.ts",
   "support/corpus/executors/shared-decision-engine.ts",
+  "support/corpus/executors/spec-arms-warrior.ts",
   "support/corpus/executors/spec-assassination.ts",
   "support/corpus/executors/spec-augmentation-evoker.ts",
   "support/corpus/executors/spec-blood-death-knight.ts",

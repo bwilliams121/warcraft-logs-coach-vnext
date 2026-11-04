@@ -17,7 +17,7 @@
  *                                 absence of its own evidence TRUTHFULLY
  *     23  Paladin / Retribution   likewise
  *     25  Rogue / Assassination   likewise
- *     12  Warrior / Arms          SPEC_NOT_SUPPORTED — no analyzer exists
+ *     12  Warrior / Arms          SPEC_NOT_SUPPORTED — internal only since ONB-B1, so no public analyzer
  *     17  Monk / Mistweaver       the same class as the promoted
  *                                 specialization, never routed to it; since
  *                                 HEAL-B1P routed to its OWN healer analyzer,
@@ -184,6 +184,7 @@ const NO_CALLS = {
   "rogue-subtlety-observed-decisions": 0,
   "warrior-fury-observed-decisions": 0,
   "warrior-protection-observed-decisions": 0,
+  "warrior-arms-observed-decisions": 0,
 };
 
 describe("a Brewmaster Monk alone", () => {

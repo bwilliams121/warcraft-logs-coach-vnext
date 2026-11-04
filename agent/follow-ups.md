@@ -29,6 +29,49 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After ONB-B1: what the Arms Warrior slice does not establish
+
+**Raised:** ONB-B1 (2026-11-03). Coverage, not soundness: every decision is UNKNOWN.
+
+**ONB-S3 gates Cohort B, not only Cohort T.** Every Arms GCD action sits behind `active_enemies`, and `slayer_execute` also has a
+`target_if` over enemies nothing enumerates. Cohort B's followers read the same way: Frost Death Knight's list dispatches on
+`active_enemies>=2` and Enhancement's on `spell_targets.chain_lightning>=3` (read from the pinned lists, not measured). So ONB-B2 and
+its public entry should expect what ONB-A2 and ONB-B1 found, unless ONB-S3 lands first. This does not reorder the queue: each entry
+can still register internally and fail closed. The owner should know that **the queue's next rotational promotions wait on that one
+decision**.
+
+**ONB-B1P should expect "not promoted".** The gate search over Arms finds nothing today (`m11-promotion-evidence-gate`). Its evidence is
+not the gap, so ONB-EV does not apply. ONB-S3 does.
+
+**What ONB-S3 alone would not unlock.** With the enemy count settled, a single-target decision would still meet:
+
+- Charge and Pummel at `default[0]` and `default[3]`, which need reviewed transition contracts. Charge writes Rage: the log shows
+  `resourcechange` 20 from it.
+- `variable.execute_phase`, which reads the target's health, or a dispatch that stays undecided at `default[18]` and `[19]`.
+- `dot.rend_dot.remains` in `slayer_st[1..2]`, and `buff.*.stack`, for which M4 reconstructs no count.
+- Cooldowns the pin cannot bound. Avatar, Bladestorm, Colossus Smash, Mortal Strike and Cleave all show gaps below the pinned value.
+  It needs a model of the resets (Unrelenting Onslaught at sc_warrior.cpp:4361-4363 is one), not a floor from the pin.
+- `fervor_of_battle` and any other lone-node talent, the evidence-semantics question recorded after ONB-A1.
+
+**A logged cast is not always a press, and this one is measured.** Unhinged's copies run on 12294: every Bladestorm is followed by a
+logged Mortal Strike within 404 to 527 ms. Of 329 GCD casts, 24 follow another by under 700 ms. They are eligible and UNKNOWN today, so
+nothing is wrongly judged, but the 324 eligible decisions overstate the presses. A first resolving decision must tell them apart.
+
+**Reading window fill is not coaching.** `colossusSmashWindows` is internal, and it says nothing about whether a window should have held
+a press. Turning it into a finding needs the list's decision, so it waits on the same thing. The two windows holding no gated cast are
+not a finding, and nobody has reviewed why they are empty.
+
+**The archive's notice line has 5,212 bytes left.** The next tranche with real decisions needs an owner decision on a measured proposal.
+None is raised here: Arms' whole fight is about 1.1 MB of decision families and would change nothing pinned today. A proposal should be
+sized when something would resolve on those bytes.
+
+**Other Arms subjects are retained and unmeasured.** A7R6 fight 7 actor 4 and gtKb fight 22 actor 12 are Arms Warriors in committed
+contexts, with events in the retained captures of those fights. Their hero trees and windows were not read. A promotion would measure
+them, for the reason Brewmaster needed a second subject.
+
+**Timing and fidelity.** The window edges are the log's. The first Colossus Smash is logged 549 ms before its debuff, so a cast at the
+start of a window can fall just outside it. No tolerance was chosen, because no verdict reads it.
+
 ## After ONB-A2: what Cohort A's followers do not establish
 
 **Raised:** ONB-A2 (2026-11-03). Coverage, not soundness: every decision is UNKNOWN.

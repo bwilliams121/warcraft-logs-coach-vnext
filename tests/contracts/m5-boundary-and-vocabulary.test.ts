@@ -240,6 +240,8 @@ describe("M5 invents no combat state", () => {
     // the skew window read from before it only for the action's own pinned effect.
     // Its companion test is tests/unit/specs/onb-a1-havoc-demon-hunter.test.ts.
     "src/specs/demonhunter/havoc/aura-bindings.ts",
+    // ONB-B1: Arms' Colossus Smash windows read their own continuity from M4, and bind no atom.
+    "src/specs/warrior/arms/colossus-smash-windows.ts",
   ] as const;
 
   const AURA_READING_MODULE = AURA_READING_MODULES[0];
@@ -465,7 +467,9 @@ describe("M5 forms no unearned verdict", () => {
       "src/specs/warrior/fury/observed-analysis.ts",
       "src/specs/warrior/fury/domains.ts",
       "src/specs/warrior/protection/observed-analysis.ts",
+      "src/specs/warrior/arms/observed-analysis.ts",
       "src/specs/warrior/protection/domains.ts",
+      "src/specs/warrior/arms/domains.ts",
     ];
     for (const path of M5_FILES) {
       const code = codeOf(path);

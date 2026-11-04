@@ -16,7 +16,7 @@
  *             narrow slice, the validated hero tree and the retained UNKNOWN
  *             areas.
  *   BEFORE    until M11-C4j the same request answered SPEC_NOT_SUPPORTED; the
- *             Arms Warrior sentinel still does, and so does another Monk
+ *             Fire Mage sentinel still does, and so does another Monk
  *             specialization: promotion named Brewmaster and nothing else.
  *   REPEAT    the same request twice produces the identical document.
  *   AUTH      the generic bearer behaviour is untouched: no token, no
@@ -86,6 +86,7 @@ const EVERY_ANALYZER = [
   "rogue-subtlety-observed-decisions",
   "warrior-fury-observed-decisions",
   "warrior-protection-observed-decisions",
+  "warrior-arms-observed-decisions",
   // HEAL-B3: Discipline Priest INTERNAL_ONLY.
   "priest-discipline-healer-findings",
   // HEAL-B4: Preservation Evoker INTERNAL_ONLY.
@@ -335,7 +336,7 @@ describe("REST: a real Brewmaster Monk identity resolves publicly", () => {
     expect(second).toEqual(first);
   });
 
-  it("the Arms Warrior sentinel over the same evidence is still SPEC_NOT_SUPPORTED, and runs no analyzer", async () => {
+  it("the Fire Mage sentinel over the same evidence is still SPEC_NOT_SUPPORTED, and runs no analyzer", async () => {
     const runner = localRunner(await fightOf(SUBJECT_1), {
       sourceId: CURRENT_UNSUPPORTED_SUBJECT.sourceId,
       className: CURRENT_UNSUPPORTED_SUBJECT.expectedClassName,

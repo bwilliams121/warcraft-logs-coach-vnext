@@ -112,8 +112,8 @@ describe("the current unsupported subject is unsupported everywhere production d
     expect([...INTERNAL_ONLY_SPEC_IDS] as readonly string[], where).not.toContain(observed);
   });
 
-  it("is scoped to M11 and says so", () => {
-    expect(CURRENT_UNSUPPORTED_SUBJECT.scopedToMilestone).toBe("M11");
+  it("is scoped to the onboarding programme and says so", () => {
+    expect(CURRENT_UNSUPPORTED_SUBJECT.scopedToMilestone).toBe("ONB");
     expect(CURRENT_UNSUPPORTED_SUBJECT.eligibilityNote.length).toBeGreaterThan(0);
   });
 });

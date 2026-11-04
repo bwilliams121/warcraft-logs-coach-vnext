@@ -8,7 +8,7 @@
  *           once and returns schema v1 carrying the ONB-A1 outcomes unchanged.
  *   MCP     the analyze tool returns the SAME public document, and its derived
  *           description names the validated hero tree and how narrow the slice is.
- *   BEFORE  Vengeance and the Arms Warrior sentinel are still SPEC_NOT_SUPPORTED:
+ *   BEFORE  Vengeance and the Fire Mage sentinel are still SPEC_NOT_SUPPORTED:
  *           promotion named Havoc and nothing else.
  *   REPEAT  the same request twice produces the identical document.
  *   AUTH    no token, no analysis, and no leak.

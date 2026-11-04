@@ -11,7 +11,7 @@
  * Blood's: the public lookup, the identity table, the public contract, the
  * derived sentence and both MCP tool descriptions now carry Brewmaster, and
  * the public path dispatches the same row the internal lookup finds.
- * Warrior/Arms is still unsupported, no other Monk specialization resolves,
+ * Mage/Fire is still unsupported, no other Monk specialization resolves,
  * the other specializations' vocabularies neither gain nor lose an
  * identifier, and outside the Brewmaster tree the specialization is named only
  * by the partition, the registry row, the two promotion sites and pinned data.
@@ -141,6 +141,7 @@ describe("identity and partition", () => {
       "rogue/subtlety",
       "warrior/fury",
       "warrior/protection",
+      "warrior/arms",
     ]);
     expect([...PUBLIC_SPEC_IDS]).toEqual(NINE_PUBLIC);
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("monk/brewmaster");
@@ -166,9 +167,9 @@ describe("identity and partition", () => {
     expect(BREWMASTER_MONK_MODULE.supplementalAnalyses).toEqual([]);
   });
 
-  it("Warrior/Arms is still unsupported: it is not a SpecId and the identity table does not resolve it", () => {
-    expect(isSpecId("warrior/arms")).toBe(false);
-    expect(resolveSpecIdentity({ className: "Warrior", specName: "Arms" })).toMatchObject({
+  it("Mage/Fire is still unsupported: it is not a SpecId and the identity table does not resolve it", () => {
+    expect(isSpecId("mage/fire")).toBe(false);
+    expect(resolveSpecIdentity({ className: "Mage", specName: "Fire" })).toMatchObject({
       ok: false,
       reason: "UNSUPPORTED_SPECIALIZATION",
     });

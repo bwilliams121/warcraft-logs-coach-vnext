@@ -44,7 +44,7 @@ describe("the committed corpus loads", () => {
     // gap derivative and seven cases; M10-C5 Phase B2 added the four measured
     // steady-state segments and twelve cases (four normalization, two bundle
     // compositions, six evaluator); M10-D added no artifact and three cases
-    // (the Arms Warrior through the service and both transports over the
+    // (the Fire Mage through the service and both transports over the
     // opener slice, and the mixed roster raid night over the same slice),
     // and repurposed four cases whose premise — Protection internal-only —
     // ended; M11-A4 added the four Retribution Paladin slices (cut from the
@@ -104,7 +104,8 @@ describe("the committed corpus loads", () => {
     // HEAL-B4: two cases for the INTERNAL_ONLY Preservation Evoker registration.
     // ONB-A1: two cases for the INTERNAL_ONLY Havoc Demon Hunter registration.
     // ONB-A2: two cases each for the INTERNAL_ONLY Subtlety Rogue, Fury Warrior and Protection Warrior registrations.
-    expect(loaded.cases).toHaveLength(207);
+    // ONB-B1: two cases for the INTERNAL_ONLY Arms Warrior registration.
+    expect(loaded.cases).toHaveLength(209);
     expect(loaded.coverage.declared).toBe(0);
   });
 

@@ -1,0 +1,123 @@
+/**
+ * The identifiers the pinned Arms Warrior APL uses that the shared parser does not know (ONB-B1).
+ *
+ * WHAT DECLARING AN IDENTIFIER MEANS. It makes a condition containing it PARSE WHOLE instead of
+ * refusing at that fragment. It does not make it decidable: `resolver.ts` binds a value only
+ * where evidence and pinned facts support one, and the shared evaluator enumerates an unbound
+ * truth and refuses an unbound magnitude.
+ *
+ * NEVER GIVEN A VALUE BY THIS SLICE, and why:
+ *
+ *   active_enemies
+ *       the enemy set has no authority (ONB-S3)
+ *   time
+ *       the reaction to a pull is not modelled
+ *   movement.distance
+ *       the log has no player movement stream
+ *   raid_event.adds.in
+ *       SIM_ONLY: a simulated raid event
+ *   raid_event.adds.exists
+ *       SIM_ONLY: a simulated raid event
+ *   raid_event.adds.remains
+ *       SIM_ONLY: a simulated raid event
+ *   target.health.pct
+ *       the target's health is not modelled
+ *   gcd
+ *       hasted, and haste at a decision is not reconstructed
+ *   gcd.remains
+ *       hasted, and haste at a decision is not reconstructed
+ *   charges
+ *       no cooldown is derived
+ *   dot.rend_dot.remains
+ *       the target's debuffs are not read as remains by this slice
+ *   debuff.colossus_smash.remains
+ *       the target's debuffs are not read as remains by this slice
+ *   target.debuff.casting.react
+ *       the target's casts are not read
+ *   cooldown.bladestorm.ready
+ *       no cooldown is derived
+ *   debuff.colossus_smash.down
+ *       no decision reads the target's debuffs
+ *
+ * BOUND, from the observed tree or the decision cast's own observation:
+ *
+ *   talent.massacre.enabled: the three-way talent rule
+ *   rage: the decision cast's own PRE_COST observation
+ *
+ * WHAT IS NOT HERE. `buff.<name>.up`, `debuff.<name>.up`, `cooldown.<name>.remains`,
+ * `fight_remains` and `talent.<name>` are built-ins and parse without this vocabulary. `trinket.*`
+ * is undeclared on purpose: it appears only in the non-domain item lists and in variables only
+ * they read, so such a line refuses if anything ever reads it.
+ */
+
+import { isBuiltinIdentifier } from "../../../simc/expression/parse.js";
+import {
+  defineSpecAtomVocabulary,
+  type SpecAtomDeclaration,
+  type SpecAtomVocabulary,
+} from "../../../simc/expression/spec-vocabulary.js";
+import { ARMS_WARRIOR_SPEC_ID } from "./spec.js";
+
+export const MASSACRE_ENABLED = "talent.massacre.enabled";
+export const TARGET_CASTING_REACT = "target.debuff.casting.react";
+export const BLADESTORM_READY = "cooldown.bladestorm.ready";
+export const COLOSSUS_SMASH_DOWN = "debuff.colossus_smash.down";
+export const RAGE = "rage";
+export const ACTIVE_ENEMIES = "active_enemies";
+export const TIME = "time";
+export const MOVEMENT_DISTANCE = "movement.distance";
+export const RAID_EVENT_ADDS_IN = "raid_event.adds.in";
+export const RAID_EVENT_ADDS_EXISTS = "raid_event.adds.exists";
+export const RAID_EVENT_ADDS_REMAINS = "raid_event.adds.remains";
+export const TARGET_HEALTH_PCT = "target.health.pct";
+export const GCD = "gcd";
+export const GCD_REMAINS = "gcd.remains";
+export const CHARGES = "charges";
+export const DOT_REND_REMAINS = "dot.rend_dot.remains";
+export const COLOSSUS_SMASH_REMAINS = "debuff.colossus_smash.remains";
+
+const truthAtom = (identifier: string): SpecAtomDeclaration => ({
+  identifier,
+  shape: "BOOLEAN",
+  scope: "PLAYER_SCOPED",
+  selfAddressing: false,
+});
+
+const magnitudeAtom = (identifier: string): SpecAtomDeclaration => ({
+  identifier,
+  shape: "NUMERIC",
+  scope: "PLAYER_SCOPED",
+  selfAddressing: false,
+});
+
+/** Declared so their conditions parse; never given a value by this slice. */
+export const ARMS_WARRIOR_UNBOUND_NUMERIC_ATOMS = Object.freeze([
+  ACTIVE_ENEMIES,
+  TIME,
+  MOVEMENT_DISTANCE,
+  RAID_EVENT_ADDS_IN,
+  RAID_EVENT_ADDS_EXISTS,
+  RAID_EVENT_ADDS_REMAINS,
+  TARGET_HEALTH_PCT,
+  GCD,
+  GCD_REMAINS,
+  CHARGES,
+  DOT_REND_REMAINS,
+  COLOSSUS_SMASH_REMAINS,
+] as const);
+
+export const ARMS_WARRIOR_ATOM_DECLARATIONS: readonly SpecAtomDeclaration[] = Object.freeze([
+  truthAtom(MASSACRE_ENABLED),
+  truthAtom(TARGET_CASTING_REACT),
+  truthAtom(BLADESTORM_READY),
+  truthAtom(COLOSSUS_SMASH_DOWN),
+  magnitudeAtom(RAGE),
+  ...ARMS_WARRIOR_UNBOUND_NUMERIC_ATOMS.map((identifier) => magnitudeAtom(identifier)),
+]);
+
+/** The frozen vocabulary the resolver and traversal parse with. */
+export const ARMS_WARRIOR_ATOM_VOCABULARY: SpecAtomVocabulary = defineSpecAtomVocabulary(
+  ARMS_WARRIOR_SPEC_ID,
+  ARMS_WARRIOR_ATOM_DECLARATIONS,
+  isBuiltinIdentifier,
+);

@@ -216,6 +216,8 @@ describe("cross-spec authority access is refused structurally", () => {
       ["rogue/subtlety", ["SIMC_APL_ROGUE_SUBTLETY"]],
       ["warrior/fury", ["SIMC_APL_WARRIOR_FURY"]],
       ["warrior/protection", ["SIMC_APL_WARRIOR_PROTECTION"]],
+      // ONB-B1: Cohort B's representative binds its own pinned list.
+      ["warrior/arms", ["SIMC_APL_WARRIOR_ARMS"]],
     ]);
   });
 });

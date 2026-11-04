@@ -1138,7 +1138,9 @@ ownerDecision: Whether, and on what evidence, the analyzer may model the enemy s
 ```
 
 **Direction.** The M11-D0 census (pinned `target_if` semantics), CLAUDE.md
-"Multi-Target Support", and `agent/follow-ups.md` "After M11-D3-B".
+"Multi-Target Support", and `agent/follow-ups.md` "After M11-D3-B". ONB-B1 measured
+that every Arms decision stops here, and Cohort B's followers dispatch the same way
+(`agent/follow-ups.md` "After ONB-B1").
 
 ### ONB-S4: Shared cast and channel decision anchor
 
@@ -1543,11 +1545,13 @@ description missed (agent/architecture.md "ONB-A2"; agent/follow-ups.md "After O
 ### ONB-A2P: Subtlety Rogue, Fury Warrior and Protection Warrior (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-A2
 branch: autopilot/onb-a2p
 wcl: NONE
 publicContract: EXPECTED
+pr: 58
+mergeSha: 15658bcdcd699755bac0bb9df9b992fd67d5d36e
 ```
 
 **Outcome.** Subtlety Rogue, Fury Warrior and Protection Warrior cannot pass the rotational
@@ -1569,8 +1573,9 @@ bindings ONB-A2 left open. A promotion after that is a new public entry through 
 ### ONB-B1: Arms Warrior (internal, Cohort B representative)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-S1
+branch: autopilot/onb-b1
 wcl: NONE
 publicContract: NONE
 ```
@@ -1578,6 +1583,12 @@ publicContract: NONE
 **Scope.** Cohort B representative: `run_action_list` dispatch with
 cooldown windows. Real evidence is retained (fight 48), and the question
 `colossus-smash-window-fill` is already identified.
+
+**Outcome.** Arms Warrior is registered INTERNAL_ONLY, and no decision of it resolves: over the whole of fight 48, actor 5 (Slayer), 324
+eligible decisions are UNKNOWN, every root scan stopping at the `active_enemies` dispatch. Every GCD action of the list sits behind it, so
+requirement C cannot be met until ONB-S3 is decided. `colossus-smash-window-fill` is answered as an internal observation with no verdict: 35
+windows, all established. The first 6 s are committed and the unsupported subject moved to A7R6 fight 7 actor 17, Mage/Fire
+(agent/architecture.md "ONB-B1"; agent/follow-ups.md "After ONB-B1").
 
 ### ONB-B1P: Arms Warrior (public)
 

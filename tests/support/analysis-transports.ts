@@ -97,7 +97,7 @@ export interface RunnerOptions {
    * Rogue's; a supported identity other than the Rogue's (Paladin/Protection
    * since M10-D) would dispatch a real analyzer over another class's events,
    * which is an identity/evidence mismatch and not a transport test. The
-   * canonical unsupported identity is Warrior/Arms (A7R6 fight 7, actor 4).
+   * canonical unsupported identity is Mage/Fire (A7R6 fight 7, actor 17).
    */
   readonly className?: string;
   readonly specName?: string;

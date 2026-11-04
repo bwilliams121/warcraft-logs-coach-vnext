@@ -53,6 +53,8 @@ describe("coverage is measured from the corpus", () => {
     expect(report.byLayer.flatMap((layer) => layer.kindsRegisteredButUnused)).toEqual([
       "SPEC_HAVOC_DEMON_HUNTER.DECISION_COVERAGE",
       "SPEC_HAVOC_DEMON_HUNTER.COVERAGE_SUMMARY",
+      // ONB-B1: Arms Warrior's real first seconds run in the evidence archive too.
+      "SPEC_ARMS_WARRIOR.COVERAGE_SUMMARY",
     ]);
   });
 

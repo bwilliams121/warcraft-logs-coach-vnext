@@ -81,7 +81,8 @@ export type SpecId =
   | "demonhunter/havoc"
   | "rogue/subtlety"
   | "warrior/fury"
-  | "warrior/protection";
+  | "warrior/protection"
+  | "warrior/arms";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -101,6 +102,7 @@ export const SPEC_IDS = Object.freeze([
   "rogue/subtlety",
   "warrior/fury",
   "warrior/protection",
+  "warrior/arms",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -230,6 +232,9 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * Subtlety Rogue, Fury Warrior and Protection Warrior arrived here in ONB-A2, Cohort A's
  * followers. No retained capture can validate any of them, and no decision of any of them
  * resolves today, so their public shape waits on evidence (ONB-A2P, ONB-EV).
+ *
+ * Arms Warrior arrived here in ONB-B1, Cohort B's representative. Every GCD action of its list sits
+ * behind a dispatch on the enemy count, which is the ONB-S3 owner decision, so no decision resolves.
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
@@ -237,6 +242,7 @@ export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "rogue/subtlety",
   "warrior/fury",
   "warrior/protection",
+  "warrior/arms",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

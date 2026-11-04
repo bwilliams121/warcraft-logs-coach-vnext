@@ -63,7 +63,7 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // added the four steady-state segments, the bundle compositions and the
     // evaluator over the composed 165 s fight: twelve cases and seventy-three
     // assertions; M10-D's public Protection integration added three cases
-    // and four assertions (the Arms Warrior through the service and both
+    // and four assertions (the Fire Mage through the service and both
     // transports, the mixed-roster raid night, and actor 4's identity) and
     // repurposed four cases in place; M11-A4 added the four Retribution
     // Paladin slices and sixteen cases with sixty-eight assertions (the
@@ -161,9 +161,9 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // assertions: the same pair for the INTERNAL_ONLY Discipline Priest
     // registration. HEAL-B4 added two cases and two assertions: the same pair
     // for the INTERNAL_ONLY Preservation Evoker registration.
-    expect(result.summary.cases).toBe(207);
-    expect(result.summary.assertions).toBe(802);
-    expect(result.summary.passed).toBe(802);
+    expect(result.summary.cases).toBe(209);
+    expect(result.summary.assertions).toBe(804);
+    expect(result.summary.passed).toBe(804);
   });
 
   it("covers every layer", async () => {

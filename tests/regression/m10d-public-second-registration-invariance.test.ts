@@ -2,7 +2,7 @@
  * M10-D: the PUBLIC Protection Paladin registration moves nothing about
  * Assassination, is reached by every public path for a Protection subject,
  * and leaves the unsupported path intact for the canonical unsupported
- * specialization (Warrior/Arms, A7R6 fight 7 actor 4).
+ * specialization (Mage/Fire, A7R6 fight 7 actor 17).
  *
  * SUPERSEDES two files whose premise M10-D removed:
  *
@@ -16,7 +16,7 @@
  * re-proven here over the two REAL public registrations in both catalog
  * orders; the second half is inverted on purpose — the Protection analyzer
  * now runs, exactly once, for exactly a Protection subject — and the
- * "unreachable" role passes to Arms, which has no registration at all.
+ * "unreachable" role passes to Fire, which has no registration at all.
  *
  * Every public path — the application service, REST, MCP, raid-night
  * orchestration — is run against the production catalog and a reversed one,
@@ -74,7 +74,7 @@ const D2 = "wcl-assassination-d2-decision-corpus";
 const GTKB = "wcl-assassination-high-parse-opener";
 const PROT_OPENER = "wcl-protection-paladin-a7r6-opener";
 const PROT_ACTOR = 7;
-/** A7R6 fight 7 actor 4 — Warrior/Arms per the committed fight-context artifact. */
+/** A7R6 fight 7 actor 17 — Mage/Fire per the committed fight-context artifact. */
 const ARMS_ACTOR = CURRENT_UNSUPPORTED_SUBJECT.sourceId;
 
 interface Subject {
@@ -103,7 +103,7 @@ const PROTECTION_SUBJECT: Subject = {
   status: "ANALYZED",
 };
 const ARMS_SUBJECT: Subject = {
-  label: "the real Arms Warrior",
+  label: "the real Fire Mage",
   artifact: PROT_OPENER,
   actorId: ARMS_ACTOR,
   className: CURRENT_UNSUPPORTED_SUBJECT.expectedClassName,
@@ -183,7 +183,7 @@ function keysOf(value: unknown, into = new Set<string>()): Set<string> {
 
 describe("the production catalog", () => {
   it("is exactly the twelve PUBLIC registrations (Blood since M11-B12, Brewmaster since M11-C4j, Augmentation since M13-F, Restoration Shaman since HEAL-AP, Holy Paladin and Mistweaver Monk since HEAL-B1P, Holy Priest since HEAL-B2P, Preservation Evoker since HEAL-B4P, Havoc Demon Hunter since ONB-A1P) plus Restoration Druid and Discipline Priest INTERNAL_ONLY, and both lookups answer alike for every public one", () => {
-    expect(ANALYZER_REGISTRATIONS).toHaveLength(17);
+    expect(ANALYZER_REGISTRATIONS).toHaveLength(18);
     expect(ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "PUBLIC")).toHaveLength(12);
     // HEAL-B1: one INTERNAL_ONLY healer row since HEAL-B1P (a second, Holy Priest, from HEAL-B2 until HEAL-B2P; Discipline Priest since HEAL-B3; Preservation Evoker from HEAL-B4 until HEAL-B4P), invisible to the public lookup.
     const internal = ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "INTERNAL_ONLY");
@@ -193,6 +193,7 @@ describe("the production catalog", () => {
       "rogue/subtlety",
       "warrior/fury",
       "warrior/protection",
+      "warrior/arms",
     ]);
     for (const row of internal)
       expect(analyzerForSpec(row.specId, PRODUCTION_CATALOG), row.specId).toBeNull();
@@ -242,7 +243,7 @@ describe("the production catalog", () => {
     expect(analyzerForSpec("rogue/assassination", PRODUCTION_CATALOG)?.exposure).toBe("PUBLIC");
   });
 
-  it("public identity resolution accepts both Paladins, DeathKnight/Blood and Monk/Brewmaster, and still rejects Warrior/Arms", () => {
+  it("public identity resolution accepts both Paladins, DeathKnight/Blood and Monk/Brewmaster, and still rejects Mage/Fire", () => {
     expect(resolveSpecIdentity({ className: "Paladin", specName: "Protection" })).toEqual({
       ok: true,
       specId: "paladin/protection",
@@ -400,7 +401,7 @@ describe("the REAL Protection Paladin subject through the application service", 
   });
 });
 
-describe("the REAL Arms Warrior subject keeps the unsupported path", () => {
+describe("the REAL Fire Mage subject keeps the unsupported path", () => {
   for (const { label, registry, calls } of catalogs()) {
     it(`${label}: SPEC_NOT_SUPPORTED, one preparation-only retrieval, neither analyzer runs`, async () => {
       const run = runFor(ARMS_SUBJECT, registry);
@@ -521,7 +522,7 @@ describe("REST and MCP agree for every subject, in every catalog order", () => {
   }
 });
 
-describe("raid-night cells over the D2 fixture with an Arms participant", () => {
+describe("raid-night cells over the D2 fixture with a Fire participant", () => {
   const ROGUE_B = 23;
 
   it("deep-equal aggregate, byte-identical public document, identical ingestion, zero Protection runs", async () => {

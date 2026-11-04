@@ -75,6 +75,7 @@ describe("the five sites agree", () => {
       "rogue/subtlety",
       "warrior/fury",
       "warrior/protection",
+      "warrior/arms",
     ]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
@@ -152,6 +153,7 @@ describe("the five sites agree", () => {
       ["rogue/subtlety", "INTERNAL_ONLY"],
       ["warrior/fury", "INTERNAL_ONLY"],
       ["warrior/protection", "INTERNAL_ONLY"],
+      ["warrior/arms", "INTERNAL_ONLY"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -257,6 +259,7 @@ describe("the complete-catalog helper", () => {
       "rogue-subtlety-observed-decisions": 0,
       "warrior-fury-observed-decisions": 0,
       "warrior-protection-observed-decisions": 0,
+      "warrior-arms-observed-decisions": 0,
     });
   });
 });

@@ -571,6 +571,25 @@ npx prettier --write src/data/game/rogue-subtlety-*.json src/data/game/warrior-*
 One class-neutral extractor change, changing no earlier target's output: a sanity-anchor id a target names as an ability stays in
 its runtime slice (Backstab, for Subtlety).
 
+## ONB-B1 — Arms Warrior
+
+The `warrior-arms` target on the GCD and talent extractors, and the APL artifact through the M11-D2-C batch path. No cooldown, usability
+or aura artifact: nothing resolves past the enemy count (ONB-S3), and the retained subject's gaps contradict the pinned cooldowns.
+
+```bash
+node scripts/authority/extract-simc-apl.mjs --targets warrior-arms \
+  --source-root <root> --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 \
+  --out-dir <dir> --extracted-on 2026-11-03
+node scripts/authority/extract-simc-gcd.mjs --target warrior-arms \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-11-03   # --file-<key> for each source
+node scripts/authority/extract-simc-talents.mjs --target warrior-arms \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-11-03   # --file-<key> for each source
+npx prettier --write src/data/game/warrior-arms-*.json src/simc/data/warrior-arms.apl.json
+```
+
+Execute binds 163201 and Massacre's override 281000 (the pinned effect row 738985 of 281001). Talent `id` and `nodeID` are corroborated on
+one real subject, b1PmaKrd6CDfzngc fight 48 actor 5.
+
 ## M11-D2-C — pinned batch preflight for eight Cohort A/B targets
 
 Extraction infrastructure only. No artifact for these targets is committed,

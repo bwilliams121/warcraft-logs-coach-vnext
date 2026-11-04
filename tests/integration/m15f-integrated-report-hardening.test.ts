@@ -9,7 +9,7 @@
  *   ANALYZED with divergences   the M5-A rejection fixture (Assassination)
  *   ANALYZED, partial           the M5-D2 fixture (Assassination)
  *   ANALYZED + raid plan        the M5-D2 fixture with a supplied plan
- *   SPEC_NOT_SUPPORTED          the canonical unsupported subject (Arms)
+ *   SPEC_NOT_SUPPORTED          the canonical unsupported subject (Fire)
  *   support observations        the real M13-A Augmentation Evoker
  *   raid night                  a mixed 100-cell night and a night with no
  *                               analyzed cell
@@ -227,8 +227,8 @@ let emptyNight: PublicRaidNightResult;
 const MIXED_AGGREGATE = hundredCellAggregate();
 const EMPTY_AGGREGATE = aggregateOf({
   players: [rosterPlayerFor({ sourceId: 7, name: "Player7" })],
-  fights: [rosterFightFor({ fightId: 1, participants: [{ sourceId: 7, specName: "Arms" }] })],
-  cells: [notAnalyzedCell({ fightId: 1, sourceId: 7, status: "SPEC_NOT_SUPPORTED", specName: "Arms" })],
+  fights: [rosterFightFor({ fightId: 1, participants: [{ sourceId: 7, specName: "Fire" }] })],
+  cells: [notAnalyzedCell({ fightId: 1, sourceId: 7, status: "SPEC_NOT_SUPPORTED", specName: "Fire" })],
 });
 
 beforeAll(async () => {

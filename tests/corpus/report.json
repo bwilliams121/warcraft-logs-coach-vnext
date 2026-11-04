@@ -668,13 +668,22 @@
       "passed": 1
     },
     {
-      "assertions": 27,
-      "cases": 23,
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_ARMS_WARRIOR.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_ARMS_WARRIOR",
+      "passed": 1
+    },
+    {
+      "assertions": 28,
+      "cases": 24,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 27
+      "passed": 28
     },
     {
       "assertions": 14,
@@ -691,13 +700,13 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
-          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
           "ordinal": 0,
           "status": "PASSED"
         }
       ],
       "authority": null,
-      "caseId": "application-service.arms-warrior-subject-is-unsupported-on-the-same-evidence",
+      "caseId": "application-service.arms-warrior-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -778,6 +787,20 @@
       ],
       "authority": null,
       "caseId": "application-service.discipline-priest-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.fire-mage-subject-is-unsupported-on-the-same-evidence",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -2939,20 +2962,6 @@
       "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
     },
     {
-      "artifactId": "wcl-protection-paladin-a7r6-opener",
-      "assertions": [
-        {
-          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
-          "ordinal": 0,
-          "status": "PASSED"
-        }
-      ],
-      "authority": null,
-      "caseId": "public-contract.analysis-parity-for-the-arms-warrior-subject",
-      "owningLayer": "PUBLIC_CONTRACT",
-      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
-    },
-    {
       "artifactId": "wcl-blood-death-knight-a7r6-rotational-45s",
       "assertions": [
         {
@@ -2979,6 +2988,20 @@
       "caseId": "public-contract.analysis-parity-for-the-brewmaster-monk-subject",
       "owningLayer": "PUBLIC_CONTRACT",
       "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "public-contract.analysis-parity-for-the-fire-mage-subject",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
       "artifactId": "wcl-protection-paladin-a7r6-opener",
@@ -3265,6 +3288,20 @@
       "caseId": "shared-decision-engine.unsupported-expression-refuses-at-the-entry",
       "owningLayer": "SHARED_DECISION_ENGINE",
       "referencedArtifactIds": ["synthetic.apl-priority-short-circuit"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_ARMS_WARRIOR.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-arms-warrior.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_ARMS_WARRIOR",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
       "artifactId": "wcl-assassination-d2-decision-corpus",
@@ -7350,6 +7387,7 @@
     "SIMC_APL_PALADIN_RETRIBUTION": "simc-33622e9d-1",
     "SIMC_APL_ROGUE_ASSASSINATION": "simc-33622e9d-1",
     "SIMC_APL_ROGUE_SUBTLETY": "simc-33622e9d-1",
+    "SIMC_APL_WARRIOR_ARMS": "simc-33622e9d-1",
     "SIMC_APL_WARRIOR_FURY": "simc-33622e9d-1",
     "SIMC_APL_WARRIOR_PROTECTION": "simc-33622e9d-1",
     "SIMC_DBC_ROGUE_DOT_DURATIONS": "simc-33622e9d-1"
@@ -7360,13 +7398,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 802,
-    "cases": 207,
+    "assertions": 804,
+    "cases": 209,
     "declared": 0,
-    "executable": 802,
+    "executable": 804,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 802
+    "passed": 804
   }
 }
