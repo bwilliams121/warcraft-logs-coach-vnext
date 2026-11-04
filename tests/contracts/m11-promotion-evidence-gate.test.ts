@@ -747,6 +747,7 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
       "deathknight/frost",
       "shaman/enhancement",
       "demonhunter/devourer",
+      "druid/feral",
     ]);
     const internal = PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY");
     expect(internal.map((row) => row.specId)).toEqual([...INTERNAL_ONLY_SPEC_IDS]);

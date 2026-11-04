@@ -709,6 +709,13 @@ fields — `regionSha256`, `livePtrPolicy`, `dispatchSource`,
 Every artifact committed before M11-D2-C carries none and validates exactly
 as before.
 
+`druid-feral` was extracted in ONB-C1 (`src/simc/data/druid-feral.apl.json`, 73 actions in 8 lists), through the two class-neutral additions below. Its GCD and talent targets are in the two sibling extractors. No earlier target's output changes.
+
+- **An `INCLUDED_FILE` selector (`includedBy`).** The list is a whole file with no markers, included as the sole body of its function in a second pinned file. The preflight hash-checks that file and requires the include to be the function's one statement. It records the including file's path and hash, the include line and the header.
+- **A `PTR_SEPARATE_INCLUDE` policy.** The dispatch is one ternary on `is_ptr()`, and the PTR function includes a different file. That file is not read, and nothing is claimed about it.
+
+The pinned source root for this target adds `engine/class_modules/apl/druid/feral_apl.inc` (17,108 bytes), `engine/class_modules/apl/druid/druid.cpp` (926 bytes, both as the M11-A3 audit recorded them) and `engine/class_modules/sc_druid.cpp` (479,886 bytes, `59227a2f...`).
+
 `demonhunter-devourer` was extracted from this table in ONB-B3 (`src/simc/data/demonhunter-devourer.apl.json`, 153 actions in 12 lists). Its GCD and talent targets are in the two sibling extractors. The talent target
 is the first to need two rules: a hero row scoped to no specialization counts as class-wide (all 16 of Annihilator's), and `subTreeId` names the tree when two hero sub-trees hold one name (Demonic Intensity).
 

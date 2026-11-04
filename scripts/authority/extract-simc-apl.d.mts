@@ -24,6 +24,8 @@ export interface AplExtractionTarget {
   readonly enclosingNamespace?: string;
   /** CLASS_METHOD selection (ONB-B2): the class whose method defines the lists. */
   readonly enclosingClass?: string;
+  /** INCLUDED_FILE selection (ONB-C1): the file that holds this one as a function's sole body. */
+  readonly includedBy?: PinnedSourceFile & { readonly includeLine: string };
   readonly functionHeader: string;
   /** The parameter the list declarations are called on; `p` when absent. */
   readonly playerIdentifier?: string;
@@ -78,6 +80,15 @@ export type ExtractedRegionProvenance =
       readonly regionSelector: {
         readonly kind: "CLASS_METHOD";
         readonly enclosingClass: string;
+        readonly functionHeader: string;
+      };
+    }
+  | {
+      readonly regionSelector: {
+        readonly kind: "INCLUDED_FILE";
+        readonly includingSourcePath: string;
+        readonly includingSourceSha256: string;
+        readonly includeLine: string;
         readonly functionHeader: string;
       };
     };
@@ -161,14 +172,16 @@ export interface PinnedSourceFile {
   readonly byteLength: number;
 }
 
-export type LivePtrPolicyKind = "NO_PTR_REGION" | "PTR_MARKERS_EMPTY" | "PTR_BODY_IDENTICAL";
+export type LivePtrPolicyKind =
+  "NO_PTR_REGION" | "PTR_MARKERS_EMPTY" | "PTR_BODY_IDENTICAL" | "PTR_SEPARATE_INCLUDE";
 
 export interface PinnedTargetRecord {
   readonly pinnedSource: PinnedSourceFile & { readonly commitSha: string; readonly regionSha256: string };
   readonly livePtrPolicy: {
     readonly kind: LivePtrPolicyKind;
-    readonly ptrRegionStart: string;
-    readonly ptrRegionEnd: string;
+    readonly ptrRegionStart?: string;
+    readonly ptrRegionEnd?: string;
+    readonly ptrIncludeLine?: string;
     readonly ptrFunctionHeader: string;
   };
   readonly dispatch: PinnedSourceFile & {

@@ -188,6 +188,7 @@ const NO_CALLS = {
   "deathknight-frost-observed-decisions": 0,
   "shaman-enhancement-observed-decisions": 0,
   "demonhunter-devourer-observed-decisions": 0,
+  "druid-feral-observed-decisions": 0,
 };
 
 describe("a Brewmaster Monk alone", () => {

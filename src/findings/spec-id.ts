@@ -85,7 +85,8 @@ export type SpecId =
   | "warrior/arms"
   | "deathknight/frost"
   | "shaman/enhancement"
-  | "demonhunter/devourer";
+  | "demonhunter/devourer"
+  | "druid/feral";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -109,6 +110,7 @@ export const SPEC_IDS = Object.freeze([
   "deathknight/frost",
   "shaman/enhancement",
   "demonhunter/devourer",
+  "druid/feral",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -249,6 +251,9 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * Devourer Demon Hunter arrived here in ONB-B3, its own representative. No decision of it resolves: on a
  * Void-Scarred build with The Hunt the list reaches `voidscarred_melee` and stops on the enemy count, the
  * ONB-S3 owner decision.
+ *
+ * Feral Druid arrived here in ONB-C1, Cohort C's representative. No decision of it resolves: its real scans
+ * stop at Prowl, Tiger's Fury or the enemy count, and the pool line sits behind that count.
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
@@ -260,6 +265,7 @@ export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "deathknight/frost",
   "shaman/enhancement",
   "demonhunter/devourer",
+  "druid/feral",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

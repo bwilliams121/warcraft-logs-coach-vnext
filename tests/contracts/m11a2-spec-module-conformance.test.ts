@@ -169,6 +169,9 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
   },
   // ONB-B1: actor 4 of the committed A7R6 fight 7 context, an Arms Warrior.
   "warrior/arms": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 4 },
+  // ONB-C1: actor 1 of the corpus A7R6 fight 7 context, the Feral Druid the committed corpus context
+  // reports (also actor 170 of b1Pm fight 48, uncommitted events).
+  "druid/feral": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 1 },
   // ONB-B3: actor 32 of the corpus gtKb fight 22 context, the Devourer Demon Hunter the committed
   // corpus context reports (also actors 20 and 79 of rXAf fight 13, uncommitted events).
   "demonhunter/devourer": { artifactId: "wcl-fight-context-gtkb-fight-22", fightId: 22, sourceId: 32 },
@@ -470,6 +473,8 @@ describe("what the tree exports today", () => {
       ["DEVOURER_DEMON_HUNTER_MODULE", "demonhunter/devourer", "INTERNAL_ONLY", 0],
       // ONB-A1: Cohort A's representative, INTERNAL_ONLY.
       ["HAVOC_DEMON_HUNTER_MODULE", "demonhunter/havoc", "PUBLIC", 0],
+      // ONB-C1: Cohort C's representative, INTERNAL_ONLY.
+      ["FERAL_DRUID_MODULE", "druid/feral", "INTERNAL_ONLY", 0],
       // HEAL-B1: healers on Restoration Shaman's architecture, INTERNAL_ONLY; Holy Paladin and Mistweaver Monk PUBLIC since HEAL-B1P.
       ["RESTORATION_DRUID_MODULE", "druid/restoration", "INTERNAL_ONLY", 0],
       // M13-E: INTERNAL_ONLY, binding no decision authority; PUBLIC since M13-F.

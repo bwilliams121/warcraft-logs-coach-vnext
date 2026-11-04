@@ -1789,9 +1789,208 @@ const DEMONHUNTER_DEVOURER_TARGET = {
   ],
 };
 
+/**
+ * Feral Druid (ONB-C1). The hero sub-trees are Druid of the Claw (21) and Wildstalker (22).
+ */
+const DRUID_FERAL_TARGET = {
+  datasetId: "SIMC_TRAIT_DRUID_FERAL_TALENTS",
+  classId: 11,
+  specId: 103,
+  defaultOut: "src/data/game/druid-feral-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. That `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node is corroborated for Feral on two real subjects: b1PmaKrd6CDfzngc fight 48 actor 170 and A7R6kxPJ1hC8YQ4w fight 7 actor 1. All 159 of their entries are pinned rows of class 11.",
+  requiredTalents: [
+    {
+      simcName: "berserk_cat",
+      displayNameEn: "Berserk",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10441 talent.berserk_cat = ST( "Berserk", DRUID_FERAL ); berserk_cat_t is built on its override when Incarnation is not taken (:3937-3938, :10703)',
+    },
+    {
+      simcName: "incarnation_cat",
+      displayNameEn: "Incarnation: Avatar of Ashamane",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10455 talent.incarnation_cat = ST( "Incarnation: Avatar of Ashamane" ); the "berserk" token builds incarnation_cat_t on it (:10162-10163, :3946). A CHOICE node with Convoke the Spirits',
+    },
+    {
+      simcName: "convoke_the_spirits",
+      displayNameEn: "Convoke the Spirits",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10383 talent.convoke_the_spirits = ST( "Convoke the Spirits" ); the pinned list reads it and convoke_the_spirits_t is built on it (:9256). A CHOICE node with Incarnation',
+    },
+    {
+      simcName: "frantic_frenzy",
+      displayNameEn: "Frantic Frenzy",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10452 talent.frantic_frenzy = ST( "Frantic Frenzy" ); the pinned list reads it and frantic_frenzy_t is built on it (:4084). A CHOICE node with Focused Frenzy',
+    },
+    {
+      simcName: "focused_frenzy",
+      displayNameEn: "Focused Frenzy",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10451 talent.focused_frenzy = ST( "Focused Frenzy" ); a CHOICE node with Frantic Frenzy, pinned so that node resolves',
+    },
+    {
+      simcName: "feral_frenzy",
+      displayNameEn: "Feral Frenzy",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10450 talent.feral_frenzy = ST( "Feral Frenzy" ); feral_frenzy_t is built on it (:4134)',
+    },
+    {
+      simcName: "chomp",
+      displayNameEn: "Chomp",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10445 talent.chomp = ST( "Chomp" ); chomp_t is built on it (:4050). A CHOICE node with Lunar Inspiration',
+    },
+    {
+      simcName: "lunar_inspiration",
+      displayNameEn: "Lunar Inspiration",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10458 talent.lunar_inspiration = ST( "Lunar Inspiration" ); the pinned list reads it and lunar_inspiration_t opens on it (:4461-4462). A CHOICE node with Chomp',
+    },
+    {
+      simcName: "apex_predators_craving",
+      displayNameEn: "Apex Predator's Craving",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10439 talent.apex_predators_craving = ST( "Apex Predator\'s Craving" ); it produces buff.apex_predators_craving, which the pinned list and maximum_energy() read',
+    },
+    {
+      simcName: "ashamanes_guidance",
+      displayNameEn: "Ashamane's Guidance",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10440 talent.ashamanes_guidance = ST( "Ashamane\'s Guidance" ); the pinned list reads talent.ashamanes_guidance',
+    },
+    {
+      simcName: "berserk_heart_of_the_lion",
+      displayNameEn: "Berserk: Heart of the Lion",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10442 talent.berserk_heart_of_the_lion = ST( "Berserk: Heart of the Lion" ); the pinned list reads talent.berserk_heart_of_the_lion',
+    },
+    {
+      simcName: "doubleclawed_rake",
+      displayNameEn: "Double-Clawed Rake",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10448 talent.doubleclawed_rake = ST( "Double-Clawed Rake" ); the pinned list reads talent.doubleclawed_rake',
+    },
+    {
+      simcName: "panthers_guile",
+      displayNameEn: "Panther's Guile",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10462 talent.panthers_guile = ST( "Panther\'s Guile" ); the pinned list reads talent.panthers_guile',
+    },
+    {
+      simcName: "primal_wrath",
+      displayNameEn: "Primal Wrath",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10464 talent.primal_wrath = ST( "Primal Wrath" ); the pinned list reads it and primal_wrath_t is built on it (:4743)',
+    },
+    {
+      simcName: "rampant_ferocity",
+      displayNameEn: "Rampant Ferocity",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10467 talent.rampant_ferocity = ST( "Rampant Ferocity" ); the pinned list reads talent.rampant_ferocity',
+    },
+    {
+      simcName: "merciless_claws",
+      displayNameEn: "Merciless Claws",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10459 talent.merciless_claws = ST( "Merciless Claws" ); the precombat list reads talent.merciless_claws',
+    },
+    {
+      simcName: "wild_slashes",
+      displayNameEn: "Wild Slashes",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10482 talent.wild_slashes = ST( "Wild Slashes" ); the precombat list reads talent.wild_slashes',
+    },
+    {
+      simcName: "tigers_fury",
+      displayNameEn: "Tiger's Fury",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10475 talent.tigers_fury = ST( "Tiger\'s Fury" ); tigers_fury_t is built on it (:4857)',
+    },
+    {
+      simcName: "fluid_form",
+      displayNameEn: "Fluid Form",
+      tree: "CLASS",
+      binding:
+        'sc_druid.cpp:10326 talent.fluid_form = CT( "Fluid Form" ); the pinned list reads talent.fluid_form',
+    },
+    {
+      simcName: "rake",
+      displayNameEn: "Rake",
+      tree: "CLASS",
+      binding: 'sc_druid.cpp:10358 talent.rake = CT( "Rake" ); rake_t is built on it (:4551)',
+    },
+    {
+      simcName: "rip",
+      displayNameEn: "Rip",
+      tree: "CLASS",
+      binding: 'sc_druid.cpp:10361 talent.rip = CT( "Rip" ); rip_t is built on it (:4656)',
+    },
+    {
+      simcName: "swipe",
+      displayNameEn: "Swipe",
+      tree: "CLASS",
+      binding:
+        'sc_druid.cpp:10369 talent.swipe = CT( "Swipe" ); swipe_cat_t is built on an override of it (:4839)',
+    },
+    {
+      simcName: "ravage",
+      displayNameEn: "Ravage",
+      tree: "HERO",
+      binding:
+        "a Druid of the Claw talent, pinned so the tree resolves from an entry (trait_data.inc sub-tree 21)",
+    },
+    {
+      simcName: "wildpower_surge",
+      displayNameEn: "Wildpower Surge",
+      tree: "HERO",
+      binding:
+        "a Druid of the Claw talent, pinned so the tree resolves from more than one entry (sub-tree 21)",
+    },
+    {
+      simcName: "thriving_growth",
+      displayNameEn: "Thriving Growth",
+      tree: "HERO",
+      binding: "a Wildstalker talent, pinned so the tree resolves from an entry (sub-tree 22)",
+    },
+    {
+      simcName: "bursting_growth",
+      displayNameEn: "Bursting Growth",
+      tree: "HERO",
+      binding: "a Wildstalker talent, pinned so the tree resolves from more than one entry (sub-tree 22)",
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data` (trait_data.inc:4394, :4395).
+    { simcName: "druid_of_the_claw", subTreeId: 21 },
+    { simcName: "wildstalker", subTreeId: 22 },
+  ],
+};
+
 export const TARGETS = {
   "deathknight-blood": DEATHKNIGHT_BLOOD_TARGET,
   "demonhunter-havoc": DEMONHUNTER_HAVOC_TARGET,
+  "druid-feral": DRUID_FERAL_TARGET,
   "demonhunter-devourer": DEMONHUNTER_DEVOURER_TARGET,
   "deathknight-frost": DEATHKNIGHT_FROST_TARGET,
   "shaman-enhancement": SHAMAN_ENHANCEMENT_TARGET,

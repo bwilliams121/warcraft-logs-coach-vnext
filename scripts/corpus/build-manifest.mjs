@@ -7087,6 +7087,44 @@ const BREWMASTER_CASES = [
     "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Devourer Demon Hunter list.",
     { related: ["tests/unit/specs/onb-b1-devourer-demon-hunter.test.ts"] },
   ),
+  // ---- SPEC_FERAL_DRUID (ONB-C1, INTERNAL_ONLY) ---
+  kase(
+    "application-service.feral-druid-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Feral Druid registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "druid/feral",
+        expected: {
+          internalAnalyzerId: "druid-feral-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Feral Druid is registered INTERNAL_ONLY in ONB-C1. No decision of its retained subjects resolves: real scans stop at Prowl, Tiger's Fury or the enemy count, the ONB-S3 owner decision, and the pool line sits behind that count. So a public request must keep receiving SPEC_NOT_SUPPORTED.",
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-feral-druid.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_FERAL_DRUID",
+    "src/specs/druid/feral/observed-analysis.ts analyzeObservedFeralDruidDecisions (the spec gate)",
+    "The Feral Druid facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_FERAL_DRUID.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Feral Druid list.",
+    { related: ["tests/unit/specs/onb-c1-feral-druid.test.ts"] },
+  ),
   // ---- SPEC_ENHANCEMENT_SHAMAN (ONB-B2, INTERNAL_ONLY) ---
   kase(
     "application-service.enhancement-shaman-registration-is-internal-only",

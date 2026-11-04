@@ -189,6 +189,7 @@ describe("a Retribution Paladin alone", () => {
       "deathknight-frost-observed-decisions": 0,
       "shaman-enhancement-observed-decisions": 0,
       "demonhunter-devourer-observed-decisions": 0,
+      "druid-feral-observed-decisions": 0,
     });
     expectRetributionCell(cellOf(run.aggregate.cells, RETRIBUTION));
     expect(run.aggregate.coverage).toMatchObject({
@@ -238,6 +239,7 @@ describe("a mixed roster — Assassination, Protection, Retribution, Fire and an
       "deathknight-frost-observed-decisions": 0,
       "shaman-enhancement-observed-decisions": 0,
       "demonhunter-devourer-observed-decisions": 0,
+      "druid-feral-observed-decisions": 0,
     });
   });
 

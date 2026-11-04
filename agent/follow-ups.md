@@ -29,6 +29,35 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After ONB-C1: what the Feral Druid slice does not establish
+
+**Raised:** ONB-C1 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.
+
+**ONB-S3 gates it too, and it is not the first gate.** All four finisher and builder dispatches read `spell_targets`, and no real scan reaches them. Over 372 eligible decisions, 0 MATCH, 0 REJECTED. So ONB-C1P should expect "not promoted" unless ONB-S3 and the items below land first.
+
+**The pool is proven on synthetic decisions only.** No real scan reaches `finisher[1]`, and every costed Bite on both subjects has at least 60 Energy, so even past the count none would pool. ONB-C1P cannot claim real pooling evidence, and a promotion would have to find a Bite below the line, or say it has none.
+
+**What stands before the count, in scan order:**
+
+- **Prowl on an Incarnation build.** `buff.incarnation_cat_prowl` has no duration and no log event, and a press before the pull leaves no event, so on such a build it stays open until a Prowl is observed (164 decisions, 163 of them one subject's). Pinned, SimulationCraft would Prowl there. Whether a player can be judged against that free Prowl is a question nobody has asked yet. It needs a reviewed answer, not a binding.
+- **`auto_attack`.** Its contract lets the query branch, and the engine then reports the branch's entry (199 decisions). Its readiness is the swing state, unobserved.
+- **Tiger's Fury.** It needs a cooldown proof and a transition contract. Its write is the point: it raises `buff.tigers_fury`, which eight conditions read. Its wire gaps respect the pin, 30,008 ms against 30,000.
+- **`fight_style.*`.** Read by Tiger's Fury and `frantic_frenzy`, declared here and unbound. Assassination's reasoning for raid scope applies only as a pattern, and the difficulty authority is still open (agent/follow-ups.md "After M11-F").
+- **Chomp's choice node.** Actor 170 has neither entry of node 82108, so the node does not resolve and the line's applicability is UNKNOWN. Nothing distinguishes an untaken node from an unobserved one in this rule. The same shape as a lone node absent from the tree, and it recurs here with Fluid Form and Apex Predator's Craving.
+- **`cooldown`.** `convoke_the_spirits` overruns the engine's atom limit on a condition that also reads `fight_remains`. Berserk, Incarnation and Feral Frenzy do not respect their pins, so a floor would be false.
+
+**What stands behind the count.** `rake` and `moonfire_cat` read `persistent_multiplier` and `pmultiplier`, unbindable by design, which is `rip-rake-snapshot-refresh` and stays a recorded question for a later deep dive. `rip` needs its DoT state, and `combo_points` is known only on a finisher, so every builder decision needs a reconstruction this slice does not have (DISCRETE_EVENT_OBSERVED, from the 441 and 202 `resourcechange` events of type 4, is the likely shape).
+
+**No Energy is modelled between casts.** `energy` is the decision cast's own PRE_COST value, and it stays unknown where a Bite reports no cost (4 of actor 1's 32).
+
+**The PTR list was not read.** `feral_apl_ptr.inc` has no retained copy. `PTR_SEPARATE_INCLUDE` claims only that the live branch is the live list.
+
+**Two subjects, one hero tree.** Both are Wildstalker, one with Incarnation and one with Berserk and Convoke, and one is a prefix. Druid of the Claw is known only from synthetic tests, so a promotion must measure it or refuse it, as Havoc refuses Fel-Scarred.
+
+**The archive's notice line still has 5,212 bytes left.** Feral's first seconds were not committed, because nothing would resolve on them and the room is better kept for a tranche that does.
+
+---
+
 ## After ONB-B3: what the Devourer Demon Hunter slice does not establish
 
 **Raised:** ONB-B3 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.
@@ -313,10 +342,9 @@ validated on real logs, and one subject is not many.
   unrecognised option on any line) all block. `wait_for_cooldown` readiness
   is never proven: a cooldown with charges can be ready with remains above
   zero.
-- **Resolvers are spec-owned and absent.** No specialization supplies a
-  `PoolingResolver` yet, so the at-maximum readiness is UNKNOWN wherever a
-  resolver is needed. ONB-C1 (Feral) and ONB-C2 (Outlaw) own theirs, along with
-  `max_energy=1` on the pinned Feral `ferocious_bite`, which is still refused.
+- **Resolvers are spec-owned.** A list without a `PoolingResolver` gets UNKNOWN at
+  the at-maximum readiness. ONB-C1 supplies Feral's, and reads `max_energy=1` on
+  its one line (agent/follow-ups.md "After ONB-C1"). ONB-C2 (Outlaw) owns its own.
 - **Runtime background.** Pruning follows the existing rule: NOT_APPLICABLE
   stands for init-time background. A guarded line made background later at
   runtime is not modelled separately.

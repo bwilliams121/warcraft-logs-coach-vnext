@@ -1,0 +1,522 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_DRUID_FERAL",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "druid",
+    "specName": "feral"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "UNKNOWN",
+    "sourcePath": "engine/class_modules/apl/druid/feral_apl.inc",
+    "sourceSha256": "d4a1274f99c10bdde08d5a36832b2b20b898a09b35d2d10258aca3fa7b6fcbfb",
+    "sourceByteLength": 17108,
+    "regionSelector": {
+      "kind": "INCLUDED_FILE",
+      "includingSourcePath": "engine/class_modules/apl/druid/druid.cpp",
+      "includingSourceSha256": "dea8183f92e3a0da438e763355de6a41509d53930360287a05797994940ef28c",
+      "includeLine": "#include \"class_modules/apl/druid/feral_apl.inc\"",
+      "functionHeader": "void apl_feral( player_t* p )"
+    },
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "regionSha256": "d4a1274f99c10bdde08d5a36832b2b20b898a09b35d2d10258aca3fa7b6fcbfb",
+    "livePtrPolicy": "PTR_SEPARATE_INCLUDE",
+    "dispatchSource": {
+      "sourcePath": "engine/class_modules/sc_druid.cpp",
+      "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0"
+    }
+  },
+  "lists": [
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "variable,name=regrowth,op=reset",
+          "comment": "optional variable that sends regrowth casts. Turned off by default",
+          "sourceLine": 10
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "variable,name=dotc_rake_threshold,op=set,value=99",
+          "comment": "see the 2nd rake line in aoe_builders. This determines when that line can return true",
+          "sourceLine": 11
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=dotc_rake_threshold,op=set,if=talent.wild_slashes&talent.merciless_claws,value=5",
+          "comment": null,
+          "sourceLine": 12
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=dotc_rake_threshold,op=set,if=talent.wild_slashes&!talent.merciless_claws,value=8",
+          "comment": null,
+          "sourceLine": 13
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "potion,pre_pot_time=12,if=potion.liquid_luster",
+          "comment": null,
+          "sourceLine": 14
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "variable,name=algethar_puzzle_box_precombat_cast,value=3,if=trinket.1.is.algethar_puzzle_box|!trinket.1.has_use_buff",
+          "comment": "for practicism, we give a 1s leeway (at 0% haste) from cast end until start of the fight.",
+          "sourceLine": 15
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "use_item,name=algethar_puzzle_box,if=trinket.1.is.algethar_puzzle_box|!trinket.1.has_use_buff",
+          "comment": null,
+          "sourceLine": 16
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "cat_form,if=buff.cat_form.down",
+          "comment": null,
+          "sourceLine": 17
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "prowl",
+          "comment": null,
+          "sourceLine": 18
+        }
+      ]
+    },
+    {
+      "listName": "default",
+      "receiverIdentifier": "def",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "prowl,if=buff.bs_inc.down&!buff.prowl.up&!buff.shadowmeld.up",
+          "comment": null,
+          "sourceLine": 20
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "cat_form,if=!buff.cat_form.up&!talent.fluid_form",
+          "comment": null,
+          "sourceLine": 21
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "invoke_external_buff,name=power_infusion,if=buff.bs_inc.up|!talent.berserk_heart_of_the_lion",
+          "comment": "Line up <a href='https://www.wowhead.com/spell=10060/power-infusion'>Power Infusion</a> with <a href='https://www.wowhead.com/spell=106951/berserk'>Berserk</a> every 2 minutes.",
+          "sourceLine": 22
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "auto_attack,if=!buff.prowl.up&!buff.shadowmeld.up",
+          "comment": null,
+          "sourceLine": 23
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "tigers_fury,if=(cooldown.bs_inc.remains<=1|cooldown.bs_inc.remains>10|variable.holdBerserk)&(cooldown.frantic_frenzy.remains<buff.tigers_fury.duration-1.5|cooldown.frantic_frenzy.remains>22|!talent.frantic_frenzy|spell_targets=1|fight_style.dungeonroute|fight_style.dungeonslice)",
+          "comment": "tigers fury on cooldown, in aoe patchwerk we can hold ~2s for frantic frenzy as needed. Like frantic frenzy, holding can sometimes be a gain in dr/ds, but the conditions are unclear. Addendum: Seems't've been related to holding Berserk, attempt to check holding tigers fury at your own risk.",
+          "sourceLine": 24
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "rake,if=buff.prowl.up|buff.shadowmeld.up",
+          "comment": "rake out of stealth",
+          "sourceLine": 25
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "chomp,if=buff.chomp_enabler.up",
+          "comment": "chomp if its possible. Check this in aoe",
+          "sourceLine": 26
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "call_action_list,name=cooldown",
+          "comment": null,
+          "sourceLine": 27
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "ferocious_bite,if=buff.apex_predators_craving.up",
+          "comment": "cast bite with apex procs asap",
+          "sourceLine": 28
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "call_action_list,name=finisher,if=spell_targets=1",
+          "comment": null,
+          "sourceLine": 29
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "call_action_list,name=aoe_finisher,if=spell_targets>=2",
+          "comment": null,
+          "sourceLine": 30
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "call_action_list,name=builder,if=spell_targets=1&combo_points<=4",
+          "comment": null,
+          "sourceLine": 31
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "call_action_list,name=aoe_builder,if=spell_targets>1&combo_points<=4",
+          "comment": null,
+          "sourceLine": 32
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "regrowth,if=buff.predatory_swiftness.up&variable.regrowth",
+          "comment": null,
+          "sourceLine": 33
+        }
+      ]
+    },
+    {
+      "listName": "aoe_builder",
+      "receiverIdentifier": "aoe_builder",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "prowl,target_if=dot.rake.refreshable,if=!buff.shadowmeld.up",
+          "comment": null,
+          "sourceLine": 35
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "shadowmeld,target_if=dot.rake.refreshable,if=!buff.prowl.up",
+          "comment": null,
+          "sourceLine": 36
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "rake,target_if=refreshable,if=(talent.doubleclawed_rake&(!talent.lunar_inspiration|!talent.panthers_guile|active_dot.rake<5))|hero_tree.wildstalker&(active_dot.rake<2+!talent.panthers_guile+talent.lunar_inspiration)",
+          "comment": "ensure at last 2(pg)/3(nopg) rake at all times if wildstalker, rake highest prio with dcr. on 4t raking all 4 first (no pg) is 0.3% gain. DCR PG LI rakes up to 6 then moonfire",
+          "sourceLine": 37
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "moonfire_cat,target_if=refreshable",
+          "comment": "there are scenarios where this is -0.1/-0.2% vs being under cc swipe line, but im willing to scrap that complexity",
+          "sourceLine": 38
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "shred,if=spell_targets=2&talent.panthers_guile&buff.clearcasting.react",
+          "comment": "panthers guile, spend clearcast on shred",
+          "sourceLine": 39
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "swipe_cat,if=hero_tree.druid_of_the_claw&buff.bs_inc.up|buff.clearcasting.react&(hero_tree.druid_of_the_claw|spell_targets<7)",
+          "comment": "with dotc, nodcr/nowildslashes, swipe spam in berserk at 2t. Wildstalker begins ignoring cc again if you have the energy to rake at 7t",
+          "sourceLine": 40
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "swipe_cat,if=buff.sudden_ambush.up&spell_targets.swipe_cat>=5+(2*hero_tree.wildstalker)",
+          "comment": "sa swipe takes precedence over single-rake at 5t for dotc 7t for wildstalker (0.1% at 7t for wildstalker, 0.2% for dotc at 5t)",
+          "sourceLine": 41
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "rake,target_if=refreshable,if=hero_tree.wildstalker|spell_targets.swipe_cat<=variable.dotc_rake_threshold",
+          "comment": "no dcr, spread rakes up to 3t(ws+noiw)->5t(nows+noiw/wild slashes+iw)->8t(no ws+iw)",
+          "sourceLine": 42
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "rake,target_if=min:pmultiplier,if=persistent_multiplier>pmultiplier&spell_targets=2",
+          "comment": "on 2t replace weaker rakes with stronger ones. (its a tiny gain for 3t too, @0.2% but keeping track of 3 snapshots is a bit much I think)",
+          "sourceLine": 43
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "shred,if=spell_targets=2&talent.panthers_guile",
+          "comment": "with panther's guile, its worth using shred on 2t",
+          "sourceLine": 44
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "swipe_cat,if=spell_targets>2|!talent.panthers_guile",
+          "comment": null,
+          "sourceLine": 45
+        }
+      ]
+    },
+    {
+      "listName": "aoe_finisher",
+      "receiverIdentifier": "aoe_finisher",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "primal_wrath,target_if=min:remains,if=combo_points>=5&spell_targets.primal_wrath>1&(dot.primal_wrath.remains<6.5&!buff.bs_inc.up|dot.primal_wrath.refreshable)",
+          "comment": "primal wrath in pandemic during berserk, else with sub 6.5s remaining",
+          "sourceLine": 47
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "ferocious_bite,if=buff.ravage.up&combo_points>=5&!talent.primal_wrath&spell_targets>=2+(3*!talent.rampant_ferocity)",
+          "comment": "without pw, we prio ravage>rip at 2t with rampant ferocity, and 5t without TODO: check vines",
+          "sourceLine": 48
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "rip,target_if=min:remains,if=combo_points>=5&!talent.primal_wrath&refreshable",
+          "comment": "if we dont have primal wrath, indefinitely apply manual 4cp rips (minmax note: without rampant, its ~0.3% better to do 5cp rip/5cp bite on 3/4t)",
+          "sourceLine": 49
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "ferocious_bite,target_if=min:dot.rip.remains,if=combo_points>=5&(talent.rampant_ferocity|buff.ravage.up&spell_targets<8|dot.bloodseeker_vines.ticking&spell_targets<5)",
+          "comment": "we can send bite with rampant or under 5t with vines, 8t with ravage. TODO: check these numbers",
+          "sourceLine": 50
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "primal_wrath,if=combo_points>=5",
+          "comment": "fallback primal wrath",
+          "sourceLine": 51
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "ferocious_bite,target_if=min:dot.rip.remains,if=combo_points>=5",
+          "comment": "if we dont have primal wrath then bite here",
+          "sourceLine": 52
+        }
+      ]
+    },
+    {
+      "listName": "builder",
+      "receiverIdentifier": "builder",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "prowl,if=!buff.shadowmeld.up&(action.rake.pmultiplier<1.6|dot.rake.refreshable)",
+          "comment": null,
+          "sourceLine": 54
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "shadowmeld,if=!buff.prowl.up&(action.rake.pmultiplier<1.6|dot.rake.refreshable)",
+          "comment": null,
+          "sourceLine": 55
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "shred,if=buff.sudden_ambush.up&hero_tree.druid_of_the_claw",
+          "comment": "0.2% for dotc, like, do we even care? Like, the only reason I even put this in is to feel something",
+          "sourceLine": 56
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "rake,if=(buff.tigers_fury.up|remains<cooldown.tigers_fury.remains)&(refreshable&persistent_multiplier>=pmultiplier|remains<2|persistent_multiplier>pmultiplier)",
+          "comment": "freely upgrade rakes",
+          "sourceLine": 57
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "moonfire_cat,if=(buff.tigers_fury.up|remains<cooldown.tigers_fury.remains)&(refreshable&persistent_multiplier>=pmultiplier|remains<2|persistent_multiplier>pmultiplier)",
+          "comment": "freely upgrade li, aggressive moonfire clipping can be a gain in some talent builds, look further into this.",
+          "sourceLine": 58
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "shred",
+          "comment": null,
+          "sourceLine": 59
+        }
+      ]
+    },
+    {
+      "listName": "cd_variable",
+      "receiverIdentifier": "cd_variable",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "variable,name=convokeCountRemaining,value=floor(cooldown.convoke_the_spirits.charges_fractional+fight_remains%cooldown.convoke_the_spirits.duration-0.05)",
+          "comment": "these variables math out how many uses of each relevant cooldown remain, with a buffer (as a %of a cast) as we dont care if a cd comes up as the fight ends",
+          "sourceLine": 61
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "variable,name=zerkCountRemaining,value=floor(cooldown.bs_inc.charges_fractional+fight_remains%cooldown.bs_inc.duration-0.05)",
+          "comment": null,
+          "sourceLine": 62
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=potCountRemaining,value=floor(cooldown.potion.charges_fractional+fight_remains%cooldown.potion.duration-0.06)",
+          "comment": null,
+          "sourceLine": 63
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=slot1CountRemaining,value=floor(trinket.1.cooldown.charges_fractional+fight_remains%trinket.1.cooldown.duration-0.05)",
+          "comment": null,
+          "sourceLine": 64
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=slot2CountRemaining,value=floor(trinket.2.cooldown.charges_fractional+fight_remains%trinket.2.cooldown.duration-0.05)",
+          "comment": null,
+          "sourceLine": 65
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "variable,name=holdBerserk,value=variable.zerkCountRemaining=1&variable.potCountRemaining=1&cooldown.potion.remains",
+          "comment": "hold berserk for potion if able without losing a use",
+          "sourceLine": 66
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "variable,name=holdPot,value=variable.potCountRemaining=floor((fight_remains-cooldown.bs_inc.remains-10)%cooldown.potion.duration+(fight_remains>cooldown.bs_inc.remains))",
+          "comment": "hold potion for berserk if doing so does not lose you a cast (compares the thereotical potion casts remaining to what potCountRemaining will be once the berserk is ready). If they are same, this variable is true. Potion always gets used if berserk is already casted.",
+          "sourceLine": 67
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "variable,name=highestCDremaining,op=setif,condition=talent.convoke_the_spirits,value=cooldown.convoke_the_spirits.remains<?cooldown.bs_inc.remains<?cooldown.potion.remains,value_else=cooldown.bs_inc.remains<?cooldown.potion.remains",
+          "comment": "tells us when our upcoming cooldown windows are for use in trinket lines",
+          "sourceLine": 68
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "variable,name=lowestCDremaining,op=setif,condition=talent.convoke_the_spirits,value=cooldown.convoke_the_spirits.remains>?cooldown.bs_inc.remains>?cooldown.potion.remains,value_else=cooldown.bs_inc.remains>?cooldown.potion.remains",
+          "comment": null,
+          "sourceLine": 69
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "variable,name=secondLowestCDremaining,op=setif,condition=cooldown.convoke_the_spirits.remains>cooldown.bs_inc.remains,value=cooldown.convoke_the_spirits.remains>?cooldown.potion.remains,value_else=cooldown.bs_inc.remains>?cooldown.potion.remains",
+          "comment": null,
+          "sourceLine": 70
+        }
+      ]
+    },
+    {
+      "listName": "cooldown",
+      "receiverIdentifier": "cooldown",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "call_action_list,name=cd_variable,if=!cooldown.bs_inc.remains|!cooldown.potion.remains|!trinket.1.cooldown.remains|!trinket.2.cooldown.remains",
+          "comment": "this line is here to reduce the amount of variable calls in the APL by only checking variables when they are potentially relevant.",
+          "sourceLine": 72
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "use_item,slot=trinket1,if=trinket.1.has_use_damage&(trinket.2.cooldown.remains>20|!trinket.2.has_use_buff|(cooldown.tigers_fury.remains<25&cooldown.tigers_fury.remains>20))&(!trinket.1.is.font_of_venomous_rage|!buff.bs_inc.up)",
+          "comment": "non-stat on use trinkets get used on cooldown, so long as it wont interfere with a stat on-use trinket",
+          "sourceLine": 73
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_item,slot=trinket2,if=trinket.2.has_use_damage&(trinket.1.cooldown.remains>20|!trinket.1.has_use_buff|(cooldown.tigers_fury.remains<25&cooldown.tigers_fury.remains>20))&(!trinket.2.is.font_of_venomous_rage|!buff.bs_inc.up)",
+          "comment": null,
+          "sourceLine": 74
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "berserking",
+          "comment": null,
+          "sourceLine": 75
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "potion,if=buff.bs_inc.up|fight_remains<32|buff.tigers_fury.up&!variable.holdPot",
+          "comment": "potion during berserk, fallback pot if the fight is going to end within its duration. Expedite use if you would lose a pot use by holding it.",
+          "sourceLine": 76
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "use_items",
+          "comment": "non trinket gear-on-uses have variable rules on whether or not they trigger the trinket shared CD. For the cases they do we will need specific APL entries. For now just use on cooldown.",
+          "sourceLine": 77
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "use_item,slot=trinket1,use_off_gcd=1,if=trinket.1.has_use_buff&(cooldown.tigers_fury.remains>=25|trinket.1.is.algethar_puzzle_box&(!raid_event.adds.up|raid_event.adds.remains>13)&cooldown.tigers_fury.remains<2)&((cooldown.bs_inc.remains<5|buff.bs_inc.remains>=14)&!variable.holdBerserk|cooldown.convoke_the_spirits.remains<10&talent.ashamanes_guidance&talent.convoke_the_spirits|variable.lowestCDremaining>trinket.1.cooldown.duration|variable.zerkCountRemaining=1&(!talent.convoke_the_spirits|variable.convokeCountRemaining=1)&variable.potCountRemaining=1&(variable.highestCDremaining+3)>trinket.1.cooldown.duration|variable.zerkCountRemaining=variable.convokeCountRemaining&talent.convoke_the_spirits&variable.zerkCountRemaining!=variable.potCountRemaining&(cooldown.bs_inc.remains<?cooldown.convoke_the_spirits.remains)>trinket.1.cooldown.duration|variable.slot1CountRemaining=variable.potCountRemaining+1&buff.potion.up|trinket.2.has_use_buff&(variable.secondLowestCDremaining>trinket.1.cooldown.duration&variable.lowestCDremaining>trinket.2.cooldown.remains|variable.zerkCountRemaining=1&(!talent.convoke_the_spirits|variable.convokeCountRemaining=1)&variable.potCountRemaining=1&variable.highestCDremaining>trinket.2.cooldown.remains|variable.zerkCountRemaining=variable.convokeCountRemaining&talent.convoke_the_spirits&variable.zerkCountRemaining!=variable.potCountRemaining&(cooldown.convoke_the_spirits.remains<?cooldown.bs_inc.remains)>trinket.2.cooldown.remains|variable.convokeCountRemaining=0&variable.zerkCountRemaining=0&variable.potCountRemaining=0))",
+          "comment": "stat on-use trinkets, essentially this compares the number of trinket uses to the number of other cooldown uses remaining in the fight to determine whether or not to send the trinket.",
+          "sourceLine": 78
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "use_item,slot=trinket2,use_off_gcd=1,if=trinket.2.has_use_buff&(!trinket.1.has_use_buff|trinket.1.cooldown.remains>20)&(cooldown.tigers_fury.remains>=25|trinket.2.is.algethar_puzzle_box&(!raid_event.adds.up|raid_event.adds.remains>13)&(cooldown.tigers_fury.remains<2|buff.tigers_fury.up))&(buff.potion.up|variable.slot2CountRemaining!=variable.potCountRemaining)&((cooldown.bs_inc.remains<5|buff.bs_inc.remains>=14)&!variable.holdBerserk|cooldown.convoke_the_spirits.remains<10&talent.ashamanes_guidance&talent.convoke_the_spirits|variable.lowestCDremaining>trinket.2.cooldown.duration|variable.zerkCountRemaining=1&(!talent.convoke_the_spirits|variable.convokeCountRemaining=1)&variable.potCountRemaining=1&(variable.highestCDremaining+3)>trinket.2.cooldown.duration|variable.zerkCountRemaining=variable.convokeCountRemaining&talent.convoke_the_spirits&variable.zerkCountRemaining!=variable.potCountRemaining&(cooldown.bs_inc.remains<?cooldown.convoke_the_spirits.remains)>trinket.2.cooldown.duration|variable.slot1CountRemaining=variable.potCountRemaining-1&buff.potion.up|trinket.1.has_use_buff&(variable.secondLowestCDremaining>trinket.2.cooldown.duration&variable.lowestCDremaining>trinket.1.cooldown.remains|variable.zerkCountRemaining=1&(!talent.convoke_the_spirits|variable.convokeCountRemaining=1)&variable.potCountRemaining=1&variable.highestCDremaining>trinket.1.cooldown.remains|variable.zerkCountRemaining=variable.convokeCountRemaining&talent.convoke_the_spirits&variable.zerkCountRemaining!=variable.potCountRemaining&(cooldown.convoke_the_spirits.remains<?cooldown.bs_inc.remains)>trinket.1.cooldown.remains|variable.convokeCountRemaining=0&variable.zerkCountRemaining=0&variable.potCountRemaining=0))",
+          "comment": null,
+          "sourceLine": 79
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "use_item,slot=trinket1,if=fight_remains<=(21<?trinket.1.proc.any_dps.duration)",
+          "comment": "fallback use if fight is ending soon",
+          "sourceLine": 80
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "use_item,slot=trinket2,if=fight_remains<=(21<?trinket.2.proc.any_dps.duration)",
+          "comment": null,
+          "sourceLine": 81
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "berserk,if=buff.tigers_fury.up&!variable.holdBerserk",
+          "comment": null,
+          "sourceLine": 82
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "feral_frenzy,if=!talent.frantic_frenzy&combo_points<=2+(2*buff.bs_inc.up)",
+          "comment": "0-2 combo points outside zerk, 0-4 combo points inside zerk",
+          "sourceLine": 83
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "frantic_frenzy,if=(!fight_style.dungeonroute&!fight_style.dungeonslice|raid_event.adds.remains>5)&(buff.tigers_fury.up&spell_targets>=2|combo_points<=2+(2*buff.bs_inc.up))",
+          "comment": "we can find some gains in dslice by holding frantic frenzy for larger target counts occasionally, but its not by a lot, whereas holding tends to devolve pretty quickly in droute. I suspect this is due to how reliant on single target droute ends up being. Further investigations should be looked into.",
+          "sourceLine": 84
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "convoke_the_spirits,if=(buff.bs_inc.up|talent.ashamanes_guidance&(cooldown.bs_inc.remains>45|variable.holdBerserk))&buff.tigers_fury.up&(prev_gcd.1.rip|prev_gcd.1.ferocious_bite|prev_gcd.1.primal_wrath|buff.tigers_fury.remains<=1+action.convoke_the_spirits.execute_time)|fight_remains<5",
+          "comment": "line up convoke with berserk",
+          "sourceLine": 85
+        }
+      ]
+    },
+    {
+      "listName": "finisher",
+      "receiverIdentifier": "finisher",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "rip,if=combo_points>=5&refreshable&(buff.tigers_fury.up|remains<cooldown.tigers_fury.remains)",
+          "comment": "maintain rip in single-target. 4cp rips is a ~0.1-0.2% gain, omitted for simplicity",
+          "sourceLine": 87
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "pool_resource,for_next=1",
+          "comment": null,
+          "sourceLine": 88
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "ferocious_bite,max_energy=1,if=combo_points>=5",
+          "comment": null,
+          "sourceLine": 89
+        }
+      ]
+    }
+  ]
+}

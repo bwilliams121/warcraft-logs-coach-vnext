@@ -3974,6 +3974,286 @@ const DEMONHUNTER_DEVOURER_FACTS = {
   ],
 };
 
+/**
+ * The Feral Druid facts (ONB-C1).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every spell a token of the
+ * pinned Feral list (`apl/druid/feral_apl.inc`) can execute. Facts a reader should not
+ * have to rediscover (all read off the pinned DBC and the retained wire):
+ *
+ *   - BERSERK IS ONE TOKEN WITH TWO ACTIONS. `berserk` builds Incarnation when it is
+ *     taken, so both records are candidates and the talent decides which.
+ *   - TALENT ROWS ARE NOT ALWAYS THE ACTION. Lunar Inspiration's row is 155580 and the
+ *     action is 155625; Berserk's is 343223 and the action 106951; Swipe's is 213764 and
+ *     the cat action 106785.
+ *   - PROWL, TIGER'S FURY AND BERSERK ARE `_gcd` 0: off-GCD steps of a scan.
+ */
+const DRUID_FERAL_SOURCES = {
+  spellData: "engine/dbc/generated/sc_spell_data.inc",
+  classSpells: "engine/dbc/generated/class_spells.inc",
+  clientDataVersion: "engine/dbc/generated/client_data_version.inc",
+  spellDataLayout: "engine/dbc/spell_data.hpp",
+  // HASHED, NEVER PARSED — the class module every token binding is a hand-reviewed reading of.
+  classModule: "engine/class_modules/sc_druid.cpp",
+  // HASHED, NEVER PARSED. The racial rows are class-mask readings of this table.
+  racialSpells: "engine/dbc/generated/racial_spells.inc",
+  playerModule: "engine/player/player.cpp",
+  consumableModule: "engine/player/consumable.cpp",
+};
+
+const DRUID = "engine/class_modules/sc_druid.cpp";
+
+const DRUID_FERAL_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    // ---- class/spec actions the pinned Feral list names ----
+    { abilityGameId: 5215, displayNameEn: "Prowl", baseGcdMs: 0 },
+    { abilityGameId: 768, displayNameEn: "Cat Form", baseGcdMs: 1500 },
+    { abilityGameId: 5217, displayNameEn: "Tiger's Fury", baseGcdMs: 0 },
+    { abilityGameId: 1822, displayNameEn: "Rake", baseGcdMs: 1000 },
+    { abilityGameId: 1244258, displayNameEn: "Chomp", baseGcdMs: 1000 },
+    { abilityGameId: 22568, displayNameEn: "Ferocious Bite", baseGcdMs: 1000 },
+    { abilityGameId: 8936, displayNameEn: "Regrowth", baseGcdMs: 1500 },
+    { abilityGameId: 5221, displayNameEn: "Shred", baseGcdMs: 1000 },
+    { abilityGameId: 155625, displayNameEn: "Moonfire", baseGcdMs: 1000 },
+    { abilityGameId: 106785, displayNameEn: "Swipe", baseGcdMs: 1000 },
+    { abilityGameId: 285381, displayNameEn: "Primal Wrath", baseGcdMs: 1000 },
+    { abilityGameId: 1079, displayNameEn: "Rip", baseGcdMs: 1000 },
+    { abilityGameId: 106951, displayNameEn: "Berserk", baseGcdMs: 0 },
+    { abilityGameId: 102543, displayNameEn: "Incarnation: Avatar of Ashamane", baseGcdMs: 0 },
+    { abilityGameId: 274837, displayNameEn: "Feral Frenzy", baseGcdMs: 1000 },
+    { abilityGameId: 1243807, displayNameEn: "Frantic Frenzy", baseGcdMs: 1000 },
+    { abilityGameId: 391528, displayNameEn: "Convoke the Spirits", baseGcdMs: 1500 },
+    // ---- the two racial tokens of the list, as a Druid resolves them ----
+    { abilityGameId: 58984, displayNameEn: "Shadowmeld", baseGcdMs: 0 },
+    { abilityGameId: 26297, displayNameEn: "Berserking", baseGcdMs: 0 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "prowl",
+      candidateAbilityGameIds: [5215],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / prowl_t",
+      startLine: 10255,
+      endLine: 10255,
+      sourceNote:
+        'prowl_t is built on p->find_class_spell( "Prowl" ) at :7956, class_spells.inc row { 11, 0, 5215 }. use_off_gcd is set at :7958. Its ready() is false while buff.prowl is up, and while in combat without buff.incarnation_cat_prowl (:7990-7996).',
+    },
+    {
+      simcToken: "cat_form",
+      candidateAbilityGameIds: [768],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / cat_form_t",
+      startLine: 10149,
+      endLine: 10149,
+      sourceNote:
+        'create_action dispatches "cat_form" to cat_form_t, built on p->spec.cat_form (:3675); spec.cat_form = find_class_spell( "Cat Form" ) at :10674, class_spells.inc row { 11, 0, 768 }.',
+    },
+    {
+      simcToken: "tigers_fury",
+      candidateAbilityGameIds: [5217],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / tigers_fury_t",
+      startLine: 10197,
+      endLine: 10197,
+      sourceNote:
+        'create_action dispatches "tigers_fury" to tigers_fury_t, built on p->talent.tigers_fury (:4857); find_talent_spell( SPECIALIZATION, "Tiger\'s Fury" ) at :10475, trait row spell 5217, _gcd 0.',
+    },
+    {
+      simcToken: "rake",
+      candidateAbilityGameIds: [1822],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / rake_t",
+      startLine: 10232,
+      endLine: 10232,
+      sourceNote:
+        'create_action dispatches "rake" to rake_t, built on p->talent.rake (:4551); find_talent_spell( CLASS, "Rake" ) at :10358, trait row spell 1822. The log also reports the debuff 155722, which is not the action.',
+    },
+    {
+      simcToken: "chomp",
+      candidateAbilityGameIds: [1244258],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / chomp_t",
+      startLine: 10191,
+      endLine: 10191,
+      sourceNote:
+        'create_action dispatches "chomp" to chomp_t, built on p->talent.chomp (:4050); find_talent_spell( SPECIALIZATION, "Chomp" ) at :10445, trait row spell 1244258. Its ready() also needs buff.chomp_enabler (:4054). Not observed on a retained subject.',
+    },
+    {
+      simcToken: "ferocious_bite",
+      candidateAbilityGameIds: [22568],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / ferocious_bite_t",
+      startLine: 10251,
+      endLine: 10251,
+      sourceNote:
+        'create_action dispatches "ferocious_bite" to ferocious_bite_t, built on p->find_class_spell( "Ferocious Bite" ) at :4427, class_spells.inc row { 11, 0, 22568 }. Its max_energy option is read in ready() (:4267-4273).',
+    },
+    {
+      simcToken: "regrowth",
+      candidateAbilityGameIds: [8936],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / regrowth_t",
+      startLine: 10256,
+      endLine: 10256,
+      sourceNote:
+        'create_action dispatches "regrowth" to regrowth_t, built on p->find_class_spell( "Regrowth" ) at :6310, class_spells.inc row { 11, 0, 8936 }. The retained subjects log a begincast for every hardcast.',
+    },
+    {
+      simcToken: "shred",
+      candidateAbilityGameIds: [5221],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / shred_t",
+      startLine: 10257,
+      endLine: 10257,
+      sourceNote:
+        'create_action dispatches "shred" to shred_t, built on p->find_class_spell( "Shred" ) at :4792, class_spells.inc row { 11, 0, 5221 }.',
+    },
+    {
+      simcToken: "moonfire_cat",
+      candidateAbilityGameIds: [155625],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / lunar_inspiration_t",
+      startLine: 10194,
+      endLine: 10195,
+      sourceNote:
+        'create_action dispatches "moonfire_cat" to lunar_inspiration_t, built on p->talent.lunar_inspiration.ok() ? p->find_spell( 155625 ) : spell_data_t::not_found() at :4461-4462. The talent row carries 155580, _gcd 0, which is not the action.',
+    },
+    {
+      simcToken: "swipe_cat",
+      candidateAbilityGameIds: [106785],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / swipe_cat_t",
+      startLine: 10244,
+      endLine: 10244,
+      sourceNote:
+        'create_action dispatches "swipe_cat" to swipe_cat_t, built on p->apply_override( p->talent.swipe, p->spec.cat_form_override ) at :4839, with spec.cat_form_override = find_spell( 48629 ) at :10675. The retained subjects log the cat override 106785; the talent row itself carries 213764.',
+    },
+    {
+      simcToken: "primal_wrath",
+      candidateAbilityGameIds: [285381],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / primal_wrath_t",
+      startLine: 10196,
+      endLine: 10196,
+      sourceNote:
+        'create_action dispatches "primal_wrath" to primal_wrath_t, built on p->talent.primal_wrath (:4743); find_talent_spell( SPECIALIZATION, "Primal Wrath" ) at :10464, trait row spell 285381.',
+    },
+    {
+      simcToken: "rip",
+      candidateAbilityGameIds: [1079],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / rip_t",
+      startLine: 10235,
+      endLine: 10235,
+      sourceNote:
+        'create_action dispatches "rip" to rip_t, built on p->talent.rip (:4656); find_talent_spell( CLASS, "Rip" ) at :10361, trait row spell 1079.',
+    },
+    {
+      simcToken: "berserk",
+      candidateAbilityGameIds: [106951, 102543],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / incarnation_cat_t or berserk_cat_t",
+      startLine: 10162,
+      endLine: 10172,
+      sourceNote:
+        'create_action dispatches "berserk" to incarnation_cat_t when talent.incarnation_cat is taken (:10162-10163), built on the talent, spell 102543 (:3946). Otherwise to berserk_cat_t (:10168-10172), built on spec.berserk_cat = talent.berserk_cat.find_override_spell() (:3937-3938, :10703). The retained subject without Incarnation logs 106951; the talent row carries 343223, _gcd 0, which is not the action.',
+    },
+    {
+      simcToken: "feral_frenzy",
+      candidateAbilityGameIds: [274837],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / feral_frenzy_t",
+      startLine: 10192,
+      endLine: 10192,
+      sourceNote:
+        'create_action dispatches "feral_frenzy" to feral_frenzy_t, built on p->talent.feral_frenzy (:4134); find_talent_spell( SPECIALIZATION, "Feral Frenzy" ) at :10450, trait row spell 274837. The log also reports the debuff 274838, which is not the action.',
+    },
+    {
+      simcToken: "frantic_frenzy",
+      candidateAbilityGameIds: [1243807],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / frantic_frenzy_t",
+      startLine: 10193,
+      endLine: 10193,
+      sourceNote:
+        'create_action dispatches "frantic_frenzy" to frantic_frenzy_t, built on p->talent.frantic_frenzy (:4084); find_talent_spell( SPECIALIZATION, "Frantic Frenzy" ) at :10452, trait row spell 1243807. Not observed on a retained subject.',
+    },
+    {
+      simcToken: "convoke_the_spirits",
+      candidateAbilityGameIds: [391528],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / convoke_the_spirits_t",
+      startLine: 10219,
+      endLine: 10219,
+      sourceNote:
+        'create_action dispatches "convoke_the_spirits" to convoke_the_spirits_t, built on p->talent.convoke_the_spirits (:9256); find_talent_spell( SPECIALIZATION, "Convoke the Spirits" ) at :10383, whose Feral trait row carries spell 391528.',
+    },
+    {
+      simcToken: "shadowmeld",
+      candidateAbilityGameIds: [58984],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / shadowmeld_t",
+      startLine: 11074,
+      endLine: 11075,
+      sourceNote:
+        'player_t::create_action dispatches "shadowmeld" to shadowmeld_t. racial_spells.inc row { 0x0000000000000008 (Night Elf), 0x00003fff (every class), 58984 } is the one row a Druid resolves. OUTSIDE the rotational decision domain (racial action).',
+    },
+    {
+      simcToken: "berserking",
+      candidateAbilityGameIds: [26297],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / berserking_t",
+      startLine: 11058,
+      endLine: 11059,
+      sourceNote:
+        'player_t::create_action dispatches "berserking" to berserking_t. racial_spells.inc row { 0x0000000000000080 (Troll), 0x00003fff (every class), 26297 } is the one row a Druid resolves. OUTSIDE the rotational decision domain (racial action).',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "auto_attack",
+      triggerGcdMs: 0,
+      sourcePath: DRUID,
+      symbol: "auto_attack_t::auto_attack_t",
+      line: 9887,
+      sourceNote:
+        'auto_attack_t is built on melee_attack_t( "auto_attack", p, spell_data_t::nil() ) (sc_druid.cpp:9885) and its constructor assigns trigger_gcd = 0_ms at :9887.',
+    },
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
 export const TARGETS = {
   "rogue-assassination": {
     datasetId: DATASET_ID,
@@ -4078,6 +4358,21 @@ export const TARGETS = {
     ],
     requiredFacts: DEMONHUNTER_DEVOURER_FACTS,
     defaultOut: "src/data/game/demonhunter-devourer-gcd-semantics.json",
+  },
+  "druid-feral": {
+    datasetId: "SIMC_DBC_DRUID_FERAL_GCD_SEMANTICS",
+    classId: 11,
+    className: "Druid",
+    sources: DRUID_FERAL_SOURCES,
+    classModulePath: DRUID_FERAL_SOURCES.classModule,
+    handReviewedPaths: [
+      DRUID_FERAL_SOURCES.classModule,
+      DRUID_FERAL_SOURCES.racialSpells,
+      DRUID_FERAL_SOURCES.playerModule,
+      DRUID_FERAL_SOURCES.consumableModule,
+    ],
+    requiredFacts: DRUID_FERAL_FACTS,
+    defaultOut: "src/data/game/druid-feral-gcd-semantics.json",
   },
   "deathknight-frost": {
     datasetId: "SIMC_DBC_DEATHKNIGHT_FROST_GCD_SEMANTICS",

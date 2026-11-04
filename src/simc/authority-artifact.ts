@@ -60,11 +60,27 @@ export interface AuthorityClassMethodSelector {
   readonly functionHeader: string;
 }
 
+/**
+ * A list held in its own file with no markers, `#include`d as the sole body of `functionHeader`
+ * in another pinned file (ONB-C1). The whole source file is the region, and the including file's
+ * hash and include line are the claim that it is that function's body.
+ */
+export interface AuthorityIncludedFileSelector {
+  readonly kind: "INCLUDED_FILE";
+  readonly includingSourcePath: string;
+  readonly includingSourceSha256: string;
+  readonly includeLine: string;
+  readonly functionHeader: string;
+}
+
 /** Every selector kind this build accepts. A marker-selected artifact carries NO selector. */
 export const AUTHORITY_REGION_SELECTOR_KINDS = [
   "NAMESPACE_FUNCTION",
   "CLASS_METHOD",
-] as const satisfies readonly (AuthorityNamespaceFunctionSelector | AuthorityClassMethodSelector)["kind"][];
+  "INCLUDED_FILE",
+] as const satisfies readonly (
+  AuthorityNamespaceFunctionSelector | AuthorityClassMethodSelector | AuthorityIncludedFileSelector
+)["kind"][];
 
 /**
  * The region's provenance, in exactly ONE of two forms (M11-C1a):
@@ -86,7 +102,8 @@ export type AuthorityRegionProvenance =
       readonly regionSelector?: never;
     }
   | {
-      readonly regionSelector: AuthorityNamespaceFunctionSelector | AuthorityClassMethodSelector;
+      readonly regionSelector:
+        AuthorityNamespaceFunctionSelector | AuthorityClassMethodSelector | AuthorityIncludedFileSelector;
       readonly regionStartMarker?: never;
       readonly regionEndMarker?: never;
     };
@@ -153,12 +170,14 @@ export interface AuthoritySpellGatedAction {
 }
 
 /** How a pinned target's live region relates to a PTR region at the pin (M11-D2-C). */
-export type AuthorityLivePtrPolicy = "NO_PTR_REGION" | "PTR_MARKERS_EMPTY" | "PTR_BODY_IDENTICAL";
+export type AuthorityLivePtrPolicy =
+  "NO_PTR_REGION" | "PTR_MARKERS_EMPTY" | "PTR_BODY_IDENTICAL" | "PTR_SEPARATE_INCLUDE";
 
 export const AUTHORITY_LIVE_PTR_POLICIES = [
   "NO_PTR_REGION",
   "PTR_MARKERS_EMPTY",
   "PTR_BODY_IDENTICAL",
+  "PTR_SEPARATE_INCLUDE",
 ] as const satisfies readonly AuthorityLivePtrPolicy[];
 
 /** One region statement the extractor dropped as proven inert, by exact text. */
@@ -393,6 +412,13 @@ function validateSpellGatedActions(value: unknown): readonly AuthoritySpellGated
 
 const NAMESPACE_FUNCTION_SELECTOR_KEYS = ["kind", "enclosingNamespace", "functionHeader", "playerIdentifier"];
 const CLASS_METHOD_SELECTOR_KEYS = ["kind", "enclosingClass", "functionHeader"];
+const INCLUDED_FILE_SELECTOR_KEYS = [
+  "kind",
+  "includingSourcePath",
+  "includingSourceSha256",
+  "includeLine",
+  "functionHeader",
+];
 const CPP_IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
 /**
@@ -421,6 +447,31 @@ function validateRegionProvenance(value: Record<string, unknown>): AuthorityRegi
     if (enclosingClass === null || methodHeader === null || !CPP_IDENTIFIER.test(enclosingClass)) return null;
     if (methodHeader.trim() !== methodHeader || !methodHeader.includes(`${enclosingClass}::`)) return null;
     return { regionSelector: { kind: "CLASS_METHOD", enclosingClass, functionHeader: methodHeader } };
+  }
+  if (selector["kind"] === "INCLUDED_FILE") {
+    if (Object.keys(selector).some((key) => !INCLUDED_FILE_SELECTOR_KEYS.includes(key))) return null;
+    const includingSourcePath = str(selector, "includingSourcePath");
+    const includingSourceSha256 = str(selector, "includingSourceSha256");
+    const includeLine = str(selector, "includeLine");
+    const includedHeader = str(selector, "functionHeader");
+    if (
+      includingSourcePath === null ||
+      includingSourceSha256 === null ||
+      includeLine === null ||
+      includedHeader === null
+    ) {
+      return null;
+    }
+    if (!/^[0-9a-f]{64}$/.test(includingSourceSha256) || !includeLine.startsWith("#include ")) return null;
+    return {
+      regionSelector: {
+        kind: "INCLUDED_FILE",
+        includingSourcePath,
+        includingSourceSha256,
+        includeLine,
+        functionHeader: includedHeader,
+      },
+    };
   }
   if (Object.keys(selector).some((key) => !NAMESPACE_FUNCTION_SELECTOR_KEYS.includes(key))) return null;
   if (selector["kind"] !== "NAMESPACE_FUNCTION") return null;

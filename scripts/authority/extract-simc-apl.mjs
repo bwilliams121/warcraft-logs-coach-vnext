@@ -59,6 +59,12 @@
  *                  header and player identifier — and WITHOUT either marker
  *                  field: a namespace boundary is not a marker.
  *
+ *   INCLUDED_FILE  `includedBy` (ONB-C1): the list is a whole pinned file with no
+ *                  markers, `#include`d as the sole body of `functionHeader` in
+ *                  another pinned file (`apl/druid/druid.cpp`). The including file
+ *                  is hash-checked, and the include must be the function's only
+ *                  statement. Recorded as `provenance.regionSelector`.
+ *
  * `playerIdentifier` names the parameter the list declarations and version
  * guards are called on (`p->get_action_priority_list`, or
  * `player->get_action_priority_list`); it defaults to `p`, must be the
@@ -151,6 +157,22 @@ const PINNED_SOURCES = Object.freeze({
     sourcePath: "engine/class_modules/sc_death_knight.cpp",
     sha256: "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
     byteLength: 636861,
+  },
+  APL_DRUID_FERAL: {
+    sourcePath: "engine/class_modules/apl/druid/feral_apl.inc",
+    commitSha: PINNED_SIMC_COMMIT,
+    sha256: "d4a1274f99c10bdde08d5a36832b2b20b898a09b35d2d10258aca3fa7b6fcbfb",
+    byteLength: 17108,
+  },
+  APL_DRUID_INCLUDER: {
+    sourcePath: "engine/class_modules/apl/druid/druid.cpp",
+    sha256: "dea8183f92e3a0da438e763355de6a41509d53930360287a05797994940ef28c",
+    byteLength: 926,
+  },
+  DRUID_DISPATCH: {
+    sourcePath: "engine/class_modules/sc_druid.cpp",
+    sha256: "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+    byteLength: 479886,
   },
   DEMON_HUNTER_DISPATCH: {
     sourcePath: "engine/class_modules/sc_demon_hunter.cpp",
@@ -985,6 +1007,86 @@ export const TARGETS = {
       forbiddenTokens: ["swap_action_list"],
     },
   },
+  "druid-feral": {
+    sourcePath: PINNED_SOURCES.APL_DRUID_FERAL.sourcePath,
+    includedBy: {
+      ...PINNED_SOURCES.APL_DRUID_INCLUDER,
+      includeLine: '#include "class_modules/apl/druid/feral_apl.inc"',
+    },
+    functionHeader: "void apl_feral( player_t* p )",
+    regionName: "apl_feral",
+    authorityId: "SIMC_APL_DRUID_FERAL",
+    spec: { className: "druid", specName: "feral" },
+    defaultOut: "src/simc/data/druid-feral.apl.json",
+    pinnedSource: {
+      ...PINNED_SOURCES.APL_DRUID_FERAL,
+      regionSha256: "d4a1274f99c10bdde08d5a36832b2b20b898a09b35d2d10258aca3fa7b6fcbfb",
+    },
+    livePtrPolicy: {
+      kind: "PTR_SEPARATE_INCLUDE",
+      ptrFunctionHeader: "void apl_feral_ptr( player_t* p )",
+      ptrIncludeLine: '#include "class_modules/apl/druid/feral_apl_ptr.inc"',
+    },
+    dispatch: {
+      ...PINNED_SOURCES.DRUID_DISPATCH,
+      functionHeader: "void druid_t::init_action_list()",
+      sequence: [
+        "case DRUID_FERAL:       is_ptr() ? druid_apl::apl_feral_ptr( this ) : druid_apl::apl_feral( this );             break;",
+      ],
+    },
+    requiredFacts: {
+      kind: "DISPATCH_GRAPH",
+      entryListName: "default",
+      requiredLists: [
+        "precombat",
+        "default",
+        "aoe_builder",
+        "aoe_finisher",
+        "builder",
+        "cd_variable",
+        "cooldown",
+        "finisher",
+      ],
+      listSizes: {
+        precombat: 9,
+        default: 14,
+        aoe_builder: 11,
+        aoe_finisher: 6,
+        builder: 6,
+        cd_variable: 10,
+        cooldown: 14,
+        finisher: 3,
+      },
+      edges: [
+        { from: "default", ordinal: 7, kind: "CALL", to: "cooldown", condition: null },
+        { from: "default", ordinal: 9, kind: "CALL", to: "finisher", condition: "spell_targets=1" },
+        { from: "default", ordinal: 10, kind: "CALL", to: "aoe_finisher", condition: "spell_targets>=2" },
+        {
+          from: "default",
+          ordinal: 11,
+          kind: "CALL",
+          to: "builder",
+          condition: "spell_targets=1&combo_points<=4",
+        },
+        {
+          from: "default",
+          ordinal: 12,
+          kind: "CALL",
+          to: "aoe_builder",
+          condition: "spell_targets>1&combo_points<=4",
+        },
+        {
+          from: "cooldown",
+          ordinal: 0,
+          kind: "CALL",
+          to: "cd_variable",
+          condition:
+            "!cooldown.bs_inc.remains|!cooldown.potion.remains|!trinket.1.cooldown.remains|!trinket.2.cooldown.remains",
+        },
+      ],
+      forbiddenTokens: ["swap_action_list", "run_action_list"],
+    },
+  },
   "demonhunter-devourer": {
     sourcePath: PINNED_SOURCES.APL_DEMON_HUNTER.sourcePath,
     regionStart: "//devourer_apl_start",
@@ -1579,10 +1681,32 @@ export function locateRegion(lines, target) {
   const hasMarkers = target.regionStart !== undefined || target.regionEnd !== undefined;
   const hasNamespace = target.enclosingNamespace !== undefined;
   const hasClass = target.enclosingClass !== undefined;
-  if (Number(hasMarkers) + Number(hasNamespace) + Number(hasClass) !== 1) {
+  const hasInclude = target.includedBy !== undefined;
+  if (Number(hasMarkers) + Number(hasNamespace) + Number(hasClass) + Number(hasInclude) !== 1) {
     fail(
-      `target '${target.regionName}' must declare exactly one region selector: regionStart/regionEnd markers, an enclosingNamespace, or an enclosingClass`,
+      `target '${target.regionName}' must declare exactly one region selector: regionStart/regionEnd markers, an enclosingNamespace, an enclosingClass, or includedBy`,
     );
+  }
+
+  if (hasInclude) {
+    // ONB-C1: the whole file is the function body, and verifyInclusion proves that against
+    // the hash-pinned including file. A file that names its own function is not this form.
+    if (lines.some((line) => line.trim() === target.functionHeader)) {
+      fail(`'${target.functionHeader}' occurs inside the included file, so it is not the body alone`);
+    }
+    return {
+      startIndex: -1,
+      endIndex: lines.length,
+      provenance: {
+        regionSelector: {
+          kind: "INCLUDED_FILE",
+          includingSourcePath: target.includedBy.sourcePath,
+          includingSourceSha256: target.includedBy.sha256,
+          includeLine: target.includedBy.includeLine,
+          functionHeader: target.functionHeader,
+        },
+      },
+    };
   }
 
   if (hasClass) {
@@ -1726,8 +1850,10 @@ export function extract(sourceText, target) {
   );
   const addActionHead = /^([A-Za-z_][A-Za-z0-9_]*)->add_action\s*\(/;
 
-  let sawFunctionHeader = false;
-  let braceDepth = 0;
+  // An included file is already inside its function: there is no header and no closing brace.
+  const included = target.includedBy !== undefined;
+  let sawFunctionHeader = included;
+  let braceDepth = included ? 1 : 0;
   const inertDeclared = TARGET.inertStatements ?? [];
   const inertSeen = [];
   const prologueDeclared = TARGET.methodPrologue ?? null;
@@ -1934,7 +2060,7 @@ export function extract(sourceText, target) {
   }
 
   if (!sawFunctionHeader) fail(`${TARGET.regionName} function header not found inside the region`);
-  if (braceDepth !== 0) fail(`unbalanced braces inside the ${TARGET.regionName} region`);
+  if (braceDepth !== (included ? 1 : 0)) fail(`unbalanced braces inside the ${TARGET.regionName} region`);
   if (pending !== null || active !== null) fail(`a version guard is left open at the end of the region`);
   if (prologueDeclared !== null && prologueSeen === null) {
     fail(`the declared method prologue does not open the ${TARGET.regionName} method`);
@@ -1982,7 +2108,7 @@ export function extract(sourceText, target) {
     guards,
     regionProvenance: region.provenance,
     // The region's own bytes, marker lines included, LF-joined (M11-D2-C).
-    regionSha256: sha256Of(lines.slice(startIndex, endIndex + 1).join("\n")),
+    regionSha256: sha256Of(lines.slice(Math.max(startIndex, 0), endIndex + 1).join("\n")),
     ...(inertDeclared.length === 0 ? {} : { inertStatements }),
     ...(prologueSeen === null
       ? {}
@@ -2372,7 +2498,12 @@ export function buildArtifact({
 // written. `--check` writes nothing even when everything passes.
 // --------------------------------------------------------------------------
 
-export const LIVE_PTR_POLICIES = Object.freeze(["NO_PTR_REGION", "PTR_MARKERS_EMPTY", "PTR_BODY_IDENTICAL"]);
+export const LIVE_PTR_POLICIES = Object.freeze([
+  "NO_PTR_REGION",
+  "PTR_MARKERS_EMPTY",
+  "PTR_BODY_IDENTICAL",
+  "PTR_SEPARATE_INCLUDE",
+]);
 
 const MARKER_LINE = /^\/\/[a-z][a-z0-9_]*_apl_(?:start|end)$/;
 const SHA256_HEX = /^[0-9a-f]{64}$/;
@@ -2465,8 +2596,13 @@ export function validatePinnedRecord(targetName, target) {
       );
     }
   }
+  if (target.includedBy !== undefined) {
+    if (!isPinnedFile(target.includedBy) || typeof target.includedBy.includeLine !== "string") {
+      problems.push(`MALFORMED_RECORD: '${targetName}' includedBy is incomplete`);
+    }
+  }
   const markerFields =
-    target.enclosingClass === undefined
+    target.enclosingClass === undefined && target.includedBy === undefined
       ? [
           ["regionStart", target.regionStart, "_start"],
           ["regionEnd", target.regionEnd, "_end"],
@@ -2497,6 +2633,18 @@ export function validatePinnedRecord(targetName, target) {
   const policy = target.livePtrPolicy;
   if (policy === undefined || !LIVE_PTR_POLICIES.includes(policy.kind)) {
     problems.push(`MALFORMED_POLICY: '${targetName}' declares no known live/PTR policy`);
+  } else if ((policy.kind === "PTR_SEPARATE_INCLUDE") !== (target.includedBy !== undefined)) {
+    problems.push(`MALFORMED_POLICY: '${targetName}' PTR_SEPARATE_INCLUDE and includedBy go together`);
+  } else if (live !== null && policy.kind === "PTR_SEPARATE_INCLUDE") {
+    if (policy.ptrFunctionHeader !== `void ${live[1]}_ptr( player_t* p )`) {
+      problems.push(`MALFORMED_POLICY: '${targetName}' PTR function header does not name ${live[1]}_ptr`);
+    }
+    if (
+      typeof policy.ptrIncludeLine !== "string" ||
+      policy.ptrIncludeLine === target.includedBy.includeLine
+    ) {
+      problems.push(`MALFORMED_POLICY: '${targetName}' names no separate PTR include`);
+    }
   } else if (live !== null) {
     if (
       policy.ptrRegionStart !== `//${live[1]}_ptr_apl_start` ||
@@ -2521,6 +2669,12 @@ export function validatePinnedRecord(targetName, target) {
     dispatch.sequence.some((line) => typeof line !== "string" || line.length === 0 || line.trim() !== line)
   ) {
     problems.push(`MALFORMED_DISPATCH: '${targetName}' dispatch record is incomplete`);
+  } else if (live !== null && target.includedBy !== undefined) {
+    if (dispatch.sequence.filter((line) => line.includes(`::${live[1]}( this );`)).length !== 1) {
+      problems.push(
+        `MALFORMED_DISPATCH: '${targetName}' dispatch sequence does not call ${live[1]}( this ) exactly once`,
+      );
+    }
   } else if (live !== null) {
     const call =
       target.enclosingClass === undefined
@@ -2616,9 +2770,25 @@ function countLines(lines, text) {
 }
 
 /** The live/PTR relationship the target declares, checked against the module and its dispatch. */
-export function verifyLivePtrPolicy(lines, dispatchText, target) {
+export function verifyLivePtrPolicy(lines, dispatchText, target, includerText = null) {
   const policy = target.livePtrPolicy;
   const name = liveFunctionOf(target)[1];
+  if (policy.kind === "PTR_SEPARATE_INCLUDE") {
+    // ONB-C1: the PTR list is another file, and the dispatch chooses between the two with
+    // is_ptr(). A live build takes the live branch, so the PTR file is neither read nor needed.
+    // The choice must be that one ternary, and the two functions must include different files.
+    const ptrBody = functionBody((includerText ?? "").split(/\r?\n/), policy.ptrFunctionHeader)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+    if (!ptrBody.includes(policy.ptrIncludeLine)) {
+      fail(`POLICY_VIOLATED: ${policy.ptrFunctionHeader} does not include ${policy.ptrIncludeLine}`);
+    }
+    const ternary = `is_ptr() ? ${target.dispatch.sequence[0].split("is_ptr() ? ")[1]?.split(" : ")[0]} : `;
+    if (dispatchText.split(ternary).length !== 2) {
+      fail(`POLICY_VIOLATED: the dispatch must choose ${name} by one is_ptr() ternary`);
+    }
+    return;
+  }
   const starts = countLines(lines, policy.ptrRegionStart);
   const ends = countLines(lines, policy.ptrRegionEnd);
   const ptrDefinitions = lines.filter((line) =>
@@ -2702,12 +2872,30 @@ export function verifyDispatch(dispatchText, target) {
   }
   const name = liveFunctionOf(target)[1];
   const call = sequence.find((line) =>
-    target.enclosingClass === undefined
-      ? new RegExp(`::${name}\\( this \\);$`).test(line)
-      : line === `${name}();`,
+    target.includedBy !== undefined
+      ? line.includes(`::${name}( this );`)
+      : target.enclosingClass === undefined
+        ? new RegExp(`::${name}\\( this \\);$`).test(line)
+        : line === `${name}();`,
   );
   if (countLines(lines, call) !== 1)
     fail(`DISPATCH_UNVERIFIED: '${call}' must occur exactly once in the module`);
+}
+
+/** ONB-C1: the included file is the whole body of its function, in the hash-pinned including file. */
+export function verifyInclusion(includerText, target) {
+  const { includeLine } = target.includedBy;
+  const lines = includerText.split(/\r?\n/);
+  const body = functionBody(lines, target.functionHeader)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  // Header, opening brace, the include, closing brace: nothing else.
+  if (body.length !== 4 || body[2] !== includeLine) {
+    fail(`INCLUSION_UNVERIFIED: '${includeLine}' is not the sole body of ${target.functionHeader}`);
+  }
+  if (countLines(lines, includeLine) !== 1) {
+    fail(`INCLUSION_UNVERIFIED: '${includeLine}' must occur exactly once`);
+  }
 }
 
 /** One hash-pinned proof file's checks. */
@@ -2781,6 +2969,8 @@ export function preflightTarget({ targetName, target, read, sha, extractedOn, co
 
   const module = readPinned(read, target.pinnedSource, "module", problems);
   const dispatchBytes = readPinned(read, target.dispatch, "dispatch", problems);
+  const includerBytes =
+    target.includedBy === undefined ? null : readPinned(read, target.includedBy, "includer", problems);
   const proofBytes = [...(target.inertStatements ?? []), ...(target.spellGatedActions ?? [])].flatMap(
     (inert) =>
       inert.proofs.map((proof) => ({ proof, bytes: readPinned(read, proof, "inert proof", problems) })),
@@ -2801,7 +2991,9 @@ export function preflightTarget({ targetName, target, read, sha, extractedOn, co
       );
     }
   }
-  step(() => verifyLivePtrPolicy(lines, dispatchText, target));
+  const includerText = includerBytes === null ? null : Buffer.from(includerBytes).toString("utf8");
+  if (target.includedBy !== undefined) step(() => verifyInclusion(includerText ?? "", target));
+  step(() => verifyLivePtrPolicy(lines, dispatchText, target, includerText));
   step(() => verifyDispatch(dispatchText, target));
   for (const { proof, bytes } of proofBytes) step(() => verifyProof(bytes, proof));
   if (extracted === undefined || problems.length > 0) return result;
