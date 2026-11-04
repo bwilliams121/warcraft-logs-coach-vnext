@@ -180,6 +180,7 @@ describe("an unsupported specialization", () => {
     // specialization is supported. Druid/Restoration, registered INTERNAL_ONLY,
     // stands in as the internal-only miss.
     for (const [className, specName] of [
+      // Registered INTERNAL_ONLY in ONB-C2, not promoted by ONB-C2P.
       ["Rogue", "Outlaw"],
       ["Rogue", "Subtlety"],
       // Evoker/Augmentation is NOT in this list since M13-F; Devastation is the Evoker miss.

@@ -33,7 +33,9 @@ current total (5,748,495 bytes), with what each row buys.
 
 **Raised:** ONB-C2 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.
 
-**It is on ONB-EV.** No retained capture holds an event of this specialization, and the one context naming it is uncommitted. So ONB-C2P should expect "not promoted" unless ONB-EV runs. A capture alone would not resolve a decision either: everything below stands first.
+**ONB-C2P (2026-11-04): not promoted.** The gate search finds nothing (`m11-promotion-evidence-gate`), and a wider census, of any event type, finds no event of a signature ability in 5,679 parsed files. A new public entry must follow ONB-EV and the list below, and no such entry is queued (agent/architecture.md "ONB-C2P").
+
+**It is on ONB-EV.** No retained capture holds an event of this specialization, and the one context naming it is uncommitted. A capture alone would not resolve a decision either: everything below stands first.
 
 **What stands in scan order:**
 

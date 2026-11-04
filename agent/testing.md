@@ -5649,3 +5649,9 @@ Offline only, not committed: the census (`.probe/onbb3p/census.cjs`, Mortal Stri
 No production code changed. `tests/unit/analysis-composition-refusals.test.ts` holds Druid/Feral: SPEC_NOT_SUPPORTED, one retrieval for preparation alone, no dispatch. The class token is the wire's `Druid`, so the row reaches the identity table's real lookup rather than failing on a misspelling. `tests/contracts/m11-promotion-evidence-gate.test.ts` gains an ONB-C1 gate search (no qualifying assertion, `evidenceReady` false), which ONB-C1 had not added. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, `onb-c1-feral-druid`).
 
 Offline only, not committed: the census (`.probe/onbc1p/census.cjs`, Mortal Strike as its positive control), the replay of both subjects (`.probe/onbc1p/m/`) and the Bite Energy reading (`.probe/onbc1p/wire2.cjs`). They give the numbers in agent/architecture.md "ONB-C1P". The replay is a measurement, so the prefix subject reports only its retained span.
+
+# ONB-C2P: Outlaw Rogue, not promoted
+
+No production code changed, and no assertion. `tests/unit/analysis-composition-refusals.test.ts` already held Rogue/Outlaw (SPEC_NOT_SUPPORTED, one retrieval for preparation alone, no dispatch), and `tests/contracts/m11-promotion-evidence-gate.test.ts` already held its gate search (no qualifying assertion, `evidenceReady` false). Each comment now names the outcome. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, `onb-c2-outlaw-rogue`).
+
+Offline only, not committed: the census (`.probe/onbc2p/census.cjs`, Mortal Strike as its positive control) and the id check against the pinned data (`.probe/onbc2p/ids.cjs`). They give the numbers in agent/architecture.md "ONB-C2P". There is no replay, because there is nothing to replay.

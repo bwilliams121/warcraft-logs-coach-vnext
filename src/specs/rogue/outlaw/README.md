@@ -3,6 +3,8 @@
 **Exposure: `INTERNAL_ONLY`.** The registration (`rogue-outlaw-observed-decisions`, `rogue/outlaw`) is in the production
 catalog for the internal lookup only. The public lookup and the identity table refuse it.
 
+**Not promoted by ONB-C2P.** It cannot pass the rotational gates: no decision resolves and no retained capture holds one of its events, so its gap is on ONB-EV (agent/architecture.md "ONB-C2P").
+
 **A Cohort C follower of Feral's pooling, and it resolves nothing today.** No decision of this
 specialization reaches MATCH or REJECTED on the shared engine as it stands. Every decision is observed,
 classified and explained, and stays UNKNOWN. That is a measured property of the pinned list and the
