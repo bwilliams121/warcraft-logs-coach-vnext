@@ -6823,7 +6823,7 @@ const BREWMASTER_CASES = [
       ],
     },
   ),
-  // ---- SPEC_HAVOC_DEMON_HUNTER (ONB-A1, INTERNAL_ONLY) ------------------------------
+  // ---- SPEC_HAVOC_DEMON_HUNTER (ONB-A1; PUBLIC since ONB-A1P) ------------------------------
   kase(
     "spec-havoc-demon-hunter.the-facade-refuses-every-other-specialization",
     PP,
@@ -6836,24 +6836,24 @@ const BREWMASTER_CASES = [
     { related: ["tests/unit/specs/onb-a1-havoc-demon-hunter.test.ts"] },
   ),
   kase(
-    "application-service.havoc-demon-hunter-registration-is-internal-only",
+    "application-service.havoc-demon-hunter-registration-is-public-since-onb-a1p",
     PP,
     "APPLICATION_SERVICE",
     "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
-    "The validated production catalog carries the Havoc Demon Hunter registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup finds nothing and the public identity table does not resolve it.",
+    "RE-PINNED AT ONB-A1P, INVERTING THE ONB-A1 CASE. The validated production catalog carries the Havoc Demon Hunter registration PUBLIC: both lookups find the same row, and the public identity table resolves DemonHunter/Havoc to demonhunter/havoc, so a public request selects it. The five public sites moved together in one reviewed edit (the partition, the public contract's specId enum, the identity table, the `satisfies PublicSpecId` on spec.ts, and the registration's exposure), after both rotational gates passed on b1Pm fight 48's Havoc Demon Hunter.",
     [
       a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
         specId: "demonhunter/havoc",
         expected: {
           internalAnalyzerId: "demonhunter-havoc-observed-decisions",
-          publicAnalyzerId: null,
-          exposure: "INTERNAL_ONLY",
-          identityResolvesPublicly: false,
+          publicAnalyzerId: "demonhunter-havoc-observed-decisions",
+          exposure: "PUBLIC",
+          identityResolvesPublicly: true,
         },
       }),
     ],
     ["OWNED_CONTRACT"],
-    "Havoc Demon Hunter is registered INTERNAL_ONLY in ONB-A1 and its public promotion is ONB-A1P's: registration changes what internal evaluation derives, not what a public request can reach.",
+    "Promotion changed reachability, and added one refusal: the slice stays the narrow Reaver's Glaive surface, and a build that is not Aldrachi Reaver is refused rather than judged, because only Aldrachi Reaver evidence was validated.",
     {
       related: [
         "tests/contracts/m10a-registry-integrity.test.ts",

@@ -1,9 +1,12 @@
-# Havoc Demon Hunter — observed-decision slice (ONB-A1; INTERNAL_ONLY)
+# Havoc Demon Hunter — observed-decision slice (ONB-A1; PUBLIC since ONB-A1P)
 
-**Exposure: `INTERNAL_ONLY`.** The registration
-(`demonhunter-havoc-observed-decisions`, `demonhunter/havoc`) is in the production
-catalog and reachable by the internal lookup, the corpus and tests. The application
-service, raid night, REST and MCP never select it. Public promotion is ONB-A1P.
+**Exposure: `PUBLIC`.** The registration (`demonhunter-havoc-observed-decisions`,
+`demonhunter/havoc`) is selected by the application service, raid night, REST and MCP
+for a Demon Hunter whose stated specialization is Havoc.
+
+**Validated for Aldrachi Reaver only** (`supported-profile.ts`). The one measured subject is
+Aldrachi Reaver. A Fel-Scarred build is `AUTHORITY_NOT_AVAILABLE`; an unresolved or
+contradictory hero tree is `PROFILE_NOT_RESOLVED`; both before any decision is read.
 
 **This is Cohort A's representative, and it is narrow.** Its pinned list is a single
 priority list with no `run_action_list`. On current evidence the surface it can
@@ -92,8 +95,9 @@ Why each UNKNOWN is UNKNOWN, whole fight:
 | 3 | `default[12] death_sweep` | `debuff.essence_break.up` is not bound |
 
 Every resolved decision names `default[9]`. **A REJECTED says the pinned list would have
-pressed Reaver's Glaive first. It is not coaching:** the row is internal, and the 182 to
-191 s hold in this fight is a real disagreement with the list that nobody has reviewed.
+pressed Reaver's Glaive first, and nothing more.** It does not say the hold lost damage, and
+its actionability is disclosed as unproven. The fight's 23 are listed in
+agent/architecture.md "ONB-A1P".
 
 Expressions and lists:
 
@@ -104,8 +108,8 @@ Expressions and lists:
 
 ## Not evaluated, deliberately
 
-Felscarred builds are analyzed and almost entirely UNKNOWN: Demonsurge is unbound, and no
-Felscarred evidence was measured. Eye Beam, Blade Dance, Essence Break and Immolation Aura
+Fel-Scarred builds are refused: Demonsurge is unbound, and no Fel-Scarred evidence was
+measured. Eye Beam, Blade Dance, Essence Break and Immolation Aura
 cooldowns; The Hunt's cooldown (`src/data/game/demonhunter-havoc-cooldowns.ts`); Fury between
 casts; the enemy count; debuffs; `default[15]`, which needs A Fire Inside proven absent, and a
 node absent from the tree is UNKNOWN. See `agent/follow-ups.md` "After ONB-A1".

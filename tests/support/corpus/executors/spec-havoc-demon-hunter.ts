@@ -1,5 +1,5 @@
 /**
- * SPEC_HAVOC_DEMON_HUNTER executors (ONB-A1; INTERNAL_ONLY): the internal Havoc
+ * SPEC_HAVOC_DEMON_HUNTER executors (ONB-A1; PUBLIC since ONB-A1P): the Havoc
  * Demon Hunter evaluator over a sanitized capture, driven through the registration
  * as orchestration holds it, under the committed pinned authority.
  *

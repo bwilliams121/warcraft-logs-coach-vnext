@@ -1,5 +1,5 @@
 /**
- * Havoc Demon Hunter's analyzer registration (ONB-A1; INTERNAL_ONLY).
+ * Havoc Demon Hunter's analyzer registration (ONB-A1; PUBLIC since ONB-A1P).
  *
  * THIS IS WHERE HAVOC STATES WHAT IT IS, AND THE ONLY PLACE. One row, owned by the
  * specialization, joining its identity, its exposure, the four decision families it
@@ -8,9 +8,10 @@
  * code may read. `src/services/analyzer-registry.ts` lists this row and reads nothing
  * else from this directory.
  *
- * INTERNAL_ONLY: in the production catalog, reachable by the internal lookup, the
- * corpus and tests, never selected by the application service, raid-night
- * orchestration, REST or MCP. Its public promotion is ONB-A1P.
+ * PUBLIC since ONB-A1P, by the same five-site edit as every earlier promotion: the
+ * application service, raid-night orchestration, REST and MCP select it for a Demon
+ * Hunter whose stated specialization is Havoc. Its answers are validated for Aldrachi
+ * Reaver builds only (`supported-profile.ts`); another build is refused, not judged.
  *
  * THE AUTHORITY, BOUND TO ONE DOMAIN. `SIMC_APL_DEMONHUNTER_HAVOC` governs
  * OFFENSIVE_ROTATION and nothing else (`authority-bindings.ts`, `domains.ts`).
@@ -128,30 +129,35 @@ export function havocObservedDecisionView(
 
 /**
  * The limitation prose. Owned here because it is a claim about what this evaluator
- * refuses to judge. Not published while the row is INTERNAL_ONLY; it states the slice
- * so ONB-A1P does not have to rediscover it.
+ * refuses to judge, and PUBLISHED since ONB-A1P: the MCP tool descriptions compose it
+ * through `publicSpecializationDescriptions`, by the same mechanism as every other
+ * public specialization. It names the validated hero tree and how narrow the slice is,
+ * so a reader cannot mistake a one-decision surface for a rotation review, or an
+ * UNKNOWN for a fault.
  */
 export const HAVOC_LIMITS = Object.freeze({
   analysis: [
     "Havoc Demon Hunter analysis evaluates observed global-cooldown decisions against pinned class/spec rotational",
-    "authority, when the necessary state can be established. On current evidence that is the Reaver's Glaive priority",
-    "on Aldrachi Reaver builds, and little else. Throw Glaive and The Hunt are reported as excluded",
+    "authority, when the necessary state can be established. It is VALIDATED FOR THE ALDRACHI REAVER HERO TREE ONLY: a",
+    "build whose observed talent tree resolves to Fel-Scarred, to no hero tree, or to more than one is refused rather",
+    "than judged. On current evidence what it can decide is the Reaver's Glaive priority and little else, so it is a",
+    "narrow check and not a rotation review. Throw Glaive and The Hunt are reported as excluded",
     "OUTSIDE_SUPPORTED_SLICE: observed, not judged. It does NOT evaluate defensive cooldowns, interrupts or survival, it",
     "does not score performance, and it does not read race, faction, gear use effects or consumables. It does not",
-    "reconstruct Fury between observations, Eye Beam, Blade Dance, Essence Break or The Hunt cooldowns, the enemy count,",
-    "or what Demonsurge makes available. Decisions needing unproven state remain UNKNOWN, including most decisions in",
-    "most fights. UNKNOWN is expected here and is not a fault.",
+    "reconstruct Fury between observations, Eye Beam, Blade Dance, Essence Break or The Hunt cooldowns, or the enemy",
+    "count. Decisions needing unproven state remain UNKNOWN, including most decisions in most fights. UNKNOWN is expected",
+    "here and is not a fault.",
   ].join("\n"),
   raidNight: [
     "Havoc Demon Hunter cells count only observed global-cooldown decisions compared against pinned class/spec",
-    "authority; Throw Glaive and The Hunt are excluded as OUTSIDE_SUPPORTED_SLICE, not judged. They do NOT evaluate",
-    "defensive cooldowns, interrupts or survival, and they do not score performance. Most decisions typically remain",
-    "UNKNOWN, which is expected.",
+    "authority, and only for Aldrachi Reaver builds; Throw Glaive and The Hunt are excluded as OUTSIDE_SUPPORTED_SLICE,",
+    "not judged. They do NOT evaluate defensive cooldowns, interrupts or survival, and they do not score performance.",
+    "Most decisions typically remain UNKNOWN, which is expected.",
   ].join("\n"),
 });
 
 /**
- * The Havoc Demon Hunter specialization module (ONB-A1), INTERNAL_ONLY.
+ * The Havoc Demon Hunter specialization module (ONB-A1), PUBLIC since ONB-A1P.
  *
  * `supplementalAnalyses` is EMPTY by decision. The WCL identity strings are the ones
  * the committed b1Pm fight-48 context reports for actor 18 (`subType` DemonHunter,
@@ -165,7 +171,7 @@ export const HAVOC_DEMON_HUNTER_MODULE: SpecModule = defineSpecModule({
     wclClassName: "DemonHunter",
     wclSpecName: "Havoc",
   },
-  exposure: "INTERNAL_ONLY",
+  exposure: "PUBLIC",
   capabilities: HAVOC_CAPABILITIES,
   authorityBindings: HAVOC_AUTHORITY_BINDINGS,
   limitsProse: HAVOC_LIMITS,

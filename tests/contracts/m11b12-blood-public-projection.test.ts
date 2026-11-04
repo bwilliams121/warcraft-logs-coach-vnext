@@ -156,6 +156,7 @@ describe("the schema is analysis/1, widened by exactly one specId", () => {
       "monk/mistweaver",
       "priest/holy",
       "evoker/preservation",
+      "demonhunter/havoc",
     ]);
   });
 

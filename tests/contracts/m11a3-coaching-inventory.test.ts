@@ -192,6 +192,7 @@ describe("population: every ordinary M11 specialization exactly once, no healer,
       "monk/mistweaver",
       "priest/holy",
       "evoker/preservation",
+      "demonhunter/havoc",
     ]);
   });
 

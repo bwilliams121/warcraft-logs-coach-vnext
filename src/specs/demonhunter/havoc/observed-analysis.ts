@@ -1,5 +1,5 @@
 /**
- * The Havoc Demon Hunter observed-decision facade (ONB-A1; INTERNAL_ONLY).
+ * The Havoc Demon Hunter observed-decision facade (ONB-A1; PUBLIC since ONB-A1P).
  *
  * One pure function over an ALREADY-INGESTED normalized fight. It enumerates the
  * observed foreground casts of one Havoc Demon Hunter, evaluates each cast of a
@@ -32,6 +32,11 @@
  * impact, which has a NON_GCD lane record.
  *
  * MATCH MEANS AUTHORITY_COMPATIBLE_ONLY, after the non-domain exclusion.
+ *
+ * VALIDATED FOR ALDRACHI REAVER ONLY. The hero tree resolved from the observed
+ * talent entries is checked before any decision is read (`supported-profile.ts`):
+ * Fel-Scarred is AUTHORITY_NOT_AVAILABLE, an unresolved or contradictory tree
+ * PROFILE_NOT_RESOLVED.
  */
 
 import type { CombatState } from "../../../engine/state/combat-state.js";
@@ -113,6 +118,7 @@ import { resolveHavocPositiveUsability } from "./positive-usability.js";
 import type { PositiveUsability } from "../../../findings/usability/usability-completeness.js";
 import { ownCastResourceAt } from "../../../findings/resources/own-cast-resource.js";
 import { HAVOC_DEMON_HUNTER_SPEC_ID } from "./spec.js";
+import { havocValidatedProfile } from "./supported-profile.js";
 
 // ---------------------------------------------------------------------------
 // Vocabulary
@@ -532,6 +538,12 @@ export function analyzeObservedHavocDemonHunterDecisions(
   const observedTalents = snapshot.talents;
   const talents = resolveAllModelledTalents(observedTalents);
   const heroTree = resolveHavocHeroTree(observedTalents);
+
+  // ---- the validated-profile gate (ONB-A1P), before any decision is read ----
+  const profile = havocValidatedProfile(heroTree);
+  if (!profile.supported) {
+    return unsupported(profile.status, specId, profile.detail);
+  }
 
   const talentsProvenAbsent = talentsProvenAbsentFrom(talents, heroTree);
   const buildFacts: HavocBuildFacts = { talents, talentsProvenAbsent };

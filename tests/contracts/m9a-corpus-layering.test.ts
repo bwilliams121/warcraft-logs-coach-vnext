@@ -551,6 +551,11 @@ describe("captured evidence receives coverage only through the shared corpus int
       // normalization, composition and the catalog's decoding.
       "bundleOf",
       "BundleComposition",
+      // ONB-A1P: the loader-backed state of ONE artifact, the single-part
+      // analogue of stateOfBundle, for a subject whose only committed evidence
+      // is one archive segment (Havoc Demon Hunter). A bundle refuses one part.
+      // The interpreter still owns reading and normalization.
+      "stateOf",
     ]);
     for (const path of testPaths) {
       const source = sourceAt(path);

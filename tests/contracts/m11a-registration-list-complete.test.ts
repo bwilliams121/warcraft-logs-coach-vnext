@@ -259,7 +259,7 @@ describe("what the tree registers today", () => {
     // HEAL-B4.
     expect(DISCOVERED.map((found) => [found.path, found.exportName, found.registration.exposure])).toEqual([
       ["src/specs/deathknight/blood/registration.ts", "BLOOD_DEATH_KNIGHT_REGISTRATION", "PUBLIC"],
-      ["src/specs/demonhunter/havoc/registration.ts", "HAVOC_DEMON_HUNTER_REGISTRATION", "INTERNAL_ONLY"],
+      ["src/specs/demonhunter/havoc/registration.ts", "HAVOC_DEMON_HUNTER_REGISTRATION", "PUBLIC"],
       ["src/specs/druid/restoration/registration.ts", "RESTORATION_DRUID_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/evoker/augmentation/registration.ts", "AUGMENTATION_EVOKER_REGISTRATION", "PUBLIC"],
       ["src/specs/evoker/preservation/registration.ts", "PRESERVATION_EVOKER_REGISTRATION", "PUBLIC"],
