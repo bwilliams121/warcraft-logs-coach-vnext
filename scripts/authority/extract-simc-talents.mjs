@@ -1304,6 +1304,169 @@ const ROGUE_OUTLAW_TARGET = {
 };
 
 /**
+ * The Destruction Warlock profile (ONB-D1): the talents the pinned Destruction list reads as
+ * `talent.<name>`, the talents an action of that list is built on (an action on `not_found()` is
+ * background, action.cpp:541-549). The hero sub-trees are Hellcaller (58) and Diabolist (59).
+ */
+const WARLOCK_DESTRUCTION_TARGET = {
+  datasetId: "SIMC_TRAIT_WARLOCK_DESTRUCTION_TALENTS",
+  classId: 9,
+  specId: 267,
+  defaultOut: "src/data/game/warlock-destruction-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node, as every earlier target recorded. Corroborated for Destruction Warlock on the retained A7R6kxPJ1hC8YQ4w fight 7 actors 12 and 15: " +
+    'their observed trees resolve Hellcaller and the pinned list\'s talents by these keys (agent/architecture.md "ONB-D1").',
+  requiredTalents: [
+    {
+      simcName: "avatar_of_destruction",
+      displayNameEn: "Avatar of Destruction",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:500 talents.avatar_of_destruction = find_talent_spell( SPECIALIZATION, "Avatar of Destruction" ); ; the pinned list reads talent.avatar_of_destruction',
+    },
+    {
+      simcName: "backdraft",
+      displayNameEn: "Backdraft",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:400 talents.backdraft = find_talent_spell( SPECIALIZATION, "Backdraft" ); ; the pinned list reads talent.backdraft',
+    },
+    {
+      simcName: "cataclysm",
+      displayNameEn: "Cataclysm",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:426 talents.cataclysm = find_talent_spell( SPECIALIZATION, "Cataclysm" ); ; cataclysm_t is built on it',
+    },
+    {
+      simcName: "chaos_bolt",
+      displayNameEn: "Chaos Bolt",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:388 talents.chaos_bolt = find_talent_spell( SPECIALIZATION, "Chaos Bolt" ); ; chaos_bolt_t is built on it',
+    },
+    {
+      simcName: "conflagrate",
+      displayNameEn: "Conflagrate",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:390 talents.conflagrate = find_talent_spell( SPECIALIZATION, "Conflagrate" ); ; conflagrate_t is built on it',
+    },
+    {
+      simcName: "conflagration_of_chaos",
+      displayNameEn: "Conflagration of Chaos",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:490 talents.conflagration_of_chaos = find_talent_spell( SPECIALIZATION, "Conflagration of Chaos" ); ; the pinned list reads talent.conflagration_of_chaos',
+    },
+    {
+      simcName: "destructive_rapidity",
+      displayNameEn: "Destructive Rapidity",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:471 talents.destructive_rapidity = find_talent_spell( SPECIALIZATION, "Destructive Rapidity" ); ; the pinned list reads talent.destructive_rapidity',
+    },
+    {
+      simcName: "fire_and_brimstone",
+      displayNameEn: "Fire and Brimstone",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:447 talents.fire_and_brimstone = find_talent_spell( SPECIALIZATION, "Fire and Brimstone" ); ; the pinned list reads talent.fire_and_brimstone',
+    },
+    {
+      simcName: "havoc",
+      displayNameEn: "Havoc",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:411 talents.havoc = find_talent_spell( SPECIALIZATION, "Havoc" ); ; havoc_t is built on it',
+    },
+    {
+      simcName: "internal_combustion",
+      displayNameEn: "Internal Combustion",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:457 talents.internal_combustion = find_talent_spell( SPECIALIZATION, "Internal Combustion" ); ; the pinned list reads talent.internal_combustion',
+    },
+    {
+      simcName: "lake_of_fire",
+      displayNameEn: "Lake of Fire",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:449 talents.lake_of_fire = find_talent_spell( SPECIALIZATION, "Lake of Fire" ); ; the pinned list reads talent.lake_of_fire',
+    },
+    {
+      simcName: "roaring_blaze",
+      displayNameEn: "Roaring Blaze",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:405 talents.roaring_blaze = find_talent_spell( SPECIALIZATION, "Roaring Blaze" ); ; the pinned list reads talent.roaring_blaze',
+    },
+    {
+      simcName: "shadowburn",
+      displayNameEn: "Shadowburn",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:416 talents.shadowburn = find_talent_spell( SPECIALIZATION, "Shadowburn" ); ; shadowburn_t is built on it',
+    },
+    {
+      simcName: "soul_fire",
+      displayNameEn: "Soul Fire",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:485 talents.soul_fire = find_talent_spell( SPECIALIZATION, "Soul Fire" ); ; soul_fire_t is built on it',
+    },
+    {
+      simcName: "summon_infernal",
+      displayNameEn: "Summon Infernal",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:437 talents.summon_infernal = find_talent_spell( SPECIALIZATION, "Summon Infernal" ); ; summon_infernal_t is built on it',
+    },
+    {
+      simcName: "diabolic_ritual",
+      displayNameEn: "Diabolic Ritual",
+      tree: "HERO",
+      binding:
+        'sc_warlock_init.cpp:538 hero.diabolic_ritual = find_talent_spell( HERO, "Diabolic Ritual" ); ; the pinned list reads talent.diabolic_ritual',
+    },
+    {
+      simcName: "ruination",
+      displayNameEn: "Ruination",
+      tree: "HERO",
+      binding:
+        'sc_warlock_init.cpp:576 hero.ruination = find_talent_spell( HERO, "Ruination" ); ; ruination_t is built on hero.ruination_cast, which is not_found without it',
+    },
+    {
+      simcName: "secrets_of_the_coven",
+      displayNameEn: "Secrets of the Coven",
+      tree: "HERO",
+      binding:
+        'sc_warlock_init.cpp:560 hero.secrets_of_the_coven = find_talent_spell( HERO, "Secrets of the Coven" ); ; infernal_bolt_t is built on hero.infernal_bolt, which is not_found without it',
+    },
+    {
+      simcName: "wither",
+      displayNameEn: "Wither",
+      tree: "HERO",
+      binding:
+        'sc_warlock_init.cpp:604 hero.wither = find_talent_spell( HERO, "Wither" ); ; the pinned list reads talent.wither, and wither_t and immolate_t read it',
+    },
+    {
+      simcName: "malevolence",
+      displayNameEn: "Malevolence",
+      tree: "HERO",
+      binding:
+        'sc_warlock_init.cpp:634 hero.malevolence = find_talent_spell( HERO, "Malevolence" ); ; malevolence_t is built on it',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data` (trait_data.inc:4422-4423).
+    { simcName: "hellcaller", subTreeId: 58 },
+    { simcName: "diabolist", subTreeId: 59 },
+  ],
+};
+
+/**
  * The Frost Death Knight profile (ONB-B2): (a) the talents the pinned Frost list reads as
  * `talent.<name>`, and (b) the talents an action of that list is built on (an action on
  * `not_found()` is background, action.cpp:541-549). `chosen_of_frostbrood` is NOT here: it is a
@@ -2126,6 +2289,7 @@ export const TARGETS = {
   "warrior-fury": WARRIOR_FURY_TARGET,
   "warrior-protection": WARRIOR_PROTECTION_TARGET,
   "rogue-outlaw": ROGUE_OUTLAW_TARGET,
+  "warlock-destruction": WARLOCK_DESTRUCTION_TARGET,
   "rogue-subtlety": ROGUE_SUBTLETY_TARGET,
   "monk-brewmaster": MONK_BREWMASTER_TARGET,
   "paladin-retribution": PALADIN_RETRIBUTION_TARGET,

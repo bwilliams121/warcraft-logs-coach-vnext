@@ -81,7 +81,7 @@ row).
 | `mage/arcane` | D | local raw | blocked | PARTIAL | `arcane-charge-barrage-timing` |
 | `mage/fire` | D | local raw | blocked | PARTIAL | `combustion-window-fill` |
 | `mage/frost` | D | none | not yet | UNASSESSED | — |
-| `warlock/destruction` | D | local raw | blocked | SPECIFIC_QUESTIONS_IDENTIFIED | `ritual-clipping` (ownership unresolved), `immolate-wither-refresh` |
+| `warlock/destruction` | D — INTERNAL_ONLY since ONB-D1 | local raw (A7R6 fight 7 actors 12 and 15, first 165 s, both Hellcaller) | audited | SPECIFIC_QUESTIONS_IDENTIFIED | `ritual-clipping` (ownership unresolved), `immolate-wither-refresh` |
 | `warlock/affliction` | D | none | not yet | UNASSESSED | — |
 | `warlock/demonology` | D | local raw | blocked | SPECIFIC_QUESTIONS_IDENTIFIED | `ritual-clipping` (ownership unresolved), `tyrant-setup` |
 | `shaman/elemental` | D | local raw | blocked | PARTIAL | `flame-shock-maintenance` |

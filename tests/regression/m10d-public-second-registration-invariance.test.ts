@@ -198,6 +198,7 @@ describe("the production catalog", () => {
       "shaman/enhancement",
       "demonhunter/devourer",
       "druid/feral",
+      "warlock/destruction",
       "rogue/outlaw",
     ]);
     for (const row of internal)

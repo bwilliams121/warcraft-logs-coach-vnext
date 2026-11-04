@@ -1142,8 +1142,9 @@ ownerDecision: Whether, and on what evidence, the analyzer may model the enemy s
 that every Arms decision stops here. ONB-B2 found the same count behind every rotation list of Frost
 Death Knight and Enhancement Shaman, and that Frost also meets `target_if=first` before it.
 ONB-B3 measured that every Devourer decision stops on it too. ONB-C1 found all four of Feral's finisher
-and builder dispatches read it, behind other open lines
-(`agent/follow-ups.md` "After ONB-B1", "After ONB-B2", "After ONB-B3", "After ONB-C1").
+and builder dispatches read it, behind other open lines. ONB-D1 measured that every Destruction decision meets it
+first, on either hero tree's area list
+(`agent/follow-ups.md` "After ONB-B1", "After ONB-B2", "After ONB-B3", "After ONB-C1", "After ONB-D1").
 
 ### ONB-S4: Shared cast and channel decision anchor
 
@@ -1743,11 +1744,13 @@ recorded for ONB-EV if real-evidence validation cannot be met.
 ### ONB-C2P: Outlaw Rogue (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-C2
 branch: autopilot/onb-c2p
 wcl: NONE
 publicContract: EXPECTED
+pr: 68
+mergeSha: b46cbed381b35ec975fca5678739dac46ae65dd8
 ```
 
 **Outcome.** Outlaw does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. A census of 5,679 retained files finds no event, of any type, of its signature abilities, so there is nothing to replay and it stays on ONB-EV. A capture alone would resolve nothing either: every decision stops at Stealth, and Kick and the `cds` list follow. A promotion is a new public entry through the unchanged gates (agent/architecture.md "ONB-C2P"; agent/follow-ups.md "After ONB-C2").
@@ -1806,8 +1809,9 @@ publicContract: EXPECTED
 ### ONB-D1: Destruction Warlock (internal, Cohort D representative)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-S4
+branch: autopilot/onb-d1
 wcl: NONE
 publicContract: NONE
 ```
@@ -1816,6 +1820,8 @@ publicContract: NONE
 Real evidence is retained. Ritual Clipping ownership stays
 `UNRESOLVED_DIABOLIST_HERO_TREE` (`agent/m11-spec-coaching-inventory.md`);
 it is a deep-dive question, not a blocker for the rotational slice.
+
+**Outcome.** Destruction Warlock is registered INTERNAL_ONLY, and no decision of it resolves: its two retained subjects (A7R6 fight 7 actors 12 and 15, first 165 s, both Hellcaller) give 220 eligible decisions, all UNKNOWN, every scan meeting the enemy count at `default[3]`. It is the first reader of the ONB-S4 anchor: 103 decisions are instant and 4 Soul Fires pair an observed begin, while all 111 Chaos Bolts and Incinerates stay ambiguous, because each spell has a -100% cast-time row no pinned source excludes, and 2 Soul Fires began before the pull. An unestablished anchor is never judged. Requirement C cannot be met until ONB-S3 is decided and the inputs listed are bound (agent/architecture.md "ONB-D1"; agent/follow-ups.md "After ONB-D1").
 
 ### ONB-D1P: Destruction Warlock (public)
 

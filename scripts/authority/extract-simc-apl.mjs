@@ -142,6 +142,12 @@ const PINNED_SOURCES = Object.freeze({
     sha256: "a74e4daa8376197d94f8449555035b3fd67634db450d2f7cb16bf84233939eb3",
     byteLength: 26074,
   },
+  APL_WARLOCK: {
+    sourcePath: "engine/class_modules/apl/warlock.cpp",
+    commitSha: PINNED_SIMC_COMMIT,
+    sha256: "09f2bb54304a3886a87aae18931bf2214f56882a88c074c7e77f730ed3e51bda",
+    byteLength: 33759,
+  },
   APL_HUNTER: {
     sourcePath: "engine/class_modules/apl/apl_hunter.cpp",
     commitSha: PINNED_SIMC_COMMIT,
@@ -183,6 +189,11 @@ const PINNED_SOURCES = Object.freeze({
     sourcePath: "engine/class_modules/sc_rogue.cpp",
     sha256: "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
     byteLength: 436673,
+  },
+  WARLOCK_DISPATCH: {
+    sourcePath: "engine/class_modules/warlock/sc_warlock_init.cpp",
+    sha256: "8e1eae332a7be9607a4bde41640411183ecef8e00fddd1ab611c9d5fe8241d4c",
+    byteLength: 95724,
   },
   HUNTER_DISPATCH: {
     sourcePath: "engine/class_modules/sc_hunter.cpp",
@@ -1406,6 +1417,57 @@ export const TARGETS = {
       ],
       forbiddenTokens: ["swap_action_list"],
       noTargetingOptions: true,
+    },
+  },
+  "warlock-destruction": {
+    sourcePath: PINNED_SOURCES.APL_WARLOCK.sourcePath,
+    regionStart: "//destruction_apl_start",
+    regionEnd: "//destruction_apl_end",
+    functionHeader: "void destruction( player_t* p )",
+    regionName: "destruction",
+    authorityId: "SIMC_APL_WARLOCK_DESTRUCTION",
+    spec: { className: "warlock", specName: "destruction" },
+    defaultOut: "src/simc/data/warlock-destruction.apl.json",
+    pinnedSource: {
+      ...PINNED_SOURCES.APL_WARLOCK,
+      regionSha256: "7ce972aac42e3409bedab2511c407217049df1756fd23517597f0f447f068df3",
+    },
+    livePtrPolicy: {
+      kind: "NO_PTR_REGION",
+      ptrRegionStart: "//destruction_ptr_apl_start",
+      ptrRegionEnd: "//destruction_ptr_apl_end",
+      ptrFunctionHeader: "void destruction_ptr( player_t* p )",
+    },
+    dispatch: {
+      ...PINNED_SOURCES.WARLOCK_DISPATCH,
+      functionHeader: "void warlock_t::init_action_list()",
+      sequence: ["case WARLOCK_DESTRUCTION:", "warlock_apl::destruction( this );", "break;"],
+    },
+    requiredFacts: {
+      kind: "DISPATCH_GRAPH",
+      entryListName: "default",
+      requiredLists: ["default", "precombat", "aoe_hc", "aoe_dia", "items", "ogcd", "variables"],
+      listSizes: { default: 20, precombat: 15, aoe_hc: 14, aoe_dia: 16, items: 5, ogcd: 6, variables: 4 },
+      edges: [
+        { from: "default", ordinal: 0, kind: "CALL", to: "variables", condition: null },
+        { from: "default", ordinal: 1, kind: "CALL", to: "ogcd", condition: null },
+        { from: "default", ordinal: 2, kind: "CALL", to: "items", condition: null },
+        {
+          from: "default",
+          ordinal: 3,
+          kind: "CALL",
+          to: "aoe_hc",
+          condition: "active_enemies>=2&talent.wither",
+        },
+        {
+          from: "default",
+          ordinal: 4,
+          kind: "CALL",
+          to: "aoe_dia",
+          condition: "active_enemies>=2&talent.diabolic_ritual",
+        },
+      ],
+      forbiddenTokens: ["swap_action_list"],
     },
   },
   "hunter-survival": {

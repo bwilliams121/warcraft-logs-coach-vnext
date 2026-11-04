@@ -81,6 +81,7 @@ describe("the five sites agree", () => {
       "demonhunter/devourer",
       "druid/feral",
       "rogue/outlaw",
+      "warlock/destruction",
     ]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
@@ -164,6 +165,7 @@ describe("the five sites agree", () => {
       ["demonhunter/devourer", "INTERNAL_ONLY"],
       ["druid/feral", "INTERNAL_ONLY"],
       ["rogue/outlaw", "INTERNAL_ONLY"],
+      ["warlock/destruction", "INTERNAL_ONLY"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -275,6 +277,7 @@ describe("the complete-catalog helper", () => {
       "demonhunter-devourer-observed-decisions": 0,
       "druid-feral-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
+      "warlock-destruction-observed-decisions": 0,
     });
   });
 });

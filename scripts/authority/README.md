@@ -716,6 +716,8 @@ as before.
 
 The pinned source root for this target adds `engine/class_modules/apl/druid/feral_apl.inc` (17,108 bytes), `engine/class_modules/apl/druid/druid.cpp` (926 bytes, both as the M11-A3 audit recorded them) and `engine/class_modules/sc_druid.cpp` (479,886 bytes, `59227a2f...`).
 
+`warlock-destruction` was extracted in ONB-D1 (`src/simc/data/warlock-destruction.apl.json`, 80 actions in 7 lists, region 278–378 of `warlock.cpp`, `7ce972aa…68df3`, `NO_PTR_REGION`, `warlock/sc_warlock_init.cpp` `case WARLOCK_DESTRUCTION:`). Its GCD and talent targets are in the two sibling extractors, with no extractor change of any other kind. The pinned source root adds `engine/class_modules/apl/warlock.cpp` (33,759 bytes, as the M11-A3 audit recorded it), `engine/class_modules/warlock/sc_warlock_actions.cpp` (210,927 bytes, `fa37a97c…`) and `engine/class_modules/warlock/sc_warlock_init.cpp` (95,724 bytes, `8e1eae33…`).
+
 `rogue-outlaw` was extracted in ONB-C2 (`src/simc/data/rogue-outlaw.apl.json`, 48 actions in 5 lists, region 133–195 of `apl_rogue.cpp`, `859365c9…5f725`, `NO_PTR_REGION`, `sc_rogue.cpp` `else if ( specialization() == ROGUE_OUTLAW )`). Its GCD and talent targets are in the two sibling extractors, with no extractor change of any other kind.
 
 `demonhunter-devourer` was extracted from this table in ONB-B3 (`src/simc/data/demonhunter-devourer.apl.json`, 153 actions in 12 lists). Its GCD and talent targets are in the two sibling extractors. The talent target

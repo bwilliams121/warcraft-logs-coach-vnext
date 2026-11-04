@@ -219,6 +219,8 @@ function classifyBlocker(
   blockingLine: string | null,
 ): DecisionBlockerClass {
   if (blocker === "DIVERGENT_GCD_OUTCOMES") return "DIVERGENT_WORLDS";
+  // The evidence does not say when the decision was made (ONB-S4).
+  if (blocker === "DECISION_ANCHOR_NOT_ESTABLISHED") return "OBSERVED_STATE_MISSING";
   if (blocker === "UNREAD_CONDITION_ON_GCD_ACTION" || scanBlocker === "UNSUPPORTED_ACTION_OPTION") {
     return lineClass(blockingLine) ?? "TARGETING_NOT_MODELLED";
   }

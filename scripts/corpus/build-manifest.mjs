@@ -7125,6 +7125,44 @@ const BREWMASTER_CASES = [
     "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Feral Druid list.",
     { related: ["tests/unit/specs/onb-c1-feral-druid.test.ts"] },
   ),
+  // ---- SPEC_DESTRUCTION_WARLOCK (ONB-D1, INTERNAL_ONLY) ---
+  kase(
+    "application-service.destruction-warlock-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Destruction Warlock registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "warlock/destruction",
+        expected: {
+          internalAnalyzerId: "warlock-destruction-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Destruction Warlock is registered INTERNAL_ONLY in ONB-D1, Cohort D's representative on the shared cast anchor. No decision of it resolves: both hero trees' area lists read the enemy count before any single-target line. Its retained subjects are replayed offline and not committed (agent/follow-ups.md \"After ONB-D1\").",
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-destruction-warlock.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_DESTRUCTION_WARLOCK",
+    "src/specs/warlock/destruction/observed-analysis.ts analyzeObservedDestructionWarlockDecisions (the spec gate)",
+    "The Destruction Warlock facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_DESTRUCTION_WARLOCK.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Destruction Warlock list.",
+    { related: ["tests/unit/specs/onb-d1-destruction-warlock.test.ts"] },
+  ),
   // ---- SPEC_OUTLAW_ROGUE (ONB-C2, INTERNAL_ONLY) ---
   kase(
     "application-service.outlaw-rogue-registration-is-internal-only",

@@ -223,6 +223,7 @@ describe("cross-spec authority access is refused structurally", () => {
       ["demonhunter/devourer", ["SIMC_APL_DEMONHUNTER_DEVOURER"]],
       ["druid/feral", ["SIMC_APL_DRUID_FERAL"]],
       ["rogue/outlaw", ["SIMC_APL_ROGUE_OUTLAW"]],
+      ["warlock/destruction", ["SIMC_APL_WARLOCK_DESTRUCTION"]],
     ]);
   });
 });

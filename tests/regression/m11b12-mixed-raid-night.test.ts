@@ -202,6 +202,7 @@ describe("a Blood Death Knight alone", () => {
       "shaman-enhancement-observed-decisions": 0,
       "demonhunter-devourer-observed-decisions": 0,
       "druid-feral-observed-decisions": 0,
+      "warlock-destruction-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
     expectBloodCell(cellOf(run.aggregate.cells, BLOOD_DK));
@@ -253,6 +254,7 @@ describe("a mixed roster — all four supported specializations plus Fire — ov
       "shaman-enhancement-observed-decisions": 0,
       "demonhunter-devourer-observed-decisions": 0,
       "druid-feral-observed-decisions": 0,
+      "warlock-destruction-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
   });

@@ -87,6 +87,7 @@ import { FERAL_DRUID_REGISTRATION } from "../specs/druid/feral/registration.js";
 import { HAVOC_DEMON_HUNTER_REGISTRATION } from "../specs/demonhunter/havoc/registration.js";
 import { HOLY_PRIEST_REGISTRATION } from "../specs/priest/holy/registration.js";
 import { ASSASSINATION_REGISTRATION } from "../specs/rogue/assassination/registration.js";
+import { DESTRUCTION_WARLOCK_REGISTRATION } from "../specs/warlock/destruction/registration.js";
 import { OUTLAW_ROGUE_REGISTRATION } from "../specs/rogue/outlaw/registration.js";
 import { SUBTLETY_ROGUE_REGISTRATION } from "../specs/rogue/subtlety/registration.js";
 import { RESTORATION_SHAMAN_REGISTRATION } from "../specs/shaman/restoration/registration.js";
@@ -509,6 +510,9 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   // INTERNAL_ONLY since ONB-C2: a Cohort C follower. No decision resolves: every scan meets Stealth first, and
   // no retained capture holds one of its events.
   OUTLAW_ROGUE_REGISTRATION,
+  // INTERNAL_ONLY since ONB-D1: Cohort D's representative, on the shared cast anchor. No decision resolves: both hero
+  // trees' area lists read the enemy count before any single-target line.
+  DESTRUCTION_WARLOCK_REGISTRATION,
 ]);
 
 /**

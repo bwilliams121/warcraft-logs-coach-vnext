@@ -87,7 +87,8 @@ export type SpecId =
   | "shaman/enhancement"
   | "demonhunter/devourer"
   | "druid/feral"
-  | "rogue/outlaw";
+  | "rogue/outlaw"
+  | "warlock/destruction";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -113,6 +114,7 @@ export const SPEC_IDS = Object.freeze([
   "demonhunter/devourer",
   "druid/feral",
   "rogue/outlaw",
+  "warlock/destruction",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -259,6 +261,9 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  *
  * Outlaw Rogue arrived here in ONB-C2, a Cohort C follower. No decision of it resolves: every scan meets Stealth
  * first, and no retained capture holds one of its events.
+ *
+ * Destruction Warlock arrived here in ONB-D1, Cohort D's representative on the shared cast anchor. No decision of it
+ * resolves: both hero trees' area lists read the enemy count (ONB-S3) before any single-target line.
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
@@ -272,6 +277,7 @@ export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "demonhunter/devourer",
   "druid/feral",
   "rogue/outlaw",
+  "warlock/destruction",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];
