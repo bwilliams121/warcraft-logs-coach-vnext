@@ -82,6 +82,7 @@ import { HOLY_PALADIN_REGISTRATION } from "../specs/paladin/holy/registration.js
 import { PROTECTION_PALADIN_REGISTRATION } from "../specs/paladin/protection/registration.js";
 import { RETRIBUTION_PALADIN_REGISTRATION } from "../specs/paladin/retribution/registration.js";
 import { DISCIPLINE_PRIEST_REGISTRATION } from "../specs/priest/discipline/registration.js";
+import { DEVOURER_DEMON_HUNTER_REGISTRATION } from "../specs/demonhunter/devourer/registration.js";
 import { HAVOC_DEMON_HUNTER_REGISTRATION } from "../specs/demonhunter/havoc/registration.js";
 import { HOLY_PRIEST_REGISTRATION } from "../specs/priest/holy/registration.js";
 import { ASSASSINATION_REGISTRATION } from "../specs/rogue/assassination/registration.js";
@@ -497,6 +498,9 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   // of both sits behind the enemy count (ONB-S3), and each stops on its own line before that.
   FROST_DEATH_KNIGHT_REGISTRATION,
   ENHANCEMENT_SHAMAN_REGISTRATION,
+  // INTERNAL_ONLY since ONB-B3: its own representative. No decision resolves: the list stops on the enemy
+  // count (ONB-S3), and its pick-up timers are UNKNOWN from any log.
+  DEVOURER_DEMON_HUNTER_REGISTRATION,
 ]);
 
 /**

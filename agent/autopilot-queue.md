@@ -1140,8 +1140,9 @@ ownerDecision: Whether, and on what evidence, the analyzer may model the enemy s
 **Direction.** The M11-D0 census (pinned `target_if` semantics), CLAUDE.md
 "Multi-Target Support", and `agent/follow-ups.md` "After M11-D3-B". ONB-B1 measured
 that every Arms decision stops here. ONB-B2 found the same count behind every rotation list of Frost
-Death Knight and Enhancement Shaman, and that Frost also meets `target_if=first` before it
-(`agent/follow-ups.md` "After ONB-B1", "After ONB-B2").
+Death Knight and Enhancement Shaman, and that Frost also meets `target_if=first` before it.
+ONB-B3 measured that every Devourer decision stops on it too
+(`agent/follow-ups.md` "After ONB-B1", "After ONB-B2", "After ONB-B3").
 
 ### ONB-S4: Shared cast and channel decision anchor
 
@@ -1638,11 +1639,13 @@ form emits only under the player's spell data, so Wind Shear's line does not exi
 ### ONB-B2P: Frost Death Knight and Enhancement Shaman (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-B2
 branch: autopilot/onb-b2p
 wcl: NONE
 publicContract: EXPECTED
+pr: 62
+mergeSha: 548330bd6a2d2f92ab6ed569f5be9445c42a25f3
 ```
 
 **Outcome.** Neither passes the rotational promotion gates, so both stay INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Frost's two retained subjects, replayed offline, give 567 eligible decisions,
@@ -1652,8 +1655,9 @@ publicContract: EXPECTED
 ### ONB-B3: Devourer Demon Hunter (internal, own representative)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-S1, ONB-S2
+branch: autopilot/onb-b3
 wcl: NONE
 publicContract: NONE
 ```
@@ -1665,6 +1669,9 @@ numeric. Handle it alone.
 
 - Pseudo-action timers stay UNKNOWN unless the evidence attributes them.
 - It is never forced into Cohort B.
+
+**Outcome.** Devourer is registered INTERNAL_ONLY, and no decision of it resolves. Its three retained subjects (gtKb fight 22 actor 32, whole fight; rXAf fight 13 actors 20 and 79, first 165 s; all Void-Scarred with The Hunt) give 251 eligible decisions, all UNKNOWN,
+every root scan stopping at `voidscarred_melee[0] run_action_list` on `active_enemies`. The pick-up timers are UNKNOWN from any log, and behind the count they would stop a scan on their own. Requirement C cannot be met until ONB-S3 is decided (agent/architecture.md "ONB-B3"; agent/follow-ups.md "After ONB-B3").
 
 ### ONB-B3P: Devourer Demon Hunter (public)
 

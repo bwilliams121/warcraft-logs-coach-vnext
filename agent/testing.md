@@ -5576,6 +5576,14 @@ resolved a decision prompts a new public entry. The unsupported subject's guard 
 Offline only, not committed: the whole-fight replay (`.probe/onbb1/m/`) gives the numbers agent/architecture.md "ONB-B1" reports, and
 `.probe/onbb1/wire.cjs` the wire measurements. Not run: no window-counting rule was mutated beyond what the negatives above exercise.
 
+# ONB-B3: Devourer Demon Hunter
+
+`tests/unit/specs/onb-b3-devourer-demon-hunter.test.ts`, synthetic: the row is internal only and refused publicly; it refuses another specialization first; a capture with no combatant info refuses; every in-domain condition parses whole; no decision resolves over any build, and none is a confident verdict. A Void-Scarred build with The Hunt stops at `voidscarred_melee[0]` on the enemy count and never enters a rotation list; an Annihilator build reaches its own list and stays open; an absent The Hunt closes neither list; an unresolved tree closes nothing. The four timed pick-up lines bind no id and attribute nothing, each timer is UNKNOWN, and with the count given to the query only a test can give, `vsm_st[0]` reads as that and nothing falls through. No off-GCD line has a contract. `void_ray_count` inside Metamorphosis stays open, never zero. Impacts, Soul Fragment and items are excluded; cast-time actions are `OUTSIDE_FIRST_SLICE`, and Void Ray is not. Fury is exact on the cast's own observation and unknown, never zero, without one. A choice-node sibling proves the other not taken; Annihilator's tree makes the Voidsurge actions background, and an absent Voidsurge alone does not; an absent Collapsing Star closes nothing. The two talent-extractor rules are pinned there too.
+
+Two corpus cases (`application-service.*-registration-is-internal-only`, `spec-devourer-demon-hunter.the-facade-refuses-every-other-specialization`). `tests/contracts/m11-promotion-evidence-gate.test.ts` pins that the gate search finds nothing, so a change that resolved a decision would fail and prompt a public entry. The conformance suite gains the module, with committed identity proof from the corpus's gtKb fight 22 context.
+
+Offline only, not committed: the census (`.probe/onbb3/census.cjs`), the wire measurements (`.probe/onbb3/wire.cjs`) and the replay (`.probe/onbb3/m/`). The real extractor preflight runs only against a local pinned source root, as for every pinned target.
+
 # ONB-B2: Frost Death Knight and Enhancement Shaman
 
 `tests/unit/specs/onb-b2-cohort-b-followers.test.ts`, synthetic: each row is internal only and refused publicly; each refuses the other specialization first; a capture with no combatant info refuses; no decision resolves

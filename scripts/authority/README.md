@@ -709,6 +709,9 @@ fields — `regionSha256`, `livePtrPolicy`, `dispatchSource`,
 Every artifact committed before M11-D2-C carries none and validates exactly
 as before.
 
+`demonhunter-devourer` was extracted from this table in ONB-B3 (`src/simc/data/demonhunter-devourer.apl.json`, 153 actions in 12 lists). Its GCD and talent targets are in the two sibling extractors. The talent target
+is the first to need two rules: a hero row scoped to no specialization counts as class-wide (all 16 of Annihilator's), and `subTreeId` names the tree when two hero sub-trees hold one name (Demonic Intensity).
+
 Enhancement was not one of these targets: its APL is a class method in
 `sc_shaman.cpp` with a C++ prologue and `add_action( this, … )` forms whose
 meaning depends on `action_priority_list.cpp`. ONB-B2 did that audit, above.

@@ -220,6 +220,7 @@ describe("cross-spec authority access is refused structurally", () => {
       ["warrior/arms", ["SIMC_APL_WARRIOR_ARMS"]],
       ["deathknight/frost", ["SIMC_APL_DEATHKNIGHT_FROST"]],
       ["shaman/enhancement", ["SIMC_APL_SHAMAN_ENHANCEMENT"]],
+      ["demonhunter/devourer", ["SIMC_APL_DEMONHUNTER_DEVOURER"]],
     ]);
   });
 });

@@ -111,6 +111,7 @@ describe("the sweep has something to sweep", () => {
     expect([...trees].sort()).toEqual([
       "src/specs/deathknight/blood",
       "src/specs/deathknight/frost",
+      "src/specs/demonhunter/devourer",
       "src/specs/demonhunter/havoc",
       "src/specs/druid/restoration",
       "src/specs/evoker/augmentation",
@@ -145,6 +146,7 @@ describe("the sweep has something to sweep", () => {
     expect(existsSync("src/specs/warrior/protection/registration.ts")).toBe(true);
     expect(existsSync("src/specs/warrior/arms/registration.ts")).toBe(true);
     expect(existsSync("src/specs/deathknight/frost/registration.ts")).toBe(true);
+    expect(existsSync("src/specs/demonhunter/devourer/registration.ts")).toBe(true);
     expect(existsSync("src/specs/shaman/enhancement/registration.ts")).toBe(true);
     expect(existsSync("src/specs/paladin/retribution/registration.ts")).toBe(true);
   });
@@ -213,6 +215,7 @@ describe("shared code reaches specializations only through the registration boun
     expect(specImports).toEqual([
       "src/specs/deathknight/blood/registration.js",
       "src/specs/deathknight/frost/registration.js",
+      "src/specs/demonhunter/devourer/registration.js",
       "src/specs/demonhunter/havoc/registration.js",
       "src/specs/druid/restoration/registration.js",
       "src/specs/evoker/augmentation/registration.js",

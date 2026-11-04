@@ -1,0 +1,434 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_TRAIT_DEMONHUNTER_DEVOURER_TALENTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. That `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals trait_data_t::id_node is corroborated for Devourer on three real subjects: gtKb2xHn87pNcFfW fight 22 actor 32 and rXAfw9t1q8YpmkKD fight 13 actors 20 and 79. All 229 of their entries are pinned rows of class 12.",
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "talents": [
+    {
+      "simcName": "collapsing_star",
+      "displayNameEn": "Collapsing Star",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 107339,
+      "traitEntryId": 132281,
+      "talentSpellId": 1221167,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_demon_hunter.cpp:10940 talent.devourer.collapsing_star = find_talent_spell( SPECIALIZATION, \"Collapsing Star\" ); the pinned list reads talent.collapsing_star. Alone it does not prove the action unbuilt: spec.collapsing_star_spell also opens on talent.devourer.midnight3 (:11208-11209)"
+    },
+    {
+      "simcName": "dark_matter",
+      "displayNameEn": "Dark Matter",
+      "tree": "HERO",
+      "traitNodeId": 109444,
+      "traitEntryId": 135662,
+      "talentSpellId": 1256307,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_demon_hunter.cpp:11149 talent.annihilator.dark_matter = find_talent_spell( HERO, \"Dark Matter\" ); an Annihilator talent, pinned so the tree resolves from more than one entry"
+    },
+    {
+      "simcName": "demonic_intensity",
+      "displayNameEn": "Demonic Intensity",
+      "tree": "HERO",
+      "traitNodeId": 110116,
+      "traitEntryId": 136617,
+      "talentSpellId": 452415,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_demon_hunter.cpp:11184 talent.scarred.demonic_intensity = HT_FS( \"Demonic Intensity\" ), the Void-Scarred tree for a Devourer (:11160-11162); predators_wake_t is built on a lookup of it (:11380-11383)"
+    },
+    {
+      "simcName": "devourers_bite",
+      "displayNameEn": "Devourer's Bite",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 110167,
+      "traitEntryId": 136692,
+      "talentSpellId": 1240201,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_demon_hunter.cpp:10968 talent.devourer.devourers_bite = find_talent_spell( SPECIALIZATION, \"Devourer's Bite\" ); the pinned list reads talent.devourers_bite"
+    },
+    {
+      "simcName": "duty_eternal",
+      "displayNameEn": "Duty Eternal",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 108726,
+      "traitEntryId": 134275,
+      "talentSpellId": 1246562,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 134279,
+          "displayNameEn": "Scythe's Embrace",
+          "talentSpellId": 1246558
+        }
+      ],
+      "binding": "sc_demon_hunter.cpp:10939 talent.devourer.duty_eternal = find_talent_spell( SPECIALIZATION, \"Duty Eternal\" ); a CHOICE node with Scythe's Embrace, pinned so that node resolves"
+    },
+    {
+      "simcName": "eradicate",
+      "displayNameEn": "Eradicate",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 107345,
+      "traitEntryId": 132287,
+      "talentSpellId": 1226033,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_demon_hunter.cpp:10976 talent.devourer.eradicate = find_talent_spell( SPECIALIZATION, \"Eradicate\" ); the pinned list reads talent.eradicate, and eradicate_t is built on spec.eradicate = talent_spell_lookup( talent.devourer.eradicate, 1225826 ) (:6143, :11196)"
+    },
+    {
+      "simcName": "hungering_slash",
+      "displayNameEn": "Hungering Slash",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 108136,
+      "traitEntryId": 133531,
+      "talentSpellId": 1239519,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_demon_hunter.cpp:10956 talent.devourer.hungering_slash = find_talent_spell( SPECIALIZATION, \"Hungering Slash\" ); hungering_slash_t is built on spec.hungering_slash = talent_spell_lookup( talent.devourer.hungering_slash, 1239123 ) (:6808, :11216)"
+    },
+    {
+      "simcName": "scythes_embrace",
+      "displayNameEn": "Scythe's Embrace",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 108726,
+      "traitEntryId": 134279,
+      "talentSpellId": 1246558,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 134275,
+          "displayNameEn": "Duty Eternal",
+          "talentSpellId": 1246562
+        }
+      ],
+      "binding": "sc_demon_hunter.cpp:10938 talent.devourer.scythes_embrace = find_talent_spell( SPECIALIZATION, \"Scythe's Embrace\" ); the pinned list reads talent.scythes_embrace. A CHOICE node with Duty Eternal"
+    },
+    {
+      "simcName": "soul_immolation",
+      "displayNameEn": "Soul Immolation",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 107344,
+      "traitEntryId": 132286,
+      "talentSpellId": 1241937,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_demon_hunter.cpp:10930 talent.devourer.soul_immolation = find_talent_spell( SPECIALIZATION, \"Soul Immolation\" ); soul_immolation_heal_t is built on it (:5951)"
+    },
+    {
+      "simcName": "star_fragments",
+      "displayNameEn": "Star Fragments",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 110172,
+      "traitEntryId": 136697,
+      "talentSpellId": 1240204,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_demon_hunter.cpp:10971 talent.devourer.star_fragments = find_talent_spell( SPECIALIZATION, \"Star Fragments\" ); the pinned list reads talent.star_fragments"
+    },
+    {
+      "simcName": "the_hunt",
+      "displayNameEn": "The Hunt",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 109503,
+      "traitEntryId": 135736,
+      "talentSpellId": 1246167,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_demon_hunter.cpp:10973 talent.devourer.the_hunt = find_talent_spell( SPECIALIZATION, \"The Hunt\" ); the pinned list dispatches on talent.the_hunt, and the_hunt_t is built on it (:5612, :11285)"
+    },
+    {
+      "simcName": "vengeful_retreat",
+      "displayNameEn": "Vengeful Retreat",
+      "tree": "CLASS",
+      "traitNodeId": 90942,
+      "traitEntryId": 112853,
+      "talentSpellId": 198793,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_demon_hunter.cpp:10868 talent.demon_hunter.vengeful_retreat = find_talent_spell( CLASS, \"Vengeful Retreat\" ); vengeful_retreat_t is built on it (:8588-8589)"
+    },
+    {
+      "simcName": "void_ray",
+      "displayNameEn": "Void Ray",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 107336,
+      "traitEntryId": 132278,
+      "talentSpellId": 473728,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_demon_hunter.cpp:10928 talent.devourer.void_ray = find_talent_spell( SPECIALIZATION, \"Void Ray\" ); void_ray_t is built on it (:6373)"
+    },
+    {
+      "simcName": "voidblade",
+      "displayNameEn": "Voidblade",
+      "tree": "CLASS",
+      "traitNodeId": 108723,
+      "traitEntryId": 134272,
+      "talentSpellId": 1245412,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_demon_hunter.cpp:10870 talent.demon_hunter.voidblade = find_talent_spell( CLASS, \"Voidblade\" ); voidblade_t is built on it (:5913)"
+    },
+    {
+      "simcName": "voidfall",
+      "displayNameEn": "Voidfall",
+      "tree": "HERO",
+      "traitNodeId": 109449,
+      "traitEntryId": 135667,
+      "talentSpellId": 1253304,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_demon_hunter.cpp:11133 talent.annihilator.voidfall = find_talent_spell( HERO, \"Voidfall\" ); the pinned list reads talent.voidfall"
+    },
+    {
+      "simcName": "voidsurge",
+      "displayNameEn": "Voidsurge",
+      "tree": "HERO",
+      "traitNodeId": 110112,
+      "traitEntryId": 136613,
+      "talentSpellId": 452402,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_demon_hunter.cpp:11158 talent.scarred.demonsurge = find_talent_spell( HERO, \"Voidsurge\" ) for a Devourer; pierce_the_veil_t and reapers_toll_t are built on lookups of it (:11384-11385)"
+    }
+  ],
+  "heroTrees": [
+    {
+      "simcName": "annihilator",
+      "subTreeId": 124,
+      "entries": [
+        {
+          "traitEntryId": 135659,
+          "traitNodeId": 109448,
+          "displayNameEn": "State of Matter",
+          "talentSpellId": 1253402
+        },
+        {
+          "traitEntryId": 135660,
+          "traitNodeId": 109442,
+          "displayNameEn": "World Killer",
+          "talentSpellId": 1256353
+        },
+        {
+          "traitEntryId": 135661,
+          "traitNodeId": 109443,
+          "displayNameEn": "Otherworldly Focus",
+          "talentSpellId": 1253817
+        },
+        {
+          "traitEntryId": 135662,
+          "traitNodeId": 109444,
+          "displayNameEn": "Dark Matter",
+          "talentSpellId": 1256307
+        },
+        {
+          "traitEntryId": 135663,
+          "traitNodeId": 109445,
+          "displayNameEn": "Final Hour",
+          "talentSpellId": 1253805
+        },
+        {
+          "traitEntryId": 135664,
+          "traitNodeId": 109446,
+          "displayNameEn": "Meteoric Fall",
+          "talentSpellId": 1253391
+        },
+        {
+          "traitEntryId": 135665,
+          "traitNodeId": 109447,
+          "displayNameEn": "Mass Acceleration",
+          "talentSpellId": 1256295
+        },
+        {
+          "traitEntryId": 135666,
+          "traitNodeId": 109448,
+          "displayNameEn": "Path to Oblivion",
+          "talentSpellId": 1253399
+        },
+        {
+          "traitEntryId": 135667,
+          "traitNodeId": 109449,
+          "displayNameEn": "Voidfall",
+          "talentSpellId": 1253304
+        },
+        {
+          "traitEntryId": 135668,
+          "traitNodeId": 109450,
+          "displayNameEn": "Doomsayer",
+          "talentSpellId": 1253676
+        },
+        {
+          "traitEntryId": 135669,
+          "traitNodeId": 109451,
+          "displayNameEn": "Celestial Echoes",
+          "talentSpellId": 1253415
+        },
+        {
+          "traitEntryId": 135670,
+          "traitNodeId": 109452,
+          "displayNameEn": "Phase Shift",
+          "talentSpellId": 1256245
+        },
+        {
+          "traitEntryId": 135671,
+          "traitNodeId": 109453,
+          "displayNameEn": "Catastrophe",
+          "talentSpellId": 1253769
+        },
+        {
+          "traitEntryId": 135672,
+          "traitNodeId": 109454,
+          "displayNameEn": "Swift Erasure",
+          "talentSpellId": 1253668
+        },
+        {
+          "traitEntryId": 135673,
+          "traitNodeId": 109455,
+          "displayNameEn": "Meteoric Rise",
+          "talentSpellId": 1253377
+        },
+        {
+          "traitEntryId": 136810,
+          "traitNodeId": 109450,
+          "displayNameEn": "Harness the Cosmos",
+          "talentSpellId": 1279247
+        }
+      ]
+    },
+    {
+      "simcName": "voidscarred",
+      "subTreeId": 126,
+      "entries": [
+        {
+          "traitEntryId": 136606,
+          "traitNodeId": 110109,
+          "displayNameEn": "Untethered Fury",
+          "talentSpellId": 452411
+        },
+        {
+          "traitEntryId": 136607,
+          "traitNodeId": 110105,
+          "displayNameEn": "Blind Focus",
+          "talentSpellId": 1272364
+        },
+        {
+          "traitEntryId": 136608,
+          "traitNodeId": 110104,
+          "displayNameEn": "Monster Rising",
+          "talentSpellId": 452414
+        },
+        {
+          "traitEntryId": 136609,
+          "traitNodeId": 110108,
+          "displayNameEn": "Undying Embers",
+          "talentSpellId": 1272405
+        },
+        {
+          "traitEntryId": 136610,
+          "traitNodeId": 110111,
+          "displayNameEn": "Burning Blades",
+          "talentSpellId": 452408
+        },
+        {
+          "traitEntryId": 136611,
+          "traitNodeId": 110110,
+          "displayNameEn": "Volatile Instinct",
+          "talentSpellId": 1272453
+        },
+        {
+          "traitEntryId": 136612,
+          "traitNodeId": 110113,
+          "displayNameEn": "Focused Hatred",
+          "talentSpellId": 452405
+        },
+        {
+          "traitEntryId": 136613,
+          "traitNodeId": 110112,
+          "displayNameEn": "Voidsurge",
+          "talentSpellId": 452402
+        },
+        {
+          "traitEntryId": 136614,
+          "traitNodeId": 110107,
+          "displayNameEn": "Flamebound",
+          "talentSpellId": 452413
+        },
+        {
+          "traitEntryId": 136615,
+          "traitNodeId": 110106,
+          "displayNameEn": "Enduring Torment",
+          "talentSpellId": 452410
+        },
+        {
+          "traitEntryId": 136616,
+          "traitNodeId": 110107,
+          "displayNameEn": "Student of Suffering",
+          "talentSpellId": 452412
+        },
+        {
+          "traitEntryId": 136617,
+          "traitNodeId": 110116,
+          "displayNameEn": "Demonic Intensity",
+          "talentSpellId": 452415
+        },
+        {
+          "traitEntryId": 136618,
+          "traitNodeId": 110117,
+          "displayNameEn": "Improved Soul Rending",
+          "talentSpellId": 452407
+        },
+        {
+          "traitEntryId": 136619,
+          "traitNodeId": 110114,
+          "displayNameEn": "Pursuit of Angriness",
+          "talentSpellId": 452404
+        },
+        {
+          "traitEntryId": 136620,
+          "traitNodeId": 110117,
+          "displayNameEn": "Set Fire to the Pain",
+          "talentSpellId": 452406
+        },
+        {
+          "traitEntryId": 136621,
+          "traitNodeId": 110114,
+          "displayNameEn": "Wave of Debilitation",
+          "talentSpellId": 452403
+        },
+        {
+          "traitEntryId": 136622,
+          "traitNodeId": 110115,
+          "displayNameEn": "Violent Transformation",
+          "talentSpellId": 452409
+        }
+      ]
+    }
+  ]
+}

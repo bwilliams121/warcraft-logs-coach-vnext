@@ -58,6 +58,7 @@ import pinnedFuryApl from "../../../src/simc/data/warrior-fury.apl.json";
 import pinnedProtectionWarriorApl from "../../../src/simc/data/warrior-protection.apl.json";
 import pinnedArmsWarriorApl from "../../../src/simc/data/warrior-arms.apl.json";
 import pinnedFrostDeathKnightApl from "../../../src/simc/data/deathknight-frost.apl.json";
+import pinnedDevourerDemonHunterApl from "../../../src/simc/data/demonhunter-devourer.apl.json";
 import pinnedEnhancementShamanApl from "../../../src/simc/data/shaman-enhancement.apl.json";
 import { AUTHORITY_DOMAINS, AUTHORITY_RESOLUTION_OUTCOMES } from "../../../src/findings/authority-domain.js";
 import { SPEC_IDS, type SpecId } from "../../../src/findings/spec-id.js";
@@ -405,6 +406,7 @@ export const OWNING_LAYERS = {
   SPEC_PROTECTION_WARRIOR: ["src/specs/warrior/protection/"],
   SPEC_ARMS_WARRIOR: ["src/specs/warrior/arms/"],
   SPEC_FROST_DEATH_KNIGHT: ["src/specs/deathknight/frost/"],
+  SPEC_DEVOURER_DEMON_HUNTER: ["src/specs/demonhunter/devourer/"],
   SPEC_ENHANCEMENT_SHAMAN: ["src/specs/shaman/enhancement/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
   PUBLIC_CONTRACT: ["src/contracts/", "src/api/", "src/mcp/"],
@@ -449,6 +451,7 @@ export const SPEC_LAYER_OF = {
   "warrior/protection": "SPEC_PROTECTION_WARRIOR",
   "warrior/arms": "SPEC_ARMS_WARRIOR",
   "deathknight/frost": "SPEC_FROST_DEATH_KNIGHT",
+  "demonhunter/devourer": "SPEC_DEVOURER_DEMON_HUNTER",
   "shaman/enhancement": "SPEC_ENHANCEMENT_SHAMAN",
 } as const satisfies Record<SpecId, OwningLayer>;
 
@@ -3347,6 +3350,19 @@ export const ASSERTION_KINDS = {
       "The Frost Death Knight facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
   },
 
+  // ---- SPEC_DEVOURER_DEMON_HUNTER (ONB-B3, INTERNAL_ONLY) ---
+  "SPEC_DEVOURER_DEMON_HUNTER.SPEC_GATE": {
+    owningLayer: "SPEC_DEVOURER_DEMON_HUNTER",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Devourer Demon Hunter facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
+  },
+
   // ---- SPEC_ENHANCEMENT_SHAMAN (ONB-B2, INTERNAL_ONLY) ---
   "SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE": {
     owningLayer: "SPEC_ENHANCEMENT_SHAMAN",
@@ -4168,6 +4184,7 @@ export const PINNED_AUTHORITY_REVISIONS: Readonly<Record<string, string>> = {
   [pinnedProtectionWarriorApl.authorityId]: pinnedProtectionWarriorApl.artifactRevision,
   [pinnedArmsWarriorApl.authorityId]: pinnedArmsWarriorApl.artifactRevision,
   [pinnedFrostDeathKnightApl.authorityId]: pinnedFrostDeathKnightApl.artifactRevision,
+  [pinnedDevourerDemonHunterApl.authorityId]: pinnedDevourerDemonHunterApl.artifactRevision,
   [pinnedEnhancementShamanApl.authorityId]: pinnedEnhancementShamanApl.artifactRevision,
 };
 

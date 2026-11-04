@@ -531,9 +531,9 @@
     {
       "specId": "demonhunter/devourer",
       "cohort": "C_RUN_ACTION_LIST_DISPATCH",
-      "currentAnalyzerStatus": "UNREGISTERED",
+      "currentAnalyzerStatus": "INTERNAL_ONLY",
       "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
-      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "authorityAuditStatus": "AUTHORITY_AUDITED",
       "deepDiveInventoryStatus": "PARTIAL",
       "questions": [
         {
@@ -542,15 +542,12 @@
           "scope": "RESOURCE_MANAGEMENT",
           "timeHorizon": "REPEATED_CYCLES",
           "evidenceNeeded": ["Reap casts", "soul fragment events"],
-          "authorityNeeded": [
-            "pinned mechanics read of action.reap.souls_consumed in sc_demon_hunter.cpp (not fetched in A3)",
-            "pinned reaps call lines"
-          ],
+          "authorityNeeded": ["pinned reaps call lines"],
           "normalizedStateNeeded": ["soul fragment state"],
-          "implementationReadiness": "NEEDS_AUTHORITY",
-          "unknownConditions": ["souls_consumed semantics not pinned", "run_action_list dispatch"],
+          "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
+          "unknownConditions": ["the live soul fragment count", "the enemy count (ONB-S3)"],
           "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
-          "notes": "Devourer exists at the pin (roster 1480) and has real evidence (gtKb actor 32)."
+          "notes": "Unanswered since ONB-B3. The pinned read is min( active soul fragments, souls_to_consume() ) (sc_demon_hunter.cpp:6091-6094), so the value needs a live soul fragment count, which has no log event. Three real subjects are retained (gtKb fight 22 actor 32, rXAf fight 13 actors 20 and 79)."
         }
       ]
     },

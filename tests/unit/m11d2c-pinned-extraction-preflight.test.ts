@@ -807,6 +807,7 @@ describe("the registry", () => {
     // ONB-A1 extracted demonhunter-havoc through this very path, and ONB-A2 its three followers.
     const EXTRACTED = [
       "deathknight-frost",
+      "demonhunter-devourer",
       "demonhunter-havoc",
       "rogue-subtlety",
       "warrior-arms",

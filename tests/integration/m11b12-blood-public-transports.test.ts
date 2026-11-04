@@ -188,6 +188,7 @@ describe("REST: a real Blood Death Knight identity resolves publicly", () => {
       "warrior-arms-observed-decisions": 0,
       "deathknight-frost-observed-decisions": 0,
       "shaman-enhancement-observed-decisions": 0,
+      "demonhunter-devourer-observed-decisions": 0,
     });
     const parsed = PublicAnalysisResultSchema.safeParse(rest.body);
     expect(parsed.success).toBe(true);

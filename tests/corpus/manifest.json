@@ -5201,6 +5201,37 @@
       "relatedTests": ["tests/unit/analysis-service.test.ts", "tests/unit/ingestion-scope.test.ts"]
     },
     {
+      "caseId": "application-service.devourer-demon-hunter-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Devourer Demon Hunter registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "demonhunter/devourer",
+            "expected": {
+              "internalAnalyzerId": "demonhunter-devourer-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Devourer Demon Hunter is registered INTERNAL_ONLY in ONB-B3. No decision of its retained subjects resolves: its list reaches voidscarred_melee and stops on the enemy count, the ONB-S3 owner decision. So a public request must keep receiving SPEC_NOT_SUPPORTED."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
+      ]
+    },
+    {
       "caseId": "application-service.discipline-priest-registration-is-internal-only",
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "APPLICATION_SERVICE",
@@ -20313,6 +20344,29 @@
         "tests/contracts/m11c2-brewmaster-evaluator.test.ts",
         "tests/unit/m11c2-brewmaster-bindings.test.ts"
       ]
+    },
+    {
+      "caseId": "spec-devourer-demon-hunter.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_DEVOURER_DEMON_HUNTER",
+      "contractUnderTest": "src/specs/demonhunter/devourer/observed-analysis.ts analyzeObservedDevourerDemonHunterDecisions (the spec gate)",
+      "purpose": "The Devourer Demon Hunter facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_DEVOURER_DEMON_HUNTER.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Devourer Demon Hunter list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-b1-devourer-demon-hunter.test.ts"]
     },
     {
       "caseId": "spec-discipline-priest.unstated-subject-yields-no-healer-finding",

@@ -78,6 +78,7 @@ describe("the five sites agree", () => {
       "warrior/arms",
       "deathknight/frost",
       "shaman/enhancement",
+      "demonhunter/devourer",
     ]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
@@ -158,6 +159,7 @@ describe("the five sites agree", () => {
       ["warrior/arms", "INTERNAL_ONLY"],
       ["deathknight/frost", "INTERNAL_ONLY"],
       ["shaman/enhancement", "INTERNAL_ONLY"],
+      ["demonhunter/devourer", "INTERNAL_ONLY"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -266,6 +268,7 @@ describe("the complete-catalog helper", () => {
       "warrior-arms-observed-decisions": 0,
       "deathknight-frost-observed-decisions": 0,
       "shaman-enhancement-observed-decisions": 0,
+      "demonhunter-devourer-observed-decisions": 0,
     });
   });
 });
