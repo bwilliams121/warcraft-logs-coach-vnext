@@ -1,0 +1,490 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_TRAIT_WARLOCK_DESTRUCTION_TALENTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals trait_data_t::id_node, as every earlier target recorded. Corroborated for Destruction Warlock on the retained A7R6kxPJ1hC8YQ4w fight 7 actors 12 and 15: their observed trees resolve Hellcaller and the pinned list's talents by these keys (agent/architecture.md \"ONB-D1\").",
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "talents": [
+    {
+      "simcName": "avatar_of_destruction",
+      "displayNameEn": "Avatar of Destruction",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 110280,
+      "traitEntryId": 136833,
+      "talentSpellId": 1245089,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:500 talents.avatar_of_destruction = find_talent_spell( SPECIALIZATION, \"Avatar of Destruction\" ); ; the pinned list reads talent.avatar_of_destruction"
+    },
+    {
+      "simcName": "backdraft",
+      "displayNameEn": "Backdraft",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 72067,
+      "traitEntryId": 91590,
+      "talentSpellId": 196406,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:400 talents.backdraft = find_talent_spell( SPECIALIZATION, \"Backdraft\" ); ; the pinned list reads talent.backdraft"
+    },
+    {
+      "simcName": "cataclysm",
+      "displayNameEn": "Cataclysm",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 71974,
+      "traitEntryId": 91488,
+      "talentSpellId": 152108,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:426 talents.cataclysm = find_talent_spell( SPECIALIZATION, \"Cataclysm\" ); ; cataclysm_t is built on it"
+    },
+    {
+      "simcName": "chaos_bolt",
+      "displayNameEn": "Chaos Bolt",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 110282,
+      "traitEntryId": 136835,
+      "talentSpellId": 116858,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:388 talents.chaos_bolt = find_talent_spell( SPECIALIZATION, \"Chaos Bolt\" ); ; chaos_bolt_t is built on it"
+    },
+    {
+      "simcName": "conflagrate",
+      "displayNameEn": "Conflagrate",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 72068,
+      "traitEntryId": 91591,
+      "talentSpellId": 17962,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:390 talents.conflagrate = find_talent_spell( SPECIALIZATION, \"Conflagrate\" ); ; conflagrate_t is built on it"
+    },
+    {
+      "simcName": "conflagration_of_chaos",
+      "displayNameEn": "Conflagration of Chaos",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 71965,
+      "traitEntryId": 91478,
+      "talentSpellId": 387108,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:490 talents.conflagration_of_chaos = find_talent_spell( SPECIALIZATION, \"Conflagration of Chaos\" ); ; the pinned list reads talent.conflagration_of_chaos"
+    },
+    {
+      "simcName": "destructive_rapidity",
+      "displayNameEn": "Destructive Rapidity",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 71964,
+      "traitEntryId": 91477,
+      "talentSpellId": 1244928,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:471 talents.destructive_rapidity = find_talent_spell( SPECIALIZATION, \"Destructive Rapidity\" ); ; the pinned list reads talent.destructive_rapidity"
+    },
+    {
+      "simcName": "diabolic_ritual",
+      "displayNameEn": "Diabolic Ritual",
+      "tree": "HERO",
+      "traitNodeId": 94855,
+      "traitEntryId": 117452,
+      "talentSpellId": 428514,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:538 hero.diabolic_ritual = find_talent_spell( HERO, \"Diabolic Ritual\" ); ; the pinned list reads talent.diabolic_ritual"
+    },
+    {
+      "simcName": "fire_and_brimstone",
+      "displayNameEn": "Fire and Brimstone",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 71982,
+      "traitEntryId": 91499,
+      "talentSpellId": 196408,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:447 talents.fire_and_brimstone = find_talent_spell( SPECIALIZATION, \"Fire and Brimstone\" ); ; the pinned list reads talent.fire_and_brimstone"
+    },
+    {
+      "simcName": "havoc",
+      "displayNameEn": "Havoc",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 71979,
+      "traitEntryId": 91493,
+      "talentSpellId": 80240,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 91494,
+          "displayNameEn": "Mayhem",
+          "talentSpellId": 387506
+        }
+      ],
+      "binding": "sc_warlock_init.cpp:411 talents.havoc = find_talent_spell( SPECIALIZATION, \"Havoc\" ); ; havoc_t is built on it"
+    },
+    {
+      "simcName": "internal_combustion",
+      "displayNameEn": "Internal Combustion",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 71980,
+      "traitEntryId": 91495,
+      "talentSpellId": 266134,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 91496,
+          "displayNameEn": "Reverse Entropy",
+          "talentSpellId": 205148
+        }
+      ],
+      "binding": "sc_warlock_init.cpp:457 talents.internal_combustion = find_talent_spell( SPECIALIZATION, \"Internal Combustion\" ); ; the pinned list reads talent.internal_combustion"
+    },
+    {
+      "simcName": "lake_of_fire",
+      "displayNameEn": "Lake of Fire",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102427,
+      "traitEntryId": 126493,
+      "talentSpellId": 1244877,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:449 talents.lake_of_fire = find_talent_spell( SPECIALIZATION, \"Lake of Fire\" ); ; the pinned list reads talent.lake_of_fire"
+    },
+    {
+      "simcName": "malevolence",
+      "displayNameEn": "Malevolence",
+      "tree": "HERO",
+      "traitNodeId": 94842,
+      "traitEntryId": 117439,
+      "talentSpellId": 430014,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:634 hero.malevolence = find_talent_spell( HERO, \"Malevolence\" ); ; malevolence_t is built on it"
+    },
+    {
+      "simcName": "roaring_blaze",
+      "displayNameEn": "Roaring Blaze",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 72065,
+      "traitEntryId": 91588,
+      "talentSpellId": 1244310,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:405 talents.roaring_blaze = find_talent_spell( SPECIALIZATION, \"Roaring Blaze\" ); ; the pinned list reads talent.roaring_blaze"
+    },
+    {
+      "simcName": "ruination",
+      "displayNameEn": "Ruination",
+      "tree": "HERO",
+      "traitNodeId": 94830,
+      "traitEntryId": 117427,
+      "talentSpellId": 428522,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:576 hero.ruination = find_talent_spell( HERO, \"Ruination\" ); ; ruination_t is built on hero.ruination_cast, which is not_found without it"
+    },
+    {
+      "simcName": "secrets_of_the_coven",
+      "displayNameEn": "Secrets of the Coven",
+      "tree": "HERO",
+      "traitNodeId": 94826,
+      "traitEntryId": 117423,
+      "talentSpellId": 428518,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:560 hero.secrets_of_the_coven = find_talent_spell( HERO, \"Secrets of the Coven\" ); ; infernal_bolt_t is built on hero.infernal_bolt, which is not_found without it"
+    },
+    {
+      "simcName": "shadowburn",
+      "displayNameEn": "Shadowburn",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 72060,
+      "traitEntryId": 91582,
+      "talentSpellId": 17877,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:416 talents.shadowburn = find_talent_spell( SPECIALIZATION, \"Shadowburn\" ); ; shadowburn_t is built on it"
+    },
+    {
+      "simcName": "soul_fire",
+      "displayNameEn": "Soul Fire",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 108681,
+      "traitEntryId": 134221,
+      "talentSpellId": 6353,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 128600,
+          "displayNameEn": "Dimensional Rift",
+          "talentSpellId": 1280868
+        }
+      ],
+      "binding": "sc_warlock_init.cpp:485 talents.soul_fire = find_talent_spell( SPECIALIZATION, \"Soul Fire\" ); ; soul_fire_t is built on it"
+    },
+    {
+      "simcName": "summon_infernal",
+      "displayNameEn": "Summon Infernal",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 71985,
+      "traitEntryId": 91502,
+      "talentSpellId": 1122,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:437 talents.summon_infernal = find_talent_spell( SPECIALIZATION, \"Summon Infernal\" ); ; summon_infernal_t is built on it"
+    },
+    {
+      "simcName": "wither",
+      "displayNameEn": "Wither",
+      "tree": "HERO",
+      "traitNodeId": 94840,
+      "traitEntryId": 117437,
+      "talentSpellId": 445465,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:604 hero.wither = find_talent_spell( HERO, \"Wither\" ); ; the pinned list reads talent.wither, and wither_t and immolate_t read it"
+    }
+  ],
+  "heroTrees": [
+    {
+      "simcName": "hellcaller",
+      "subTreeId": 58,
+      "entries": [
+        {
+          "traitEntryId": 117419,
+          "traitNodeId": 94822,
+          "displayNameEn": "Curse of the Satyr",
+          "talentSpellId": 440057
+        },
+        {
+          "traitEntryId": 117426,
+          "traitNodeId": 94829,
+          "displayNameEn": "Seeds of Their Demise",
+          "talentSpellId": 440055
+        },
+        {
+          "traitEntryId": 117431,
+          "traitNodeId": 94834,
+          "displayNameEn": "Mark of Xavius",
+          "talentSpellId": 440046
+        },
+        {
+          "traitEntryId": 117432,
+          "traitNodeId": 94835,
+          "displayNameEn": "Zevrim's Resilience",
+          "talentSpellId": 440065
+        },
+        {
+          "traitEntryId": 117434,
+          "traitNodeId": 94837,
+          "displayNameEn": "Blackened Soul",
+          "talentSpellId": 440043
+        },
+        {
+          "traitEntryId": 117437,
+          "traitNodeId": 94840,
+          "displayNameEn": "Wither",
+          "talentSpellId": 445465
+        },
+        {
+          "traitEntryId": 117439,
+          "traitNodeId": 94842,
+          "displayNameEn": "Malevolence",
+          "talentSpellId": 430014
+        },
+        {
+          "traitEntryId": 117441,
+          "traitNodeId": 94844,
+          "displayNameEn": "Mark of Peroth'arn",
+          "talentSpellId": 440045
+        },
+        {
+          "traitEntryId": 117442,
+          "traitNodeId": 94845,
+          "displayNameEn": "Xalan's Cruelty",
+          "talentSpellId": 440040
+        },
+        {
+          "traitEntryId": 117450,
+          "traitNodeId": 94853,
+          "displayNameEn": "Xalan's Ferocity",
+          "talentSpellId": 440044
+        },
+        {
+          "traitEntryId": 117451,
+          "traitNodeId": 94854,
+          "displayNameEn": "Hatefury Rituals",
+          "talentSpellId": 440048
+        },
+        {
+          "traitEntryId": 123308,
+          "traitNodeId": 94835,
+          "displayNameEn": "Illhoof's Design",
+          "talentSpellId": 440070
+        },
+        {
+          "traitEntryId": 123309,
+          "traitNodeId": 94822,
+          "displayNameEn": "Aura of Enfeeblement",
+          "talentSpellId": 440059
+        },
+        {
+          "traitEntryId": 123310,
+          "traitNodeId": 94854,
+          "displayNameEn": "Bleakheart Tactics",
+          "talentSpellId": 440051
+        },
+        {
+          "traitEntryId": 136093,
+          "traitNodeId": 109834,
+          "displayNameEn": "Alzzin's Iniquity",
+          "talentSpellId": 1266803
+        },
+        {
+          "traitEntryId": 136094,
+          "traitNodeId": 109835,
+          "displayNameEn": "Devil Fruit",
+          "talentSpellId": 1266805
+        },
+        {
+          "traitEntryId": 136095,
+          "traitNodeId": 109836,
+          "displayNameEn": "Through the Felvine",
+          "talentSpellId": 1266799
+        }
+      ]
+    },
+    {
+      "simcName": "diabolist",
+      "subTreeId": 59,
+      "entries": [
+        {
+          "traitEntryId": 117423,
+          "traitNodeId": 94826,
+          "displayNameEn": "Secrets of the Coven",
+          "talentSpellId": 428518
+        },
+        {
+          "traitEntryId": 117427,
+          "traitNodeId": 94830,
+          "displayNameEn": "Ruination",
+          "talentSpellId": 428522
+        },
+        {
+          "traitEntryId": 117428,
+          "traitNodeId": 94831,
+          "displayNameEn": "Abyssal Dominion",
+          "talentSpellId": 429581
+        },
+        {
+          "traitEntryId": 117430,
+          "traitNodeId": 94833,
+          "displayNameEn": "Flames of Xoroth",
+          "talentSpellId": 429657
+        },
+        {
+          "traitEntryId": 117433,
+          "traitNodeId": 94836,
+          "displayNameEn": "Soul-Etched Circles",
+          "talentSpellId": 428911
+        },
+        {
+          "traitEntryId": 117440,
+          "traitNodeId": 94843,
+          "displayNameEn": "Gloom of Nathreza",
+          "talentSpellId": 429899
+        },
+        {
+          "traitEntryId": 117445,
+          "traitNodeId": 94848,
+          "displayNameEn": "Cruelty of Kerxan",
+          "talentSpellId": 429902
+        },
+        {
+          "traitEntryId": 117446,
+          "traitNodeId": 94849,
+          "displayNameEn": "Cloven Souls",
+          "talentSpellId": 428517
+        },
+        {
+          "traitEntryId": 117449,
+          "traitNodeId": 94852,
+          "displayNameEn": "Infernal Vitality",
+          "talentSpellId": 429115
+        },
+        {
+          "traitEntryId": 117452,
+          "traitNodeId": 94855,
+          "displayNameEn": "Diabolic Ritual",
+          "talentSpellId": 428514
+        },
+        {
+          "traitEntryId": 117453,
+          "traitNodeId": 94856,
+          "displayNameEn": "Touch of Rancora",
+          "talentSpellId": 429893
+        },
+        {
+          "traitEntryId": 118837,
+          "traitNodeId": 94836,
+          "displayNameEn": "Annihilan's Bellow",
+          "talentSpellId": 429072
+        },
+        {
+          "traitEntryId": 118838,
+          "traitNodeId": 94848,
+          "displayNameEn": "Infernal Machine",
+          "talentSpellId": 429917
+        },
+        {
+          "traitEntryId": 118839,
+          "traitNodeId": 94852,
+          "displayNameEn": "Infernal Bulwark",
+          "talentSpellId": 429130
+        },
+        {
+          "traitEntryId": 136090,
+          "traitNodeId": 109831,
+          "displayNameEn": "Mind's Eyes",
+          "talentSpellId": 1268716
+        },
+        {
+          "traitEntryId": 136091,
+          "traitNodeId": 109832,
+          "displayNameEn": "Looks That Kill",
+          "talentSpellId": 1268713
+        },
+        {
+          "traitEntryId": 136092,
+          "traitNodeId": 109833,
+          "displayNameEn": "Diabolic Oculi",
+          "talentSpellId": 1268709
+        }
+      ]
+    }
+  ]
+}

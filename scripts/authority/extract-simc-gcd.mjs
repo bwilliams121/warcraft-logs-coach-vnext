@@ -3946,6 +3946,227 @@ const ROGUE_OUTLAW_FACTS = {
   ],
 };
 
+const WARLOCK_DESTRUCTION_SOURCES = {
+  spellData: "engine/dbc/generated/sc_spell_data.inc",
+  classSpells: "engine/dbc/generated/class_spells.inc",
+  clientDataVersion: "engine/dbc/generated/client_data_version.inc",
+  spellDataLayout: "engine/dbc/spell_data.hpp",
+  // HASHED, NEVER PARSED — the action file every token binding is a hand-reviewed reading of,
+  // and the init file that binds each action's spell.
+  classModule: "engine/class_modules/warlock/sc_warlock_actions.cpp",
+  initModule: "engine/class_modules/warlock/sc_warlock_init.cpp",
+  // HASHED, NEVER PARSED. Present because every target hashes the same shared sources.
+  racialSpells: "engine/dbc/generated/racial_spells.inc",
+  playerModule: "engine/player/player.cpp",
+  consumableModule: "engine/player/consumable.cpp",
+};
+
+const WARLOCK_DESTRUCTION_MODULE_PATH = "engine/class_modules/warlock/sc_warlock_actions.cpp";
+
+/**
+ * The Destruction Warlock facts (ONB-D1).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the
+ * pinned Destruction list (warlock.cpp `destruction`) executes. Facts a reader should not have to
+ * rediscover (all read off the pinned DBC):
+ *
+ *   - EVERY TOKEN IS 1500, the cast-time ones included: their cast time is separate data, and it
+ *     is the specialization's cast-anchor profile that reads it.
+ *   - RAIN OF FIRE HAS TWO ROWS. The talent is one of 5740 and 1214467, by find_talent_spell order.
+ *   - THE RACIALS, ITEMS AND POTION ARE NOT BOUND.
+ */
+const WARLOCK_DESTRUCTION_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 6353, displayNameEn: "Soul Fire", baseGcdMs: 1500 },
+    { abilityGameId: 17962, displayNameEn: "Conflagrate", baseGcdMs: 1500 },
+    { abilityGameId: 116858, displayNameEn: "Chaos Bolt", baseGcdMs: 1500 },
+    { abilityGameId: 1122, displayNameEn: "Summon Infernal", baseGcdMs: 1500 },
+    { abilityGameId: 442726, displayNameEn: "Malevolence", baseGcdMs: 1500 },
+    { abilityGameId: 17877, displayNameEn: "Shadowburn", baseGcdMs: 1500 },
+    { abilityGameId: 445468, displayNameEn: "Wither", baseGcdMs: 1500 },
+    { abilityGameId: 348, displayNameEn: "Immolate", baseGcdMs: 1500 },
+    { abilityGameId: 434635, displayNameEn: "Ruination", baseGcdMs: 1500 },
+    { abilityGameId: 152108, displayNameEn: "Cataclysm", baseGcdMs: 1500 },
+    { abilityGameId: 434506, displayNameEn: "Infernal Bolt", baseGcdMs: 1500 },
+    { abilityGameId: 29722, displayNameEn: "Incinerate", baseGcdMs: 1500 },
+    { abilityGameId: 5740, displayNameEn: "Rain of Fire", baseGcdMs: 1500 },
+    { abilityGameId: 1214467, displayNameEn: "Rain of Fire", baseGcdMs: 1500 },
+    { abilityGameId: 80240, displayNameEn: "Havoc", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "soul_fire",
+      candidateAbilityGameIds: [6353],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / soul_fire_t",
+      startLine: 5934,
+      endLine: 5934,
+      sourceNote:
+        'create_action dispatches "soul_fire" to soul_fire_t, built on p->talents.soul_fire (:5101); find_talent_spell( SPECIALIZATION, "Soul Fire" ) at sc_warlock_init.cpp:485',
+    },
+    {
+      simcToken: "conflagrate",
+      candidateAbilityGameIds: [17962],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / conflagrate_t",
+      startLine: 5920,
+      endLine: 5920,
+      sourceNote:
+        'create_action dispatches "conflagrate" to conflagrate_t, built on p->talents.conflagrate (:4440); find_talent_spell( SPECIALIZATION, "Conflagrate" ) at sc_warlock_init.cpp:390',
+    },
+    {
+      simcToken: "chaos_bolt",
+      candidateAbilityGameIds: [116858],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / chaos_bolt_t",
+      startLine: 5926,
+      endLine: 5926,
+      sourceNote:
+        'create_action dispatches "chaos_bolt" to chaos_bolt_t, built on p->talents.chaos_bolt (:4285); find_talent_spell( SPECIALIZATION, "Chaos Bolt" ) at sc_warlock_init.cpp:388',
+    },
+    {
+      simcToken: "summon_infernal",
+      candidateAbilityGameIds: [1122],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / summon_infernal_t",
+      startLine: 5932,
+      endLine: 5932,
+      sourceNote:
+        'create_action dispatches "summon_infernal" to summon_infernal_t, built on p->talents.summon_infernal (:5064); find_talent_spell( SPECIALIZATION, "Summon Infernal" ) at sc_warlock_init.cpp:437',
+    },
+    {
+      simcToken: "malevolence",
+      candidateAbilityGameIds: [442726],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / malevolence_t",
+      startLine: 5962,
+      endLine: 5962,
+      sourceNote:
+        'create_action dispatches "malevolence" to malevolence_t, built on p->hero.malevolence (:1298), whose trigger_gcd and cooldown it reads from hero.malevolence_buff, conditional_spell_lookup( hero.malevolence.ok(), 442726 ) at sc_warlock_init.cpp:635',
+    },
+    {
+      simcToken: "shadowburn",
+      candidateAbilityGameIds: [17877],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / shadowburn_t",
+      startLine: 5936,
+      endLine: 5936,
+      sourceNote:
+        'create_action dispatches "shadowburn" to shadowburn_t, built on p->talents.shadowburn (:4773); find_talent_spell( SPECIALIZATION, "Shadowburn" ) at sc_warlock_init.cpp:416',
+    },
+    {
+      simcToken: "wither",
+      candidateAbilityGameIds: [445468],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / wither_t",
+      startLine: 5959,
+      endLine: 5959,
+      sourceNote:
+        'create_action dispatches "wither" to wither_t, built on p->hero.wither.ok() ? p->hero.wither_direct : not_found (:1189); hero.wither_direct = conditional_spell_lookup( hero.wither.ok(), 445468 ) at sc_warlock_init.cpp:605',
+    },
+    {
+      simcToken: "immolate",
+      candidateAbilityGameIds: [348],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / immolate_t",
+      startLine: 5924,
+      endLine: 5924,
+      sourceNote:
+        'create_action dispatches "immolate" to immolate_t, built on p->warlock_base.immolate->ok() && !p->hero.wither.ok() ? p->warlock_base.immolate_old : not_found (:4071); warlock_base.immolate_old = conditional_spell_lookup( ..., 348 ) at sc_warlock_init.cpp:42',
+    },
+    {
+      simcToken: "ruination",
+      candidateAbilityGameIds: [434635],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / ruination_t",
+      startLine: 5951,
+      endLine: 5951,
+      sourceNote:
+        'create_action dispatches "ruination" to ruination_t, built on p->hero.ruination_cast (:5309); conditional_spell_lookup( hero.ruination.ok(), 434635 ) at sc_warlock_init.cpp:578',
+    },
+    {
+      simcToken: "cataclysm",
+      candidateAbilityGameIds: [152108],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / cataclysm_t",
+      startLine: 5938,
+      endLine: 5938,
+      sourceNote:
+        'create_action dispatches "cataclysm" to cataclysm_t, built on p->talents.cataclysm (:4723); find_talent_spell( SPECIALIZATION, "Cataclysm" ) at sc_warlock_init.cpp:426',
+    },
+    {
+      simcToken: "infernal_bolt",
+      candidateAbilityGameIds: [434506],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / infernal_bolt_t",
+      startLine: 5948,
+      endLine: 5948,
+      sourceNote:
+        'create_action dispatches "infernal_bolt" to infernal_bolt_t, built on p->hero.infernal_bolt (:5202); conditional_spell_lookup( hero.secrets_of_the_coven.ok(), 434506 ) at sc_warlock_init.cpp:561',
+    },
+    {
+      simcToken: "incinerate",
+      candidateAbilityGameIds: [29722],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / incinerate_t",
+      startLine: 5922,
+      endLine: 5922,
+      sourceNote:
+        'create_action dispatches "incinerate" to incinerate_t, built on p->warlock_base.incinerate (:3922); conditional_spell_lookup( ..., 29722 ) at sc_warlock_init.cpp:44',
+    },
+    {
+      simcToken: "rain_of_fire",
+      candidateAbilityGameIds: [5740, 1214467],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / rain_of_fire_t",
+      startLine: 5928,
+      endLine: 5928,
+      sourceNote:
+        'create_action dispatches "rain_of_fire" to rain_of_fire_t, built on p->talents.rain_of_fire (:4556), find_talent_spell( SPECIALIZATION, 5740 ), falling back to 1214467, at sc_warlock_init.cpp:393-395',
+    },
+    {
+      simcToken: "havoc",
+      candidateAbilityGameIds: [80240],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / havoc_t",
+      startLine: 5930,
+      endLine: 5930,
+      sourceNote:
+        'create_action dispatches "havoc" to havoc_t, built on p->talents.havoc (:4624); find_talent_spell( SPECIALIZATION, "Havoc" ) at sc_warlock_init.cpp:411',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
 /**
  * The Devourer Demon Hunter facts (ONB-B3).
  *
@@ -4695,6 +4916,22 @@ export const TARGETS = {
     ],
     requiredFacts: ROGUE_OUTLAW_FACTS,
     defaultOut: "src/data/game/rogue-outlaw-gcd-semantics.json",
+  },
+  "warlock-destruction": {
+    datasetId: "SIMC_DBC_WARLOCK_DESTRUCTION_GCD_SEMANTICS",
+    classId: 9,
+    className: "Warlock",
+    sources: WARLOCK_DESTRUCTION_SOURCES,
+    classModulePath: WARLOCK_DESTRUCTION_SOURCES.classModule,
+    handReviewedPaths: [
+      WARLOCK_DESTRUCTION_SOURCES.classModule,
+      WARLOCK_DESTRUCTION_SOURCES.initModule,
+      WARLOCK_DESTRUCTION_SOURCES.racialSpells,
+      WARLOCK_DESTRUCTION_SOURCES.playerModule,
+      WARLOCK_DESTRUCTION_SOURCES.consumableModule,
+    ],
+    requiredFacts: WARLOCK_DESTRUCTION_FACTS,
+    defaultOut: "src/data/game/warlock-destruction-gcd-semantics.json",
   },
   "rogue-subtlety": {
     datasetId: "SIMC_DBC_ROGUE_SUBTLETY_GCD_SEMANTICS",

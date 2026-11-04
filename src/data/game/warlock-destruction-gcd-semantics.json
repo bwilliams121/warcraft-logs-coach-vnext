@@ -1,0 +1,355 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_WARLOCK_DESTRUCTION_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "byteLength": 210927
+      },
+      {
+        "path": "engine/class_modules/warlock/sc_warlock_init.cpp",
+        "sha256": "8e1eae332a7be9607a4bde41640411183ecef8e00fddd1ab611c9d5fe8241d4c",
+        "byteLength": 95724
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 348,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Immolate"
+    },
+    {
+      "abilityGameId": 1122,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Summon Infernal"
+    },
+    {
+      "abilityGameId": 5740,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Rain of Fire"
+    },
+    {
+      "abilityGameId": 6353,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Soul Fire"
+    },
+    {
+      "abilityGameId": 17877,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Shadowburn"
+    },
+    {
+      "abilityGameId": 17962,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Conflagrate"
+    },
+    {
+      "abilityGameId": 29722,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Incinerate"
+    },
+    {
+      "abilityGameId": 80240,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Havoc"
+    },
+    {
+      "abilityGameId": 116858,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Chaos Bolt"
+    },
+    {
+      "abilityGameId": 152108,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Cataclysm"
+    },
+    {
+      "abilityGameId": 434506,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Infernal Bolt"
+    },
+    {
+      "abilityGameId": 434635,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Ruination"
+    },
+    {
+      "abilityGameId": 442726,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Malevolence"
+    },
+    {
+      "abilityGameId": 445468,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Wither"
+    },
+    {
+      "abilityGameId": 1214467,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Rain of Fire"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "soul_fire",
+      "candidateAbilityGameIds": [6353],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / soul_fire_t",
+        "startLine": 5934,
+        "endLine": 5934,
+        "sourceNote": "create_action dispatches \"soul_fire\" to soul_fire_t, built on p->talents.soul_fire (:5101); find_talent_spell( SPECIALIZATION, \"Soul Fire\" ) at sc_warlock_init.cpp:485",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "conflagrate",
+      "candidateAbilityGameIds": [17962],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / conflagrate_t",
+        "startLine": 5920,
+        "endLine": 5920,
+        "sourceNote": "create_action dispatches \"conflagrate\" to conflagrate_t, built on p->talents.conflagrate (:4440); find_talent_spell( SPECIALIZATION, \"Conflagrate\" ) at sc_warlock_init.cpp:390",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "chaos_bolt",
+      "candidateAbilityGameIds": [116858],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / chaos_bolt_t",
+        "startLine": 5926,
+        "endLine": 5926,
+        "sourceNote": "create_action dispatches \"chaos_bolt\" to chaos_bolt_t, built on p->talents.chaos_bolt (:4285); find_talent_spell( SPECIALIZATION, \"Chaos Bolt\" ) at sc_warlock_init.cpp:388",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "summon_infernal",
+      "candidateAbilityGameIds": [1122],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / summon_infernal_t",
+        "startLine": 5932,
+        "endLine": 5932,
+        "sourceNote": "create_action dispatches \"summon_infernal\" to summon_infernal_t, built on p->talents.summon_infernal (:5064); find_talent_spell( SPECIALIZATION, \"Summon Infernal\" ) at sc_warlock_init.cpp:437",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "malevolence",
+      "candidateAbilityGameIds": [442726],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / malevolence_t",
+        "startLine": 5962,
+        "endLine": 5962,
+        "sourceNote": "create_action dispatches \"malevolence\" to malevolence_t, built on p->hero.malevolence (:1298), whose trigger_gcd and cooldown it reads from hero.malevolence_buff, conditional_spell_lookup( hero.malevolence.ok(), 442726 ) at sc_warlock_init.cpp:635",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "shadowburn",
+      "candidateAbilityGameIds": [17877],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / shadowburn_t",
+        "startLine": 5936,
+        "endLine": 5936,
+        "sourceNote": "create_action dispatches \"shadowburn\" to shadowburn_t, built on p->talents.shadowburn (:4773); find_talent_spell( SPECIALIZATION, \"Shadowburn\" ) at sc_warlock_init.cpp:416",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "wither",
+      "candidateAbilityGameIds": [445468],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / wither_t",
+        "startLine": 5959,
+        "endLine": 5959,
+        "sourceNote": "create_action dispatches \"wither\" to wither_t, built on p->hero.wither.ok() ? p->hero.wither_direct : not_found (:1189); hero.wither_direct = conditional_spell_lookup( hero.wither.ok(), 445468 ) at sc_warlock_init.cpp:605",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "immolate",
+      "candidateAbilityGameIds": [348],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / immolate_t",
+        "startLine": 5924,
+        "endLine": 5924,
+        "sourceNote": "create_action dispatches \"immolate\" to immolate_t, built on p->warlock_base.immolate->ok() && !p->hero.wither.ok() ? p->warlock_base.immolate_old : not_found (:4071); warlock_base.immolate_old = conditional_spell_lookup( ..., 348 ) at sc_warlock_init.cpp:42",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "ruination",
+      "candidateAbilityGameIds": [434635],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / ruination_t",
+        "startLine": 5951,
+        "endLine": 5951,
+        "sourceNote": "create_action dispatches \"ruination\" to ruination_t, built on p->hero.ruination_cast (:5309); conditional_spell_lookup( hero.ruination.ok(), 434635 ) at sc_warlock_init.cpp:578",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "cataclysm",
+      "candidateAbilityGameIds": [152108],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / cataclysm_t",
+        "startLine": 5938,
+        "endLine": 5938,
+        "sourceNote": "create_action dispatches \"cataclysm\" to cataclysm_t, built on p->talents.cataclysm (:4723); find_talent_spell( SPECIALIZATION, \"Cataclysm\" ) at sc_warlock_init.cpp:426",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "infernal_bolt",
+      "candidateAbilityGameIds": [434506],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / infernal_bolt_t",
+        "startLine": 5948,
+        "endLine": 5948,
+        "sourceNote": "create_action dispatches \"infernal_bolt\" to infernal_bolt_t, built on p->hero.infernal_bolt (:5202); conditional_spell_lookup( hero.secrets_of_the_coven.ok(), 434506 ) at sc_warlock_init.cpp:561",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "incinerate",
+      "candidateAbilityGameIds": [29722],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / incinerate_t",
+        "startLine": 5922,
+        "endLine": 5922,
+        "sourceNote": "create_action dispatches \"incinerate\" to incinerate_t, built on p->warlock_base.incinerate (:3922); conditional_spell_lookup( ..., 29722 ) at sc_warlock_init.cpp:44",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "rain_of_fire",
+      "candidateAbilityGameIds": [5740, 1214467],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / rain_of_fire_t",
+        "startLine": 5928,
+        "endLine": 5928,
+        "sourceNote": "create_action dispatches \"rain_of_fire\" to rain_of_fire_t, built on p->talents.rain_of_fire (:4556), find_talent_spell( SPECIALIZATION, 5740 ), falling back to 1214467, at sc_warlock_init.cpp:393-395",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "havoc",
+      "candidateAbilityGameIds": [80240],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / havoc_t",
+        "startLine": 5930,
+        "endLine": 5930,
+        "sourceNote": "create_action dispatches \"havoc\" to havoc_t, built on p->talents.havoc (:4624); find_talent_spell( SPECIALIZATION, \"Havoc\" ) at sc_warlock_init.cpp:411",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

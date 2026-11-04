@@ -91,6 +91,7 @@ const EVERY_ANALYZER = [
   "shaman-enhancement-observed-decisions",
   "demonhunter-devourer-observed-decisions",
   "druid-feral-observed-decisions",
+  "warlock-destruction-observed-decisions",
   "rogue-outlaw-observed-decisions",
   // HEAL-B3: Discipline Priest INTERNAL_ONLY.
   "priest-discipline-healer-findings",

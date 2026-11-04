@@ -12109,9 +12109,11 @@ coverage starts at the pull). Recorded in `agent/follow-ups.md`.
   The ambiguity is real: without a proven cast time, the same-millisecond
   shapes do not determine the anchor.
 
-**No consumer yet.** No registered specialization reads the timeline, so no
-public decision changes. Cohort D representatives (ONB-D*) supply their
-profile and own what the anchor means for their decisions.
+**No consumer yet, at this tranche.** No registered specialization read the
+timeline, so no public decision changed. Cohort D representatives (ONB-D*)
+supply their profile and own what the anchor means for their decisions. ONB-D1
+(Destruction) is the first, INTERNAL_ONLY, so still no public decision changes
+(agent/architecture.md "ONB-D1").
 
 ## ONB-S5 — Shared resource pooling and wait semantics
 
@@ -13631,6 +13633,51 @@ Autopilot queue entry ONB-C2P. Public contract: declared EXPECTED; actual change
 **What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists it; the gate search finds no qualifying assertion and `evidenceReady` false (`m11-promotion-evidence-gate`, from ONB-C2); and a public request is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which already held this row). Both tests only have their comments changed, to name the outcome. A public request still runs preparation and reports partial coverage. Nothing reads as clean play.
 
 **What a later promotion must do.** ONB-EV supplies a capture, Outlaw binds or answers what stands in scan order (agent/follow-ups.md "After ONB-C2"), and it measures the wire hazards listed there before binding anything that could resolve a decision. The `cds` list reads the enemy count, so ONB-S3 is necessary too, and it is not the first gate: Stealth and Kick stand first. A new public entry then promotes it through the unchanged gates by the five-site promotion, and must first commit identity proof, because a PUBLIC module cannot use the retained-only exception. No such entry is queued.
+
+## ONB-D1 — Destruction Warlock (internal, Cohort D representative)
+
+Autopilot queue entry ONB-D1. Public contract: NONE. No Warcraft Logs request. `src/specs/warlock/destruction/README.md` is the slice in detail.
+
+**What it is.** Destruction Warlock is registered INTERNAL_ONLY on the observed-decision pattern, with its own pinned list, GCD and talent data, cast semantics, anchor profile, resolver, facade and registration. It is the first reader of the shared ONB-S4 timeline. No shared analyzer was introduced, and no decision resolves.
+
+**Measured, offline, by replaying retained captures through production ingestion.** A census of every retained JSON file over 500 bytes (5,649 parsed), by signature ability, with Mortal Strike as its positive control, finds two subjects holding Chaos Bolt casts named Destruction by their context:
+
+| Subject | Hero tree | Span | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 12 | Hellcaller | first 165.0 s of 424.5 s | 115 | 0 | 0 | 115 | 21 |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 15 | Hellcaller | first 165.0 s of 424.5 s | 105 | 0 | 0 | 105 | 12 |
+
+Every decision's scan passes `variables`, `ogcd` and `items` and meets `default[3]` on `active_enemies`, with `talent.wither` true. Inside the open area list the scan stops on Rain of Fire's applicability (210 of 220), or on the list's own press of Summon Infernal or Malevolence (10). The other contexts naming a Destruction (24XJ9Nyq7jnfgAMQ fight 23 actor 4, LYwF6PRADV7m6vTZ fight 24 actor 22) hold no retained event.
+
+**The anchors on those 220 decisions:**
+
+| Anchor | Actor 12 | Actor 15 | What |
+| --- | ---: | ---: | --- |
+| `INSTANT_COMPLETION` | 49 | 54 | Conflagrate, Shadowburn, Wither, Summon Infernal, Malevolence, Havoc |
+| `OBSERVED_BEGINCAST` | 2 | 2 | Soul Fire |
+| `BEGINCAST_PAIRING_AMBIGUOUS` | 63 | 48 | Chaos Bolt 33 and 31, Incinerate 30 and 17: every one |
+| `CAST_TIME_UNKNOWN` | 1 | 1 | the Soul Fire at +97 ms and +923 ms: begun before the pull |
+
+Across the fight, the shared timeline reports 11 begins `INTERRUPTED` and 26 `PAIRING_NOT_PROVEN`; none is a decision. No instant contradicts its review. The ambiguity is the honest result, not a defect. Each of Chaos Bolt and Incinerate has a -100% cast-time row no pinned source excludes, so each may have been instant, and then a begin before it may be an abandoned attempt.
+
+**Requirement C is not met, and why this is not an owner stop.** As for Arms (ONB-B1). The queue asks for real MATCH, discrimination and negative-control evidence, and none can exist while the enemy count stands, which is already queued as the owner's (ONB-S3). The entry asks for an internal registration, and the fail-closed result is correct.
+
+**Decisions.**
+
+1. **The anchor decides when, and only a resolved anchor may be judged.** The decision's report and fight times become the anchor's. Its `position` and `locator` stay the completion's, because the completion is the observation that names the action. An UNKNOWN anchor replaces the query's answer with `ROTATIONAL_GCD_UNKNOWN` / `DECISION_ANCHOR_NOT_ESTABLISHED`, whatever the scan said, and keeps the scan's diagnostics. A test gives the facade an authority view that does resolve: a Soul Fire is a MATCH with its begin and UNKNOWN without one, and a Chaos Bolt is UNKNOWN even with one.
+2. **One shared addition.** `DECISION_ANCHOR_NOT_ESTABLISHED` joins `RotationalGcdBlocker`, classified `OBSERVED_STATE_MISSING`. The query never produces it, no spec logic was added to shared code, and no public vocabulary changes, because `rawBlocker` is not published and the class already exists.
+3. **Every binding is fixed for the fight, so "bindings at the anchor" holds trivially.** `soul_shard` is unbound. The wire reports it only on a costed `cast`, at the completion: `begincast` carries no `classResources`, and Immolate, Wither and Incinerate generate fractions while a Chaos Bolt is cast. Reading the completion's value would answer the wrong moment. The shared wire contract has no type 7 row either. So the offensive capability declares no resource, and a request has nothing resource-shaped to under-fetch. A test attaches five shards to a Chaos Bolt and shows `soul_shard<=4` stay open.
+4. **The profile proves a cast time above zero, never a duration.** A combatant's pull stats are buffed values (M11-G3-2), so `composite_spell_cast_speed()` is not established, `exactMs` is always null, and `DERIVED_FROM_COMPLETION` is unreachable. A hard cast with no begin stays UNKNOWN, never instant.
+5. **A row that exists is not excluded by not being named (corrected in review).** Every warlock-family effect with a cast-time misc value was matched by class mask against each hard-cast row; the family holds them on subtypes 4, 107 and 108 only, so no label modifier is involved (`warlock-destruction-cast-semantics.ts`). Chaos Bolt (281440, 364349), Incinerate (279673, 335004, 387385, 1244860), Infernal Bolt (those and 196606, 264571, 1260279) and Ruination (394776) each have a -100% row. Several appear in neither the pinned module nor the talent data, but the retained sources hold no set-bonus table and cannot prove them unavailable, so none is excluded and no build narrows it. Every Chaos Bolt having a begin corroborates the sample and proves nothing. Soul Fire, Immolate and Cataclysm have no such row and stay POSITIVE, a reading scoped to the family's class masks.
+5a. **The specialization accepts less than the timeline.** The shared timeline pairs a completion with the latest earlier begin, and enumerates an instant execution only for a begin in the completion's own millisecond. For a possibly-instant spell that earlier begin may be abandoned and the decision the completion's, so `destructionDecisionAnchor` refuses such a pairing with both instants as candidates. This is spec-side, and the shared behaviour is recorded (agent/follow-ups.md "After ONB-D1"). It changes no other reader, since none exists.
+6. **Immolate is the reverse of every other talent guard.** Its direct row applies only without the hero talent Wither (sc_warlock_actions.cpp:4071), so a Wither build has it background, and it needs Wither proven absent to be applicable.
+7. **Rain of Fire's applicability stays UNKNOWN.** Its talent is a choice of two rows on one node. It only sits inside the area lists, behind the count, and its condition reads the count too.
+8. **No transition contract exists.** No token of this list is off the GCD, and the racials, the potion, items and the external buff are non-domain.
+9. **Ritual Clipping stays `UNRESOLVED_DIABOLIST_HERO_TREE`.** As the entry says. The coaching inventory's entry is unchanged.
+
+**Evidence.** Nothing new is committed. Both subjects' pages are retained raw; only their context rows are committed, so the identity pin reads actor 12 there. These decisions would pin nothing the synthetic tests do not, and the follow-up says what would. Every pinned source read was already on disk and matches the M11-A3 hashes.
+
+**No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse the row. A public Warlock/Destruction request is SPEC_NOT_SUPPORTED, exactly as before.
 
 ## AUTOPILOT — the local project supervisor (tooling)
 

@@ -29,6 +29,36 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After ONB-D1: what the Destruction Warlock slice does not establish
+
+**Raised:** ONB-D1 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.
+
+**Evidence is not its gap, so it is not on ONB-EV.** Two retained subjects exist (A7R6 fight 7 actors 12 and 15, first 165 s, both Hellcaller), and all 220 decisions meet the count first. ONB-D1P should expect "not promoted" while ONB-S3 stands.
+
+**What stands in scan order, past the count:**
+
+- **The enemy count.** `default[3]` and `default[4]`. Inside the area list, Rain of Fire's applicability, then every line reading the count.
+- **`soul_shard`.** `default[5]`. It has no wire contract (type 7 is on the wire with `max` 50, tenths of a shard, and needs a row in `resource-types.ts` with its corroboration). It appears on costed casts only, and at a cast-time action's completion, not its begin. A reading needs an anchor-time model: at most a bounded interval across a cast, because fractions arrive during it.
+- **`action.conflagrate.charges`.** `default[6]`. No charge model. Conflagrate is the most frequent instant, so this is its own question.
+- **Everything else on the single-target lines:** `buff.backdraft.stack`, `buff.fiendish_cruelty.up`, `buff.malevolence.up`, `pet.infernal.active`, `dot.wither.*`, `refreshable`, `target.health.pct`, `fight_remains` and `target.time_to_die` (PREDICTIVE).
+
+**The anchor's own limits, as measured:**
+
+- **Every Chaos Bolt and Incinerate is UNKNOWN (111 of 220 decisions)**, because each has a -100% cast-time row no pinned source excludes. A later tranche narrows this only with versioned applicability evidence, which the retained sources cannot give: they hold no set-bonus table. Excluding 281440 and 364349 would free Chaos Bolt. Incinerate also needs Backlash's 387385 and Chaotic Inferno's 1244860 read per cast, from observed auras neither measured nor bound.
+- **The shared timeline pairs a possibly-instant completion with an earlier begin.** With `castTimeAt` UNKNOWN, `buildCastTimeline` still reports `OBSERVED_BEGINCAST` and a CASTING span, and enumerates an instant execution only for a begin in the completion's own millisecond. `destructionDecisionAnchor` refuses that reading here. If a Cohort D follower needs the same, this belongs in ONB-S4's shared rule, with its pinned measurements re-taken, and any reader of `occupancyAt` must meet it first. Nothing here reads occupancy.
+- **A hard cast begun before the pull stays UNKNOWN.** Both subjects' opening Soul Fire.
+- **A begin that never completes is not a decision.** Eleven are `INTERRUPTED`. Whether stopping a Chaos Bolt was a mistake is a question nobody has asked here.
+- **No exact cast time.** Haste at a decision is not established, so `action.*.execute_time` and `action.*.cast_time` stay unknown, and a begin-less cast is never placed.
+- **Diabolist is unmeasured.** No retained Destruction subject is one, so Demonic Art's zero-valued cast-time effect, Ruination's cast and Infernal Bolt's are unmeasured. The other contexts naming a Destruction (24XJ9Nyq7jnfgAMQ fight 23 actor 4, LYwF6PRADV7m6vTZ fight 24 actor 22) hold no retained event.
+
+**Decision times are the anchor's.** A public promotion must check its readers of `fightTimeMs`: `position` and `locator` name the completion and the time names the begin, which no earlier specialization did.
+
+**Cohort D followers.** `anchorNotEstablished` is specialization code here, and the blocker is shared. If ONB-D2 repeats it verbatim, that is the moment to move the helper, not before.
+
+**Ritual Clipping** stays `UNRESOLVED_DIABOLIST_HERO_TREE`, a deep-dive question (`agent/m11-spec-coaching-inventory.md`).
+
+---
+
 ## After ONB-C2: what the Outlaw Rogue slice does not establish
 
 **Raised:** ONB-C2 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.

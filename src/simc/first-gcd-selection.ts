@@ -121,6 +121,12 @@ export type NonGcdTransitionResolver<TState> = (
 export type RotationalGcdBlocker =
   /** The underlying foreground scan refused; its own blocker is carried. */
   | "ONE_SCAN_BLOCKED"
+  /**
+   * The moment of the decision is not established (ONB-S4). Never produced by the query: a cast-time
+   * specialization gives it to the comparison in place of the query's answer, because a selection cannot
+   * be judged at an instant nobody can name.
+   */
+  | "DECISION_ANCHOR_NOT_ESTABLISHED"
   /** A selectable action has no established lane, so it cannot be classified. */
   | "UNKNOWN_EXECUTION_LANE"
   /** A NON_GCD action fired and this project does not model what it does. */

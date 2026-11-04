@@ -172,6 +172,8 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
   // ONB-C1: actor 1 of the corpus A7R6 fight 7 context, the Feral Druid the committed corpus context
   // reports (also actor 170 of b1Pm fight 48, uncommitted events).
   "druid/feral": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 1 },
+  // ONB-D1: actor 12 of the same fight, a Destruction Warlock the committed context reports.
+  "warlock/destruction": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 12 },
   // ONB-B3: actor 32 of the corpus gtKb fight 22 context, the Devourer Demon Hunter the committed
   // corpus context reports (also actors 20 and 79 of rXAf fight 13, uncommitted events).
   "demonhunter/devourer": { artifactId: "wcl-fight-context-gtkb-fight-22", fightId: 22, sourceId: 32 },
@@ -509,6 +511,8 @@ describe("what the tree exports today", () => {
       ["ENHANCEMENT_SHAMAN_MODULE", "shaman/enhancement", "INTERNAL_ONLY", 0],
       // HEAL-A: the first healer, INTERNAL_ONLY, binding no pinned decision authority; PUBLIC since HEAL-AP.
       ["RESTORATION_SHAMAN_MODULE", "shaman/restoration", "PUBLIC", 0],
+      // ONB-D1: Cohort D's representative, INTERNAL_ONLY.
+      ["DESTRUCTION_WARLOCK_MODULE", "warlock/destruction", "INTERNAL_ONLY", 0],
       // ONB-B1: Cohort B's representative, INTERNAL_ONLY.
       ["ARMS_WARRIOR_MODULE", "warrior/arms", "INTERNAL_ONLY", 0],
       // ONB-A2: Cohort A's followers, INTERNAL_ONLY.

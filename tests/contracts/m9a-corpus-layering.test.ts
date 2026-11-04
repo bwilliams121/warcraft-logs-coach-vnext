@@ -205,6 +205,7 @@ const EXECUTOR_RING = [
   "support/corpus/executors/spec-frost-death-knight.ts",
   "support/corpus/executors/spec-devourer-demon-hunter.ts",
   "support/corpus/executors/spec-feral-druid.ts",
+  "support/corpus/executors/spec-destruction-warlock.ts",
   "support/corpus/executors/spec-outlaw-rogue.ts",
   "support/corpus/executors/spec-enhancement-shaman.ts",
   "support/corpus/executors/spec-assassination.ts",

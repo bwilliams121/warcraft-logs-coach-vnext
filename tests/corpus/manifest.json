@@ -5201,6 +5201,37 @@
       "relatedTests": ["tests/unit/analysis-service.test.ts", "tests/unit/ingestion-scope.test.ts"]
     },
     {
+      "caseId": "application-service.destruction-warlock-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Destruction Warlock registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "warlock/destruction",
+            "expected": {
+              "internalAnalyzerId": "warlock-destruction-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Destruction Warlock is registered INTERNAL_ONLY in ONB-D1, Cohort D's representative on the shared cast anchor. No decision of it resolves: both hero trees' area lists read the enemy count before any single-target line. Its retained subjects are replayed offline and not committed (agent/follow-ups.md \"After ONB-D1\")."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
+      ]
+    },
+    {
       "caseId": "application-service.devourer-demon-hunter-registration-is-internal-only",
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "APPLICATION_SERVICE",
@@ -20406,6 +20437,29 @@
         "tests/contracts/m11c2-brewmaster-evaluator.test.ts",
         "tests/unit/m11c2-brewmaster-bindings.test.ts"
       ]
+    },
+    {
+      "caseId": "spec-destruction-warlock.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_DESTRUCTION_WARLOCK",
+      "contractUnderTest": "src/specs/warlock/destruction/observed-analysis.ts analyzeObservedDestructionWarlockDecisions (the spec gate)",
+      "purpose": "The Destruction Warlock facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_DESTRUCTION_WARLOCK.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Destruction Warlock list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-d1-destruction-warlock.test.ts"]
     },
     {
       "caseId": "spec-devourer-demon-hunter.the-facade-refuses-every-other-specialization",
