@@ -148,6 +148,24 @@ const PINNED_SOURCES = Object.freeze({
     sha256: "09f2bb54304a3886a87aae18931bf2214f56882a88c074c7e77f730ed3e51bda",
     byteLength: 33759,
   },
+  APL_SHAMAN: {
+    sourcePath: "engine/class_modules/apl/apl_shaman.cpp",
+    commitSha: PINNED_SIMC_COMMIT,
+    sha256: "71f38c728fdba909d3a807139c538aedad7a63bec56a15ad64647b5a29630f65",
+    byteLength: 25414,
+  },
+  APL_PRIEST: {
+    sourcePath: "engine/class_modules/apl/apl_priest.cpp",
+    commitSha: PINNED_SIMC_COMMIT,
+    sha256: "eff8fcc1db8f4ff8a992a48f7c66fc1595cd7b6ca7b0136b12020e9fd0540516",
+    byteLength: 38115,
+  },
+  APL_DRUID_BALANCE: {
+    sourcePath: "engine/class_modules/apl/druid/balance_apl.inc",
+    commitSha: PINNED_SIMC_COMMIT,
+    sha256: "9b481c5f42e9671941adfabd44f6a02a3912b42dc5c2d191cc4629873aa54525",
+    byteLength: 12928,
+  },
   APL_HUNTER: {
     sourcePath: "engine/class_modules/apl/apl_hunter.cpp",
     commitSha: PINNED_SIMC_COMMIT,
@@ -194,6 +212,11 @@ const PINNED_SOURCES = Object.freeze({
     sourcePath: "engine/class_modules/warlock/sc_warlock_init.cpp",
     sha256: "8e1eae332a7be9607a4bde41640411183ecef8e00fddd1ab611c9d5fe8241d4c",
     byteLength: 95724,
+  },
+  PRIEST_DISPATCH: {
+    sourcePath: "engine/class_modules/priest/sc_priest.cpp",
+    sha256: "520c2ad3599926a3f8c4a0620c78edd61c006685ae8dd855ccae1b80e00db76d",
+    byteLength: 148517,
   },
   HUNTER_DISPATCH: {
     sourcePath: "engine/class_modules/sc_hunter.cpp",
@@ -1470,6 +1493,204 @@ export const TARGETS = {
       forbiddenTokens: ["swap_action_list"],
     },
   },
+  "shaman-elemental": {
+    sourcePath: PINNED_SOURCES.APL_SHAMAN.sourcePath,
+    regionStart: "//elemental_apl_start",
+    regionEnd: "//elemental_apl_end",
+    functionHeader: "void elemental( player_t* p )",
+    regionName: "elemental",
+    authorityId: "SIMC_APL_SHAMAN_ELEMENTAL",
+    spec: { className: "shaman", specName: "elemental" },
+    defaultOut: "src/simc/data/shaman-elemental.apl.json",
+    pinnedSource: {
+      ...PINNED_SOURCES.APL_SHAMAN,
+      regionSha256: "db72156b6e5625ae51f01e08a1ba65c671a2faebe7eff6b91ed3dbec43e77517",
+    },
+    livePtrPolicy: {
+      kind: "PTR_BODY_IDENTICAL",
+      ptrRegionStart: "//elemental_ptr_apl_start",
+      ptrRegionEnd: "//elemental_ptr_apl_end",
+      ptrFunctionHeader: "void elemental_ptr( player_t* p )",
+    },
+    dispatch: {
+      ...PINNED_SOURCES.SHAMAN_DISPATCH,
+      functionHeader: "void shaman_t::init_action_list()",
+      sequence: [
+        "case SHAMAN_ELEMENTAL:",
+        "is_ptr() ? shaman_apl::elemental_ptr( this ) : shaman_apl::elemental( this );",
+        "break;",
+      ],
+    },
+    requiredFacts: {
+      kind: "DISPATCH_GRAPH",
+      entryListName: "default",
+      requiredLists: ["default", "precombat", "aoe", "single_target"],
+      listSizes: { default: 19, precombat: 9, aoe: 21, single_target: 31 },
+      edges: [
+        {
+          from: "default",
+          ordinal: 17,
+          kind: "RUN",
+          to: "aoe",
+          condition: "spell_targets.chain_lightning>=3",
+        },
+        { from: "default", ordinal: 18, kind: "RUN", to: "single_target", condition: null },
+      ],
+      forbiddenTokens: ["swap_action_list", "call_action_list"],
+    },
+  },
+  "druid-balance": {
+    sourcePath: PINNED_SOURCES.APL_DRUID_BALANCE.sourcePath,
+    includedBy: {
+      ...PINNED_SOURCES.APL_DRUID_INCLUDER,
+      includeLine: '#include "class_modules/apl/druid/balance_apl.inc"',
+    },
+    functionHeader: "void apl_balance( player_t* p )",
+    regionName: "apl_balance",
+    authorityId: "SIMC_APL_DRUID_BALANCE",
+    spec: { className: "druid", specName: "balance" },
+    defaultOut: "src/simc/data/druid-balance.apl.json",
+    pinnedSource: {
+      ...PINNED_SOURCES.APL_DRUID_BALANCE,
+      regionSha256: "9b481c5f42e9671941adfabd44f6a02a3912b42dc5c2d191cc4629873aa54525",
+    },
+    livePtrPolicy: {
+      kind: "PTR_SEPARATE_INCLUDE",
+      ptrFunctionHeader: "void apl_balance_ptr( player_t* p )",
+      ptrIncludeLine: '#include "class_modules/apl/druid/balance_apl_ptr.inc"',
+    },
+    dispatch: {
+      ...PINNED_SOURCES.DRUID_DISPATCH,
+      functionHeader: "void druid_t::init_action_list()",
+      sequence: [
+        "case DRUID_BALANCE:     is_ptr() ? druid_apl::apl_balance_ptr( this ) : druid_apl::apl_balance( this );         break;",
+      ],
+    },
+    requiredFacts: {
+      kind: "DISPATCH_GRAPH",
+      entryListName: "default",
+      requiredLists: ["precombat", "default", "aoe", "cooldowns", "ec_st", "kotg_st", "mini", "opener"],
+      listSizes: {
+        precombat: 11,
+        default: 19,
+        aoe: 19,
+        cooldowns: 6,
+        ec_st: 15,
+        kotg_st: 15,
+        mini: 3,
+        opener: 13,
+      },
+      edges: [
+        { from: "default", ordinal: 13, kind: "RUN", to: "opener", condition: "variable.opener" },
+        {
+          from: "default",
+          ordinal: 14,
+          kind: "RUN",
+          to: "mini",
+          condition: "variable.mini&!variable.opener",
+        },
+        {
+          from: "default",
+          ordinal: 15,
+          kind: "RUN",
+          to: "cooldowns",
+          condition: "variable.cds&!variable.opener",
+        },
+        {
+          from: "default",
+          ordinal: 16,
+          kind: "RUN",
+          to: "ec_st",
+          condition: "hero_tree.elunes_chosen&spell_targets=1",
+        },
+        { from: "default", ordinal: 17, kind: "RUN", to: "kotg_st", condition: "spell_targets=1" },
+        { from: "default", ordinal: 18, kind: "RUN", to: "aoe", condition: "spell_targets>1" },
+      ],
+      forbiddenTokens: ["swap_action_list", "call_action_list"],
+    },
+  },
+  "priest-shadow": {
+    sourcePath: PINNED_SOURCES.APL_PRIEST.sourcePath,
+    regionStart: "//shadow_apl_start",
+    regionEnd: "//shadow_apl_end",
+    functionHeader: "void shadow( player_t* p )",
+    regionName: "shadow",
+    authorityId: "SIMC_APL_PRIEST_SHADOW",
+    spec: { className: "priest", specName: "shadow" },
+    defaultOut: "src/simc/data/priest-shadow.apl.json",
+    pinnedSource: {
+      ...PINNED_SOURCES.APL_PRIEST,
+      regionSha256: "638c4a8f9e9907dcb3c9299b2e3e2485999cbe8fcb910c3d5288d840cd92c33e",
+    },
+    livePtrPolicy: {
+      kind: "PTR_BODY_DIFFERS",
+      ptrRegionStart: "//shadow_ptr_apl_start",
+      ptrRegionEnd: "//shadow_ptr_apl_end",
+      ptrFunctionHeader: "void shadow_ptr( player_t* p )",
+    },
+    dispatch: {
+      ...PINNED_SOURCES.PRIEST_DISPATCH,
+      functionHeader: "void priest_t::init_action_list()",
+      sequence: [
+        "case PRIEST_SHADOW:",
+        "if ( is_ptr() )",
+        "{",
+        "priest_apl::shadow_ptr( this );",
+        "}",
+        "else",
+        "{",
+        "priest_apl::shadow( this );",
+        "}",
+        "break;",
+      ],
+    },
+    requiredFacts: {
+      kind: "DISPATCH_GRAPH",
+      entryListName: "default",
+      requiredLists: [
+        "default",
+        "precombat",
+        "aoe",
+        "aoe_variables",
+        "cds",
+        "heal_for_tof",
+        "main",
+        "trinkets",
+      ],
+      listSizes: {
+        default: 3,
+        precombat: 12,
+        aoe: 1,
+        aoe_variables: 6,
+        cds: 13,
+        heal_for_tof: 1,
+        main: 23,
+        trinkets: 5,
+      },
+      edges: [
+        { from: "default", ordinal: 1, kind: "CALL", to: "aoe", condition: "active_enemies>2" },
+        { from: "default", ordinal: 2, kind: "RUN", to: "main", condition: null },
+        { from: "aoe", ordinal: 0, kind: "CALL", to: "aoe_variables", condition: null },
+        { from: "cds", ordinal: 11, kind: "CALL", to: "trinkets", condition: null },
+        {
+          from: "main",
+          ordinal: 1,
+          kind: "CALL",
+          to: "cds",
+          condition:
+            "fight_remains<30|target.time_to_die>15&(!variable.holding_tentacle_slam|active_enemies>2)&variable.dots_up",
+        },
+        {
+          from: "main",
+          ordinal: 13,
+          kind: "CALL",
+          to: "heal_for_tof",
+          condition: "!buff.twist_of_fate.up&buff.twist_of_fate_can_trigger_on_ally_heal.up&talent.halo",
+        },
+      ],
+      forbiddenTokens: ["swap_action_list"],
+    },
+  },
   "hunter-survival": {
     sourcePath: PINNED_SOURCES.APL_HUNTER.sourcePath,
     regionStart: "//survival_apl_start",
@@ -2602,6 +2823,7 @@ export const LIVE_PTR_POLICIES = Object.freeze([
   "NO_PTR_REGION",
   "PTR_MARKERS_EMPTY",
   "PTR_BODY_IDENTICAL",
+  "PTR_BODY_DIFFERS",
   "PTR_SEPARATE_INCLUDE",
 ]);
 
@@ -2778,7 +3000,10 @@ export function validatePinnedRecord(targetName, target) {
   } else if (live !== null) {
     const call =
       target.enclosingClass === undefined
-        ? new RegExp(`^[A-Za-z_][A-Za-z0-9_]*::${live[1]}\\( this \\);$`)
+        ? // ONB-D2: Elemental's dispatch chooses its live function in one ternary.
+          new RegExp(
+            `^(?:is_ptr\\(\\) \\? [A-Za-z_][A-Za-z0-9_]*::${live[1]}_ptr\\( this \\) : )?[A-Za-z_][A-Za-z0-9_]*::${live[1]}\\( this \\);$`,
+          )
         : new RegExp(`^${live[1]}\\(\\);$`);
     if (dispatch.sequence.filter((line) => call.test(line)).length !== 1) {
       problems.push(
@@ -2920,6 +3145,38 @@ export function verifyLivePtrPolicy(lines, dispatchText, target, includerText = 
       fail(
         `POLICY_VIOLATED: PTR_MARKERS_EMPTY, but the PTR region holds ${String(between.length)} non-blank lines, the module defines ${name}_ptr ${String(ptrDefinitions)} times and the dispatch calls it ${String(ptrDispatches)} times`,
       );
+    }
+    return;
+  }
+
+  // PTR_BODY_DIFFERS (ONB-D2): the module defines both regions and they differ, and the dispatch
+  // chooses by is_ptr(), so a live build takes the live branch and the PTR region is neither read
+  // nor needed. The same shape as PTR_SEPARATE_INCLUDE, inside one file. The choice must be a
+  // literal if ( is_ptr() ) around the PTR call, and if the bodies are equal the stronger
+  // PTR_BODY_IDENTICAL is the policy to declare.
+  if (policy.kind === "PTR_BODY_DIFFERS") {
+    const liveStartAt = lines.findIndex((line) => line.trim() === target.regionStart);
+    const liveEndAt = lines.findIndex((line) => line.trim() === target.regionEnd);
+    const liveOpen = nextCodeLine(lines, liveStartAt + 1);
+    const ptrOpen = nextCodeLine(lines, ptrStart + 1);
+    if (liveOpen < 0 || lines[liveOpen].trim() !== target.functionHeader) {
+      fail(`POLICY_VIOLATED: the live region does not open on ${target.functionHeader}`);
+    }
+    if (ptrOpen < 0 || lines[ptrOpen].trim() !== policy.ptrFunctionHeader) {
+      fail(`POLICY_VIOLATED: the PTR region does not open on ${policy.ptrFunctionHeader}`);
+    }
+    const live = lines.slice(liveOpen + 1, liveEndAt);
+    const ptr = lines.slice(ptrOpen + 1, ptrEnd);
+    if (live.length === ptr.length && live.every((line, index) => line === ptr[index])) {
+      fail("POLICY_VIOLATED: PTR_BODY_DIFFERS, but the bodies are identical; declare PTR_BODY_IDENTICAL");
+    }
+    if (ptrDefinitions !== 1 || ptrDispatches !== 1) {
+      fail(`POLICY_VIOLATED: PTR_BODY_DIFFERS needs one ${name}_ptr definition and one dispatch call`);
+    }
+    const choice = target.dispatch.sequence.findIndex((line) => line === "if ( is_ptr() )");
+    const ptrCall = target.dispatch.sequence.findIndex((line) => line.includes(`::${name}_ptr(`));
+    if (choice < 0 || ptrCall < choice) {
+      fail(`POLICY_VIOLATED: PTR_BODY_DIFFERS needs the dispatch to choose ${name}_ptr by if ( is_ptr() )`);
     }
     return;
   }

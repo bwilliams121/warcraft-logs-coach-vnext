@@ -113,6 +113,7 @@ describe("the sweep has something to sweep", () => {
       "src/specs/deathknight/frost",
       "src/specs/demonhunter/devourer",
       "src/specs/demonhunter/havoc",
+      "src/specs/druid/balance",
       "src/specs/druid/feral",
       "src/specs/druid/restoration",
       "src/specs/evoker/augmentation",
@@ -124,9 +125,11 @@ describe("the sweep has something to sweep", () => {
       "src/specs/paladin/retribution",
       "src/specs/priest/discipline",
       "src/specs/priest/holy",
+      "src/specs/priest/shadow",
       "src/specs/rogue/assassination",
       "src/specs/rogue/outlaw",
       "src/specs/rogue/subtlety",
+      "src/specs/shaman/elemental",
       "src/specs/shaman/enhancement",
       "src/specs/shaman/restoration",
       "src/specs/warlock/destruction",
@@ -152,6 +155,9 @@ describe("the sweep has something to sweep", () => {
     expect(existsSync("src/specs/demonhunter/devourer/registration.ts")).toBe(true);
     expect(existsSync("src/specs/druid/feral/registration.ts")).toBe(true);
     expect(existsSync("src/specs/warlock/destruction/registration.ts")).toBe(true);
+    expect(existsSync("src/specs/shaman/elemental/registration.ts")).toBe(true);
+    expect(existsSync("src/specs/druid/balance/registration.ts")).toBe(true);
+    expect(existsSync("src/specs/priest/shadow/registration.ts")).toBe(true);
     expect(existsSync("src/specs/rogue/outlaw/registration.ts")).toBe(true);
     expect(existsSync("src/specs/shaman/enhancement/registration.ts")).toBe(true);
     expect(existsSync("src/specs/paladin/retribution/registration.ts")).toBe(true);
@@ -223,6 +229,7 @@ describe("shared code reaches specializations only through the registration boun
       "src/specs/deathknight/frost/registration.js",
       "src/specs/demonhunter/devourer/registration.js",
       "src/specs/demonhunter/havoc/registration.js",
+      "src/specs/druid/balance/registration.js",
       "src/specs/druid/feral/registration.js",
       "src/specs/druid/restoration/registration.js",
       "src/specs/evoker/augmentation/registration.js",
@@ -234,9 +241,11 @@ describe("shared code reaches specializations only through the registration boun
       "src/specs/paladin/retribution/registration.js",
       "src/specs/priest/discipline/registration.js",
       "src/specs/priest/holy/registration.js",
+      "src/specs/priest/shadow/registration.js",
       "src/specs/rogue/assassination/registration.js",
       "src/specs/rogue/outlaw/registration.js",
       "src/specs/rogue/subtlety/registration.js",
+      "src/specs/shaman/elemental/registration.js",
       "src/specs/shaman/enhancement/registration.js",
       "src/specs/shaman/restoration/registration.js",
       "src/specs/warlock/destruction/registration.js",

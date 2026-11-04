@@ -750,6 +750,9 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
       "druid/feral",
       "rogue/outlaw",
       "warlock/destruction",
+      "shaman/elemental",
+      "druid/balance",
+      "priest/shadow",
     ]);
     const internal = PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY");
     expect(internal.map((row) => row.specId)).toEqual([...INTERNAL_ONLY_SPEC_IDS]);
@@ -767,6 +770,39 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
       expect(readiness.qualifyingAssertions, specId).toEqual([]);
       expect(readiness.evidenceReady, specId).toBe(false);
     }
+  });
+
+  it("ONB-D2: the gate search finds nothing for Elemental Shaman", async () => {
+    // No decision of it resolves on its retained subjects, none of which is committed as a decision set (agent/architecture.md "ONB-D2").
+    // A later capture that changed this would fail this pin and prompt a new public entry; it would not promote anything by itself.
+    const tiers = await tiersPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "shaman/elemental");
+    if (module === undefined) throw new Error("no module for shaman/elemental");
+    const readiness = evaluate(tiers, "shaman/elemental", "INTERNAL_ONLY", internalPairing(module));
+    expect(readiness.qualifyingAssertions).toEqual([]);
+    expect(readiness.evidenceReady).toBe(false);
+  });
+
+  it("ONB-D2: the gate search finds nothing for Balance Druid", async () => {
+    // No decision of it resolves on its retained subjects, none of which is committed as a decision set (agent/architecture.md "ONB-D2").
+    // A later capture that changed this would fail this pin and prompt a new public entry; it would not promote anything by itself.
+    const tiers = await tiersPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "druid/balance");
+    if (module === undefined) throw new Error("no module for druid/balance");
+    const readiness = evaluate(tiers, "druid/balance", "INTERNAL_ONLY", internalPairing(module));
+    expect(readiness.qualifyingAssertions).toEqual([]);
+    expect(readiness.evidenceReady).toBe(false);
+  });
+
+  it("ONB-D2: the gate search finds nothing for Shadow Priest", async () => {
+    // No decision of it resolves on its retained subjects, none of which is committed as a decision set (agent/architecture.md "ONB-D2").
+    // A later capture that changed this would fail this pin and prompt a new public entry; it would not promote anything by itself.
+    const tiers = await tiersPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "priest/shadow");
+    if (module === undefined) throw new Error("no module for priest/shadow");
+    const readiness = evaluate(tiers, "priest/shadow", "INTERNAL_ONLY", internalPairing(module));
+    expect(readiness.qualifyingAssertions).toEqual([]);
+    expect(readiness.evidenceReady).toBe(false);
   });
 
   it("ONB-D1: the gate search finds nothing for Destruction Warlock", async () => {

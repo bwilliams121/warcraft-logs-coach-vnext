@@ -1,0 +1,546 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_TRAIT_PRIEST_SHADOW_TALENTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals trait_data_t::id_node, as every earlier target recorded. Corroborated for Shadow Priest on its retained subjects, whose observed trees resolve a hero tree and the pinned list's talents by these keys (agent/architecture.md \"ONB-D2\").",
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "talents": [
+    {
+      "simcName": "ancient_madness",
+      "displayNameEn": "Ancient Madness",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82656,
+      "traitEntryId": 134052,
+      "talentSpellId": 1231346,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 103798,
+          "displayNameEn": "Improved Voidform",
+          "talentSpellId": 341240
+        }
+      ],
+      "binding": "sc_priest_shadow.cpp:2424 talents.shadow.ancient_madness          = ST( \"Ancient Madness\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "deathspeaker",
+      "displayNameEn": "Deathspeaker",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82558,
+      "traitEntryId": 103681,
+      "talentSpellId": 392507,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 134274,
+          "displayNameEn": "Death and Madness",
+          "talentSpellId": 321291
+        }
+      ],
+      "binding": "sc_priest_shadow.cpp:2438 talents.shadow.deathspeaker                 = ST( \"Deathspeaker\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "desperate_prayer",
+      "displayNameEn": "Desperate Prayer",
+      "tree": "CLASS",
+      "traitNodeId": 109012,
+      "traitEntryId": 134846,
+      "talentSpellId": 19236,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest.cpp:3364 talents.desperate_prayer   = CT( \"Desperate Prayer\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "devour_matter",
+      "displayNameEn": "Devour Matter",
+      "tree": "HERO",
+      "traitNodeId": 94668,
+      "traitEntryId": 117271,
+      "talentSpellId": 451840,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest.cpp:3459 talents.voidweaver.devour_matter          = HT( \"Devour Matter\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "distorted_reality",
+      "displayNameEn": "Distorted Reality",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82647,
+      "traitEntryId": 115671,
+      "talentSpellId": 409044,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 103786,
+          "displayNameEn": "Mind's Eye",
+          "talentSpellId": 407470
+        }
+      ],
+      "binding": "sc_priest_shadow.cpp:2434 talents.shadow.distorted_reality   = ST( \"Distorted Reality\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "halo",
+      "displayNameEn": "Halo",
+      "tree": "HERO",
+      "traitNodeId": 94697,
+      "traitEntryId": 117300,
+      "talentSpellId": 120644,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest.cpp:3394 talents.archon.halo                     = HT( \"Halo\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "holy_nova",
+      "displayNameEn": "Holy Nova",
+      "tree": "CLASS",
+      "traitNodeId": 82718,
+      "traitEntryId": 103870,
+      "talentSpellId": 132157,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest.cpp:3325 talents.holy_nova          = CT( \"Holy Nova\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "idol_of_yshaarj",
+      "displayNameEn": "Idol of Y'Shaarj",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82553,
+      "traitEntryId": 103787,
+      "talentSpellId": 373310,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest_shadow.cpp:2454 talents.shadow.idol_of_yshaarj        = ST( \"Idol of Y'Shaarj\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "inescapable_torment",
+      "displayNameEn": "Inescapable Torment",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82644,
+      "traitEntryId": 103783,
+      "talentSpellId": 373427,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest.cpp:3292 talents.shared.inescapable_torment = ST( \"Inescapable Torment\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "invoked_nightmare",
+      "displayNameEn": "Invoked Nightmare",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82666,
+      "traitEntryId": 136811,
+      "talentSpellId": 1279350,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 103809,
+          "displayNameEn": "Misery",
+          "talentSpellId": 238558
+        }
+      ],
+      "binding": "sc_priest_shadow.cpp:2396 talents.shadow.invoked_nightmare = ST( \"Invoked Nightmare\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "lightburst",
+      "displayNameEn": "Lightburst",
+      "tree": "CLASS",
+      "traitNodeId": 82719,
+      "traitEntryId": 103871,
+      "talentSpellId": 1246549,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest.cpp:3331 talents.lightburst         = CT( \"Lightburst\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "maddening_tentacles",
+      "displayNameEn": "Maddening Tentacles",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82654,
+      "traitEntryId": 103796,
+      "talentSpellId": 1279353,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest_shadow.cpp:2444 talents.shadow.maddening_tentacles          = ST( \"Maddening Tentacles\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "mind_blast",
+      "displayNameEn": "Mind Blast",
+      "tree": "CLASS",
+      "traitNodeId": 82713,
+      "traitEntryId": 103865,
+      "talentSpellId": 8092,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest.cpp:3322 talents.mind_blast          = CT( \"Mind Blast\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "mind_devourer",
+      "displayNameEn": "Mind Devourer",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 108153,
+      "traitEntryId": 133550,
+      "talentSpellId": 373202,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest_shadow.cpp:2442 talents.shadow.mind_devourer                = ST( \"Mind Devourer\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "power_infusion",
+      "displayNameEn": "Power Infusion",
+      "tree": "CLASS",
+      "traitNodeId": 82556,
+      "traitEntryId": 103834,
+      "talentSpellId": 10060,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest.cpp:3334 talents.power_infusion     = CT( \"Power Infusion\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "resonant_energy",
+      "displayNameEn": "Resonant Energy",
+      "tree": "HERO",
+      "traitNodeId": 94676,
+      "traitEntryId": 117279,
+      "talentSpellId": 453845,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest.cpp:3417 talents.archon.resonant_energy         = HT( \"Resonant Energy\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "shadow_word_death",
+      "displayNameEn": "Shadow Word: Death",
+      "tree": "CLASS",
+      "traitNodeId": 82712,
+      "traitEntryId": 103864,
+      "talentSpellId": 32379,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest.cpp:3360 talents.shadow_word_death             = CT( \"Shadow Word: Death\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "shadow_word_madness",
+      "displayNameEn": "Shadow Word: Madness",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82665,
+      "traitEntryId": 103808,
+      "talentSpellId": 335467,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest.cpp:3311 dot_spells.shadow_word_madness = find_talent_spell( talent_tree::SPECIALIZATION, \"Shadow Word: Madness\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "shadowfiend",
+      "displayNameEn": "Shadowfiend",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 109018,
+      "traitEntryId": 134851,
+      "talentSpellId": 34433,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest.cpp:3293 talents.shared.shadowfiend         = ST( \"Shadowfiend\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "tentacle_slam",
+      "displayNameEn": "Tentacle Slam",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 93171,
+      "traitEntryId": 115448,
+      "talentSpellId": 1227280,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest_shadow.cpp:2401 talents.shadow.tentacle_slam        = ST( \"Tentacle Slam\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "thought_harvester",
+      "displayNameEn": "Thought Harvester",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82653,
+      "traitEntryId": 103795,
+      "talentSpellId": 406788,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest_shadow.cpp:2400 talents.shadow.thought_harvester    = ST( \"Thought Harvester\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "void_blast",
+      "displayNameEn": "Void Blast",
+      "tree": "HERO",
+      "traitNodeId": 94703,
+      "traitEntryId": 117306,
+      "talentSpellId": 450405,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest.cpp:3453 talents.voidweaver.void_blast             = HT( \"Void Blast\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "void_torrent",
+      "displayNameEn": "Void Torrent",
+      "tree": "HERO",
+      "traitNodeId": 94684,
+      "traitEntryId": 117287,
+      "talentSpellId": 263165,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest.cpp:3445 talents.voidweaver.void_torrent           = HT( \"Void Torrent\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "voidform",
+      "displayNameEn": "Voidform",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 82657,
+      "traitEntryId": 103674,
+      "talentSpellId": 228260,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_priest_shadow.cpp:2412 talents.shadow.voidform            = ST( \"Voidform\" );; the pinned list reads it or an action of the list is built on it"
+    }
+  ],
+  "heroTrees": [
+    {
+      "simcName": "voidweaver",
+      "subTreeId": 18,
+      "entries": [
+        {
+          "traitEntryId": 117271,
+          "traitNodeId": 94668,
+          "displayNameEn": "Devour Matter",
+          "talentSpellId": 451840
+        },
+        {
+          "traitEntryId": 117272,
+          "traitNodeId": 94669,
+          "displayNameEn": "Void Infusion",
+          "talentSpellId": 450612
+        },
+        {
+          "traitEntryId": 117273,
+          "traitNodeId": 94670,
+          "displayNameEn": "Inner Quietus",
+          "talentSpellId": 448278
+        },
+        {
+          "traitEntryId": 117287,
+          "traitNodeId": 94684,
+          "displayNameEn": "Void Torrent",
+          "talentSpellId": 263165
+        },
+        {
+          "traitEntryId": 117295,
+          "traitNodeId": 94692,
+          "displayNameEn": "Quickened Pulse",
+          "talentSpellId": 1266845
+        },
+        {
+          "traitEntryId": 117296,
+          "traitNodeId": 94693,
+          "displayNameEn": "No Escape",
+          "talentSpellId": 451204
+        },
+        {
+          "traitEntryId": 117297,
+          "traitNodeId": 94694,
+          "displayNameEn": "Collapsing Void",
+          "talentSpellId": 448403
+        },
+        {
+          "traitEntryId": 117299,
+          "traitNodeId": 94696,
+          "displayNameEn": "Void Leech",
+          "talentSpellId": 451311
+        },
+        {
+          "traitEntryId": 117306,
+          "traitNodeId": 94703,
+          "displayNameEn": "Void Blast",
+          "talentSpellId": 450405
+        },
+        {
+          "traitEntryId": 123841,
+          "traitNodeId": 100212,
+          "displayNameEn": "Voidwraith",
+          "talentSpellId": 451234
+        },
+        {
+          "traitEntryId": 123844,
+          "traitNodeId": 94696,
+          "displayNameEn": "Embrace the Shadow",
+          "talentSpellId": 451569
+        },
+        {
+          "traitEntryId": 123845,
+          "traitNodeId": 94693,
+          "displayNameEn": "Dark Energy",
+          "talentSpellId": 451018
+        },
+        {
+          "traitEntryId": 125821,
+          "traitNodeId": 94695,
+          "displayNameEn": "Void Empowerment",
+          "talentSpellId": 450138
+        },
+        {
+          "traitEntryId": 125982,
+          "traitNodeId": 94695,
+          "displayNameEn": "Darkening Horizon",
+          "talentSpellId": 449912
+        },
+        {
+          "traitEntryId": 136036,
+          "traitNodeId": 109778,
+          "displayNameEn": "Overwhelming Shadows",
+          "talentSpellId": 1266883
+        },
+        {
+          "traitEntryId": 136037,
+          "traitNodeId": 109779,
+          "displayNameEn": "Touch of the Void",
+          "talentSpellId": 1266856
+        },
+        {
+          "traitEntryId": 136038,
+          "traitNodeId": 109780,
+          "displayNameEn": "Voidheart",
+          "talentSpellId": 449880
+        }
+      ]
+    },
+    {
+      "simcName": "archon",
+      "subTreeId": 19,
+      "entries": [
+        {
+          "traitEntryId": 117279,
+          "traitNodeId": 94676,
+          "displayNameEn": "Resonant Energy",
+          "talentSpellId": 453845
+        },
+        {
+          "traitEntryId": 117280,
+          "traitNodeId": 94677,
+          "displayNameEn": "Perfected Form",
+          "talentSpellId": 453917
+        },
+        {
+          "traitEntryId": 117281,
+          "traitNodeId": 94678,
+          "displayNameEn": "Energy Compression",
+          "talentSpellId": 449874
+        },
+        {
+          "traitEntryId": 117283,
+          "traitNodeId": 94680,
+          "displayNameEn": "Energy Conservation",
+          "talentSpellId": 1272308
+        },
+        {
+          "traitEntryId": 117284,
+          "traitNodeId": 94681,
+          "displayNameEn": "Power Surge",
+          "talentSpellId": 453109
+        },
+        {
+          "traitEntryId": 117288,
+          "traitNodeId": 94685,
+          "displayNameEn": "Energy Cycle",
+          "talentSpellId": 453828
+        },
+        {
+          "traitEntryId": 117289,
+          "traitNodeId": 94686,
+          "displayNameEn": "Shock Pulse",
+          "talentSpellId": 453852
+        },
+        {
+          "traitEntryId": 117291,
+          "traitNodeId": 94688,
+          "displayNameEn": "Empowered Surges",
+          "talentSpellId": 453799
+        },
+        {
+          "traitEntryId": 117300,
+          "traitNodeId": 94697,
+          "displayNameEn": "Halo",
+          "talentSpellId": 120644
+        },
+        {
+          "traitEntryId": 117302,
+          "traitNodeId": 94699,
+          "displayNameEn": "Manifested Power",
+          "talentSpellId": 453783
+        },
+        {
+          "traitEntryId": 117305,
+          "traitNodeId": 94702,
+          "displayNameEn": "Divine Halo",
+          "talentSpellId": 449806
+        },
+        {
+          "traitEntryId": 125083,
+          "traitNodeId": 94686,
+          "displayNameEn": "Incessant Screams",
+          "talentSpellId": 453918
+        },
+        {
+          "traitEntryId": 125085,
+          "traitNodeId": 94678,
+          "displayNameEn": "Sustained Potency",
+          "talentSpellId": 454001
+        },
+        {
+          "traitEntryId": 136033,
+          "traitNodeId": 109775,
+          "displayNameEn": "Realized Potential",
+          "talentSpellId": 1272326
+        },
+        {
+          "traitEntryId": 136034,
+          "traitNodeId": 109776,
+          "displayNameEn": "Word of Supremacy",
+          "talentSpellId": 453726
+        },
+        {
+          "traitEntryId": 136035,
+          "traitNodeId": 109777,
+          "displayNameEn": "Focused Outburst",
+          "talentSpellId": 1272320
+        },
+        {
+          "traitEntryId": 136687,
+          "traitNodeId": 109776,
+          "displayNameEn": "Heightened Alteration",
+          "talentSpellId": 453729
+        },
+        {
+          "traitEntryId": 136688,
+          "traitNodeId": 109775,
+          "displayNameEn": "Spiritwell",
+          "talentSpellId": 1247178
+        }
+      ]
+    }
+  ]
+}

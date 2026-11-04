@@ -1828,11 +1828,13 @@ it is a deep-dive question, not a blocker for the rotational slice.
 ### ONB-D1P: Destruction Warlock (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-D1
 branch: autopilot/onb-d1p
 wcl: NONE
 publicContract: EXPECTED
+pr: 70
+mergeSha: 5502bcad59748bacead8e25ccdf25d37b3c3f96e
 ```
 
 **Outcome.** Destruction does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Its two retained subjects, replayed offline, give 220 eligible decisions, 0 MATCH, 0 REJECTED and 220 UNKNOWN, all behind the enemy count, and a census of 5,683 retained files finds no third subject. Evidence is not its gap, so it is not on ONB-EV; it waits on ONB-S3 and the inputs behind it. A promotion after those is a new public entry through the unchanged gates (agent/architecture.md "ONB-D1P"; agent/follow-ups.md "After ONB-D1").
@@ -1840,8 +1842,9 @@ publicContract: EXPECTED
 ### ONB-D2: Elemental Shaman, Balance Druid and Shadow Priest (internal, Cohort D)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-D1
+branch: autopilot/onb-d2
 wcl: NONE
 publicContract: NONE
 ```
@@ -1849,6 +1852,8 @@ publicContract: NONE
 **Scope.** Cohort D casters with DoT maintenance and builder resources
 (Maelstrom, Astral Power, Insanity), each with its own meaning. Real
 evidence is retained for all three.
+
+**Outcome.** All three are registered INTERNAL_ONLY, and no decision of any of them resolves: 1,210 Elemental decisions (seven retained subjects, all Farseer) stop at the movement option on the list's first line, 287 Balance decisions (three subjects, all Elune's Chosen) at `variable.opener`, and 356 Shadow decisions (two subjects, both Archon) at `target_if` and a contract-less Power Infusion. All three need the rule ONB-D1 said would then move, so a begin before a possibly-instant completion is now never its anchor, in the shared timeline, and Destruction's own refusal is gone. Evidence is not their gap, so none is on ONB-EV, and ONB-S3 alone moves none of them (agent/architecture.md "ONB-D2"; agent/follow-ups.md "After ONB-D2").
 
 ### ONB-D2P: Elemental Shaman, Balance Druid and Shadow Priest (public)
 

@@ -465,6 +465,19 @@ describe("every fail-closed case", () => {
       "beta",
       /POLICY_VIOLATED: PTR_BODY_IDENTICAL, but the bodies differ/,
     );
+    // PTR_BODY_DIFFERS (ONB-D2): the same differing bodies pass under the policy that says so...
+    const declared = (files: Files) =>
+      ({
+        ...repinned("beta", files),
+        livePtrPolicy: { ...SYNTH.beta.livePtrPolicy, kind: "PTR_BODY_DIFFERS" },
+      }) as AplExtractionTarget;
+    expect(batch({ files: differs, targets: { beta: declared(differs) }, names: ["beta"] }).ok).toBe(true);
+    // ...and identical bodies refuse it, because the stronger policy is the one to declare.
+    expectFails(
+      batch({ targets: { beta: declared(CLEAN) }, names: ["beta"] }),
+      "beta",
+      /POLICY_VIOLATED: PTR_BODY_DIFFERS, but the bodies are identical/,
+    );
     // A policy that names an unknown kind.
     const unknown = {
       ...SYNTH.gamma,
@@ -749,6 +762,12 @@ const D2C = {
   "rogue-subtlety": ["rogue", "subtlety", "NO_PTR_REGION", false],
   "hunter-survival": ["hunter", "survival", "PTR_BODY_IDENTICAL", false],
 } as const;
+/** ONB-D2's three targets, and the policy each declares. */
+const ONB_D2_POLICIES = {
+  "shaman-elemental": "PTR_BODY_IDENTICAL",
+  "druid-balance": "PTR_SEPARATE_INCLUDE",
+  "priest-shadow": "PTR_BODY_DIFFERS",
+} as const;
 const EARLIER = [
   "rogue-assassination",
   "paladin-protection",
@@ -758,7 +777,7 @@ const EARLIER = [
 ];
 
 describe("the registry", () => {
-  it("holds exactly the five earlier targets, the eight D2-C targets, ONB-B2's Enhancement, ONB-C1's Feral, ONB-C2's Outlaw and ONB-D1's Destruction", () => {
+  it("holds exactly the five earlier targets, the eight D2-C targets, ONB-B2's Enhancement, ONB-C1's Feral, ONB-C2's Outlaw, ONB-D1's Destruction and ONB-D2's three", () => {
     // ONB-B2 is the audit this entry waited for: its list is a class method (onb-b2-class-method-extraction).
     // ONB-C1's list is an included file with a separate PTR file (onb-c1-included-file-extraction).
     expect(Object.keys(TARGETS).sort()).toEqual(
@@ -769,6 +788,9 @@ describe("the registry", () => {
         "druid-feral",
         "rogue-outlaw",
         "warlock-destruction",
+        "shaman-elemental",
+        "druid-balance",
+        "priest-shadow",
       ].sort(),
     );
   });
@@ -792,6 +814,12 @@ describe("the registry", () => {
     expect(arms).not.toBe(fury);
     expect(arms?.reason).toContain("the arms region");
     expect(fury?.reason).toContain("the fury region");
+  });
+
+  it("ONB-D2's targets declare the relationship their bodies have", () => {
+    for (const [name, kind] of Object.entries(ONB_D2_POLICIES)) {
+      expect((TARGETS[name] as AplExtractionTarget).livePtrPolicy?.kind, name).toBe(kind);
+    }
   });
 
   it("no two targets share a region or an output path", () => {

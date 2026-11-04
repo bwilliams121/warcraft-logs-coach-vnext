@@ -1738,6 +1738,7 @@ cast and channel decision anchor (ONB-S4, tests/unit/onb-s4-cast-decision-anchor
   derived start vs observed evidence           -> before previous completion / start or completion inside / overlap -> CONFLICT; covered -> NOT_OBSERVED
   begin only some placements pair              -> PAIRING_NOT_PROVEN; occupancy after the completion UNKNOWN to the next start, both orders
   same-ms begin and completion                 -> order-invariant (both orders equal); POSITIVE resolves, UNKNOWN cast time -> AMBIGUOUS
+  UNKNOWN cast time, earlier begin (ONB-D2)    -> AMBIGUOUS with the completion a candidate; begin not consumed; no CASTING span. POSITIVE pairs as before
   proven instant with same-ms begin            -> INSTANT_COMPLETION, begin consumed; earlier begin abandoned
   two begins / two completions in one ms       -> BEGINCAST_PAIRING_AMBIGUOUS
   other begin or channel start mid-cast        -> CAST_EVIDENCE_CONFLICT; off-GCD instant mid-cast does not break pairing
@@ -5575,6 +5576,16 @@ resolved a decision prompts a new public entry. The unsupported subject's guard 
 
 Offline only, not committed: the whole-fight replay (`.probe/onbb1/m/`) gives the numbers agent/architecture.md "ONB-B1" reports, and
 `.probe/onbb1/wire.cjs` the wire measurements. Not run: no window-counting rule was mutated beyond what the negatives above exercise.
+
+# ONB-D2: Elemental Shaman, Balance Druid and Shadow Priest
+
+`tests/unit/specs/onb-d2-elemental-shaman.test.ts`, `onb-d2-balance-druid.test.ts` and `onb-d2-shadow-priest.test.ts`, synthetic, one shape: the row is internal only and refused publicly; it refuses another specialization first; a capture with no combatant info refuses; it declares no resource. The anchor: a hard cast's decision takes its begin's times and keeps its completion's identity; an instant's is when it lands; a later begin supersedes an earlier, which is counted and is no decision; a begin that never completes is no decision. No moment, no verdict: over an authority view that does resolve, a hard cast with its begin is a MATCH, and with none, with no coverage, or begun before the pull it is UNKNOWN; every possibly-instant spell is UNKNOWN even with a begin; a begin of an instant is a conflict. Balance and Shadow also pin a channel: anchored at its cast, never idle after it, no bound claimed. No decision resolves on either hero tree or on neither; a build with no hero entry proves nothing absent; a resource value on the wire is not read and a full bar leaves the deficit line open; an open enemy count stays open, and a single target only a test can state still does not fall through. Absent talents stay UNKNOWN; a resolved tree disproves only the other tree's; non-domain entries cannot preempt. The data: every cast row names the token the GCD dataset binds, and no token lacks a row. Each file ends on what its own list asks: Elemental's `moving` refusal, its Earthquake rows, its Ascendance rows and its 188389; Balance's `variable.opener` stop, its `hero_tree` bindings, its either-talent Celestial Alignment and its Eclipse rows; Shadow's open area list, its contract-less Power Infusion, its Shadowy Apparition and its own Halo and Void Blast rows.
+
+`tests/unit/onb-s4-cast-decision-anchor.test.ts` adds the moved rule with its positive control, and back to back in both same-millisecond orders no begin is consumed and occupancy after the last completion stays UNKNOWN, and its retained-shape measurements are re-taken: Mage 121 all ten hard casts ambiguous, Restoration Shaman 122 85 and 32 ambiguous, 117 `PAIRING_NOT_PROVEN`. `m11d2c-pinned-extraction-preflight` adds `PTR_BODY_DIFFERS`: differing bodies pass under it, identical ones refuse it, and each new target declares its policy.
+
+Six corpus cases, two per spec, as for ONB-D1, and `tests/contracts/m11-promotion-evidence-gate.test.ts` pins that the gate search finds nothing for each.
+
+Offline only, not committed: the census (`.probe/onbd2/census.cjs`, Mortal Strike as its positive control), the replay through production ingestion (`.probe/onbd2/m/`), and the class-mask reading of cast-time effects (`.probe/onbd2/masks.cjs`). The real extractor preflight runs only against a local pinned source root, as for every pinned target.
 
 # ONB-D1: Destruction Warlock
 

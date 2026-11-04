@@ -1,0 +1,374 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_DRUID_BALANCE_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/sc_druid.cpp",
+        "sha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "byteLength": 479886
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 8921,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Moonfire"
+    },
+    {
+      "abilityGameId": 78674,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Starsurge"
+    },
+    {
+      "abilityGameId": 88747,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Wild Mushroom"
+    },
+    {
+      "abilityGameId": 93402,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Sunfire"
+    },
+    {
+      "abilityGameId": 102560,
+      "baseGcdMs": 0,
+      "displayNameEn": "Incarnation: Chosen of Elune"
+    },
+    {
+      "abilityGameId": 190984,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Wrath"
+    },
+    {
+      "abilityGameId": 191034,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Starfall"
+    },
+    {
+      "abilityGameId": 194153,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Starfire"
+    },
+    {
+      "abilityGameId": 194223,
+      "baseGcdMs": 0,
+      "displayNameEn": "Celestial Alignment"
+    },
+    {
+      "abilityGameId": 202770,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Fury of Elune"
+    },
+    {
+      "abilityGameId": 205636,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Force of Nature"
+    },
+    {
+      "abilityGameId": 274281,
+      "baseGcdMs": 1000,
+      "displayNameEn": "New Moon"
+    },
+    {
+      "abilityGameId": 274282,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Half Moon"
+    },
+    {
+      "abilityGameId": 274283,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Full Moon"
+    },
+    {
+      "abilityGameId": 391528,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Convoke the Spirits"
+    },
+    {
+      "abilityGameId": 1233272,
+      "baseGcdMs": 500,
+      "displayNameEn": "Lunar Eclipse"
+    },
+    {
+      "abilityGameId": 1233346,
+      "baseGcdMs": 500,
+      "displayNameEn": "Solar Eclipse"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "celestial_alignment",
+      "candidateAbilityGameIds": [102560, 194223],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "create_action / celestial_alignment_t / incarnation_moonkin_t",
+        "startLine": 10160,
+        "endLine": 10160,
+        "sourceNote": "create_action dispatches \"celestial_alignment\" to celestial_alignment_t / incarnation_moonkin_t: on the token \"celestial_alignment\", create_action builds incarnation_moonkin_t when talent.incarnation_moonkin is taken (:10160), else celestial_alignment_t (:10167). spec.celestial_alignment = talent.celestial_alignment.find_override_spell() at :10692; spec.incarnation_moonkin = check( talent.incarnation_moonkin, 102560 ) at :10697.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "wrath",
+      "candidateAbilityGameIds": [190984],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "create_action / wrath_t",
+        "startLine": 10258,
+        "endLine": 10258,
+        "sourceNote": "create_action dispatches \"wrath\" to wrath_t: built on p->spec.wrath (:9030); find_specialization_spell( \"Wrath\" ) at :10686.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "starfire",
+      "candidateAbilityGameIds": [194153],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "create_action / starfire_t",
+        "startLine": 10239,
+        "endLine": 10239,
+        "sourceNote": "create_action dispatches \"starfire\" to starfire_t: built on p->talent.starfire (:8486); CT( \"Starfire\" ) at :10365.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "eclipse",
+      "candidateAbilityGameIds": [1233272, 1233346],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "create_action / eclipse_t",
+        "startLine": 10175,
+        "endLine": 10175,
+        "sourceNote": "create_action dispatches \"eclipse\" to eclipse_t: built on p->find_spell( p->talent.lunar_calling.ok() ? 1233272 : 1233346 ) (:7258).",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "moonfire",
+      "candidateAbilityGameIds": [8921],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "create_action / moonfire_t",
+        "startLine": 10254,
+        "endLine": 10254,
+        "sourceNote": "create_action dispatches \"moonfire\" to moonfire_t: built on p->spec.moonfire (:7869); find_class_spell( \"Moonfire\" ), or find_spell( 8921 ) with Red Moon, at :10681. Both are 8921.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "sunfire",
+      "candidateAbilityGameIds": [93402],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "create_action / sunfire_t",
+        "startLine": 10241,
+        "endLine": 10241,
+        "sourceNote": "create_action dispatches \"sunfire\" to sunfire_t: built on p->talent.sunfire (:8764); CT( \"Sunfire\" ) at :10368.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "fury_of_elune",
+      "candidateAbilityGameIds": [202770],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "create_action / fury_of_elune_t",
+        "startLine": 10179,
+        "endLine": 10179,
+        "sourceNote": "create_action dispatches \"fury_of_elune\" to fury_of_elune_t: built on p->talent.fury_of_elune; ST( \"Fury of Elune\" ) at :10402.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "force_of_nature",
+      "candidateAbilityGameIds": [205636],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "create_action / force_of_nature_t",
+        "startLine": 10178,
+        "endLine": 10178,
+        "sourceNote": "create_action dispatches \"force_of_nature\" to force_of_nature_t: built on p->talent.force_of_nature (:7304); ST( \"Force of Nature\" ) at :10401.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "convoke_the_spirits",
+      "candidateAbilityGameIds": [391528],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "create_action / convoke_the_spirits_t",
+        "startLine": 10219,
+        "endLine": 10219,
+        "sourceNote": "create_action dispatches \"convoke_the_spirits\" to convoke_the_spirits_t: built on p->talent.convoke_the_spirits (:9256); ST( \"Convoke the Spirits\" ) at :10383, trait row spell 391528.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "starsurge",
+      "candidateAbilityGameIds": [78674],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "create_action / starsurge_t",
+        "startLine": 10186,
+        "endLine": 10186,
+        "sourceNote": "create_action dispatches \"starsurge\" to starsurge_t: for Balance, create_action builds starsurge_t (:10186), built on p->talent.starsurge (:8650); CT( \"Starsurge\" ) at :10367, Balance's trait row spell 78674.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "starfall",
+      "candidateAbilityGameIds": [191034],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "create_action / starfall_t",
+        "startLine": 10185,
+        "endLine": 10185,
+        "sourceNote": "create_action dispatches \"starfall\" to starfall_t: built on spec.starfall; find_specialization_spell( \"Starfall\" ) at :10699.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "new_moon",
+      "candidateAbilityGameIds": [274281],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "create_action / new_moon_t",
+        "startLine": 10180,
+        "endLine": 10180,
+        "sourceNote": "create_action dispatches \"new_moon\" to new_moon_t: built on p->talent.new_moon (:7611); ST( \"New Moon\" ) at :10412.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "half_moon",
+      "candidateAbilityGameIds": [274282],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "create_action / half_moon_t",
+        "startLine": 10181,
+        "endLine": 10181,
+        "sourceNote": "create_action dispatches \"half_moon\" to half_moon_t: built on p->spec.half_moon (:7623); check( talent.new_moon, 274282 ) at :10696.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "full_moon",
+      "candidateAbilityGameIds": [274283],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "create_action / full_moon_t",
+        "startLine": 10182,
+        "endLine": 10182,
+        "sourceNote": "create_action dispatches \"full_moon\" to full_moon_t: built on p->spec.full_moon (:7635); check( talent.new_moon, 274283 ) at :10695.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "wild_mushroom",
+      "candidateAbilityGameIds": [88747],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "create_action / wild_mushroom_t",
+        "startLine": 10188,
+        "endLine": 10188,
+        "sourceNote": "create_action dispatches \"wild_mushroom\" to wild_mushroom_t: built on talent.wild_mushroom; ST( \"Wild Mushroom\" ) at :10434.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

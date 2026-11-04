@@ -1195,3 +1195,25 @@ export function firstGcdSelectionAcrossRescans<TState>(
       };
   }
 }
+
+/**
+ * What a comparison is given when the moment of the decision is not established (ONB-D1, shared by ONB-D2).
+ * A moment that is not established cannot be judged, whatever the scan said. The query never produces this: a
+ * specialization reading the shared cast anchor substitutes it, and keeps the scan's own diagnostics beside it.
+ */
+export function decisionAnchorNotEstablished(rootListName: string, detail: string): RotationalGcdResult {
+  return {
+    kind: "ROTATIONAL_GCD_UNKNOWN",
+    blocker: "DECISION_ANCHOR_NOT_ESTABLISHED",
+    scanBlocker: null,
+    blockedAt: null,
+    detail,
+    trace: {
+      stateKey: "[]",
+      rootListName,
+      scan: "NOT_SCANNED",
+      branches: [],
+      outcome: "UNKNOWN DECISION_ANCHOR_NOT_ESTABLISHED",
+    },
+  };
+}

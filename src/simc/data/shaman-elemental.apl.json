@@ -1,0 +1,535 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_SHAMAN_ELEMENTAL",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "shaman",
+    "specName": "elemental"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "UNKNOWN",
+    "sourcePath": "engine/class_modules/apl/apl_shaman.cpp",
+    "sourceSha256": "71f38c728fdba909d3a807139c538aedad7a63bec56a15ad64647b5a29630f65",
+    "sourceByteLength": 25414,
+    "regionStartMarker": "//elemental_apl_start",
+    "regionEndMarker": "//elemental_apl_end",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "regionSha256": "db72156b6e5625ae51f01e08a1ba65c671a2faebe7eff6b91ed3dbec43e77517",
+    "livePtrPolicy": "PTR_BODY_IDENTICAL",
+    "dispatchSource": {
+      "sourcePath": "engine/class_modules/sc_shaman.cpp",
+      "sourceSha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0"
+    }
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "spiritwalkers_grace,moving=1,if=movement.distance>6",
+          "comment": "Enable more movement.",
+          "sourceLine": 53
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "wind_shear",
+          "comment": "Interrupt of casts.",
+          "sourceLine": 54
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "blood_fury",
+          "comment": null,
+          "sourceLine": 55
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "berserking",
+          "comment": null,
+          "sourceLine": 56
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "fireblood",
+          "comment": null,
+          "sourceLine": 57
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "ancestral_call",
+          "comment": null,
+          "sourceLine": 58
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "use_item,name=stormbound_emblem_of_dazar,if=cooldown.ascendance.ready&(cooldown.stormkeeper.remains>15|cooldown.stormkeeper.remains<2)|fight_remains<23",
+          "comment": "Special trinkets",
+          "sourceLine": 59
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "use_item,name=hex_lords_dooming_idol,if=cooldown.ascendance.ready&cooldown.stormkeeper.remains>15|fight_remains<23",
+          "comment": null,
+          "sourceLine": 60
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "use_item,slot=trinket1,use_off_gcd=1,if=!variable.trinket_1_special&variable.trinket_1_buffs&(cooldown.ascendance.remains>trinket.1.cooldown.duration-5|cooldown.ascendance.ready&cooldown.stormkeeper.remains>15|fight_remains<21)",
+          "comment": "Normal buff trinkets, mimic Ascendance activation conditions",
+          "sourceLine": 61
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "use_item,slot=trinket2,use_off_gcd=1,if=!variable.trinket_2_special&variable.trinket_2_buffs&(cooldown.ascendance.remains>trinket.2.cooldown.duration-5|cooldown.ascendance.ready&cooldown.stormkeeper.remains>15|fight_remains<21)",
+          "comment": null,
+          "sourceLine": 62
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "use_item,slot=main_hand,use_off_gcd=1",
+          "comment": "Normal weapons",
+          "sourceLine": 63
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "use_item,slot=trinket1,use_off_gcd=1,if=!variable.trinket_1_special&!variable.trinket_1_buffs&(cooldown.ascendance.remains>20|trinket.2.cooldown.remains>20)",
+          "comment": "Dmg trinkets",
+          "sourceLine": 64
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "use_item,slot=trinket2,use_off_gcd=1,if=!variable.trinket_2_special&!variable.trinket_2_buffs&(cooldown.ascendance.remains>20|trinket.1.cooldown.remains>20)",
+          "comment": null,
+          "sourceLine": 65
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "lightning_shield,if=buff.lightning_shield.down",
+          "comment": null,
+          "sourceLine": 66
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "natures_swiftness",
+          "comment": null,
+          "sourceLine": 67
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "invoke_external_buff,name=power_infusion",
+          "comment": "Use Power Infusion on Cooldown.",
+          "sourceLine": 68
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "potion,if=buff.bloodlust.up|cooldown.ascendance.ready&cooldown.stormkeeper.remains>15|fight_remains<31",
+          "comment": null,
+          "sourceLine": 69
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "run_action_list,name=aoe,if=spell_targets.chain_lightning>=3",
+          "comment": null,
+          "sourceLine": 70
+        },
+        {
+          "priorityOrdinal": 18,
+          "actionStringVerbatim": "run_action_list,name=single_target",
+          "comment": null,
+          "sourceLine": 71
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": "Snapshot raid buffed stats before combat begins and pre-potting is done.",
+          "sourceLine": 43
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "flametongue_weapon,if=talent.flametongue_weapon",
+          "comment": null,
+          "sourceLine": 44
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "lightning_shield",
+          "comment": null,
+          "sourceLine": 45
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "thunderstrike_ward",
+          "comment": null,
+          "sourceLine": 46
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=trinket_1_buffs,value=(trinket.1.has_use_buff|trinket.1.is.funhouse_lens)",
+          "comment": null,
+          "sourceLine": 47
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "variable,name=trinket_2_buffs,value=(trinket.2.has_use_buff|trinket.2.is.funhouse_lens)",
+          "comment": null,
+          "sourceLine": 48
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "variable,name=trinket_1_special,value=(trinket.1.is.stormbound_emblem_of_dazar|trinket.1.is.hex_lords_dooming_idol)",
+          "comment": null,
+          "sourceLine": 49
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "variable,name=trinket_2_special,value=(trinket.2.is.stormbound_emblem_of_dazar|trinket.2.is.hex_lords_dooming_idol)",
+          "comment": null,
+          "sourceLine": 50
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "stormkeeper",
+          "comment": null,
+          "sourceLine": 51
+        }
+      ]
+    },
+    {
+      "listName": "aoe",
+      "receiverIdentifier": "aoe",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "stormkeeper,if=cooldown.ascendance.remains>10|cooldown.ascendance.remains<gcd|fight_remains<20",
+          "comment": "--- 3+ TARGET ROTATION ---  Stormkeeper on CD, unless sub 10s hold for Asc or the fight is about to end.",
+          "sourceLine": 73
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "ancestral_swiftness",
+          "comment": null,
+          "sourceLine": 74
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "flame_shock,if=!buff.master_of_the_elements.up&((dot.flame_shock.refreshable&cooldown.ascendance.remains>5)|(buff.fire_elemental.up&buff.fire_elemental.remains<2))&talent.master_of_the_elements&talent.inferno_arc&spell_targets.chain_lightning=3",
+          "comment": "[3t] Apply Flame shock on 3t for MotE and Inferno arc.",
+          "sourceLine": 75
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "voltaic_blaze,if=!buff.master_of_the_elements.up&((dot.flame_shock.refreshable&cooldown.ascendance.remains>5)|(buff.fire_elemental.up&buff.fire_elemental.remains<2)|talent.purging_flames)",
+          "comment": "Apply Voltaic blaze for Inferno arc or Purging flames.",
+          "sourceLine": 76
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "ascendance,if=cooldown.stormkeeper.remains>15|fight_remains<20",
+          "comment": "Ascendance on CD, unless SK can be sync'd with it.",
+          "sourceLine": 77
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "elemental_blast,target_if=min:debuff.lightning_rod.remains,if=buff.tempest.stack<2&(buff.elemental_blast_critical_strike.up+buff.elemental_blast_haste.up+buff.elemental_blast_mastery.up=0)&talent.tempest",
+          "comment": "[SB] Elemental Blast if no buffs or at 3t, Earthquake to spread Lightning Rod otherwise  [FS] EQ with ancestors, EB - without",
+          "sourceLine": 78
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "earthquake,if=buff.tempest.stack<2&lightning_rod<active_enemies&(spell_targets.chain_lightning>=3+talent.elemental_blast)&(buff.elemental_blast_critical_strike.up+buff.elemental_blast_haste.up+buff.elemental_blast_mastery.up>0|!talent.elemental_blast)&talent.tempest",
+          "comment": null,
+          "sourceLine": 79
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "earthquake,if=buff.call_of_the_ancestors.up|(spell_targets.chain_lightning>=3+3*talent.elemental_blast)&talent.call_of_the_ancestors",
+          "comment": null,
+          "sourceLine": 80
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "elemental_blast,target_if=min:debuff.lightning_rod.remains,if=buff.tempest.stack<2&(spell_targets.chain_lightning<=3+2*talent.call_of_the_ancestors)&!buff.call_of_the_ancestors.up",
+          "comment": null,
+          "sourceLine": 81
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "lava_burst,if=buff.purging_flames.up&(buff.lava_surge.up&buff.flowing_elements.stack<2|cooldown.voltaic_blaze.remains<2)",
+          "comment": "Spend Purging flames.  !!! Remove tier requirement once fixed ingame",
+          "sourceLine": 82
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "lava_burst,if=(buff.tempest.up|!talent.purging_flames&talent.call_of_the_ancestors)&buff.lava_surge.up&talent.master_of_the_elements&spell_targets.chain_lightning=3",
+          "comment": "[3t] Spend Lava Surge procs to buff Tempest with MotE OR anything with Farseer (without PF specced).",
+          "sourceLine": 83
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "tempest,target_if=min:debuff.lightning_rod.remains,if=buff.master_of_the_elements.up",
+          "comment": "[3t] Tempest if you have MotE.",
+          "sourceLine": 84
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "tempest,target_if=min:debuff.lightning_rod.remains,if=buff.stormkeeper.stack<4&buff.tempest.stack=2",
+          "comment": null,
+          "sourceLine": 85
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "chain_lightning,if=buff.stormkeeper.up&maelstrom.deficit>(spell_targets.chain_lightning>?5)*(2+(spell_targets.chain_lightning>?5)+2)",
+          "comment": null,
+          "sourceLine": 86
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "earthquake,if=!talent.elemental_blast&maelstrom.deficit<15+(buff.stormkeeper.up*(spell_targets.chain_lightning>?5)*(2+(spell_targets.chain_lightning>?5)))",
+          "comment": null,
+          "sourceLine": 87
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "elemental_blast,if=talent.tempest",
+          "comment": null,
+          "sourceLine": 88
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "tempest,target_if=min:debuff.lightning_rod.remains",
+          "comment": null,
+          "sourceLine": 89
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "chain_lightning",
+          "comment": "Filler spell. Always available. Always the bottom line.",
+          "sourceLine": 90
+        },
+        {
+          "priorityOrdinal": 18,
+          "actionStringVerbatim": "flame_shock,moving=1",
+          "comment": null,
+          "sourceLine": 91
+        },
+        {
+          "priorityOrdinal": 19,
+          "actionStringVerbatim": "voltaic_blaze,moving=1",
+          "comment": null,
+          "sourceLine": 92
+        },
+        {
+          "priorityOrdinal": 20,
+          "actionStringVerbatim": "frost_shock,moving=1",
+          "comment": null,
+          "sourceLine": 93
+        }
+      ]
+    },
+    {
+      "listName": "single_target",
+      "receiverIdentifier": "single_target",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "stormkeeper,if=cooldown.ascendance.remains>10|cooldown.ascendance.remains<gcd|fight_remains<20",
+          "comment": "--- 1 and 2 TARGET ROTATION ---  Stormkeeper on CD, unless sub 10s hold for Asc or the fight is about to end.",
+          "sourceLine": 95
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "ancestral_swiftness",
+          "comment": null,
+          "sourceLine": 96
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "flame_shock,if=!buff.master_of_the_elements.up&dot.flame_shock.refreshable&cooldown.ascendance.remains>5",
+          "comment": "Maintain Flame shock, minor gain to refresh it when FE is about to fade on up to 2 targets.",
+          "sourceLine": 97
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "flame_shock,target_if=min:dot.flame_shock.remains,if=!buff.master_of_the_elements.up&!buff.ascendance.up&buff.fire_elemental.up&buff.fire_elemental.remains<6*active_enemies-4",
+          "comment": null,
+          "sourceLine": 98
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "voltaic_blaze,if=!buff.master_of_the_elements.up&(dot.flame_shock.refreshable&cooldown.ascendance.remains>5|talent.purging_flames&spell_targets.chain_lightning=2)",
+          "comment": "Voltaic Blaze to maintain Flame shock and on cooldown to proc Purging Flames.",
+          "sourceLine": 99
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "ascendance,if=cooldown.stormkeeper.remains>15|fight_remains<20",
+          "comment": "Ascendance on CD, unless SK can be sync'd with it.",
+          "sourceLine": 100
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "earthquake,if=buff.flowing_elements.up&buff.overcharge_tier.up&buff.call_of_the_ancestors.stack>=3&spell_targets.chain_lightning=2",
+          "comment": "Consume tier procs if you gona proc new one with next builder.",
+          "sourceLine": 101
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "elemental_blast,if=buff.flowing_elements.up&buff.overcharge_tier.up",
+          "comment": null,
+          "sourceLine": 102
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "earthquake,if=buff.flowing_elements.up&buff.overcharge_tier.up&buff.call_of_the_ancestors.up&spell_targets.chain_lightning=2",
+          "comment": null,
+          "sourceLine": 103
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "earth_shock,if=buff.flowing_elements.up&buff.overcharge_tier.up",
+          "comment": null,
+          "sourceLine": 104
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "lava_burst,if=talent.master_of_the_elements&!buff.master_of_the_elements.up&maelstrom.deficit>15&cooldown.lava_burst.charges_fractional>1.8&((!buff.storm_elemental.up|buff.wind_gust.stack=4)+talent.call_of_the_ancestors>=spell_targets.chain_lightning)",
+          "comment": "Lava Burst to proc MotE if you are about to reach 2 charges and (1 target OR wind gust stacked for Farseer) or (1 target AND wind gust stacked for SB).",
+          "sourceLine": 105
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "lava_burst,if=talent.master_of_the_elements&!buff.master_of_the_elements.up&maelstrom.deficit>15&(maelstrom>52-5*talent.eye_of_the_storm*(1+talent.elemental_blast)+30*talent.elemental_blast)",
+          "comment": "Lava Burst to proc MotE if you have enough maelstrom for a spender.",
+          "sourceLine": 106
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "lava_burst,if=talent.master_of_the_elements&!buff.master_of_the_elements.up&maelstrom.deficit>15&(maelstrom>52-5*talent.eye_of_the_storm)&buff.call_of_the_ancestors.stack>=3&spell_targets.chain_lightning=2",
+          "comment": null,
+          "sourceLine": 107
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "lava_burst,if=!talent.master_of_the_elements&maelstrom.deficit>15&(!buff.storm_elemental.up|buff.wind_gust.stack=4)&((cooldown.lava_burst.charges_fractional>1.8|!buff.call_of_the_ancestors.up)&(talent.molten_wrath|talent.purging_flames)|buff.lava_surge.up)",
+          "comment": "Lava Burst without MotE to prevent overcap (with any empowering talents) or with surge proc.",
+          "sourceLine": 108
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "lava_burst,if=!buff.master_of_the_elements.up&maelstrom.deficit>15&buff.flowing_elements.up",
+          "comment": null,
+          "sourceLine": 109
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "lava_burst,if=!buff.master_of_the_elements.up&maelstrom.deficit>15&buff.power_of_the_maelstrom.stack=2",
+          "comment": null,
+          "sourceLine": 110
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "lava_burst,if=!buff.master_of_the_elements.up&maelstrom.deficit>15&buff.purging_flames.up&cooldown.voltaic_blaze.remains<2&active_dot.flame_shock=2",
+          "comment": null,
+          "sourceLine": 111
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "tempest,if=buff.master_of_the_elements.up|!talent.master_of_the_elements",
+          "comment": "[SB] Tempest and Lightning Bolt with SK if you have MotE.",
+          "sourceLine": 112
+        },
+        {
+          "priorityOrdinal": 18,
+          "actionStringVerbatim": "lightning_bolt,if=buff.stormkeeper.up&buff.master_of_the_elements.up&talent.tempest",
+          "comment": null,
+          "sourceLine": 113
+        },
+        {
+          "priorityOrdinal": 19,
+          "actionStringVerbatim": "earthquake,if=buff.call_of_the_ancestors.stack>=3&(buff.master_of_the_elements.up|!talent.master_of_the_elements|maelstrom.deficit<15)&spell_targets.chain_lightning=2",
+          "comment": null,
+          "sourceLine": 114
+        },
+        {
+          "priorityOrdinal": 20,
+          "actionStringVerbatim": "elemental_blast,target_if=min:debuff.lightning_rod.remains,if=buff.master_of_the_elements.up|maelstrom.deficit<15",
+          "comment": null,
+          "sourceLine": 115
+        },
+        {
+          "priorityOrdinal": 21,
+          "actionStringVerbatim": "earthquake,if=(buff.master_of_the_elements.up|!talent.master_of_the_elements|maelstrom.deficit<15)&buff.call_of_the_ancestors.up&!talent.elemental_blast&spell_targets.chain_lightning=2",
+          "comment": null,
+          "sourceLine": 116
+        },
+        {
+          "priorityOrdinal": 22,
+          "actionStringVerbatim": "earth_shock,target_if=min:debuff.lightning_rod.remains,if=buff.master_of_the_elements.up|maelstrom.deficit<15",
+          "comment": null,
+          "sourceLine": 117
+        },
+        {
+          "priorityOrdinal": 23,
+          "actionStringVerbatim": "flame_shock,target_if=min:dot.flame_shock.remains,if=buff.master_of_the_elements.up&dot.flame_shock.refreshable",
+          "comment": "Consume spare MotE to buff Flame Shock, mostly on off-targets.",
+          "sourceLine": 118
+        },
+        {
+          "priorityOrdinal": 24,
+          "actionStringVerbatim": "voltaic_blaze,if=talent.crackling_fury&!buff.ascendance.up",
+          "comment": null,
+          "sourceLine": 119
+        },
+        {
+          "priorityOrdinal": 25,
+          "actionStringVerbatim": "tempest",
+          "comment": null,
+          "sourceLine": 120
+        },
+        {
+          "priorityOrdinal": 26,
+          "actionStringVerbatim": "chain_lightning,if=spell_targets.chain_lightning=2",
+          "comment": "Filler spell. Always available. Always the bottom line.",
+          "sourceLine": 121
+        },
+        {
+          "priorityOrdinal": 27,
+          "actionStringVerbatim": "lightning_bolt",
+          "comment": null,
+          "sourceLine": 122
+        },
+        {
+          "priorityOrdinal": 28,
+          "actionStringVerbatim": "flame_shock,moving=1",
+          "comment": null,
+          "sourceLine": 123
+        },
+        {
+          "priorityOrdinal": 29,
+          "actionStringVerbatim": "voltaic_blaze,moving=1",
+          "comment": null,
+          "sourceLine": 124
+        },
+        {
+          "priorityOrdinal": 30,
+          "actionStringVerbatim": "frost_shock,moving=1",
+          "comment": null,
+          "sourceLine": 125
+        }
+      ]
+    }
+  ]
+}

@@ -87,6 +87,9 @@ import { FERAL_DRUID_REGISTRATION } from "../specs/druid/feral/registration.js";
 import { HAVOC_DEMON_HUNTER_REGISTRATION } from "../specs/demonhunter/havoc/registration.js";
 import { HOLY_PRIEST_REGISTRATION } from "../specs/priest/holy/registration.js";
 import { ASSASSINATION_REGISTRATION } from "../specs/rogue/assassination/registration.js";
+import { BALANCE_DRUID_REGISTRATION } from "../specs/druid/balance/registration.js";
+import { ELEMENTAL_SHAMAN_REGISTRATION } from "../specs/shaman/elemental/registration.js";
+import { SHADOW_PRIEST_REGISTRATION } from "../specs/priest/shadow/registration.js";
 import { DESTRUCTION_WARLOCK_REGISTRATION } from "../specs/warlock/destruction/registration.js";
 import { OUTLAW_ROGUE_REGISTRATION } from "../specs/rogue/outlaw/registration.js";
 import { SUBTLETY_ROGUE_REGISTRATION } from "../specs/rogue/subtlety/registration.js";
@@ -513,6 +516,10 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   // INTERNAL_ONLY since ONB-D1: Cohort D's representative, on the shared cast anchor. No decision resolves: both hero
   // trees' area lists read the enemy count before any single-target line.
   DESTRUCTION_WARLOCK_REGISTRATION,
+  // INTERNAL_ONLY since ONB-D2: Cohort D's followers, on the shared cast anchor. No decision of any of them resolves.
+  ELEMENTAL_SHAMAN_REGISTRATION,
+  BALANCE_DRUID_REGISTRATION,
+  SHADOW_PRIEST_REGISTRATION,
 ]);
 
 /**

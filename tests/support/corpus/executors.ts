@@ -45,6 +45,9 @@ import * as frostDeathKnight from "./executors/spec-frost-death-knight.js";
 import * as devourerDemonHunter from "./executors/spec-devourer-demon-hunter.js";
 import * as feralDruid from "./executors/spec-feral-druid.js";
 import * as destructionWarlock from "./executors/spec-destruction-warlock.js";
+import * as elementalShaman from "./executors/spec-elemental-shaman.js";
+import * as balanceDruid from "./executors/spec-balance-druid.js";
+import * as shadowPriest from "./executors/spec-shadow-priest.js";
 import * as outlawRogue from "./executors/spec-outlaw-rogue.js";
 import * as enhancementShaman from "./executors/spec-enhancement-shaman.js";
 import * as sharedEngine from "./executors/shared-decision-engine.js";
@@ -691,6 +694,12 @@ export async function executeAssertion(
       return feralDruid.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_DESTRUCTION_WARLOCK.SPEC_GATE":
       return destructionWarlock.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_ELEMENTAL_SHAMAN.SPEC_GATE":
+      return elementalShaman.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_BALANCE_DRUID.SPEC_GATE":
+      return balanceDruid.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_SHADOW_PRIEST.SPEC_GATE":
+      return shadowPriest.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_OUTLAW_ROGUE.SPEC_GATE":
       return outlawRogue.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE":
@@ -833,6 +842,9 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_DEVOURER_DEMON_HUNTER.SPEC_GATE",
   "SPEC_FERAL_DRUID.SPEC_GATE",
   "SPEC_DESTRUCTION_WARLOCK.SPEC_GATE",
+  "SPEC_ELEMENTAL_SHAMAN.SPEC_GATE",
+  "SPEC_BALANCE_DRUID.SPEC_GATE",
+  "SPEC_SHADOW_PRIEST.SPEC_GATE",
   "SPEC_OUTLAW_ROGUE.SPEC_GATE",
   "SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE",
   "SPEC_PRESERVATION_EVOKER.REGISTRATION_RESULT",

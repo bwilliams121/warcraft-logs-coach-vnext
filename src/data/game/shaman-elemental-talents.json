@@ -1,0 +1,507 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_TRAIT_SHAMAN_ELEMENTAL_TALENTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals trait_data_t::id_node, as every earlier target recorded. Corroborated for Elemental Shaman on its retained subjects, whose observed trees resolve a hero tree and the pinned list's talents by these keys (agent/architecture.md \"ONB-D2\").",
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "talents": [
+    {
+      "simcName": "ancestral_swiftness",
+      "displayNameEn": "Ancestral Swiftness",
+      "tree": "HERO",
+      "traitNodeId": 94894,
+      "traitEntryId": 117491,
+      "talentSpellId": 448861,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11411 talent.ancestral_swiftness    = find_talent_spell( talent_tree::HERO, \"Ancestral Swiftness\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "ascendance",
+      "displayNameEn": "Ascendance",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 80989,
+      "traitEntryId": 101860,
+      "talentSpellId": 114050,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11202 { talent.ascendance,             \"Ascendance\"            },; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "call_of_the_ancestors",
+      "displayNameEn": "Call of the Ancestors",
+      "tree": "HERO",
+      "traitNodeId": 94888,
+      "traitEntryId": 117485,
+      "talentSpellId": 443450,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11393 talent.call_of_the_ancestors  = find_talent_spell( talent_tree::HERO, \"Call of the Ancestors\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "chain_lightning",
+      "displayNameEn": "Chain Lightning",
+      "tree": "CLASS",
+      "traitNodeId": 103583,
+      "traitEntryId": 127856,
+      "talentSpellId": 188443,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11154 talent.chain_lightning = _CT( \"Chain Lightning\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "crackling_fury",
+      "displayNameEn": "Crackling Fury",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 103632,
+      "traitEntryId": 127914,
+      "talentSpellId": 1269215,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11384 talent.crackling_fury            = _ST( \"Crackling Fury\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "earth_shock",
+      "displayNameEn": "Earth Shock",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 80984,
+      "traitEntryId": 101854,
+      "talentSpellId": 8042,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 127924,
+          "displayNameEn": "Elemental Blast",
+          "talentSpellId": 117014
+        }
+      ],
+      "binding": "sc_shaman.cpp:11332 talent.earth_shock = _ST( \"Earth Shock\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "elemental_blast",
+      "displayNameEn": "Elemental Blast",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 80984,
+      "traitEntryId": 127924,
+      "talentSpellId": 117014,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 101854,
+          "displayNameEn": "Earth Shock",
+          "talentSpellId": 8042
+        }
+      ],
+      "binding": "sc_shaman.cpp:11198 talent.elemental_blast         = _ST( \"Elemental Blast\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "eye_of_the_storm",
+      "displayNameEn": "Eye of the Storm",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 81003,
+      "traitEntryId": 101877,
+      "talentSpellId": 381708,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11372 talent.eye_of_the_storm       = _ST( \"Eye of the Storm\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "flametongue_weapon",
+      "displayNameEn": "Flametongue Weapon",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 81004,
+      "traitEntryId": 101879,
+      "talentSpellId": 318038,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11221 { talent.flametongue_weapon,     \"Flametongue Weapon\"     },; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "frost_shock",
+      "displayNameEn": "Frost Shock",
+      "tree": "CLASS",
+      "traitNodeId": 109492,
+      "traitEntryId": 135718,
+      "talentSpellId": 196840,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11160 talent.frost_shock     = _CT( \"Frost Shock\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "inferno_arc",
+      "displayNameEn": "Inferno Arc",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 81008,
+      "traitEntryId": 101885,
+      "talentSpellId": 1259047,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11373 talent.inferno_arc            = _ST( \"Inferno Arc\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "lava_burst",
+      "displayNameEn": "Lava Burst",
+      "tree": "CLASS",
+      "traitNodeId": 103598,
+      "traitEntryId": 127873,
+      "talentSpellId": 51505,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11152 talent.lava_burst      = _CT( \"Lava Burst\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "master_of_the_elements",
+      "displayNameEn": "Master of the Elements",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 80999,
+      "traitEntryId": 136714,
+      "talentSpellId": 16166,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 101872,
+          "displayNameEn": "Molten Wrath",
+          "talentSpellId": 1258843
+        }
+      ],
+      "binding": "sc_shaman.cpp:11346 talent.master_of_the_elements = _ST( \"Master of the Elements\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "molten_wrath",
+      "displayNameEn": "Molten Wrath",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 80999,
+      "traitEntryId": 101872,
+      "talentSpellId": 1258843,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 136714,
+          "displayNameEn": "Master of the Elements",
+          "talentSpellId": 16166
+        }
+      ],
+      "binding": "sc_shaman.cpp:11347 talent.molten_wrath           = _ST( \"Molten Wrath\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "natures_swiftness",
+      "displayNameEn": "Nature's Swiftness",
+      "tree": "CLASS",
+      "traitNodeId": 103620,
+      "traitEntryId": 127899,
+      "talentSpellId": 378081,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11182 talent.natures_swiftness       = _CT( \"Nature's Swiftness\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "purging_flames",
+      "displayNameEn": "Purging Flames",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 103637,
+      "traitEntryId": 101884,
+      "talentSpellId": 1259471,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11385 talent.purging_flames            = _ST( \"Purging Flames\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "spiritwalkers_grace",
+      "displayNameEn": "Spiritwalker's Grace",
+      "tree": "CLASS",
+      "traitNodeId": 103584,
+      "traitEntryId": 127857,
+      "talentSpellId": 79206,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11166 talent.spiritwalkers_grace = _CT( \"Spiritwalker's Grace\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "stormkeeper",
+      "displayNameEn": "Stormkeeper",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 80988,
+      "traitEntryId": 101859,
+      "talentSpellId": 191634,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11345 talent.stormkeeper            = _ST( \"Stormkeeper\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "tempest",
+      "displayNameEn": "Tempest",
+      "tree": "HERO",
+      "traitNodeId": 94892,
+      "traitEntryId": 117489,
+      "talentSpellId": 454009,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11268 { talent.tempest,           \"Tempest\"           },; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "voltaic_blaze",
+      "displayNameEn": "Voltaic Blaze",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 81007,
+      "traitEntryId": 101883,
+      "talentSpellId": 470057,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11237 { talent.voltaic_blaze,          \"Voltaic Blaze\"          },; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "wind_shear",
+      "displayNameEn": "Wind Shear",
+      "tree": "CLASS",
+      "traitNodeId": 103615,
+      "traitEntryId": 127892,
+      "talentSpellId": 57994,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11157 talent.wind_shear      = _CT( \"Wind Shear\" );; the pinned list reads it or an action of the list is built on it"
+    }
+  ],
+  "heroTrees": [
+    {
+      "simcName": "stormbringer",
+      "subTreeId": 55,
+      "entries": [
+        {
+          "traitEntryId": 117460,
+          "traitNodeId": 94863,
+          "displayNameEn": "Lightning Conduit",
+          "talentSpellId": 467778
+        },
+        {
+          "traitEntryId": 117464,
+          "traitNodeId": 94867,
+          "displayNameEn": "Awakening Storms",
+          "talentSpellId": 455129
+        },
+        {
+          "traitEntryId": 117465,
+          "traitNodeId": 94868,
+          "displayNameEn": "Conductive Energy",
+          "talentSpellId": 455123
+        },
+        {
+          "traitEntryId": 117467,
+          "traitNodeId": 94870,
+          "displayNameEn": "Voltaic Surge",
+          "talentSpellId": 454919
+        },
+        {
+          "traitEntryId": 117470,
+          "traitNodeId": 94873,
+          "displayNameEn": "Storm Swell",
+          "talentSpellId": 455088
+        },
+        {
+          "traitEntryId": 117477,
+          "traitNodeId": 94880,
+          "displayNameEn": "Nature's Protection",
+          "talentSpellId": 454027
+        },
+        {
+          "traitEntryId": 117482,
+          "traitNodeId": 94885,
+          "displayNameEn": "Arc Discharge",
+          "talentSpellId": 455096
+        },
+        {
+          "traitEntryId": 117483,
+          "traitNodeId": 94886,
+          "displayNameEn": "Unlimited Power",
+          "talentSpellId": 454391
+        },
+        {
+          "traitEntryId": 117486,
+          "traitNodeId": 94889,
+          "displayNameEn": "Rolling Thunder",
+          "talentSpellId": 454026
+        },
+        {
+          "traitEntryId": 117489,
+          "traitNodeId": 94892,
+          "displayNameEn": "Tempest",
+          "talentSpellId": 454009
+        },
+        {
+          "traitEntryId": 117490,
+          "traitNodeId": 94893,
+          "displayNameEn": "Stormcaller",
+          "talentSpellId": 454021
+        },
+        {
+          "traitEntryId": 125617,
+          "traitNodeId": 94880,
+          "displayNameEn": "Surging Currents",
+          "talentSpellId": 454372
+        },
+        {
+          "traitEntryId": 128225,
+          "traitNodeId": 94873,
+          "displayNameEn": "Supercharge",
+          "talentSpellId": 455110
+        },
+        {
+          "traitEntryId": 128226,
+          "traitNodeId": 94863,
+          "displayNameEn": "Electroshock",
+          "talentSpellId": 454022
+        },
+        {
+          "traitEntryId": 135985,
+          "traitNodeId": 109727,
+          "displayNameEn": "Descending Skies",
+          "talentSpellId": 1264688
+        },
+        {
+          "traitEntryId": 135986,
+          "traitNodeId": 109728,
+          "displayNameEn": "Natural Gift",
+          "talentSpellId": 1264691
+        },
+        {
+          "traitEntryId": 135987,
+          "traitNodeId": 109729,
+          "displayNameEn": "Stormwell",
+          "talentSpellId": 1264762
+        }
+      ]
+    },
+    {
+      "simcName": "farseer",
+      "subTreeId": 56,
+      "entries": [
+        {
+          "traitEntryId": 117455,
+          "traitNodeId": 94858,
+          "displayNameEn": "Natural Harmony",
+          "talentSpellId": 443442
+        },
+        {
+          "traitEntryId": 117457,
+          "traitNodeId": 94860,
+          "displayNameEn": "Primordial Capacity",
+          "talentSpellId": 443448
+        },
+        {
+          "traitEntryId": 117458,
+          "traitNodeId": 94861,
+          "displayNameEn": "Spiritwalker's Momentum",
+          "talentSpellId": 443425
+        },
+        {
+          "traitEntryId": 117459,
+          "traitNodeId": 94862,
+          "displayNameEn": "Latent Wisdom",
+          "talentSpellId": 443449
+        },
+        {
+          "traitEntryId": 117466,
+          "traitNodeId": 94869,
+          "displayNameEn": "Elemental Reverb",
+          "talentSpellId": 443418
+        },
+        {
+          "traitEntryId": 117472,
+          "traitNodeId": 94875,
+          "displayNameEn": "Final Calling",
+          "talentSpellId": 443446
+        },
+        {
+          "traitEntryId": 117480,
+          "traitNodeId": 94883,
+          "displayNameEn": "Maelstrom Supremacy",
+          "talentSpellId": 443447
+        },
+        {
+          "traitEntryId": 117481,
+          "traitNodeId": 94884,
+          "displayNameEn": "Heed My Call",
+          "talentSpellId": 443444
+        },
+        {
+          "traitEntryId": 117484,
+          "traitNodeId": 94887,
+          "displayNameEn": "Offering from Beyond",
+          "talentSpellId": 443451
+        },
+        {
+          "traitEntryId": 117485,
+          "traitNodeId": 94888,
+          "displayNameEn": "Call of the Ancestors",
+          "talentSpellId": 443450
+        },
+        {
+          "traitEntryId": 117491,
+          "traitNodeId": 94894,
+          "displayNameEn": "Ancestral Swiftness",
+          "talentSpellId": 448861
+        },
+        {
+          "traitEntryId": 123630,
+          "traitNodeId": 94884,
+          "displayNameEn": "Routine Communication",
+          "talentSpellId": 443445
+        },
+        {
+          "traitEntryId": 123631,
+          "traitNodeId": 94858,
+          "displayNameEn": "Earthen Communion",
+          "talentSpellId": 443441
+        },
+        {
+          "traitEntryId": 123632,
+          "traitNodeId": 94862,
+          "displayNameEn": "Ancient Fellowship",
+          "talentSpellId": 443423
+        },
+        {
+          "traitEntryId": 135988,
+          "traitNodeId": 109730,
+          "displayNameEn": "Mystic Knowledge",
+          "talentSpellId": 1270450
+        },
+        {
+          "traitEntryId": 135989,
+          "traitNodeId": 109731,
+          "displayNameEn": "Windspeaker",
+          "talentSpellId": 1270447
+        },
+        {
+          "traitEntryId": 135990,
+          "traitNodeId": 109732,
+          "displayNameEn": "Ancestral Influence",
+          "talentSpellId": 1270446
+        }
+      ]
+    }
+  ]
+}

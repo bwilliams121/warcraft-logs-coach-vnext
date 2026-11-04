@@ -51,11 +51,13 @@ import type {
 } from "../../../findings/analysis-envelope.js";
 import type { AuthorityAccess } from "../../../findings/authority-domain.js";
 import type { AplAuthority } from "../../../simc/apl-authority.js";
-import type { RotationalGcdResult } from "../../../simc/first-gcd-selection.js";
+import { decisionAnchorNotEstablished, type RotationalGcdResult } from "../../../simc/first-gcd-selection.js";
 import { unknownNumber, type AtomBindings } from "../../../simc/expression/evaluate.js";
 import {
   buildCastTimeline,
-  type CastDecisionAnchor,
+  castAnchorKey,
+  decisionAnchorStateAt,
+  unpairedBeginKey,
   type CastDecisionAnchorState,
   type UnpairedBegin,
 } from "../../../engine/game-state/casting/cast-decision-anchor.js";
@@ -89,9 +91,10 @@ import type {
 } from "../../../data/game/talent-selection.js";
 import type { DestructionBuildFacts } from "./action-profile.js";
 import { standaloneDestructionAuthorityAccess } from "./authority-bindings.js";
-import { destructionCastAnchorProfile, destructionDecisionAnchor } from "./cast-anchor-profile.js";
+import { destructionCastAnchorProfile } from "./cast-anchor-profile.js";
 import { destructionDomainResults, type DestructionDomainResults } from "./domains.js";
 import {
+  DESTRUCTION_FIRST_GCD_ROOT_LIST,
   destructionFirstGcdSelectionAt,
   type DestructionDispatchStep,
   type DestructionFirstGcdQueryOutcome,
@@ -343,47 +346,6 @@ function knownTalentsFrom(
   return [...known].map(([name, taken]) => ({ name, taken }));
 }
 
-/** The anchor of a completion the shared timeline does not hold: never a time to judge at. */
-const ANCHOR_NOT_ON_TIMELINE: CastDecisionAnchorState = {
-  state: "UNKNOWN",
-  reason: "EXECUTION_NOT_REVIEWED",
-  evidenceReason: null,
-  candidateReportTimesMs: [],
-  detail: "the shared timeline holds no anchor for this completion",
-};
-
-function anchorStateOf(anchor: CastDecisionAnchor | null): CastDecisionAnchorState {
-  return anchor === null ? ANCHOR_NOT_ON_TIMELINE : anchor.anchor;
-}
-
-/** What the comparison is given when the moment of the decision is not established. */
-function anchorNotEstablished(
-  state: Extract<CastDecisionAnchorState, { state: "UNKNOWN" }>,
-): RotationalGcdResult {
-  return {
-    kind: "ROTATIONAL_GCD_UNKNOWN",
-    blocker: "DECISION_ANCHOR_NOT_ESTABLISHED",
-    scanBlocker: null,
-    blockedAt: null,
-    detail: `${state.reason}: ${state.detail}`,
-    trace: {
-      stateKey: "[]",
-      rootListName: "default",
-      scan: "NOT_SCANNED",
-      branches: [],
-      outcome: "UNKNOWN DECISION_ANCHOR_NOT_ESTABLISHED",
-    },
-  };
-}
-
-function anchorKeyOf(state: CastDecisionAnchorState): string {
-  return state.state === "ESTABLISHED" ? state.source : state.reason;
-}
-
-function unpairedKeyOf(begin: UnpairedBegin): string {
-  return begin.outcome.state === "INTERRUPTED" ? "INTERRUPTED" : begin.outcome.reason;
-}
-
 // ---------------------------------------------------------------------------
 // The facade
 // ---------------------------------------------------------------------------
@@ -503,11 +465,7 @@ export function analyzeObservedDestructionWarlockDecisions(
     }
 
     const targetActorId = input.targetActorId ?? event.target?.actorId ?? null;
-    const anchor = destructionDecisionAnchor(
-      anchorStateOf(timeline.anchorAt(position)),
-      abilityGameId,
-      event.reportTimeMs,
-    );
+    const anchor = decisionAnchorStateAt(timeline, position);
     const decidedBeforeCompletionMs =
       anchor.state === "ESTABLISHED" ? event.reportTimeMs - anchor.reportTimeMs : 0;
     const decision: ObservedRotationalDecision = {
@@ -528,7 +486,10 @@ export function analyzeObservedDestructionWarlockDecisions(
       observedAbilityGameId: abilityGameId,
     });
 
-    const authorityResult = anchor.state === "ESTABLISHED" ? outcome.result : anchorNotEstablished(anchor);
+    const authorityResult =
+      anchor.state === "ESTABLISHED"
+        ? outcome.result
+        : decisionAnchorNotEstablished(DESTRUCTION_FIRST_GCD_ROOT_LIST, `${anchor.reason}: ${anchor.detail}`);
 
     resolved.push({
       position,
@@ -594,7 +555,7 @@ export function summarizeDestructionDecisions(
   const undecidedNonGcdCandidates = new Map<string, number>();
   const anchors = new Map<string, number>();
   const unpaired = new Map<string, number>();
-  for (const begin of unpairedBegins) bump(unpaired, unpairedKeyOf(begin));
+  for (const begin of unpairedBegins) bump(unpaired, unpairedBeginKey(begin));
 
   comparisons.forEach((comparison, index) => {
     bump(eligibleTokens, comparison.decision.observedToken);
@@ -617,7 +578,7 @@ export function summarizeDestructionDecisions(
   });
   for (const cast of excluded) exclusions.set(cast.reason, (exclusions.get(cast.reason) ?? 0) + 1);
   for (const entry of resolved) {
-    bump(anchors, anchorKeyOf(entry.anchor));
+    bump(anchors, castAnchorKey(entry.anchor));
     const { stoppingPoint, dispatches, undecidedCandidates } = entry.selection;
     if (stoppingPoint !== null) {
       for (const atom of stoppingPoint.atoms) bump(stoppingAtoms, `${stoppingPoint.at} | ${atom}`);

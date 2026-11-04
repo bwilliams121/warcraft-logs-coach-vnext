@@ -224,6 +224,9 @@ describe("cross-spec authority access is refused structurally", () => {
       ["druid/feral", ["SIMC_APL_DRUID_FERAL"]],
       ["rogue/outlaw", ["SIMC_APL_ROGUE_OUTLAW"]],
       ["warlock/destruction", ["SIMC_APL_WARLOCK_DESTRUCTION"]],
+      ["shaman/elemental", ["SIMC_APL_SHAMAN_ELEMENTAL"]],
+      ["druid/balance", ["SIMC_APL_DRUID_BALANCE"]],
+      ["priest/shadow", ["SIMC_APL_PRIEST_SHADOW"]],
     ]);
   });
 });

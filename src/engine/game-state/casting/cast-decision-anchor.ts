@@ -55,6 +55,14 @@
  *
  *     a POSITIVE cast time cannot complete in the millisecond it began
  *     an INSTANT execution is decided at its completion, whatever the bits
+ *     an UNKNOWN cast time may be either, so no earlier begin proves its moment
+ *
+ * AN EXECUTION THAT MAY HAVE BEEN INSTANT (moved here from Destruction by ONB-D2).
+ * If the caller cannot say the cast took time, a begin before the completion may
+ * be an attempt that was abandoned, and the decision the completion's. So an
+ * earlier begin is only ever a candidate: the anchor is
+ * BEGINCAST_PAIRING_AMBIGUOUS, with the completion among its candidates, and
+ * the begin is not consumed. This is why a CASTING span needs a POSITIVE fact.
  *
  * Neighbour consistency is checked one completion either side. That admits
  * placements a global check might exclude — so it can only report MORE
@@ -326,6 +334,32 @@ export interface CastTimelineInput {
   readonly state: CombatState;
   readonly actorId: number;
   readonly profile: CastAnchorProfile;
+}
+
+/**
+ * The anchor state of one completion on a timeline. A position the timeline does not hold is a
+ * refusal, never a time to judge at.
+ */
+export function decisionAnchorStateAt(timeline: CastTimeline, position: number): CastDecisionAnchorState {
+  const anchor = timeline.anchorAt(position);
+  if (anchor !== null) return anchor.anchor;
+  return {
+    state: "UNKNOWN",
+    reason: "EXECUTION_NOT_REVIEWED",
+    evidenceReason: null,
+    candidateReportTimesMs: [],
+    detail: "the shared timeline holds no anchor for this completion",
+  };
+}
+
+/** A coverage key for one anchor: its source, or why it is not established. */
+export function castAnchorKey(state: CastDecisionAnchorState): string {
+  return state.state === "ESTABLISHED" ? state.source : state.reason;
+}
+
+/** A coverage key for one unpaired begin: `INTERRUPTED`, or why that is not established. */
+export function unpairedBeginKey(begin: UnpairedBegin): string {
+  return begin.outcome.state === "INTERRUPTED" ? "INTERRUPTED" : begin.outcome.reason;
 }
 
 // ---------------------------------------------------------------------------
@@ -690,6 +724,10 @@ export function buildCastTimeline(input: CastTimelineInput): CastTimeline {
       const fact = facts[j]!;
       const lower = previousTime(j);
       const worlds = paired[j]!;
+      // A completion that may have been instant consumes no begin, in any placement: each stays possibly running.
+      if (fact.kind === "UNKNOWN" && Array.isArray(worlds)) {
+        for (const world of worlds) if (world.begin !== null) surelyPaired.delete(world.begin.position);
+      }
       const possibleFrom = (from: number | null): void => {
         spans.push({
           kind: "POSSIBLE",
@@ -724,9 +762,9 @@ export function buildCastTimeline(input: CastTimelineInput): CastTimeline {
       for (const world of worlds) if (world.begin !== null) referencedBegins.add(world.begin.position);
       const times = [...new Set(worlds.map((world) => world.t))];
       if (times.length > 1) {
-        const candidates = times
+        const candidates = [...times, ...(fact.kind === "UNKNOWN" ? [cast.t] : [])]
           .map((t) => t ?? Number.NaN)
-          .filter((t) => !Number.isNaN(t))
+          .filter((t, index, all) => !Number.isNaN(t) && all.indexOf(t) === index)
           .sort((a, b) => a - b);
         record(
           cast,
@@ -802,6 +840,20 @@ export function buildCastTimeline(input: CastTimelineInput): CastTimeline {
               "CAST_TIME_UNKNOWN",
               "A later begin may be missing from incomplete cast coverage.",
               gap,
+            ),
+          );
+          possibleFrom(anchorTime);
+          return;
+        }
+        if (fact.kind === "UNKNOWN") {
+          record(
+            cast,
+            execution,
+            unknownAnchor(
+              "BEGINCAST_PAIRING_AMBIGUOUS",
+              `A begin precedes this completion, but the cast time is not established (${fact.reason}), so the execution may have been instant and the begin an abandoned attempt.`,
+              null,
+              [anchorTime, cast.t],
             ),
           );
           possibleFrom(anchorTime);

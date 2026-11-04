@@ -5071,6 +5071,37 @@
       ]
     },
     {
+      "caseId": "application-service.balance-druid-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Balance Druid registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "druid/balance",
+            "expected": {
+              "internalAnalyzerId": "druid-balance-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Balance Druid is registered INTERNAL_ONLY in ONB-D2, a Cohort D follower on the shared cast anchor. No decision of it resolves. Its retained subjects are replayed offline and not committed (agent/follow-ups.md \"After ONB-D2\")."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
+      ]
+    },
+    {
       "caseId": "application-service.blood-death-knight-subject-is-publicly-supported-since-m11-b12",
       "artifactId": "wcl-blood-death-knight-a7r6-rotational-45s",
       "owningLayer": "APPLICATION_SERVICE",
@@ -5285,6 +5316,37 @@
       "rationale": {
         "basis": ["OWNED_CONTRACT"],
         "text": "Discipline Priest is registered INTERNAL_ONLY in HEAL-B3 and its public promotion is HEAL-B3P's: registration changes what internal evaluation derives, not what a public request can reach."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
+      ]
+    },
+    {
+      "caseId": "application-service.elemental-shaman-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Elemental Shaman registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "shaman/elemental",
+            "expected": {
+              "internalAnalyzerId": "shaman-elemental-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Elemental Shaman is registered INTERNAL_ONLY in ONB-D2, a Cohort D follower on the shared cast anchor. No decision of it resolves. Its retained subjects are replayed offline and not committed (agent/follow-ups.md \"After ONB-D2\")."
       },
       "authority": null,
       "limitations": [],
@@ -5950,6 +6012,37 @@
         "tests/contracts/m11a4-retribution-registration.test.ts",
         "tests/contracts/m11-promotion-evidence-gate.test.ts",
         "tests/contracts/m11a5-retribution-public-projection.test.ts"
+      ]
+    },
+    {
+      "caseId": "application-service.shadow-priest-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Shadow Priest registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "priest/shadow",
+            "expected": {
+              "internalAnalyzerId": "priest-shadow-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Shadow Priest is registered INTERNAL_ONLY in ONB-D2, a Cohort D follower on the shared cast anchor. No decision of it resolves. Its retained subjects are replayed offline and not committed (agent/follow-ups.md \"After ONB-D2\")."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
       ]
     },
     {
@@ -11904,6 +11997,29 @@
         "tests/unit/specs/augmentation-evoker-registration.test.ts",
         "tests/contracts/m11a2-cross-spec-isolation.test.ts"
       ]
+    },
+    {
+      "caseId": "spec-balance-druid.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_BALANCE_DRUID",
+      "contractUnderTest": "src/specs/druid/balance/observed-analysis.ts analyzeObservedBalanceDruidDecisions (the spec gate)",
+      "purpose": "The Balance Druid facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_BALANCE_DRUID.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Balance Druid list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-d2-balance-druid.test.ts"]
     },
     {
       "caseId": "spec-blood-death-knight.a-segment-alone-has-no-profile",
@@ -20533,6 +20649,29 @@
       ]
     },
     {
+      "caseId": "spec-elemental-shaman.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_ELEMENTAL_SHAMAN",
+      "contractUnderTest": "src/specs/shaman/elemental/observed-analysis.ts analyzeObservedElementalShamanDecisions (the spec gate)",
+      "purpose": "The Elemental Shaman facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_ELEMENTAL_SHAMAN.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Elemental Shaman list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-d2-elemental-shaman.test.ts"]
+    },
+    {
       "caseId": "spec-enhancement-shaman.the-facade-refuses-every-other-specialization",
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "SPEC_ENHANCEMENT_SHAMAN",
@@ -25519,6 +25658,29 @@
         "tests/unit/m11a4-retribution-bindings.test.ts",
         "tests/contracts/m11a4-known-buff-stacks.test.ts"
       ]
+    },
+    {
+      "caseId": "spec-shadow-priest.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_SHADOW_PRIEST",
+      "contractUnderTest": "src/specs/priest/shadow/observed-analysis.ts analyzeObservedShadowPriestDecisions (the spec gate)",
+      "purpose": "The Shadow Priest facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_SHADOW_PRIEST.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Shadow Priest list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-d2-shadow-priest.test.ts"]
     },
     {
       "caseId": "spec-subtlety-rogue.the-facade-refuses-every-other-specialization",

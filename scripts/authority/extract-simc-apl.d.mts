@@ -173,7 +173,7 @@ export interface PinnedSourceFile {
 }
 
 export type LivePtrPolicyKind =
-  "NO_PTR_REGION" | "PTR_MARKERS_EMPTY" | "PTR_BODY_IDENTICAL" | "PTR_SEPARATE_INCLUDE";
+  "NO_PTR_REGION" | "PTR_MARKERS_EMPTY" | "PTR_BODY_IDENTICAL" | "PTR_BODY_DIFFERS" | "PTR_SEPARATE_INCLUDE";
 
 export interface PinnedTargetRecord {
   readonly pinnedSource: PinnedSourceFile & { readonly commitSha: string; readonly regionSha256: string };

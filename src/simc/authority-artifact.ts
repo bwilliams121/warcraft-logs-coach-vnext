@@ -171,12 +171,13 @@ export interface AuthoritySpellGatedAction {
 
 /** How a pinned target's live region relates to a PTR region at the pin (M11-D2-C). */
 export type AuthorityLivePtrPolicy =
-  "NO_PTR_REGION" | "PTR_MARKERS_EMPTY" | "PTR_BODY_IDENTICAL" | "PTR_SEPARATE_INCLUDE";
+  "NO_PTR_REGION" | "PTR_MARKERS_EMPTY" | "PTR_BODY_IDENTICAL" | "PTR_BODY_DIFFERS" | "PTR_SEPARATE_INCLUDE";
 
 export const AUTHORITY_LIVE_PTR_POLICIES = [
   "NO_PTR_REGION",
   "PTR_MARKERS_EMPTY",
   "PTR_BODY_IDENTICAL",
+  "PTR_BODY_DIFFERS",
   "PTR_SEPARATE_INCLUDE",
 ] as const satisfies readonly AuthorityLivePtrPolicy[];
 

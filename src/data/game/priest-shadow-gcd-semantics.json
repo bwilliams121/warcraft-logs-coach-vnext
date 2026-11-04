@@ -1,0 +1,388 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_PRIEST_SHADOW_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/priest/sc_priest.cpp",
+        "sha256": "520c2ad3599926a3f8c4a0620c78edd61c006685ae8dd855ccae1b80e00db76d",
+        "byteLength": 148517
+      },
+      {
+        "path": "engine/class_modules/priest/sc_priest_shadow.cpp",
+        "sha256": "cdc1284ef7195b99c74e77a9c0f6a3395cdacb62f04a24518ca8619a6b553b77",
+        "byteLength": 98990
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 589,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Shadow Word: Pain"
+    },
+    {
+      "abilityGameId": 8092,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Mind Blast"
+    },
+    {
+      "abilityGameId": 10060,
+      "baseGcdMs": 0,
+      "displayNameEn": "Power Infusion"
+    },
+    {
+      "abilityGameId": 15407,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Mind Flay"
+    },
+    {
+      "abilityGameId": 19236,
+      "baseGcdMs": 0,
+      "displayNameEn": "Desperate Prayer"
+    },
+    {
+      "abilityGameId": 32379,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Shadow Word: Death"
+    },
+    {
+      "abilityGameId": 34914,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Vampiric Touch"
+    },
+    {
+      "abilityGameId": 120644,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Halo"
+    },
+    {
+      "abilityGameId": 132157,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Holy Nova"
+    },
+    {
+      "abilityGameId": 228260,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Voidform"
+    },
+    {
+      "abilityGameId": 263165,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Void Torrent"
+    },
+    {
+      "abilityGameId": 335467,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Shadow Word: Madness"
+    },
+    {
+      "abilityGameId": 391403,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Mind Flay: Insanity"
+    },
+    {
+      "abilityGameId": 450983,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Void Blast"
+    },
+    {
+      "abilityGameId": 1227280,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Tentacle Slam"
+    },
+    {
+      "abilityGameId": 1242173,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Void Volley"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "power_infusion",
+      "candidateAbilityGameIds": [10060],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/priest/sc_priest.cpp",
+        "sourceSha256": "520c2ad3599926a3f8c4a0620c78edd61c006685ae8dd855ccae1b80e00db76d",
+        "symbol": "create_action / power_infusion_t",
+        "startLine": 3078,
+        "endLine": 3078,
+        "sourceNote": "create_action dispatches \"power_infusion\" to power_infusion_t: built on p.talents.power_infusion (:925); CT( \"Power Infusion\" ) at :3334.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "halo",
+      "candidateAbilityGameIds": [120644],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/priest/sc_priest.cpp",
+        "sourceSha256": "520c2ad3599926a3f8c4a0620c78edd61c006685ae8dd855ccae1b80e00db76d",
+        "symbol": "create_action / halo_t",
+        "startLine": 3046,
+        "endLine": 3046,
+        "sourceNote": "create_action dispatches \"halo\" to halo_t: built on p.talents.archon.halo (:604); HT( \"Halo\" ) at :3394, Shadow's trait row spell 120644.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "voidform",
+      "candidateAbilityGameIds": [228260],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/priest/sc_priest_shadow.cpp",
+        "sourceSha256": "cdc1284ef7195b99c74e77a9c0f6a3395cdacb62f04a24518ca8619a6b553b77",
+        "symbol": "create_action / voidform_t",
+        "startLine": 2497,
+        "endLine": 2497,
+        "sourceNote": "create_action dispatches \"voidform\" to voidform_t: built on p.talents.shadow.voidform (:1349); ST( \"Voidform\" ) at :2412.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "desperate_prayer",
+      "candidateAbilityGameIds": [19236],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/priest/sc_priest.cpp",
+        "sourceSha256": "520c2ad3599926a3f8c4a0620c78edd61c006685ae8dd855ccae1b80e00db76d",
+        "symbol": "create_action / desperate_prayer_t",
+        "startLine": 3074,
+        "endLine": 3074,
+        "sourceNote": "create_action dispatches \"desperate_prayer\" to desperate_prayer_t: built on p.talents.desperate_prayer (:1857); CT( \"Desperate Prayer\" ) at :3364.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "holy_nova",
+      "candidateAbilityGameIds": [132157],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/priest/sc_priest.cpp",
+        "sourceSha256": "520c2ad3599926a3f8c4a0620c78edd61c006685ae8dd855ccae1b80e00db76d",
+        "symbol": "create_action / holy_nova_t",
+        "startLine": 3090,
+        "endLine": 3090,
+        "sourceNote": "create_action dispatches \"holy_nova\" to holy_nova_t: built on p.talents.holy_nova (:1497); CT( \"Holy Nova\" ) at :3325.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "shadow_word_death",
+      "candidateAbilityGameIds": [32379],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/priest/sc_priest.cpp",
+        "sourceSha256": "520c2ad3599926a3f8c4a0620c78edd61c006685ae8dd855ccae1b80e00db76d",
+        "symbol": "create_action / shadow_word_death_t",
+        "startLine": 3086,
+        "endLine": 3086,
+        "sourceNote": "create_action dispatches \"shadow_word_death\" to shadow_word_death_t: built on p.talents.shadow_word_death (:1211); CT( \"Shadow Word: Death\" ) at :3360.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "shadow_word_madness",
+      "candidateAbilityGameIds": [335467],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/priest/sc_priest_shadow.cpp",
+        "sourceSha256": "cdc1284ef7195b99c74e77a9c0f6a3395cdacb62f04a24518ca8619a6b553b77",
+        "symbol": "create_action / shadow_word_madness_t",
+        "startLine": 2533,
+        "endLine": 2533,
+        "sourceNote": "create_action dispatches \"shadow_word_madness\" to shadow_word_madness_t: built on p.dot_spells.shadow_word_madness; find_talent_spell( SPECIALIZATION, \"Shadow Word: Madness\" ) at sc_priest.cpp:3311.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "tentacle_slam",
+      "candidateAbilityGameIds": [1227280],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/priest/sc_priest_shadow.cpp",
+        "sourceSha256": "cdc1284ef7195b99c74e77a9c0f6a3395cdacb62f04a24518ca8619a6b553b77",
+        "symbol": "create_action / tentacle_slam_t",
+        "startLine": 2501,
+        "endLine": 2501,
+        "sourceNote": "create_action dispatches \"tentacle_slam\" to tentacle_slam_t: built on p.talents.shadow.tentacle_slam (:1801); ST( \"Tentacle Slam\" ) at :2401.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "void_torrent",
+      "candidateAbilityGameIds": [263165],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/priest/sc_priest_shadow.cpp",
+        "sourceSha256": "cdc1284ef7195b99c74e77a9c0f6a3395cdacb62f04a24518ca8619a6b553b77",
+        "symbol": "create_action / void_torrent_t",
+        "startLine": 2505,
+        "endLine": 2505,
+        "sourceNote": "create_action dispatches \"void_torrent\" to void_torrent_t: built on p.talents.voidweaver.void_torrent (:1424); HT( \"Void Torrent\" ) at sc_priest.cpp:3445.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "shadow_word_pain",
+      "candidateAbilityGameIds": [589],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/priest/sc_priest_shadow.cpp",
+        "sourceSha256": "cdc1284ef7195b99c74e77a9c0f6a3395cdacb62f04a24518ca8619a6b553b77",
+        "symbol": "create_action / shadow_word_pain_t",
+        "startLine": 2509,
+        "endLine": 2509,
+        "sourceNote": "create_action dispatches \"shadow_word_pain\" to shadow_word_pain_t: built on p.dot_spells.shadow_word_pain (:559); find_class_spell( \"Shadow Word: Pain\" ) at sc_priest.cpp:3309.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "void_volley",
+      "candidateAbilityGameIds": [1242173],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/priest/sc_priest_shadow.cpp",
+        "sourceSha256": "cdc1284ef7195b99c74e77a9c0f6a3395cdacb62f04a24518ca8619a6b553b77",
+        "symbol": "create_action / void_volley_t",
+        "startLine": 2537,
+        "endLine": 2537,
+        "sourceNote": "create_action dispatches \"void_volley\" to void_volley_t: built on talents.shadow.void_volley = find_spell( 1242173 ) at :2413.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "void_blast",
+      "candidateAbilityGameIds": [450983],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/priest/sc_priest.cpp",
+        "sourceSha256": "520c2ad3599926a3f8c4a0620c78edd61c006685ae8dd855ccae1b80e00db76d",
+        "symbol": "create_action / void_blast_shadow_t",
+        "startLine": 3102,
+        "endLine": 3102,
+        "sourceNote": "create_action dispatches \"void_blast\" to void_blast_shadow_t: for Shadow, create_action builds void_blast_shadow_t, built on p.talents.voidweaver.void_blast_shadow (:373).",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "mind_blast",
+      "candidateAbilityGameIds": [8092],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/priest/sc_priest.cpp",
+        "sourceSha256": "520c2ad3599926a3f8c4a0620c78edd61c006685ae8dd855ccae1b80e00db76d",
+        "symbol": "create_action / mind_blast_t",
+        "startLine": 3066,
+        "endLine": 3066,
+        "sourceNote": "create_action dispatches \"mind_blast\" to mind_blast_t: built on p.talents.mind_blast (:340); CT( \"Mind Blast\" ) at :3322.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "mind_flay_insanity",
+      "candidateAbilityGameIds": [391403],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/priest/sc_priest_shadow.cpp",
+        "sourceSha256": "cdc1284ef7195b99c74e77a9c0f6a3395cdacb62f04a24518ca8619a6b553b77",
+        "symbol": "create_action / mind_flay_insanity_t",
+        "startLine": 2493,
+        "endLine": 2493,
+        "sourceNote": "create_action dispatches \"mind_flay_insanity\" to mind_flay_insanity_t: built on p.talents.archon.mind_flay_insanity_spell (:97); find_spell( 391403 ) at sc_priest.cpp:3405.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "vampiric_touch",
+      "candidateAbilityGameIds": [34914],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/priest/sc_priest_shadow.cpp",
+        "sourceSha256": "cdc1284ef7195b99c74e77a9c0f6a3395cdacb62f04a24518ca8619a6b553b77",
+        "symbol": "create_action / vampiric_touch_t",
+        "startLine": 2513,
+        "endLine": 2513,
+        "sourceNote": "create_action dispatches \"vampiric_touch\" to vampiric_touch_t: built on p.dot_spells.vampiric_touch; find_specialization_spell( \"Vampiric Touch\", PRIEST_SHADOW ) at sc_priest.cpp:3310.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "mind_flay",
+      "candidateAbilityGameIds": [15407],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/priest/sc_priest_shadow.cpp",
+        "sourceSha256": "cdc1284ef7195b99c74e77a9c0f6a3395cdacb62f04a24518ca8619a6b553b77",
+        "symbol": "create_action / mind_flay_t",
+        "startLine": 2489,
+        "endLine": 2489,
+        "sourceNote": "create_action dispatches \"mind_flay\" to mind_flay_t: built on p.specs.mind_flay (:130); find_specialization_spell( \"Mind Flay\" ) at :2472.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

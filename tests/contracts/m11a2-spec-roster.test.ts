@@ -194,7 +194,7 @@ describe("the roster and the analyzers", () => {
   it("the roster confers no support: twenty-seven rows have no registration (Preservation Evoker INTERNAL_ONLY since HEAL-B4, its roster role still UNKNOWN; Discipline Priest INTERNAL_ONLY since HEAL-B3; Holy Priest INTERNAL_ONLY since HEAL-B2; Brewmaster Monk registered at M11-C2, PUBLIC since M11-C4j; Augmentation Evoker INTERNAL_ONLY since M13-E; Restoration Shaman INTERNAL_ONLY since HEAL-A; Holy Paladin, Restoration Druid and Mistweaver Monk INTERNAL_ONLY since HEAL-B1)", () => {
     const registered = new Set(ANALYZER_REGISTRATIONS.map((registration) => registration.specId as string));
     const unregistered = roster().specializations.filter((row) => !registered.has(row.rosterKey));
-    expect(unregistered).toHaveLength(16);
+    expect(unregistered).toHaveLength(13);
     expect(registered.has("demonhunter/havoc")).toBe(true);
     expect(registered.has("rogue/subtlety")).toBe(true);
     expect(registered.has("warrior/fury")).toBe(true);
@@ -204,6 +204,9 @@ describe("the roster and the analyzers", () => {
     expect(registered.has("demonhunter/devourer")).toBe(true);
     expect(registered.has("druid/feral")).toBe(true);
     expect(registered.has("warlock/destruction")).toBe(true);
+    expect(registered.has("shaman/elemental")).toBe(true);
+    expect(registered.has("druid/balance")).toBe(true);
+    expect(registered.has("priest/shadow")).toBe(true);
     expect(registered.has("rogue/outlaw")).toBe(true);
     expect(registered.has("shaman/enhancement")).toBe(true);
     expect(registered.has("evoker/preservation")).toBe(true);

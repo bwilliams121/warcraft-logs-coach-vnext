@@ -12096,24 +12096,32 @@ coverage starts at the pull). Recorded in `agent/follow-ups.md`.
 
 - Mage 121, with cast times POSITIVE: every hard cast pairs (30451 ×6,
   1295924 ×4), 20 channel starts, and one interrupted 1295924 begin. If
-  instant casts cannot be excluded, two back-to-back 30451 casts are
-  ambiguous.
+  instant casts cannot be excluded, all ten are ambiguous (re-measured under
+  the rule ONB-D2 moved here; two 30451 casts were before it).
 - Restoration Shaman 122 (whole fight, CASTS complete), with instant procs not
-  excluded:
-  - Chain Heal: 36 established, 49 ambiguous.
-  - Healing Wave: 16 established, 16 ambiguous.
-  - Three interrupted begins, no conflict. Fifty further begins are
-    `PAIRING_NOT_PROVEN`, mostly an instant Chain Heal's same-millisecond
-    begin, so the actor stays possibly casting until the next start.
+  excluded, re-measured under that rule:
+  - Chain Heal: 0 established, 85 ambiguous (36 and 49 before it).
+  - Healing Wave: 0 established, 32 ambiguous (16 and 16 before it).
+  - Three interrupted begins, no conflict. All 117 paired begins are
+    `PAIRING_NOT_PROVEN` (50 before it), so the actor stays possibly casting
+    until the next start.
 
-  The ambiguity is real: without a proven cast time, the same-millisecond
-  shapes do not determine the anchor.
+  The ambiguity is real: without a proven cast time, no earlier begin
+  determines the anchor.
+
+**An execution that may have been instant (ONB-D2).** A completion whose
+`castTimeAt` is UNKNOWN is never anchored at an earlier begin. The begin may
+be an abandoned attempt, and the decision the completion's. So the anchor is
+`BEGINCAST_PAIRING_AMBIGUOUS` with the completion among its candidates, no
+begin is consumed in any placement, back-to-back ones included, and no CASTING span is recorded. ONB-D1 held this as
+`destructionDecisionAnchor`, and recorded that a follower needing it would move
+it here. All three of ONB-D2's do. Nothing reads occupancy yet.
 
 **No consumer yet, at this tranche.** No registered specialization read the
 timeline, so no public decision changed. Cohort D representatives (ONB-D*)
 supply their profile and own what the anchor means for their decisions. ONB-D1
-(Destruction) is the first, INTERNAL_ONLY, so still no public decision changes
-(agent/architecture.md "ONB-D1").
+(Destruction) is the first, and ONB-D2's three follow, all INTERNAL_ONLY, so
+still no public decision changes (agent/architecture.md "ONB-D1", "ONB-D2").
 
 ## ONB-S5 — Shared resource pooling and wait semantics
 
@@ -13669,7 +13677,7 @@ Across the fight, the shared timeline reports 11 begins `INTERRUPTED` and 26 `PA
 3. **Every binding is fixed for the fight, so "bindings at the anchor" holds trivially.** `soul_shard` is unbound. The wire reports it only on a costed `cast`, at the completion: `begincast` carries no `classResources`, and Immolate, Wither and Incinerate generate fractions while a Chaos Bolt is cast. Reading the completion's value would answer the wrong moment. The shared wire contract has no type 7 row either. So the offensive capability declares no resource, and a request has nothing resource-shaped to under-fetch. A test attaches five shards to a Chaos Bolt and shows `soul_shard<=4` stay open.
 4. **The profile proves a cast time above zero, never a duration.** A combatant's pull stats are buffed values (M11-G3-2), so `composite_spell_cast_speed()` is not established, `exactMs` is always null, and `DERIVED_FROM_COMPLETION` is unreachable. A hard cast with no begin stays UNKNOWN, never instant.
 5. **A row that exists is not excluded by not being named (corrected in review).** Every warlock-family effect with a cast-time misc value was matched by class mask against each hard-cast row; the family holds them on subtypes 4, 107 and 108 only, so no label modifier is involved (`warlock-destruction-cast-semantics.ts`). Chaos Bolt (281440, 364349), Incinerate (279673, 335004, 387385, 1244860), Infernal Bolt (those and 196606, 264571, 1260279) and Ruination (394776) each have a -100% row. Several appear in neither the pinned module nor the talent data, but the retained sources hold no set-bonus table and cannot prove them unavailable, so none is excluded and no build narrows it. Every Chaos Bolt having a begin corroborates the sample and proves nothing. Soul Fire, Immolate and Cataclysm have no such row and stay POSITIVE, a reading scoped to the family's class masks.
-5a. **The specialization accepts less than the timeline.** The shared timeline pairs a completion with the latest earlier begin, and enumerates an instant execution only for a begin in the completion's own millisecond. For a possibly-instant spell that earlier begin may be abandoned and the decision the completion's, so `destructionDecisionAnchor` refuses such a pairing with both instants as candidates. This is spec-side, and the shared behaviour is recorded (agent/follow-ups.md "After ONB-D1"). It changes no other reader, since none exists.
+5a. **The specialization accepts less than the timeline.** The shared timeline pairs a completion with the latest earlier begin, and enumerates an instant execution only for a begin in the completion's own millisecond. For a possibly-instant spell that earlier begin may be abandoned and the decision the completion's, so `destructionDecisionAnchor` refuses such a pairing with both instants as candidates. This was spec-side at ONB-D1. ONB-D2 moved it into the shared timeline, so the helper is gone (agent/architecture.md "ONB-D2").
 6. **Immolate is the reverse of every other talent guard.** Its direct row applies only without the hero talent Wither (sc_warlock_actions.cpp:4071), so a Wither build has it background, and it needs Wither proven absent to be applicable.
 7. **Rain of Fire's applicability stays UNKNOWN.** Its talent is a choice of two rows on one node. It only sits inside the area lists, behind the count, and its condition reads the count too.
 8. **No transition contract exists.** No token of this list is off the GCD, and the racials, the potion, items and the external buff are non-domain.
@@ -13715,6 +13723,73 @@ So no third subject exists, and no retained event comes from a Destruction Diabo
 **What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists it; the gate search finds no qualifying assertion and `evidenceReady` false (`m11-promotion-evidence-gate`, from ONB-D1, its comment now naming the outcome); and a public request is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which now holds it). A public request still runs preparation and reports partial coverage. Nothing reads as clean play. The replay and census are offline and not committed.
 
 **What a later promotion must do.** The owner decides ONB-S3, and Destruction binds what stands behind the count (`soul_shard`, Conflagrate's charges, the auras and DoTs), measures its failure modes on real subjects, and answers the anchor's limits, since 111 of its 220 decisions are Chaos Bolts and Incinerates with no established anchor. A new public entry then promotes it through the unchanged gates by the five-site promotion. No such entry is queued.
+
+## ONB-D2 — Elemental Shaman, Balance Druid and Shadow Priest (internal, Cohort D)
+
+Autopilot queue entry ONB-D2. Public contract: NONE. No Warcraft Logs request. `src/specs/shaman/elemental/README.md`, `src/specs/druid/balance/README.md` and `src/specs/priest/shadow/README.md` are the slices in detail.
+
+**What it is.** Three specializations registered INTERNAL_ONLY on Destruction's observed-decision pattern, each with its own pinned list, GCD and talent data, cast semantics, anchor profile, resolver, facade and registration. No shared analyzer was introduced, and no decision resolves. Each resource keeps its own meaning: Maelstrom, Astral Power and Insanity are named, and all three stay unbound.
+
+**Measured, offline, by replaying retained captures through production ingestion.** A census of every retained JSON file over 500 bytes (5,686 parsed), by signature ability, with Mortal Strike as its positive control (559 casts), finds these subjects holding casts and combatant info. Every one ANALYZED, with 0 MATCH and 0 REJECTED:
+
+| Subject | Spec, hero tree | Span | Eligible | UNKNOWN | Excluded |
+| --- | --- | --- | ---: | ---: | ---: |
+| b1PmaKrd6CDfzngc fight 48 actor 8 | Elemental, Farseer | whole fight, 345.2 s | 225 | 225 | 55 |
+| b1PmaKrd6CDfzngc fight 48 actor 17 | Elemental, Farseer | whole fight | 236 | 236 | 26 |
+| gtKb2xHn87pNcFfW fight 22 actor 9 | Elemental, Farseer | whole fight, 284.8 s | 212 | 212 | 35 |
+| gtKb2xHn87pNcFfW fight 22 actor 19 | Elemental, Farseer | whole fight | 213 | 213 | 32 |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 8 | Elemental, Farseer | first 165 s of 424.5 s | 115 | 115 | 23 |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 16 | Elemental, Farseer | first 165 s | 93 | 93 | 30 |
+| rXAfw9t1q8YpmkKD fight 13 actor 12 | Elemental, Farseer | first 165 s of 271.8 s | 116 | 116 | 27 |
+| rXAfw9t1q8YpmkKD fight 13 actor 9 | Balance, Elune's Chosen | first 165 s | 143 | 143 | 8 |
+| rXAfw9t1q8YpmkKD fight 13 actor 13 | Balance, Elune's Chosen | first 165 s | 132 | 132 | 14 |
+| gtKb2xHn87pNcFfW fight 22 actor 27 | Balance, Elune's Chosen | 16 casts over 56 s | 12 | 12 | 4 |
+| gtKb2xHn87pNcFfW fight 22 actor 29 | Shadow, Archon | whole fight | 213 | 213 | 236 |
+| rXAfw9t1q8YpmkKD fight 13 actor 40 | Shadow, Archon | first 165 s | 143 | 143 | 140 |
+
+Elemental 1,210, Balance 287, Shadow 356. The filtered M13-A capture's Balance (actor 3) and Shadow (actors 9, 10) casts have no combatant info, so they would refuse. No Stormbringer, Keeper of the Grove or Voidweaver subject is retained.
+
+**Where each stops:**
+
+| Spec | Root scan stops at | On |
+| --- | --- | --- |
+| Elemental | `default[0] spiritwalkers_grace`, all 1,210 | the option `moving=1`, read as `ACTION_OPTION:moving` |
+| Balance | `default[13] run_action_list,name=opener`, all 287 | `variable.opener`, which `default[7]` clears on an unbound buff |
+| Shadow | `main[3] shadow_word_madness` 348, `main[1] call_action_list,name=cds` 8 | `target_if` over enemies; `fight_remains`, `target.time_to_die`, `active_enemies` and two variables. The engine's own refusal is `cds[7] power_infusion`, on all 300 anchored decisions |
+
+So the enemy count is not the first gate of any of the three, as it was for Destruction: **ONB-S3 alone moves nothing here.** Each needs its own first question answered too.
+
+**The anchors on those decisions:**
+
+| Anchor | Elemental | Balance | Shadow |
+| --- | ---: | ---: | ---: |
+| `INSTANT_COMPLETION` | 122 | 178 | 178 |
+| `OBSERVED_BEGINCAST` | 30 (Stormkeeper) | 0 | 13 (Halo, Voidform) |
+| `CHANNEL_START` | 0 | 0 | 109 (Mind Flay, Insanity) |
+| `BEGINCAST_PAIRING_AMBIGUOUS` | 984 | 108 | 54 (Mind Blast) |
+| `BEGINCAST_NOT_OBSERVED` | 65 | 0 | 0 |
+| `CAST_TIME_UNKNOWN` | 7 | 1 | 2 |
+| `CAST_EVIDENCE_CONFLICT` | 2 | 0 | 0 |
+
+The 65 are Lava Bursts, Lightning Bolts and others with complete coverage and no begin: real instant casts, and still UNKNOWN, because nothing here establishes which proc made them so. Never inferred.
+
+**Requirement C is not met, and why this is not an owner stop.** As for Arms and Destruction. The queue asks for an internal registration of each, and the fail-closed result is correct. What would change it is listed in agent/follow-ups.md "After ONB-D2", and the shared part of that, ONB-S3, is already queued as the owner's.
+
+**Decisions.**
+
+1. **The rule ONB-D1 said would move, moved.** Every one of these lists has possibly-instant spells, so "a begin before a possibly-instant completion proves no moment" is now the shared timeline's rule (agent/architecture.md "ONB-S4"), and `destructionDecisionAnchor` is gone. A fact of UNKNOWN never anchors at an earlier begin, never consumes it, and records no CASTING span. The retained shape measurements in `onb-s4-cast-decision-anchor` were re-taken, and a POSITIVE fact still pairs as before.
+2. **Destruction is unchanged but for one count.** Its 220 decisions, stops and anchors are identical by replay. Its unpaired begins move from 26 to 117 `PAIRING_NOT_PROVEN`, because those begins are no longer consumed, and 11 stay `INTERRUPTED`. Nothing reads them but the coverage.
+3. **Three small helpers became shared, verbatim.** `decisionAnchorStateAt`, `castAnchorKey` and `unpairedBeginKey` in the anchor module, `decisionAnchorNotEstablished` in `first-gcd-selection.ts`. None knows a spell.
+4. **A new extractor policy, `PTR_BODY_DIFFERS`.** Shadow's PTR region differs from its live region by one item line, so neither `PTR_BODY_IDENTICAL` nor `NO_PTR_REGION` is true. The dispatch chooses by `if ( is_ptr() )`, so a live build reads the live region. It refuses when the bodies are in fact identical, and it joins `AUTHORITY_LIVE_PTR_POLICIES`, so the artifact loads. Elemental's dispatch is a one-line ternary, which the preflight's dispatch check now admits. No earlier target's output changes.
+5. **The option `moving` stays refused.** It joins nothing. It is the right refusal for a stream Warcraft Logs does not have (CLAUDE.md "Movement Claims"). The coverage classes it `TARGETING_NOT_MODELLED`, the shared class for every unrecognised option, which is coarse and recorded.
+6. **A resource on the wire is not the decision's.** Maelstrom (type 11), Astral Power (type 8) and Insanity (type 13) appear on casts at a completion, and a hard cast generates them. None has a wire contract row, so none is read and no capability declares one, and a test attaches a full bar to a press and shows the deficit line stay open.
+7. **Observed ids the pin does not name are bound or excluded, each by evidence.** Elemental's Ascendance binds 114050, which every subject logs, and 1219480, which the constructor reads; both are `_gcd` 1500. Flame Shock binds the class row 470411, and the 188389 logged with it is excluded, which corroborates ONB-B2's reading. Shadowy Apparition, logged 339 times, is no press.
+8. **A `ready()` refusal is not applicability.** Stormkeeper, Ascendance, Elemental Blast and Ancestral Swiftness are built on literal spells and refuse in `ready()` without their talent, a usability claim this slice does not make, so they stay applicable. Earthquake's talent is a choice of two rows, so its applicability stays UNKNOWN.
+9. **Tiered talents stay out.** Void Apparitions has three entries on a node, which the talent extractor refuses as ambiguous, so `talent.void_apparitions` is unmodelled and UNKNOWN.
+
+**Evidence.** Nothing new is committed. All these subjects' events are retained raw, and these decisions would pin nothing the synthetic tests do not. Every pinned source read was already on disk and matches the M11-A3 hashes.
+
+**No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse all three rows. A public request for any of them is SPEC_NOT_SUPPORTED, exactly as before.
 
 ## AUTOPILOT — the local project supervisor (tooling)
 

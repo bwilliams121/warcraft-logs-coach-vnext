@@ -161,9 +161,9 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // assertions: the same pair for the INTERNAL_ONLY Discipline Priest
     // registration. HEAL-B4 added two cases and two assertions: the same pair
     // for the INTERNAL_ONLY Preservation Evoker registration.
-    expect(result.summary.cases).toBe(221);
-    expect(result.summary.assertions).toBe(816);
-    expect(result.summary.passed).toBe(816);
+    expect(result.summary.cases).toBe(227);
+    expect(result.summary.assertions).toBe(822);
+    expect(result.summary.passed).toBe(822);
   });
 
   it("covers every layer", async () => {

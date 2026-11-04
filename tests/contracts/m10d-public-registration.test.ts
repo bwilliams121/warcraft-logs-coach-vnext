@@ -82,6 +82,9 @@ describe("the five sites agree", () => {
       "druid/feral",
       "rogue/outlaw",
       "warlock/destruction",
+      "shaman/elemental",
+      "druid/balance",
+      "priest/shadow",
     ]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
@@ -166,6 +169,9 @@ describe("the five sites agree", () => {
       ["druid/feral", "INTERNAL_ONLY"],
       ["rogue/outlaw", "INTERNAL_ONLY"],
       ["warlock/destruction", "INTERNAL_ONLY"],
+      ["shaman/elemental", "INTERNAL_ONLY"],
+      ["druid/balance", "INTERNAL_ONLY"],
+      ["priest/shadow", "INTERNAL_ONLY"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -278,6 +284,9 @@ describe("the complete-catalog helper", () => {
       "druid-feral-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
       "warlock-destruction-observed-decisions": 0,
+      "shaman-elemental-observed-decisions": 0,
+      "druid-balance-observed-decisions": 0,
+      "priest-shadow-observed-decisions": 0,
     });
   });
 });
