@@ -767,6 +767,18 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     }
   });
 
+  it("ONB-C1: the gate search finds nothing for Feral Druid", async () => {
+    // Its two retained subjects resolve no decision (agent/architecture.md "ONB-C1P"), so it was not promoted.
+    // A later change that resolved one would fail this pin and prompt a new public entry; it would not promote
+    // anything by itself.
+    const tiers = await tiersPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "druid/feral");
+    if (module === undefined) throw new Error("no module for druid/feral");
+    const readiness = evaluate(tiers, "druid/feral", "INTERNAL_ONLY", internalPairing(module));
+    expect(readiness.qualifyingAssertions).toEqual([]);
+    expect(readiness.evidenceReady).toBe(false);
+  });
+
   it("ONB-B3: the gate search finds nothing for Devourer Demon Hunter", async () => {
     // Its three retained subjects resolve no decision (agent/architecture.md "ONB-B3P"), so it was not promoted.
     // A later change that resolved one would fail this pin and prompt a new public entry; it would not promote

@@ -3,6 +3,8 @@
 **Exposure: `INTERNAL_ONLY`.** The registration (`druid-feral-observed-decisions`, `druid/feral`) is in the production
 catalog for the internal lookup only. The public lookup and the identity table refuse it.
 
+**Not promoted by ONB-C1P.** It cannot pass the rotational gates, and it waits on the inputs before the enemy count and on ONB-S3, rather than on evidence (agent/architecture.md "ONB-C1P").
+
 **Cohort C's representative, on the observed-decision pattern, and it resolves nothing today.** No decision of this
 specialization reaches MATCH or REJECTED on the shared engine as it stands. Every decision is observed,
 classified and explained, and stays UNKNOWN. That is a measured property of the pinned list and the

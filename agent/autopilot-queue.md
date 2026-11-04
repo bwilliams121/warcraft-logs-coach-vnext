@@ -1694,11 +1694,13 @@ mergeSha: a41a68bbe92c932132b3243ea5f348d4318e96f5
 ### ONB-C1: Feral Druid (internal, Cohort C representative)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-S5
 branch: autopilot/onb-c1
 wcl: NONE
 publicContract: NONE
+pr: 65
+mergeSha: 6c17d8fb36a35f5fce02b1c6ff15c8834cbec65b
 ```
 
 **Scope.** Cohort C representative: pooling, plus form state. Real evidence
@@ -1710,11 +1712,14 @@ for a later deep dive only.
 ### ONB-C1P: Feral Druid (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-C1
+branch: autopilot/onb-c1p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** Feral does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Its two retained subjects, replayed offline, give 372 eligible decisions, 0 MATCH, 0 REJECTED and 372 UNKNOWN, with no real scan reaching the enemy count or the pool line, and no real Bite below that line. A wider census found no other subject. Evidence is not its gap, so it is not on ONB-EV; it waits on the inputs before the enemy count and on ONB-S3. A promotion after those is a new public entry through the unchanged gates (agent/architecture.md "ONB-C1P"; agent/follow-ups.md "After ONB-C1").
 
 ### ONB-C2: Outlaw Rogue (internal, Cohort C)
 
