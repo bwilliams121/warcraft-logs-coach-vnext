@@ -13647,7 +13647,7 @@ Autopilot queue entry ONB-D1. Public contract: NONE. No Warcraft Logs request. `
 | A7R6kxPJ1hC8YQ4w fight 7 actor 12 | Hellcaller | first 165.0 s of 424.5 s | 115 | 0 | 0 | 115 | 21 |
 | A7R6kxPJ1hC8YQ4w fight 7 actor 15 | Hellcaller | first 165.0 s of 424.5 s | 105 | 0 | 0 | 105 | 12 |
 
-Every decision's scan passes `variables`, `ogcd` and `items` and meets `default[3]` on `active_enemies`, with `talent.wither` true. Inside the open area list the scan stops on Rain of Fire's applicability (210 of 220), or on the list's own press of Summon Infernal or Malevolence (10). The other contexts naming a Destruction (24XJ9Nyq7jnfgAMQ fight 23 actor 4, LYwF6PRADV7m6vTZ fight 24 actor 22) hold no retained event.
+Every decision's scan passes `variables`, `ogcd` and `items` and meets `default[3]` on `active_enemies`, with `talent.wither` true. Inside the open area list the scan stops on Rain of Fire's applicability (210 of 220), or on the list's own press of Summon Infernal or Malevolence (10). The other contexts naming a Destruction (24XJ9Nyq7jnfgAMQ fight 23 actor 4, LYwFGPRADV7m6vTZ fight 24 actor 22) hold no retained event.
 
 **The anchors on those 220 decisions:**
 
@@ -13678,6 +13678,43 @@ Across the fight, the shared timeline reports 11 begins `INTERRUPTED` and 26 `PA
 **Evidence.** Nothing new is committed. Both subjects' pages are retained raw; only their context rows are committed, so the identity pin reads actor 12 there. These decisions would pin nothing the synthetic tests do not, and the follow-up says what would. Every pinned source read was already on disk and matches the M11-A3 hashes.
 
 **No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse the row. A public Warlock/Destruction request is SPEC_NOT_SUPPORTED, exactly as before.
+
+## ONB-D1P — Destruction Warlock public promotion: not promoted
+
+Autopilot queue entry ONB-D1P. Public contract: declared EXPECTED; actual change NONE, because nothing passes. No Warcraft Logs request and no new evidence.
+
+**The outcome.** Destruction does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4). The gates are not weakened and gain no subject. This is not an owner stop: rule 4 decides it, and the decision that could change it (ONB-S3) is already queued as the owner's.
+
+**Why it cannot pass.** OBSERVATION needs a real MATCH and real resolved decisions over several distinct action tokens, and DISCRIMINATION needs a real REJECTED or a control that flips a real MATCH. Both start from a real resolved decision. Replaying the retained pages through production ingestion and the facade over a fake transport, at this tranche's base commit:
+
+| Subject | Build | Retained span | Result | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 12 | Hellcaller | first 165.0 s of 424.5 s | ANALYZED | 115 | 0 | 0 | 115 | 21 |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 15 | Hellcaller | first 165.0 s of 424.5 s | ANALYZED | 105 | 0 | 0 | 105 | 12 |
+
+The output file is identical, line for line, to ONB-D1's replay, including the anchors. So the enemy count at `default[3]` still stops every decision, inside the area list or at it. An established anchor does not change this: the 107 decisions with one (103 instant, 4 Soul Fire) are UNKNOWN on the scan, and the other 113 fail on both the scan and the anchor.
+
+**The census found nothing more.** It parsed every JSON file over 500 bytes under `.probe/` and `tests/`, skipping tool output and worktree copies (5,683 parsed of 5,684). It looked for any event, of any type and any source, of the ability ids that the retained contexts' master data names Chaos Bolt, Incinerate, Conflagrate, Immolate, Wither, Rain of Fire, Summon Infernal, Shadowburn, Soul Fire, Cataclysm, Channel Demonfire, Ruination, Malevolence or Infernal Bolt. Mortal Strike, the positive control, has 985 events, 559 of them casts. ONB-D1's census read casts only, so this one is wider. Every source holding a cast was then resolved against its report's actors:
+
+| Source | What it is | Casts seen |
+| --- | --- | --- |
+| A7R6 actors 12 and 15 | the two subjects | every family spell above except Rain of Fire, Immolate, Cataclysm, Channel Demonfire, Ruination and Infernal Bolt |
+| A7R6 actors 34 and 35 | Overfiend pets, owned by 12 and 15 | Chaos Bolt |
+| gtKb 3, 7, 10; rXAf 6, 22; b1Pm 11, 14; Gw2kXrTfLWcDdhFY 19 | Demonology players | Infernal Bolt, Ruination |
+| Gw2kXrTfLWcDdhFY 20 | an Affliction player | Wither, Malevolence |
+| A7R6 24, 33; gtKb 51, 54; rXAf 37; b1Pm 25, 29 | pets; the ones with a retained name are Primal Fire Elementals | Immolate |
+
+So no third subject exists, and no retained event comes from a Destruction Diabolist. The other contexts naming a Destruction (24XJ9Nyq7jnfgAMQ fight 23 actor 4, LYwFGPRADV7m6vTZ fight 24 actor 22) hold no event in any parsed file. The census matches ids, so a retained file holding only abilities outside that list would not appear.
+
+**Two corrections to ONB-D1's records.** The second report code above was misspelled in agent/architecture.md "ONB-D1" and agent/follow-ups.md "After ONB-D1", and is corrected here. "Nothing committed but its context rows" was too strong: Assassination fixtures from the same pull carry a few events of these actors (two Chaos Bolt casts among them), incidental to those fixtures. They are not a decision set. The inventory row now says so, and the gate search still finds nothing.
+
+**Evidence is not its gap.** Two subjects are retained, so it is not added to ONB-EV. Both are the first 165 s of one fight, and both are Hellcaller, so more evidence would be needed to promote. But more evidence alone would resolve nothing: the enemy count stands first (agent/follow-ups.md "After ONB-D1").
+
+**How far this reaches.** Diabolist has no real subject, so a later promotion must measure it or refuse it, as Havoc refuses Fel-Scarred. Decision times are the anchor's here, and that promotion must check their readers (agent/follow-ups.md "After ONB-D1").
+
+**What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists it; the gate search finds no qualifying assertion and `evidenceReady` false (`m11-promotion-evidence-gate`, from ONB-D1, its comment now naming the outcome); and a public request is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which now holds it). A public request still runs preparation and reports partial coverage. Nothing reads as clean play. The replay and census are offline and not committed.
+
+**What a later promotion must do.** The owner decides ONB-S3, and Destruction binds what stands behind the count (`soul_shard`, Conflagrate's charges, the auras and DoTs), measures its failure modes on real subjects, and answers the anchor's limits, since 111 of its 220 decisions are Chaos Bolts and Incinerates with no established anchor. A new public entry then promotes it through the unchanged gates by the five-site promotion. No such entry is queued.
 
 ## AUTOPILOT — the local project supervisor (tooling)
 

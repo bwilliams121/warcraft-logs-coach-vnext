@@ -33,7 +33,9 @@ current total (5,748,495 bytes), with what each row buys.
 
 **Raised:** ONB-D1 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.
 
-**Evidence is not its gap, so it is not on ONB-EV.** Two retained subjects exist (A7R6 fight 7 actors 12 and 15, first 165 s, both Hellcaller), and all 220 decisions meet the count first. ONB-D1P should expect "not promoted" while ONB-S3 stands.
+**ONB-D1P (2026-11-04): not promoted.** The gate search finds nothing (`m11-promotion-evidence-gate`). A census of retained JSON files of any name, reading any event type, finds no third subject, and a replay at that base gives the same 220 UNKNOWN. A new public entry must follow ONB-S3 and the list below, and no such entry is queued (agent/architecture.md "ONB-D1P").
+
+**Evidence is not its gap, so it is not on ONB-EV.** Two retained subjects exist (A7R6 fight 7 actors 12 and 15, first 165 s, both Hellcaller), and all 220 decisions meet the count first.
 
 **What stands in scan order, past the count:**
 
@@ -49,7 +51,7 @@ current total (5,748,495 bytes), with what each row buys.
 - **A hard cast begun before the pull stays UNKNOWN.** Both subjects' opening Soul Fire.
 - **A begin that never completes is not a decision.** Eleven are `INTERRUPTED`. Whether stopping a Chaos Bolt was a mistake is a question nobody has asked here.
 - **No exact cast time.** Haste at a decision is not established, so `action.*.execute_time` and `action.*.cast_time` stay unknown, and a begin-less cast is never placed.
-- **Diabolist is unmeasured.** No retained Destruction subject is one, so Demonic Art's zero-valued cast-time effect, Ruination's cast and Infernal Bolt's are unmeasured. The other contexts naming a Destruction (24XJ9Nyq7jnfgAMQ fight 23 actor 4, LYwF6PRADV7m6vTZ fight 24 actor 22) hold no retained event.
+- **Diabolist is unmeasured.** No retained Destruction subject is one, so Demonic Art's zero-valued cast-time effect, Ruination's cast and Infernal Bolt's are unmeasured. The other contexts naming a Destruction (24XJ9Nyq7jnfgAMQ fight 23 actor 4, LYwFGPRADV7m6vTZ fight 24 actor 22) hold no retained event.
 
 **Decision times are the anchor's.** A public promotion must check its readers of `fightTimeMs`: `position` and `locator` name the completion and the time names the begin, which no earlier specialization did.
 

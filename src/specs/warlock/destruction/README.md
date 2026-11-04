@@ -3,6 +3,8 @@
 **Exposure: `INTERNAL_ONLY`.** The registration (`warlock-destruction-observed-decisions`, `warlock/destruction`) is in the production
 catalog for the internal lookup only. The public lookup and the identity table refuse it.
 
+**Not promoted by ONB-D1P.** It cannot pass the rotational gates, and it waits on the enemy count (ONB-S3) and the inputs behind it, rather than on evidence (agent/architecture.md "ONB-D1P").
+
 **Cohort D's representative, and the first reader of the shared cast anchor (ONB-S4). It resolves nothing today.** No decision of this
 specialization reaches MATCH or REJECTED on the shared engine as it stands. Every decision is observed, anchored where the evidence allows,
 classified and explained, and stays UNKNOWN. That is a measured property of the pinned list and the missing inputs below, not a claim about any player.

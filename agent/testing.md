@@ -5663,3 +5663,9 @@ Offline only, not committed: the census (`.probe/onbc1p/census.cjs`, Mortal Stri
 No production code changed, and no assertion. `tests/unit/analysis-composition-refusals.test.ts` already held Rogue/Outlaw (SPEC_NOT_SUPPORTED, one retrieval for preparation alone, no dispatch), and `tests/contracts/m11-promotion-evidence-gate.test.ts` already held its gate search (no qualifying assertion, `evidenceReady` false). Each comment now names the outcome. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, `onb-c2-outlaw-rogue`).
 
 Offline only, not committed: the census (`.probe/onbc2p/census.cjs`, Mortal Strike as its positive control) and the id check against the pinned data (`.probe/onbc2p/ids.cjs`). They give the numbers in agent/architecture.md "ONB-C2P". There is no replay, because there is nothing to replay.
+
+# ONB-D1P: Destruction Warlock, not promoted
+
+No production code changed. `tests/unit/analysis-composition-refusals.test.ts` holds Warlock/Destruction: SPEC_NOT_SUPPORTED, one retrieval for preparation alone, no dispatch. The class token is the wire's `Warlock`, the one its registration names, so the row reaches the identity table's real lookup rather than failing on a misspelling. `tests/contracts/m11-promotion-evidence-gate.test.ts` keeps its ONB-D1 gate search (no qualifying assertion, `evidenceReady` false), its comment now naming the outcome. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, `onb-d1-destruction-warlock`).
+
+Offline only, not committed: the census (`.probe/onbd1p/census.cjs`, Mortal Strike as its positive control), the resolution of its sources against each report's actors (`.probe/onbd1p/actors.cjs`), and the replay of both subjects (`.probe/onbd1p/m/`). They give the numbers in agent/architecture.md "ONB-D1P". The replay is a measurement, so both prefix subjects report only their retained span.
