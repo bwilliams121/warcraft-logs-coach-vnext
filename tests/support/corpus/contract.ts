@@ -60,6 +60,7 @@ import pinnedArmsWarriorApl from "../../../src/simc/data/warrior-arms.apl.json";
 import pinnedFrostDeathKnightApl from "../../../src/simc/data/deathknight-frost.apl.json";
 import pinnedDevourerDemonHunterApl from "../../../src/simc/data/demonhunter-devourer.apl.json";
 import pinnedFeralDruidApl from "../../../src/simc/data/druid-feral.apl.json";
+import pinnedOutlawRogueApl from "../../../src/simc/data/rogue-outlaw.apl.json";
 import pinnedEnhancementShamanApl from "../../../src/simc/data/shaman-enhancement.apl.json";
 import { AUTHORITY_DOMAINS, AUTHORITY_RESOLUTION_OUTCOMES } from "../../../src/findings/authority-domain.js";
 import { SPEC_IDS, type SpecId } from "../../../src/findings/spec-id.js";
@@ -409,6 +410,7 @@ export const OWNING_LAYERS = {
   SPEC_FROST_DEATH_KNIGHT: ["src/specs/deathknight/frost/"],
   SPEC_DEVOURER_DEMON_HUNTER: ["src/specs/demonhunter/devourer/"],
   SPEC_FERAL_DRUID: ["src/specs/druid/feral/"],
+  SPEC_OUTLAW_ROGUE: ["src/specs/rogue/outlaw/"],
   SPEC_ENHANCEMENT_SHAMAN: ["src/specs/shaman/enhancement/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
   PUBLIC_CONTRACT: ["src/contracts/", "src/api/", "src/mcp/"],
@@ -455,6 +457,7 @@ export const SPEC_LAYER_OF = {
   "deathknight/frost": "SPEC_FROST_DEATH_KNIGHT",
   "demonhunter/devourer": "SPEC_DEVOURER_DEMON_HUNTER",
   "druid/feral": "SPEC_FERAL_DRUID",
+  "rogue/outlaw": "SPEC_OUTLAW_ROGUE",
   "shaman/enhancement": "SPEC_ENHANCEMENT_SHAMAN",
 } as const satisfies Record<SpecId, OwningLayer>;
 
@@ -3379,6 +3382,19 @@ export const ASSERTION_KINDS = {
       "The Feral Druid facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
   },
 
+  // ---- SPEC_OUTLAW_ROGUE (ONB-C2, INTERNAL_ONLY) ---
+  "SPEC_OUTLAW_ROGUE.SPEC_GATE": {
+    owningLayer: "SPEC_OUTLAW_ROGUE",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Outlaw Rogue facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
+  },
+
   // ---- SPEC_ENHANCEMENT_SHAMAN (ONB-B2, INTERNAL_ONLY) ---
   "SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE": {
     owningLayer: "SPEC_ENHANCEMENT_SHAMAN",
@@ -4202,6 +4218,7 @@ export const PINNED_AUTHORITY_REVISIONS: Readonly<Record<string, string>> = {
   [pinnedFrostDeathKnightApl.authorityId]: pinnedFrostDeathKnightApl.artifactRevision,
   [pinnedDevourerDemonHunterApl.authorityId]: pinnedDevourerDemonHunterApl.artifactRevision,
   [pinnedFeralDruidApl.authorityId]: pinnedFeralDruidApl.artifactRevision,
+  [pinnedOutlawRogueApl.authorityId]: pinnedOutlawRogueApl.artifactRevision,
   [pinnedEnhancementShamanApl.authorityId]: pinnedEnhancementShamanApl.artifactRevision,
 };
 

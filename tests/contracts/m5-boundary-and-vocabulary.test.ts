@@ -472,12 +472,14 @@ describe("M5 forms no unearned verdict", () => {
       "src/specs/deathknight/frost/observed-analysis.ts",
       "src/specs/demonhunter/devourer/observed-analysis.ts",
       "src/specs/druid/feral/observed-analysis.ts",
+      "src/specs/rogue/outlaw/observed-analysis.ts",
       "src/specs/shaman/enhancement/observed-analysis.ts",
       "src/specs/warrior/protection/domains.ts",
       "src/specs/warrior/arms/domains.ts",
       "src/specs/deathknight/frost/domains.ts",
       "src/specs/demonhunter/devourer/domains.ts",
       "src/specs/druid/feral/domains.ts",
+      "src/specs/rogue/outlaw/domains.ts",
       "src/specs/shaman/enhancement/domains.ts",
     ];
     for (const path of M5_FILES) {

@@ -1,0 +1,349 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_ROGUE_OUTLAW",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "rogue",
+    "specName": "outlaw"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "UNKNOWN",
+    "sourcePath": "engine/class_modules/apl/apl_rogue.cpp",
+    "sourceSha256": "a74e4daa8376197d94f8449555035b3fd67634db450d2f7cb16bf84233939eb3",
+    "sourceByteLength": 26074,
+    "regionStartMarker": "//outlaw_apl_start",
+    "regionEndMarker": "//outlaw_apl_end",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "regionSha256": "859365c952280376f1ae604968f2178054a60cbb1809416b9b223aad4a07f725",
+    "livePtrPolicy": "NO_PTR_REGION",
+    "dispatchSource": {
+      "sourcePath": "engine/class_modules/sc_rogue.cpp",
+      "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e"
+    }
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "stealth",
+          "comment": "Restealth if possible (no vulnerable enemies in combat).",
+          "sourceLine": 149
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "kick",
+          "comment": "Interrupt on cooldown to allow simming interactions with that.",
+          "sourceLine": 150
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=ambush_condition,value=(talent.hidden_opportunity|combo_points.deficit>=2+talent.improved_ambush)&energy>=50",
+          "comment": null,
+          "sourceLine": 151
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=finish_condition,value=combo_points>=cp_max_spend-1-(!cooldown.between_the_eyes.ready&hero_tree.fatebound)",
+          "comment": "Use finishers if at -1 from max combo points, but Fatebound uses Dispatch at -2.",
+          "sourceLine": 152
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=finish_condition,value=1,if=buff.fang_strike.up&!cooldown.between_the_eyes.ready&!cooldown.killing_spree.ready",
+          "comment": "Use Dispatch early with MID2 4pc proc but not as priority over other finishers.",
+          "sourceLine": 153
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "variable,name=blade_flurry_sync,value=spell_targets.blade_flurry<2&raid_event.adds.in>20|buff.blade_flurry.up",
+          "comment": null,
+          "sourceLine": 154
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "call_action_list,name=cds",
+          "comment": null,
+          "sourceLine": 155
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "run_action_list,name=finish,if=variable.finish_condition",
+          "comment": null,
+          "sourceLine": 156
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "call_action_list,name=build",
+          "comment": null,
+          "sourceLine": 157
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "arcane_torrent,if=energy.base_deficit>=15+energy.regen",
+          "comment": null,
+          "sourceLine": 158
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "arcane_pulse",
+          "comment": null,
+          "sourceLine": 159
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "lights_judgment",
+          "comment": null,
+          "sourceLine": 160
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "bag_of_tricks",
+          "comment": null,
+          "sourceLine": 161
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "apply_poison,nonlethal=none,lethal=instant",
+          "comment": null,
+          "sourceLine": 142
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": "Snapshot raid buffed stats before combat begins and pre-potting is done.",
+          "sourceLine": 143
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "stealth,precombat_seconds=2",
+          "comment": null,
+          "sourceLine": 144
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "adrenaline_rush,precombat_seconds=1,if=talent.improved_adrenaline_rush",
+          "comment": null,
+          "sourceLine": 145
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "slice_and_dice,precombat_seconds=1,if=talent.improved_adrenaline_rush",
+          "comment": null,
+          "sourceLine": 146
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "roll_the_bones,precombat_seconds=0,if=buff.loaded_dice.up",
+          "comment": null,
+          "sourceLine": 147
+        }
+      ]
+    },
+    {
+      "listName": "build",
+      "receiverIdentifier": "build",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "ambush,if=talent.hidden_opportunity&buff.audacity.up",
+          "comment": "Builders  High priority Ambush with Hidden Opportunity.",
+          "sourceLine": 163
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "blade_flurry,if=talent.deft_maneuvers&spell_targets>=3",
+          "comment": "With Deft Maneuvers, build CPs with Blade Flurry at 3+ targets.",
+          "sourceLine": 164
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "pistol_shot,if=talent.audacity&talent.hidden_opportunity&buff.opportunity.up&!buff.audacity.up",
+          "comment": "With Audacity + Hidden Opportunity, consume Opportunity to proc Audacity any time Ambush is not available.",
+          "sourceLine": 165
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "pistol_shot,if=talent.fan_the_hammer&buff.opportunity.up&(buff.opportunity.stack>=buff.opportunity.max_stack|buff.opportunity.remains<2)",
+          "comment": "With Fan the Hammer, consume Opportunity if at max stacks or if it will expire.",
+          "sourceLine": 166
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "pistol_shot,if=talent.fan_the_hammer&buff.opportunity.up&(combo_points.deficit>=(1+talent.quick_draw+(talent.quick_draw*talent.fan_the_hammer.rank))&(combo_points>1|rtb_buffs<2|!talent.deal_fate))",
+          "comment": "With Fan the Hammer, consume Opportunity if it will not overcap CPs. Fatebound with stage 2 RTB tries to avoid consuming PS at 1CP.",
+          "sourceLine": 167
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "pistol_shot,if=!talent.fan_the_hammer&buff.opportunity.up&(energy.base_deficit>energy.regen*1.5|combo_points.deficit<=1|talent.quick_draw.enabled|talent.audacity.enabled&!buff.audacity.up)",
+          "comment": "If not using Fan the Hammer, then consume Opportunity based on energy, when it will exactly cap CPs, or when using Quick Draw.",
+          "sourceLine": 168
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "pool_resource,for_next=1",
+          "comment": "Fallback pooling just so Hidden Opportunity builds do not skip Ambush at low energy.",
+          "sourceLine": 169
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "ambush,if=talent.hidden_opportunity",
+          "comment": null,
+          "sourceLine": 170
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "sinister_strike",
+          "comment": null,
+          "sourceLine": 171
+        }
+      ]
+    },
+    {
+      "listName": "cds",
+      "receiverIdentifier": "cds",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "adrenaline_rush,if=!buff.adrenaline_rush.up&(raid_event.adds.remains>5|raid_event.adds.in<5|raid_event.adds.in>30)",
+          "comment": "Cooldowns  Maintain Adrenaline Rush. Has a cursory check to try not to send if immediate downtime is expected.",
+          "sourceLine": 173
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "blade_flurry,if=spell_targets>=2&buff.blade_flurry.remains<gcd",
+          "comment": "Maintain Blade Flurry at 2+ targets.",
+          "sourceLine": 174
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "preparation,if=cooldown.adrenaline_rush.remains>30&!cooldown.between_the_eyes.ready&!cooldown.killing_spree.ready|fight_remains<30",
+          "comment": "Use Preparation to reset Adrenaline Rush, Between the Eyes, and Killing Spree.",
+          "sourceLine": 175
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "keep_it_rolling,if=rtb_buffs>=3",
+          "comment": "Use Keep it Rolling with at least stage 3 of RtB.",
+          "sourceLine": 176
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "roll_the_bones,if=!buff.roll_the_bones.up|rtb_buffs=1+(buff.loaded_dice.up&cooldown.between_the_eyes.ready)",
+          "comment": "Use Roll the Bones if not active, or reroll for stage 2. Roll over stage 2 if both Loaded Dice is active and BtE is ready.",
+          "sourceLine": 177
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "blade_rush,if=set_bonus.mid1_2pc|spell_targets=1&energy.base_time_to_max>2|spell_targets>=2",
+          "comment": "Use Blade Rush if using MID1 tier, or in AoE, or if you will not overcap energy within the gcd on ST.",
+          "sourceLine": 178
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "vanish,if=!variable.finish_condition&talent.hidden_opportunity&!buff.audacity.up&!buff.opportunity.up",
+          "comment": "Hidden Opportunity builds use Vanish or Shadowmeld for an extra Ambush in between procs.",
+          "sourceLine": 179
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "shadowmeld,if=!variable.finish_condition&talent.hidden_opportunity&!buff.audacity.up&!buff.opportunity.up",
+          "comment": null,
+          "sourceLine": 180
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "potion,if=buff.bloodlust.react|fight_remains<30|buff.adrenaline_rush.up",
+          "comment": null,
+          "sourceLine": 181
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "blood_fury",
+          "comment": null,
+          "sourceLine": 182
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "berserking",
+          "comment": null,
+          "sourceLine": 183
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "fireblood",
+          "comment": null,
+          "sourceLine": 184
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "ancestral_call",
+          "comment": null,
+          "sourceLine": 185
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "use_items,slots=trinket1,if=buff.between_the_eyes.up|trinket.1.has_stat.any_dps|fight_remains<=20",
+          "comment": "Default conditions for usable items.",
+          "sourceLine": 186
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "use_items,slots=trinket2,if=buff.between_the_eyes.up|trinket.2.has_stat.any_dps|fight_remains<=20",
+          "comment": null,
+          "sourceLine": 187
+        }
+      ]
+    },
+    {
+      "listName": "finish",
+      "receiverIdentifier": "finish",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "between_the_eyes,if=!(buff.supercharge_1.up&!buff.supercharge_2.up)|!talent.supercharger|!cooldown.killing_spree.ready",
+          "comment": "Finishers  Prioritize Between the Eyes unless you can spend the final Supercharger on Killing Spree.",
+          "sourceLine": 189
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "pool_resource,for_next=1",
+          "comment": null,
+          "sourceLine": 190
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "killing_spree,if=buff.supercharge_1.up|cooldown.adrenaline_rush.remains>120|!talent.supercharger",
+          "comment": "Always attempt to Supercharge Killing Spree unless Adrenaline Rush is horrifically desync'd.",
+          "sourceLine": 191
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "coup_de_grace",
+          "comment": null,
+          "sourceLine": 192
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "dispatch",
+          "comment": null,
+          "sourceLine": 193
+        }
+      ]
+    }
+  ]
+}

@@ -86,7 +86,8 @@ export type SpecId =
   | "deathknight/frost"
   | "shaman/enhancement"
   | "demonhunter/devourer"
-  | "druid/feral";
+  | "druid/feral"
+  | "rogue/outlaw";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -111,6 +112,7 @@ export const SPEC_IDS = Object.freeze([
   "shaman/enhancement",
   "demonhunter/devourer",
   "druid/feral",
+  "rogue/outlaw",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -254,6 +256,9 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  *
  * Feral Druid arrived here in ONB-C1, Cohort C's representative. No decision of it resolves: its real scans
  * stop at Prowl, Tiger's Fury or the enemy count, and the pool line sits behind that count.
+ *
+ * Outlaw Rogue arrived here in ONB-C2, a Cohort C follower. No decision of it resolves: every scan meets Stealth
+ * first, and no retained capture holds one of its events.
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
@@ -266,6 +271,7 @@ export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "shaman/enhancement",
   "demonhunter/devourer",
   "druid/feral",
+  "rogue/outlaw",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

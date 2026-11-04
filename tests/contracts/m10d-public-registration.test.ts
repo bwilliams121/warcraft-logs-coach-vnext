@@ -80,6 +80,7 @@ describe("the five sites agree", () => {
       "shaman/enhancement",
       "demonhunter/devourer",
       "druid/feral",
+      "rogue/outlaw",
     ]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
@@ -162,6 +163,7 @@ describe("the five sites agree", () => {
       ["shaman/enhancement", "INTERNAL_ONLY"],
       ["demonhunter/devourer", "INTERNAL_ONLY"],
       ["druid/feral", "INTERNAL_ONLY"],
+      ["rogue/outlaw", "INTERNAL_ONLY"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -272,6 +274,7 @@ describe("the complete-catalog helper", () => {
       "shaman-enhancement-observed-decisions": 0,
       "demonhunter-devourer-observed-decisions": 0,
       "druid-feral-observed-decisions": 0,
+      "rogue-outlaw-observed-decisions": 0,
     });
   });
 });

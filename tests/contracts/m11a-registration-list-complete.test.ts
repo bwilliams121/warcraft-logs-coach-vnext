@@ -279,6 +279,7 @@ describe("what the tree registers today", () => {
       ["src/specs/priest/discipline/registration.ts", "DISCIPLINE_PRIEST_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/priest/holy/registration.ts", "HOLY_PRIEST_REGISTRATION", "PUBLIC"],
       ["src/specs/rogue/assassination/registration.ts", "ASSASSINATION_REGISTRATION", "PUBLIC"],
+      ["src/specs/rogue/outlaw/registration.ts", "OUTLAW_ROGUE_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/rogue/subtlety/registration.ts", "SUBTLETY_ROGUE_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/shaman/enhancement/registration.ts", "ENHANCEMENT_SHAMAN_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/shaman/restoration/registration.ts", "RESTORATION_SHAMAN_REGISTRATION", "PUBLIC"],

@@ -107,8 +107,8 @@ describe("the committed corpus loads", () => {
     // ONB-B1: two cases for the INTERNAL_ONLY Arms Warrior registration.
     // ONB-B2: two cases each for the INTERNAL_ONLY Frost Death Knight and Enhancement Shaman registrations.
     // ONB-B3: two cases for the INTERNAL_ONLY Devourer Demon Hunter registration.
-    // ONB-C1: two cases for the INTERNAL_ONLY Feral Druid registration.
-    expect(loaded.cases).toHaveLength(217);
+    // ONB-C2: two cases for the INTERNAL_ONLY Outlaw Rogue registration.
+    expect(loaded.cases).toHaveLength(219);
     expect(loaded.coverage.declared).toBe(0);
   });
 

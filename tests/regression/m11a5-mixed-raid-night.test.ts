@@ -190,6 +190,7 @@ describe("a Retribution Paladin alone", () => {
       "shaman-enhancement-observed-decisions": 0,
       "demonhunter-devourer-observed-decisions": 0,
       "druid-feral-observed-decisions": 0,
+      "rogue-outlaw-observed-decisions": 0,
     });
     expectRetributionCell(cellOf(run.aggregate.cells, RETRIBUTION));
     expect(run.aggregate.coverage).toMatchObject({
@@ -240,6 +241,7 @@ describe("a mixed roster — Assassination, Protection, Retribution, Fire and an
       "shaman-enhancement-observed-decisions": 0,
       "demonhunter-devourer-observed-decisions": 0,
       "druid-feral-observed-decisions": 0,
+      "rogue-outlaw-observed-decisions": 0,
     });
   });
 

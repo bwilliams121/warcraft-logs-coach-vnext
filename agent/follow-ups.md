@@ -29,6 +29,27 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After ONB-C2: what the Outlaw Rogue slice does not establish
+
+**Raised:** ONB-C2 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.
+
+**It is on ONB-EV.** No retained capture holds an event of this specialization, and the one context naming it is uncommitted. So ONB-C2P should expect "not promoted" unless ONB-EV runs. A capture alone would not resolve a decision either: everything below stands first.
+
+**What stands in scan order:**
+
+- **Stealth and Kick.** Both are unconditional and off the GCD, with unknown readiness and no contract. Assassination has reviewed readings of both (`combat-engagement.ts`, its transition authority), so a later tranche has a pattern, but they need a capture to check them against.
+- **The `cds` list.** Every line reads auras, cooldowns, `rtb_buffs`, `raid_event.adds.*`, `fight_remains` or the enemy count (ONB-S3).
+- **`variable.finish_condition`.** It reads `cp_max_spend` and two cooldowns, and `combo_points` is known only where a cast's own observation reports it. It decides the `run_action_list` to `finish`.
+- **`rtb_buffs`.** The Roll the Bones stage is an internal value (sc_rogue.cpp:9635-9643). Nothing here reads it from the buffs a log reports.
+
+**The pool never answers READY_AT_MAX, so POOLS is unreachable.** It needs an unpressed Ambush's or Killing Spree's non-Energy readiness, which stealth, Audacity, Blindside, a cooldown and Combo Points decide. Binding those is not enough to change a verdict: a POOLS selection is UNKNOWN against any observed cast (agent/follow-ups.md "After ONB-S5").
+
+**The Outlaw talent id space is assumed.** No retained combatantinfo corroborates `id` and `nodeID` for it, as for Subtlety.
+
+**Unmeasured on the wire.** Killing Spree's channel and whether it logs a begincast (it stays eligible, as Convoke does, until measured), Killing Spree's children 57841 and 57842, Blade Rush's strike 271881, Sinister Strike's extra attack 197834, and Fan the Hammer's extra Pistol Shots. A logged child of a press would be excluded as having no lane record, but the press itself might not log under its pinned id. Measure these before binding anything that could resolve a decision.
+
+---
+
 ## After ONB-C1: what the Feral Druid slice does not establish
 
 **Raised:** ONB-C1 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.
@@ -346,7 +367,7 @@ validated on real logs, and one subject is not many.
   zero.
 - **Resolvers are spec-owned.** A list without a `PoolingResolver` gets UNKNOWN at
   the at-maximum readiness. ONB-C1 supplies Feral's, and reads `max_energy=1` on
-  its one line (agent/follow-ups.md "After ONB-C1"). ONB-C2 (Outlaw) owns its own.
+  its one line (agent/follow-ups.md "After ONB-C1"). ONB-C2 (Outlaw) owns its own (agent/follow-ups.md "After ONB-C2").
 - **Runtime background.** Pruning follows the existing rule: NOT_APPLICABLE
   stands for init-time background. A guarded line made background later at
   runtime is not modelled separately.

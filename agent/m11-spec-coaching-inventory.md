@@ -77,7 +77,7 @@ row).
 | `monk/brewmaster` | C — INTERNAL_ONLY measurement slice at M11-C2, PUBLIC since M11-C4j (Shado-Pan-validated) | committed sanitized (gtKb actor 4, full fight; rXAf actor 11, 165 s; both Shado-Pan) | audited (M11-C0/C1: the namespace-selected 12.1.0 list, six lists and sixty-two actions) | PARTIAL | `celestial-brew-charge-capping` (charge state declared, UNKNOWN; the observed offensive slice measures 109 MATCH / 10 REJECTED / 70 UNKNOWN over subject 1's full fight and 47 / 1 / 91 over subject 2's 165 s window) |
 | `demonhunter/vengeance` | C | none | not yet | UNASSESSED | — |
 | `demonhunter/devourer` | C — INTERNAL_ONLY since ONB-B3 | local raw (gtKb fight 22 actor 32, whole fight; rXAf fight 13 actors 20 and 79, first 165 s) | audited | PARTIAL | `reap-soul-threshold` |
-| `rogue/outlaw` | C | none | not yet | UNASSESSED | — |
+| `rogue/outlaw` | C — INTERNAL_ONLY since ONB-C2 | none (context only: g34m fights 1, 6, 7, actor 17; ONB-EV) | audited | UNASSESSED | — |
 | `mage/arcane` | D | local raw | blocked | PARTIAL | `arcane-charge-barrage-timing` |
 | `mage/fire` | D | local raw | blocked | PARTIAL | `combustion-window-fill` |
 | `mage/frost` | D | none | not yet | UNASSESSED | — |

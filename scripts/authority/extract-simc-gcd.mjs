@@ -3714,6 +3714,238 @@ const ROGUE_SUBTLETY_FACTS = {
   ],
 };
 
+const ROGUE_OUTLAW_SOURCES = ROGUE_SUBTLETY_SOURCES;
+
+const ROGUE_OUTLAW_MODULE_PATH = "engine/class_modules/sc_rogue.cpp";
+
+/**
+ * The Outlaw Rogue facts (ONB-C2).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the
+ * pinned Outlaw list (apl_rogue.cpp `outlaw`) executes. Facts a reader should not have to
+ * rediscover (all read off the pinned DBC):
+ *
+ *   - STEALTH, KICK, VANISH, ADRENALINE RUSH AND KEEP IT ROLLING ARE `_gcd` 0. COUP DE
+ *     GRACE IS 1200. Every other token is 1000.
+ *   - SINISTER STRIKE'S ACTION IS 193315, the Outlaw row replacing the class's 1752.
+ *   - SHADOWMELD, THE RACIALS AND ITEMS ARE NOT BOUND, and `arcane_pulse` refuses if reached, as for
+ *     Subtlety.
+ */
+const ROGUE_OUTLAW_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 1784, displayNameEn: "Stealth", baseGcdMs: 0 },
+    { abilityGameId: 1766, displayNameEn: "Kick", baseGcdMs: 0 },
+    { abilityGameId: 1856, displayNameEn: "Vanish", baseGcdMs: 0 },
+    { abilityGameId: 13750, displayNameEn: "Adrenaline Rush", baseGcdMs: 0 },
+    { abilityGameId: 381989, displayNameEn: "Keep It Rolling", baseGcdMs: 0 },
+    { abilityGameId: 1277933, displayNameEn: "Preparation", baseGcdMs: 1000 },
+    { abilityGameId: 13877, displayNameEn: "Blade Flurry", baseGcdMs: 1000 },
+    { abilityGameId: 1214909, displayNameEn: "Roll the Bones", baseGcdMs: 1000 },
+    { abilityGameId: 271877, displayNameEn: "Blade Rush", baseGcdMs: 1000 },
+    { abilityGameId: 8676, displayNameEn: "Ambush", baseGcdMs: 1000 },
+    { abilityGameId: 185763, displayNameEn: "Pistol Shot", baseGcdMs: 1000 },
+    { abilityGameId: 193315, displayNameEn: "Sinister Strike", baseGcdMs: 1000 },
+    { abilityGameId: 315341, displayNameEn: "Between the Eyes", baseGcdMs: 1000 },
+    { abilityGameId: 51690, displayNameEn: "Killing Spree", baseGcdMs: 1000 },
+    { abilityGameId: 441776, displayNameEn: "Coup de Grace", baseGcdMs: 1200 },
+    { abilityGameId: 2098, displayNameEn: "Dispatch", baseGcdMs: 1000 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "stealth",
+      candidateAbilityGameIds: [1784],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: ROGUE_OUTLAW_MODULE_PATH,
+      symbol: "rogue_t::create_action / stealth_t",
+      startLine: 9497,
+      endLine: 9497,
+      sourceNote:
+        'create_action dispatches "stealth" to stealth_t, built on p->spell.stealth (:6062); spell.stealth = find_class_spell( "Stealth" ) at :9919, class_spells.inc row { 4, 0, 1784 }.',
+    },
+    {
+      simcToken: "kick",
+      candidateAbilityGameIds: [1766],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: ROGUE_OUTLAW_MODULE_PATH,
+      symbol: "rogue_t::create_action / kick_t",
+      startLine: 9477,
+      endLine: 9477,
+      sourceNote:
+        'create_action dispatches "kick" to kick_t, built on p->spell.kick (:4603); spell.kick = find_class_spell( "Kick" ) at :9915, class_spells.inc row { 4, 0, 1766 }.',
+    },
+    {
+      simcToken: "vanish",
+      candidateAbilityGameIds: [1856],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: ROGUE_OUTLAW_MODULE_PATH,
+      symbol: "rogue_t::create_action / vanish_t",
+      startLine: 9500,
+      endLine: 9500,
+      sourceNote:
+        'create_action dispatches "vanish" to vanish_t, built on p->spell.vanish (:6032); spell.vanish = find_class_spell( "Vanish" ) at :9920, class_spells.inc row { 4, 0, 1856 }.',
+    },
+    {
+      simcToken: "adrenaline_rush",
+      candidateAbilityGameIds: [13750],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: ROGUE_OUTLAW_MODULE_PATH,
+      symbol: "rogue_t::create_action / adrenaline_rush_t",
+      startLine: 9452,
+      endLine: 9452,
+      sourceNote:
+        'create_action dispatches "adrenaline_rush" to adrenaline_rush_t, built on p->talent.outlaw.adrenaline_rush (:3545); find_talent_spell( SPECIALIZATION, "Adrenaline Rush" ) at :10074, trait row spell 13750.',
+    },
+    {
+      simcToken: "keep_it_rolling",
+      candidateAbilityGameIds: [381989],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: ROGUE_OUTLAW_MODULE_PATH,
+      symbol: "rogue_t::create_action / keep_it_rolling_t",
+      startLine: 9476,
+      endLine: 9476,
+      sourceNote:
+        'create_action dispatches "keep_it_rolling" to keep_it_rolling_t, built on p->talent.outlaw.keep_it_rolling (:6330); find_talent_spell( SPECIALIZATION, "Keep it Rolling" ) at :10098, trait row spell 381989.',
+    },
+    {
+      simcToken: "preparation",
+      candidateAbilityGameIds: [1277933],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: ROGUE_OUTLAW_MODULE_PATH,
+      symbol: "rogue_t::create_action / preparation_t",
+      startLine: 9484,
+      endLine: 9484,
+      sourceNote:
+        'create_action dispatches "preparation" to preparation_t, built on p->talent.outlaw.preparation (:6348); find_talent_spell( SPECIALIZATION, "Preparation" ) at :10104, trait row spell 1277933.',
+    },
+    {
+      simcToken: "blade_flurry",
+      candidateAbilityGameIds: [13877],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: ROGUE_OUTLAW_MODULE_PATH,
+      symbol: "rogue_t::create_action / blade_flurry_t",
+      startLine: 9459,
+      endLine: 9459,
+      sourceNote:
+        'create_action dispatches "blade_flurry" to blade_flurry_t, built on p->spec.blade_flurry (:3948); find_specialization_spell( "Blade Flurry" ) at :9947, the Outlaw active spell row { 4, 260, 13877 } in class_spells.inc.',
+    },
+    {
+      simcToken: "roll_the_bones",
+      candidateAbilityGameIds: [1214909],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: ROGUE_OUTLAW_MODULE_PATH,
+      symbol: "rogue_t::create_action / roll_the_bones_t",
+      startLine: 9485,
+      endLine: 9485,
+      sourceNote:
+        'create_action dispatches "roll_the_bones" to roll_the_bones_t, built on p->spec.roll_the_bones (:5129); find_specialization_spell( "Roll the Bones" ) at :9945, the Outlaw active spell row { 4, 260, 1214909 } in class_spells.inc.',
+    },
+    {
+      simcToken: "blade_rush",
+      candidateAbilityGameIds: [271877],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: ROGUE_OUTLAW_MODULE_PATH,
+      symbol: "rogue_t::create_action / blade_rush_t",
+      startLine: 9460,
+      endLine: 9460,
+      sourceNote:
+        'create_action dispatches "blade_rush" to blade_rush_t, built on p->talent.outlaw.blade_rush (:4040); find_talent_spell( SPECIALIZATION, "Blade Rush" ) at :10076, trait row spell 271877.',
+    },
+    {
+      simcToken: "ambush",
+      candidateAbilityGameIds: [8676],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: ROGUE_OUTLAW_MODULE_PATH,
+      symbol: "rogue_t::create_action / ambush_t",
+      startLine: 9453,
+      endLine: 9453,
+      sourceNote:
+        'create_action dispatches "ambush" to ambush_t, built on p->spell.ambush (:3582); spell.ambush = find_class_spell( "Ambush" ) at :9908, class_spells.inc row { 4, 0, 8676 }.',
+    },
+    {
+      simcToken: "pistol_shot",
+      candidateAbilityGameIds: [185763],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: ROGUE_OUTLAW_MODULE_PATH,
+      symbol: "rogue_t::create_action / pistol_shot_t",
+      startLine: 9482,
+      endLine: 9482,
+      sourceNote:
+        'create_action dispatches "pistol_shot" to pistol_shot_t, built on p->spec.pistol_shot (:4910); find_specialization_spell( "Pistol Shot" ) at :9943, the Outlaw active spell row { 4, 260, 185763 } in class_spells.inc.',
+    },
+    {
+      simcToken: "sinister_strike",
+      candidateAbilityGameIds: [193315],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: ROGUE_OUTLAW_MODULE_PATH,
+      symbol: "rogue_t::create_action / sinister_strike_t",
+      startLine: 9494,
+      endLine: 9494,
+      sourceNote:
+        'create_action dispatches "sinister_strike" to sinister_strike_t, built on p->spec.sinister_strike (:5895); find_specialization_spell( "Sinister Strike" ) at :9944, the Outlaw active spell row { 4, 260, 193315, 1752 } in class_spells.inc.',
+    },
+    {
+      simcToken: "between_the_eyes",
+      candidateAbilityGameIds: [315341],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: ROGUE_OUTLAW_MODULE_PATH,
+      symbol: "rogue_t::create_action / between_the_eyes_t",
+      startLine: 9457,
+      endLine: 9457,
+      sourceNote:
+        'create_action dispatches "between_the_eyes" to between_the_eyes_t, built on p->spec.between_the_eyes (:3810); find_specialization_spell( "Between the Eyes" ) at :9941, the Outlaw active spell row { 4, 260, 315341 } in class_spells.inc.',
+    },
+    {
+      simcToken: "killing_spree",
+      candidateAbilityGameIds: [51690],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: ROGUE_OUTLAW_MODULE_PATH,
+      symbol: "rogue_t::create_action / killing_spree_t",
+      startLine: 9479,
+      endLine: 9479,
+      sourceNote:
+        'create_action dispatches "killing_spree" to killing_spree_t, built on p->talent.outlaw.killing_spree (:4673); find_talent_spell( SPECIALIZATION, "Killing Spree" ) at :10099, trait row spell 51690.',
+    },
+    {
+      simcToken: "coup_de_grace",
+      candidateAbilityGameIds: [441776],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: ROGUE_OUTLAW_MODULE_PATH,
+      symbol: "rogue_t::create_action / coup_de_grace_t",
+      startLine: 9462,
+      endLine: 9462,
+      sourceNote:
+        'create_action dispatches "coup_de_grace" to coup_de_grace_t, built on p->spell.coup_de_grace (:6782); spell.coup_de_grace = talent.trickster.coup_de_grace->ok() ? find_spell( 441776 ) : not_found at :10265. Its record carries _gcd 1200.',
+    },
+    {
+      simcToken: "dispatch",
+      candidateAbilityGameIds: [2098],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: ROGUE_OUTLAW_MODULE_PATH,
+      symbol: "rogue_t::create_action / dispatch_t",
+      startLine: 9467,
+      endLine: 9467,
+      sourceNote:
+        'create_action dispatches "dispatch" to dispatch_t, built on p->spec.dispatch (:3752); find_specialization_spell( "Dispatch" ) at :9942, the Outlaw active spell row { 4, 260, 2098, 196819 } in class_spells.inc.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
 /**
  * The Devourer Demon Hunter facts (ONB-B3).
  *
@@ -4448,6 +4680,21 @@ export const TARGETS = {
     ],
     requiredFacts: WARRIOR_PROTECTION_FACTS,
     defaultOut: "src/data/game/warrior-protection-gcd-semantics.json",
+  },
+  "rogue-outlaw": {
+    datasetId: "SIMC_DBC_ROGUE_OUTLAW_GCD_SEMANTICS",
+    classId: 4,
+    className: "Rogue",
+    sources: ROGUE_OUTLAW_SOURCES,
+    classModulePath: ROGUE_OUTLAW_SOURCES.classModule,
+    handReviewedPaths: [
+      ROGUE_OUTLAW_SOURCES.classModule,
+      ROGUE_OUTLAW_SOURCES.racialSpells,
+      ROGUE_OUTLAW_SOURCES.playerModule,
+      ROGUE_OUTLAW_SOURCES.consumableModule,
+    ],
+    requiredFacts: ROGUE_OUTLAW_FACTS,
+    defaultOut: "src/data/game/rogue-outlaw-gcd-semantics.json",
   },
   "rogue-subtlety": {
     datasetId: "SIMC_DBC_ROGUE_SUBTLETY_GCD_SEMANTICS",

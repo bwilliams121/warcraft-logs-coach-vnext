@@ -1176,6 +1176,134 @@ const ROGUE_SUBTLETY_TARGET = {
 };
 
 /**
+ * The Outlaw Rogue profile (ONB-C2): the talents the pinned Outlaw list reads as `talent.<name>`, and
+ * the talents an action of that list is built on (an action on `not_found()` is background,
+ * action.cpp:541-549). The hero sub-trees are Trickster (51) and Fatebound (52).
+ */
+const ROGUE_OUTLAW_TARGET = {
+  datasetId: "SIMC_TRAIT_ROGUE_OUTLAW_TALENTS",
+  classId: 4,
+  specId: 260,
+  defaultOut: "src/data/game/rogue-outlaw-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. The same equivalence every earlier target " +
+    "recorded, that `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals trait_data_t::id_node, is ASSUMED for Outlaw Rogue: " +
+    "no retained capture holds one of its combatantinfo events, so this target has no corroboration of its own.",
+  requiredTalents: [
+    {
+      simcName: "adrenaline_rush",
+      displayNameEn: "Adrenaline Rush",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_rogue.cpp:10074 talent.outlaw.adrenaline_rush = find_talent_spell( SPECIALIZATION, "Adrenaline Rush" ); ; adrenaline_rush_t is built on it',
+    },
+    {
+      simcName: "audacity",
+      displayNameEn: "Audacity",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_rogue.cpp:10075 talent.outlaw.audacity = find_talent_spell( SPECIALIZATION, "Audacity" ); ; the pinned list reads talent.audacity',
+    },
+    {
+      simcName: "blade_rush",
+      displayNameEn: "Blade Rush",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_rogue.cpp:10076 talent.outlaw.blade_rush = find_talent_spell( SPECIALIZATION, "Blade Rush" ); ; blade_rush_t is built on it',
+    },
+    {
+      simcName: "deft_maneuvers",
+      displayNameEn: "Deft Maneuvers",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_rogue.cpp:10083 talent.outlaw.deft_maneuvers = find_talent_spell( SPECIALIZATION, "Deft Maneuvers" ); ; the pinned list reads talent.deft_maneuvers',
+    },
+    {
+      simcName: "fan_the_hammer",
+      displayNameEn: "Fan the Hammer",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_rogue.cpp:10087 talent.outlaw.fan_the_hammer = find_talent_spell( SPECIALIZATION, "Fan the Hammer" ); ; the pinned list reads talent.fan_the_hammer',
+    },
+    {
+      simcName: "hidden_opportunity",
+      displayNameEn: "Hidden Opportunity",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_rogue.cpp:10094 talent.outlaw.hidden_opportunity = find_talent_spell( SPECIALIZATION, "Hidden Opportunity" ); ; the pinned list reads talent.hidden_opportunity, which gates the guarded Ambush',
+    },
+    {
+      simcName: "improved_adrenaline_rush",
+      displayNameEn: "Improved Adrenaline Rush",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_rogue.cpp:10096 talent.outlaw.improved_adrenaline_rush = find_talent_spell( SPECIALIZATION, "Improved Adrenaline Rush" ); ; the pinned precombat list reads talent.improved_adrenaline_rush',
+    },
+    {
+      simcName: "keep_it_rolling",
+      displayNameEn: "Keep It Rolling",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_rogue.cpp:10098 talent.outlaw.keep_it_rolling = find_talent_spell( SPECIALIZATION, "Keep it Rolling" ); ; keep_it_rolling_t is built on it',
+    },
+    {
+      simcName: "killing_spree",
+      displayNameEn: "Killing Spree",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_rogue.cpp:10099 talent.outlaw.killing_spree = find_talent_spell( SPECIALIZATION, "Killing Spree" ); ; killing_spree_t is built on it',
+    },
+    {
+      simcName: "preparation",
+      displayNameEn: "Preparation",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_rogue.cpp:10104 talent.outlaw.preparation = find_talent_spell( SPECIALIZATION, "Preparation" ); ; preparation_t is built on it',
+    },
+    {
+      simcName: "quick_draw",
+      displayNameEn: "Quick Draw",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_rogue.cpp:10105 talent.outlaw.quick_draw = find_talent_spell( SPECIALIZATION, "Quick Draw" ); ; the pinned list reads talent.quick_draw',
+    },
+    {
+      simcName: "improved_ambush",
+      displayNameEn: "Improved Ambush",
+      tree: "CLASS",
+      binding:
+        'sc_rogue.cpp:9993 talent.rogue.improved_ambush = find_talent_spell( CLASS, "Improved Ambush" ); ; the pinned list reads talent.improved_ambush',
+    },
+    {
+      simcName: "supercharger",
+      displayNameEn: "Supercharger",
+      tree: "CLASS",
+      binding:
+        'sc_rogue.cpp:10009 talent.rogue.supercharger = find_talent_spell( CLASS, "Supercharger" ); ; the pinned list reads talent.supercharger',
+    },
+    {
+      simcName: "deal_fate",
+      displayNameEn: "Deal Fate",
+      tree: "HERO",
+      binding:
+        'sc_rogue.cpp:10193 talent.fatebound.deal_fate = find_talent_spell( HERO, "Deal Fate" ); ; the pinned list reads talent.deal_fate',
+    },
+    {
+      simcName: "coup_de_grace",
+      displayNameEn: "Coup de Grace",
+      tree: "HERO",
+      binding:
+        'sc_rogue.cpp:10212 talent.trickster.coup_de_grace = find_talent_spell( HERO, "Coup de Grace" ); ; spell.coup_de_grace, which coup_de_grace_t is built on, is not_found without it (:10265)',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data` (trait_data.inc:4415-4416).
+    { simcName: "trickster", subTreeId: 51 },
+    { simcName: "fatebound", subTreeId: 52 },
+  ],
+};
+
+/**
  * The Frost Death Knight profile (ONB-B2): (a) the talents the pinned Frost list reads as
  * `talent.<name>`, and (b) the talents an action of that list is built on (an action on
  * `not_found()` is background, action.cpp:541-549). `chosen_of_frostbrood` is NOT here: it is a
@@ -1997,6 +2125,7 @@ export const TARGETS = {
   "warrior-arms": WARRIOR_ARMS_TARGET,
   "warrior-fury": WARRIOR_FURY_TARGET,
   "warrior-protection": WARRIOR_PROTECTION_TARGET,
+  "rogue-outlaw": ROGUE_OUTLAW_TARGET,
   "rogue-subtlety": ROGUE_SUBTLETY_TARGET,
   "monk-brewmaster": MONK_BREWMASTER_TARGET,
   "paladin-retribution": PALADIN_RETRIBUTION_TARGET,

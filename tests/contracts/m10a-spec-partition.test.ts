@@ -102,6 +102,7 @@ describe("the known specialization ids are exactly partitioned", () => {
       "shaman/enhancement",
       "demonhunter/devourer",
       "druid/feral",
+      "rogue/outlaw",
     ]);
     for (const id of INTERNAL_ONLY_SPEC_IDS) {
       expect(isSpecId(id), id).toBe(true);
@@ -124,7 +125,7 @@ describe("the known specialization ids are exactly partitioned", () => {
     for (const value of [
       "",
       "paladin",
-      "rogue/outlaw",
+      "hunter/survival",
       "Rogue/Assassination",
       "Paladin/Protection",
       "Paladin/Retribution",
