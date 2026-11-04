@@ -191,6 +191,9 @@ describe("a Retribution Paladin alone", () => {
       "demonhunter-devourer-observed-decisions": 0,
       "druid-feral-observed-decisions": 0,
       "warlock-destruction-observed-decisions": 0,
+      "shaman-elemental-observed-decisions": 0,
+      "druid-balance-observed-decisions": 0,
+      "priest-shadow-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
     expectRetributionCell(cellOf(run.aggregate.cells, RETRIBUTION));
@@ -243,6 +246,9 @@ describe("a mixed roster — Assassination, Protection, Retribution, Fire and an
       "demonhunter-devourer-observed-decisions": 0,
       "druid-feral-observed-decisions": 0,
       "warlock-destruction-observed-decisions": 0,
+      "shaman-elemental-observed-decisions": 0,
+      "druid-balance-observed-decisions": 0,
+      "priest-shadow-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
   });

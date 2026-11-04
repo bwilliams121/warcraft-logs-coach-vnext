@@ -760,9 +760,9 @@
     {
       "specId": "shaman/elemental",
       "cohort": "D_CAST_ANCHORED",
-      "currentAnalyzerStatus": "UNREGISTERED",
+      "currentAnalyzerStatus": "INTERNAL_ONLY",
       "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
-      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "authorityAuditStatus": "AUTHORITY_AUDITED",
       "deepDiveInventoryStatus": "PARTIAL",
       "questions": [
         {
@@ -783,9 +783,9 @@
     {
       "specId": "priest/shadow",
       "cohort": "D_CAST_ANCHORED",
-      "currentAnalyzerStatus": "UNREGISTERED",
+      "currentAnalyzerStatus": "INTERNAL_ONLY",
       "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
-      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "authorityAuditStatus": "AUTHORITY_AUDITED",
       "deepDiveInventoryStatus": "PARTIAL",
       "questions": [
         {
@@ -806,9 +806,9 @@
     {
       "specId": "druid/balance",
       "cohort": "D_CAST_ANCHORED",
-      "currentAnalyzerStatus": "UNREGISTERED",
+      "currentAnalyzerStatus": "INTERNAL_ONLY",
       "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
-      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "authorityAuditStatus": "AUTHORITY_AUDITED",
       "deepDiveInventoryStatus": "PARTIAL",
       "questions": [
         {

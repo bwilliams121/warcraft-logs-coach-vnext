@@ -61,6 +61,9 @@ import pinnedFrostDeathKnightApl from "../../../src/simc/data/deathknight-frost.
 import pinnedDevourerDemonHunterApl from "../../../src/simc/data/demonhunter-devourer.apl.json";
 import pinnedFeralDruidApl from "../../../src/simc/data/druid-feral.apl.json";
 import pinnedDestructionWarlockApl from "../../../src/simc/data/warlock-destruction.apl.json";
+import pinnedElementalShamanApl from "../../../src/simc/data/shaman-elemental.apl.json";
+import pinnedBalanceDruidApl from "../../../src/simc/data/druid-balance.apl.json";
+import pinnedShadowPriestApl from "../../../src/simc/data/priest-shadow.apl.json";
 import pinnedOutlawRogueApl from "../../../src/simc/data/rogue-outlaw.apl.json";
 import pinnedEnhancementShamanApl from "../../../src/simc/data/shaman-enhancement.apl.json";
 import { AUTHORITY_DOMAINS, AUTHORITY_RESOLUTION_OUTCOMES } from "../../../src/findings/authority-domain.js";
@@ -412,6 +415,9 @@ export const OWNING_LAYERS = {
   SPEC_DEVOURER_DEMON_HUNTER: ["src/specs/demonhunter/devourer/"],
   SPEC_FERAL_DRUID: ["src/specs/druid/feral/"],
   SPEC_DESTRUCTION_WARLOCK: ["src/specs/warlock/destruction/"],
+  SPEC_ELEMENTAL_SHAMAN: ["src/specs/shaman/elemental/"],
+  SPEC_BALANCE_DRUID: ["src/specs/druid/balance/"],
+  SPEC_SHADOW_PRIEST: ["src/specs/priest/shadow/"],
   SPEC_OUTLAW_ROGUE: ["src/specs/rogue/outlaw/"],
   SPEC_ENHANCEMENT_SHAMAN: ["src/specs/shaman/enhancement/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
@@ -460,6 +466,9 @@ export const SPEC_LAYER_OF = {
   "demonhunter/devourer": "SPEC_DEVOURER_DEMON_HUNTER",
   "druid/feral": "SPEC_FERAL_DRUID",
   "warlock/destruction": "SPEC_DESTRUCTION_WARLOCK",
+  "shaman/elemental": "SPEC_ELEMENTAL_SHAMAN",
+  "druid/balance": "SPEC_BALANCE_DRUID",
+  "priest/shadow": "SPEC_SHADOW_PRIEST",
   "rogue/outlaw": "SPEC_OUTLAW_ROGUE",
   "shaman/enhancement": "SPEC_ENHANCEMENT_SHAMAN",
 } as const satisfies Record<SpecId, OwningLayer>;
@@ -3398,6 +3407,45 @@ export const ASSERTION_KINDS = {
       "The Destruction Warlock facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
   },
 
+  // ---- SPEC_ELEMENTAL_SHAMAN (ONB-D2, INTERNAL_ONLY) ---
+  "SPEC_ELEMENTAL_SHAMAN.SPEC_GATE": {
+    owningLayer: "SPEC_ELEMENTAL_SHAMAN",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Elemental Shaman facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
+  },
+
+  // ---- SPEC_BALANCE_DRUID (ONB-D2, INTERNAL_ONLY) ---
+  "SPEC_BALANCE_DRUID.SPEC_GATE": {
+    owningLayer: "SPEC_BALANCE_DRUID",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Balance Druid facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
+  },
+
+  // ---- SPEC_SHADOW_PRIEST (ONB-D2, INTERNAL_ONLY) ---
+  "SPEC_SHADOW_PRIEST.SPEC_GATE": {
+    owningLayer: "SPEC_SHADOW_PRIEST",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Shadow Priest facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
+  },
+
   // ---- SPEC_OUTLAW_ROGUE (ONB-C2, INTERNAL_ONLY) ---
   "SPEC_OUTLAW_ROGUE.SPEC_GATE": {
     owningLayer: "SPEC_OUTLAW_ROGUE",
@@ -4235,6 +4283,9 @@ export const PINNED_AUTHORITY_REVISIONS: Readonly<Record<string, string>> = {
   [pinnedDevourerDemonHunterApl.authorityId]: pinnedDevourerDemonHunterApl.artifactRevision,
   [pinnedFeralDruidApl.authorityId]: pinnedFeralDruidApl.artifactRevision,
   [pinnedDestructionWarlockApl.authorityId]: pinnedDestructionWarlockApl.artifactRevision,
+  [pinnedElementalShamanApl.authorityId]: pinnedElementalShamanApl.artifactRevision,
+  [pinnedBalanceDruidApl.authorityId]: pinnedBalanceDruidApl.artifactRevision,
+  [pinnedShadowPriestApl.authorityId]: pinnedShadowPriestApl.artifactRevision,
   [pinnedOutlawRogueApl.authorityId]: pinnedOutlawRogueApl.artifactRevision,
   [pinnedEnhancementShamanApl.authorityId]: pinnedEnhancementShamanApl.artifactRevision,
 };

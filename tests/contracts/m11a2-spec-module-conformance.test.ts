@@ -174,6 +174,9 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
   "druid/feral": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 1 },
   // ONB-D1: actor 12 of the same fight, a Destruction Warlock the committed context reports.
   "warlock/destruction": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 12 },
+  "shaman/elemental": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 8 },
+  "druid/balance": { artifactId: "wcl-fight-context-gtkb-fight-22", fightId: 22, sourceId: 27 },
+  "priest/shadow": { artifactId: "wcl-fight-context-gtkb-fight-22", fightId: 22, sourceId: 29 },
   // ONB-B3: actor 32 of the corpus gtKb fight 22 context, the Devourer Demon Hunter the committed
   // corpus context reports (also actors 20 and 79 of rXAf fight 13, uncommitted events).
   "demonhunter/devourer": { artifactId: "wcl-fight-context-gtkb-fight-22", fightId: 22, sourceId: 32 },
@@ -485,6 +488,7 @@ describe("what the tree exports today", () => {
       ["DEVOURER_DEMON_HUNTER_MODULE", "demonhunter/devourer", "INTERNAL_ONLY", 0],
       // ONB-A1: Cohort A's representative, INTERNAL_ONLY.
       ["HAVOC_DEMON_HUNTER_MODULE", "demonhunter/havoc", "PUBLIC", 0],
+      ["BALANCE_DRUID_MODULE", "druid/balance", "INTERNAL_ONLY", 0],
       // ONB-C1: Cohort C's representative, INTERNAL_ONLY.
       ["FERAL_DRUID_MODULE", "druid/feral", "INTERNAL_ONLY", 0],
       // HEAL-B1: healers on Restoration Shaman's architecture, INTERNAL_ONLY; Holy Paladin and Mistweaver Monk PUBLIC since HEAL-B1P.
@@ -502,11 +506,13 @@ describe("what the tree exports today", () => {
       // HEAL-B3: a healer on the same architecture that also reports observed Atonement, INTERNAL_ONLY.
       ["DISCIPLINE_PRIEST_MODULE", "priest/discipline", "INTERNAL_ONLY", 0],
       ["HOLY_PRIEST_MODULE", "priest/holy", "PUBLIC", 0],
+      ["SHADOW_PRIEST_MODULE", "priest/shadow", "INTERNAL_ONLY", 0],
       ["ASSASSINATION_MODULE", "rogue/assassination", "PUBLIC", 0],
       // ONB-C2: a Cohort C follower, INTERNAL_ONLY. No committed context names it.
       ["OUTLAW_ROGUE_MODULE", "rogue/outlaw", "INTERNAL_ONLY", 0],
       // ONB-A2: Cohort A's followers, INTERNAL_ONLY.
       ["SUBTLETY_ROGUE_MODULE", "rogue/subtlety", "INTERNAL_ONLY", 0],
+      ["ELEMENTAL_SHAMAN_MODULE", "shaman/elemental", "INTERNAL_ONLY", 0],
       // ONB-B2: a Cohort B follower, INTERNAL_ONLY.
       ["ENHANCEMENT_SHAMAN_MODULE", "shaman/enhancement", "INTERNAL_ONLY", 0],
       // HEAL-A: the first healer, INTERNAL_ONLY, binding no pinned decision authority; PUBLIC since HEAL-AP.

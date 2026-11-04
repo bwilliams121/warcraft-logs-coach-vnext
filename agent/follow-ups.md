@@ -29,6 +29,34 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After ONB-D2: what the Elemental, Balance and Shadow slices do not establish
+
+**Raised:** ONB-D2 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.
+
+**Evidence is not their gap, so none is on ONB-EV.** Seven Elemental, three Balance and two Shadow subjects are retained with combatant info (agent/architecture.md "ONB-D2"). Each promotion also needs what follows, then a new public entry through the unchanged gates.
+
+**ONB-S3 alone moves none of them.** The enemy count is not the first gate of any of the three:
+
+- **Elemental.** `default[0] spiritwalkers_grace,moving=1`, an option for a stream Warcraft Logs does not have. Whether a movement line can be stepped past without claiming anything about movement is a shared question: the line is off the GCD, and what it writes is a movement buff. Then `default[1] wind_shear` and `default[14] natures_swiftness`, off the GCD with no contract; `default[13] lightning_shield` on an aura; then the count at `default[17]`.
+- **Balance.** `default[13]`, `variable.opener`. Precombat sets it, and `default[7]` clears it when `buff.ca_inc.up`, so it needs Celestial Alignment's aura, and whether the opener already ran. Then `variable.mini` and `variable.cds`, on cooldowns, Eclipse and buffs; then the count at `default[16]` to `[18]`.
+- **Shadow.** `default[1]` on the count; `main[1]` on `fight_remains` and `target.time_to_die` (PREDICTIVE) and `variable.dots_up`, which reads `active_dot.*` and so the enemy set; `cds[7] power_infusion` with no contract; `main[3] shadow_word_madness` on `target_if`, which scores enemies. The ONB-S3 decision must cover `target_if=max:` for it.
+
+**Each one's own resource.** No wire contract row exists for Maelstrom (type 11), Astral Power (type 8) or Insanity (type 13). Each appears on casts at a completion, and hard casts generate them, so a reading needs an anchor-time model: at most a bounded interval across a cast. The shape of that is per resource, and what a reading means stays the specialization's.
+
+**The anchor's limits, as measured:**
+
+- **Every possibly-instant cast is UNKNOWN**: 984 Elemental, 108 Balance and 54 Shadow decisions ambiguous, and 65 Elemental with no begin at all. A later tranche narrows this only with evidence of the proc per cast: Lava Surge, Stormkeeper, Nature's Swiftness, Ancestral Swiftness and Arc Discharge for Elemental; Owlkin Frenzy, Ascendant Fires and Blooming Infusion for Balance; Shadowy Insight for Shadow. Each is an aura read at a completion, so it must be read at the right moment.
+- **No exact cast time.** Haste at a decision is not established.
+- **A channel's end is not read.** No bound is claimed for Mind Flay, Insanity, Void Torrent or Convoke, so occupancy after each is UNKNOWN to the next cast start. Shadow's `mind_flay,chain=1,interrupt_if=ticks>=2` is an option set no one reads.
+
+**Unmeasured hero trees and spells.** No Stormbringer, Keeper of the Grove or Voidweaver subject is retained, and no subject casts a moon, Wild Mushroom, Force of Nature, Convoke, Vampiric Touch, Void Torrent or Void Blast. A promotion must measure these or refuse them, as Havoc refuses Fel-Scarred. Tempest's, Void Blast's and the moons' reviews rest on pinned data alone. Also no subject casts Halo at Holy's row, Shadow binding 120644 on real evidence only.
+
+**Pins that want a look at promotion.** Elemental's Ascendance binds two rows, and the pin and the log disagree on which. `TARGETING_NOT_MODELLED` is the coverage's class for the refused `moving` option, because every unrecognised option falls there; a promotion's reports should not read that as a targeting problem.
+
+**Decision times are the anchor's**, as for Destruction, so a public promotion must check its readers of `fightTimeMs`.
+
+---
+
 ## After ONB-D1: what the Destruction Warlock slice does not establish
 
 **Raised:** ONB-D1 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.
@@ -47,7 +75,7 @@ current total (5,748,495 bytes), with what each row buys.
 **The anchor's own limits, as measured:**
 
 - **Every Chaos Bolt and Incinerate is UNKNOWN (111 of 220 decisions)**, because each has a -100% cast-time row no pinned source excludes. A later tranche narrows this only with versioned applicability evidence, which the retained sources cannot give: they hold no set-bonus table. Excluding 281440 and 364349 would free Chaos Bolt. Incinerate also needs Backlash's 387385 and Chaotic Inferno's 1244860 read per cast, from observed auras neither measured nor bound.
-- **The shared timeline pairs a possibly-instant completion with an earlier begin.** With `castTimeAt` UNKNOWN, `buildCastTimeline` still reports `OBSERVED_BEGINCAST` and a CASTING span, and enumerates an instant execution only for a begin in the completion's own millisecond. `destructionDecisionAnchor` refuses that reading here. If a Cohort D follower needs the same, this belongs in ONB-S4's shared rule, with its pinned measurements re-taken, and any reader of `occupancyAt` must meet it first. Nothing here reads occupancy.
+- **Resolved by ONB-D2: the shared timeline no longer pairs a possibly-instant completion with an earlier begin.** ONB-D2's three followers all needed it, so it moved into ONB-S4's shared rule, its pinned measurements re-taken. Any later reader of `occupancyAt` meets it there.
 - **A hard cast begun before the pull stays UNKNOWN.** Both subjects' opening Soul Fire.
 - **A begin that never completes is not a decision.** Eleven are `INTERRUPTED`. Whether stopping a Chaos Bolt was a mistake is a question nobody has asked here.
 - **No exact cast time.** Haste at a decision is not established, so `action.*.execute_time` and `action.*.cast_time` stay unknown, and a begin-less cast is never placed.
@@ -55,7 +83,7 @@ current total (5,748,495 bytes), with what each row buys.
 
 **Decision times are the anchor's.** A public promotion must check its readers of `fightTimeMs`: `position` and `locator` name the completion and the time names the begin, which no earlier specialization did.
 
-**Cohort D followers.** `anchorNotEstablished` is specialization code here, and the blocker is shared. If ONB-D2 repeats it verbatim, that is the moment to move the helper, not before.
+**Cohort D followers.** ONB-D2 repeated `anchorNotEstablished` verbatim, so it moved: `decisionAnchorNotEstablished` in `first-gcd-selection.ts`.
 
 **Ritual Clipping** stays `UNRESOLVED_DIABOLIST_HERO_TREE`, a deep-dive question (`agent/m11-spec-coaching-inventory.md`).
 

@@ -716,6 +716,33 @@
       "assertions": 1,
       "cases": 1,
       "failed": 0,
+      "kindsExercised": ["SPEC_ELEMENTAL_SHAMAN.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_ELEMENTAL_SHAMAN",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_BALANCE_DRUID.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_BALANCE_DRUID",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_SHADOW_PRIEST.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_SHADOW_PRIEST",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
       "kindsExercised": ["SPEC_OUTLAW_ROGUE.SPEC_GATE"],
       "notExecuted": 0,
       "owningLayer": "SPEC_OUTLAW_ROGUE",
@@ -731,13 +758,13 @@
       "passed": 1
     },
     {
-      "assertions": 34,
-      "cases": 30,
+      "assertions": 37,
+      "cases": 33,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 34
+      "passed": 37
     },
     {
       "assertions": 14,
@@ -775,6 +802,20 @@
       ],
       "authority": null,
       "caseId": "application-service.augmentation-evoker-registration-is-public-since-m13-f",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.balance-druid-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -869,6 +910,20 @@
       ],
       "authority": null,
       "caseId": "application-service.discipline-priest-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.elemental-shaman-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -1147,6 +1202,20 @@
       "caseId": "application-service.retribution-paladin-subject-is-analyzed-under-player-context",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-45s"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.shadow-priest-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
       "artifactId": "wcl-protection-paladin-a7r6-opener",
@@ -3728,6 +3797,20 @@
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_BALANCE_DRUID.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-balance-druid.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_BALANCE_DRUID",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
       "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
       "assertions": [
         {
@@ -5572,6 +5655,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_ELEMENTAL_SHAMAN.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-elemental-shaman.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_ELEMENTAL_SHAMAN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE",
           "ordinal": 0,
           "status": "PASSED"
@@ -7262,6 +7359,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_SHADOW_PRIEST.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-shadow-priest.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_SHADOW_PRIEST",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_SUBTLETY_ROGUE.SPEC_GATE",
           "ordinal": 0,
           "status": "PASSED"
@@ -7606,13 +7717,16 @@
     "SIMC_APL_DEATHKNIGHT_FROST": "simc-33622e9d-1",
     "SIMC_APL_DEMONHUNTER_DEVOURER": "simc-33622e9d-1",
     "SIMC_APL_DEMONHUNTER_HAVOC": "simc-33622e9d-1",
+    "SIMC_APL_DRUID_BALANCE": "simc-33622e9d-1",
     "SIMC_APL_DRUID_FERAL": "simc-33622e9d-1",
     "SIMC_APL_MONK_BREWMASTER": "simc-33622e9d-1",
     "SIMC_APL_PALADIN_PROTECTION": "simc-33622e9d-1",
     "SIMC_APL_PALADIN_RETRIBUTION": "simc-33622e9d-1",
+    "SIMC_APL_PRIEST_SHADOW": "simc-33622e9d-1",
     "SIMC_APL_ROGUE_ASSASSINATION": "simc-33622e9d-1",
     "SIMC_APL_ROGUE_OUTLAW": "simc-33622e9d-1",
     "SIMC_APL_ROGUE_SUBTLETY": "simc-33622e9d-1",
+    "SIMC_APL_SHAMAN_ELEMENTAL": "simc-33622e9d-1",
     "SIMC_APL_SHAMAN_ENHANCEMENT": "simc-33622e9d-1",
     "SIMC_APL_WARLOCK_DESTRUCTION": "simc-33622e9d-1",
     "SIMC_APL_WARRIOR_ARMS": "simc-33622e9d-1",
@@ -7626,13 +7740,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 816,
-    "cases": 221,
+    "assertions": 822,
+    "cases": 227,
     "declared": 0,
-    "executable": 816,
+    "executable": 822,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 816
+    "passed": 822
   }
 }

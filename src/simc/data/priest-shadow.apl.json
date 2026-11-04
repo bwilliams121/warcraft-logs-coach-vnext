@@ -1,0 +1,463 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_PRIEST_SHADOW",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "priest",
+    "specName": "shadow"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "UNKNOWN",
+    "sourcePath": "engine/class_modules/apl/apl_priest.cpp",
+    "sourceSha256": "eff8fcc1db8f4ff8a992a48f7c66fc1595cd7b6ca7b0136b12020e9fd0540516",
+    "sourceByteLength": 38115,
+    "regionStartMarker": "//shadow_apl_start",
+    "regionEndMarker": "//shadow_apl_end",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "regionSha256": "638c4a8f9e9907dcb3c9299b2e3e2485999cbe8fcb910c3d5288d840cd92c33e",
+    "livePtrPolicy": "PTR_BODY_DIFFERS",
+    "dispatchSource": {
+      "sourcePath": "engine/class_modules/priest/sc_priest.cpp",
+      "sourceSha256": "520c2ad3599926a3f8c4a0620c78edd61c006685ae8dd855ccae1b80e00db76d"
+    }
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "variable,name=holding_tentacle_slam,op=set,value=raid_event.adds.in<15",
+          "comment": null,
+          "sourceLine": 69
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "call_action_list,name=aoe,if=active_enemies>2",
+          "comment": null,
+          "sourceLine": 70
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "run_action_list,name=main",
+          "comment": null,
+          "sourceLine": 71
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": null,
+          "sourceLine": 56
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "shadowform,if=!buff.shadowform.up",
+          "comment": null,
+          "sourceLine": 57
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=trinket_1_buffs,value=(trinket.1.has_buff.intellect|trinket.1.has_buff.mastery|trinket.1.has_buff.versatility|trinket.1.has_buff.haste|trinket.1.has_buff.crit|trinket.1.is.signet_of_the_priory)&(trinket.1.cooldown.duration>=20)",
+          "comment": null,
+          "sourceLine": 58
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=trinket_2_buffs,value=(trinket.2.has_buff.intellect|trinket.2.has_buff.mastery|trinket.2.has_buff.versatility|trinket.2.has_buff.haste|trinket.2.has_buff.crit|trinket.2.is.signet_of_the_priory)&(trinket.2.cooldown.duration>=20)",
+          "comment": null,
+          "sourceLine": 59
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=dr_force_prio,default=0,op=reset",
+          "comment": null,
+          "sourceLine": 60
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "variable,name=me_force_prio,default=0,op=reset",
+          "comment": null,
+          "sourceLine": 61
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "variable,name=max_vts,default=12,op=reset",
+          "comment": null,
+          "sourceLine": 62
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "variable,name=is_vt_possible,default=0,op=reset",
+          "comment": null,
+          "sourceLine": 63
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "arcane_torrent",
+          "comment": null,
+          "sourceLine": 64
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "potion,if=potion.liquid_luster",
+          "comment": null,
+          "sourceLine": 65
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "mind_blast,if=set_bonus.mid2_4pc",
+          "comment": "Crushing Void from Tentacle Slam is reset on pull, open with Mind Blast instead.",
+          "sourceLine": 66
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "tentacle_slam",
+          "comment": null,
+          "sourceLine": 67
+        }
+      ]
+    },
+    {
+      "listName": "aoe",
+      "receiverIdentifier": "aoe",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "call_action_list,name=aoe_variables",
+          "comment": null,
+          "sourceLine": 73
+        }
+      ]
+    },
+    {
+      "listName": "aoe_variables",
+      "receiverIdentifier": "aoe_variables",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "variable,name=max_vts,op=set,default=12,value=spell_targets.vampiric_touch>?12",
+          "comment": null,
+          "sourceLine": 75
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "variable,name=is_vt_possible,op=set,value=0,default=1",
+          "comment": null,
+          "sourceLine": 76
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=is_vt_possible,op=set,value=1,target_if=max:(target.time_to_die*dot.vampiric_touch.refreshable),if=target.time_to_die>=18",
+          "comment": null,
+          "sourceLine": 77
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=dots_up,op=set,value=(active_dot.vampiric_touch>=variable.max_vts|!variable.is_vt_possible)&(active_dot.shadow_word_pain>=active_dot.vampiric_touch)",
+          "comment": "TODO: Revamp to fix undesired behavior with unstacked fights",
+          "sourceLine": 78
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=holding_tentacle_slam,op=set,value=(variable.max_vts-active_dot.vampiric_touch)<4&raid_event.adds.in>15|raid_event.adds.in<10&raid_event.adds.count>(variable.max_vts-active_dot.vampiric_touch),if=variable.holding_tentacle_slam&action.tentacle_slam.enabled&raid_event.adds.exists",
+          "comment": null,
+          "sourceLine": 79
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "variable,name=manual_vts_applied,op=set,value=(active_dot.vampiric_touch+6*!variable.holding_tentacle_slam)>=variable.max_vts|!variable.is_vt_possible",
+          "comment": null,
+          "sourceLine": 80
+        }
+      ]
+    },
+    {
+      "listName": "cds",
+      "receiverIdentifier": "cds",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "potion,if=(((buff.voidform.up|!talent.voidform)&buff.power_infusion.up)&(fight_remains>=320|time_to_bloodlust>=320|buff.bloodlust.react)|fight_remains<=30)",
+          "comment": "TODO: Add holding condition for weird fight times to potion with execute",
+          "sourceLine": 82
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "fireblood,if=((buff.voidform.up|!talent.voidform)&buff.power_infusion.up)|fight_remains<=8",
+          "comment": null,
+          "sourceLine": 83
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "berserking,if=((buff.voidform.up|!talent.voidform)&buff.power_infusion.up)|fight_remains<=12",
+          "comment": null,
+          "sourceLine": 84
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "blood_fury,if=((buff.voidform.up|!talent.voidform)&buff.power_infusion.up)|fight_remains<=15",
+          "comment": null,
+          "sourceLine": 85
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "ancestral_call,if=((buff.voidform.up|!talent.voidform)&buff.power_infusion.up)|fight_remains<=15",
+          "comment": null,
+          "sourceLine": 86
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "invoke_external_buff,name=power_infusion,if=(buff.voidform.up|!talent.voidform)&!buff.power_infusion.up",
+          "comment": null,
+          "sourceLine": 87
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "invoke_external_buff,name=bloodlust,if=buff.power_infusion.up&fight_remains<120|fight_remains<=40",
+          "comment": null,
+          "sourceLine": 88
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "power_infusion,if=(buff.voidform.up|!talent.voidform)&!buff.power_infusion.up",
+          "comment": "Sync Power Infusion with Voidform",
+          "sourceLine": 89
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "halo",
+          "comment": null,
+          "sourceLine": 90
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "use_item,name=stormbound_emblem_of_dazar,if=cooldown.voidform.remains<=2&active_dot.shadow_word_pain>=active_dot.vampiric_touch&!buff.crushing_void.up",
+          "comment": null,
+          "sourceLine": 91
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "voidform,if=active_dot.shadow_word_pain>=active_dot.vampiric_touch",
+          "comment": null,
+          "sourceLine": 92
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "call_action_list,name=trinkets",
+          "comment": null,
+          "sourceLine": 93
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "desperate_prayer,if=health.pct<=75",
+          "comment": "Use Desperate Prayer to heal up should Shadow Word: Death or other damage bring you below 75%",
+          "sourceLine": 94
+        }
+      ]
+    },
+    {
+      "listName": "heal_for_tof",
+      "receiverIdentifier": "heal_for_tof",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "holy_nova,if=talent.lightburst",
+          "comment": "Use Holy Nova during Halo to acquire Twist of Fate when Lightburst can heal an ally and Twist of Fate is not active.",
+          "sourceLine": 96
+        }
+      ]
+    },
+    {
+      "listName": "main",
+      "receiverIdentifier": "main",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "variable,name=dots_up,op=set,value=active_dot.vampiric_touch=active_enemies&active_dot.shadow_word_pain>=active_dot.vampiric_touch,if=active_enemies<3",
+          "comment": null,
+          "sourceLine": 98
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "call_action_list,name=cds,if=fight_remains<30|target.time_to_die>15&(!variable.holding_tentacle_slam|active_enemies>2)&variable.dots_up",
+          "comment": null,
+          "sourceLine": 99
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "shadow_word_death,target_if=max:(target.health.pct<=20)*100+dot.shadow_word_madness.ticking,if=(priest.force_devour_matter|target.has_absorb)&talent.devour_matter",
+          "comment": "High Priority Shadow Word: Death when Devour Matter is active (target shielded or forced)",
+          "sourceLine": 100
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "shadow_word_madness,target_if=max:target.time_to_die*(dot.shadow_word_madness.remains<=gcd.max*2|variable.dr_force_prio|!talent.distorted_reality&variable.me_force_prio),if=active_dot.shadow_word_madness<=1&dot.shadow_word_madness.remains<=gcd.max|insanity.deficit<=35&(cooldown.voidform.remains>25|target.time_to_die<25|active_enemies>1|insanity.deficit<=5)|buff.mind_devourer.react|!raid_event.adds.exists&target.time_to_die<=10|buff.entropic_rift.up&(cooldown.voidform.remains>=75|!talent.ancient_madness)|buff.voidform.up",
+          "comment": null,
+          "sourceLine": 101
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "tentacle_slam,target_if=min:dot.vampiric_touch.remains,if=dot.vampiric_touch.refreshable&(!in_flight|active_dot.vampiric_touch+6<active_enemies)|cooldown.tentacle_slam.full_recharge_time<=gcd.max*2",
+          "comment": null,
+          "sourceLine": 102
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "void_torrent,target_if=max:(dot.shadow_word_madness.remains*1000+target.time_to_die),if=!variable.holding_tentacle_slam&variable.dots_up",
+          "comment": "Use Void Torrent if it will get near full Mastery Value",
+          "sourceLine": 103
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "shadow_word_pain,target_if=max:(refreshable*100000+target.time_to_die+dot.vampiric_touch.ticking*10000),if=talent.invoked_nightmare&refreshable&target.time_to_die>12&(dot.vampiric_touch.ticking|action.tentacle_slam.in_flight)",
+          "comment": "Put out Shadow Word: Pain on enemies that will live at least 12s as a filler when talented into Invoked Nightmare.",
+          "sourceLine": 104
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "void_volley,if=cooldown.voidform.up",
+          "comment": null,
+          "sourceLine": 105
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "void_blast,target_if=max:(dot.shadow_word_madness.remains*1000+target.time_to_die)",
+          "comment": null,
+          "sourceLine": 106
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "mind_blast,target_if=max:dot.shadow_word_madness.remains,if=(!buff.mind_devourer.react|!talent.mind_devourer)&(!talent.void_blast|!talent.thought_harvester|cooldown.void_torrent.remains>=gcd.max*2|variable.holding_tentacle_slam|!variable.dots_up)",
+          "comment": null,
+          "sourceLine": 107
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "mind_flay_insanity,target_if=max:dot.shadow_word_madness.remains",
+          "comment": null,
+          "sourceLine": 108
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "tentacle_slam,target_if=min:dot.vampiric_touch.remains,if=(talent.void_apparitions|talent.maddening_tentacles)&(raid_event.adds.in>30|raid_event.adds.in>5&cooldown.tentacle_slam.full_recharge_time<=gcd.max*2)",
+          "comment": "Use Tentacle Slam for Void Apparitions or Maddening Tentacles value, holding for adds if needed",
+          "sourceLine": 109
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "vampiric_touch,target_if=max:(refreshable*10000+target.time_to_die)*(dot.vampiric_touch.ticking|!variable.dots_up),if=refreshable&target.time_to_die>12&(dot.vampiric_touch.ticking|!variable.dots_up)&(variable.max_vts>0|active_enemies=1)&(action.tentacle_slam.usable_in>=dot.vampiric_touch.remains|variable.holding_tentacle_slam|!action.tentacle_slam.enabled)",
+          "comment": "Put out Vampiric Touch on enemies that will live at least 12s and Tentacle Slam is not available soon",
+          "sourceLine": 110
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "call_action_list,name=heal_for_tof,if=!buff.twist_of_fate.up&buff.twist_of_fate_can_trigger_on_ally_heal.up&talent.halo",
+          "comment": "Healing spell action list for proccing Twist of Fate. Set priest.twist_of_fate_heal_rppm=<rppm> to make this be used.",
+          "sourceLine": 111
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "vampiric_touch,target_if=max:(refreshable*10000+target.time_to_die),if=refreshable&target.time_to_die>12",
+          "comment": "Put out Vampiric Touch on enemies that will live at least 12s as a filler action.",
+          "sourceLine": 112
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "shadow_word_death,target_if=min:target.health.pct,if=(pet.mindbender.active|pet.voidwraith.active|pet.shadowfiend.active)&talent.inescapable_torment|target.health.pct<(20+15*talent.deathspeaker)&talent.shadowfiend&talent.idol_of_yshaarj",
+          "comment": null,
+          "sourceLine": 113
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "shadow_word_death,target_if=min:target.health.pct,if=(target.health.pct<(20+15*talent.deathspeaker))",
+          "comment": null,
+          "sourceLine": 114
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "void_volley,if=!talent.resonant_energy|cooldown.voidform.remains<60|buff.voidform.up|buff.resonant_energy_damage.react|buff.crushing_void.stack>=4|fight_remains<45",
+          "comment": "Bank Void Volley charges for Resonant Energy, spending them after the proc is reaction-ready, during Voidform, near the next Voidform, at four Crushing Void stacks, or near fight end",
+          "sourceLine": 115
+        },
+        {
+          "priorityOrdinal": 18,
+          "actionStringVerbatim": "mind_flay,target_if=max:dot.shadow_word_madness.remains,chain=1,interrupt_immediate=1,interrupt_if=ticks>=2,interrupt_global=1",
+          "comment": null,
+          "sourceLine": 116
+        },
+        {
+          "priorityOrdinal": 19,
+          "actionStringVerbatim": "tentacle_slam,if=raid_event.adds.in>20",
+          "comment": "Use Tentacle Slam while moving as a low-priority action when adds will not spawn in 20 seconds.",
+          "sourceLine": 117
+        },
+        {
+          "priorityOrdinal": 20,
+          "actionStringVerbatim": "shadow_word_death,target_if=target.health.pct<20",
+          "comment": "Use Shadow Word: Death while moving as a low-priority action in execute",
+          "sourceLine": 118
+        },
+        {
+          "priorityOrdinal": 21,
+          "actionStringVerbatim": "shadow_word_death,target_if=max:dot.shadow_word_madness.remains",
+          "comment": "Use Shadow Word: Death while moving as a low-priority action",
+          "sourceLine": 119
+        },
+        {
+          "priorityOrdinal": 22,
+          "actionStringVerbatim": "shadow_word_pain,target_if=min:remains",
+          "comment": "Use Shadow Word: Pain while moving as a low-priority action",
+          "sourceLine": 120
+        }
+      ]
+    },
+    {
+      "listName": "trinkets",
+      "receiverIdentifier": "trinkets",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "use_item,name=galactic_gladiators_badge_of_ferocity,if=(buff.voidform.up|buff.power_infusion.remains>=10|(talent.voidform&cooldown.voidform.remains>10))|fight_remains<20",
+          "comment": null,
+          "sourceLine": 122
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "use_item,name=hex_lords_dooming_idol,if=buff.power_infusion.up&buff.hex_lords_doom.stack>5|fight_remains<=30",
+          "comment": null,
+          "sourceLine": 123
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_item,name=font_of_venomous_rage",
+          "comment": null,
+          "sourceLine": 124
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "use_item,name=vexhuls_everflowing_gland",
+          "comment": null,
+          "sourceLine": 125
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "use_items,if=(buff.voidform.up|buff.power_infusion.remains>=10|equipped.neural_synapse_enhancer&buff.entropic_rift.up)|fight_remains<20",
+          "comment": null,
+          "sourceLine": 126
+        }
+      ]
+    }
+  ]
+}

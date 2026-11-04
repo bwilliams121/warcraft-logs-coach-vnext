@@ -55,10 +55,7 @@ import {
   DESTRUCTION_CAPABILITIES,
   standaloneDestructionAuthorityAccess,
 } from "../../../src/specs/warlock/destruction/authority-bindings.js";
-import {
-  destructionCastAnchorProfile,
-  destructionDecisionAnchor,
-} from "../../../src/specs/warlock/destruction/cast-anchor-profile.js";
+import { destructionCastAnchorProfile } from "../../../src/specs/warlock/destruction/cast-anchor-profile.js";
 import { destructionNonDomainApplicabilityFor } from "../../../src/specs/warlock/destruction/domain-boundary.js";
 import { destructionFirstGcdSelectionAt } from "../../../src/specs/warlock/destruction/first-gcd-adapter.js";
 import { initialDestructionState } from "../../../src/specs/warlock/destruction/first-gcd-state.js";
@@ -572,20 +569,6 @@ describe("what the profile proves about a cast", () => {
       ]);
       expect(analysis.resolved[0]?.anchor).toMatchObject({ state: "UNKNOWN" });
     }
-  });
-
-  it("an accepted anchor passes through, and only a possibly-instant begin pairing is refused", () => {
-    const established = {
-      state: "ESTABLISHED",
-      source: "OBSERVED_BEGINCAST",
-      reportTimeMs: 2000,
-      beginPosition: 1,
-      beginLocator: null,
-    } as const;
-    expect(destructionDecisionAnchor(established, SOUL_FIRE, 3000)).toBe(established);
-    expect(destructionDecisionAnchor(established, CHAOS_BOLT, 3000)).toMatchObject({ state: "UNKNOWN" });
-    const instant = { ...established, source: "INSTANT_COMPLETION", reportTimeMs: 3000 } as const;
-    expect(destructionDecisionAnchor(instant, WITHER, 3000)).toBe(instant);
   });
 
   it("no cast time is ever exact, so no anchor is ever derived from a completion", () => {

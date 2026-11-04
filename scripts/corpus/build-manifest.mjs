@@ -7163,6 +7163,120 @@ const BREWMASTER_CASES = [
     "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Destruction Warlock list.",
     { related: ["tests/unit/specs/onb-d1-destruction-warlock.test.ts"] },
   ),
+  // ---- SPEC_ELEMENTAL_SHAMAN (ONB-D2, INTERNAL_ONLY) ---
+  kase(
+    "application-service.elemental-shaman-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Elemental Shaman registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "shaman/elemental",
+        expected: {
+          internalAnalyzerId: "shaman-elemental-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    'Elemental Shaman is registered INTERNAL_ONLY in ONB-D2, a Cohort D follower on the shared cast anchor. No decision of it resolves. Its retained subjects are replayed offline and not committed (agent/follow-ups.md "After ONB-D2").',
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-elemental-shaman.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_ELEMENTAL_SHAMAN",
+    "src/specs/shaman/elemental/observed-analysis.ts analyzeObservedElementalShamanDecisions (the spec gate)",
+    "The Elemental Shaman facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_ELEMENTAL_SHAMAN.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Elemental Shaman list.",
+    { related: ["tests/unit/specs/onb-d2-elemental-shaman.test.ts"] },
+  ),
+  // ---- SPEC_BALANCE_DRUID (ONB-D2, INTERNAL_ONLY) ---
+  kase(
+    "application-service.balance-druid-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Balance Druid registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "druid/balance",
+        expected: {
+          internalAnalyzerId: "druid-balance-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    'Balance Druid is registered INTERNAL_ONLY in ONB-D2, a Cohort D follower on the shared cast anchor. No decision of it resolves. Its retained subjects are replayed offline and not committed (agent/follow-ups.md "After ONB-D2").',
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-balance-druid.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_BALANCE_DRUID",
+    "src/specs/druid/balance/observed-analysis.ts analyzeObservedBalanceDruidDecisions (the spec gate)",
+    "The Balance Druid facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_BALANCE_DRUID.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Balance Druid list.",
+    { related: ["tests/unit/specs/onb-d2-balance-druid.test.ts"] },
+  ),
+  // ---- SPEC_SHADOW_PRIEST (ONB-D2, INTERNAL_ONLY) ---
+  kase(
+    "application-service.shadow-priest-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Shadow Priest registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "priest/shadow",
+        expected: {
+          internalAnalyzerId: "priest-shadow-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    'Shadow Priest is registered INTERNAL_ONLY in ONB-D2, a Cohort D follower on the shared cast anchor. No decision of it resolves. Its retained subjects are replayed offline and not committed (agent/follow-ups.md "After ONB-D2").',
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-shadow-priest.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_SHADOW_PRIEST",
+    "src/specs/priest/shadow/observed-analysis.ts analyzeObservedShadowPriestDecisions (the spec gate)",
+    "The Shadow Priest facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_SHADOW_PRIEST.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Shadow Priest list.",
+    { related: ["tests/unit/specs/onb-d2-shadow-priest.test.ts"] },
+  ),
   // ---- SPEC_OUTLAW_ROGUE (ONB-C2, INTERNAL_ONLY) ---
   kase(
     "application-service.outlaw-rogue-registration-is-internal-only",

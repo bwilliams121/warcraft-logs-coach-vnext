@@ -3963,6 +3963,729 @@ const WARLOCK_DESTRUCTION_SOURCES = {
 
 const WARLOCK_DESTRUCTION_MODULE_PATH = "engine/class_modules/warlock/sc_warlock_actions.cpp";
 
+const SHAMAN_ELEMENTAL_SOURCES = SHAMAN_SOURCES;
+
+/**
+ * The Elemental Shaman facts (ONB-D2).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the pinned Elemental list
+ * (apl_shaman.cpp `elemental`) executes. Facts a reader should not have to rediscover:
+ *
+ *   - FLAME SHOCK BINDS THE CLASS ROW 470411, as Enhancement's does. Every retained subject that casts it logs both 470411 and
+ *     188389 in one press, which corroborates the binding: 188389 has no lane record here and is excluded.
+ *   - ASCENDANCE BINDS TWO ROWS. The constructor reads find_spell( 1219480 ) for Elemental (sc_shaman.cpp:11419), and every
+ *     retained subject logs 114050. Both are _gcd 1500, so the lane does not depend on which, and neither is called wrong.
+ *   - EARTHQUAKE IS ONE OF TWO ROWS: the talent node offers 61882 and 462620.
+ *   - SPIRITWALKER'S GRACE, WIND SHEAR, NATURE'S SWIFTNESS AND ANCESTRAL SWIFTNESS ARE `_gcd` 0, SO THEY ARE NON_GCD.
+ *   - THE RACIAL, POTION, ITEM AND EXTERNAL-BUFF TOKENS ARE NOT BOUND. The imbue and the ward appear only in precombat.
+ */
+const SHAMAN_ELEMENTAL_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 79206, displayNameEn: "Spiritwalker's Grace", baseGcdMs: 0 },
+    { abilityGameId: 57994, displayNameEn: "Wind Shear", baseGcdMs: 0 },
+    { abilityGameId: 192106, displayNameEn: "Lightning Shield", baseGcdMs: 1500 },
+    { abilityGameId: 378081, displayNameEn: "Nature's Swiftness", baseGcdMs: 0 },
+    { abilityGameId: 443454, displayNameEn: "Ancestral Swiftness", baseGcdMs: 0 },
+    { abilityGameId: 191634, displayNameEn: "Stormkeeper", baseGcdMs: 1500 },
+    { abilityGameId: 470411, displayNameEn: "Flame Shock", baseGcdMs: 1500 },
+    { abilityGameId: 470057, displayNameEn: "Voltaic Blaze", baseGcdMs: 1500 },
+    { abilityGameId: 114050, displayNameEn: "Ascendance", baseGcdMs: 1500 },
+    { abilityGameId: 1219480, displayNameEn: "Ascendance", baseGcdMs: 1500 },
+    { abilityGameId: 117014, displayNameEn: "Elemental Blast", baseGcdMs: 1500 },
+    { abilityGameId: 61882, displayNameEn: "Earthquake", baseGcdMs: 1500 },
+    { abilityGameId: 462620, displayNameEn: "Earthquake", baseGcdMs: 1500 },
+    { abilityGameId: 51505, displayNameEn: "Lava Burst", baseGcdMs: 1500 },
+    { abilityGameId: 452201, displayNameEn: "Tempest", baseGcdMs: 1500 },
+    { abilityGameId: 188443, displayNameEn: "Chain Lightning", baseGcdMs: 1500 },
+    { abilityGameId: 196840, displayNameEn: "Frost Shock", baseGcdMs: 1500 },
+    { abilityGameId: 8042, displayNameEn: "Earth Shock", baseGcdMs: 1500 },
+    { abilityGameId: 188196, displayNameEn: "Lightning Bolt", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "spiritwalkers_grace",
+      candidateAbilityGameIds: [79206],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "create_action / spiritwalkers_grace_t",
+      startLine: 10423,
+      endLine: 10423,
+      sourceNote:
+        'create_action dispatches "spiritwalkers_grace" to spiritwalkers_grace_t: built on player->talent.spiritwalkers_grace (:7761); _CT( "Spiritwalker\'s Grace" ) at :11166.',
+    },
+    {
+      simcToken: "wind_shear",
+      candidateAbilityGameIds: [57994],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "create_action / wind_shear_t",
+      startLine: 10364,
+      endLine: 10364,
+      sourceNote:
+        'create_action dispatches "wind_shear" to wind_shear_t: built on player->talent.wind_shear (:8509); _CT( "Wind Shear" ) at :11157. Its string form in the list is emitted whatever the class tables say.',
+    },
+    {
+      simcToken: "lightning_shield",
+      candidateAbilityGameIds: [192106],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "create_action / lightning_shield_t",
+      startLine: 10403,
+      endLine: 10403,
+      sourceNote:
+        'create_action dispatches "lightning_shield" to lightning_shield_t: built on player->find_class_spell( "Lightning Shield" ) (:4788), class_spells.inc row 192106.',
+    },
+    {
+      simcToken: "natures_swiftness",
+      candidateAbilityGameIds: [378081],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "create_action / natures_swiftness_t",
+      startLine: 10370,
+      endLine: 10370,
+      sourceNote:
+        'create_action dispatches "natures_swiftness" to natures_swiftness_t: built on player->talent.natures_swiftness (:8118); _CT( "Nature\'s Swiftness" ) at :11182.',
+    },
+    {
+      simcToken: "ancestral_swiftness",
+      candidateAbilityGameIds: [443454],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "create_action / ancestral_swiftness_t",
+      startLine: 10441,
+      endLine: 10441,
+      sourceNote:
+        'create_action dispatches "ancestral_swiftness" to ancestral_swiftness_t: built on player->find_spell( 443454 ) (:8148). Its ready() refuses without the hero talent, a usability claim this slice does not make.',
+    },
+    {
+      simcToken: "stormkeeper",
+      candidateAbilityGameIds: [191634],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "create_action / stormkeeper_t",
+      startLine: 10362,
+      endLine: 10362,
+      sourceNote:
+        'create_action dispatches "stormkeeper" to stormkeeper_t: built on player->find_spell( 191634 ) (:8733). Its ready() refuses without talent.stormkeeper, a usability claim this slice does not make.',
+    },
+    {
+      simcToken: "flame_shock",
+      candidateAbilityGameIds: [470411],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "create_action / flame_shock_t",
+      startLine: 10352,
+      endLine: 10352,
+      sourceNote:
+        'create_action dispatches "flame_shock" to flame_shock_t: built on player->find_spell( 188389 ), a record whose _gcd is 0; its constructor takes the cooldown and trigger_gcd from find_class_spell( "Flame Shock" ), class_spells.inc row 470411, _gcd 1500. So this token binds the class row. The retained Elemental subjects log both ids in one press, so a logged 188389 has no lane record and is excluded.',
+    },
+    {
+      simcToken: "voltaic_blaze",
+      candidateAbilityGameIds: [470057],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "create_action / voltaic_blaze_t",
+      startLine: 10417,
+      endLine: 10417,
+      sourceNote:
+        'create_action dispatches "voltaic_blaze" to voltaic_blaze_t: built on player->talent.voltaic_blaze (:10112); { talent.voltaic_blaze, "Voltaic Blaze" } at :11237.',
+    },
+    {
+      simcToken: "ascendance",
+      candidateAbilityGameIds: [114050, 1219480],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "create_action / ascendance_t",
+      startLine: 10341,
+      endLine: 10341,
+      sourceNote:
+        'create_action dispatches "ascendance" to ascendance_t: built on player->spell.ascendance (:8559); spell.ascendance = find_spell( 1219480 ) for Elemental at :11419. Every retained subject logs 114050, so both rows bind; both are _gcd 1500. Its ready() refuses without talent.ascendance, a usability claim this slice does not make.',
+    },
+    {
+      simcToken: "elemental_blast",
+      candidateAbilityGameIds: [117014],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "create_action / elemental_blast_t",
+      startLine: 10350,
+      endLine: 10350,
+      sourceNote:
+        'create_action dispatches "elemental_blast" to elemental_blast_t: built on player->find_spell( 117014 ). Its ready() refuses without talent.elemental_blast, a usability claim this slice does not make.',
+    },
+    {
+      simcToken: "earthquake",
+      candidateAbilityGameIds: [61882, 462620],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "create_action / earthquake_t",
+      startLine: 10381,
+      endLine: 10381,
+      sourceNote:
+        'create_action dispatches "earthquake" to earthquake_t: built on talent.earthquake_reticle or talent.earthquake_target (:7956); find_talent_spell( SPECIALIZATION, 61882 ) and ( SPECIALIZATION, 462620 ) at :11334-11335, one choice node.',
+    },
+    {
+      simcToken: "lava_burst",
+      candidateAbilityGameIds: [51505],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "create_action / lava_burst_t",
+      startLine: 10385,
+      endLine: 10385,
+      sourceNote:
+        'create_action dispatches "lava_burst" to lava_burst_t: built on player->talent.lava_burst (:7087); _CT( "Lava Burst" ) at :11152.',
+    },
+    {
+      simcToken: "tempest",
+      candidateAbilityGameIds: [452201],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "create_action / tempest_t",
+      startLine: 10372,
+      endLine: 10372,
+      sourceNote:
+        'create_action dispatches "tempest" to tempest_t: built on player->find_spell( 452201 ) (:9876).',
+    },
+    {
+      simcToken: "chain_lightning",
+      candidateAbilityGameIds: [188443],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "create_action / chain_lightning_t",
+      startLine: 10360,
+      endLine: 10360,
+      sourceNote:
+        'create_action dispatches "chain_lightning" to chain_lightning_t: built on player->talent.chain_lightning; _CT( "Chain Lightning" ) at :11154.',
+    },
+    {
+      simcToken: "frost_shock",
+      candidateAbilityGameIds: [196840],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "create_action / frost_shock_t",
+      startLine: 10354,
+      endLine: 10354,
+      sourceNote:
+        'create_action dispatches "frost_shock" to frost_shock_t: built on player->talent.frost_shock (:8491); _CT( "Frost Shock" ) at :11160.',
+    },
+    {
+      simcToken: "earth_shock",
+      candidateAbilityGameIds: [8042],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "create_action / earth_shock_t",
+      startLine: 10379,
+      endLine: 10379,
+      sourceNote:
+        'create_action dispatches "earth_shock" to earth_shock_t: built on player->talent.earth_shock (:8207); _ST( "Earth Shock" ) at :11332.',
+    },
+    {
+      simcToken: "lightning_bolt",
+      candidateAbilityGameIds: [188196],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "create_action / lightning_bolt_t",
+      startLine: 10358,
+      endLine: 10358,
+      sourceNote:
+        'create_action dispatches "lightning_bolt" to lightning_bolt_t: built on player->find_class_spell( "Lightning Bolt" ), class_spells.inc row 188196.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
+const DRUID_BALANCE_SOURCES = {
+  spellData: "engine/dbc/generated/sc_spell_data.inc",
+  classSpells: "engine/dbc/generated/class_spells.inc",
+  clientDataVersion: "engine/dbc/generated/client_data_version.inc",
+  spellDataLayout: "engine/dbc/spell_data.hpp",
+  // HASHED, NEVER PARSED: the class module every token binding is a hand-reviewed reading of.
+  classModule: "engine/class_modules/sc_druid.cpp",
+  // HASHED, NEVER PARSED. Present because every target hashes the same shared sources.
+  racialSpells: "engine/dbc/generated/racial_spells.inc",
+  playerModule: "engine/player/player.cpp",
+  consumableModule: "engine/player/consumable.cpp",
+};
+
+const DRUID_BALANCE_MODULE_PATH = "engine/class_modules/sc_druid.cpp";
+
+/**
+ * The Balance Druid facts (ONB-D2).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the pinned Balance list
+ * (apl/druid/balance_apl.inc) executes. Facts a reader should not have to rediscover:
+ *
+ *   - CELESTIAL ALIGNMENT BINDS TWO ROWS. create_action builds Incarnation for the same token when the talent is taken, and
+ *     both rows are _gcd 0, so the token is NON_GCD on either build.
+ *   - ECLIPSE BINDS TWO ROWS. eclipse_t picks 1233272 or 1233346 by Lunar Calling, and both are _gcd 500: a GCD action.
+ *     Retained subjects log 1233272.
+ *   - THE MOONS BIND THEIR OWN ROWS: 274281 at _gcd 1000, 274282 and 274283 at 1500.
+ *   - THE RACIAL, POTION, ITEM AND EXTERNAL-BUFF TOKENS ARE NOT BOUND. Moonkin Form appears only in precombat.
+ */
+const DRUID_BALANCE_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 194223, displayNameEn: "Celestial Alignment", baseGcdMs: 0 },
+    { abilityGameId: 102560, displayNameEn: "Incarnation: Chosen of Elune", baseGcdMs: 0 },
+    { abilityGameId: 190984, displayNameEn: "Wrath", baseGcdMs: 1500 },
+    { abilityGameId: 194153, displayNameEn: "Starfire", baseGcdMs: 1500 },
+    { abilityGameId: 1233272, displayNameEn: "Lunar Eclipse", baseGcdMs: 500 },
+    { abilityGameId: 1233346, displayNameEn: "Solar Eclipse", baseGcdMs: 500 },
+    { abilityGameId: 8921, displayNameEn: "Moonfire", baseGcdMs: 1500 },
+    { abilityGameId: 93402, displayNameEn: "Sunfire", baseGcdMs: 1500 },
+    { abilityGameId: 202770, displayNameEn: "Fury of Elune", baseGcdMs: 1500 },
+    { abilityGameId: 205636, displayNameEn: "Force of Nature", baseGcdMs: 1500 },
+    { abilityGameId: 391528, displayNameEn: "Convoke the Spirits", baseGcdMs: 1500 },
+    { abilityGameId: 78674, displayNameEn: "Starsurge", baseGcdMs: 1500 },
+    { abilityGameId: 191034, displayNameEn: "Starfall", baseGcdMs: 1500 },
+    { abilityGameId: 274281, displayNameEn: "New Moon", baseGcdMs: 1000 },
+    { abilityGameId: 274282, displayNameEn: "Half Moon", baseGcdMs: 1500 },
+    { abilityGameId: 274283, displayNameEn: "Full Moon", baseGcdMs: 1500 },
+    { abilityGameId: 88747, displayNameEn: "Wild Mushroom", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "celestial_alignment",
+      candidateAbilityGameIds: [194223, 102560],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID_BALANCE_MODULE_PATH,
+      symbol: "create_action / celestial_alignment_t / incarnation_moonkin_t",
+      startLine: 10160,
+      endLine: 10160,
+      sourceNote:
+        'create_action dispatches "celestial_alignment" to celestial_alignment_t / incarnation_moonkin_t: on the token "celestial_alignment", create_action builds incarnation_moonkin_t when talent.incarnation_moonkin is taken (:10160), else celestial_alignment_t (:10167). spec.celestial_alignment = talent.celestial_alignment.find_override_spell() at :10692; spec.incarnation_moonkin = check( talent.incarnation_moonkin, 102560 ) at :10697.',
+    },
+    {
+      simcToken: "wrath",
+      candidateAbilityGameIds: [190984],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DRUID_BALANCE_MODULE_PATH,
+      symbol: "create_action / wrath_t",
+      startLine: 10258,
+      endLine: 10258,
+      sourceNote:
+        'create_action dispatches "wrath" to wrath_t: built on p->spec.wrath (:9030); find_specialization_spell( "Wrath" ) at :10686.',
+    },
+    {
+      simcToken: "starfire",
+      candidateAbilityGameIds: [194153],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID_BALANCE_MODULE_PATH,
+      symbol: "create_action / starfire_t",
+      startLine: 10239,
+      endLine: 10239,
+      sourceNote:
+        'create_action dispatches "starfire" to starfire_t: built on p->talent.starfire (:8486); CT( "Starfire" ) at :10365.',
+    },
+    {
+      simcToken: "eclipse",
+      candidateAbilityGameIds: [1233272, 1233346],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DRUID_BALANCE_MODULE_PATH,
+      symbol: "create_action / eclipse_t",
+      startLine: 10175,
+      endLine: 10175,
+      sourceNote:
+        'create_action dispatches "eclipse" to eclipse_t: built on p->find_spell( p->talent.lunar_calling.ok() ? 1233272 : 1233346 ) (:7258).',
+    },
+    {
+      simcToken: "moonfire",
+      candidateAbilityGameIds: [8921],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DRUID_BALANCE_MODULE_PATH,
+      symbol: "create_action / moonfire_t",
+      startLine: 10254,
+      endLine: 10254,
+      sourceNote:
+        'create_action dispatches "moonfire" to moonfire_t: built on p->spec.moonfire (:7869); find_class_spell( "Moonfire" ), or find_spell( 8921 ) with Red Moon, at :10681. Both are 8921.',
+    },
+    {
+      simcToken: "sunfire",
+      candidateAbilityGameIds: [93402],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID_BALANCE_MODULE_PATH,
+      symbol: "create_action / sunfire_t",
+      startLine: 10241,
+      endLine: 10241,
+      sourceNote:
+        'create_action dispatches "sunfire" to sunfire_t: built on p->talent.sunfire (:8764); CT( "Sunfire" ) at :10368.',
+    },
+    {
+      simcToken: "fury_of_elune",
+      candidateAbilityGameIds: [202770],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID_BALANCE_MODULE_PATH,
+      symbol: "create_action / fury_of_elune_t",
+      startLine: 10179,
+      endLine: 10179,
+      sourceNote:
+        'create_action dispatches "fury_of_elune" to fury_of_elune_t: built on p->talent.fury_of_elune; ST( "Fury of Elune" ) at :10402.',
+    },
+    {
+      simcToken: "force_of_nature",
+      candidateAbilityGameIds: [205636],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID_BALANCE_MODULE_PATH,
+      symbol: "create_action / force_of_nature_t",
+      startLine: 10178,
+      endLine: 10178,
+      sourceNote:
+        'create_action dispatches "force_of_nature" to force_of_nature_t: built on p->talent.force_of_nature (:7304); ST( "Force of Nature" ) at :10401.',
+    },
+    {
+      simcToken: "convoke_the_spirits",
+      candidateAbilityGameIds: [391528],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID_BALANCE_MODULE_PATH,
+      symbol: "create_action / convoke_the_spirits_t",
+      startLine: 10219,
+      endLine: 10219,
+      sourceNote:
+        'create_action dispatches "convoke_the_spirits" to convoke_the_spirits_t: built on p->talent.convoke_the_spirits (:9256); ST( "Convoke the Spirits" ) at :10383, trait row spell 391528.',
+    },
+    {
+      simcToken: "starsurge",
+      candidateAbilityGameIds: [78674],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID_BALANCE_MODULE_PATH,
+      symbol: "create_action / starsurge_t",
+      startLine: 10186,
+      endLine: 10186,
+      sourceNote:
+        'create_action dispatches "starsurge" to starsurge_t: for Balance, create_action builds starsurge_t (:10186), built on p->talent.starsurge (:8650); CT( "Starsurge" ) at :10367, Balance\'s trait row spell 78674.',
+    },
+    {
+      simcToken: "starfall",
+      candidateAbilityGameIds: [191034],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DRUID_BALANCE_MODULE_PATH,
+      symbol: "create_action / starfall_t",
+      startLine: 10185,
+      endLine: 10185,
+      sourceNote:
+        'create_action dispatches "starfall" to starfall_t: built on spec.starfall; find_specialization_spell( "Starfall" ) at :10699.',
+    },
+    {
+      simcToken: "new_moon",
+      candidateAbilityGameIds: [274281],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID_BALANCE_MODULE_PATH,
+      symbol: "create_action / new_moon_t",
+      startLine: 10180,
+      endLine: 10180,
+      sourceNote:
+        'create_action dispatches "new_moon" to new_moon_t: built on p->talent.new_moon (:7611); ST( "New Moon" ) at :10412.',
+    },
+    {
+      simcToken: "half_moon",
+      candidateAbilityGameIds: [274282],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DRUID_BALANCE_MODULE_PATH,
+      symbol: "create_action / half_moon_t",
+      startLine: 10181,
+      endLine: 10181,
+      sourceNote:
+        'create_action dispatches "half_moon" to half_moon_t: built on p->spec.half_moon (:7623); check( talent.new_moon, 274282 ) at :10696.',
+    },
+    {
+      simcToken: "full_moon",
+      candidateAbilityGameIds: [274283],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DRUID_BALANCE_MODULE_PATH,
+      symbol: "create_action / full_moon_t",
+      startLine: 10182,
+      endLine: 10182,
+      sourceNote:
+        'create_action dispatches "full_moon" to full_moon_t: built on p->spec.full_moon (:7635); check( talent.new_moon, 274283 ) at :10695.',
+    },
+    {
+      simcToken: "wild_mushroom",
+      candidateAbilityGameIds: [88747],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID_BALANCE_MODULE_PATH,
+      symbol: "create_action / wild_mushroom_t",
+      startLine: 10188,
+      endLine: 10188,
+      sourceNote:
+        'create_action dispatches "wild_mushroom" to wild_mushroom_t: built on talent.wild_mushroom; ST( "Wild Mushroom" ) at :10434.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
+const PRIEST_SHADOW_SOURCES = {
+  spellData: "engine/dbc/generated/sc_spell_data.inc",
+  classSpells: "engine/dbc/generated/class_spells.inc",
+  clientDataVersion: "engine/dbc/generated/client_data_version.inc",
+  spellDataLayout: "engine/dbc/spell_data.hpp",
+  // HASHED, NEVER PARSED: the two files every token binding is a hand-reviewed reading of.
+  classModule: "engine/class_modules/priest/sc_priest.cpp",
+  shadowModule: "engine/class_modules/priest/sc_priest_shadow.cpp",
+  // HASHED, NEVER PARSED. Present because every target hashes the same shared sources.
+  racialSpells: "engine/dbc/generated/racial_spells.inc",
+  playerModule: "engine/player/player.cpp",
+  consumableModule: "engine/player/consumable.cpp",
+};
+
+const PRIEST_MODULE_PATH = "engine/class_modules/priest/sc_priest.cpp";
+const SHADOW_MODULE_PATH = "engine/class_modules/priest/sc_priest_shadow.cpp";
+
+/**
+ * The Shadow Priest facts (ONB-D2).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the pinned Shadow list
+ * (apl_priest.cpp `shadow`) executes. Facts a reader should not have to rediscover:
+ *
+ *   - POWER INFUSION AND DESPERATE PRAYER ARE `_gcd` 0, SO THEY ARE NON_GCD.
+ *   - HALO BINDS SHADOW'S TRAIT ROW 120644. Holy's is 120517; the retained subjects log 120644.
+ *   - VOID BLAST BINDS 450983, Shadow's row, not Discipline's 450215.
+ *   - SHADOWY APPARITION (341263) IS LOGGED AS A CAST HUNDREDS OF TIMES AND IS NOT A PRESS. It is no token of the list, has no lane
+ *     record and is excluded.
+ *   - THE RACIAL, POTION, ITEM AND EXTERNAL-BUFF TOKENS ARE NOT BOUND. Shadowform appears only in precombat.
+ */
+const PRIEST_SHADOW_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 10060, displayNameEn: "Power Infusion", baseGcdMs: 0 },
+    { abilityGameId: 120644, displayNameEn: "Halo", baseGcdMs: 1500 },
+    { abilityGameId: 228260, displayNameEn: "Voidform", baseGcdMs: 1500 },
+    { abilityGameId: 19236, displayNameEn: "Desperate Prayer", baseGcdMs: 0 },
+    { abilityGameId: 132157, displayNameEn: "Holy Nova", baseGcdMs: 1500 },
+    { abilityGameId: 32379, displayNameEn: "Shadow Word: Death", baseGcdMs: 1500 },
+    { abilityGameId: 335467, displayNameEn: "Shadow Word: Madness", baseGcdMs: 1500 },
+    { abilityGameId: 1227280, displayNameEn: "Tentacle Slam", baseGcdMs: 1500 },
+    { abilityGameId: 263165, displayNameEn: "Void Torrent", baseGcdMs: 1500 },
+    { abilityGameId: 589, displayNameEn: "Shadow Word: Pain", baseGcdMs: 1500 },
+    { abilityGameId: 1242173, displayNameEn: "Void Volley", baseGcdMs: 1500 },
+    { abilityGameId: 450983, displayNameEn: "Void Blast", baseGcdMs: 1500 },
+    { abilityGameId: 8092, displayNameEn: "Mind Blast", baseGcdMs: 1500 },
+    { abilityGameId: 391403, displayNameEn: "Mind Flay: Insanity", baseGcdMs: 1500 },
+    { abilityGameId: 34914, displayNameEn: "Vampiric Touch", baseGcdMs: 1500 },
+    { abilityGameId: 15407, displayNameEn: "Mind Flay", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "power_infusion",
+      candidateAbilityGameIds: [10060],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: PRIEST_MODULE_PATH,
+      symbol: "create_action / power_infusion_t",
+      startLine: 3078,
+      endLine: 3078,
+      sourceNote:
+        'create_action dispatches "power_infusion" to power_infusion_t: built on p.talents.power_infusion (:925); CT( "Power Infusion" ) at :3334.',
+    },
+    {
+      simcToken: "halo",
+      candidateAbilityGameIds: [120644],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: PRIEST_MODULE_PATH,
+      symbol: "create_action / halo_t",
+      startLine: 3046,
+      endLine: 3046,
+      sourceNote:
+        'create_action dispatches "halo" to halo_t: built on p.talents.archon.halo (:604); HT( "Halo" ) at :3394, Shadow\'s trait row spell 120644.',
+    },
+    {
+      simcToken: "voidform",
+      candidateAbilityGameIds: [228260],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: SHADOW_MODULE_PATH,
+      symbol: "create_action / voidform_t",
+      startLine: 2497,
+      endLine: 2497,
+      sourceNote:
+        'create_action dispatches "voidform" to voidform_t: built on p.talents.shadow.voidform (:1349); ST( "Voidform" ) at :2412.',
+    },
+    {
+      simcToken: "desperate_prayer",
+      candidateAbilityGameIds: [19236],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: PRIEST_MODULE_PATH,
+      symbol: "create_action / desperate_prayer_t",
+      startLine: 3074,
+      endLine: 3074,
+      sourceNote:
+        'create_action dispatches "desperate_prayer" to desperate_prayer_t: built on p.talents.desperate_prayer (:1857); CT( "Desperate Prayer" ) at :3364.',
+    },
+    {
+      simcToken: "holy_nova",
+      candidateAbilityGameIds: [132157],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: PRIEST_MODULE_PATH,
+      symbol: "create_action / holy_nova_t",
+      startLine: 3090,
+      endLine: 3090,
+      sourceNote:
+        'create_action dispatches "holy_nova" to holy_nova_t: built on p.talents.holy_nova (:1497); CT( "Holy Nova" ) at :3325.',
+    },
+    {
+      simcToken: "shadow_word_death",
+      candidateAbilityGameIds: [32379],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: PRIEST_MODULE_PATH,
+      symbol: "create_action / shadow_word_death_t",
+      startLine: 3086,
+      endLine: 3086,
+      sourceNote:
+        'create_action dispatches "shadow_word_death" to shadow_word_death_t: built on p.talents.shadow_word_death (:1211); CT( "Shadow Word: Death" ) at :3360.',
+    },
+    {
+      simcToken: "shadow_word_madness",
+      candidateAbilityGameIds: [335467],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: SHADOW_MODULE_PATH,
+      symbol: "create_action / shadow_word_madness_t",
+      startLine: 2533,
+      endLine: 2533,
+      sourceNote:
+        'create_action dispatches "shadow_word_madness" to shadow_word_madness_t: built on p.dot_spells.shadow_word_madness; find_talent_spell( SPECIALIZATION, "Shadow Word: Madness" ) at sc_priest.cpp:3311.',
+    },
+    {
+      simcToken: "tentacle_slam",
+      candidateAbilityGameIds: [1227280],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: SHADOW_MODULE_PATH,
+      symbol: "create_action / tentacle_slam_t",
+      startLine: 2501,
+      endLine: 2501,
+      sourceNote:
+        'create_action dispatches "tentacle_slam" to tentacle_slam_t: built on p.talents.shadow.tentacle_slam (:1801); ST( "Tentacle Slam" ) at :2401.',
+    },
+    {
+      simcToken: "void_torrent",
+      candidateAbilityGameIds: [263165],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: SHADOW_MODULE_PATH,
+      symbol: "create_action / void_torrent_t",
+      startLine: 2505,
+      endLine: 2505,
+      sourceNote:
+        'create_action dispatches "void_torrent" to void_torrent_t: built on p.talents.voidweaver.void_torrent (:1424); HT( "Void Torrent" ) at sc_priest.cpp:3445.',
+    },
+    {
+      simcToken: "shadow_word_pain",
+      candidateAbilityGameIds: [589],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: SHADOW_MODULE_PATH,
+      symbol: "create_action / shadow_word_pain_t",
+      startLine: 2509,
+      endLine: 2509,
+      sourceNote:
+        'create_action dispatches "shadow_word_pain" to shadow_word_pain_t: built on p.dot_spells.shadow_word_pain (:559); find_class_spell( "Shadow Word: Pain" ) at sc_priest.cpp:3309.',
+    },
+    {
+      simcToken: "void_volley",
+      candidateAbilityGameIds: [1242173],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: SHADOW_MODULE_PATH,
+      symbol: "create_action / void_volley_t",
+      startLine: 2537,
+      endLine: 2537,
+      sourceNote:
+        'create_action dispatches "void_volley" to void_volley_t: built on talents.shadow.void_volley = find_spell( 1242173 ) at :2413.',
+    },
+    {
+      simcToken: "void_blast",
+      candidateAbilityGameIds: [450983],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: PRIEST_MODULE_PATH,
+      symbol: "create_action / void_blast_shadow_t",
+      startLine: 3102,
+      endLine: 3102,
+      sourceNote:
+        'create_action dispatches "void_blast" to void_blast_shadow_t: for Shadow, create_action builds void_blast_shadow_t, built on p.talents.voidweaver.void_blast_shadow (:373).',
+    },
+    {
+      simcToken: "mind_blast",
+      candidateAbilityGameIds: [8092],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: PRIEST_MODULE_PATH,
+      symbol: "create_action / mind_blast_t",
+      startLine: 3066,
+      endLine: 3066,
+      sourceNote:
+        'create_action dispatches "mind_blast" to mind_blast_t: built on p.talents.mind_blast (:340); CT( "Mind Blast" ) at :3322.',
+    },
+    {
+      simcToken: "mind_flay_insanity",
+      candidateAbilityGameIds: [391403],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: SHADOW_MODULE_PATH,
+      symbol: "create_action / mind_flay_insanity_t",
+      startLine: 2493,
+      endLine: 2493,
+      sourceNote:
+        'create_action dispatches "mind_flay_insanity" to mind_flay_insanity_t: built on p.talents.archon.mind_flay_insanity_spell (:97); find_spell( 391403 ) at sc_priest.cpp:3405.',
+    },
+    {
+      simcToken: "vampiric_touch",
+      candidateAbilityGameIds: [34914],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: SHADOW_MODULE_PATH,
+      symbol: "create_action / vampiric_touch_t",
+      startLine: 2513,
+      endLine: 2513,
+      sourceNote:
+        'create_action dispatches "vampiric_touch" to vampiric_touch_t: built on p.dot_spells.vampiric_touch; find_specialization_spell( "Vampiric Touch", PRIEST_SHADOW ) at sc_priest.cpp:3310.',
+    },
+    {
+      simcToken: "mind_flay",
+      candidateAbilityGameIds: [15407],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: SHADOW_MODULE_PATH,
+      symbol: "create_action / mind_flay_t",
+      startLine: 2489,
+      endLine: 2489,
+      sourceNote:
+        'create_action dispatches "mind_flay" to mind_flay_t: built on p.specs.mind_flay (:130); find_specialization_spell( "Mind Flay" ) at :2472.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
 /**
  * The Destruction Warlock facts (ONB-D1).
  *
@@ -4916,6 +5639,52 @@ export const TARGETS = {
     ],
     requiredFacts: ROGUE_OUTLAW_FACTS,
     defaultOut: "src/data/game/rogue-outlaw-gcd-semantics.json",
+  },
+  "shaman-elemental": {
+    datasetId: "SIMC_DBC_SHAMAN_ELEMENTAL_GCD_SEMANTICS",
+    classId: 7,
+    className: "Shaman",
+    sources: SHAMAN_ELEMENTAL_SOURCES,
+    classModulePath: SHAMAN_ELEMENTAL_SOURCES.classModule,
+    handReviewedPaths: [
+      SHAMAN_ELEMENTAL_SOURCES.classModule,
+      SHAMAN_ELEMENTAL_SOURCES.racialSpells,
+      SHAMAN_ELEMENTAL_SOURCES.playerModule,
+      SHAMAN_ELEMENTAL_SOURCES.consumableModule,
+    ],
+    requiredFacts: SHAMAN_ELEMENTAL_FACTS,
+    defaultOut: "src/data/game/shaman-elemental-gcd-semantics.json",
+  },
+  "druid-balance": {
+    datasetId: "SIMC_DBC_DRUID_BALANCE_GCD_SEMANTICS",
+    classId: 11,
+    className: "Druid",
+    sources: DRUID_BALANCE_SOURCES,
+    classModulePath: DRUID_BALANCE_SOURCES.classModule,
+    handReviewedPaths: [
+      DRUID_BALANCE_SOURCES.classModule,
+      DRUID_BALANCE_SOURCES.racialSpells,
+      DRUID_BALANCE_SOURCES.playerModule,
+      DRUID_BALANCE_SOURCES.consumableModule,
+    ],
+    requiredFacts: DRUID_BALANCE_FACTS,
+    defaultOut: "src/data/game/druid-balance-gcd-semantics.json",
+  },
+  "priest-shadow": {
+    datasetId: "SIMC_DBC_PRIEST_SHADOW_GCD_SEMANTICS",
+    classId: 5,
+    className: "Priest",
+    sources: PRIEST_SHADOW_SOURCES,
+    classModulePath: PRIEST_SHADOW_SOURCES.classModule,
+    handReviewedPaths: [
+      PRIEST_SHADOW_SOURCES.classModule,
+      PRIEST_SHADOW_SOURCES.shadowModule,
+      PRIEST_SHADOW_SOURCES.racialSpells,
+      PRIEST_SHADOW_SOURCES.playerModule,
+      PRIEST_SHADOW_SOURCES.consumableModule,
+    ],
+    requiredFacts: PRIEST_SHADOW_FACTS,
+    defaultOut: "src/data/game/priest-shadow-gcd-semantics.json",
   },
   "warlock-destruction": {
     datasetId: "SIMC_DBC_WARLOCK_DESTRUCTION_GCD_SEMANTICS",

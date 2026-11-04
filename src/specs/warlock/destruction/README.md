@@ -41,7 +41,7 @@ A cast-time action is decided when it begins. `cast-anchor-profile.ts` supplies 
 
 The rows are hand-reviewed readings of the pinned `_cast_time` and of every warlock-family cast-time effect matching each spell (`warlock-destruction-cast-semantics.ts`). No haste is established, so `exactMs` is always null and no anchor is ever derived from a completion.
 
-**A begin does not prove the moment of a cast that may have been instant.** The shared timeline pairs a completion with the latest begin before it. For the four spells above, that begin may have been abandoned and the cast instant, so `destructionDecisionAnchor` keeps both instants as candidates and the anchor is UNKNOWN.
+**A begin does not prove the moment of a cast that may have been instant.** For the four spells above, a begin before the completion may have been abandoned and the cast instant, so the shared timeline keeps both instants as candidates and the anchor is UNKNOWN. This specialization's own refusal became that shared rule in ONB-D2.
 
 **What it changes:**
 

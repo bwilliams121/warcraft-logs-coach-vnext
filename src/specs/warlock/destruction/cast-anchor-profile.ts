@@ -8,12 +8,8 @@
  *
  * A POSITIVE CAST TIME IS CLAIMED ONLY WHERE NO -100% ROW MATCHES THE SPELL (`warlock-destruction-cast-semantics.ts`).
  * Chaos Bolt, Incinerate, Infernal Bolt and Ruination each have one that no pinned source excludes, so each stays
- * UNKNOWN on every build, and the anchor keeps every placement that reading admits.
- *
- * AND THE ANCHOR THIS SPECIALIZATION ACCEPTS IS NARROWER THAN THE TIMELINE'S. The timeline pairs a completion with the
- * latest begin before it, and only enumerates an instant execution for a begin in the completion's own millisecond. If
- * the execution may have been instant, an earlier begin may be an abandoned attempt, and the decision may be the
- * completion's. So `destructionDecisionAnchor` refuses to read such a pairing as the moment of the decision.
+ * UNKNOWN on every build, and the shared timeline keeps every placement that reading admits: a begin before such a
+ * completion may be an abandoned attempt, so it is a candidate and never the moment (ONB-D2 moved that rule there).
  *
  * UNREVIEWED MEANS NOT REVIEWED. Burning Rush, Soulburn, Dark Pact, Mortal Coil, Unending Resolve, the
  * healthstone, the potion and the trinkets are outside the pinned list. The profile says nothing about them,
@@ -25,7 +21,6 @@
 import {
   hastedCastTime,
   type CastAnchorProfile,
-  type CastDecisionAnchorState,
   type CastDurationFact,
   type CastExecution,
 } from "../../../engine/game-state/casting/cast-decision-anchor.js";
@@ -61,27 +56,5 @@ export function destructionCastAnchorProfile(): CastAnchorProfile {
       return castDurationOf(row);
     },
     channelDurationAt: () => ({ kind: "UNKNOWN", reason: "NO_CHANNEL_REVIEWED" }),
-  };
-}
-
-/**
- * The instant this specialization accepts as a decision's moment. An established anchor stands, unless the ability's
- * execution may have been instant and the anchor is an earlier begin: then both instants remain candidates.
- */
-export function destructionDecisionAnchor(
-  anchor: CastDecisionAnchorState,
-  abilityGameId: number,
-  completionReportTimeMs: number,
-): CastDecisionAnchorState {
-  if (anchor.state !== "ESTABLISHED" || anchor.source !== "OBSERVED_BEGINCAST") return anchor;
-  if (destructionCastRowFor(abilityGameId)?.rule !== "INSTANT_ROW_NOT_EXCLUDED") return anchor;
-  return {
-    state: "UNKNOWN",
-    reason: "BEGINCAST_PAIRING_AMBIGUOUS",
-    evidenceReason: null,
-    candidateReportTimesMs: [anchor.reportTimeMs, completionReportTimeMs],
-    detail:
-      "A begin precedes this completion, but a -100% cast-time row of the spell is not excluded, so the execution may " +
-      "have been instant and the begin an abandoned attempt.",
   };
 }

@@ -513,12 +513,69 @@ describe("same-millisecond pairing is order-invariant", () => {
           reason: "BEGINCAST_PAIRING_AMBIGUOUS",
           candidateReportTimesMs: [1_000, 2_000],
         }),
-        expect.objectContaining({ reason: "BEGINCAST_PAIRING_AMBIGUOUS", candidateReportTimesMs: [2_000] }),
+        // The second cast may have been instant whichever way the bits fall, so its own completion is a candidate too.
+        expect.objectContaining({
+          reason: "BEGINCAST_PAIRING_AMBIGUOUS",
+          candidateReportTimesMs: [2_000, 3_000],
+        }),
       ]);
       // An ambiguous cast is never read as idle.
       expect(timeline.occupancyAt(1_500).state).toBe("UNKNOWN");
       expect(timeline.occupancyAt(2_500).state).toBe("UNKNOWN");
     }
+  });
+
+  it("a cast that may have been instant is never anchored at an earlier begin (ONB-D2)", () => {
+    const timeline = timelineOf(
+      [
+        [1_000, "BEGIN", BOLT],
+        [2_000, "COMPLETE", BOLT],
+      ],
+      profileOf({ kind: "UNKNOWN", reason: "PROC" }),
+    );
+    expect(timeline.anchors[0]?.anchor).toMatchObject({
+      state: "UNKNOWN",
+      reason: "BEGINCAST_PAIRING_AMBIGUOUS",
+      candidateReportTimesMs: [1_000, 2_000],
+    });
+    // Neither a proven cast nor proven idle: the begin may have been abandoned, and may still have been running after.
+    expect(timeline.occupancyAt(1_500).state).toBe("UNKNOWN");
+    expect(timeline.occupancyAt(2_500)).toMatchObject({
+      state: "UNKNOWN",
+      reason: "UNPAIRED_BEGIN_END_UNKNOWN",
+    });
+    expect(timeline.spans.some((span) => span.kind === "CASTING")).toBe(false);
+    expect(timeline.unpairedBegins).toEqual([
+      expect.objectContaining({
+        reportTimeMs: 1_000,
+        outcome: { state: "UNKNOWN", reason: "PAIRING_NOT_PROVEN" },
+      }),
+    ]);
+  });
+
+  it("back to back, no begin is consumed by a cast that may have been instant, in both orders (ONB-D2)", () => {
+    for (const steps of [chain, swapped]) {
+      const timeline = timelineOf(steps, profileOf({ kind: "UNKNOWN", reason: "PROC" }));
+      expect(timeline.unpairedBegins.map((begin) => [begin.reportTimeMs, begin.outcome])).toEqual([
+        [1_000, { state: "UNKNOWN", reason: "PAIRING_NOT_PROVEN" }],
+        [2_000, { state: "UNKNOWN", reason: "PAIRING_NOT_PROVEN" }],
+      ]);
+      // The last begin may still be running after the last completion: never idle, to the next start.
+      expect(timeline.occupancyAt(3_500)).toMatchObject({
+        state: "UNKNOWN",
+        reason: "UNPAIRED_BEGIN_END_UNKNOWN",
+      });
+    }
+  });
+
+  it("the same shape with a proven cast time stays a cast, so only the unknown fact is refused (ONB-D2)", () => {
+    const timeline = timelineOf([
+      [1_000, "BEGIN", BOLT],
+      [2_000, "COMPLETE", BOLT],
+    ]);
+    expect(anchorsOf(timeline)).toEqual(["OBSERVED_BEGINCAST@1000"]);
+    expect(timeline.occupancyAt(1_500).state).toBe("CASTING");
+    expect(timeline.unpairedBegins).toEqual([]);
   });
 
   it("a proven instant is decided at completion, but a begin in its millisecond may be a new attempt", () => {
@@ -564,7 +621,11 @@ describe("same-millisecond pairing is order-invariant", () => {
         reason: "BEGINCAST_PAIRING_AMBIGUOUS",
         candidateReportTimesMs: [2_000],
       });
-      expect(timeline.occupancyAt(1_500)).toMatchObject({ state: "UNKNOWN", reason: "CAST_START_UNKNOWN" });
+      // The first begin is not consumed either, so the time after the first completion is its possible span.
+      expect(timeline.occupancyAt(1_500)).toMatchObject({
+        state: "UNKNOWN",
+        reason: "UNPAIRED_BEGIN_END_UNKNOWN",
+      });
       expect(timeline.occupancyAt(1_999).state).toBe("UNKNOWN");
     }
     // With no earlier completion the window is unbounded below.
@@ -601,7 +662,9 @@ describe("same-millisecond pairing is order-invariant", () => {
     // A next begin bounds the possible attempt.
     const bounded = timelineOf(
       [...steps, [3_000, "BEGIN", BLAST], [4_000, "COMPLETE", BLAST]],
-      profileOf({ kind: "UNKNOWN", reason: "PROC" }),
+      profileOf((time) =>
+        time === 2_000 ? { kind: "UNKNOWN", reason: "PROC" } : { kind: "POSITIVE", exactMs: null },
+      ),
     );
     expect(bounded.occupancyAt(2_500).state).toBe("UNKNOWN");
     expect(bounded.occupancyAt(3_500).state).toBe("CASTING");
@@ -883,17 +946,17 @@ describe("retained real evidence (b1PmaKrd6CDfzngc fight 48, no new request)", (
       ]);
     });
 
-    it("leaves two back-to-back casts UNKNOWN when an instant cast cannot be excluded", () => {
+    it("leaves every hard cast UNKNOWN when an instant cast cannot be excluded (ONB-D2)", () => {
       const timeline = buildCastTimeline({
         state,
         actorId: 121,
         profile: profile({ kind: "UNKNOWN", reason: "TEST" }),
       });
       expect(tally(timeline)).toMatchObject({
-        "30451:OBSERVED_BEGINCAST": 4,
-        "30451:BEGINCAST_PAIRING_AMBIGUOUS": 2,
-        "1295924:OBSERVED_BEGINCAST": 4,
+        "30451:BEGINCAST_PAIRING_AMBIGUOUS": 6,
+        "1295924:BEGINCAST_PAIRING_AMBIGUOUS": 4,
       });
+      expect(Object.keys(tally(timeline)).filter((key) => key.endsWith("OBSERVED_BEGINCAST"))).toEqual([]);
     });
   });
 
@@ -939,14 +1002,16 @@ describe("retained real evidence (b1PmaKrd6CDfzngc fight 48, no new request)", (
       expect(sameMs("COMPLETE")).toBeGreaterThan(0); // completion + the next begin in one ms
     });
 
-    it("establishes what every placement agrees on and leaves the rest UNKNOWN", () => {
+    it("establishes no hard cast that may have been instant, and leaves each one a candidate (ONB-D2)", () => {
       const timeline = buildCastTimeline({ state, actorId: 122, profile });
       const counts = tally(timeline);
       expect([counts["1064:OBSERVED_BEGINCAST"], counts["1064:BEGINCAST_PAIRING_AMBIGUOUS"]]).toEqual([
-        36, 49,
+        undefined,
+        85,
       ]);
       expect([counts["77472:OBSERVED_BEGINCAST"], counts["77472:BEGINCAST_PAIRING_AMBIGUOUS"]]).toEqual([
-        16, 16,
+        undefined,
+        32,
       ]);
       expect(Object.keys(counts).filter((key) => key.endsWith("CAST_EVIDENCE_CONFLICT"))).toEqual([]);
       expect(
@@ -965,9 +1030,16 @@ describe("retained real evidence (b1PmaKrd6CDfzngc fight 48, no new request)", (
           (begin) => begin.outcome.state === "UNKNOWN" && begin.outcome.reason === "PAIRING_NOT_PROVEN",
         ),
       ).toBe(true);
-      expect(notProven.length).toBe(50);
-      // The first Healing Wave is a proven cast in progress.
-      expect(timeline.occupancyAt(7_445_000)).toMatchObject({
+      expect(notProven.length).toBe(117);
+      // The first Healing Wave's begin is observed, but under this profile it may have been instant: never a proven cast.
+      expect(timeline.occupancyAt(7_445_000).state).toBe("UNKNOWN");
+      // With its cast time proven positive, the same instant is a cast in progress.
+      const proven = buildCastTimeline({
+        state,
+        actorId: 122,
+        profile: { ...profile, castTimeAt: () => ({ kind: "POSITIVE", exactMs: null }) },
+      });
+      expect(proven.occupancyAt(7_445_000)).toMatchObject({
         state: "CASTING",
         span: { fromReportTimeMs: 7_444_822, toReportTimeMs: 7_445_429, basis: "OBSERVED_BEGINCAST" },
       });
