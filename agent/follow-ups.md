@@ -33,6 +33,8 @@ current total (5,748,495 bytes), with what each row buys.
 
 **Raised:** ONB-D2 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.
 
+**ONB-D2P (2026-11-04): not promoted.** The gate search finds nothing for any of the three (`m11-promotion-evidence-gate`). A census of retained JSON files of any name, reading any event type, finds no new subject, and a replay at that base gives the same 1,210, 287 and 356 UNKNOWN. No new public entry is queued; one must follow this list (agent/architecture.md "ONB-D2P").
+
 **Evidence is not their gap, so none is on ONB-EV.** Seven Elemental, three Balance and two Shadow subjects are retained with combatant info (agent/architecture.md "ONB-D2"). Each promotion also needs what follows, then a new public entry through the unchanged gates.
 
 **ONB-S3 alone moves none of them.** The enemy count is not the first gate of any of the three:

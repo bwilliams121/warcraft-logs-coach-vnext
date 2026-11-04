@@ -3,6 +3,8 @@
 **Exposure: `INTERNAL_ONLY`.** The registration (`shaman-elemental-observed-decisions`, `shaman/elemental`) is in the production
 catalog for the internal lookup only. The public lookup and the identity table refuse it.
 
+**Not promoted by ONB-D2P.** It cannot pass the rotational gates, and it waits on its first line's movement option and the inputs behind it, then the enemy count (ONB-S3), rather than on evidence (agent/architecture.md "ONB-D2P").
+
 **A Cohort D follower on the shared cast anchor (ONB-S4). It resolves nothing today.** No decision of this
 specialization reaches MATCH or REJECTED on the shared engine as it stands. Every decision is observed, anchored where the evidence allows,
 classified and explained, and stays UNKNOWN. That is a measured property of the pinned list and the missing inputs below, not a claim about any player.

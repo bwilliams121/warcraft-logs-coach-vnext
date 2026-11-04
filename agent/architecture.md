@@ -13747,7 +13747,7 @@ Autopilot queue entry ONB-D2. Public contract: NONE. No Warcraft Logs request. `
 | gtKb2xHn87pNcFfW fight 22 actor 29 | Shadow, Archon | whole fight | 213 | 213 | 236 |
 | rXAfw9t1q8YpmkKD fight 13 actor 40 | Shadow, Archon | first 165 s | 143 | 143 | 140 |
 
-Elemental 1,210, Balance 287, Shadow 356. The filtered M13-A capture's Balance (actor 3) and Shadow (actors 9, 10) casts have no combatant info, so they would refuse. No Stormbringer, Keeper of the Grove or Voidweaver subject is retained.
+Elemental 1,210, Balance 287, Shadow 356. The filtered M13-A capture's Balance (actor 3) and Shadow (actor 10) casts have no combatant info, so they would refuse. No Stormbringer, Keeper of the Grove or Voidweaver subject is retained.
 
 **Where each stops:**
 
@@ -13790,6 +13790,56 @@ The 65 are Lava Bursts, Lightning Bolts and others with complete coverage and no
 **Evidence.** Nothing new is committed. All these subjects' events are retained raw, and these decisions would pin nothing the synthetic tests do not. Every pinned source read was already on disk and matches the M11-A3 hashes.
 
 **No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse all three rows. A public request for any of them is SPEC_NOT_SUPPORTED, exactly as before.
+
+## ONB-D2P — Elemental Shaman, Balance Druid and Shadow Priest public promotion: not promoted
+
+Autopilot queue entry ONB-D2P. Public contract: declared EXPECTED; actual change NONE, because nothing passes. No Warcraft Logs request and no new evidence.
+
+**The outcome.** None of the three passes the rotational promotion gates, so each stays INTERNAL_ONLY (onboarding rule 4). The gates are not weakened and gain no subject. This is not an owner stop: rule 4 decides it, and no new decision is needed to record that. ONB-S3, already queued as the owner's, is not enough to change it for any of the three.
+
+**Why none can pass.** OBSERVATION needs a real MATCH and real resolved decisions over several distinct action tokens, and DISCRIMINATION needs a real REJECTED or a control that flips a real MATCH. Both start from a real resolved decision. Replaying the retained pages through production ingestion and each facade over a fake transport, at this tranche's base commit:
+
+| Subject | Spec, hero tree | Retained span | Result | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| b1PmaKrd6CDfzngc fight 48 actor 8 | Elemental, Farseer | whole fight, 345.2 s | ANALYZED | 225 | 0 | 0 | 225 | 55 |
+| b1PmaKrd6CDfzngc fight 48 actor 17 | Elemental, Farseer | whole fight | ANALYZED | 236 | 0 | 0 | 236 | 26 |
+| gtKb2xHn87pNcFfW fight 22 actor 9 | Elemental, Farseer | whole fight, 284.8 s | ANALYZED | 212 | 0 | 0 | 212 | 35 |
+| gtKb2xHn87pNcFfW fight 22 actor 19 | Elemental, Farseer | whole fight | ANALYZED | 213 | 0 | 0 | 213 | 32 |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 8 | Elemental, Farseer | first 165 s of 424.5 s | ANALYZED | 115 | 0 | 0 | 115 | 23 |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 16 | Elemental, Farseer | first 165 s | ANALYZED | 93 | 0 | 0 | 93 | 30 |
+| rXAfw9t1q8YpmkKD fight 13 actor 12 | Elemental, Farseer | first 165 s of 271.8 s | ANALYZED | 116 | 0 | 0 | 116 | 27 |
+| rXAfw9t1q8YpmkKD fight 13 actor 9 | Balance, Elune's Chosen | first 165 s | ANALYZED | 143 | 0 | 0 | 143 | 8 |
+| rXAfw9t1q8YpmkKD fight 13 actor 13 | Balance, Elune's Chosen | first 165 s | ANALYZED | 132 | 0 | 0 | 132 | 14 |
+| gtKb2xHn87pNcFfW fight 22 actor 27 | Balance, Elune's Chosen | 16 casts over 56 s | ANALYZED | 12 | 0 | 0 | 12 | 4 |
+| gtKb2xHn87pNcFfW fight 22 actor 29 | Shadow, Archon | whole fight | ANALYZED | 213 | 0 | 0 | 213 | 236 |
+| rXAfw9t1q8YpmkKD fight 13 actor 40 | Shadow, Archon | first 165 s | ANALYZED | 143 | 0 | 0 | 143 | 140 |
+
+Elemental 1,210, Balance 287, Shadow 356, all UNKNOWN. Compared with the output file saved during ONB-D2, every decision count, stop and anchor is identical. Six `unpairedBegins` counts differ (four Elemental, two Balance), each higher now. That file was written before ONB-D2's review cycles, which changed how a begin is consumed, so that is the likely reason; this tranche did not re-run the older code to prove it. Nothing reads those counts but the coverage.
+
+**Where each stops, unchanged:** Elemental at `default[0] spiritwalkers_grace` on the option `moving=1`, all 1,210. Balance at `default[13] run_action_list,name=opener` on `variable.opener`, all 287. Shadow at `main[3] shadow_word_madness` on `target_if`, 348, and `main[1] call_action_list,name=cds`, 8, with the engine's own refusal at `cds[7] power_infusion` on 300 decisions. An established anchor does not change this: a decision holding one still stops at the scan.
+
+**The census found nothing more.** It parsed every JSON file over 500 bytes under `.probe/` and `tests/`, skipping tool output and worktree copies (5,691 parsed of 5,692). It looked for any event, of any type and any source, of the ability ids that the retained contexts' master data names as the three families' signature abilities. Mortal Strike, the positive control, has 985 events, 559 of them casts. ONB-D2's census counted casts only. Every source holding one of those casts was resolved against its report's actors:
+
+| Source | What it is | Casts seen |
+| --- | --- | --- |
+| The twelve subjects above | Elemental, Balance and Shadow, with combatant info | their own |
+| Gw2kXrTfLWcDdhFY fight 1 actors 3 and 10 (M13-A) | Balance and Shadow, in a filtered capture with no combatant info, so each would refuse | their own |
+| Gw2k actor 7 (M13-A) | Enhancement Shaman, already on ONB-EV | Voltaic Blaze, Tempest |
+| Gw2k actor 9 (M13-A) | Discipline Priest | Mind Blast, Void Blast |
+| gtKb 31, A7R6 10, rXAf 8 | Restoration Shamans | Lava Burst |
+| gtKb 2 | a Restoration Druid | Starsurge, Moonfire, Wrath |
+| A7R6 1, b1Pm 170 | Feral Druids | Moonfire, Wrath |
+| gtKb 235, rXAf 165 | boss NPCs, with a like-named ability | Tempest |
+
+So no new subject exists, and nothing changes "no Stormbringer, Keeper of the Grove or Voidweaver subject is retained": the only Tempest and Void Blast casts come from the sources above. The subjects' pets and two stray sources hold other event types and no cast. The other contexts naming one of these specializations hold no family cast in any parsed file. The census matches ids, so a retained file holding only abilities outside that list would not appear.
+
+**One correction to ONB-D2's records.** Its census text and inventory row called M13-A actors 9 and 10 Shadow. Actor 9 is a Discipline Priest, as agent/architecture.md "HEAL-B3" already said, so only actor 10 is Shadow. Corrected in place in both.
+
+**Evidence is not their gap.** None is added to ONB-EV: more subjects would resolve nothing, because each list stops before any input a subject could supply. More evidence would still be needed to promote: all seven Elemental subjects are Farseer, all three Balance are Elune's Chosen, both Shadow are Archon, and Balance has no whole-fight subject (agent/follow-ups.md "After ONB-D2").
+
+**What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists all three; the gate search finds no qualifying assertion and `evidenceReady` false for each (`m11-promotion-evidence-gate`, from ONB-D2, its comments now naming the outcome); and a public request for each is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which now holds them). A public request still runs preparation and reports partial coverage. Nothing reads as clean play. The replay and census are offline and not committed.
+
+**What a later promotion must do.** Each specialization answers its own first question before the enemy count matters: for Elemental, how a movement option is stepped past without claiming anything about movement, then its off-GCD lines; for Balance, `variable.opener` and Celestial Alignment's aura; for Shadow, `target_if` scoring, predictive state and Power Infusion's contract. The owner decides ONB-S3, which all three then meet. Each binds its own resource, measures its unmeasured hero trees and spells or refuses them, and answers the anchor's limits (agent/follow-ups.md "After ONB-D2"). A new public entry then promotes it through the unchanged gates by the five-site promotion. No such entry is queued.
 
 ## AUTOPILOT — the local project supervisor (tooling)
 
