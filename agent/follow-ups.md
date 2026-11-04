@@ -43,6 +43,13 @@ could not be met. Retained material, from a census of every capture:
 | `warrior/protection` | m11c4f context-1 fight 17 actor 5, context only and uncommitted | no event |
 
 All three are appended to ONB-EV. ONB-A2P should record them as not promoted, as HEAL-B3P did, until that campaign runs.
+**ONB-A2P (2026-11-03): not promoted.** A second offline census, by signature ability over every retained and committed event
+file with positive controls, agrees with the table (agent/architecture.md "ONB-A2P"). All three stay INTERNAL_ONLY.
+
+**ONB-EV alone does not unlock any of them.** Evidence makes the measurements below possible, and each spec still stops at the
+same line until the rest lands: Subtlety at Stealth's missing transition contract, Fury at the enemy-count dispatch (ONB-S3), and
+Protection at Ignore Pain's condition, then the enemy count (ONB-S3). A new public entry must follow that work, and no such entry
+is queued yet.
 
 **Fury and Protection Warrior are in the wrong cohort.** Each pinned list dispatches on the enemy count, so ONB-S3 gates them.
 The M11-D0 census's "no `run_action_list`" description of Cohort A does not hold for either. ONB-S3's owner decision now names

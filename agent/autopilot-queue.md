@@ -1517,11 +1517,13 @@ fight's decisions are UNKNOWN and every resolved one names the Reaver's Glaive p
 ### ONB-A2: Subtlety Rogue, Fury Warrior and Protection Warrior (internal, Cohort A)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-A1
 branch: autopilot/onb-a2
 wcl: NONE
 publicContract: NONE
+pr: 57
+mergeSha: 0955a0753ae62f4d9b2dc2152bffbb5a9d8b68b6
 ```
 
 **Scope.** Cohort A followers on Havoc's proven pattern.
@@ -1541,11 +1543,28 @@ description missed (agent/architecture.md "ONB-A2"; agent/follow-ups.md "After O
 ### ONB-A2P: Subtlety Rogue, Fury Warrior and Protection Warrior (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-A2
+branch: autopilot/onb-a2p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** Subtlety Rogue, Fury Warrior and Protection Warrior cannot pass the rotational
+promotion gates and stay INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public
+contract is unchanged. The gates need a real MATCH, real resolved decisions over several action
+tokens and a real REJECTED or control, and neither input exists:
+
+- no decision of any of the three resolves on any input, because each list stops first at a line
+  ONB-A2 could not close;
+- no committed or retained capture can supply a subject. Subtlety has 150 filtered M13-A casts
+  with no combatant info and none of its own auras or resources, and Fury and Protection Warrior
+  have fight contexts and not one retained event.
+
+The evidence gap stays on ONB-EV. New evidence alone does not unlock any of them: Fury and
+Protection Warrior also need ONB-S3, and all three need the off-GCD contracts and aura and cooldown
+bindings ONB-A2 left open. A promotion after that is a new public entry through the unchanged gates
+(agent/architecture.md "ONB-A2P"; agent/follow-ups.md "After ONB-A2").
 
 ### ONB-B1: Arms Warrior (internal, Cohort B representative)
 

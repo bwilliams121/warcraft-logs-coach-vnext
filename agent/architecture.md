@@ -13231,6 +13231,48 @@ three are on ONB-EV, and this tranche commits no evidence, so the archive's noti
 **No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table
 refuse all three rows.
 
+## ONB-A2P — Subtlety Rogue, Fury Warrior and Protection Warrior public promotion: not promoted
+
+Autopilot queue entry ONB-A2P. Public contract: declared EXPECTED; actual change NONE, because nothing passes. No
+Warcraft Logs request and no new evidence.
+
+**The outcome.** None of the three passes the rotational promotion gates, so each stays INTERNAL_ONLY (onboarding rule 4:
+a specialization that cannot pass stays INTERNAL_ONLY, its reason in the inventory and its evidence gap on ONB-EV). Rule 4's
+"its cohort-mates still promote" has nobody to apply to. The gates are not weakened and gain no subject. This is not an owner
+stop: rule 4 decides it, and the decisions that could change it (ONB-EV and ONB-S3) are already queued as the owner's.
+
+**Why it cannot pass, twice over.** OBSERVATION needs a real MATCH and real resolved decisions over several distinct action
+tokens, and DISCRIMINATION needs a real REJECTED or a control that flips a real MATCH. Both start from a real resolved decision.
+
+1. **No decision resolves, on any input.** ONB-A2 pinned where each list stops, over synthetic whole builds. A capture alone
+   would still produce no MATCH: Subtlety refuses at `default[5] stealth`, Fury's root scan at the `active_enemies` dispatch,
+   and Protection's at `default[15] ignore_pain`.
+2. **No retained capture can supply a subject.** Two independent censuses, offline, agree:
+   - by identity, with `friendlySpecs` aligned to `friendlyPlayers`: Subtlety is M13-A actor 17, G2 cohort261 fight 31 actor 70
+     and m11c4f context-1 actor 3; Fury is m11c4f context-2 actor 3 and context-4 actor 21; Protection Warrior is m11c4f
+     context-1 actor 5. Only M13-A holds events of any of them;
+   - by signature ability, over every retained and committed event file, with Mortal Strike and Mutilate as positive controls:
+     no event of Bloodthirst, Raging Blow, Rampage or Recklessness, and none of Shield Slam, Revenge, Shield Block, Shield Wall or
+     Demoralizing Shout (each id as the pinned GCD data names it). Subtlety's abilities appear only in the M13-A capture.
+
+   M13-A actor 17 has 150 casts over a 151 s wipe, and in the aura file only buffs other players put on it. It has no combatant
+   info and no resources, and none of its own auras, so its talents never resolve (the facade refuses `PROFILE_NOT_RESOLVED`).
+
+**A narrow surface is not the question here.** ONB-A1P promoted Havoc at 83% UNKNOWN because no rotational gate has a coverage
+floor and Havoc did pass both gates. These three have no resolved decision at all, so they fail the gates themselves.
+
+**The promotion precondition stays.** `IDENTITY_RETAINED_ONLY` refuses a PUBLIC module, so a Fury or Protection Warrior
+promotion needs a committed context first. Nothing here loosens it.
+
+**What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists all three (`m10d-public-registration`,
+`m10a-spec-partition`); the gate search over all three finds no qualifying assertion and `evidenceReady` false
+(`m11-promotion-evidence-gate`, new); and a public request for each is SPEC_NOT_SUPPORTED, with one retrieval for preparation
+alone and no dispatch (`analysis-composition-refusals`, which did not list either Warrior until now).
+
+**What a later promotion must do.** ONB-EV supplies a capture, ONB-S3 settles the enemy count for the two Warriors, and a
+follower binds what ONB-A2 left open, measuring its failure modes on the real events first (agent/follow-ups.md "After
+ONB-A2"). A new public entry then promotes through the unchanged gates by the five-site promotion.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and
