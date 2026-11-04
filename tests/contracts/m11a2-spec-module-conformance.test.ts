@@ -169,6 +169,22 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
   },
   // ONB-B1: actor 4 of the committed A7R6 fight 7 context, an Arms Warrior.
   "warrior/arms": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 4 },
+  // ONB-B2: actor 19 of the canonical fight 48 context, the Frost Death Knight the committed
+  // evidence archive context reports (also actor 26 of gtKb fight 22, uncommitted).
+  "deathknight/frost": {
+    artifactId: "wcl-fight-context-b1pm-fight-48",
+    fightId: 48,
+    sourceId: 19,
+    archive: true,
+  },
+  // ONB-B2: actor 7 of the M13-A fight context, the Enhancement Shaman the committed evidence
+  // archive context reports. That capture's casts are filtered and carry no combatant info.
+  "shaman/enhancement": {
+    artifactId: "wcl-m13a-fight-context-aug1-fight-1",
+    fightId: 1,
+    sourceId: 7,
+    archive: true,
+  },
   // HEAL-B3: actor 9 of the M13-A fight context, the Discipline Priest the
   // committed evidence archive context reports (also actor 88 of the G2
   // cohort246 fight 33 context).
@@ -445,6 +461,8 @@ describe("what the tree exports today", () => {
       ]),
     ).toEqual([
       ["BLOOD_DEATH_KNIGHT_MODULE", "deathknight/blood", "PUBLIC", 0],
+      // ONB-B2: a Cohort B follower, INTERNAL_ONLY.
+      ["FROST_DEATH_KNIGHT_MODULE", "deathknight/frost", "INTERNAL_ONLY", 0],
       // ONB-A1: Cohort A's representative, INTERNAL_ONLY.
       ["HAVOC_DEMON_HUNTER_MODULE", "demonhunter/havoc", "PUBLIC", 0],
       // HEAL-B1: healers on Restoration Shaman's architecture, INTERNAL_ONLY; Holy Paladin and Mistweaver Monk PUBLIC since HEAL-B1P.
@@ -465,6 +483,8 @@ describe("what the tree exports today", () => {
       ["ASSASSINATION_MODULE", "rogue/assassination", "PUBLIC", 0],
       // ONB-A2: Cohort A's followers, INTERNAL_ONLY.
       ["SUBTLETY_ROGUE_MODULE", "rogue/subtlety", "INTERNAL_ONLY", 0],
+      // ONB-B2: a Cohort B follower, INTERNAL_ONLY.
+      ["ENHANCEMENT_SHAMAN_MODULE", "shaman/enhancement", "INTERNAL_ONLY", 0],
       // HEAL-A: the first healer, INTERNAL_ONLY, binding no pinned decision authority; PUBLIC since HEAL-AP.
       ["RESTORATION_SHAMAN_MODULE", "shaman/restoration", "PUBLIC", 0],
       // ONB-B1: Cohort B's representative, INTERNAL_ONLY.

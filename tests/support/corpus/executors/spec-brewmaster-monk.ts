@@ -219,7 +219,7 @@ export function authorityProvenance(
     sourcePath: authority.sourcePath,
     sourceSha256: authority.sourceSha256,
     regionSelector:
-      selector === null
+      selector === null || selector.kind !== "NAMESPACE_FUNCTION"
         ? null
         : {
             kind: selector.kind,

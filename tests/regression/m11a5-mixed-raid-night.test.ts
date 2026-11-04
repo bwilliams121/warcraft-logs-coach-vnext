@@ -186,6 +186,8 @@ describe("a Retribution Paladin alone", () => {
       "warrior-fury-observed-decisions": 0,
       "warrior-protection-observed-decisions": 0,
       "warrior-arms-observed-decisions": 0,
+      "deathknight-frost-observed-decisions": 0,
+      "shaman-enhancement-observed-decisions": 0,
     });
     expectRetributionCell(cellOf(run.aggregate.cells, RETRIBUTION));
     expect(run.aggregate.coverage).toMatchObject({
@@ -232,6 +234,8 @@ describe("a mixed roster — Assassination, Protection, Retribution, Fire and an
       "warrior-fury-observed-decisions": 0,
       "warrior-protection-observed-decisions": 0,
       "warrior-arms-observed-decisions": 0,
+      "deathknight-frost-observed-decisions": 0,
+      "shaman-enhancement-observed-decisions": 0,
     });
   });
 

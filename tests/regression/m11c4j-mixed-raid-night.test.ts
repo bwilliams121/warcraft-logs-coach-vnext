@@ -185,6 +185,8 @@ const NO_CALLS = {
   "warrior-fury-observed-decisions": 0,
   "warrior-protection-observed-decisions": 0,
   "warrior-arms-observed-decisions": 0,
+  "deathknight-frost-observed-decisions": 0,
+  "shaman-enhancement-observed-decisions": 0,
 };
 
 describe("a Brewmaster Monk alone", () => {

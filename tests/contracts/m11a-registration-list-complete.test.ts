@@ -260,6 +260,7 @@ describe("what the tree registers today", () => {
     // ONB-A2 as Cohort A's followers.
     expect(DISCOVERED.map((found) => [found.path, found.exportName, found.registration.exposure])).toEqual([
       ["src/specs/deathknight/blood/registration.ts", "BLOOD_DEATH_KNIGHT_REGISTRATION", "PUBLIC"],
+      ["src/specs/deathknight/frost/registration.ts", "FROST_DEATH_KNIGHT_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/demonhunter/havoc/registration.ts", "HAVOC_DEMON_HUNTER_REGISTRATION", "PUBLIC"],
       ["src/specs/druid/restoration/registration.ts", "RESTORATION_DRUID_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/evoker/augmentation/registration.ts", "AUGMENTATION_EVOKER_REGISTRATION", "PUBLIC"],
@@ -273,6 +274,7 @@ describe("what the tree registers today", () => {
       ["src/specs/priest/holy/registration.ts", "HOLY_PRIEST_REGISTRATION", "PUBLIC"],
       ["src/specs/rogue/assassination/registration.ts", "ASSASSINATION_REGISTRATION", "PUBLIC"],
       ["src/specs/rogue/subtlety/registration.ts", "SUBTLETY_ROGUE_REGISTRATION", "INTERNAL_ONLY"],
+      ["src/specs/shaman/enhancement/registration.ts", "ENHANCEMENT_SHAMAN_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/shaman/restoration/registration.ts", "RESTORATION_SHAMAN_REGISTRATION", "PUBLIC"],
       ["src/specs/warrior/arms/registration.ts", "ARMS_WARRIOR_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/warrior/fury/registration.ts", "FURY_WARRIOR_REGISTRATION", "INTERNAL_ONLY"],

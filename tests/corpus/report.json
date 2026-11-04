@@ -677,13 +677,31 @@
       "passed": 1
     },
     {
-      "assertions": 28,
-      "cases": 24,
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_FROST_DEATH_KNIGHT.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_FROST_DEATH_KNIGHT",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_ENHANCEMENT_SHAMAN",
+      "passed": 1
+    },
+    {
+      "assertions": 30,
+      "cases": 26,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 28
+      "passed": 30
     },
     {
       "assertions": 14,
@@ -794,6 +812,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.enhancement-shaman-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
           "ordinal": 0,
           "status": "PASSED"
@@ -801,6 +833,20 @@
       ],
       "authority": null,
       "caseId": "application-service.fire-mage-subject-is-unsupported-on-the-same-evidence",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.frost-death-knight-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -5406,6 +5452,34 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-enhancement-shaman.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_ENHANCEMENT_SHAMAN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_FROST_DEATH_KNIGHT.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-frost-death-knight.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_FROST_DEATH_KNIGHT",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_FURY_WARRIOR.SPEC_GATE",
           "ordinal": 0,
           "status": "PASSED"
@@ -7381,12 +7455,14 @@
   ],
   "pinnedAuthorities": {
     "SIMC_APL_DEATHKNIGHT_BLOOD": "simc-33622e9d-1",
+    "SIMC_APL_DEATHKNIGHT_FROST": "simc-33622e9d-1",
     "SIMC_APL_DEMONHUNTER_HAVOC": "simc-33622e9d-1",
     "SIMC_APL_MONK_BREWMASTER": "simc-33622e9d-1",
     "SIMC_APL_PALADIN_PROTECTION": "simc-33622e9d-1",
     "SIMC_APL_PALADIN_RETRIBUTION": "simc-33622e9d-1",
     "SIMC_APL_ROGUE_ASSASSINATION": "simc-33622e9d-1",
     "SIMC_APL_ROGUE_SUBTLETY": "simc-33622e9d-1",
+    "SIMC_APL_SHAMAN_ENHANCEMENT": "simc-33622e9d-1",
     "SIMC_APL_WARRIOR_ARMS": "simc-33622e9d-1",
     "SIMC_APL_WARRIOR_FURY": "simc-33622e9d-1",
     "SIMC_APL_WARRIOR_PROTECTION": "simc-33622e9d-1",
@@ -7398,13 +7474,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 804,
-    "cases": 209,
+    "assertions": 808,
+    "cases": 213,
     "declared": 0,
-    "executable": 804,
+    "executable": 808,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 804
+    "passed": 808
   }
 }

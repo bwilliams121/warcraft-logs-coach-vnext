@@ -218,6 +218,8 @@ describe("cross-spec authority access is refused structurally", () => {
       ["warrior/protection", ["SIMC_APL_WARRIOR_PROTECTION"]],
       // ONB-B1: Cohort B's representative binds its own pinned list.
       ["warrior/arms", ["SIMC_APL_WARRIOR_ARMS"]],
+      ["deathknight/frost", ["SIMC_APL_DEATHKNIGHT_FROST"]],
+      ["shaman/enhancement", ["SIMC_APL_SHAMAN_ENHANCEMENT"]],
     ]);
   });
 });

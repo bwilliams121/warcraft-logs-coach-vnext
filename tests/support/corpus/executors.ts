@@ -41,6 +41,8 @@ import * as subtletyRogue from "./executors/spec-subtlety-rogue.js";
 import * as furyWarrior from "./executors/spec-fury-warrior.js";
 import * as protectionWarrior from "./executors/spec-protection-warrior.js";
 import * as armsWarrior from "./executors/spec-arms-warrior.js";
+import * as frostDeathKnight from "./executors/spec-frost-death-knight.js";
+import * as enhancementShaman from "./executors/spec-enhancement-shaman.js";
 import * as sharedEngine from "./executors/shared-decision-engine.js";
 import * as transport from "./executors/wcl-transport.js";
 
@@ -677,6 +679,10 @@ export async function executeAssertion(
       return armsWarrior.coverageSummary(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_ARMS_WARRIOR.SPEC_GATE":
       return armsWarrior.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_FROST_DEATH_KNIGHT.SPEC_GATE":
+      return frostDeathKnight.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE":
+      return enhancementShaman.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_PRESERVATION_EVOKER.REGISTRATION_RESULT":
       return preservationEvoker.registrationResult(
         corpus,
@@ -811,6 +817,8 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_PROTECTION_WARRIOR.SPEC_GATE",
   "SPEC_ARMS_WARRIOR.COVERAGE_SUMMARY",
   "SPEC_ARMS_WARRIOR.SPEC_GATE",
+  "SPEC_FROST_DEATH_KNIGHT.SPEC_GATE",
+  "SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE",
   "SPEC_PRESERVATION_EVOKER.REGISTRATION_RESULT",
   "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
   "PUBLIC_CONTRACT.REST_MCP_PARITY",

@@ -22,6 +22,8 @@ export interface AplExtractionTarget {
   readonly regionEnd?: string;
   /** NAMESPACE selection (M11-C1): the namespace the function header is looked for in. */
   readonly enclosingNamespace?: string;
+  /** CLASS_METHOD selection (ONB-B2): the class whose method defines the lists. */
+  readonly enclosingClass?: string;
   readonly functionHeader: string;
   /** The parameter the list declarations are called on; `p` when absent. */
   readonly playerIdentifier?: string;
@@ -35,6 +37,15 @@ export interface AplExtractionTarget {
   readonly livePtrPolicy?: PinnedTargetRecord["livePtrPolicy"];
   readonly dispatch?: PinnedTargetRecord["dispatch"];
   readonly inertStatements?: PinnedTargetRecord["inertStatements"];
+  /** ONB-B2: the guard a class method opens on, by exact code lines, and when the lists exist. */
+  readonly methodPrologue?: { readonly lines: readonly string[]; readonly appliesWhen: string };
+  /** ONB-B2: each `add_action( this, ... )`, by exact text, with the proof of what it emits. */
+  readonly spellGatedActions?: readonly {
+    readonly statement: string;
+    readonly spellName: string;
+    readonly emitted: string | null;
+    readonly proofs: readonly (PinnedSourceFile & { readonly checks: readonly unknown[] })[];
+  }[];
   readonly requiredFacts: {
     readonly kind: string;
     readonly entryListName: string;
@@ -61,6 +72,13 @@ export type ExtractedRegionProvenance =
         readonly enclosingNamespace: string;
         readonly functionHeader: string;
         readonly playerIdentifier: string;
+      };
+    }
+  | {
+      readonly regionSelector: {
+        readonly kind: "CLASS_METHOD";
+        readonly enclosingClass: string;
+        readonly functionHeader: string;
       };
     };
 
@@ -94,6 +112,17 @@ export interface ExtractedRegion {
     readonly sourceLine: number;
     readonly statement: string;
     readonly identifier: string;
+  }[];
+  readonly methodPrologue?: {
+    readonly startLine: number;
+    readonly endLine: number;
+    readonly appliesWhen: string;
+  };
+  readonly spellGatedActions?: readonly {
+    readonly sourceLine: number;
+    readonly statement: string;
+    readonly spellName: string;
+    readonly emitted: string | null;
   }[];
 }
 

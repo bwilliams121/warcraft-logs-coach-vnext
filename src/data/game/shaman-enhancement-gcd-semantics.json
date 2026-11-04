@@ -1,0 +1,376 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_SHAMAN_ENHANCEMENT_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/sc_shaman.cpp",
+        "sha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+        "byteLength": 450570
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 2825,
+      "baseGcdMs": 0,
+      "displayNameEn": "Bloodlust"
+    },
+    {
+      "abilityGameId": 17364,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Stormstrike"
+    },
+    {
+      "abilityGameId": 60103,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Lava Lash"
+    },
+    {
+      "abilityGameId": 114051,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Ascendance"
+    },
+    {
+      "abilityGameId": 115356,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Windstrike"
+    },
+    {
+      "abilityGameId": 187874,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Crash Lightning"
+    },
+    {
+      "abilityGameId": 188196,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Lightning Bolt"
+    },
+    {
+      "abilityGameId": 188443,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Chain Lightning"
+    },
+    {
+      "abilityGameId": 197214,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Sundering"
+    },
+    {
+      "abilityGameId": 384352,
+      "baseGcdMs": 0,
+      "displayNameEn": "Doom Winds"
+    },
+    {
+      "abilityGameId": 444995,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Surging Totem"
+    },
+    {
+      "abilityGameId": 452201,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Tempest"
+    },
+    {
+      "abilityGameId": 470057,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Voltaic Blaze"
+    },
+    {
+      "abilityGameId": 470411,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Flame Shock"
+    },
+    {
+      "abilityGameId": 1218090,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Primordial Storm"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "bloodlust",
+      "candidateAbilityGameIds": [2825],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_shaman.cpp",
+        "sourceSha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+        "symbol": "shaman_t::create_action / bloodlust_t",
+        "startLine": 10345,
+        "endLine": 10346,
+        "sourceNote": "create_action dispatches \"bloodlust\" to bloodlust_t, built on player->find_class_spell( \"Bloodlust\" ) (:6259-6260), class_spells.inc row { 7, 0, 2825 }. Heroism (32182) has its own row and no action of its own in this module, so nothing here binds it: a logged Heroism has no lane record and is excluded, never judged.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "voltaic_blaze",
+      "candidateAbilityGameIds": [470057],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_shaman.cpp",
+        "sourceSha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+        "symbol": "shaman_t::create_action / voltaic_blaze_t",
+        "startLine": 10417,
+        "endLine": 10418,
+        "sourceNote": "create_action dispatches \"voltaic_blaze\" to voltaic_blaze_t, built on player->talent.voltaic_blaze (:10111-10112), trait row spell 470057.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "flame_shock",
+      "candidateAbilityGameIds": [470411],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_shaman.cpp",
+        "sourceSha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+        "symbol": "shaman_t::create_action / flame_shock_t",
+        "startLine": 10352,
+        "endLine": 10353,
+        "sourceNote": "create_action dispatches \"flame_shock\" to flame_shock_t, built on player->find_spell( 188389 ) (:8343-8346), a record whose _gcd is 0; its constructor takes the cooldown and trigger_gcd from find_class_spell( \"Flame Shock\" ) (:8352-8353), class_spells.inc row { 7, 0, 470411 }, _gcd 1500. So this token binds the class row: the action consumes a GCD, and binding 188389 would read it as off-GCD. No retained capture holds a Flame Shock cast, so which id the log reports is not corroborated; a logged 188389 has no lane record and is excluded.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "surging_totem",
+      "candidateAbilityGameIds": [444995],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_shaman.cpp",
+        "sourceSha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+        "symbol": "shaman_t::create_action / surging_totem_spell_t",
+        "startLine": 10437,
+        "endLine": 10438,
+        "sourceNote": "create_action dispatches \"surging_totem\" to surging_totem_spell_t, built on p->find_spell( 444995 ) (:9538-9540); the talent itself (spell 455630) gates it at :9561.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "ascendance",
+      "candidateAbilityGameIds": [114051],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_shaman.cpp",
+        "sourceSha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+        "symbol": "shaman_t::create_action / ascendance_t",
+        "startLine": 10341,
+        "endLine": 10342,
+        "sourceNote": "create_action dispatches \"ascendance\" to ascendance_t, built on player->spell.ascendance (:8557-8559); spell.ascendance = find_spell( 114051 ) for Enhancement at :11420. Its ready() refuses without talent.ascendance (:8686-8691), a usability claim this slice does not make.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "sundering",
+      "candidateAbilityGameIds": [197214],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_shaman.cpp",
+        "sourceSha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+        "symbol": "shaman_t::create_action / sundering_t",
+        "startLine": 10409,
+        "endLine": 10410,
+        "sourceNote": "create_action dispatches \"sundering\" to sundering_t, built on player->talent.sundering (:5708-5709), trait row spell 197214.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "lava_lash",
+      "candidateAbilityGameIds": [60103],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_shaman.cpp",
+        "sourceSha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+        "symbol": "shaman_t::create_action / lava_lash_t",
+        "startLine": 10401,
+        "endLine": 10402,
+        "sourceNote": "create_action dispatches \"lava_lash\" to lava_lash_t, built on player->talent.lava_lash (:5167-5168); _CT( \"Lava Lash\" ) at :11153, trait row spell 60103.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "doom_winds",
+      "candidateAbilityGameIds": [384352],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_shaman.cpp",
+        "sourceSha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+        "symbol": "shaman_t::create_action / doom_winds_t",
+        "startLine": 10415,
+        "endLine": 10416,
+        "sourceNote": "create_action dispatches \"doom_winds\" to doom_winds_t, built on player->talent.doom_winds (:8795-8796), trait row spell 384352. The log reports 469270, doom_winds_damage on find_spell( 469270 ) (:8785), triggered by effect row 1183511 of 384352: ten of those in 151 s on the filtered M13-A capture cannot be a 90 s cooldown press, so that id is NOT bound. It has no lane record here and is excluded.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "crash_lightning",
+      "candidateAbilityGameIds": [187874],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_shaman.cpp",
+        "sourceSha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+        "symbol": "shaman_t::create_action / crash_lightning_t",
+        "startLine": 10393,
+        "endLine": 10394,
+        "sourceNote": "create_action dispatches \"crash_lightning\" to crash_lightning_t, built on player->talent.crash_lightning (:5926-5927), trait row spell 187874.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "windstrike",
+      "candidateAbilityGameIds": [115356],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_shaman.cpp",
+        "sourceSha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+        "symbol": "shaman_t::create_action / windstrike_t",
+        "startLine": 10411,
+        "endLine": 10412,
+        "sourceNote": "create_action dispatches \"windstrike\" to windstrike_t, built on player->find_spell( 115356 ) (:5665-5667).",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "stormstrike",
+      "candidateAbilityGameIds": [17364],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_shaman.cpp",
+        "sourceSha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+        "symbol": "shaman_t::create_action / stormstrike_t",
+        "startLine": 10407,
+        "endLine": 10408,
+        "sourceNote": "create_action dispatches \"stormstrike\" to stormstrike_t, built on player->spec.stormstrike (:5622-5624); find_specialization_spell( \"Stormstrike\" ) at :11126, class_spells.inc row { 7, 263, 17364 }.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "tempest",
+      "candidateAbilityGameIds": [452201],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_shaman.cpp",
+        "sourceSha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+        "symbol": "shaman_t::create_action / tempest_t",
+        "startLine": 10372,
+        "endLine": 10373,
+        "sourceNote": "create_action dispatches \"tempest\" to tempest_t, built on player->find_spell( 452201 ) (:9875-9876). The talent itself is spell 454009.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "primordial_storm",
+      "candidateAbilityGameIds": [1218090],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_shaman.cpp",
+        "sourceSha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+        "symbol": "shaman_t::create_action / primordial_storm_t",
+        "startLine": 10419,
+        "endLine": 10420,
+        "sourceNote": "create_action dispatches \"primordial_storm\" to primordial_storm_t, built on player->find_spell( 1218090 ) (:9702-9703). The talent itself is spell 1218047.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "chain_lightning",
+      "candidateAbilityGameIds": [188443],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_shaman.cpp",
+        "sourceSha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+        "symbol": "shaman_t::create_action / chain_lightning_t",
+        "startLine": 10360,
+        "endLine": 10361,
+        "sourceNote": "create_action dispatches \"chain_lightning\" to chain_lightning_t, built on player->talent.chain_lightning (:6463-6464); _CT( \"Chain Lightning\" ) at :11154, trait row spell 188443.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "lightning_bolt",
+      "candidateAbilityGameIds": [188196],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_shaman.cpp",
+        "sourceSha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+        "symbol": "shaman_t::create_action / lightning_bolt_t",
+        "startLine": 10358,
+        "endLine": 10359,
+        "sourceNote": "create_action dispatches \"lightning_bolt\" to lightning_bolt_t, built on player->find_class_spell( \"Lightning Bolt\" ) (:7356-7357), class_spells.inc row { 7, 0, 188196 }.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "auto_attack",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/class_modules/sc_shaman.cpp",
+        "sourceSha256": "0ca278a862eb9ceb8aba2255bceb534955a9e5ed83c9b81ec35b2a0f86763bd0",
+        "symbol": "auto_attack_t::auto_attack_t",
+        "line": 5104,
+        "sourceNote": "auto_attack_t is built on shaman_attack_t( \"auto_attack\", player, spell_data_t::nil() ) (sc_shaman.cpp:5081-5082) and its constructor assigns trigger_gcd = 0_ms."
+      }
+    },
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

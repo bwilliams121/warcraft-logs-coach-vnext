@@ -87,6 +87,8 @@ import { HOLY_PRIEST_REGISTRATION } from "../specs/priest/holy/registration.js";
 import { ASSASSINATION_REGISTRATION } from "../specs/rogue/assassination/registration.js";
 import { SUBTLETY_ROGUE_REGISTRATION } from "../specs/rogue/subtlety/registration.js";
 import { RESTORATION_SHAMAN_REGISTRATION } from "../specs/shaman/restoration/registration.js";
+import { FROST_DEATH_KNIGHT_REGISTRATION } from "../specs/deathknight/frost/registration.js";
+import { ENHANCEMENT_SHAMAN_REGISTRATION } from "../specs/shaman/enhancement/registration.js";
 import { ARMS_WARRIOR_REGISTRATION } from "../specs/warrior/arms/registration.js";
 import { FURY_WARRIOR_REGISTRATION } from "../specs/warrior/fury/registration.js";
 import { PROTECTION_WARRIOR_REGISTRATION } from "../specs/warrior/protection/registration.js";
@@ -491,6 +493,10 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   PROTECTION_WARRIOR_REGISTRATION,
   // INTERNAL_ONLY since ONB-B1: Cohort B's representative. Its row resolves no decision while the enemy count (ONB-S3) stands.
   ARMS_WARRIOR_REGISTRATION,
+  // INTERNAL_ONLY since ONB-B2: Cohort B's followers. Neither resolves a decision: every rotation list
+  // of both sits behind the enemy count (ONB-S3), and each stops on its own line before that.
+  FROST_DEATH_KNIGHT_REGISTRATION,
+  ENHANCEMENT_SHAMAN_REGISTRATION,
 ]);
 
 /**

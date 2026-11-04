@@ -1,0 +1,468 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_TRAIT_SHAMAN_ENHANCEMENT_TALENTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. That `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals trait_data_t::id_node is NOT corroborated for Enhancement Shaman: no retained capture holds one of its combatantinfo events. It is corroborated for other specializations of the same parser version.",
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "talents": [
+    {
+      "simcName": "ascendance",
+      "displayNameEn": "Ascendance",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 92219,
+      "traitEntryId": 114291,
+      "talentSpellId": 114051,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 101816,
+          "displayNameEn": "Deeply Rooted Elements",
+          "talentSpellId": 378270
+        }
+      ],
+      "binding": "sc_shaman.cpp:11202 { talent.ascendance, \"Ascendance\" }; the pinned Enhancement list reads it; ascendance_t is not built on it, but its ready() reads it (:8686-8691). A CHOICE node with Deeply Rooted Elements"
+    },
+    {
+      "simcName": "chain_lightning",
+      "displayNameEn": "Chain Lightning",
+      "tree": "CLASS",
+      "traitNodeId": 103583,
+      "traitEntryId": 127856,
+      "talentSpellId": 188443,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11154 talent.chain_lightning = _CT( \"Chain Lightning\" ); chain_lightning_t is built on it (:6463-6464)"
+    },
+    {
+      "simcName": "crash_lightning",
+      "displayNameEn": "Crash Lightning",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 80974,
+      "traitEntryId": 101840,
+      "talentSpellId": 187874,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11224 { talent.crash_lightning, \"Crash Lightning\" }; crash_lightning_t is built on it (:5926-5927)"
+    },
+    {
+      "simcName": "deeply_rooted_elements",
+      "displayNameEn": "Deeply Rooted Elements",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 92219,
+      "traitEntryId": 101816,
+      "talentSpellId": 378270,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 114291,
+          "displayNameEn": "Ascendance",
+          "talentSpellId": 114051
+        }
+      ],
+      "binding": "sc_shaman.cpp:11260 { talent.deeply_rooted_elements, \"Deeply Rooted Elements\" }; the pinned Enhancement list reads it. A CHOICE node with Ascendance"
+    },
+    {
+      "simcName": "doom_winds",
+      "displayNameEn": "Doom Winds",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 80959,
+      "traitEntryId": 101824,
+      "talentSpellId": 384352,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11250 { talent.doom_winds, \"Doom Winds\" }; doom_winds_t is built on it (:8795-8796), and the pinned Enhancement list reads it"
+    },
+    {
+      "simcName": "elemental_tempo",
+      "displayNameEn": "Elemental Tempo",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 80961,
+      "traitEntryId": 101826,
+      "talentSpellId": 1250364,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11238 { talent.elemental_tempo, \"Elemental Tempo\" }; the pinned Enhancement list reads it"
+    },
+    {
+      "simcName": "feral_spirit",
+      "displayNameEn": "Feral Spirit",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 109194,
+      "traitEntryId": 128236,
+      "talentSpellId": 469314,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11256 { talent.feral_spirit, \"Feral Spirit\" }; the pinned Enhancement list reads it"
+    },
+    {
+      "simcName": "fire_nova",
+      "displayNameEn": "Fire Nova",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 109909,
+      "traitEntryId": 136176,
+      "talentSpellId": 1260666,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11246 { talent.fire_nova, \"Fire Nova\" }; the pinned Enhancement list reads it"
+    },
+    {
+      "simcName": "lashing_flames",
+      "displayNameEn": "Lashing Flames",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 80948,
+      "traitEntryId": 101812,
+      "talentSpellId": 334046,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11247 { talent.lashing_flames, \"Lashing Flames\" }; the pinned Enhancement list reads it"
+    },
+    {
+      "simcName": "lava_lash",
+      "displayNameEn": "Lava Lash",
+      "tree": "CLASS",
+      "traitNodeId": 109389,
+      "traitEntryId": 135593,
+      "talentSpellId": 60103,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11153 talent.lava_lash = _CT( \"Lava Lash\" ); lava_lash_t is built on it (:5167-5168)"
+    },
+    {
+      "simcName": "primordial_storm",
+      "displayNameEn": "Primordial Storm",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 80963,
+      "traitEntryId": 101828,
+      "talentSpellId": 1218047,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11262 { talent.primordial_storm, \"Primordial Storm\" }; the pinned list names the action; primordial_storm_t is not built on it"
+    },
+    {
+      "simcName": "splitstream",
+      "displayNameEn": "Splitstream",
+      "tree": "HERO",
+      "traitNodeId": 94872,
+      "traitEntryId": 117469,
+      "talentSpellId": 445035,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11300 { talent.splitstream, \"Splitstream\" }; the pinned Enhancement list reads it"
+    },
+    {
+      "simcName": "sundering",
+      "displayNameEn": "Sundering",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 80975,
+      "traitEntryId": 101841,
+      "talentSpellId": 197214,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11251 { talent.sundering, \"Sundering\" }; sundering_t is built on it (:5708-5709), and the pinned Enhancement list reads it"
+    },
+    {
+      "simcName": "surging_elements",
+      "displayNameEn": "Surging Elements",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 80964,
+      "traitEntryId": 101829,
+      "talentSpellId": 382042,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11257 { talent.surging_elements, \"Surging Elements\" }; the pinned Enhancement list reads it"
+    },
+    {
+      "simcName": "surging_totem",
+      "displayNameEn": "Surging Totem",
+      "tree": "HERO",
+      "traitNodeId": 94877,
+      "traitEntryId": 117474,
+      "talentSpellId": 455630,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11292 { talent.surging_totem, \"Surging Totem\" }; the pinned Enhancement list reads it, and it picks the single-target list"
+    },
+    {
+      "simcName": "tempest",
+      "displayNameEn": "Tempest",
+      "tree": "HERO",
+      "traitNodeId": 94892,
+      "traitEntryId": 117489,
+      "talentSpellId": 454009,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11268 { talent.tempest, \"Tempest\" }; a Stormbringer talent the hero tree resolves against, and tempest_t is not built on it"
+    },
+    {
+      "simcName": "thorims_invocation",
+      "displayNameEn": "Thorim's Invocation",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 80949,
+      "traitEntryId": 101813,
+      "talentSpellId": 384444,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11261 { talent.thorims_invocation, \"Thorim's Invocation\" }; the pinned Enhancement list reads it"
+    },
+    {
+      "simcName": "voltaic_blaze",
+      "displayNameEn": "Voltaic Blaze",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 80954,
+      "traitEntryId": 101819,
+      "talentSpellId": 470057,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_shaman.cpp:11237 { talent.voltaic_blaze, \"Voltaic Blaze\" }; voltaic_blaze_t is built on it (:10111-10112)"
+    }
+  ],
+  "heroTrees": [
+    {
+      "simcName": "totemic",
+      "subTreeId": 54,
+      "entries": [
+        {
+          "traitEntryId": 117456,
+          "traitNodeId": 94859,
+          "displayNameEn": "Oversized Totems",
+          "talentSpellId": 445026
+        },
+        {
+          "traitEntryId": 117463,
+          "traitNodeId": 94866,
+          "displayNameEn": "Pulse Capacitor",
+          "talentSpellId": 445032
+        },
+        {
+          "traitEntryId": 117468,
+          "traitNodeId": 94871,
+          "displayNameEn": "Imbuement Mastery",
+          "talentSpellId": 445028
+        },
+        {
+          "traitEntryId": 117469,
+          "traitNodeId": 94872,
+          "displayNameEn": "Splitstream",
+          "talentSpellId": 445035
+        },
+        {
+          "traitEntryId": 117471,
+          "traitNodeId": 94874,
+          "displayNameEn": "Amplification Core",
+          "talentSpellId": 445029
+        },
+        {
+          "traitEntryId": 117474,
+          "traitNodeId": 94877,
+          "displayNameEn": "Surging Totem",
+          "talentSpellId": 455630
+        },
+        {
+          "traitEntryId": 117476,
+          "traitNodeId": 94879,
+          "displayNameEn": "Whirling Elements",
+          "talentSpellId": 445024
+        },
+        {
+          "traitEntryId": 117478,
+          "traitNodeId": 94881,
+          "displayNameEn": "Totemic Coordination",
+          "talentSpellId": 445036
+        },
+        {
+          "traitEntryId": 117479,
+          "traitNodeId": 94882,
+          "displayNameEn": "Lively Totems",
+          "talentSpellId": 445034
+        },
+        {
+          "traitEntryId": 117487,
+          "traitNodeId": 94890,
+          "displayNameEn": "Totemic Rebound",
+          "talentSpellId": 445025
+        },
+        {
+          "traitEntryId": 117488,
+          "traitNodeId": 94891,
+          "displayNameEn": "Wind Barrier",
+          "talentSpellId": 445031
+        },
+        {
+          "traitEntryId": 125822,
+          "traitNodeId": 94881,
+          "displayNameEn": "Earthsurge",
+          "talentSpellId": 455590
+        },
+        {
+          "traitEntryId": 125823,
+          "traitNodeId": 94874,
+          "displayNameEn": "Oversurge",
+          "talentSpellId": 445030
+        },
+        {
+          "traitEntryId": 125824,
+          "traitNodeId": 94866,
+          "displayNameEn": "Supportive Imbuements",
+          "talentSpellId": 445033
+        },
+        {
+          "traitEntryId": 125825,
+          "traitNodeId": 94859,
+          "displayNameEn": "Swift Recall",
+          "talentSpellId": 445027
+        },
+        {
+          "traitEntryId": 135982,
+          "traitNodeId": 109724,
+          "displayNameEn": "Primal Catalyst",
+          "talentSpellId": 1260874
+        },
+        {
+          "traitEntryId": 135983,
+          "traitNodeId": 109725,
+          "displayNameEn": "Elemental Attunement",
+          "talentSpellId": 1263288
+        },
+        {
+          "traitEntryId": 135984,
+          "traitNodeId": 109726,
+          "displayNameEn": "Totemic Momentum",
+          "talentSpellId": 1260644
+        }
+      ]
+    },
+    {
+      "simcName": "stormbringer",
+      "subTreeId": 55,
+      "entries": [
+        {
+          "traitEntryId": 117460,
+          "traitNodeId": 94863,
+          "displayNameEn": "Lightning Conduit",
+          "talentSpellId": 467778
+        },
+        {
+          "traitEntryId": 117464,
+          "traitNodeId": 94867,
+          "displayNameEn": "Awakening Storms",
+          "talentSpellId": 455129
+        },
+        {
+          "traitEntryId": 117465,
+          "traitNodeId": 94868,
+          "displayNameEn": "Conductive Energy",
+          "talentSpellId": 455123
+        },
+        {
+          "traitEntryId": 117467,
+          "traitNodeId": 94870,
+          "displayNameEn": "Voltaic Surge",
+          "talentSpellId": 454919
+        },
+        {
+          "traitEntryId": 117470,
+          "traitNodeId": 94873,
+          "displayNameEn": "Storm Swell",
+          "talentSpellId": 455088
+        },
+        {
+          "traitEntryId": 117477,
+          "traitNodeId": 94880,
+          "displayNameEn": "Nature's Protection",
+          "talentSpellId": 454027
+        },
+        {
+          "traitEntryId": 117482,
+          "traitNodeId": 94885,
+          "displayNameEn": "Arc Discharge",
+          "talentSpellId": 455096
+        },
+        {
+          "traitEntryId": 117483,
+          "traitNodeId": 94886,
+          "displayNameEn": "Unlimited Power",
+          "talentSpellId": 454391
+        },
+        {
+          "traitEntryId": 117486,
+          "traitNodeId": 94889,
+          "displayNameEn": "Rolling Thunder",
+          "talentSpellId": 454026
+        },
+        {
+          "traitEntryId": 117489,
+          "traitNodeId": 94892,
+          "displayNameEn": "Tempest",
+          "talentSpellId": 454009
+        },
+        {
+          "traitEntryId": 117490,
+          "traitNodeId": 94893,
+          "displayNameEn": "Stormcaller",
+          "talentSpellId": 454021
+        },
+        {
+          "traitEntryId": 125617,
+          "traitNodeId": 94880,
+          "displayNameEn": "Surging Currents",
+          "talentSpellId": 454372
+        },
+        {
+          "traitEntryId": 128225,
+          "traitNodeId": 94873,
+          "displayNameEn": "Supercharge",
+          "talentSpellId": 455110
+        },
+        {
+          "traitEntryId": 128226,
+          "traitNodeId": 94863,
+          "displayNameEn": "Electroshock",
+          "talentSpellId": 454022
+        },
+        {
+          "traitEntryId": 135985,
+          "traitNodeId": 109727,
+          "displayNameEn": "Descending Skies",
+          "talentSpellId": 1264688
+        },
+        {
+          "traitEntryId": 135986,
+          "traitNodeId": 109728,
+          "displayNameEn": "Natural Gift",
+          "talentSpellId": 1264691
+        },
+        {
+          "traitEntryId": 135987,
+          "traitNodeId": 109729,
+          "displayNameEn": "Stormwell",
+          "talentSpellId": 1264762
+        }
+      ]
+    }
+  ]
+}

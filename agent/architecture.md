@@ -13375,6 +13375,65 @@ to Mage/Fire, and which holds it again here). The replay is offline and not comm
 **What a later promotion must do.** The owner decides ONB-S3. Arms then binds what ONB-B1 left open and measures its failure modes on these subjects
 (agent/follow-ups.md "After ONB-B1"), and a new public entry promotes it through the unchanged gates by the five-site promotion. No such entry is queued.
 
+## ONB-B2 — Frost Death Knight and Enhancement Shaman (internal, Cohort B)
+
+Autopilot queue entry ONB-B2. Public contract: NONE. No Warcraft Logs request. `src/specs/deathknight/frost/README.md` and `src/specs/shaman/enhancement/README.md` are
+the slices in detail.
+
+**What it is.** Both are registered INTERNAL_ONLY on the observed-decision pattern, each with its own pinned list, GCD and talent data, resolver, facade and registration. No
+shared analyzer was introduced. No decision of either resolves, for reasons that differ, so each spec states its own stops.
+
+**Frost, measured offline by replaying retained captures through production ingestion.** A census of retained pages by signature ability, with Mortal Strike as its positive
+control, finds two subjects:
+
+| Subject | Hero tree | Span | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| b1PmaKrd6CDfzngc fight 48 actor 19 | Deathbringer | whole, 345.2 s | 308 | 0 | 0 | 308 | 703 |
+| gtKb2xHn87pNcFfW fight 22 actor 26 | Deathbringer | whole, 284.8 s | 259 | 0 | 0 | 259 | 281 |
+
+All 567 root scans stop at `cooldowns[4] reapers_mark` on `target_if=first:`, which reads the enemy set. Open before it: off-GCD lines with no reviewed contract
+(`antimagic_shell`, `pillar_of_frost`, `breath_of_sindragosa`) and `remorseless_winter`. A Rider build, synthetic only, closes Reaper's Mark and stops next at
+`cooldowns[5] frostwyrms_fury`, on too many unresolved atoms. Behind all of it, `default[6]` dispatches on the enemy count. So Cohort B's follow-up claim held, and it is not the
+first stop for this list.
+
+**Enhancement: no subject can validate it.** The only retained events are the filtered M13-A casts of actor 7 (134 casts, 31 begincasts, no combatant info, auras or resources), and that
+refuses as `PROFILE_NOT_RESOLVED`. On synthetic builds the engine's first refusal is `default[4] bloodlust`, and the root scan stops at `default[6]` (Stormbringer) or `default[7]` (Totemic)
+on `active_enemies`. It joins ONB-EV.
+
+**Requirement C is not met, and why this is not an owner stop.** As for Arms (ONB-B1). The queue asks for real MATCH, discrimination and negative-control evidence, and none can exist while
+the enemy count stands, which is already queued as the owner's (ONB-S3). The entry asks for an internal registration, and the fail-closed result is correct.
+
+**Decisions.**
+
+1. **The Enhancement list is a class method, and the extractor now says so.** `shaman_t::init_action_list_enhancement` is not a marked region, so a third selector was added
+   (`CLASS_METHOD`), admitted by the runtime validator and refused when mixed, partial or naming another class. Two things in that method are not list lines, and each is declared by exact text:
+   - **The opening guard** returns before any list exists for an actor with no main-hand weapon. The artifact records it as `methodPrologue`, with the condition it applies under.
+   - **`add_action( this, "<Spell>", ... )`** emits only when `find_class_spell` or `find_specialization_spell` finds the spell (`action_priority_list.cpp`). Each statement's outcome rests on checks
+     against hash-pinned bytes, and the artifact records it as `spellGatedActions`. **Wind Shear's line does not exist at the pin**: its spell is talent-only, so neither table has a row, and the
+     method's `def->add_action( this, "Wind Shear", ... )` emits nothing. Reading that statement as a line would have shifted every ordinal of `default` and invented an interrupt priority.
+2. **Bloodlust's line attributes, and the timer stays UNKNOWN.** The queue names `bloodlust,line_cd=600`. Enhancement is the first adapter to supply `lineCooldownFor`, from the shared
+   `lineSelectionHistoryFromObservedCasts`: a logged 2825 attributes to the sole in-combat entry. A cast only bounds a selection from above and a selection that casts nothing is in no log, so the
+   readiness stays UNKNOWN, with `LINE_CD:SELECTION_COVERAGE_NOT_PROVEN` as the stop's atom. Attribution is evidence, not a verdict. Nothing in the shared rule changed.
+3. **Bind what the action is, not what the log says, and let the rest be excluded.**
+   - **Doom Winds** binds its talent 384352. The log reports 469270, `doom_winds_damage` (sc_shaman.cpp:8785), triggered by effect row 1183511: ten in 151 s cannot be a 90 s press.
+   - **Frostwyrm's Fury** binds 279302. The log's second id, 1265384, comes once per 279302. **Exterminate** (441424, 441426) is logged too and has no action in the list.
+   - **Bloodlust** binds 2825. Heroism (32182) has its own row and no action in this module, so a logged Heroism is excluded, never judged. This is a coverage gap on Alliance subjects, recorded below.
+   - **Flame Shock** binds the class row 470411, unlike the rest: `flame_shock_t` is built on 188389, `_gcd` 0, and takes `trigger_gcd` from that class row in its constructor. Binding 188389 would call a
+     GCD action off-GCD.
+4. **Mind Freeze's line can never be selected.** `mind_freeze_t` asks `find_class_spell`, and the pinned table has no row: it is talent-only, as Wind Shear is. So the action is on `not_found()` for every build
+   and its list line is proven background. Without this, an interrupt line would stop every Frost scan on a line SimulationCraft cannot run. A logged Mind Freeze stays an excluded off-GCD action.
+5. **A cast-time action is excluded, not judged.** Lightning Bolt and Tempest have begincasts on the wire, and Maelstrom Weapon shortens them, so this facade's reading at the `cast` asks the wrong moment.
+   They and Chain Lightning are `OUTSIDE_FIRST_SLICE`. ONB-S4's anchor could answer this later, and nothing reaches them today.
+6. **Bind no aura or cooldown.** No binding would reach the gates: every rotation list sits behind the enemy count. Frost's pins also fail for two actions: Raise Dead reaches 90.3 s against 120 s, and Anti-Magic Shell
+   51.0 s against 60 s. `rune` and `runic_power` are bound from the cast's own PRE_COST observation only, and are unknown otherwise, never zero. That is the multi-resource state the queue names. `buff.killing_machine.react=2`
+   is the M11-D1 numeric reading, and it stays open because no aura is bound.
+7. **Two tiered talents are not modelled.** `chosen_of_frostbrood` and `storm_unleashed` are three-entry tiered nodes, which the talent extractor refuses as ambiguous, so they resolve UNKNOWN, never false.
+
+**Evidence.** Nothing new is committed. The archive's notice line has 5,212 bytes left, and these decisions would pin nothing the synthetic tests do not: no measured proposal is raised (agent/follow-ups.md "After ONB-B2").
+No Warcraft Logs request was made. Three pinned SimulationCraft files were fetched from GitHub at the pinned commit, each matched to its git blob id before use: `action_priority_list.cpp`, `action_priority_list.hpp` and `sc_const_data.cpp`.
+
+**No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse both rows. A public request for either is SPEC_NOT_SUPPORTED, exactly as before.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

@@ -2239,6 +2239,466 @@ const WARRIOR_SOURCES = {
 const WARRIOR_MODULE_PATH = "engine/class_modules/sc_warrior.cpp";
 
 /**
+ * The Frost Death Knight facts (ONB-B2).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of
+ * the pinned Frost list (apl_death_knight.cpp `frost`) executes. Facts a reader should not have
+ * to rediscover (all read off the pinned DBC and module):
+ *
+ *   - MIND FREEZE IS BUILT ON not_found(). mind_freeze_t asks find_class_spell, and the pinned
+ *     table has no row: the spell is talent-only. So its list line is background at this pin.
+ *   - THE LOG REPORTS IDS NO ACTION BUILDS. Exterminate (441424, 441426) and the second
+ *     Frostwyrm's Fury (1265384) have no record here and no token, so they are excluded.
+ *   - THE LIST'S RACIAL, POTION AND ITEM TOKENS ARE NOT BOUND. They are outside the rotational
+ *     domain, and the domain boundary refuses them before any lane is read.
+ */
+const DEATHKNIGHT_FROST_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 49020, displayNameEn: "Obliterate", baseGcdMs: 1500 },
+    { abilityGameId: 49184, displayNameEn: "Howling Blast", baseGcdMs: 1500 },
+    { abilityGameId: 49143, displayNameEn: "Frost Strike", baseGcdMs: 1500 },
+    { abilityGameId: 207230, displayNameEn: "Frostscythe", baseGcdMs: 1500 },
+    { abilityGameId: 194913, displayNameEn: "Glacial Advance", baseGcdMs: 1500 },
+    { abilityGameId: 196770, displayNameEn: "Remorseless Winter", baseGcdMs: 1500 },
+    { abilityGameId: 51271, displayNameEn: "Pillar of Frost", baseGcdMs: 0 },
+    { abilityGameId: 1249658, displayNameEn: "Breath of Sindragosa", baseGcdMs: 0 },
+    { abilityGameId: 439843, displayNameEn: "Reaper's Mark", baseGcdMs: 1500 },
+    { abilityGameId: 279302, displayNameEn: "Frostwyrm's Fury", baseGcdMs: 1500 },
+    { abilityGameId: 46585, displayNameEn: "Raise Dead", baseGcdMs: 0 },
+    { abilityGameId: 47568, displayNameEn: "Empower Rune Weapon", baseGcdMs: 750 },
+    { abilityGameId: 47528, displayNameEn: "Mind Freeze", baseGcdMs: 0 },
+    { abilityGameId: 48707, displayNameEn: "Anti-Magic Shell", baseGcdMs: 0 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "obliterate",
+      candidateAbilityGameIds: [49020],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / obliterate_t",
+      startLine: 14391,
+      endLine: 14392,
+      sourceNote:
+        'create_action dispatches "obliterate" to obliterate_t, built on p->talent.frost.obliterate (:11855-11856); find_talent_spell( SPECIALIZATION, "Obliterate" ) at :14958, trait row spell 49020. The wire agrees: 104 and 103 casts on the two retained subjects.',
+    },
+    {
+      simcToken: "howling_blast",
+      candidateAbilityGameIds: [49184],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / howling_blast_t",
+      startLine: 14389,
+      endLine: 14390,
+      sourceNote:
+        'create_action dispatches "howling_blast" to howling_blast_t, built on p->talent.frost.howling_blast (:11460-11461); find_talent_spell( SPECIALIZATION, "Howling Blast" ) at :14959, trait row spell 49184.',
+    },
+    {
+      simcToken: "frost_strike",
+      candidateAbilityGameIds: [49143],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / frost_strike_t",
+      startLine: 14381,
+      endLine: 14382,
+      sourceNote:
+        'create_action dispatches "frost_strike" to frost_strike_t, built on p->talent.frost.frost_strike (:10933-10934); find_talent_spell( SPECIALIZATION, "Frost Strike" ) at :14956, trait row spell 49143.',
+    },
+    {
+      simcToken: "frostscythe",
+      candidateAbilityGameIds: [207230],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / frostscythe_t",
+      startLine: 14383,
+      endLine: 14384,
+      sourceNote:
+        'create_action dispatches "frostscythe" to frostscythe_t, built on p->talent.frost.frostscythe (:10535-10536); find_talent_spell( SPECIALIZATION, "Frostscythe" ) at :14963, trait row spell 207230.',
+    },
+    {
+      simcToken: "glacial_advance",
+      candidateAbilityGameIds: [194913],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / glacial_advance_t",
+      startLine: 14387,
+      endLine: 14388,
+      sourceNote:
+        'create_action dispatches "glacial_advance" to glacial_advance_t, built on p->spec.glacial_advance (:11111-11112); find_specialization_spell( "Glacial Advance" ) at :14830, class_spells.inc row { 6, 251, 194913 }.',
+    },
+    {
+      simcToken: "remorseless_winter",
+      candidateAbilityGameIds: [196770],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / remorseless_winter_t",
+      startLine: 14395,
+      endLine: 14396,
+      sourceNote:
+        'create_action dispatches "remorseless_winter" to remorseless_winter_t, built on p->spec.remorseless_winter (:12435-12436); find_specialization_spell( "Remorseless Winter" ) at :14826, class_spells.inc row { 6, 251, 196770 }.',
+    },
+    {
+      simcToken: "pillar_of_frost",
+      candidateAbilityGameIds: [51271],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / pillar_of_frost_t",
+      startLine: 14393,
+      endLine: 14394,
+      sourceNote:
+        'create_action dispatches "pillar_of_frost" to pillar_of_frost_t, built on p->talent.frost.pillar_of_frost (:12008-12009); find_talent_spell( SPECIALIZATION, "Pillar of Frost" ) at :14972, trait row spell 51271.',
+    },
+    {
+      simcToken: "breath_of_sindragosa",
+      candidateAbilityGameIds: [1249658],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / breath_of_sindragosa_t",
+      startLine: 14377,
+      endLine: 14378,
+      sourceNote:
+        'create_action dispatches "breath_of_sindragosa" to breath_of_sindragosa_t, built on p->talent.frost.breath_of_sindragosa (:9235-9236); find_talent_spell( SPECIALIZATION, "Breath of Sindragosa" ) at :15003, trait row spell 1249658.',
+    },
+    {
+      simcToken: "reapers_mark",
+      candidateAbilityGameIds: [439843],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / reapers_mark_t",
+      startLine: 14331,
+      endLine: 14332,
+      sourceNote:
+        'create_action dispatches "reapers_mark" to reapers_mark_t, built on p->talent.deathbringer.reapers_mark (:8490-8491); find_talent_spell( HERO, "Reaper\'s Mark" ) at :15083, trait row spell 439843.',
+    },
+    {
+      simcToken: "frostwyrms_fury",
+      candidateAbilityGameIds: [279302],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / frostwyrms_fury_t",
+      startLine: 14385,
+      endLine: 14386,
+      sourceNote:
+        'create_action dispatches "frostwyrms_fury" to frostwyrms_fury_t, built on p->talent.frost.frostwyrms_fury (:10697-10698); find_talent_spell( SPECIALIZATION, "Frostwyrm\'s Fury" ) at :14979, trait row spell 279302. The log also reports 1265384 once per 279302 on both retained subjects; that id is not built by this action, so it has no lane record here and no token.',
+    },
+    {
+      simcToken: "raise_dead",
+      candidateAbilityGameIds: [46585],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / raise_dead_t",
+      startLine: 14349,
+      endLine: 14350,
+      sourceNote:
+        'create_action dispatches "raise_dead" to raise_dead_t, on p->spec.raise_dead when that is ok and p->talent.raise_dead otherwise (:12218-12220). Frost has no specialization row for it (class_spells.inc holds { 6, 252, 46584 } for Unholy only), so it builds on talent.raise_dead = find_talent_spell( CLASS, "Raise Dead" ) at :14844, trait row spell 46585.',
+    },
+    {
+      simcToken: "empower_rune_weapon",
+      candidateAbilityGameIds: [47568],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / empower_rune_weapon_t",
+      startLine: 14379,
+      endLine: 14380,
+      sourceNote:
+        'create_action dispatches "empower_rune_weapon" to empower_rune_weapon_t, built on p->talent.frost.empower_rune_weapon (:10148-10149); find_talent_spell( SPECIALIZATION, "Empower Rune Weapon" ) at :14962, trait row spell 47568.',
+    },
+    {
+      simcToken: "mind_freeze",
+      candidateAbilityGameIds: [47528],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / mind_freeze_t",
+      startLine: 14347,
+      endLine: 14348,
+      sourceNote:
+        'create_action dispatches "mind_freeze" to mind_freeze_t, built on p->find_class_spell( "Mind Freeze" ) (:11728-11729). class_spells.inc has no such row, the spell being talent-only (talent.mindfreeze at :14850, trait row spell 47528), so the action is built on not_found() and is background (action.cpp:541-549). The id is bound so a logged Mind Freeze reads NON_GCD. OUTSIDE offensive authority by domain: an interrupt.',
+    },
+    {
+      simcToken: "antimagic_shell",
+      candidateAbilityGameIds: [48707],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / antimagic_shell_t",
+      startLine: 14335,
+      endLine: 14336,
+      sourceNote:
+        'create_action dispatches "antimagic_shell" to antimagic_shell_t, built on p->spec.antimagic_shell (:12697-12698); find_class_spell( "Anti-Magic Shell" ) at :14813, class_spells.inc row { 6, 0, 48707 }. OUTSIDE offensive authority by domain: a defensive.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "auto_attack",
+      triggerGcdMs: 0,
+      sourcePath: DK,
+      symbol: "auto_attack_t::auto_attack_t",
+      line: 7753,
+      sourceNote:
+        'auto_attack_t is built on death_knight_melee_attack_t( "auto_attack", p ) with no spell data ' +
+        "(sc_death_knight.cpp:7732-7733) and its constructor assigns trigger_gcd = 0_ms.",
+    },
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
+const SHAMAN_SOURCES = {
+  spellData: "engine/dbc/generated/sc_spell_data.inc",
+  classSpells: "engine/dbc/generated/class_spells.inc",
+  clientDataVersion: "engine/dbc/generated/client_data_version.inc",
+  spellDataLayout: "engine/dbc/spell_data.hpp",
+  // HASHED, NEVER PARSED — the class module every token binding is a hand-reviewed reading of.
+  classModule: "engine/class_modules/sc_shaman.cpp",
+  // HASHED, NEVER PARSED. Present because every target hashes the same shared sources.
+  racialSpells: "engine/dbc/generated/racial_spells.inc",
+  playerModule: "engine/player/player.cpp",
+  consumableModule: "engine/player/consumable.cpp",
+};
+
+const SHAMAN_MODULE_PATH = "engine/class_modules/sc_shaman.cpp";
+
+/**
+ * The Enhancement Shaman facts (ONB-B2).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of
+ * the pinned Enhancement list (sc_shaman.cpp `init_action_list_enhancement`) executes. Facts a
+ * reader should not have to rediscover:
+ *
+ *   - WIND SHEAR IS NOT HERE. Its list statement is the spell-gated add_action form, and it has
+ *     no class or specialization row, so that line does not exist at this pin.
+ *   - DOOM WINDS BINDS THE TALENT, NOT WHAT THE LOG REPORTS. 469270 is its damage child.
+ *   - BLOODLUST BINDS 2825 ONLY. Heroism has its own row and no action here.
+ *   - FLAME SHOCK BINDS THE CLASS ROW 470411. The action is built on 188389, `_gcd` 0, and takes
+ *     its trigger_gcd from the class row in its constructor, so that row is what makes it a GCD action.
+ *   - DOOM WINDS AND BLOODLUST ARE `_gcd` 0, SO THEY ARE NON_GCD. SURGING TOTEM IS 1000.
+ *   - THE LIST'S RACIAL, POTION, ITEM AND IMBUE TOKENS ARE NOT BOUND. The imbues appear only in
+ *     precombat, which nothing here selects from.
+ */
+const SHAMAN_ENHANCEMENT_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 2825, displayNameEn: "Bloodlust", baseGcdMs: 0 },
+    { abilityGameId: 470057, displayNameEn: "Voltaic Blaze", baseGcdMs: 1500 },
+    { abilityGameId: 470411, displayNameEn: "Flame Shock", baseGcdMs: 1500 },
+    { abilityGameId: 444995, displayNameEn: "Surging Totem", baseGcdMs: 1000 },
+    { abilityGameId: 114051, displayNameEn: "Ascendance", baseGcdMs: 1500 },
+    { abilityGameId: 197214, displayNameEn: "Sundering", baseGcdMs: 1500 },
+    { abilityGameId: 60103, displayNameEn: "Lava Lash", baseGcdMs: 1500 },
+    { abilityGameId: 384352, displayNameEn: "Doom Winds", baseGcdMs: 0 },
+    { abilityGameId: 187874, displayNameEn: "Crash Lightning", baseGcdMs: 1500 },
+    { abilityGameId: 115356, displayNameEn: "Windstrike", baseGcdMs: 1500 },
+    { abilityGameId: 17364, displayNameEn: "Stormstrike", baseGcdMs: 1500 },
+    { abilityGameId: 452201, displayNameEn: "Tempest", baseGcdMs: 1500 },
+    { abilityGameId: 1218090, displayNameEn: "Primordial Storm", baseGcdMs: 1500 },
+    { abilityGameId: 188443, displayNameEn: "Chain Lightning", baseGcdMs: 1500 },
+    { abilityGameId: 188196, displayNameEn: "Lightning Bolt", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "bloodlust",
+      candidateAbilityGameIds: [2825],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "shaman_t::create_action / bloodlust_t",
+      startLine: 10345,
+      endLine: 10346,
+      sourceNote:
+        'create_action dispatches "bloodlust" to bloodlust_t, built on player->find_class_spell( "Bloodlust" ) (:6259-6260), class_spells.inc row { 7, 0, 2825 }. Heroism (32182) has its own row and no action of its own in this module, so nothing here binds it: a logged Heroism has no lane record and is excluded, never judged.',
+    },
+    {
+      simcToken: "voltaic_blaze",
+      candidateAbilityGameIds: [470057],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "shaman_t::create_action / voltaic_blaze_t",
+      startLine: 10417,
+      endLine: 10418,
+      sourceNote:
+        'create_action dispatches "voltaic_blaze" to voltaic_blaze_t, built on player->talent.voltaic_blaze (:10111-10112), trait row spell 470057.',
+    },
+    {
+      simcToken: "flame_shock",
+      candidateAbilityGameIds: [470411],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "shaman_t::create_action / flame_shock_t",
+      startLine: 10352,
+      endLine: 10353,
+      sourceNote:
+        'create_action dispatches "flame_shock" to flame_shock_t, built on player->find_spell( 188389 ) (:8343-8346), a record whose _gcd is 0; its constructor takes the cooldown and trigger_gcd from find_class_spell( "Flame Shock" ) (:8352-8353), class_spells.inc row { 7, 0, 470411 }, _gcd 1500. So this token binds the class row: the action consumes a GCD, and binding 188389 would read it as off-GCD. No retained capture holds a Flame Shock cast, so which id the log reports is not corroborated; a logged 188389 has no lane record and is excluded.',
+    },
+    {
+      simcToken: "surging_totem",
+      candidateAbilityGameIds: [444995],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "shaman_t::create_action / surging_totem_spell_t",
+      startLine: 10437,
+      endLine: 10438,
+      sourceNote:
+        'create_action dispatches "surging_totem" to surging_totem_spell_t, built on p->find_spell( 444995 ) (:9538-9540); the talent itself (spell 455630) gates it at :9561.',
+    },
+    {
+      simcToken: "ascendance",
+      candidateAbilityGameIds: [114051],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "shaman_t::create_action / ascendance_t",
+      startLine: 10341,
+      endLine: 10342,
+      sourceNote:
+        'create_action dispatches "ascendance" to ascendance_t, built on player->spell.ascendance (:8557-8559); spell.ascendance = find_spell( 114051 ) for Enhancement at :11420. Its ready() refuses without talent.ascendance (:8686-8691), a usability claim this slice does not make.',
+    },
+    {
+      simcToken: "sundering",
+      candidateAbilityGameIds: [197214],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "shaman_t::create_action / sundering_t",
+      startLine: 10409,
+      endLine: 10410,
+      sourceNote:
+        'create_action dispatches "sundering" to sundering_t, built on player->talent.sundering (:5708-5709), trait row spell 197214.',
+    },
+    {
+      simcToken: "lava_lash",
+      candidateAbilityGameIds: [60103],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "shaman_t::create_action / lava_lash_t",
+      startLine: 10401,
+      endLine: 10402,
+      sourceNote:
+        'create_action dispatches "lava_lash" to lava_lash_t, built on player->talent.lava_lash (:5167-5168); _CT( "Lava Lash" ) at :11153, trait row spell 60103.',
+    },
+    {
+      simcToken: "doom_winds",
+      candidateAbilityGameIds: [384352],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "shaman_t::create_action / doom_winds_t",
+      startLine: 10415,
+      endLine: 10416,
+      sourceNote:
+        'create_action dispatches "doom_winds" to doom_winds_t, built on player->talent.doom_winds (:8795-8796), trait row spell 384352. The log reports 469270, doom_winds_damage on find_spell( 469270 ) (:8785), triggered by effect row 1183511 of 384352: ten of those in 151 s on the filtered M13-A capture cannot be a 90 s cooldown press, so that id is NOT bound. It has no lane record here and is excluded.',
+    },
+    {
+      simcToken: "crash_lightning",
+      candidateAbilityGameIds: [187874],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "shaman_t::create_action / crash_lightning_t",
+      startLine: 10393,
+      endLine: 10394,
+      sourceNote:
+        'create_action dispatches "crash_lightning" to crash_lightning_t, built on player->talent.crash_lightning (:5926-5927), trait row spell 187874.',
+    },
+    {
+      simcToken: "windstrike",
+      candidateAbilityGameIds: [115356],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "shaman_t::create_action / windstrike_t",
+      startLine: 10411,
+      endLine: 10412,
+      sourceNote:
+        'create_action dispatches "windstrike" to windstrike_t, built on player->find_spell( 115356 ) (:5665-5667).',
+    },
+    {
+      simcToken: "stormstrike",
+      candidateAbilityGameIds: [17364],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "shaman_t::create_action / stormstrike_t",
+      startLine: 10407,
+      endLine: 10408,
+      sourceNote:
+        'create_action dispatches "stormstrike" to stormstrike_t, built on player->spec.stormstrike (:5622-5624); find_specialization_spell( "Stormstrike" ) at :11126, class_spells.inc row { 7, 263, 17364 }.',
+    },
+    {
+      simcToken: "tempest",
+      candidateAbilityGameIds: [452201],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "shaman_t::create_action / tempest_t",
+      startLine: 10372,
+      endLine: 10373,
+      sourceNote:
+        'create_action dispatches "tempest" to tempest_t, built on player->find_spell( 452201 ) (:9875-9876). The talent itself is spell 454009.',
+    },
+    {
+      simcToken: "primordial_storm",
+      candidateAbilityGameIds: [1218090],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "shaman_t::create_action / primordial_storm_t",
+      startLine: 10419,
+      endLine: 10420,
+      sourceNote:
+        'create_action dispatches "primordial_storm" to primordial_storm_t, built on player->find_spell( 1218090 ) (:9702-9703). The talent itself is spell 1218047.',
+    },
+    {
+      simcToken: "chain_lightning",
+      candidateAbilityGameIds: [188443],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "shaman_t::create_action / chain_lightning_t",
+      startLine: 10360,
+      endLine: 10361,
+      sourceNote:
+        'create_action dispatches "chain_lightning" to chain_lightning_t, built on player->talent.chain_lightning (:6463-6464); _CT( "Chain Lightning" ) at :11154, trait row spell 188443.',
+    },
+    {
+      simcToken: "lightning_bolt",
+      candidateAbilityGameIds: [188196],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "shaman_t::create_action / lightning_bolt_t",
+      startLine: 10358,
+      endLine: 10359,
+      sourceNote:
+        'create_action dispatches "lightning_bolt" to lightning_bolt_t, built on player->find_class_spell( "Lightning Bolt" ) (:7356-7357), class_spells.inc row { 7, 0, 188196 }.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "auto_attack",
+      triggerGcdMs: 0,
+      sourcePath: SHAMAN_MODULE_PATH,
+      symbol: "auto_attack_t::auto_attack_t",
+      line: 5104,
+      sourceNote:
+        'auto_attack_t is built on shaman_attack_t( "auto_attack", player, spell_data_t::nil() ) ' +
+        "(sc_shaman.cpp:5081-5082) and its constructor assigns trigger_gcd = 0_ms.",
+    },
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
+/**
  * The Arms Warrior facts (ONB-B1).
  *
  * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of
@@ -3343,6 +3803,36 @@ export const TARGETS = {
     ],
     requiredFacts: DEMONHUNTER_HAVOC_FACTS,
     defaultOut: "src/data/game/demonhunter-havoc-gcd-semantics.json",
+  },
+  "deathknight-frost": {
+    datasetId: "SIMC_DBC_DEATHKNIGHT_FROST_GCD_SEMANTICS",
+    classId: 6,
+    className: "Death Knight",
+    sources: DEATHKNIGHT_BLOOD_SOURCES,
+    classModulePath: DEATHKNIGHT_BLOOD_SOURCES.classModule,
+    handReviewedPaths: [
+      DEATHKNIGHT_BLOOD_SOURCES.classModule,
+      DEATHKNIGHT_BLOOD_SOURCES.racialSpells,
+      DEATHKNIGHT_BLOOD_SOURCES.playerModule,
+      DEATHKNIGHT_BLOOD_SOURCES.consumableModule,
+    ],
+    requiredFacts: DEATHKNIGHT_FROST_FACTS,
+    defaultOut: "src/data/game/deathknight-frost-gcd-semantics.json",
+  },
+  "shaman-enhancement": {
+    datasetId: "SIMC_DBC_SHAMAN_ENHANCEMENT_GCD_SEMANTICS",
+    classId: 7,
+    className: "Shaman",
+    sources: SHAMAN_SOURCES,
+    classModulePath: SHAMAN_SOURCES.classModule,
+    handReviewedPaths: [
+      SHAMAN_SOURCES.classModule,
+      SHAMAN_SOURCES.racialSpells,
+      SHAMAN_SOURCES.playerModule,
+      SHAMAN_SOURCES.consumableModule,
+    ],
+    requiredFacts: SHAMAN_ENHANCEMENT_FACTS,
+    defaultOut: "src/data/game/shaman-enhancement-gcd-semantics.json",
   },
   "warrior-arms": {
     datasetId: "SIMC_DBC_WARRIOR_ARMS_GCD_SEMANTICS",

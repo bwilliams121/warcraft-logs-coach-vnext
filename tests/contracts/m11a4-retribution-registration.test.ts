@@ -348,6 +348,8 @@ describe("the public path analyzes (M11-A5), and the internal path analyzes the 
       "warrior-fury-observed-decisions": 0,
       "warrior-protection-observed-decisions": 0,
       "warrior-arms-observed-decisions": 0,
+      "deathknight-frost-observed-decisions": 0,
+      "shaman-enhancement-observed-decisions": 0,
     });
     const document = projectAnalysisResult(result.analysis);
     expect(document).toMatchObject({

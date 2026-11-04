@@ -57,6 +57,8 @@ import pinnedSubtletyApl from "../../../src/simc/data/rogue-subtlety.apl.json";
 import pinnedFuryApl from "../../../src/simc/data/warrior-fury.apl.json";
 import pinnedProtectionWarriorApl from "../../../src/simc/data/warrior-protection.apl.json";
 import pinnedArmsWarriorApl from "../../../src/simc/data/warrior-arms.apl.json";
+import pinnedFrostDeathKnightApl from "../../../src/simc/data/deathknight-frost.apl.json";
+import pinnedEnhancementShamanApl from "../../../src/simc/data/shaman-enhancement.apl.json";
 import { AUTHORITY_DOMAINS, AUTHORITY_RESOLUTION_OUTCOMES } from "../../../src/findings/authority-domain.js";
 import { SPEC_IDS, type SpecId } from "../../../src/findings/spec-id.js";
 import {
@@ -402,6 +404,8 @@ export const OWNING_LAYERS = {
   SPEC_FURY_WARRIOR: ["src/specs/warrior/fury/"],
   SPEC_PROTECTION_WARRIOR: ["src/specs/warrior/protection/"],
   SPEC_ARMS_WARRIOR: ["src/specs/warrior/arms/"],
+  SPEC_FROST_DEATH_KNIGHT: ["src/specs/deathknight/frost/"],
+  SPEC_ENHANCEMENT_SHAMAN: ["src/specs/shaman/enhancement/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
   PUBLIC_CONTRACT: ["src/contracts/", "src/api/", "src/mcp/"],
 } as const;
@@ -444,6 +448,8 @@ export const SPEC_LAYER_OF = {
   "warrior/fury": "SPEC_FURY_WARRIOR",
   "warrior/protection": "SPEC_PROTECTION_WARRIOR",
   "warrior/arms": "SPEC_ARMS_WARRIOR",
+  "deathknight/frost": "SPEC_FROST_DEATH_KNIGHT",
+  "shaman/enhancement": "SPEC_ENHANCEMENT_SHAMAN",
 } as const satisfies Record<SpecId, OwningLayer>;
 
 /** The specialization-owned layers: exactly those a `SpecId` maps to. */
@@ -3328,6 +3334,32 @@ export const ASSERTION_KINDS = {
       "The Arms Warrior facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
   },
 
+  // ---- SPEC_FROST_DEATH_KNIGHT (ONB-B2, INTERNAL_ONLY) ---
+  "SPEC_FROST_DEATH_KNIGHT.SPEC_GATE": {
+    owningLayer: "SPEC_FROST_DEATH_KNIGHT",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Frost Death Knight facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
+  },
+
+  // ---- SPEC_ENHANCEMENT_SHAMAN (ONB-B2, INTERNAL_ONLY) ---
+  "SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE": {
+    owningLayer: "SPEC_ENHANCEMENT_SHAMAN",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Enhancement Shaman facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
+  },
+
   // ---- SPEC_AUGMENTATION_EVOKER (M13-E, INTERNAL_ONLY) ---------------------
   //
   // The first registration that binds no decision authority. Driven through
@@ -4135,6 +4167,8 @@ export const PINNED_AUTHORITY_REVISIONS: Readonly<Record<string, string>> = {
   [pinnedFuryApl.authorityId]: pinnedFuryApl.artifactRevision,
   [pinnedProtectionWarriorApl.authorityId]: pinnedProtectionWarriorApl.artifactRevision,
   [pinnedArmsWarriorApl.authorityId]: pinnedArmsWarriorApl.artifactRevision,
+  [pinnedFrostDeathKnightApl.authorityId]: pinnedFrostDeathKnightApl.artifactRevision,
+  [pinnedEnhancementShamanApl.authorityId]: pinnedEnhancementShamanApl.artifactRevision,
 };
 
 // --------------------------------------------------------------------------

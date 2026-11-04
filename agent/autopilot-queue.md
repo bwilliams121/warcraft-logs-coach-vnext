@@ -1139,8 +1139,9 @@ ownerDecision: Whether, and on what evidence, the analyzer may model the enemy s
 
 **Direction.** The M11-D0 census (pinned `target_if` semantics), CLAUDE.md
 "Multi-Target Support", and `agent/follow-ups.md` "After M11-D3-B". ONB-B1 measured
-that every Arms decision stops here, and Cohort B's followers dispatch the same way
-(`agent/follow-ups.md` "After ONB-B1").
+that every Arms decision stops here. ONB-B2 found the same count behind every rotation list of Frost
+Death Knight and Enhancement Shaman, and that Frost also meets `target_if=first` before it
+(`agent/follow-ups.md` "After ONB-B1", "After ONB-B2").
 
 ### ONB-S4: Shared cast and channel decision anchor
 
@@ -1218,7 +1219,7 @@ status: OWNER_DECISION_REQUIRED
 dependsOn: none
 wcl: NONE
 publicContract: NONE
-ownerDecision: Authorize one bounded, neutral, deterministic Warcraft Logs evidence campaign for the specializations that have no retained, already-authorized real evidence. Known today: Fury Warrior, Protection Warrior, Outlaw Rogue, Survival Hunter and Vengeance Demon Hunter appear in no committed fight context, and onboarding tranches append any further spec whose review finds its evidence inadequate. Appended by HEAL-B1P, and corrected by HEAL-B4P: Restoration Druid needs no campaign (its whole-fight events in gtKb2xHn87pNcFfW fight 22, actor 2, are in the retained M9-C2, M11-C4 and M11-C4b captures, which HEAL-B1P's census did not read; agent/follow-ups.md "After HEAL-B4P"). Appended by HEAL-B3: Discipline Priest (committed evidence is a filtered M13-A cast capture, actor 9, and Atonement applications by the G2 cohort246 fight 33 actor 88 onto another player; no committed or retained capture holds its whole-fight casts or any Atonement heal event, and fight 48 has no Discipline Priest, so HEAL-B3P cannot meet the healer promotion gate). (Preservation Evoker, appended by HEAL-B4, was removed by HEAL-B4P: it passed the gate on retained evidence.) Appended by ONB-A2: Subtlety Rogue (committed evidence is 150 filtered M13-A casts of actor 17, with no combatant info, auras or resources, so its talents never resolve); its census also found Fury and Protection Warrior only in retained fight contexts, with no event. The proposal is the smallest campaign: per spec, the first public raid fight in a fixed order containing it, with its actor slice (casts, auras, resources, combatant info), and no ranking or comparison data.
+ownerDecision: Authorize one bounded, neutral, deterministic Warcraft Logs evidence campaign for the specializations that have no retained, already-authorized real evidence. Known today: Fury Warrior, Protection Warrior, Outlaw Rogue, Survival Hunter and Vengeance Demon Hunter appear in no committed fight context, and onboarding tranches append any further spec whose review finds its evidence inadequate. Appended by ONB-B2: Enhancement Shaman (the only retained events are the filtered M13-A casts of actor 7, with no combatant info, so its talents never resolve). Appended by HEAL-B1P, and corrected by HEAL-B4P: Restoration Druid needs no campaign (its whole-fight events in gtKb2xHn87pNcFfW fight 22, actor 2, are in the retained M9-C2, M11-C4 and M11-C4b captures, which HEAL-B1P's census did not read; agent/follow-ups.md "After HEAL-B4P"). Appended by HEAL-B3: Discipline Priest (committed evidence is a filtered M13-A cast capture, actor 9, and Atonement applications by the G2 cohort246 fight 33 actor 88 onto another player; no committed or retained capture holds its whole-fight casts or any Atonement heal event, and fight 48 has no Discipline Priest, so HEAL-B3P cannot meet the healer promotion gate). (Preservation Evoker, appended by HEAL-B4, was removed by HEAL-B4P: it passed the gate on retained evidence.) Appended by ONB-A2: Subtlety Rogue (committed evidence is 150 filtered M13-A casts of actor 17, with no combatant info, auras or resources, so its talents never resolve); its census also found Fury and Protection Warrior only in retained fight contexts, with no event. The proposal is the smallest campaign: per spec, the first public raid fight in a fixed order containing it, with its actor slice (casts, auras, resources, combatant info), and no ranking or comparison data.
 ```
 
 **Direction.** The owner's onboarding evidence policy: neutral,
@@ -1595,11 +1596,13 @@ windows, all established. The first 6 s are committed and the unsupported subjec
 ### ONB-B1P: Arms Warrior (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-B1
 branch: autopilot/onb-b1p
 wcl: NONE
 publicContract: EXPECTED
+pr: 60
+mergeSha: 26eb55720b957c59a34a7340b6b1e4b16b49280c
 ```
 
 **Outcome.** Arms Warrior cannot pass the rotational promotion gates and stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and
@@ -1611,8 +1614,9 @@ ONB-B1 left open, then a new public entry through the unchanged gates (agent/arc
 ### ONB-B2: Frost Death Knight and Enhancement Shaman (internal, Cohort B)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-B1
+branch: autopilot/onb-b2
 wcl: NONE
 publicContract: NONE
 ```
@@ -1622,6 +1626,12 @@ publicContract: NONE
 - Frost DK relies on the M11-D1 numeric-`react` fix and multi-resource
   (runes and Runic Power) state.
 - Enhancement's `bloodlust,line_cd=600` attributes.
+
+**Outcome.** Both are registered INTERNAL_ONLY and no decision of either resolves. Frost's two retained subjects (fight 48 actor 19, gtKb fight 22 actor 26, both
+whole fights, both Deathbringer) give 567 eligible decisions, all UNKNOWN, every root scan stopping at Reaper's Mark's `target_if`. Enhancement has no capture that can
+validate it (the filtered M13-A casts carry no combatant info), so it joins ONB-EV. Its list needed its own audit: it is a class method whose `add_action( this, ... )`
+form emits only under the player's spell data, so Wind Shear's line does not exist at the pin. Requirement C cannot be met for either until ONB-S3 is decided
+(agent/architecture.md "ONB-B2"; agent/follow-ups.md "After ONB-B2").
 
 ### ONB-B2P: Frost Death Knight and Enhancement Shaman (public)
 

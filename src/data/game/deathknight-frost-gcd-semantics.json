@@ -1,0 +1,357 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_DEATHKNIGHT_FROST_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/sc_death_knight.cpp",
+        "sha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "byteLength": 636861
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 46585,
+      "baseGcdMs": 0,
+      "displayNameEn": "Raise Dead"
+    },
+    {
+      "abilityGameId": 47528,
+      "baseGcdMs": 0,
+      "displayNameEn": "Mind Freeze"
+    },
+    {
+      "abilityGameId": 47568,
+      "baseGcdMs": 750,
+      "displayNameEn": "Empower Rune Weapon"
+    },
+    {
+      "abilityGameId": 48707,
+      "baseGcdMs": 0,
+      "displayNameEn": "Anti-Magic Shell"
+    },
+    {
+      "abilityGameId": 49020,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Obliterate"
+    },
+    {
+      "abilityGameId": 49143,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Frost Strike"
+    },
+    {
+      "abilityGameId": 49184,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Howling Blast"
+    },
+    {
+      "abilityGameId": 51271,
+      "baseGcdMs": 0,
+      "displayNameEn": "Pillar of Frost"
+    },
+    {
+      "abilityGameId": 194913,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Glacial Advance"
+    },
+    {
+      "abilityGameId": 196770,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Remorseless Winter"
+    },
+    {
+      "abilityGameId": 207230,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Frostscythe"
+    },
+    {
+      "abilityGameId": 279302,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Frostwyrm's Fury"
+    },
+    {
+      "abilityGameId": 439843,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Reaper's Mark"
+    },
+    {
+      "abilityGameId": 1249658,
+      "baseGcdMs": 0,
+      "displayNameEn": "Breath of Sindragosa"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "obliterate",
+      "candidateAbilityGameIds": [49020],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / obliterate_t",
+        "startLine": 14391,
+        "endLine": 14392,
+        "sourceNote": "create_action dispatches \"obliterate\" to obliterate_t, built on p->talent.frost.obliterate (:11855-11856); find_talent_spell( SPECIALIZATION, \"Obliterate\" ) at :14958, trait row spell 49020. The wire agrees: 104 and 103 casts on the two retained subjects.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "howling_blast",
+      "candidateAbilityGameIds": [49184],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / howling_blast_t",
+        "startLine": 14389,
+        "endLine": 14390,
+        "sourceNote": "create_action dispatches \"howling_blast\" to howling_blast_t, built on p->talent.frost.howling_blast (:11460-11461); find_talent_spell( SPECIALIZATION, \"Howling Blast\" ) at :14959, trait row spell 49184.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "frost_strike",
+      "candidateAbilityGameIds": [49143],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / frost_strike_t",
+        "startLine": 14381,
+        "endLine": 14382,
+        "sourceNote": "create_action dispatches \"frost_strike\" to frost_strike_t, built on p->talent.frost.frost_strike (:10933-10934); find_talent_spell( SPECIALIZATION, \"Frost Strike\" ) at :14956, trait row spell 49143.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "frostscythe",
+      "candidateAbilityGameIds": [207230],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / frostscythe_t",
+        "startLine": 14383,
+        "endLine": 14384,
+        "sourceNote": "create_action dispatches \"frostscythe\" to frostscythe_t, built on p->talent.frost.frostscythe (:10535-10536); find_talent_spell( SPECIALIZATION, \"Frostscythe\" ) at :14963, trait row spell 207230.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "glacial_advance",
+      "candidateAbilityGameIds": [194913],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / glacial_advance_t",
+        "startLine": 14387,
+        "endLine": 14388,
+        "sourceNote": "create_action dispatches \"glacial_advance\" to glacial_advance_t, built on p->spec.glacial_advance (:11111-11112); find_specialization_spell( \"Glacial Advance\" ) at :14830, class_spells.inc row { 6, 251, 194913 }.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "remorseless_winter",
+      "candidateAbilityGameIds": [196770],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / remorseless_winter_t",
+        "startLine": 14395,
+        "endLine": 14396,
+        "sourceNote": "create_action dispatches \"remorseless_winter\" to remorseless_winter_t, built on p->spec.remorseless_winter (:12435-12436); find_specialization_spell( \"Remorseless Winter\" ) at :14826, class_spells.inc row { 6, 251, 196770 }.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "pillar_of_frost",
+      "candidateAbilityGameIds": [51271],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / pillar_of_frost_t",
+        "startLine": 14393,
+        "endLine": 14394,
+        "sourceNote": "create_action dispatches \"pillar_of_frost\" to pillar_of_frost_t, built on p->talent.frost.pillar_of_frost (:12008-12009); find_talent_spell( SPECIALIZATION, \"Pillar of Frost\" ) at :14972, trait row spell 51271.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "breath_of_sindragosa",
+      "candidateAbilityGameIds": [1249658],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / breath_of_sindragosa_t",
+        "startLine": 14377,
+        "endLine": 14378,
+        "sourceNote": "create_action dispatches \"breath_of_sindragosa\" to breath_of_sindragosa_t, built on p->talent.frost.breath_of_sindragosa (:9235-9236); find_talent_spell( SPECIALIZATION, \"Breath of Sindragosa\" ) at :15003, trait row spell 1249658.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "reapers_mark",
+      "candidateAbilityGameIds": [439843],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / reapers_mark_t",
+        "startLine": 14331,
+        "endLine": 14332,
+        "sourceNote": "create_action dispatches \"reapers_mark\" to reapers_mark_t, built on p->talent.deathbringer.reapers_mark (:8490-8491); find_talent_spell( HERO, \"Reaper's Mark\" ) at :15083, trait row spell 439843.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "frostwyrms_fury",
+      "candidateAbilityGameIds": [279302],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / frostwyrms_fury_t",
+        "startLine": 14385,
+        "endLine": 14386,
+        "sourceNote": "create_action dispatches \"frostwyrms_fury\" to frostwyrms_fury_t, built on p->talent.frost.frostwyrms_fury (:10697-10698); find_talent_spell( SPECIALIZATION, \"Frostwyrm's Fury\" ) at :14979, trait row spell 279302. The log also reports 1265384 once per 279302 on both retained subjects; that id is not built by this action, so it has no lane record here and no token.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "raise_dead",
+      "candidateAbilityGameIds": [46585],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / raise_dead_t",
+        "startLine": 14349,
+        "endLine": 14350,
+        "sourceNote": "create_action dispatches \"raise_dead\" to raise_dead_t, on p->spec.raise_dead when that is ok and p->talent.raise_dead otherwise (:12218-12220). Frost has no specialization row for it (class_spells.inc holds { 6, 252, 46584 } for Unholy only), so it builds on talent.raise_dead = find_talent_spell( CLASS, \"Raise Dead\" ) at :14844, trait row spell 46585.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "empower_rune_weapon",
+      "candidateAbilityGameIds": [47568],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / empower_rune_weapon_t",
+        "startLine": 14379,
+        "endLine": 14380,
+        "sourceNote": "create_action dispatches \"empower_rune_weapon\" to empower_rune_weapon_t, built on p->talent.frost.empower_rune_weapon (:10148-10149); find_talent_spell( SPECIALIZATION, \"Empower Rune Weapon\" ) at :14962, trait row spell 47568.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "mind_freeze",
+      "candidateAbilityGameIds": [47528],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / mind_freeze_t",
+        "startLine": 14347,
+        "endLine": 14348,
+        "sourceNote": "create_action dispatches \"mind_freeze\" to mind_freeze_t, built on p->find_class_spell( \"Mind Freeze\" ) (:11728-11729). class_spells.inc has no such row, the spell being talent-only (talent.mindfreeze at :14850, trait row spell 47528), so the action is built on not_found() and is background (action.cpp:541-549). The id is bound so a logged Mind Freeze reads NON_GCD. OUTSIDE offensive authority by domain: an interrupt.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "antimagic_shell",
+      "candidateAbilityGameIds": [48707],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / antimagic_shell_t",
+        "startLine": 14335,
+        "endLine": 14336,
+        "sourceNote": "create_action dispatches \"antimagic_shell\" to antimagic_shell_t, built on p->spec.antimagic_shell (:12697-12698); find_class_spell( \"Anti-Magic Shell\" ) at :14813, class_spells.inc row { 6, 0, 48707 }. OUTSIDE offensive authority by domain: a defensive.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "auto_attack",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "auto_attack_t::auto_attack_t",
+        "line": 7753,
+        "sourceNote": "auto_attack_t is built on death_knight_melee_attack_t( \"auto_attack\", p ) with no spell data (sc_death_knight.cpp:7732-7733) and its constructor assigns trigger_gcd = 0_ms."
+      }
+    },
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

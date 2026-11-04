@@ -87,6 +87,8 @@ const EVERY_ANALYZER = [
   "warrior-fury-observed-decisions",
   "warrior-protection-observed-decisions",
   "warrior-arms-observed-decisions",
+  "deathknight-frost-observed-decisions",
+  "shaman-enhancement-observed-decisions",
   // HEAL-B3: Discipline Priest INTERNAL_ONLY.
   "priest-discipline-healer-findings",
   // HEAL-B4: Preservation Evoker INTERNAL_ONLY.

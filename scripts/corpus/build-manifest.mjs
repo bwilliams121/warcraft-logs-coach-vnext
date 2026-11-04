@@ -7011,6 +7011,82 @@ const BREWMASTER_CASES = [
     "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Arms Warrior list.",
     { related: ["tests/unit/specs/onb-b1-arms-warrior.test.ts"] },
   ),
+  // ---- SPEC_FROST_DEATH_KNIGHT (ONB-B2, INTERNAL_ONLY) ---
+  kase(
+    "application-service.frost-death-knight-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Frost Death Knight registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "deathknight/frost",
+        expected: {
+          internalAnalyzerId: "deathknight-frost-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Frost Death Knight is registered INTERNAL_ONLY in ONB-B2. No decision of its two retained subjects resolves: each stops on Reaper's Mark's target_if, and behind that every rotation list sits on the enemy count, the ONB-S3 owner decision. So a public request must keep receiving SPEC_NOT_SUPPORTED.",
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-frost-death-knight.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_FROST_DEATH_KNIGHT",
+    "src/specs/deathknight/frost/observed-analysis.ts analyzeObservedFrostDeathKnightDecisions (the spec gate)",
+    "The Frost Death Knight facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_FROST_DEATH_KNIGHT.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Frost Death Knight list.",
+    { related: ["tests/unit/specs/onb-b1-frost-death-knight.test.ts"] },
+  ),
+  // ---- SPEC_ENHANCEMENT_SHAMAN (ONB-B2, INTERNAL_ONLY) ---
+  kase(
+    "application-service.enhancement-shaman-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Enhancement Shaman registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "shaman/enhancement",
+        expected: {
+          internalAnalyzerId: "shaman-enhancement-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Enhancement Shaman is registered INTERNAL_ONLY in ONB-B2. Its list stops on Bloodlust and behind that on the enemy count, the ONB-S3 owner decision, and no retained capture holds its combatant info. So a public request must keep receiving SPEC_NOT_SUPPORTED.",
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-enhancement-shaman.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_ENHANCEMENT_SHAMAN",
+    "src/specs/shaman/enhancement/observed-analysis.ts analyzeObservedEnhancementShamanDecisions (the spec gate)",
+    "The Enhancement Shaman facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Enhancement Shaman list.",
+    { related: ["tests/unit/specs/onb-b1-enhancement-shaman.test.ts"] },
+  ),
   // ---- SPEC_PRESERVATION_EVOKER (HEAL-B4; PUBLIC since HEAL-B4P) --------------------
   kase(
     "spec-preservation-evoker.unstated-subject-yields-no-healer-finding",
