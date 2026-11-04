@@ -13134,6 +13134,55 @@ and discrimination gates with three tokens and no control. It authorizes nothing
 **No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the
 public lookup and identity table refuse the row.
 
+## ONB-A1P — Havoc Demon Hunter public promotion
+
+Autopilot queue entry ONB-A1P. Public contract: EXPECTED (additive under `analysis/1`: the
+`specId` value `demonhunter/havoc`). No Warcraft Logs request and no new evidence.
+
+**The two questions ONB-A1 left open.**
+
+1. **Is a narrow surface worth publishing?** Yes. Onboarding rule 4 promotes what passes the
+   gate that applies, and rule 6 says no gate moves for a spec's sake, in either direction. No
+   rotational gate has a coverage floor: Retribution's gtKb subject is all UNKNOWN on a public
+   row. Over fight 48 the slice resolves 47 of 279 decisions, every one at `default[9]`, so the
+   narrowness is disclosed rather than hidden: the coverage block, the TLDR and report
+   disclosures (the assessment is always PARTIAL) and the limits prose, which calls it a narrow
+   check and not a rotation review. A coverage floor for promotion would be a new gate and an
+   owner decision. None is introduced here.
+2. **Is Fel-Scarred refused?** Yes, by a validated-profile gate
+   (`src/specs/demonhunter/havoc/supported-profile.ts`), before any decision is read, by the
+   Brewmaster M11-C4j precedent: only Aldrachi Reaver was measured, and Demonsurge is unbound on
+   a Fel-Scarred build. Fel-Scarred is AUTHORITY_NOT_AVAILABLE; an unresolved or contradictory
+   hero tree is PROFILE_NOT_RESOLVED. A7R6 fight 7 actor 18, retained raw, carries Fel-Scarred
+   entries (read offline, no request) and is what a later measurement would use. The binding
+   rules ONB-A1 wrote for a Fel-Scarred build stay in the resolver, unreachable through the
+   facade until that measurement lifts the gate.
+
+**What was reviewed before publishing.** ONB-A1 recorded the 23 whole-fight REJECTEDs as a
+disagreement nobody had reviewed. They are four isolated casts in
+the first 90 s (7,473,830 to 7,525,056) and five short runs later (7,619,176 to 7,627,472, 7,643,853 to
+7,644,789, 7,727,677 to 7,729,522, 7,735,033 to 7,736,179 and 7,747,555 to 7,750,284). Each needs
+the buff up for at least the 1,000 ms reaction tolerance, the decision's own cast on the same
+enemy target, and a pinned range record, so a target that was not there cannot produce one. They
+are priority disagreements with the pinned list, stated as such: `matchMeaning` is
+AUTHORITY_COMPATIBLE_ONLY, the performance score is absent, and the report's
+DIVERGENCE_ACTIONABILITY_UNPROVEN disclosure applies. They are not a claim that holding the glaive
+lost damage. The Metamorphosis bound was rechecked because The Hunt's pin is contradicted by the
+wire: the subject's impact gaps are 126,242 ms and 146,734 ms, both above the pinned 120,000 ms,
+so the wire does not contradict that one.
+
+**Reachability: the five-site promotion**, by the same reviewed edit as every earlier promotion:
+the partition (`INTERNAL_ONLY_SPEC_IDS` now holds `druid/restoration` and `priest/discipline`),
+the public contract's `specId` enum, the identity table, the `satisfies PublicSpecId` on
+`spec.ts`, and the registration's `exposure`. The registration's limits prose is now published.
+Nothing else in the evaluator, data or authority changed; the only new behaviour is the gate.
+
+**What a public request now receives.** A DemonHunter/Havoc identity dispatches its own row,
+derives PLAYER_CONTEXT with resources (Fury is declared on the offensive capability, so ingestion
+cannot under-fetch), and publishes the same decisions the registration produced. Vengeance stays
+SPEC_NOT_SUPPORTED: the class alone never selects a row. The committed evidence is the first 90 s,
+so the public pins are the 90 s numbers (76 eligible, 7 MATCH, 4 REJECTED, 65 UNKNOWN).
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

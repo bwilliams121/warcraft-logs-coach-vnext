@@ -50,6 +50,7 @@ import { MISTWEAVER_MONK_REGISTRATION } from "../../src/specs/monk/mistweaver/re
 import { HOLY_PALADIN_REGISTRATION } from "../../src/specs/paladin/holy/registration.js";
 import { HOLY_PRIEST_REGISTRATION } from "../../src/specs/priest/holy/registration.js";
 import { PRESERVATION_EVOKER_REGISTRATION } from "../../src/specs/evoker/preservation/registration.js";
+import { HAVOC_DEMON_HUNTER_REGISTRATION } from "../../src/specs/demonhunter/havoc/registration.js";
 
 const PINNED_COMMIT = "33622e9d1662ff0e451691edf85a6b49cc9d11d9";
 const PINNED_REVISION = "simc-33622e9d-1";
@@ -141,6 +142,7 @@ describe("DUPLICATE_DECISION_AUTHORITY_BINDING — two analyzers may not own one
       MISTWEAVER_MONK_REGISTRATION,
       HOLY_PRIEST_REGISTRATION,
       PRESERVATION_EVOKER_REGISTRATION,
+      HAVOC_DEMON_HUNTER_REGISTRATION,
     ]) {
       const validation = validateAnalyzerCatalog([alone]);
       expect(validation.ok).toBe(false);
@@ -166,6 +168,7 @@ describe("DUPLICATE_DECISION_AUTHORITY_BINDING — two analyzers may not own one
       MISTWEAVER_MONK_REGISTRATION,
       HOLY_PRIEST_REGISTRATION,
       PRESERVATION_EVOKER_REGISTRATION,
+      HAVOC_DEMON_HUNTER_REGISTRATION,
     ]);
     expect(validation.ok).toBe(false);
     if (validation.ok) return;
@@ -191,6 +194,7 @@ describe("DUPLICATE_DECISION_AUTHORITY_BINDING — two analyzers may not own one
       MISTWEAVER_MONK_REGISTRATION,
       HOLY_PRIEST_REGISTRATION,
       PRESERVATION_EVOKER_REGISTRATION,
+      HAVOC_DEMON_HUNTER_REGISTRATION,
     ]);
     expect(validation.ok).toBe(false);
     if (validation.ok) return;
@@ -221,6 +225,7 @@ describe("DUPLICATE_DECISION_AUTHORITY_BINDING — two analyzers may not own one
       MISTWEAVER_MONK_REGISTRATION,
       HOLY_PRIEST_REGISTRATION,
       PRESERVATION_EVOKER_REGISTRATION,
+      HAVOC_DEMON_HUNTER_REGISTRATION,
     ]);
     expect(validation.ok).toBe(true);
   });
@@ -260,6 +265,7 @@ describe("control — shared provenance is legal; only the decision-authority id
         MISTWEAVER_MONK_REGISTRATION,
         HOLY_PRIEST_REGISTRATION,
         PRESERVATION_EVOKER_REGISTRATION,
+        HAVOC_DEMON_HUNTER_REGISTRATION,
       ]),
     ).toMatchObject({
       ok: true,
@@ -321,6 +327,7 @@ describe("control — shared provenance is legal; only the decision-authority id
         MISTWEAVER_MONK_REGISTRATION,
         HOLY_PRIEST_REGISTRATION,
         PRESERVATION_EVOKER_REGISTRATION,
+        HAVOC_DEMON_HUNTER_REGISTRATION,
       ]),
     ).toMatchObject({ ok: true });
   });

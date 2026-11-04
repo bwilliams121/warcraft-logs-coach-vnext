@@ -94,7 +94,7 @@ describe("the supported identities", () => {
     expect(outcome("Paladin", "Brewmaster")).toBe("UNSUPPORTED_SPECIALIZATION");
   });
 
-  it("recognizes exactly eleven specializations", () => {
+  it("recognizes exactly twelve specializations", () => {
     // Pinned. This table is the entire definition of "which specializations this
     // build recognizes", and it should be impossible to grow by accident.
     expect(Object.keys(SUPPORTED_SPEC_IDENTITIES)).toEqual([
@@ -109,6 +109,7 @@ describe("the supported identities", () => {
       "monk/mistweaver",
       "priest/holy",
       "evoker/preservation",
+      "demonhunter/havoc",
     ]);
   });
 
@@ -117,6 +118,12 @@ describe("the supported identities", () => {
     expect(outcome(" evoker ", "AUGMENTATION")).toBe("evoker/augmentation");
     expect(outcome("Evoker", "Devastation")).toBe("UNSUPPORTED_SPECIALIZATION");
     expect(outcome("Evoker", "Preservation")).toBe("evoker/preservation");
+  });
+
+  it("resolves DemonHunter/Havoc (ONB-A1P) to its own id, and not Vengeance", () => {
+    expect(outcome("DemonHunter", "Havoc")).toBe("demonhunter/havoc");
+    expect(outcome(" demonhunter ", "HAVOC")).toBe("demonhunter/havoc");
+    expect(outcome("DemonHunter", "Vengeance")).toBe("UNSUPPORTED_SPECIALIZATION");
   });
 
   it("does not let one Paladin specialization stand for another", () => {

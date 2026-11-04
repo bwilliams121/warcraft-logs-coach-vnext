@@ -33,11 +33,12 @@ current total (5,748,495 bytes), with what each row buys.
 
 **Raised:** ONB-A1 (2026-11-03). Coverage, not soundness: each is UNKNOWN or refused.
 
-**ONB-A1P: the promotion question.** The readiness report passes both gates, and the
-surface is one decision: the Reaver's Glaive priority on Aldrachi Reaver builds. A public
-report would read 83% UNKNOWN and every REJECTED would say the same thing. Whether that
-is worth publishing, and whether Felscarred is refused by a validated-profile gate as
-Brewmaster refuses Master of Harmony, is ONB-A1P's to decide.
+**ONB-A1P: the promotion question (decided).** The surface is one decision: the Reaver's Glaive
+priority on Aldrachi Reaver builds, and a public report reads 83% UNKNOWN. It passed both gates and
+no rotational gate has a coverage floor, so ONB-A1P promoted it, with the narrowness disclosed, and
+refuses Fel-Scarred by a validated-profile gate (agent/architecture.md "ONB-A1P"). What ONB-A1P
+leaves open: whether promotion should have a coverage floor is an owner question, not raised as a
+stop because nothing requires one today, and every REJECTED still names the same line.
 
 **The Hunt's cooldown stops most decisions.** The census gives 75,000 ms (90,000 less
 Eternal Hunt's 15,000), every pinned SimulationCraft commit agrees, and the retained
@@ -68,8 +69,10 @@ the log reports only its impact, so its press has no observed moment.
 `debuff.reavers_mark.stack`: M4 reconstructs no count. Demonsurge on a Felscarred build:
 runtime state on a quiet buff. `gcd.max`, `gcd.remains`: hasted. The enemy count: ONB-S3.
 
-**Felscarred has no measurement.** A7R6 fight 7 actor 18 (165 s, retained raw across the M10-B
-and M10-C5 captures) is Felscarred and was not measured.
+**Felscarred has no measurement, and is refused.** A7R6 fight 7 actor 18 (165 s, retained raw across
+the M10-B and M10-C5 captures) is Felscarred and was not measured. Since ONB-A1P the validated-profile
+gate refuses the build. Lifting it means measuring that subject and reviewing Demonsurge, and adding
+`felscarred` to `HAVOC_VALIDATED_HERO_TREES` only after that.
 
 **`immolation_aura,,if=` at `default[17]`.** The pinned line has an empty option segment. It is
 never reached today, and it refuses as malformed when it is. Whether SimulationCraft ignores

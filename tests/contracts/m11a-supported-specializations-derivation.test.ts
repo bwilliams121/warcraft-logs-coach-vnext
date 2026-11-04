@@ -58,7 +58,7 @@ describe("the production sentence", () => {
     // would. The display names are in code-point order, which is why Blood
     // Death Knight sits second and not last.
     expect(SUPPORTED_SPECIALIZATIONS_SENTENCE).toBe(
-      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Holy Paladin, Holy Priest, Mistweaver Monk, Preservation Evoker, Protection Paladin, Restoration Shaman and Retribution Paladin.",
+      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Havoc Demon Hunter, Holy Paladin, Holy Priest, Mistweaver Monk, Preservation Evoker, Protection Paladin, Restoration Shaman and Retribution Paladin.",
     );
   });
 

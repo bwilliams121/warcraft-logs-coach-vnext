@@ -365,6 +365,13 @@ describe("PUBLIC mode — every public registration is backed by real, resolved,
         "spec-brewmaster-monk.the-second-subjects-first-resolved-match-over-its-fixed-165s-bundle[0] -> MATCH",
         "spec-brewmaster-monk.the-second-subjects-rejected-tiger-palm-over-its-fixed-165s-bundle[0] -> REJECTED",
       ],
+      // ONB-A1P: Havoc Demon Hunter's promotion evidence, the same three the
+      // INTERNAL_ONLY report counted at ONB-A1, over one Aldrachi Reaver subject.
+      "demonhunter/havoc": [
+        "spec-havoc-demon-hunter.annihilation-with-reavers-glaive-proven-usable-is-rejected[0] -> REJECTED",
+        "spec-havoc-demon-hunter.chaos-strike-with-reavers-glaive-proven-usable-is-rejected[0] -> REJECTED",
+        "spec-havoc-demon-hunter.the-first-resolved-reavers-glaive-matches[0] -> MATCH",
+      ],
       "paladin/protection": [
         "spec-protection-paladin.hammer-of-wrath-is-unusable-only-from-an-observed-removal-of-its-readiness-aura[1] -> MATCH",
         "spec-protection-paladin.hammer-of-wrath-is-unusable-only-from-an-observed-removal-of-its-readiness-aura[6] -> MATCH",
@@ -411,6 +418,8 @@ describe("PUBLIC mode — every public registration is backed by real, resolved,
     );
     expect(routes).toEqual({
       "deathknight/blood": { realRejected: 10, controls: [] },
+      // ONB-A1P: Havoc passes by its two qualifying real REJECTEDs, with no control.
+      "demonhunter/havoc": { realRejected: 2, controls: [] },
       // M11-C4j: Brewmaster passes by its two real REJECTEDs, one per
       // independent subject, with no control.
       "monk/brewmaster": { realRejected: 2, controls: [] },
@@ -438,6 +447,8 @@ describe("PUBLIC mode — every public registration is backed by real, resolved,
     );
     expect(spans).toEqual({
       "deathknight/blood": [49998, 50842, 195182, 206930, 433895],
+      // Chaos Strike, Annihilation, Reaver's Glaive.
+      "demonhunter/havoc": [162794, 201427, 442294],
       // Tiger Palm, Breath of Fire, Keg Smash, Blackout Kick.
       "monk/brewmaster": [100780, 115181, 121253, 205523],
       "paladin/protection": [31935, 375576],
@@ -714,7 +725,7 @@ describe("M13-F / HEAL-AP / HEAL-B1P / HEAL-B2P / HEAL-B4P: a PUBLIC registratio
 });
 
 describe("INTERNAL_ONLY mode — reported, never failed, paired against the module's own WCL identity", () => {
-  it("the production INTERNAL_ONLY registrations are exactly Restoration Druid, Discipline Priest and Preservation Evoker, and the partition agrees", () => {
+  it("the production INTERNAL_ONLY registrations are exactly Restoration Druid and Discipline Priest, and the partition agrees", () => {
     // Blood Death Knight held this half from M11-B2 until M11-B12 promoted
     // it; Brewmaster Monk held it from M11-C2 until M11-C4j promoted it;
     // Augmentation Evoker held it in M13-E until M13-F promoted it; Restoration
@@ -723,13 +734,9 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     // Paladin and Mistweaver Monk through the healer gate; Restoration Druid
     // has no retained evidence. HEAL-B2 added Holy Priest, and HEAL-B2P
     // promoted it through the healer gate. HEAL-B3 added Discipline Priest,
-    // HEAL-B4 Preservation Evoker, and HEAL-B4P promoted that through the healer gate. ONB-A1 added Havoc Demon Hunter.
+    // HEAL-B4 Preservation Evoker, and HEAL-B4P promoted that through the healer gate. ONB-A1 added Havoc Demon Hunter, and ONB-A1P promoted it through both gates.
     // The synthetic module below still exercises the branch.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([
-      "druid/restoration",
-      "priest/discipline",
-      "demonhunter/havoc",
-    ]);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration", "priest/discipline"]);
     const internal = PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY");
     expect(internal.map((row) => row.specId)).toEqual([...INTERNAL_ONLY_SPEC_IDS]);
   });

@@ -3160,7 +3160,7 @@ export const ASSERTION_KINDS = {
       "The Brewmaster facade refuses this specialization with SPEC_NOT_SUPPORTED before any Brewmaster rule runs: no comparisons, no domains, no authority.",
   },
 
-  // ---- SPEC_HAVOC_DEMON_HUNTER (ONB-A1, INTERNAL_ONLY) ---------------------
+  // ---- SPEC_HAVOC_DEMON_HUNTER (ONB-A1; PUBLIC since ONB-A1P) ---------------
   "SPEC_HAVOC_DEMON_HUNTER.DECISION_COVERAGE": {
     owningLayer: "SPEC_HAVOC_DEMON_HUNTER",
     outcomeClass: "POSITIVE_FACT",
@@ -3193,7 +3193,7 @@ export const ASSERTION_KINDS = {
     runtime: "ANY",
     requiresAuthority: true,
     description:
-      "The internal Havoc Demon Hunter evaluator, under the committed pinned authority, compares this observed cast exactly as pinned, with the query's own refusal or selection and the unselectability outcome.",
+      "The Havoc Demon Hunter evaluator, under the committed pinned authority, compares this observed cast exactly as pinned, with the query's own refusal or selection and the unselectability outcome.",
   },
   "SPEC_HAVOC_DEMON_HUNTER.COVERAGE_SUMMARY": {
     owningLayer: "SPEC_HAVOC_DEMON_HUNTER",

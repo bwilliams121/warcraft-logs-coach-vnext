@@ -1464,11 +1464,13 @@ its ONB-EV entry is wrong and its promotion needs no new request
 ### ONB-A1: Havoc Demon Hunter (internal, Cohort A representative)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-S1
 branch: autopilot/onb-a1
 wcl: NONE
 publicContract: NONE
+pr: 55
+mergeSha: b2af8bfde38b409c0190e56a616721b9f8dd226d
 ```
 
 **Scope.** Cohort A representative: an instant builder/spender list with
@@ -1494,11 +1496,21 @@ The Hunt's pinned cooldown is contradicted by the wire and is never bounded, whi
 ### ONB-A1P: Havoc Demon Hunter (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-A1
+branch: autopilot/onb-a1p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** Havoc Demon Hunter passed both rotational gates (observation and
+discrimination) on its real decisions in b1PmaKrd6CDfzngc fight 48 actor 18, with no
+control, and is PUBLIC for Aldrachi Reaver builds only. A Fel-Scarred build, which was
+never measured, is refused as AUTHORITY_NOT_AVAILABLE by a validated-profile gate, the
+Brewmaster precedent. The public contract gains the `specId` `demonhunter/havoc` and
+nothing else. The surface stays narrow, and the document says so: 83% of the whole
+fight's decisions are UNKNOWN and every resolved one names the Reaver's Glaive priority
+(agent/architecture.md "ONB-A1P").
 
 ### ONB-A2: Subtlety Rogue, Fury Warrior and Protection Warrior (internal, Cohort A)
 

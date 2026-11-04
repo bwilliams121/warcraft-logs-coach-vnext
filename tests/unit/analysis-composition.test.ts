@@ -289,6 +289,11 @@ describe("ingestion is requested from the analyzer's declared requirement", () =
         analyzerId: "evoker-preservation-healer-findings",
         requiredScope: "FULL_RAID",
         includeResources: false,
+      }, // ONB-A1P: Havoc Demon Hunter, PLAYER_CONTEXT, with the Fury its offensive capability declares.
+      {
+        analyzerId: "demonhunter-havoc-observed-decisions",
+        requiredScope: "PLAYER_CONTEXT",
+        includeResources: true,
       },
     ]);
   });

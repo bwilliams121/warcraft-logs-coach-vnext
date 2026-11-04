@@ -105,7 +105,7 @@ describe("the ingestion requirement is derived from the declaration", () => {
     expect(both.contributingAnalyzers).toEqual([fixture.analyzerId]);
   });
 
-  it("the build's public requirement set is the eleven public analyzers' derived requirements", () => {
+  it("the build's public requirement set is the twelve public analyzers' derived requirements", () => {
     expect(ENABLED_ANALYSIS_REQUIREMENTS).toEqual([
       {
         analyzerId: "rogue-assassination-observed-decisions",
@@ -165,6 +165,11 @@ describe("the ingestion requirement is derived from the declaration", () => {
         analyzerId: "evoker-preservation-healer-findings",
         requiredScope: "FULL_RAID",
         includeResources: false,
+      }, // ONB-A1P: Havoc Demon Hunter, PLAYER_CONTEXT, with the Fury its offensive capability declares.
+      {
+        analyzerId: "demonhunter-havoc-observed-decisions",
+        requiredScope: "PLAYER_CONTEXT",
+        includeResources: true,
       },
     ]);
   });

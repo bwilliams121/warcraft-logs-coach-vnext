@@ -90,6 +90,7 @@ export const SUPPORTED_SPEC_IDENTITIES: Readonly<Record<string, SpecId>> = Objec
   "monk/mistweaver": "monk/mistweaver",
   "priest/holy": "priest/holy",
   "evoker/preservation": "evoker/preservation",
+  "demonhunter/havoc": "demonhunter/havoc",
 });
 
 /**

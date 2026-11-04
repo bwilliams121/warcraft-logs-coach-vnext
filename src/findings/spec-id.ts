@@ -30,9 +30,10 @@
  * (`src/services/spec-identity.ts`) does not resolve to it and no PUBLIC
  * analyzer is registered for it.
  *
- * THE INTERNAL-ONLY SET HOLDS THREE MEMBERS SINCE ONB-A1 (Restoration Druid,
- * Discipline Priest and Havoc Demon Hunter). It held the first two from HEAL-B4P,
- * which promoted Preservation Evoker. It held those three
+ * THE INTERNAL-ONLY SET HOLDS TWO MEMBERS SINCE ONB-A1P (Restoration Druid and
+ * Discipline Priest), which promoted Havoc Demon Hunter. It held those three from
+ * ONB-A1. It held the first two from HEAL-B4P,
+ * which promoted Preservation Evoker. It held those two and Preservation Evoker
  * from HEAL-B4, and the first two from HEAL-B3. It held Restoration Druid alone from HEAL-B2P, which
  * promoted Holy Priest. It held two from HEAL-B2 (Restoration Druid and
  * Holy Priest), and Restoration Druid alone from HEAL-B1P, which promoted
@@ -109,6 +110,7 @@ export const PUBLIC_SPEC_IDS = Object.freeze([
   "monk/mistweaver",
   "priest/holy",
   "evoker/preservation",
+  "demonhunter/havoc",
 ] as const satisfies readonly SpecId[]);
 
 export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
@@ -215,13 +217,13 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * captures).
  *
  * Havoc Demon Hunter arrived here in ONB-A1, the first rotational specialization of
- * full onboarding and Cohort A's representative. Its public shape and promotion are
- * ONB-A1P's; until then the id stays here.
+ * full onboarding and Cohort A's representative. ONB-A1P moved it to
+ * `PUBLIC_SPEC_IDS` by the same five-site edit, for Aldrachi Reaver builds only
+ * (`supported-profile.ts`), after it passed both rotational gates on real evidence.
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
   "priest/discipline",
-  "demonhunter/havoc",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

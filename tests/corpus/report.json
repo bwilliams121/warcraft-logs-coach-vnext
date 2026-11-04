@@ -764,7 +764,7 @@
         }
       ],
       "authority": null,
-      "caseId": "application-service.havoc-demon-hunter-registration-is-internal-only",
+      "caseId": "application-service.havoc-demon-hunter-registration-is-public-since-onb-a1p",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },

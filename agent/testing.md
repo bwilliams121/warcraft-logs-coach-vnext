@@ -5514,3 +5514,21 @@ coverage disclosure are archive cases (`spec-havoc-demon-hunter.*`), and
 
 The whole-fight numbers in agent/architecture.md "ONB-A1" come from replaying the retained capture
 through production ingestion. They are not pinned, because those bytes are not committed.
+
+# ONB-A1P: Havoc Demon Hunter public promotion
+
+- `tests/contracts/onb-a1-havoc-promotion-readiness.test.ts`, re-pinned: the same real assertions
+  in PUBLIC mode, through the identity table; the internal pairing now finds nothing.
+- `tests/contracts/m11-promotion-evidence-gate.test.ts`: the global gates' reviewed snapshots gain
+  Havoc (two gates, no control).
+- `tests/contracts/onb-a1p-havoc-public-projection.test.ts`: schema, the ONB-A1 counts, no internal
+  leak, equality with the registration, the PARTIAL disclosures, and the Fel-Scarred refusal on the
+  public path. The refusal swaps the real subject's tree for pinned Fel-Scarred entries, because no
+  Fel-Scarred bytes are committed.
+- `tests/integration/onb-a1p-havoc-public-transports.test.ts`: REST and MCP parity through the real
+  Worker and handler, Vengeance refused, repeatability, bearer behaviour, and the tool description.
+- `tests/unit/specs/onb-a1p-havoc-supported-profile.test.ts`: the four gate answers, directly and on
+  the facade.
+
+Offline only, not committed: the whole-fight replay (`.probe/onba1/m/`) gives the numbers
+agent/architecture.md "ONB-A1" reports, unchanged by the gate.

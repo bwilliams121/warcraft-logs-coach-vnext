@@ -1,9 +1,12 @@
 /**
- * ONB-A1: Havoc Demon Hunter's promotion readiness, reported in INTERNAL_ONLY mode
- * by the same shared reader the PUBLIC gate uses. It authorizes nothing: ONB-A1P is
- * the reviewed promotion. It pins that the two gates are met on real evidence, that
- * no control or derived artifact was needed, and that a public request still cannot
- * reach the row.
+ * ONB-A1P: Havoc Demon Hunter's promotion evidence, through the identity table.
+ *
+ * RE-PINNED AT ONB-A1P, INVERTING ONB-A1. This file reported the readiness in
+ * INTERNAL_ONLY mode and pinned that a public request could not reach the row. It
+ * now pins the same real assertions in PUBLIC mode, by the same shared reader, with
+ * no Havoc branch in the gate. The global gate itself is
+ * `m11-promotion-evidence-gate.test.ts`, which fails CI if a PUBLIC specialization
+ * stops passing.
  */
 
 import { describe, expect, it } from "vitest";
@@ -42,19 +45,20 @@ async function tiers(): Promise<readonly EvidenceTier[]> {
   ];
 }
 
+const publicPairing = (identity: WclIdentity): boolean => {
+  const resolved = resolveSpecIdentity(identity);
+  return resolved.ok && resolved.specId === "demonhunter/havoc";
+};
+
 const internalPairing = (identity: WclIdentity): boolean =>
   identity.className === HAVOC_DEMON_HUNTER_MODULE.identity.wclClassName &&
   identity.specName === HAVOC_DEMON_HUNTER_MODULE.identity.wclSpecName &&
   !resolveSpecIdentity(identity).ok;
 
-describe("Havoc Demon Hunter's readiness, reported and never authorizing", () => {
-  it("meets the observation and discrimination gates on sanitized capture, with no control", async () => {
-    const readiness = evaluatePromotionReadiness(
-      await tiers(),
-      "demonhunter/havoc",
-      "INTERNAL_ONLY",
-      internalPairing,
-    );
+describe("Havoc Demon Hunter passes both global gates in PUBLIC mode, on real evidence and no control", () => {
+  it("meets the observation and discrimination gates on sanitized capture, paired through the identity table", async () => {
+    const readiness = evaluatePromotionReadiness(await tiers(), "demonhunter/havoc", "PUBLIC", publicPairing);
+    expect(readiness.exposure).toBe("PUBLIC");
     expect(readiness.observationGate.ready).toBe(true);
     expect(readiness.observationGate.realMatches).toBeGreaterThanOrEqual(1);
     expect(readiness.observationGate.distinctResolvedAbilityIds.length).toBeGreaterThanOrEqual(
@@ -77,8 +81,29 @@ describe("Havoc Demon Hunter's readiness, reported and never authorizing", () =>
     }
   });
 
-  it("a public request cannot reach the row: the identity table refuses and the public lookup finds nothing", () => {
-    expect(resolveSpecIdentity({ className: "DemonHunter", specName: "Havoc" }).ok).toBe(false);
-    expect(analyzerForSpec("demonhunter/havoc", PRODUCTION_CATALOG)).toBeNull();
+  it("a public request reaches the row: the identity table resolves it and the public lookup finds it", () => {
+    expect(resolveSpecIdentity({ className: "DemonHunter", specName: "Havoc" })).toEqual({
+      ok: true,
+      specId: "demonhunter/havoc",
+    });
+    expect(analyzerForSpec("demonhunter/havoc", PRODUCTION_CATALOG)?.analyzerId).toBe(
+      "demonhunter-havoc-observed-decisions",
+    );
+    expect(HAVOC_DEMON_HUNTER_MODULE.exposure).toBe("PUBLIC");
+  });
+
+  it("the internal pairing finds nothing now that the identity table resolves it", async () => {
+    const readiness = evaluatePromotionReadiness(
+      await tiers(),
+      "demonhunter/havoc",
+      "INTERNAL_ONLY",
+      internalPairing,
+    );
+    expect(readiness.qualifyingAssertions).toEqual([]);
+    expect(readiness.evidenceReady).toBe(false);
+  });
+
+  it("Vengeance stays unsupported: the class alone never selects a row", () => {
+    expect(resolveSpecIdentity({ className: "DemonHunter", specName: "Vengeance" }).ok).toBe(false);
   });
 });
