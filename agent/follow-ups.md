@@ -33,6 +33,8 @@ current total (5,748,495 bytes), with what each row buys.
 
 **Raised:** ONB-B3 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.
 
+**ONB-B3P (2026-11-04): not promoted.** The gate search finds nothing (`m11-promotion-evidence-gate`). A census of retained JSON files of any name finds no fourth subject, and a replay at that base gives the same 251 UNKNOWN. Its gap is ONB-S3, not evidence, so it is not on ONB-EV. A new public entry must follow ONB-S3 and the list below, and no such entry is queued (agent/architecture.md "ONB-B3P").
+
 **ONB-S3 gates it too.** All three retained subjects are Void-Scarred with The Hunt, so every scan reaches `voidscarred_melee` and stops on its first line, `run_action_list,name=vsm_st,if=active_enemies=1`: 251 eligible decisions, 0 MATCH, 0 REJECTED. So ONB-B3P should expect "not promoted" unless ONB-S3 lands first. The queue kept it out of Cohort B, and its stop is the same one.
 
 **What ONB-S3 alone would not unlock.** With the count settled, a Void-Scarred decision would still meet:

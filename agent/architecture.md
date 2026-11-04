@@ -13508,6 +13508,32 @@ All 251 root scans stop at `voidscarred_melee[0] run_action_list` on `active_ene
 
 **No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse the row. A public Demon Hunter/Devourer request is SPEC_NOT_SUPPORTED, exactly as before.
 
+## ONB-B3P — Devourer Demon Hunter public promotion: not promoted
+
+Autopilot queue entry ONB-B3P. Public contract: declared EXPECTED; actual change NONE, because nothing passes. No Warcraft Logs request and no new evidence.
+
+**The outcome.** Devourer does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4). The gates are not weakened and gain no subject. This is not an owner stop: rule 4 decides it, and the decision that could change it (ONB-S3) is already queued as the owner's.
+
+**Why it cannot pass.** OBSERVATION needs a real MATCH and real resolved decisions over several distinct action tokens, and DISCRIMINATION needs a real REJECTED or a control that flips a real MATCH. Both start from a real resolved decision. Replaying the retained pages through production ingestion and the facade over a fake transport, at this tranche's base commit:
+
+| Subject | Hero tree | Retained span | Result | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| gtKb2xHn87pNcFfW fight 22 actor 32 | Void-Scarred | whole fight | ANALYZED | 98 | 0 | 0 | 98 | 602 |
+| rXAfw9t1q8YpmkKD fight 13 actor 20 | Void-Scarred | first 165.0 s of 271.8 s | ANALYZED | 81 | 0 | 0 | 81 | 394 |
+| rXAfw9t1q8YpmkKD fight 13 actor 79 | Void-Scarred | first 165.0 s of 271.8 s | ANALYZED | 72 | 0 | 0 | 72 | 377 |
+
+All 251 decisions stop on one atom: `voidscarred_melee[0] run_action_list | active_enemies`. Each subject's identity is its context's `friendlySpecs` entry, aligned to `friendlyPlayers`. The numbers equal ONB-B3's.
+
+**The census found nothing more.** It parsed every JSON file over 500 bytes under `.probe/` and `tests/`, skipping tool output and worktree copies (5,645 parsed), by signature abilities named in the contexts' master data, with Mortal Strike as a positive control. Signature casts come only from these three actors. Contexts in seven other reports name a Devourer (2xpt, FPp6, yzH9, 24XJ, xBFW, 6xZN, hqvr), and no parsed file holds a signature cast of theirs. The census reads casts only, so a subject with no signature cast in a retained span would not appear.
+
+**Evidence is not its gap.** A whole-fight subject with combatant info is retained, so it is not added to ONB-EV. Its next step is the owner's ONB-S3, and ONB-S3 alone would not be enough (agent/follow-ups.md "After ONB-B3").
+
+**How far this reaches.** All three subjects are Void-Scarred with The Hunt, on one encounter, and two are prefixes. Annihilator and `voidscarred_ranged` have no real subject, so a later promotion must measure them or refuse them, as Havoc refuses Fel-Scarred.
+
+**What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists it; the gate search finds no qualifying assertion and `evidenceReady` false (`m11-promotion-evidence-gate`, from ONB-B3, its comment updated); and a public request is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which now holds it). The replay is offline and not committed.
+
+**What a later promotion must do.** The owner decides ONB-S3. Devourer then binds what ONB-B3 left open and measures its failure modes on real subjects, and a new public entry promotes it through the unchanged gates by the five-site promotion. No such entry is queued.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and
