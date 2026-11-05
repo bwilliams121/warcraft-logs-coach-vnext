@@ -5766,3 +5766,9 @@ The negatives: over each hero tree and none, no decision resolves; every query r
 `m11d2c-pinned-extraction-preflight` holds the new target. Two corpus cases, as for Outlaw, and `tests/contracts/m11-promotion-evidence-gate.test.ts` pins that the gate search finds nothing. `m11a2-spec-module-conformance` holds it in the retained-only exception, with its class proven through committed Havoc.
 
 Offline only, not committed: the census (`.probe/onbx3/census.cjs`, Mortal Strike as its positive control) and the synthetic measure (`.probe/onbx3/m/`). No replay exists, because nothing is retained.
+
+# ONB-X3P: Vengeance Demon Hunter, not promoted
+
+No production code changed. One assertion row is new: `tests/unit/analysis-composition-refusals.test.ts` had no row for it, and now holds DemonHunter/Vengeance (SPEC_NOT_SUPPORTED, one retrieval for preparation alone, no dispatch). `tests/contracts/m11-promotion-evidence-gate.test.ts` keeps its ONB-X3 gate search (no qualifying assertion, `evidenceReady` false), its comment now naming the outcome. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, the `onb-x3` suite).
+
+Offline only, not committed: the census (`.probe/onbx3p/census.cjs`, Mortal Strike as its positive control for events and the specID distribution as its control for combatant info), its reading by source (`.probe/onbx3p/census-read.cjs`), and the resolution of those sources against each report's context (`.probe/onbx3p/actors.cjs`). They give the results in agent/architecture.md "ONB-X3P". There is no replay, because there is nothing to replay.

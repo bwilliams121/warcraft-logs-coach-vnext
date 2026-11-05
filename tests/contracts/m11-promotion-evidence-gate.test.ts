@@ -780,8 +780,9 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
   });
 
   it("ONB-X3: the gate search finds nothing for Vengeance Demon Hunter", async () => {
-    // No decision of it resolves, and no retained capture holds one of its events (agent/architecture.md "ONB-X3").
-    // A later capture that changed this would fail this pin and prompt a new public entry; it would not promote anything by itself.
+    // No decision of it resolves and no retained capture holds one of its events, so it was not promoted (agent/architecture.md
+    // "ONB-X3P"). A later capture that changed this would fail this pin and prompt a new public entry; it would not
+    // promote anything by itself.
     const tiers = await tiersPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "demonhunter/vengeance");
     if (module === undefined) throw new Error("no module for demonhunter/vengeance");

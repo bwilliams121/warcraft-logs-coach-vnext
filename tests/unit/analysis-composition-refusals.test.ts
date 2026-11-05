@@ -199,6 +199,8 @@ describe("an unsupported specialization", () => {
       // Registered INTERNAL_ONLY in ONB-B3, not promoted by ONB-B3P. "DemonHunter" is the wire's class token,
       // the one that resolves Demon Hunter/Havoc; another spelling would pass here for the wrong reason.
       ["DemonHunter", "Devourer"],
+      // Registered INTERNAL_ONLY in ONB-X3, not promoted by ONB-X3P. The same class token as Devourer above.
+      ["DemonHunter", "Vengeance"],
       // Registered INTERNAL_ONLY in ONB-C1, not promoted by ONB-C1P. Druid/Restoration below is the same class token.
       ["Druid", "Feral"],
       ["Druid", "Restoration"],

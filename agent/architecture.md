@@ -14243,6 +14243,38 @@ Autopilot queue entry ONB-X3. Public contract: NONE. No Warcraft Logs request. `
 
 **No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse the row. A public DemonHunter/Vengeance request is SPEC_NOT_SUPPORTED, exactly as before. The unsupported-path subject is unchanged, since Vengeance is not in A7R6 fight 7.
 
+## ONB-X3P — Vengeance Demon Hunter public promotion: not promoted
+
+Autopilot queue entry ONB-X3P. Public contract: declared EXPECTED; actual change NONE, because nothing passes. No Warcraft Logs request and no new evidence.
+
+**The outcome.** Vengeance Demon Hunter does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4), with its evidence gap on ONB-EV. The gates are not weakened and gain no subject. This is not an owner stop: rule 4 decides it, rule 7 records missing evidence rather than fetching it, and ONB-EV, which already names this specialization, is queued as the owner's decision.
+
+**Why it cannot pass, twice over.** OBSERVATION needs a real MATCH and real resolved decisions over several distinct action tokens, and DISCRIMINATION needs a real REJECTED or a control that flips a real MATCH. Both start from a real resolved decision.
+
+1. **There is nothing to replay.** The census at this tranche's base parsed every JSON file over 500 bytes under `.probe/` and `tests/`, skipping tool output and worktree copies (5,714 parsed of 5,715; the other is `.probe/m11d2c/bad.json`). It widens ONB-X3's, which read only `cast` and `combatantinfo`, to any event type and any source:
+   - **Combatant info.** No `combatantinfo` event has specID 581. The route can find others: 31 specIDs appear in the distribution, among them Havoc's 577 and Devourer's 1480.
+   - **Named abilities.** The 21 ids retained contexts' master data give Fracture, Soul Cleave, Spirit Bomb, Fel Devastation, Demon Spikes, Fiery Brand, Sigil of Spite, Fiery Demise, Infernal Strike and Sigil of Flame have no event of any type. Mortal Strike, the positive control, has 985 events, 559 of them casts.
+   - **Pinned ids.** Every id in `demonhunter-vengeance-gcd-semantics.json`, 17 of them, read from the file, plus Shear 203782, which ONB-X3's census held and the pinned data does not name. Fifteen of those 18, including Disrupt, Metamorphosis and Reaver's Glaive 1283344, have no event of any type. Only Immolation Aura 258920, Vengeful Retreat 198793 and Felblade 232893 appear, in 17 files, and none is a signature of this specialization.
+2. **A capture alone would resolve nothing.** Over synthetic builds, ONB-X3 pinned that every query refuses first at `default[16] auto_attack`, with Disrupt, Infernal Strike and Demon Spikes open behind it, and that each root scan stops at an unconditional filler or dispatch (agent/architecture.md "ONB-X3"). Its programme also stays unknown, because `%` does not parse and soul fragments have no reading.
+
+**Every source of those three ids is another specialization**, resolved against its report's own context:
+
+| Source | What it is |
+| --- | --- |
+| A7R6kxPJ1hC8YQ4w actor 18 (`m10b`, `m10c5` pages) | Havoc |
+| b1PmaKrd6CDfzngc actor 18 (`m11e2`, `onba1`, the committed Havoc artifact) | Havoc, by combatant info |
+| M13-A actors 15 and 16 (`m13a` casts, retained and committed segments) | Havoc in that capture's context; neither casts a named or pinned signature above |
+| G2 `diagnose` actors 52 and 192 | Havoc, by combatant info |
+| gtKb2xHn87pNcFfW actor 32 (`m11c4`, `m11c4b`) and M11-C4f actors 20 and 79 (`m11c4f`) | Devourer, by context or combatant info |
+
+**The contexts naming a Vengeance player.** LYwFGPRADV7m6vTZ fights 1, 6, 12, 20 and 24 actor 19, g34mvXTKLMJ2Nfwr fights 1, 6 and 7 actor 13, and zpryqKdtRjWNQXa6 fights 30 to 34 actor 741. Only `.probe/m13a/discovery.json`, `.probe/m13a/candidates.json` and the earlier census output `.probe/onbd2p/census-files.json` name those reports, and none holds an event.
+
+Limits: the census does not read JSON files of 500 bytes or less, or log and text output. Its ability routes match the ids above only; the combatant-info route does not depend on them. An actor with neither a context nor combatant info, holding none of those ids, would not appear.
+
+**What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists it; the gate search finds no qualifying assertion and `evidenceReady` false (`m11-promotion-evidence-gate`, from ONB-X3, its comment now naming the outcome). One test row is new: a public DemonHunter/Vengeance request is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which held no row for it). A public request still runs preparation and reports partial coverage. Nothing reads as clean play. The census is offline and not committed.
+
+**What a later promotion must do.** ONB-EV supplies a capture, which first checks what the synthetic builds assume: the talent id space, the wire's cast shape, the moment a logged Fel Devastation reports, and Fury on Fracture and Soul Cleave. Vengeance then answers what stands in scan order (agent/follow-ups.md "After ONB-X3"), and measures or refuses each hero list. ONB-S3 alone moves nothing. The tank's domains keep `NO_PINNED_AUTHORITY_FOR_DOMAIN` until their own authority is decided, and an offensive promotion must not read as tank coaching. A new public entry then promotes it through the unchanged gates by the five-site promotion, and must first commit identity proof, because a PUBLIC module cannot use the retained-only exception. No such entry is queued.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

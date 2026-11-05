@@ -3,6 +3,8 @@
 **Exposure: `INTERNAL_ONLY`.** The registration (`demonhunter-vengeance-observed-decisions`, `demonhunter/vengeance`) is in the production
 catalog for the internal lookup only. The public lookup and the identity table refuse it.
 
+**Not promoted by ONB-X3P.** It cannot pass the rotational gates: no decision resolves and no retained capture holds one of its events, so its gap is on ONB-EV (agent/architecture.md "ONB-X3P").
+
 **Its own representative, a tank, and it resolves nothing today.** No decision of this specialization reaches MATCH or
 REJECTED on the shared engine as it stands, and no retained capture holds one of its events. Every decision is observed,
 classified and explained, and stays UNKNOWN. That is a measured property of the pinned list and the
