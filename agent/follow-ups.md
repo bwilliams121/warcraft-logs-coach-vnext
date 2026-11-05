@@ -29,6 +29,31 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After ONB-X2: what the Devastation Evoker slice does not establish
+
+**Raised:** ONB-X2 (2026-11-05). Coverage, not soundness: every decision is UNKNOWN.
+
+**Devastation Evoker is not on ONB-EV.** Three subjects are retained with combatant info, two of them whole fights (agent/architecture.md "ONB-X2"). ONB-S3 alone moves nothing, since neither first stop reads an enemy count.
+
+**What Scalecommander needs, in order, before any line behind it is read:**
+
+- **`default[6] quell`.** It needs `target.debuff.casting.react`, an enemy cast's interruptibility, or a contract that lets a scan step past an off-GCD interrupt. Arcane's Counterspell has the same shape, unconditional there.
+- **`sc[0] deep_breath`.** Its `cancel_if` is unsupported, and it reads `buff.strafing_run.remains` and `gcd.max`. A `cancel_if` only ends the channel early, so a reviewed reading might step past the option, and that is a shared decision for every list using it. The stop reports `UNSUPPORTED_TARGETING` for an option that is no targeting at all, a label worth correcting then.
+- **`sc[1] dragonrage`**, `target.time_to_die` and `raid_event.*`. The first is predictive, so it needs a player-knowable reading, and the second has no meaning in a real fight, so this line needs a decision about simulation-only state and is not mechanical.
+- **`sc[2] hover`**, `sc[5] tip_the_scales`, and their contracts. Then `es`, `fire_breath,empower_to=1`, then the Disintegrate line with `early_chain_if` and `interrupt_if`.
+
+**Unmeasured.** No Flameshaper subject is retained, so `fs`, `fb` and the `legacy_of_the_lifebinder` branch are unmeasured. A promotion must measure them or refuse them, as Havoc refuses Fel-Scarred. The first stop, `fs[0] fire_breath`, is synthetic, on `target_if` and `empower_to`.
+
+**`empower-cast-usage`, the rank.** `empower_to` is unsupported, so every `es` and `fb` line and two others refuse. `empowermentLevel` is on the wire at the release, and nothing reads it, because `empowerend` is envelope-only. Of the 67 releases on the three subjects, 66 are level 1 and one is level 3, so a test of a real rank has little evidence to stand on yet. A real answer needs three things: a normalized reading of the level, a shared meaning for `empower_to` as an observed-action check rather than a selection option, and a decision about what a level below the list's choice means when the hold can be cut by movement or a mechanic. Until then a token MATCH says nothing about a rank, and a test pins that.
+
+**The anchor's limits, as measured:** Living Flame is UNKNOWN on every build, 89 decisions, 88 ambiguous and 1 at a capture edge. Burnout's aura could tell them apart if its edges are proven against the press. Empowered, Disintegrate and Deep Breath spans are possible, never proven, so occupancy inside one stays UNKNOWN: no channel bound is claimed, and `empowerend` could bound a hold if it were read. No haste is established. Off-GCD Hover and Tip the Scales presses are excluded from the population.
+
+**Decision times are the anchor's**, as for Destruction, so a public promotion must check its readers of `fightTimeMs`.
+
+**The unsupported subject has no further migration inside this capture.** Beast Mastery Hunter is the last unregistered specialization in A7R6 fight 7. ONB-T2 owes a move to another committed fight context, which brings a new corpus artifact or an existing one's roster. Its `hunter/beastmastery` observed string and `hunter/beast_mastery` roster key are both pinned now. The row in `SUPPORTED_SPEC_IDENTITIES` that ONB-T2's promotion adds needs that same mapping.
+
+---
+
 ## After ONB-X1: what the Fire Mage slice does not establish
 
 **Raised:** ONB-X1 (2026-11-05). Coverage, not soundness: every decision is UNKNOWN.
@@ -927,7 +952,8 @@ validated on real logs, and one subject is not many.
   `CastAnchorProfile` has no empowered execution kind, so an empowered spell
   has no decision anchor. Before any Preservation (or Devastation,
   Augmentation) decision that involves an empowered spell, that kind needs a
-  reviewed definition from the pinned wire fact: `empowerstart` and `cast` at
+  reviewed definition from the pinned wire fact (ONB-X2 reviewed it for Devastation: a channel to
+  the shared anchor, with no new kind, and its rank unread; agent/architecture.md "ONB-X2"): `empowerstart` and `cast` at
   the start (same millisecond or one later), `empowerend` at the release, and
   a `cast` alone when the spell was made instant. The healer evaluator only
   refuses to read an identified ability's empowered `cast` as a use.

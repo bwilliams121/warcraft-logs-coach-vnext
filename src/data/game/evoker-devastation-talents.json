@@ -1,0 +1,467 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_TRAIT_EVOKER_DEVASTATION_TALENTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
+    "extractedOn": "2026-11-05",
+    "extractorVersion": 1,
+    "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals trait_data_t::id_node, as every earlier target recorded. Corroborated for Devastation Evoker on its three retained subjects, whose observed trees resolve a hero tree and the pinned list's talents by these keys (agent/architecture.md \"ONB-X2\").",
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "talents": [
+    {
+      "simcName": "ancient_flame",
+      "displayNameEn": "Ancient Flame",
+      "tree": "CLASS",
+      "traitNodeId": 93271,
+      "traitEntryId": 115577,
+      "talentSpellId": 369990,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_evoker.cpp:10005 talent.ancient_flame = CT( \"Ancient Flame\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "animosity",
+      "displayNameEn": "Animosity",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 93330,
+      "traitEntryId": 115642,
+      "talentSpellId": 375797,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_evoker.cpp:10031 talent.animosity = ST( \"Animosity\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "charged_blast",
+      "displayNameEn": "Charged Blast",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 93317,
+      "traitEntryId": 115628,
+      "talentSpellId": 370455,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_evoker.cpp:10041 talent.charged_blast = ST( \"Charged Blast\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "dragonrage",
+      "displayNameEn": "Dragonrage",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 93331,
+      "traitEntryId": 115643,
+      "talentSpellId": 375087,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_evoker.cpp:10023 talent.dragonrage = ST( \"Dragonrage\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "eternity_surge",
+      "displayNameEn": "Eternity Surge",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 93275,
+      "traitEntryId": 115581,
+      "talentSpellId": 359073,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_evoker.cpp:10020 talent.eternity_surge = ST( \"Eternity Surge\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "eternitys_span",
+      "displayNameEn": "Eternity's Span",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 93320,
+      "traitEntryId": 115632,
+      "talentSpellId": 375757,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_evoker.cpp:10035 talent.eternitys_span = ST( \"Eternity's Span\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "feed_the_flames",
+      "displayNameEn": "Feed the Flames",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 93277,
+      "traitEntryId": 115584,
+      "talentSpellId": 369846,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_evoker.cpp:10048 talent.feed_the_flames = ST( \"Feed the Flames\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "imminent_destruction",
+      "displayNameEn": "Imminent Destruction",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 93326,
+      "traitEntryId": 115638,
+      "talentSpellId": 370781,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_evoker.cpp:10056 talent.imminent_destruction = ST( \"Imminent Destruction\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "legacy_of_the_lifebinder",
+      "displayNameEn": "Legacy of the Lifebinder",
+      "tree": "HERO",
+      "traitNodeId": 94950,
+      "traitEntryId": 117547,
+      "talentSpellId": 1264269,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_evoker.cpp:10214 talent.flameshaper.legacy_of_the_lifebinder = HT( \"Legacy of the Lifebinder\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "mass_disintegrate",
+      "displayNameEn": "Mass Disintegrate",
+      "tree": "HERO",
+      "traitNodeId": 94939,
+      "traitEntryId": 117536,
+      "talentSpellId": 436335,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_evoker.cpp:10228 talent.scalecommander.mass_disintegrate = HT( \"Mass Disintegrate\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "pyre",
+      "displayNameEn": "Pyre",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 93334,
+      "traitEntryId": 115647,
+      "talentSpellId": 357211,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_evoker.cpp:10016 talent.pyre = ST( \"Pyre\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "quell",
+      "displayNameEn": "Quell",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 93332,
+      "traitEntryId": 115645,
+      "talentSpellId": 351338,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_evoker.cpp:9991 talent.quell = CT( \"Quell\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "scarlet_adaptation",
+      "displayNameEn": "Scarlet Adaptation",
+      "tree": "CLASS",
+      "traitNodeId": 93340,
+      "traitEntryId": 115654,
+      "talentSpellId": 372469,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_evoker.cpp:9990 talent.scarlet_adaptation = CT( \"Scarlet Adaptation\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "scorching_embers",
+      "displayNameEn": "Scorching Embers",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 93365,
+      "traitEntryId": 115622,
+      "talentSpellId": 370819,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_evoker.cpp:10057 talent.scorching_embers = ST( \"Scorching Embers\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "slipstream",
+      "displayNameEn": "Slipstream",
+      "tree": "HERO",
+      "traitNodeId": 94943,
+      "traitEntryId": 120123,
+      "talentSpellId": 441257,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 117540,
+          "displayNameEn": "Nimble Flyer",
+          "talentSpellId": 441253
+        }
+      ],
+      "binding": "sc_evoker.cpp:10251 talent.scalecommander.slipstream = HT( \"Slipstream\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "star_salvo",
+      "displayNameEn": "Star Salvo",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 93315,
+      "traitEntryId": 115626,
+      "talentSpellId": 1265826,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_evoker.cpp:10044 talent.star_salvo = ST( \"Star Salvo\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "tip_the_scales",
+      "displayNameEn": "Tip the Scales",
+      "tree": "CLASS",
+      "traitNodeId": 93350,
+      "traitEntryId": 115665,
+      "talentSpellId": 370553,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_evoker.cpp:9995 talent.tip_the_scales = CT( \"Tip the Scales\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "verdant_embrace",
+      "displayNameEn": "Verdant Embrace",
+      "tree": "CLASS",
+      "traitNodeId": 93341,
+      "traitEntryId": 115655,
+      "talentSpellId": 360995,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_evoker.cpp:9985 talent.verdant_embrace = CT( \"Verdant Embrace\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "volatility",
+      "displayNameEn": "Volatility",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 93283,
+      "traitEntryId": 115591,
+      "talentSpellId": 369089,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_evoker.cpp:10021 talent.volatility = ST( \"Volatility\" );; the pinned list reads it or an action of the list is built on it"
+    }
+  ],
+  "heroTrees": [
+    {
+      "simcName": "scalecommander",
+      "subTreeId": 36,
+      "entries": [
+        {
+          "traitEntryId": 117518,
+          "traitNodeId": 94921,
+          "displayNameEn": "Melt Armor",
+          "talentSpellId": 441176
+        },
+        {
+          "traitEntryId": 117525,
+          "traitNodeId": 94928,
+          "displayNameEn": "Extended Battle",
+          "talentSpellId": 441212
+        },
+        {
+          "traitEntryId": 117530,
+          "traitNodeId": 94933,
+          "displayNameEn": "Hardened Scales",
+          "talentSpellId": 441180
+        },
+        {
+          "traitEntryId": 117531,
+          "traitNodeId": 94934,
+          "displayNameEn": "Unrelenting Siege",
+          "talentSpellId": 441246
+        },
+        {
+          "traitEntryId": 117533,
+          "traitNodeId": 94936,
+          "displayNameEn": "Bombardments",
+          "talentSpellId": 434300
+        },
+        {
+          "traitEntryId": 117536,
+          "traitNodeId": 94939,
+          "displayNameEn": "Mass Disintegrate",
+          "talentSpellId": 436335
+        },
+        {
+          "traitEntryId": 117538,
+          "traitNodeId": 94941,
+          "displayNameEn": "Maneuverability",
+          "talentSpellId": 433871
+        },
+        {
+          "traitEntryId": 117540,
+          "traitNodeId": 94943,
+          "displayNameEn": "Nimble Flyer",
+          "talentSpellId": 441253
+        },
+        {
+          "traitEntryId": 117541,
+          "traitNodeId": 94944,
+          "displayNameEn": "Onslaught",
+          "talentSpellId": 441245
+        },
+        {
+          "traitEntryId": 117549,
+          "traitNodeId": 94952,
+          "displayNameEn": "Might of the Black Dragonflight",
+          "talentSpellId": 441705
+        },
+        {
+          "traitEntryId": 117550,
+          "traitNodeId": 94953,
+          "displayNameEn": "Wingleader",
+          "talentSpellId": 441206
+        },
+        {
+          "traitEntryId": 120123,
+          "traitNodeId": 94943,
+          "displayNameEn": "Slipstream",
+          "talentSpellId": 441257
+        },
+        {
+          "traitEntryId": 120124,
+          "traitNodeId": 94928,
+          "displayNameEn": "Diverted Power",
+          "talentSpellId": 441219
+        },
+        {
+          "traitEntryId": 120125,
+          "traitNodeId": 94933,
+          "displayNameEn": "Menacing Presence",
+          "talentSpellId": 441181
+        },
+        {
+          "traitEntryId": 136051,
+          "traitNodeId": 109793,
+          "displayNameEn": "Refined Essence",
+          "talentSpellId": 1261452
+        },
+        {
+          "traitEntryId": 136052,
+          "traitNodeId": 109794,
+          "displayNameEn": "Concentrated Power",
+          "talentSpellId": 1261448
+        },
+        {
+          "traitEntryId": 136053,
+          "traitNodeId": 109795,
+          "displayNameEn": "Command Squadron",
+          "talentSpellId": 1260745
+        }
+      ]
+    },
+    {
+      "simcName": "flameshaper",
+      "subTreeId": 37,
+      "entries": [
+        {
+          "traitEntryId": 117517,
+          "traitNodeId": 94920,
+          "displayNameEn": "Titanic Precision",
+          "talentSpellId": 445625
+        },
+        {
+          "traitEntryId": 117519,
+          "traitNodeId": 94922,
+          "displayNameEn": "Consume Flame",
+          "talentSpellId": 444088
+        },
+        {
+          "traitEntryId": 117520,
+          "traitNodeId": 94923,
+          "displayNameEn": "Fulminous Roar",
+          "talentSpellId": 1218447
+        },
+        {
+          "traitEntryId": 117528,
+          "traitNodeId": 94931,
+          "displayNameEn": "Lifecinders",
+          "talentSpellId": 444322
+        },
+        {
+          "traitEntryId": 117534,
+          "traitNodeId": 94937,
+          "displayNameEn": "Trailblazer",
+          "talentSpellId": 444849
+        },
+        {
+          "traitEntryId": 117542,
+          "traitNodeId": 94945,
+          "displayNameEn": "Deep Exhalation",
+          "talentSpellId": 1264321
+        },
+        {
+          "traitEntryId": 117543,
+          "traitNodeId": 94946,
+          "displayNameEn": "Burning Adrenaline",
+          "talentSpellId": 444020
+        },
+        {
+          "traitEntryId": 117546,
+          "traitNodeId": 94949,
+          "displayNameEn": "Conduit of Flame",
+          "talentSpellId": 444843
+        },
+        {
+          "traitEntryId": 117547,
+          "traitNodeId": 94950,
+          "displayNameEn": "Legacy of the Lifebinder",
+          "talentSpellId": 1264269
+        },
+        {
+          "traitEntryId": 117553,
+          "traitNodeId": 94956,
+          "displayNameEn": "Enkindle",
+          "talentSpellId": 444016
+        },
+        {
+          "traitEntryId": 123404,
+          "traitNodeId": 94937,
+          "displayNameEn": "Shape of Flame",
+          "talentSpellId": 445074
+        },
+        {
+          "traitEntryId": 123405,
+          "traitNodeId": 94931,
+          "displayNameEn": "Draconic Instincts",
+          "talentSpellId": 445958
+        },
+        {
+          "traitEntryId": 123416,
+          "traitNodeId": 99857,
+          "displayNameEn": "Ashes in Motion",
+          "talentSpellId": 1264365
+        },
+        {
+          "traitEntryId": 128713,
+          "traitNodeId": 94956,
+          "displayNameEn": "Expanded Lungs",
+          "talentSpellId": 444845
+        },
+        {
+          "traitEntryId": 136054,
+          "traitNodeId": 109796,
+          "displayNameEn": "Fire Torrent",
+          "talentSpellId": 1265992
+        },
+        {
+          "traitEntryId": 136055,
+          "traitNodeId": 109797,
+          "displayNameEn": "Essence Well",
+          "talentSpellId": 1265993
+        },
+        {
+          "traitEntryId": 136056,
+          "traitNodeId": 109798,
+          "displayNameEn": "Twin Flame",
+          "talentSpellId": 1265979
+        }
+      ]
+    }
+  ]
+}

@@ -497,7 +497,7 @@ let unsupported: FightAnalysis;
 beforeAll(async () => {
   const subject = await subjectInput();
   blood = await viaService(subject, "Blood");
-  unsupported = await viaService(subject, "Devastation");
+  unsupported = await viaService(subject, "BeastMastery");
 }, 180_000);
 
 describe("the committed Blood fight, through the service", () => {

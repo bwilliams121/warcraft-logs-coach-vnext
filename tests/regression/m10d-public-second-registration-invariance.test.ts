@@ -2,7 +2,7 @@
  * M10-D: the PUBLIC Protection Paladin registration moves nothing about
  * Assassination, is reached by every public path for a Protection subject,
  * and leaves the unsupported path intact for the canonical unsupported
- * specialization (Evoker/Devastation, A7R6 fight 7 actor 11).
+ * specialization (Hunter/BeastMastery, A7R6 fight 7 actor 20).
  *
  * SUPERSEDES two files whose premise M10-D removed:
  *
@@ -16,7 +16,7 @@
  * re-proven here over the two REAL public registrations in both catalog
  * orders; the second half is inverted on purpose — the Protection analyzer
  * now runs, exactly once, for exactly a Protection subject — and the
- * "unreachable" role passes to Devastation, which has no registration at all.
+ * "unreachable" role passes to Beast Mastery, which has no registration at all.
  *
  * Every public path — the application service, REST, MCP, raid-night
  * orchestration — is run against the production catalog and a reversed one,
@@ -74,8 +74,8 @@ const D2 = "wcl-assassination-d2-decision-corpus";
 const GTKB = "wcl-assassination-high-parse-opener";
 const PROT_OPENER = "wcl-protection-paladin-a7r6-opener";
 const PROT_ACTOR = 7;
-/** A7R6 fight 7 actor 11 — Evoker/Devastation per the committed fight-context artifact. */
-const ARMS_ACTOR = CURRENT_UNSUPPORTED_SUBJECT.sourceId;
+/** A7R6 fight 7 actor 20 — Hunter/BeastMastery per the committed fight-context artifact. */
+const UNSUPPORTED_ACTOR = CURRENT_UNSUPPORTED_SUBJECT.sourceId;
 
 interface Subject {
   readonly label: string;
@@ -102,10 +102,10 @@ const PROTECTION_SUBJECT: Subject = {
   specName: "Protection",
   status: "ANALYZED",
 };
-const ARMS_SUBJECT: Subject = {
-  label: "the real Devastation Evoker",
+const UNSUPPORTED_SUBJECT_CASE: Subject = {
+  label: "the real Beast Mastery Hunter",
   artifact: PROT_OPENER,
-  actorId: ARMS_ACTOR,
+  actorId: UNSUPPORTED_ACTOR,
   className: CURRENT_UNSUPPORTED_SUBJECT.expectedClassName,
   specName: CURRENT_UNSUPPORTED_SUBJECT.expectedSpecName,
   status: "SPEC_NOT_SUPPORTED",
@@ -183,7 +183,7 @@ function keysOf(value: unknown, into = new Set<string>()): Set<string> {
 
 describe("the production catalog", () => {
   it("is exactly the twelve PUBLIC registrations (Blood since M11-B12, Brewmaster since M11-C4j, Augmentation since M13-F, Restoration Shaman since HEAL-AP, Holy Paladin and Mistweaver Monk since HEAL-B1P, Holy Priest since HEAL-B2P, Preservation Evoker since HEAL-B4P, Havoc Demon Hunter since ONB-A1P) plus Restoration Druid and Discipline Priest INTERNAL_ONLY, and both lookups answer alike for every public one", () => {
-    expect(ANALYZER_REGISTRATIONS).toHaveLength(32);
+    expect(ANALYZER_REGISTRATIONS).toHaveLength(33);
     expect(ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "PUBLIC")).toHaveLength(12);
     // HEAL-B1: one INTERNAL_ONLY healer row since HEAL-B1P (a second, Holy Priest, from HEAL-B2 until HEAL-B2P; Discipline Priest since HEAL-B3; Preservation Evoker from HEAL-B4 until HEAL-B4P), invisible to the public lookup.
     const internal = ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "INTERNAL_ONLY");
@@ -208,6 +208,7 @@ describe("the production catalog", () => {
       "warlock/affliction",
       "hunter/marksmanship",
       "mage/fire",
+      "evoker/devastation",
     ]);
     for (const row of internal)
       expect(analyzerForSpec(row.specId, PRODUCTION_CATALOG), row.specId).toBeNull();
@@ -257,7 +258,7 @@ describe("the production catalog", () => {
     expect(analyzerForSpec("rogue/assassination", PRODUCTION_CATALOG)?.exposure).toBe("PUBLIC");
   });
 
-  it("public identity resolution accepts both Paladins, DeathKnight/Blood and Monk/Brewmaster, and still rejects Evoker/Devastation", () => {
+  it("public identity resolution accepts both Paladins, DeathKnight/Blood and Monk/Brewmaster, and still rejects Hunter/BeastMastery", () => {
     expect(resolveSpecIdentity({ className: "Paladin", specName: "Protection" })).toEqual({
       ok: true,
       specId: "paladin/protection",
@@ -415,10 +416,10 @@ describe("the REAL Protection Paladin subject through the application service", 
   });
 });
 
-describe("the REAL Devastation Evoker subject keeps the unsupported path", () => {
+describe("the REAL Beast Mastery Hunter subject keeps the unsupported path", () => {
   for (const { label, registry, calls } of catalogs()) {
     it(`${label}: SPEC_NOT_SUPPORTED, one preparation-only retrieval, neither analyzer runs`, async () => {
-      const run = runFor(ARMS_SUBJECT, registry);
+      const run = runFor(UNSUPPORTED_SUBJECT_CASE, registry);
       const result = await analyzeFight(run.request, run.deps);
       expect(result.ok).toBe(true);
       if (!result.ok) return;
@@ -501,7 +502,7 @@ describe("REST and MCP agree for every subject, in every catalog order", () => {
     };
   }
 
-  for (const subject of [ASSASSINATION_SUBJECT, PROTECTION_SUBJECT, ARMS_SUBJECT]) {
+  for (const subject of [ASSASSINATION_SUBJECT, PROTECTION_SUBJECT, UNSUPPORTED_SUBJECT_CASE]) {
     it(`${subject.label}: identical, schema-valid documents across transports and catalogs`, async () => {
       const documents: string[] = [];
       for (const { registry, label } of catalogs()) {
@@ -536,7 +537,7 @@ describe("REST and MCP agree for every subject, in every catalog order", () => {
   }
 });
 
-describe("raid-night cells over the D2 fixture with a Devastation participant", () => {
+describe("raid-night cells over the D2 fixture with a Beast Mastery participant", () => {
   const ROGUE_B = 23;
 
   it("deep-equal aggregate, byte-identical public document, identical ingestion, zero Protection runs", async () => {
@@ -544,10 +545,11 @@ describe("raid-night cells over the D2 fixture with a Devastation participant", 
     for (const { registry, calls, label } of catalogs()) {
       const snapshot = assassinationSnapshot({
         fightIds: [1, 2],
-        sourceIds: [ARMS_ACTOR, M5D2_ACTOR, ROGUE_B],
-        classNameFor: (sourceId) => (sourceId === ARMS_ACTOR ? UNSUPPORTED_WCL_IDENTITY.className : "Rogue"),
+        sourceIds: [UNSUPPORTED_ACTOR, M5D2_ACTOR, ROGUE_B],
+        classNameFor: (sourceId) =>
+          sourceId === UNSUPPORTED_ACTOR ? UNSUPPORTED_WCL_IDENTITY.className : "Rogue",
         specNameFor: (_fightId, sourceId) =>
-          sourceId === ARMS_ACTOR ? UNSUPPORTED_WCL_IDENTITY.specName : "Assassination",
+          sourceId === UNSUPPORTED_ACTOR ? UNSUPPORTED_WCL_IDENTITY.specName : "Assassination",
         absentOn: new Map([[2, [ROGUE_B]]]),
       });
       const ports = fakePorts({ snapshot });

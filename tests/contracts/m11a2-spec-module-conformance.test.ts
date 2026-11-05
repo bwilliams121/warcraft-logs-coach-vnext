@@ -179,6 +179,8 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
   "mage/arcane": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 3 },
   // ONB-X1: actor 17 of the same fight, its Fire Mage and the unsupported subject until this tranche.
   "mage/fire": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 17 },
+  // ONB-X2: actor 11 of the same fight, its Devastation Evoker and the unsupported subject until this tranche.
+  "evoker/devastation": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 11 },
   // ONB-D3: actor 6 of the M13-A fight context, the Frost Mage the committed evidence archive
   // context reports. That capture's casts are filtered and carry no combatant info.
   "mage/frost": {
@@ -520,6 +522,7 @@ describe("what the tree exports today", () => {
       ["RESTORATION_DRUID_MODULE", "druid/restoration", "INTERNAL_ONLY", 0],
       // M13-E: INTERNAL_ONLY, binding no decision authority; PUBLIC since M13-F.
       ["AUGMENTATION_EVOKER_MODULE", "evoker/augmentation", "PUBLIC", 0],
+      ["DEVASTATION_EVOKER_MODULE", "evoker/devastation", "INTERNAL_ONLY", 0],
       // HEAL-B4: a healer on the same architecture, its roster role UNKNOWN as pinned, INTERNAL_ONLY.
       ["PRESERVATION_EVOKER_MODULE", "evoker/preservation", "PUBLIC", 0],
       ["MARKSMANSHIP_HUNTER_MODULE", "hunter/marksmanship", "INTERNAL_ONLY", 0],

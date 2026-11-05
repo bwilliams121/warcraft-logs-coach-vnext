@@ -1,0 +1,595 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_EVOKER_DEVASTATION",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "evoker",
+    "specName": "devastation"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "UNKNOWN",
+    "sourcePath": "engine/class_modules/apl/apl_evoker.cpp",
+    "sourceSha256": "84086fb5b6c3e40e28859c2e4ca3ee13e70b8bee0ca64cab69fedd7819b93c4b",
+    "sourceByteLength": 42774,
+    "regionStartMarker": "//devastation_apl_start",
+    "regionEndMarker": "//devastation_apl_end",
+    "extractedOn": "2026-11-05",
+    "extractorVersion": 1,
+    "regionSha256": "460e88bfba7864def1fd982bd25a05500e92481dd4d9dd3ebdfe8ef0bb89111b",
+    "livePtrPolicy": "PTR_STUB_NEVER_DISPATCHED",
+    "dispatchSource": {
+      "sourcePath": "engine/class_modules/sc_evoker.cpp",
+      "sourceSha256": "91f34b4bcc311efc6c9a8d199dd766af9957a8b3ffd58e8703c3df32885a9976"
+    }
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "potion,if=(!talent.dragonrage|buff.dragonrage.up)|fight_remains<35",
+          "comment": null,
+          "sourceLine": 81
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "variable,name=next_dragonrage,value=cooldown.dragonrage.remains<?((cooldown.eternity_surge.remains-8)>?(cooldown.fire_breath.remains-8))",
+          "comment": null,
+          "sourceLine": 82
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "invoke_external_buff,name=power_infusion,if=buff.dragonrage.up|fight_remains<35",
+          "comment": null,
+          "sourceLine": 83
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=can_use_empower,op=set,value=cooldown.dragonrage.remains>=gcd.max*variable.dr_prep_time,if=talent.animosity&talent.dragonrage",
+          "comment": null,
+          "sourceLine": 84
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=use_pyre_fs,op=set,value=talent.legacy_of_the_lifebinder&(active_enemies>=5|active_enemies>=3&(talent.volatility.rank=2|talent.feed_the_flames))",
+          "comment": null,
+          "sourceLine": 85
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "variable,name=use_tts,op=set,value=(cooldown.eternity_surge.remains<=action.fire_breath.usable_in),if=talent.legacy_of_the_lifebinder",
+          "comment": null,
+          "sourceLine": 86
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "quell,use_off_gcd=1,if=target.debuff.casting.react",
+          "comment": null,
+          "sourceLine": 87
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "call_action_list,name=trinkets",
+          "comment": null,
+          "sourceLine": 88
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "run_action_list,name=sc,if=talent.mass_disintegrate",
+          "comment": null,
+          "sourceLine": 89
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "run_action_list,name=fs",
+          "comment": null,
+          "sourceLine": 90
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": null,
+          "sourceLine": 53
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "variable,name=trinket_1_buffs,value=trinket.1.has_buff.intellect|trinket.1.has_buff.mastery|trinket.1.has_buff.versatility|trinket.1.has_buff.haste|trinket.1.has_buff.crit",
+          "comment": null,
+          "sourceLine": 54
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=trinket_2_buffs,value=trinket.2.has_buff.intellect|trinket.2.has_buff.mastery|trinket.2.has_buff.versatility|trinket.2.has_buff.haste|trinket.2.has_buff.crit",
+          "comment": null,
+          "sourceLine": 55
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=weapon_buffs,value=0",
+          "comment": null,
+          "sourceLine": 56
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=weapon_sync,op=setif,value=1,value_else=0.5,condition=0",
+          "comment": null,
+          "sourceLine": 57
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "variable,name=weapon_stat_value,value=0",
+          "comment": null,
+          "sourceLine": 58
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "variable,name=trinket_1_sync,op=setif,value=1,value_else=0.5,condition=variable.trinket_1_buffs&(trinket.1.cooldown.duration%%cooldown.dragonrage.duration=0|cooldown.dragonrage.duration%%trinket.1.cooldown.duration=0)",
+          "comment": null,
+          "sourceLine": 59
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "variable,name=trinket_2_sync,op=setif,value=1,value_else=0.5,condition=variable.trinket_2_buffs&(trinket.2.cooldown.duration%%cooldown.dragonrage.duration=0|cooldown.dragonrage.duration%%trinket.2.cooldown.duration=0)",
+          "comment": null,
+          "sourceLine": 60
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "variable,name=trinket_1_manual,value=0",
+          "comment": null,
+          "sourceLine": 61
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "variable,name=trinket_2_manual,value=0",
+          "comment": null,
+          "sourceLine": 62
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "variable,name=trinket_1_ogcd_cast,value=0",
+          "comment": null,
+          "sourceLine": 63
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "variable,name=trinket_2_ogcd_cast,value=0",
+          "comment": null,
+          "sourceLine": 64
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "variable,name=trinket_1_exclude,value=trinket.1.is.ruby_whelp_shell|trinket.1.is.whispering_incarnate_icon",
+          "comment": null,
+          "sourceLine": 65
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "variable,name=trinket_2_exclude,value=trinket.2.is.ruby_whelp_shell|trinket.2.is.whispering_incarnate_icon",
+          "comment": null,
+          "sourceLine": 66
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "variable,name=trinket_priority,op=setif,value=2,value_else=1,condition=!variable.trinket_1_buffs&variable.trinket_2_buffs|variable.trinket_2_buffs&((trinket.2.proc.any_dps.duration)*(variable.trinket_2_sync)*trinket.2.proc.any_dps.default_value)>((trinket.1.proc.any_dps.duration)*(variable.trinket_1_sync)*trinket.1.proc.any_dps.default_value)",
+          "comment": null,
+          "sourceLine": 67
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "variable,name=trinket_priority,op=setif,if=variable.weapon_buffs,value=3,value_else=variable.trinket_priority,condition=!variable.trinket_1_buffs&!variable.trinket_2_buffs|variable.weapon_stat_value*variable.weapon_sync>(((trinket.2.proc.any_dps.duration)*(variable.trinket_2_sync)*trinket.2.proc.any_dps.default_value)<?((trinket.1.proc.any_dps.duration)*(variable.trinket_1_sync)*trinket.1.proc.any_dps.default_value))",
+          "comment": null,
+          "sourceLine": 68
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "variable,name=trinket_priority,op=set,value=trinket.1.is.signet_of_the_priory+2*trinket.2.is.signet_of_the_priory,if=equipped.signet_of_the_priory&variable.trinket_priority=3",
+          "comment": null,
+          "sourceLine": 69
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "variable,name=damage_trinket_priority,op=setif,value=2,value_else=1,condition=!variable.trinket_1_buffs&!variable.trinket_2_buffs&trinket.2.ilvl>=trinket.1.ilvl",
+          "comment": null,
+          "sourceLine": 70
+        },
+        {
+          "priorityOrdinal": 18,
+          "actionStringVerbatim": "variable,name=r1_cast_time,value=1.0*spell_haste",
+          "comment": null,
+          "sourceLine": 71
+        },
+        {
+          "priorityOrdinal": 19,
+          "actionStringVerbatim": "variable,name=dr_prep_time,default=6,op=reset",
+          "comment": null,
+          "sourceLine": 72
+        },
+        {
+          "priorityOrdinal": 20,
+          "actionStringVerbatim": "variable,name=dr_prep_time_aoe,default=4,op=reset",
+          "comment": null,
+          "sourceLine": 73
+        },
+        {
+          "priorityOrdinal": 21,
+          "actionStringVerbatim": "variable,name=can_use_empower,value=1,default=1,if=!talent.animosity|!talent.dragonrage",
+          "comment": null,
+          "sourceLine": 74
+        },
+        {
+          "priorityOrdinal": 22,
+          "actionStringVerbatim": "variable,name=test,default=1,op=reset",
+          "comment": null,
+          "sourceLine": 75
+        },
+        {
+          "priorityOrdinal": 23,
+          "actionStringVerbatim": "verdant_embrace,if=talent.scarlet_adaptation",
+          "comment": null,
+          "sourceLine": 76
+        },
+        {
+          "priorityOrdinal": 24,
+          "actionStringVerbatim": "hover,if=talent.slipstream",
+          "comment": null,
+          "sourceLine": 77
+        },
+        {
+          "priorityOrdinal": 25,
+          "actionStringVerbatim": "hover,if=talent.slipstream",
+          "comment": null,
+          "sourceLine": 78
+        },
+        {
+          "priorityOrdinal": 26,
+          "actionStringVerbatim": "living_flame",
+          "comment": null,
+          "sourceLine": 79
+        }
+      ]
+    },
+    {
+      "listName": "sc",
+      "receiverIdentifier": "sc",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "deep_breath,if=buff.strafing_run.remains<=gcd.max*2,cancel_if=gcd.remains<=0",
+          "comment": "SC Action List. Use Deep Breath to optimise for Strafing Run",
+          "sourceLine": 92
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "dragonrage,if=target.time_to_die>=30&raid_event.adds.in>=60|!raid_event.adds.exists|raid_event.adds.in=0",
+          "comment": null,
+          "sourceLine": 93
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "hover,use_off_gcd=1,if=raid_event.movement.in<6&!buff.hover.up&gcd.remains>=0.5|talent.slipstream&gcd.remains>=0.5",
+          "comment": null,
+          "sourceLine": 94
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "azure_sweep,if=(buff.essence_burst.down|!buff.essence_burst.at_max_stacks)&set_bonus.mid1_2pc&cooldown.eternity_surge.remains<=6",
+          "comment": "Use Azure Sweep if Eternity Surge is reasonably Soon. This is not a magic number, it's just simpler than writing out the expansion to account for azure sweep stacks.",
+          "sourceLine": 95
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "call_action_list,name=es",
+          "comment": "Swell Gaming with EoI is good, With EH its bad",
+          "sourceLine": 96
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "tip_the_scales,use_off_gcd=1,if=action.fire_breath.ready",
+          "comment": null,
+          "sourceLine": 97
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "fire_breath,empower_to=1",
+          "comment": "Swell Gaming with EoI is good, With EH its bad",
+          "sourceLine": 98
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "deep_breath,if=active_enemies>=2,cancel_if=gcd.remains=0",
+          "comment": "Using DB whenever is neutral at 2T and a gain above",
+          "sourceLine": 99
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "disintegrate,early_chain_if=ticks_remain<=1&buff.mass_disintegrate_stacks.up,if=(raid_event.movement.in>2|buff.hover.up)&buff.mass_disintegrate_stacks.up&buff.charged_blast.stack<15,interrupt_if=talent.volatility&active_enemies>=8",
+          "comment": null,
+          "sourceLine": 100
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "pyre,target_if=max:target.health.pct,if=(active_enemies>=5|active_enemies>=4&talent.volatility.rank=2)&!buff.mass_disintegrate_stacks.up|active_enemies>=3&talent.charged_blast&buff.charged_blast.stack>=15",
+          "comment": null,
+          "sourceLine": 101
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "disintegrate,target_if=max:dot.fire_breath_damage.remains,if=(raid_event.movement.in>2|buff.hover.up),early_chain_if=ticks_remain<=1,interrupt_if=ticks_remain<=1&active_enemies>=3",
+          "comment": null,
+          "sourceLine": 102
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "living_flame,if=buff.burnout.up&buff.leaping_flames.up&active_enemies<=1+buff.leaping_flames.stack",
+          "comment": null,
+          "sourceLine": 103
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "unbound_flame,if=!buff.essence_burst.at_max_stacks",
+          "comment": null,
+          "sourceLine": 104
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "azure_sweep",
+          "comment": null,
+          "sourceLine": 105
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "living_flame,if=raid_event.movement.in>execute_time|buff.hover.up",
+          "comment": null,
+          "sourceLine": 106
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "call_action_list,name=green,if=talent.ancient_flame&!buff.ancient_flame.up&talent.scarlet_adaptation&!buff.dragonrage.up",
+          "comment": null,
+          "sourceLine": 107
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "azure_strike",
+          "comment": null,
+          "sourceLine": 108
+        }
+      ]
+    },
+    {
+      "listName": "fs",
+      "receiverIdentifier": "fs",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "fire_breath,target_if=max:target.health.pct,empower_to=1,if=cooldown.dragonrage.remains<gcd.max*2&active_dot.fire_breath_damage=0&(target.time_to_die>=15|!raid_event.adds.exists)&variable.use_pyre_fs",
+          "comment": "Flameshaper Action List. AoE Precast for Dragonrage Pyres",
+          "sourceLine": 110
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "dragonrage,if=target.time_to_die>=30&raid_event.adds.in>=60|target.time_to_die>=15&active_enemies>4|!raid_event.adds.exists|raid_event.adds.in=0",
+          "comment": null,
+          "sourceLine": 111
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "hover,use_off_gcd=1,if=raid_event.movement.in<6&!buff.hover.up&gcd.remains>=0.5&!variable.use_pyre_fs",
+          "comment": null,
+          "sourceLine": 112
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "tip_the_scales,use_off_gcd=1,if=buff.dragonrage.up&variable.use_tts",
+          "comment": null,
+          "sourceLine": 113
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "call_action_list,name=es,if=variable.can_use_empower|buff.tip_the_scales.up",
+          "comment": "Target Match with ES (Hitting everything is priority over lower ranks)",
+          "sourceLine": 114
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "call_action_list,name=fb,if=variable.can_use_empower&dot.fire_breath_damage.refreshable&!buff.tip_the_scales.up",
+          "comment": "Upranking in 2-3T is back on the menu boys",
+          "sourceLine": 115
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "pyre,target_if=max:target.health.pct,if=variable.use_pyre_fs",
+          "comment": null,
+          "sourceLine": 116
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "disintegrate,target_if=max:dot.fire_breath_damage.remains,chain=1,if=(raid_event.movement.in>2|buff.hover.up),early_chain_if=ticks_remain<=1,interrupt_if=ticks_remain<=1",
+          "comment": null,
+          "sourceLine": 117
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "deep_breath,if=talent.imminent_destruction&active_dot.fire_breath_damage=0&active_enemies>=4,cancel_if=gcd.remains=0,interrupt_if=gcd.remains=0",
+          "comment": "Queue the token deep breath condition",
+          "sourceLine": 118
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "unbound_flame,target_if=max:dot.fire_breath_damage.remains,if=!buff.essence_burst.at_max_stacks&(!talent.scorching_embers|active_dot.fire_breath_damage>0)",
+          "comment": "Aim at the ones that are burning",
+          "sourceLine": 119
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "living_flame,if=buff.burnout.up|buff.leaping_flames.up&active_enemies>=4|(buff.leaping_flames.up|buff.ancient_flame.up)&raid_event.movement.in>execute_time",
+          "comment": null,
+          "sourceLine": 120
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "azure_sweep",
+          "comment": "Sweep is worse than LF with procs",
+          "sourceLine": 121
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "living_flame,if=raid_event.movement.in>execute_time",
+          "comment": null,
+          "sourceLine": 122
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "call_action_list,name=green,if=talent.ancient_flame&!buff.ancient_flame.up&talent.scarlet_adaptation&!buff.dragonrage.up&active_enemies<4",
+          "comment": null,
+          "sourceLine": 123
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "azure_strike",
+          "comment": null,
+          "sourceLine": 124
+        }
+      ]
+    },
+    {
+      "listName": "es",
+      "receiverIdentifier": "es",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "eternity_surge,empower_to=1,target_if=max:target.health.pct,if=active_enemies<=3-talent.star_salvo",
+          "comment": "Pick optimal Eternity Surge Rank",
+          "sourceLine": 126
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "eternity_surge,empower_to=2,target_if=max:target.health.pct,if=(active_enemies>=2+2*talent.eternitys_span)-talent.star_salvo",
+          "comment": null,
+          "sourceLine": 127
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "eternity_surge,empower_to=3,target_if=max:target.health.pct,if=(active_enemies>=3+3*talent.eternitys_span)-talent.star_salvo",
+          "comment": null,
+          "sourceLine": 128
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "eternity_surge,empower_to=4,target_if=max:target.health.pct",
+          "comment": null,
+          "sourceLine": 129
+        }
+      ]
+    },
+    {
+      "listName": "fb",
+      "receiverIdentifier": "fb",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "fire_breath,empower_to=1,target_if=max:target.health.pct,if=active_enemies=1|variable.use_pyre_fs",
+          "comment": "Fire Breath Upranking",
+          "sourceLine": 131
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "fire_breath,empower_to=2,target_if=max:target.health.pct,if=active_enemies=2|buff.dragonrage.up|buff.rising_fury.up",
+          "comment": null,
+          "sourceLine": 132
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "fire_breath,empower_to=3,target_if=max:target.health.pct,if=active_enemies>=3",
+          "comment": "Cap at R3 since R4 is just sort of bad for all cases",
+          "sourceLine": 133
+        }
+      ]
+    },
+    {
+      "listName": "green",
+      "receiverIdentifier": "green",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "emerald_blossom",
+          "comment": "Green Spells for Ancient Flame",
+          "sourceLine": 135
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "verdant_embrace",
+          "comment": null,
+          "sourceLine": 136
+        }
+      ]
+    },
+    {
+      "listName": "trinkets",
+      "receiverIdentifier": "trinkets",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "use_item,slot=trinket1,if=(buff.dragonrage.up&(buff.rising_fury.stack>=4|talent.legacy_of_the_lifebinder)&((variable.trinket_2_buffs&!cooldown.fire_breath.up&trinket.2.cooldown.remains)|buff.tip_the_scales.up&variable.trinket_priority=1|(!cooldown.fire_breath.up)|active_enemies>=3)&(!trinket.2.has_cooldown|trinket.2.cooldown.remains|variable.trinket_priority=1|variable.trinket_2_exclude)&!variable.trinket_1_manual|trinket.1.proc.any_dps.duration>=fight_remains|trinket.1.cooldown.duration<=60&(variable.next_dragonrage>20|!talent.dragonrage)&(!buff.dragonrage.up|variable.trinket_priority=1)&!variable.trinket_1_manual)",
+          "comment": "Trinket Spaghetti",
+          "sourceLine": 138
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "use_item,slot=trinket2,if=trinket.2.is.vaelgors_final_stare&buff.dragonrage.up&active_enemies>=3",
+          "comment": "other spagetti is so complicated. Just Trinket in AoE without a delay.",
+          "sourceLine": 139
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_item,slot=trinket2,if=buff.dragonrage.up&(buff.rising_fury.stack>=4|talent.legacy_of_the_lifebinder)&((variable.trinket_1_buffs&!cooldown.fire_breath.up&trinket.1.cooldown.remains)|buff.tip_the_scales.up&variable.trinket_priority=2|(!cooldown.fire_breath.up)|active_enemies>=3)&(!trinket.1.has_cooldown|trinket.1.cooldown.remains|variable.trinket_priority=2|variable.trinket_1_exclude)&!variable.trinket_2_manual|trinket.2.proc.any_dps.duration>=fight_remains|trinket.2.cooldown.duration<=60&(variable.next_dragonrage>20|!talent.dragonrage)&(!buff.dragonrage.up|variable.trinket_priority=2)&!variable.trinket_2_manual",
+          "comment": null,
+          "sourceLine": 140
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "use_item,slot=main_hand,if=variable.weapon_buffs&((variable.trinket_2_buffs&(trinket.2.cooldown.remains|trinket.2.cooldown.duration<=20)|!variable.trinket_2_buffs|variable.trinket_2_exclude|variable.trinket_priority=3)&(variable.trinket_1_buffs&(trinket.1.cooldown.remains|trinket.1.cooldown.duration<=20)|!variable.trinket_1_buffs|variable.trinket_1_exclude|variable.trinket_priority=3)&(!cooldown.fire_breath.up|(!cooldown.fire_breath.up)|active_enemies>=3))&(variable.next_dragonrage>20|!talent.dragonrage)&(!buff.dragonrage.up|variable.trinket_priority=3|variable.trinket_priority=1&trinket.1.cooldown.remains|variable.trinket_priority=2&trinket.2.cooldown.remains)",
+          "comment": null,
+          "sourceLine": 141
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "use_item,use_off_gcd=1,slot=trinket1,if=!variable.trinket_1_buffs&!variable.trinket_1_manual&(variable.damage_trinket_priority=1|trinket.2.cooldown.remains|trinket.2.is.spymasters_web|trinket.2.cooldown.duration=0)&(gcd.remains>0.1&!prev_gcd.1.deep_breath)&(variable.next_dragonrage>20|!talent.dragonrage|!variable.trinket_2_buffs|trinket.2.is.spymasters_web&(buff.spymasters_report.stack<5|fight_remains>=130+variable.next_dragonrage))",
+          "comment": null,
+          "sourceLine": 142
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "use_item,use_off_gcd=1,slot=trinket2,if=!variable.trinket_2_buffs&!variable.trinket_2_manual&(variable.damage_trinket_priority=2|trinket.1.cooldown.remains|trinket.1.is.spymasters_web|trinket.1.cooldown.duration=0)&(gcd.remains>0.1&!prev_gcd.1.deep_breath)&(variable.next_dragonrage>20|!talent.dragonrage|!variable.trinket_1_buffs|trinket.1.is.spymasters_web&(buff.spymasters_report.stack<5|fight_remains>=130+variable.next_dragonrage))",
+          "comment": null,
+          "sourceLine": 143
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "use_item,slot=trinket1,if=!variable.trinket_1_buffs&!variable.trinket_1_manual&(variable.damage_trinket_priority=1|trinket.2.cooldown.remains|trinket.2.is.spymasters_web|trinket.2.cooldown.duration=0)&(!variable.trinket_1_ogcd_cast)&(variable.next_dragonrage>20|!talent.dragonrage|!variable.trinket_2_buffs|trinket.2.is.spymasters_web&(buff.spymasters_report.stack<5|fight_remains>=130+variable.next_dragonrage))",
+          "comment": null,
+          "sourceLine": 144
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "use_item,slot=trinket2,if=!variable.trinket_2_buffs&!variable.trinket_2_manual&(variable.damage_trinket_priority=2|trinket.1.cooldown.remains|trinket.1.is.spymasters_web|trinket.1.cooldown.duration=0)&(!variable.trinket_2_ogcd_cast)&(variable.next_dragonrage>20|!talent.dragonrage|!variable.trinket_1_buffs|trinket.1.is.spymasters_web&(buff.spymasters_report.stack<5|fight_remains>=130+variable.next_dragonrage))",
+          "comment": null,
+          "sourceLine": 145
+        }
+      ]
+    }
+  ]
+}

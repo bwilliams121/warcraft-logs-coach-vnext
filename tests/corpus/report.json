@@ -788,6 +788,15 @@
       "assertions": 1,
       "cases": 1,
       "failed": 0,
+      "kindsExercised": ["SPEC_DEVASTATION_EVOKER.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_DEVASTATION_EVOKER",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
       "kindsExercised": ["SPEC_OUTLAW_ROGUE.SPEC_GATE"],
       "notExecuted": 0,
       "owningLayer": "SPEC_OUTLAW_ROGUE",
@@ -803,13 +812,13 @@
       "passed": 1
     },
     {
-      "assertions": 42,
-      "cases": 38,
+      "assertions": 43,
+      "cases": 39,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 42
+      "passed": 43
     },
     {
       "assertions": 14,
@@ -893,6 +902,20 @@
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.beast-mastery-hunter-subject-is-unsupported-on-the-same-evidence",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
       "artifactId": "wcl-blood-death-knight-a7r6-rotational-45s",
       "assertions": [
         {
@@ -962,13 +985,13 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
-          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
           "ordinal": 0,
           "status": "PASSED"
         }
       ],
       "authority": null,
-      "caseId": "application-service.devastation-evoker-subject-is-unsupported-on-the-same-evidence",
+      "caseId": "application-service.devastation-evoker-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -3284,6 +3307,20 @@
       "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "public-contract.analysis-parity-for-the-beast-mastery-hunter-subject",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
       "artifactId": "wcl-blood-death-knight-a7r6-rotational-45s",
       "assertions": [
         {
@@ -3310,20 +3347,6 @@
       "caseId": "public-contract.analysis-parity-for-the-brewmaster-monk-subject",
       "owningLayer": "PUBLIC_CONTRACT",
       "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-opener"]
-    },
-    {
-      "artifactId": "wcl-protection-paladin-a7r6-opener",
-      "assertions": [
-        {
-          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
-          "ordinal": 0,
-          "status": "PASSED"
-        }
-      ],
-      "authority": null,
-      "caseId": "public-contract.analysis-parity-for-the-devastation-evoker-subject",
-      "owningLayer": "PUBLIC_CONTRACT",
-      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
       "artifactId": "wcl-protection-paladin-a7r6-opener",
@@ -5770,6 +5793,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_DEVASTATION_EVOKER.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-devastation-evoker.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_DEVASTATION_EVOKER",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_DEVOURER_DEMON_HUNTER.SPEC_GATE",
           "ordinal": 0,
           "status": "PASSED"
@@ -7904,6 +7941,7 @@
     "SIMC_APL_DEMONHUNTER_HAVOC": "simc-33622e9d-1",
     "SIMC_APL_DRUID_BALANCE": "simc-33622e9d-1",
     "SIMC_APL_DRUID_FERAL": "simc-33622e9d-1",
+    "SIMC_APL_EVOKER_DEVASTATION": "simc-33622e9d-1",
     "SIMC_APL_HUNTER_MARKSMANSHIP": "simc-33622e9d-1",
     "SIMC_APL_MAGE_ARCANE": "simc-33622e9d-1",
     "SIMC_APL_MAGE_FIRE": "simc-33622e9d-1",
@@ -7930,13 +7968,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 832,
-    "cases": 237,
+    "assertions": 834,
+    "cases": 239,
     "declared": 0,
-    "executable": 832,
+    "executable": 834,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 832
+    "passed": 834
   }
 }

@@ -48,6 +48,7 @@ import {
   type AplExtractionTarget,
   type PinnedExtractionTarget,
   type SourceReader,
+  verifyLivePtrPolicy,
 } from "../../scripts/authority/extract-simc-apl.mjs";
 import { validateAuthorityArtifact } from "../../src/simc/authority-artifact.js";
 import assassinationArtifact from "../../src/simc/data/rogue-assassination.apl.json";
@@ -777,7 +778,7 @@ const EARLIER = [
 ];
 
 describe("the registry", () => {
-  it("holds exactly the five earlier targets, the eight D2-C targets, ONB-B2's Enhancement, ONB-C1's Feral, ONB-C2's Outlaw, ONB-D1's Destruction, ONB-D2's three, ONB-D3's two, ONB-D4's two and ONB-X1's one", () => {
+  it("holds exactly the five earlier targets, the eight D2-C targets, ONB-B2's Enhancement, ONB-C1's Feral, ONB-C2's Outlaw, ONB-D1's Destruction, ONB-D2's three, ONB-D3's two, ONB-D4's two, ONB-X1's one and ONB-X2's one", () => {
     // ONB-B2 is the audit this entry waited for: its list is a class method (onb-b2-class-method-extraction).
     // ONB-C1's list is an included file with a separate PTR file (onb-c1-included-file-extraction).
     expect(Object.keys(TARGETS).sort()).toEqual(
@@ -796,6 +797,7 @@ describe("the registry", () => {
         "warlock-affliction",
         "hunter-marksmanship",
         "mage-fire",
+        "evoker-devastation",
       ].sort(),
     );
   });
@@ -819,6 +821,45 @@ describe("the registry", () => {
     expect(arms).not.toBe(fury);
     expect(arms?.reason).toContain("the arms region");
     expect(fury?.reason).toContain("the fury region");
+  });
+
+  it("ONB-X2: Devastation's PTR region is an empty stub never dispatched, and the policy refuses anything more", () => {
+    const target = TARGETS["evoker-devastation"] as PinnedExtractionTarget;
+    expect(validatePinnedRecord("evoker-devastation", target)).toEqual([]);
+    expect(target.livePtrPolicy.kind).toBe("PTR_STUB_NEVER_DISPATCHED");
+    const module = [
+      "//devastation_apl_start",
+      "void devastation( player_t* p )",
+      "{",
+      "}",
+      "//devastation_apl_end",
+      "",
+      "//devastation_ptr_apl_start",
+      "void devastation_ptr( player_t* )",
+      "{",
+      "}",
+      "//devastation_ptr_apl_end",
+    ];
+    const dispatch = "evoker_apl::devastation( this );";
+    expect(() => verifyLivePtrPolicy(module, dispatch, target)).not.toThrow();
+    // A body in the stub, which a later commit could use to build a list.
+    const filled = module.map((line) => (line === "}" ? line : line));
+    filled.splice(9, 0, '  default_->add_action( "azure_strike" );');
+    expect(() => verifyLivePtrPolicy(filled, dispatch, target)).toThrow(
+      /POLICY_VIOLATED: PTR_STUB_NEVER_DISPATCHED/,
+    );
+    // A dispatch that reaches it.
+    expect(() => verifyLivePtrPolicy(module, "evoker_apl::devastation_ptr( this );", target)).toThrow(
+      /POLICY_VIOLATED: PTR_STUB_NEVER_DISPATCHED/,
+    );
+    // No stub at all is another policy's shape.
+    expect(() =>
+      verifyLivePtrPolicy(
+        module.filter((line) => !line.includes("_ptr(")),
+        dispatch,
+        target,
+      ),
+    ).toThrow(/POLICY_VIOLATED/);
   });
 
   it("ONB-D2's targets declare the relationship their bodies have", () => {

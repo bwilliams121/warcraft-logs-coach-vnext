@@ -1956,11 +1956,13 @@ their own. Real evidence is retained.
 ### ONB-X1P: Fire Mage (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-X1
 branch: autopilot/onb-x1p
 wcl: NONE
 publicContract: EXPECTED
+pr: 78
+mergeSha: 14d5fea94f84c043fd930c040143d113cd91fc14
 ```
 
 **Outcome.** It does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Its one retained subject, A7R6 fight 7 actor 17, replayed offline, gives 113 decisions, 0 MATCH, 0 REJECTED, all UNKNOWN, output byte-identical to ONB-X1's. A census of 5,714 retained files finds no new subject, by combatant-info specID as well as by named and pinned ability ids. Evidence is not its gap, so it is not on ONB-EV, and ONB-S3 alone moves nothing. The Mage/Fire public refusal row ONB-X1's migration overwrote is restored. A promotion after its own inputs, first an authority for `variable.combustion_delay`, is a new public entry through the unchanged gates (agent/architecture.md "ONB-X1P"; agent/follow-ups.md "After ONB-X1").
@@ -1968,8 +1970,9 @@ publicContract: EXPECTED
 ### ONB-X2: Devastation Evoker (internal, own representative)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-S4
+branch: autopilot/onb-x2
 wcl: NONE
 publicContract: NONE
 ```
@@ -1979,6 +1982,8 @@ roster role left UNKNOWN by the pinned data; use the declared M11
 classification. `empower-cast-usage` is a recorded question. Real evidence
 is retained (fight 48). The unsupported-path subject is this specialization's
 A7R6 actor 11 since ONB-X1, so migrate it first (`tests/support/unsupported-subject.ts`).
+
+**Outcome.** Registered INTERNAL_ONLY, and no decision resolves. Its three retained subjects, all Scalecommander (A7R6 fight 7 actor 11, first 165 s; b1Pm fight 48 actor 16 and gtKb fight 22 actor 33, whole fights), give 440 decisions, 0 MATCH, 0 REJECTED, all UNKNOWN: the engine refuses at the off-GCD Quell, and every root scan stops at `sc[0] deep_breath`, on its `cancel_if`. Empowered spells read as channels to the shared anchor, on the pinned constructor and the wire, so the shared code gains no kind. The rank stays unread, every `empower_to` line refuses, and a test pins that the level on the wire changes nothing, so `empower-cast-usage` stays open. The roster role stays UNKNOWN. ONB-S3 alone moves nothing. The unsupported-path subject moved to that fight's Beast Mastery Hunter, actor 20, the last it holds (agent/architecture.md "ONB-X2"; agent/follow-ups.md "After ONB-X2").
 
 ### ONB-X2P: Devastation Evoker (public)
 

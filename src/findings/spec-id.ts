@@ -96,7 +96,8 @@ export type SpecId =
   | "mage/frost"
   | "warlock/affliction"
   | "hunter/marksmanship"
-  | "mage/fire";
+  | "mage/fire"
+  | "evoker/devastation";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -131,6 +132,7 @@ export const SPEC_IDS = Object.freeze([
   "warlock/affliction",
   "hunter/marksmanship",
   "mage/fire",
+  "evoker/devastation",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -292,6 +294,9 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  *
  * Fire Mage arrived here in ONB-X1, its own representative on the shared cast anchor. No decision of it resolves, on its one retained
  * subject or on a synthetic build. The unsupported-path subject moved from it to Devastation Evoker the same day.
+ *
+ * Devastation Evoker arrived here in ONB-X2, its own representative on the shared cast anchor. No decision of it resolves, on its three retained
+ * subjects or on a synthetic build. The unsupported-path subject moved from it to Beast Mastery Hunter the same day.
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
@@ -314,6 +319,7 @@ export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "warlock/affliction",
   "hunter/marksmanship",
   "mage/fire",
+  "evoker/devastation",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

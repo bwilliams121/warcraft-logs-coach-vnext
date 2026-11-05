@@ -11,7 +11,7 @@
  * Blood's: the public lookup, the identity table, the public contract, the
  * derived sentence and both MCP tool descriptions now carry Brewmaster, and
  * the public path dispatches the same row the internal lookup finds.
- * Evoker/Devastation is still unsupported, no other Monk specialization resolves,
+ * Hunter/BeastMastery is still unsupported, no other Monk specialization resolves,
  * the other specializations' vocabularies neither gain nor lose an
  * identifier, and outside the Brewmaster tree the specialization is named only
  * by the partition, the registry row, the two promotion sites and pinned data.
@@ -156,6 +156,7 @@ describe("identity and partition", () => {
       "warlock/affliction",
       "hunter/marksmanship",
       "mage/fire",
+      "evoker/devastation",
     ]);
     expect([...PUBLIC_SPEC_IDS]).toEqual(NINE_PUBLIC);
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("monk/brewmaster");
@@ -181,9 +182,9 @@ describe("identity and partition", () => {
     expect(BREWMASTER_MONK_MODULE.supplementalAnalyses).toEqual([]);
   });
 
-  it("Evoker/Devastation is still unsupported: it is not a SpecId and the identity table does not resolve it", () => {
-    expect(isSpecId("evoker/devastation")).toBe(false);
-    expect(resolveSpecIdentity({ className: "Evoker", specName: "Devastation" })).toMatchObject({
+  it("Hunter/BeastMastery is still unsupported: it is not a SpecId and the identity table does not resolve it", () => {
+    expect(isSpecId("hunter/beast_mastery")).toBe(false);
+    expect(resolveSpecIdentity({ className: "Hunter", specName: "BeastMastery" })).toMatchObject({
       ok: false,
       reason: "UNSUPPORTED_SPECIALIZATION",
     });

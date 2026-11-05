@@ -1,0 +1,379 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_EVOKER_DEVASTATION_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/sc_evoker.cpp",
+        "sha256": "91f34b4bcc311efc6c9a8d199dd766af9957a8b3ffd58e8703c3df32885a9976",
+        "byteLength": 378295
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-05",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 351338,
+      "baseGcdMs": 0,
+      "displayNameEn": "Quell"
+    },
+    {
+      "abilityGameId": 355913,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Emerald Blossom"
+    },
+    {
+      "abilityGameId": 356995,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Disintegrate"
+    },
+    {
+      "abilityGameId": 357208,
+      "baseGcdMs": 500,
+      "displayNameEn": "Fire Breath"
+    },
+    {
+      "abilityGameId": 357210,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Deep Breath"
+    },
+    {
+      "abilityGameId": 357211,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Pyre"
+    },
+    {
+      "abilityGameId": 358267,
+      "baseGcdMs": 0,
+      "displayNameEn": "Hover"
+    },
+    {
+      "abilityGameId": 359073,
+      "baseGcdMs": 500,
+      "displayNameEn": "Eternity Surge"
+    },
+    {
+      "abilityGameId": 360995,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Verdant Embrace"
+    },
+    {
+      "abilityGameId": 361469,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Living Flame"
+    },
+    {
+      "abilityGameId": 362969,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Azure Strike"
+    },
+    {
+      "abilityGameId": 370553,
+      "baseGcdMs": 0,
+      "displayNameEn": "Tip the Scales"
+    },
+    {
+      "abilityGameId": 375087,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Dragonrage"
+    },
+    {
+      "abilityGameId": 382266,
+      "baseGcdMs": 500,
+      "displayNameEn": "Fire Breath"
+    },
+    {
+      "abilityGameId": 382411,
+      "baseGcdMs": 500,
+      "displayNameEn": "Eternity Surge"
+    },
+    {
+      "abilityGameId": 433874,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Deep Breath"
+    },
+    {
+      "abilityGameId": 1265872,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Azure Sweep"
+    },
+    {
+      "abilityGameId": 1292321,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Unbound Flame"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "azure_strike",
+      "candidateAbilityGameIds": [362969],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_evoker.cpp",
+        "sourceSha256": "91f34b4bcc311efc6c9a8d199dd766af9957a8b3ffd58e8703c3df32885a9976",
+        "symbol": "create_action / azure_strike_t",
+        "startLine": 10941,
+        "endLine": 10941,
+        "sourceNote": "create_action dispatches \"azure_strike\" to azure_strike_t: built on p->find_class_spell( \"Azure Strike\" ) (:5584).",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "azure_sweep",
+      "candidateAbilityGameIds": [1265872],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_evoker.cpp",
+        "sourceSha256": "91f34b4bcc311efc6c9a8d199dd766af9957a8b3ffd58e8703c3df32885a9976",
+        "symbol": "create_action / azure_sweep_t",
+        "startLine": 10943,
+        "endLine": 10943,
+        "sourceNote": "create_action dispatches \"azure_sweep\" to azure_sweep_t: built on p->talent.azure_sweep_spell (:5602), which is find_spell( 1265872 ) at :10027; ready() asks for its buff.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "deep_breath",
+      "candidateAbilityGameIds": [357210, 433874],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_evoker.cpp",
+        "sourceSha256": "91f34b4bcc311efc6c9a8d199dd766af9957a8b3ffd58e8703c3df32885a9976",
+        "symbol": "create_action / deep_breath_t",
+        "startLine": 10945,
+        "endLine": 10945,
+        "sourceNote": "create_action dispatches \"deep_breath\" to deep_breath_t: built on the Maneuverability row 433874 when that hero talent is taken, else p->find_class_spell( \"Deep Breath\" ) 357210 (:6253), and on not_found() only with breath_of_eons, which no Devastation build has. Both rows are _gcd 1500, so the lane does not depend on which.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "disintegrate",
+      "candidateAbilityGameIds": [356995],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_evoker.cpp",
+        "sourceSha256": "91f34b4bcc311efc6c9a8d199dd766af9957a8b3ffd58e8703c3df32885a9976",
+        "symbol": "create_action / disintegrate_t",
+        "startLine": 10947,
+        "endLine": 10947,
+        "sourceNote": "create_action dispatches \"disintegrate\" to disintegrate_t: built on p->find_class_spell( \"Disintegrate\" ) (:6353), and on not_found() only with eruption, which no Devastation build has.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "dragonrage",
+      "candidateAbilityGameIds": [375087],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_evoker.cpp",
+        "sourceSha256": "91f34b4bcc311efc6c9a8d199dd766af9957a8b3ffd58e8703c3df32885a9976",
+        "symbol": "create_action / dragonrage_t",
+        "startLine": 10949,
+        "endLine": 10949,
+        "sourceNote": "create_action dispatches \"dragonrage\" to dragonrage_t: built on p->talent.dragonrage (:7336).",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "emerald_blossom",
+      "candidateAbilityGameIds": [355913],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_evoker.cpp",
+        "sourceSha256": "91f34b4bcc311efc6c9a8d199dd766af9957a8b3ffd58e8703c3df32885a9976",
+        "symbol": "create_action / emerald_blossom_t",
+        "startLine": 10973,
+        "endLine": 10973,
+        "sourceNote": "create_action dispatches \"emerald_blossom\" to emerald_blossom_t: built on p->spec.emerald_blossom (:4343), which is find_spell( 355913 ) at :9970.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "eternity_surge",
+      "candidateAbilityGameIds": [359073, 382411],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_evoker.cpp",
+        "sourceSha256": "91f34b4bcc311efc6c9a8d199dd766af9957a8b3ffd58e8703c3df32885a9976",
+        "symbol": "create_action / eternity_surge_t",
+        "startLine": 10951,
+        "endLine": 10951,
+        "sourceNote": "create_action dispatches \"eternity_surge\" to eternity_surge_t: built on p->talent.eternity_surge (:5508), and find_spell_override( spell, p->talent.font_of_magic ) reads the Font of Magic row (:3509). Both rows are _gcd 500, so the lane does not depend on which.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "fire_breath",
+      "candidateAbilityGameIds": [357208, 382266],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_evoker.cpp",
+        "sourceSha256": "91f34b4bcc311efc6c9a8d199dd766af9957a8b3ffd58e8703c3df32885a9976",
+        "symbol": "create_action / fire_breath_t",
+        "startLine": 10955,
+        "endLine": 10955,
+        "sourceNote": "create_action dispatches \"fire_breath\" to fire_breath_t: built on p->find_class_spell( \"Fire Breath\" ) (:5339), and find_spell_override( spell, p->talent.font_of_magic ) reads the Font of Magic row (:3509). Both rows are _gcd 500, so the lane does not depend on which.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "hover",
+      "candidateAbilityGameIds": [358267],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_evoker.cpp",
+        "sourceSha256": "91f34b4bcc311efc6c9a8d199dd766af9957a8b3ffd58e8703c3df32885a9976",
+        "symbol": "create_action / hover_t",
+        "startLine": 10957,
+        "endLine": 10957,
+        "sourceNote": "create_action dispatches \"hover\" to hover_t: built on p->find_class_spell( \"Hover\" ) (:6730). _gcd 0, usable_while_casting.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "living_flame",
+      "candidateAbilityGameIds": [361469],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_evoker.cpp",
+        "sourceSha256": "91f34b4bcc311efc6c9a8d199dd766af9957a8b3ffd58e8703c3df32885a9976",
+        "symbol": "create_action / living_flame_t",
+        "startLine": 10961,
+        "endLine": 10961,
+        "sourceNote": "create_action dispatches \"living_flame\" to living_flame_t: built on p->find_class_spell( \"Living Flame\" ) (:6790).",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "pyre",
+      "candidateAbilityGameIds": [357211],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_evoker.cpp",
+        "sourceSha256": "91f34b4bcc311efc6c9a8d199dd766af9957a8b3ffd58e8703c3df32885a9976",
+        "symbol": "create_action / pyre_t",
+        "startLine": 10965,
+        "endLine": 10965,
+        "sourceNote": "create_action dispatches \"pyre\" to pyre_t: built on p->talent.pyre (:7189).",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "quell",
+      "candidateAbilityGameIds": [351338],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_evoker.cpp",
+        "sourceSha256": "91f34b4bcc311efc6c9a8d199dd766af9957a8b3ffd58e8703c3df32885a9976",
+        "symbol": "create_action / quell_t",
+        "startLine": 10967,
+        "endLine": 10967,
+        "sourceNote": "create_action dispatches \"quell\" to quell_t: built on p->talent.quell (:7029). _gcd 0, use_off_gcd.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "tip_the_scales",
+      "candidateAbilityGameIds": [370553],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_evoker.cpp",
+        "sourceSha256": "91f34b4bcc311efc6c9a8d199dd766af9957a8b3ffd58e8703c3df32885a9976",
+        "symbol": "create_action / tip_the_scales_t",
+        "startLine": 10969,
+        "endLine": 10969,
+        "sourceNote": "create_action dispatches \"tip_the_scales\" to tip_the_scales_t: built on p->talent.tip_the_scales (:7079). _gcd 0.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "unbound_flame",
+      "candidateAbilityGameIds": [1292321],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_evoker.cpp",
+        "sourceSha256": "91f34b4bcc311efc6c9a8d199dd766af9957a8b3ffd58e8703c3df32885a9976",
+        "symbol": "create_action / unbound_flame_t",
+        "startLine": 10995,
+        "endLine": 10995,
+        "sourceNote": "create_action dispatches \"unbound_flame\" to unbound_flame_t: built on p->talent.unbound_flame_spell (:7383), which is find_spell( 1292321 ) at :10068. create_action builds it from client data 12.1.0, which this data is.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "verdant_embrace",
+      "candidateAbilityGameIds": [360995],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_evoker.cpp",
+        "sourceSha256": "91f34b4bcc311efc6c9a8d199dd766af9957a8b3ffd58e8703c3df32885a9976",
+        "symbol": "create_action / verdant_embrace_t",
+        "startLine": 10971,
+        "endLine": 10971,
+        "sourceNote": "create_action dispatches \"verdant_embrace\" to verdant_embrace_t: built on p->talent.verdant_embrace (:4471).",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

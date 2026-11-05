@@ -172,6 +172,12 @@ const PINNED_SOURCES = Object.freeze({
     sha256: "b0310f97988f53af34507015d8adda68606c2401466f534430c876676b72c578",
     byteLength: 40053,
   },
+  APL_EVOKER: {
+    sourcePath: "engine/class_modules/apl/apl_evoker.cpp",
+    commitSha: PINNED_SIMC_COMMIT,
+    sha256: "84086fb5b6c3e40e28859c2e4ca3ee13e70b8bee0ca64cab69fedd7819b93c4b",
+    byteLength: 42774,
+  },
   APL_HUNTER: {
     sourcePath: "engine/class_modules/apl/apl_hunter.cpp",
     commitSha: PINNED_SIMC_COMMIT,
@@ -228,6 +234,11 @@ const PINNED_SOURCES = Object.freeze({
     sourcePath: "engine/class_modules/sc_mage.cpp",
     sha256: "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
     byteLength: 262461,
+  },
+  EVOKER_DISPATCH: {
+    sourcePath: "engine/class_modules/sc_evoker.cpp",
+    sha256: "91f34b4bcc311efc6c9a8d199dd766af9957a8b3ffd58e8703c3df32885a9976",
+    byteLength: 378295,
   },
   HUNTER_DISPATCH: {
     sourcePath: "engine/class_modules/sc_hunter.cpp",
@@ -1784,6 +1795,74 @@ export const TARGETS = {
       forbiddenTokens: ["swap_action_list"],
     },
   },
+  "evoker-devastation": {
+    sourcePath: PINNED_SOURCES.APL_EVOKER.sourcePath,
+    regionStart: "//devastation_apl_start",
+    regionEnd: "//devastation_apl_end",
+    functionHeader: "void devastation( player_t* p )",
+    regionName: "devastation",
+    authorityId: "SIMC_APL_EVOKER_DEVASTATION",
+    spec: { className: "evoker", specName: "devastation" },
+    defaultOut: "src/simc/data/evoker-devastation.apl.json",
+    pinnedSource: {
+      ...PINNED_SOURCES.APL_EVOKER,
+      regionSha256: "460e88bfba7864def1fd982bd25a05500e92481dd4d9dd3ebdfe8ef0bb89111b",
+    },
+    livePtrPolicy: {
+      kind: "PTR_STUB_NEVER_DISPATCHED",
+      ptrRegionStart: "//devastation_ptr_apl_start",
+      ptrRegionEnd: "//devastation_ptr_apl_end",
+      ptrFunctionHeader: "void devastation_ptr( player_t* )",
+    },
+    dispatch: {
+      ...PINNED_SOURCES.EVOKER_DISPATCH,
+      functionHeader: "void evoker_t::init_action_list()",
+      sequence: ["case EVOKER_DEVASTATION:", "evoker_apl::devastation( this );", "break;"],
+    },
+    requiredFacts: {
+      kind: "DISPATCH_GRAPH",
+      entryListName: "default",
+      requiredLists: ["default", "precombat", "sc", "fs", "es", "fb", "green", "trinkets"],
+      listSizes: { default: 10, precombat: 27, sc: 17, fs: 15, es: 4, fb: 3, green: 2, trinkets: 8 },
+      edges: [
+        { from: "default", ordinal: 7, kind: "CALL", to: "trinkets", condition: null },
+        { from: "default", ordinal: 8, kind: "RUN", to: "sc", condition: "talent.mass_disintegrate" },
+        { from: "default", ordinal: 9, kind: "RUN", to: "fs", condition: null },
+        { from: "sc", ordinal: 4, kind: "CALL", to: "es", condition: null },
+        {
+          from: "sc",
+          ordinal: 15,
+          kind: "CALL",
+          to: "green",
+          condition:
+            "talent.ancient_flame&!buff.ancient_flame.up&talent.scarlet_adaptation&!buff.dragonrage.up",
+        },
+        {
+          from: "fs",
+          ordinal: 4,
+          kind: "CALL",
+          to: "es",
+          condition: "variable.can_use_empower|buff.tip_the_scales.up",
+        },
+        {
+          from: "fs",
+          ordinal: 5,
+          kind: "CALL",
+          to: "fb",
+          condition: "variable.can_use_empower&dot.fire_breath_damage.refreshable&!buff.tip_the_scales.up",
+        },
+        {
+          from: "fs",
+          ordinal: 13,
+          kind: "CALL",
+          to: "green",
+          condition:
+            "talent.ancient_flame&!buff.ancient_flame.up&talent.scarlet_adaptation&!buff.dragonrage.up&active_enemies<4",
+        },
+      ],
+      forbiddenTokens: ["swap_action_list"],
+    },
+  },
   "mage-fire": {
     sourcePath: PINNED_SOURCES.APL_MAGE.sourcePath,
     regionStart: "//fire_apl_start",
@@ -3160,6 +3239,7 @@ export function buildArtifact({
 export const LIVE_PTR_POLICIES = Object.freeze([
   "NO_PTR_REGION",
   "PTR_MARKERS_EMPTY",
+  "PTR_STUB_NEVER_DISPATCHED",
   "PTR_BODY_IDENTICAL",
   "PTR_BODY_DIFFERS",
   "PTR_SEPARATE_INCLUDE",
@@ -3313,9 +3393,11 @@ export function validatePinnedRecord(targetName, target) {
       problems.push(`MALFORMED_POLICY: '${targetName}' PTR markers do not name the ${live[1]}_ptr region`);
     }
     const expectedPtrHeader =
-      target.enclosingClass === undefined
-        ? `void ${live[1]}_ptr( player_t* p )`
-        : `void ${target.enclosingClass}::${live[1]}_ptr()`;
+      policy.kind === "PTR_STUB_NEVER_DISPATCHED"
+        ? `void ${live[1]}_ptr( player_t* )`
+        : target.enclosingClass === undefined
+          ? `void ${live[1]}_ptr( player_t* p )`
+          : `void ${target.enclosingClass}::${live[1]}_ptr()`;
     if (policy.ptrFunctionHeader !== expectedPtrHeader) {
       problems.push(`MALFORMED_POLICY: '${targetName}' PTR function header does not name ${live[1]}_ptr`);
     }
@@ -3482,6 +3564,23 @@ export function verifyLivePtrPolicy(lines, dispatchText, target, includerText = 
     if (between.length !== 0 || ptrDefinitions !== 0 || ptrDispatches !== 0) {
       fail(
         `POLICY_VIOLATED: PTR_MARKERS_EMPTY, but the PTR region holds ${String(between.length)} non-blank lines, the module defines ${name}_ptr ${String(ptrDefinitions)} times and the dispatch calls it ${String(ptrDispatches)} times`,
+      );
+    }
+    return;
+  }
+
+  // PTR_STUB_NEVER_DISPATCHED (ONB-X2): the markers hold one definition whose parameter is unnamed and whose
+  // body is empty, and nothing calls it, so it can build no list. Anything more in the region is a violation.
+  if (policy.kind === "PTR_STUB_NEVER_DISPATCHED") {
+    const between = lines
+      .slice(ptrStart + 1, ptrEnd)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+    const stub = [policy.ptrFunctionHeader, "{", "}"];
+    const isStub = between.length === stub.length && between.every((line, index) => line === stub[index]);
+    if (!isStub || ptrDefinitions !== 1 || ptrDispatches !== 0) {
+      fail(
+        `POLICY_VIOLATED: PTR_STUB_NEVER_DISPATCHED, but the PTR region holds ${String(between.length)} non-blank lines, the module defines ${name}_ptr ${String(ptrDefinitions)} times and the dispatch calls it ${String(ptrDispatches)} times`,
       );
     }
     return;

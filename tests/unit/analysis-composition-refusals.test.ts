@@ -173,8 +173,8 @@ describe("an unsupported specialization", () => {
   });
 
   it("refuses every unsupported specialization the same way", async () => {
-    // Evoker/Devastation is the canonical captured unsupported identity (A7R6 fight 7,
-    // actor 11); the others are stated names. Paladin/Protection is NOT in this
+    // Hunter/BeastMastery is the canonical captured unsupported identity (A7R6 fight 7,
+    // actor 20); the others are stated names. Paladin/Protection is NOT in this
     // list: it has been supported since M10-D. Paladin/Retribution is NOT in
     // it either, since M11-A5, and Paladin/Holy is not since HEAL-B1P: every Paladin
     // specialization is supported. Druid/Restoration, registered INTERNAL_ONLY,
@@ -183,7 +183,8 @@ describe("an unsupported specialization", () => {
       // Registered INTERNAL_ONLY in ONB-C2, not promoted by ONB-C2P.
       ["Rogue", "Outlaw"],
       ["Rogue", "Subtlety"],
-      // Evoker/Augmentation is NOT in this list since M13-F; Devastation is the Evoker miss.
+      ["Hunter", "BeastMastery"],
+      // Evoker/Augmentation is NOT in this list since M13-F. Devastation is the Evoker miss, INTERNAL_ONLY since ONB-X2.
       ["Evoker", "Devastation"],
       // Registered INTERNAL_ONLY in ONB-A2, not promoted by ONB-A2P, like Rogue/Subtlety above.
       ["Warrior", "Fury"],

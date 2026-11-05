@@ -17,7 +17,7 @@
  *     raid-night-mixed-ret.public.json  the same roster with the Retribution
  *                               actor over the Protection opener (M11-A4+)
  *     raid-night-mixed-ret-45s.public.json  all three supported specs plus
- *                               Devastation over the Retribution 45 s slice (M11-A5+)
+ *                               Beast Mastery over the Retribution 45 s slice (M11-A5+)
  *     timings.json              wall-clock and CPU per request, invocation
  *                               counts — REPORT ONLY, nothing is asserted
  *
@@ -407,12 +407,12 @@ describe(`M10-D invariance capture -> ${CAPTURE_DIR}`, () => {
     write("raid-night-mixed-ret.public.json", projectRaidNightResult(run.aggregate));
   });
 
-  it("raid-night: all three supported specializations plus Devastation over the Retribution 45 s slice (M11-A5)", async () => {
+  it("raid-night: all three supported specializations plus Beast Mastery over the Retribution 45 s slice (M11-A5)", async () => {
     // Actors 6 (Paladin/Retribution), 7 (Paladin/Protection), 19
     // (Rogue/Assassination) and the unsupported subject per the committed
     // fight-context artifact, over the slice that describes actor 6 only: the
     // Retribution cell is ANALYZED, the other two supported players answer
-    // PROFILE_NOT_RESOLVED truthfully, Devastation is SPEC_NOT_SUPPORTED. Not
+    // PROFILE_NOT_RESOLVED truthfully, Beast Mastery is SPEC_NOT_SUPPORTED. Not
     // present in a pre-M11-A5 baseline.
     const CLASS_OF: Readonly<Record<number, string>> = {
       6: "Paladin",

@@ -226,7 +226,7 @@ export function nonAnalyzedFightAnalysis(options: {
     scope: supported ? "PLAYER_CONTEXT" : null,
     analysis: {
       status: options.status,
-      // The OBSERVED identity string on an unsupported envelope: Evoker/Devastation,
+      // The OBSERVED identity string on an unsupported envelope: Hunter/BeastMastery,
       // the canonical unsupported specialization since ONB-B1.
       specId: supported ? "rogue/assassination" : CURRENT_UNSUPPORTED_SUBJECT.observedSpecId,
       detail: options.detail ?? `no analysis: ${options.status}`,
