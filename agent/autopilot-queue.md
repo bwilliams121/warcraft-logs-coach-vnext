@@ -2037,11 +2037,13 @@ mergeSha: 3d8c6f4fe89f462686d61690ceec11b8afce5ae4
 ### ONB-X4: Demonology Warlock (internal, own representative)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-S4, ONB-S6
 branch: autopilot/onb-x4
 wcl: NONE
 publicContract: NONE
+pr: 83
+mergeSha: f21be56badfef447b9df961acfc2c4f5e8bda028
 ```
 
 **Scope.** A holdout. Demon summons and imp counts use ONB-S6 pet mapping,
@@ -2053,11 +2055,14 @@ unresolved and is not a blocker. Real evidence is retained (fight 48).
 ### ONB-X4P: Demonology Warlock (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-X4
+branch: autopilot/onb-x4p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** It does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Its seven retained subjects, all Diabolist, replayed offline, give 1,391 decisions, 0 MATCH, 0 REJECTED, all UNKNOWN, output byte-identical to ONB-X4's. A census of 5,714 retained files finds one more source of casts, the filtered M13-A actor 19, which has no combatant info and refuses `PROFILE_NOT_RESOLVED`. Evidence is not its gap, so it is not on ONB-EV, and ONB-S3 alone moves nothing. A promotion after its own inputs, first `buff.dominion_of_argus.up` and Summon Doomguard's lone node, is a new public entry through the unchanged gates (agent/architecture.md "ONB-X4P"; agent/follow-ups.md "After ONB-X4").
 
 ### ONB-X5: Unholy Death Knight (internal, own representative)
 

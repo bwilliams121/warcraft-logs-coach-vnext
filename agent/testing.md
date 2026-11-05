@@ -5786,3 +5786,9 @@ The negatives: over each hero tree and none, no decision resolves; the stops at 
 `m11d2c-pinned-extraction-preflight` holds the new target. Two corpus cases, as for its neighbours, and `tests/contracts/m11-promotion-evidence-gate.test.ts` pins that the gate search finds nothing. `m11a2-spec-module-conformance` proves its identity through the committed fight 48 context, actor 11.
 
 Offline only, not committed: the wire probes (`.probe/onbx4/wire.cjs`, `wire2.cjs`), the cast-row review (`rows.cjs`) and the replay of the seven subjects (`.probe/onbx4/m/`).
+
+# ONB-X4P: Demonology Warlock, not promoted
+
+No production code changed. One assertion row is new: `tests/unit/analysis-composition-refusals.test.ts` had no row for it, and now holds Warlock/Demonology (SPEC_NOT_SUPPORTED, one retrieval for preparation alone, no dispatch). `tests/contracts/m11-promotion-evidence-gate.test.ts` keeps its ONB-X4 gate search (no qualifying assertion, `evidenceReady` false), its comment now naming the outcome. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, the `onb-x4` suite).
+
+Offline only, not committed: the census (`.probe/onbx4p/census.cjs`, Mortal Strike as its positive control for events and the specID distribution as its control for combatant info), its reading by source (`.probe/onbx4p/census-read.cjs`, `actors.cjs`), and the replays of the subjects (`.probe/onbx4p/m/measure.baseline.ts`, `subjects.baseline.ts`). They give the results in agent/architecture.md "ONB-X4P".

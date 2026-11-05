@@ -5,6 +5,8 @@ catalog for the internal lookup only. The public lookup and the identity table r
 
 **Its own representative on the shared cast anchor (ONB-S4), and the first consumer of the shared pet mapping (ONB-S6). It resolves nothing today.** All 1,391 eligible decisions of its seven retained subjects stay UNKNOWN. That is a property of the pinned list and the missing inputs below, not a claim about any player.
 
+**Not promoted by ONB-X4P.** It cannot pass the rotational gates: all 1,391 decisions stay UNKNOWN. It waits on `buff.dominion_of_argus.up`, Summon Doomguard's lone node and the inputs behind them (agent/architecture.md "ONB-X4P").
+
 ## The authority
 
 `SIMC_APL_WARLOCK_DEMONOLOGY` (`simc-33622e9d-1`), the `//demonology_apl_start .. _end` region of `apl/warlock.cpp`, with no PTR region, governs

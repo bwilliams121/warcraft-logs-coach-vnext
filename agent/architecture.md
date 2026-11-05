@@ -14331,6 +14331,53 @@ The 146 with an established anchor all refuse in the engine at `diabolist[1] han
 
 **No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse the row. A public request is SPEC_NOT_SUPPORTED, exactly as before.
 
+## ONB-X4P — Demonology Warlock public promotion: not promoted
+
+Autopilot queue entry ONB-X4P. Public contract: declared EXPECTED; actual change NONE, because nothing passes. No Warcraft Logs request and no new evidence.
+
+**The outcome.** Demonology Warlock does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4). The gates are not weakened and gain no subject. This is not an owner stop: rule 4 decides it, and no new decision is needed to record that. ONB-EV would not help, because evidence is not the first gap, and ONB-S3 alone moves nothing.
+
+**Why it cannot pass.** OBSERVATION needs a real MATCH and real resolved decisions over several distinct action tokens, and DISCRIMINATION needs a real REJECTED or a control that flips a real MATCH. Both start from a real resolved decision, and Demonology has none. Replaying the retained subjects through production ingestion and the facade over a fake transport, at this tranche's base commit:
+
+| Subject | Hero tree | Span | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| b1PmaKrd6CDfzngc fight 48 actor 11 | Diabolist | whole, 345 s | 269 | 0 | 0 | 269 | 10 |
+| b1PmaKrd6CDfzngc fight 48 actor 14 | Diabolist | whole, 345 s | 247 | 0 | 0 | 247 | 28 |
+| gtKb2xHn87pNcFfW fight 22 actor 3 | Diabolist | whole, 285 s | 209 | 0 | 0 | 209 | 18 |
+| gtKb2xHn87pNcFfW fight 22 actor 7 | Diabolist | whole, 285 s | 200 | 0 | 0 | 200 | 10 |
+| gtKb2xHn87pNcFfW fight 22 actor 10 | Diabolist | whole, 285 s | 216 | 0 | 0 | 216 | 19 |
+| rXAfw9t1q8YpmkKD fight 13 actor 6 | Diabolist | first 165 s | 128 | 0 | 0 | 128 | 9 |
+| rXAfw9t1q8YpmkKD fight 13 actor 22 | Diabolist | first 165 s | 122 | 0 | 0 | 122 | 5 |
+| **Total** | | | **1,391** | **0** | **0** | **1,391** | **99** |
+
+The replay's output file is byte-identical to the one saved during ONB-X4 (sha256 f4bcc42d). 1,245 of the 1,391 have no established anchor, and the other 146 refuse in the engine at `diabolist[1] hand_of_guldan`, on `buff.dominion_of_argus.up`. The root scan of all 1,391 stops first: 1,372 at `diabolist[4] summon_doomguard` and 19 at `default[4] call_action_list`, so an anchor alone would not resolve the 1,245. Every pet answer is UNKNOWN on `OWNERSHIP_NOT_STATED`. Every subject is Diabolist, so the result would not measure Soul Harvester even if it resolved.
+
+**An eighth source, which ONB-X4 did not name, resolves nothing.** Gw2kXrTfLWcDdhFY fight 1 actor 19, in the filtered M13-A capture, has 103 casts and 90 begins over the 150.8 s fight, and part of it is committed in that capture's evidence segments. The capture holds no `combatantinfo` event, so the facade returns `PROFILE_NOT_RESOLVED`. A refusal is no decision at all, so it adds no UNKNOWN to the table.
+
+**The census found nothing more, by three routes.** It parsed every JSON file over 500 bytes under `.probe/` and `tests/`, skipping tool output and worktree copies (5,714 parsed of 5,715; the other is `.probe/m11d2c/bad.json`). Mortal Strike, the positive control, has 985 events, 559 of them casts.
+
+1. **Combatant info.** The `combatantinfo` events with specID 266 are 13, naming actors 6 and 22 (`m11c4f` pages), 11 and 14 (`m11e2` pages), 3, 7 and 10 (`m9c2-opener` pages) and 30 and 201 (`m11g2` `diagnose` and `diagnose2`). The route can find others: 31 specIDs appear in the distribution, each one a control.
+2. **Named abilities.** The 18 ids retained contexts' master data give Hand of Gul'dan, Call Dreadstalkers, Summon Demonic Tyrant, Implosion, Demonbolt, Infernal Bolt, Ruination and the two Grimoires. No master data read names Power Siphon or Summon Doomguard.
+3. **Pinned ids.** Every id in `warlock-demonology-gcd-semantics.json`, 12 of them, read from the file. The census throws if this route or the named route is empty, because earlier clones of it ran empty unnoticed. This route adds Power Siphon 264130 and Summon Doomguard 1276672, neither with an event, and Shadow Bolt 686, which every Warlock shares.
+
+Every source holding a hit was resolved against its report's context or its capture:
+
+| Source | What it is | Result |
+| --- | --- | --- |
+| b1Pm actors 11 and 14 (`m11e2` pages, also `replay`, `m11g34-wcl` `a3` and the committed fight 48 segments), gtKb actors 3, 7 and 10 (`m9c2-opener`, `m11c4`, `m11c4b`), rXAf actors 6 and 22 (`m11c4f`) | the subjects | replayed, above |
+| Gw2k fight 1 actor 19 (`m13a` casts, retained and committed segments) | Demonology, by context | `PROFILE_NOT_RESOLVED`, above |
+| Gw2k fight 1 actor 20 (the same files) | Affliction, by context | Shadow Bolt only, an id every Warlock shares |
+| gBMCKxyY7dQDRZav fight 33 actors 30 and 201 (`m11g2` `diagnose`, `diagnose2`) | Demonology, by combatant info and context | one resource change and one summon of actor 30, no cast |
+| qJ1pgB49ZrRNVmCd fight 6 source 15 (`wcl-pull-window-with-resources`) | unresolved: that context names Demonology without stating an actor | one resource change and one summon, no cast |
+
+The retained contexts hold 170 rows naming Demonology, over 24 report codes, four of them sanitized stand-ins (`COHORT116AAAAAAA`, `COHORT246AAAAAAA`, `COHORT261AAAAAAA`, `M13AAUGAAAAAAAAA`). Apart from the sources above they hold no cast in any retained file: they name a player and carry no retained cast of that player. No source is Soul Harvester.
+
+Limits: the census does not read JSON files of 500 bytes or less, or log and text output. Its ability routes match the ids above only; the combatant-info route does not depend on them. An actor with neither a context nor combatant info, holding none of those ids, would not appear.
+
+**What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists it; the gate search finds no qualifying assertion and `evidenceReady` false (`m11-promotion-evidence-gate`, from ONB-X4, its comment now naming the outcome). One test row is new: a public Warlock/Demonology request is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which held no row for it). A public request still runs preparation and reports partial coverage. Nothing reads as clean play. The replay and census are offline and not committed.
+
+**What a later promotion must do.** Evidence is not the first gap, so Demonology is not on ONB-EV. It first answers its stops, in order (agent/follow-ups.md "After ONB-X4"): a reviewed aura identity for `buff.dominion_of_argus.up` at `diabolist[1]`, then a reviewed reading of what a complete tree proves for Summon Doomguard's lone node at `diabolist[4]`, and then the possibly-instant casts, which hold 1,245 decisions without an anchor. Pet answers need an owner-approved attribution rule for pets with no stated owner, and the Tyrant and imps need floors. It measures or refuses Soul Harvester, as Havoc refuses Fel-Scarred. Tyrant setup stays a recorded question, and Ritual Clipping stays unresolved. A new public entry then promotes it through the unchanged gates by the five-site promotion, and must first commit its evidence with identity proof, because a PUBLIC module cannot use the retained-only exception. No such entry is queued.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and
