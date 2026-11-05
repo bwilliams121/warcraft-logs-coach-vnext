@@ -1,0 +1,452 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_TRAIT_WARLOCK_DEMONOLOGY_TALENTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
+    "extractedOn": "2026-11-05",
+    "extractorVersion": 1,
+    "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals trait_data_t::id_node, as every earlier target recorded. The retained Demonology subjects corroborate these keys (agent/architecture.md \"ONB-X4\").",
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "talents": [
+    {
+      "simcName": "call_dreadstalkers",
+      "displayNameEn": "Call Dreadstalkers",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101894,
+      "traitEntryId": 125837,
+      "talentSpellId": 104316,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:255 talents.call_dreadstalkers = find_talent_spell( talent_tree::SPECIALIZATION, \"Call Dreadstalkers\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "demoniac",
+      "displayNameEn": "Demoniac",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 109244,
+      "traitEntryId": 135306,
+      "talentSpellId": 426115,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:249 talents.demoniac = find_talent_spell( talent_tree::SPECIALIZATION, \"Demoniac\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "demonic_soul",
+      "displayNameEn": "Demonic Soul",
+      "tree": "HERO",
+      "traitNodeId": 94851,
+      "traitEntryId": 117448,
+      "talentSpellId": 449614,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:641 hero.demonic_soul = find_talent_spell( talent_tree::HERO, \"Demonic Soul\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "diabolic_ritual",
+      "displayNameEn": "Diabolic Ritual",
+      "tree": "HERO",
+      "traitNodeId": 94855,
+      "traitEntryId": 117452,
+      "talentSpellId": 428514,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:538 hero.diabolic_ritual = find_talent_spell( talent_tree::HERO, \"Diabolic Ritual\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "doom",
+      "displayNameEn": "Doom",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 110200,
+      "traitEntryId": 136729,
+      "talentSpellId": 460551,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:321 talents.doom = find_talent_spell( talent_tree::SPECIALIZATION, \"Doom\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "grimoire_fel_ravager",
+      "displayNameEn": "Grimoire: Fel Ravager",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 110197,
+      "traitEntryId": 136725,
+      "talentSpellId": 1276467,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 136726,
+          "displayNameEn": "Grimoire: Imp Lord",
+          "talentSpellId": 1276452
+        }
+      ],
+      "binding": "sc_warlock_init.cpp:330 talents.grimoire_fel_ravager = find_talent_spell( talent_tree::SPECIALIZATION, \"Grimoire: Fel Ravager\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "grimoire_imp_lord",
+      "displayNameEn": "Grimoire: Imp Lord",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 110197,
+      "traitEntryId": 136726,
+      "talentSpellId": 1276452,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 136725,
+          "displayNameEn": "Grimoire: Fel Ravager",
+          "talentSpellId": 1276467
+        }
+      ],
+      "binding": "sc_warlock_init.cpp:328 talents.grimoire_imp_lord = find_talent_spell( talent_tree::SPECIALIZATION, \"Grimoire: Imp Lord\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "hand_of_guldan",
+      "displayNameEn": "Hand of Gul'dan",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101891,
+      "traitEntryId": 125834,
+      "talentSpellId": 1250273,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:245 talents.hand_of_guldan = find_talent_spell( talent_tree::SPECIALIZATION, \"Hand of Gul'dan\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "implosion",
+      "displayNameEn": "Implosion",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101893,
+      "traitEntryId": 125836,
+      "talentSpellId": 196277,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 136731,
+          "displayNameEn": "Power Siphon",
+          "talentSpellId": 264130
+        }
+      ],
+      "binding": "sc_warlock_init.cpp:269 talents.implosion = find_talent_spell( talent_tree::SPECIALIZATION, \"Implosion\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "power_siphon",
+      "displayNameEn": "Power Siphon",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101893,
+      "traitEntryId": 136731,
+      "talentSpellId": 264130,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 125836,
+          "displayNameEn": "Implosion",
+          "talentSpellId": 196277
+        }
+      ],
+      "binding": "sc_warlock_init.cpp:272 talents.power_siphon = find_talent_spell( talent_tree::SPECIALIZATION, \"Power Siphon\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "reign_of_tyranny",
+      "displayNameEn": "Reign of Tyranny",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 110201,
+      "traitEntryId": 136730,
+      "talentSpellId": 1276748,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:315 talents.reign_of_tyranny = find_talent_spell( talent_tree::SPECIALIZATION, \"Reign of Tyranny\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "ruination",
+      "displayNameEn": "Ruination",
+      "tree": "HERO",
+      "traitNodeId": 94830,
+      "traitEntryId": 117427,
+      "talentSpellId": 428522,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:576 hero.ruination = find_talent_spell( talent_tree::HERO, \"Ruination\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "secrets_of_the_coven",
+      "displayNameEn": "Secrets of the Coven",
+      "tree": "HERO",
+      "traitNodeId": 94826,
+      "traitEntryId": 117423,
+      "talentSpellId": 428518,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:560 hero.secrets_of_the_coven = find_talent_spell( talent_tree::HERO, \"Secrets of the Coven\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "summon_demonic_tyrant",
+      "displayNameEn": "Summon Demonic Tyrant",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101905,
+      "traitEntryId": 125850,
+      "talentSpellId": 265187,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:291 talents.summon_demonic_tyrant = find_talent_spell( talent_tree::SPECIALIZATION, \"Summon Demonic Tyrant\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "summon_doomguard",
+      "displayNameEn": "Summon Doomguard",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101917,
+      "traitEntryId": 125863,
+      "talentSpellId": 1276672,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:339 talents.summon_doomguard = find_talent_spell( talent_tree::SPECIALIZATION, \"Summon Doomguard\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "to_hell_and_back",
+      "displayNameEn": "To Hell and Back",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 110199,
+      "traitEntryId": 136728,
+      "talentSpellId": 1281511,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_warlock_init.cpp:342 talents.to_hell_and_back = find_talent_spell( talent_tree::SPECIALIZATION, \"To Hell and Back\" );; the pinned list reads it or an action of the list is built on it"
+    }
+  ],
+  "heroTrees": [
+    {
+      "simcName": "soul_harvester",
+      "subTreeId": 57,
+      "entries": [
+        {
+          "traitEntryId": 117418,
+          "traitNodeId": 94821,
+          "displayNameEn": "Wicked Reaping",
+          "talentSpellId": 449631
+        },
+        {
+          "traitEntryId": 117420,
+          "traitNodeId": 94823,
+          "displayNameEn": "Shared Fate",
+          "talentSpellId": 449704
+        },
+        {
+          "traitEntryId": 117421,
+          "traitNodeId": 94824,
+          "displayNameEn": "Eternal Servitude",
+          "talentSpellId": 449707
+        },
+        {
+          "traitEntryId": 117422,
+          "traitNodeId": 94825,
+          "displayNameEn": "Necrolyte Teachings",
+          "talentSpellId": 449620
+        },
+        {
+          "traitEntryId": 117429,
+          "traitNodeId": 94832,
+          "displayNameEn": "Demoniac's Fervor",
+          "talentSpellId": 449629
+        },
+        {
+          "traitEntryId": 117435,
+          "traitNodeId": 94838,
+          "displayNameEn": "Sataiel's Volition",
+          "talentSpellId": 449637
+        },
+        {
+          "traitEntryId": 117443,
+          "traitNodeId": 94846,
+          "displayNameEn": "Quietus",
+          "talentSpellId": 449634
+        },
+        {
+          "traitEntryId": 117444,
+          "traitNodeId": 94847,
+          "displayNameEn": "Soul Anathema",
+          "talentSpellId": 449624
+        },
+        {
+          "traitEntryId": 117447,
+          "traitNodeId": 94850,
+          "displayNameEn": "Gorebound Fortitude",
+          "talentSpellId": 449701
+        },
+        {
+          "traitEntryId": 117448,
+          "traitNodeId": 94851,
+          "displayNameEn": "Demonic Soul",
+          "talentSpellId": 449614
+        },
+        {
+          "traitEntryId": 117454,
+          "traitNodeId": 94857,
+          "displayNameEn": "Shadow of Death",
+          "talentSpellId": 449638
+        },
+        {
+          "traitEntryId": 123838,
+          "traitNodeId": 94824,
+          "displayNameEn": "Gorefiend's Resolve",
+          "talentSpellId": 389623
+        },
+        {
+          "traitEntryId": 123839,
+          "traitNodeId": 94823,
+          "displayNameEn": "Feast of Souls",
+          "talentSpellId": 449706
+        },
+        {
+          "traitEntryId": 123840,
+          "traitNodeId": 94850,
+          "displayNameEn": "Friends In Dark Places",
+          "talentSpellId": 449703
+        },
+        {
+          "traitEntryId": 136096,
+          "traitNodeId": 109837,
+          "displayNameEn": "Eternal Hunger",
+          "talentSpellId": 1268903
+        },
+        {
+          "traitEntryId": 136097,
+          "traitNodeId": 109838,
+          "displayNameEn": "Shared Vessel",
+          "talentSpellId": 1268889
+        },
+        {
+          "traitEntryId": 136098,
+          "traitNodeId": 109839,
+          "displayNameEn": "Manifested Avarice",
+          "talentSpellId": 1268884
+        }
+      ]
+    },
+    {
+      "simcName": "diabolist",
+      "subTreeId": 59,
+      "entries": [
+        {
+          "traitEntryId": 117423,
+          "traitNodeId": 94826,
+          "displayNameEn": "Secrets of the Coven",
+          "talentSpellId": 428518
+        },
+        {
+          "traitEntryId": 117427,
+          "traitNodeId": 94830,
+          "displayNameEn": "Ruination",
+          "talentSpellId": 428522
+        },
+        {
+          "traitEntryId": 117428,
+          "traitNodeId": 94831,
+          "displayNameEn": "Abyssal Dominion",
+          "talentSpellId": 429581
+        },
+        {
+          "traitEntryId": 117430,
+          "traitNodeId": 94833,
+          "displayNameEn": "Flames of Xoroth",
+          "talentSpellId": 429657
+        },
+        {
+          "traitEntryId": 117433,
+          "traitNodeId": 94836,
+          "displayNameEn": "Soul-Etched Circles",
+          "talentSpellId": 428911
+        },
+        {
+          "traitEntryId": 117440,
+          "traitNodeId": 94843,
+          "displayNameEn": "Gloom of Nathreza",
+          "talentSpellId": 429899
+        },
+        {
+          "traitEntryId": 117445,
+          "traitNodeId": 94848,
+          "displayNameEn": "Cruelty of Kerxan",
+          "talentSpellId": 429902
+        },
+        {
+          "traitEntryId": 117446,
+          "traitNodeId": 94849,
+          "displayNameEn": "Cloven Souls",
+          "talentSpellId": 428517
+        },
+        {
+          "traitEntryId": 117449,
+          "traitNodeId": 94852,
+          "displayNameEn": "Infernal Vitality",
+          "talentSpellId": 429115
+        },
+        {
+          "traitEntryId": 117452,
+          "traitNodeId": 94855,
+          "displayNameEn": "Diabolic Ritual",
+          "talentSpellId": 428514
+        },
+        {
+          "traitEntryId": 117453,
+          "traitNodeId": 94856,
+          "displayNameEn": "Touch of Rancora",
+          "talentSpellId": 429893
+        },
+        {
+          "traitEntryId": 118837,
+          "traitNodeId": 94836,
+          "displayNameEn": "Annihilan's Bellow",
+          "talentSpellId": 429072
+        },
+        {
+          "traitEntryId": 118838,
+          "traitNodeId": 94848,
+          "displayNameEn": "Infernal Machine",
+          "talentSpellId": 429917
+        },
+        {
+          "traitEntryId": 118839,
+          "traitNodeId": 94852,
+          "displayNameEn": "Infernal Bulwark",
+          "talentSpellId": 429130
+        },
+        {
+          "traitEntryId": 136090,
+          "traitNodeId": 109831,
+          "displayNameEn": "Mind's Eyes",
+          "talentSpellId": 1268716
+        },
+        {
+          "traitEntryId": 136091,
+          "traitNodeId": 109832,
+          "displayNameEn": "Looks That Kill",
+          "talentSpellId": 1268713
+        },
+        {
+          "traitEntryId": 136092,
+          "traitNodeId": 109833,
+          "displayNameEn": "Diabolic Oculi",
+          "talentSpellId": 1268709
+        }
+      ]
+    }
+  ]
+}

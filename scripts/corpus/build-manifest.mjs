@@ -7543,6 +7543,44 @@ const BREWMASTER_CASES = [
     "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Vengeance Demon Hunter list.",
     { related: ["tests/unit/specs/onb-x3-vengeance-demon-hunter.test.ts"] },
   ),
+  // ---- SPEC_DEMONOLOGY_WARLOCK (ONB-X4, INTERNAL_ONLY) ---
+  kase(
+    "application-service.demonology-warlock-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Demonology Warlock registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "warlock/demonology",
+        expected: {
+          internalAnalyzerId: "warlock-demonology-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    'Demonology Warlock is registered INTERNAL_ONLY in ONB-X4, its own representative. No decision of it resolves, and its seven retained subjects are uncommitted (agent/follow-ups.md "After ONB-X4").',
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-demonology-warlock.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_DEMONOLOGY_WARLOCK",
+    "src/specs/warlock/demonology/observed-analysis.ts analyzeObservedDemonologyWarlockDecisions (the spec gate)",
+    "The Demonology Warlock facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_DEMONOLOGY_WARLOCK.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Demonology Warlock list.",
+    { related: ["tests/unit/specs/onb-x4-demonology-warlock.test.ts"] },
+  ),
   // ---- SPEC_OUTLAW_ROGUE (ONB-C2, INTERNAL_ONLY) ---
   kase(
     "application-service.outlaw-rogue-registration-is-internal-only",

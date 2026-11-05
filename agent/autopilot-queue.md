@@ -2023,11 +2023,13 @@ is known, so record it for ONB-EV if needed.
 ### ONB-X3P: Vengeance Demon Hunter (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-X3
 branch: autopilot/onb-x3p
 wcl: NONE
 publicContract: EXPECTED
+pr: 82
+mergeSha: 3d8c6f4fe89f462686d61690ceec11b8afce5ae4
 ```
 
 **Outcome.** It does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. A census of 5,714 retained files finds no specID 581 and no event, of any type, of its signature abilities, so there is nothing to replay and it stays on ONB-EV. A capture alone would resolve nothing either: every query refuses first at `auto_attack`, with Disrupt, Infernal Strike and Demon Spikes open behind it, and ONB-S3 alone moves nothing. A promotion is a new public entry through the unchanged gates (agent/architecture.md "ONB-X3P"; agent/follow-ups.md "After ONB-X3").
@@ -2035,8 +2037,9 @@ publicContract: EXPECTED
 ### ONB-X4: Demonology Warlock (internal, own representative)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-S4, ONB-S6
+branch: autopilot/onb-x4
 wcl: NONE
 publicContract: NONE
 ```
@@ -2044,6 +2047,8 @@ publicContract: NONE
 **Scope.** A holdout. Demon summons and imp counts use ONB-S6 pet mapping,
 and Tyrant setup is a recorded question. Ritual Clipping ownership stays
 unresolved and is not a blocker. Real evidence is retained (fight 48).
+
+**Outcome.** Registered INTERNAL_ONLY, and no decision resolves. Its seven retained subjects, all Diabolist (b1Pm fight 48 actors 11 and 14, gtKb fight 22 actors 3, 7 and 10, whole fights; rXAf fight 13 actors 6 and 22, first 165 s), give 1,391 decisions, 0 MATCH, 0 REJECTED, all UNKNOWN: 1,245 have no established anchor, and the other 146 refuse at `diabolist[1] hand_of_guldan`, on `buff.dominion_of_argus.up`. It is the first consumer of ONB-S6, with reviewed rows and readings taken at the anchor. Neither pet has a floor, and only the imps have a ceiling, so the Tyrant is never decided and the imp count is a ceiling at best. Every retained fight's catalog holds pets with no stated owner, so every real pet answer is UNKNOWN, and a test pins that a synthetic ceiling does reach the scan. Tyrant setup stays a recorded question, and Ritual Clipping stays unresolved. No shared code changed, and ONB-S3 alone moves nothing (agent/architecture.md "ONB-X4"; agent/follow-ups.md "After ONB-X4").
 
 ### ONB-X4P: Demonology Warlock (public)
 

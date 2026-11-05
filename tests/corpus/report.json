@@ -806,6 +806,15 @@
       "assertions": 1,
       "cases": 1,
       "failed": 0,
+      "kindsExercised": ["SPEC_DEMONOLOGY_WARLOCK.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_DEMONOLOGY_WARLOCK",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
       "kindsExercised": ["SPEC_OUTLAW_ROGUE.SPEC_GATE"],
       "notExecuted": 0,
       "owningLayer": "SPEC_OUTLAW_ROGUE",
@@ -821,13 +830,13 @@
       "passed": 1
     },
     {
-      "assertions": 44,
-      "cases": 40,
+      "assertions": 45,
+      "cases": 41,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 44
+      "passed": 45
     },
     {
       "assertions": 14,
@@ -961,6 +970,20 @@
       "caseId": "application-service.brewmaster-monk-subject-is-publicly-supported-since-m11-c4j",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.demonology-warlock-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
       "artifactId": "wcl-assassination-d2-decision-corpus",
@@ -5802,6 +5825,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_DEMONOLOGY_WARLOCK.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-demonology-warlock.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_DEMONOLOGY_WARLOCK",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_DESTRUCTION_WARLOCK.SPEC_GATE",
           "ordinal": 0,
           "status": "PASSED"
@@ -7994,6 +8031,7 @@
     "SIMC_APL_SHAMAN_ELEMENTAL": "simc-33622e9d-1",
     "SIMC_APL_SHAMAN_ENHANCEMENT": "simc-33622e9d-1",
     "SIMC_APL_WARLOCK_AFFLICTION": "simc-33622e9d-1",
+    "SIMC_APL_WARLOCK_DEMONOLOGY": "simc-33622e9d-1",
     "SIMC_APL_WARLOCK_DESTRUCTION": "simc-33622e9d-1",
     "SIMC_APL_WARRIOR_ARMS": "simc-33622e9d-1",
     "SIMC_APL_WARRIOR_FURY": "simc-33622e9d-1",
@@ -8006,13 +8044,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 836,
-    "cases": 241,
+    "assertions": 838,
+    "cases": 243,
     "declared": 0,
-    "executable": 836,
+    "executable": 838,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 836
+    "passed": 838
   }
 }

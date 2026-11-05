@@ -297,6 +297,7 @@ describe("what the tree registers today", () => {
       ["src/specs/shaman/enhancement/registration.ts", "ENHANCEMENT_SHAMAN_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/shaman/restoration/registration.ts", "RESTORATION_SHAMAN_REGISTRATION", "PUBLIC"],
       ["src/specs/warlock/affliction/registration.ts", "AFFLICTION_WARLOCK_REGISTRATION", "INTERNAL_ONLY"],
+      ["src/specs/warlock/demonology/registration.ts", "DEMONOLOGY_WARLOCK_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/warlock/destruction/registration.ts", "DESTRUCTION_WARLOCK_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/warrior/arms/registration.ts", "ARMS_WARRIOR_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/warrior/fury/registration.ts", "FURY_WARRIOR_REGISTRATION", "INTERNAL_ONLY"],

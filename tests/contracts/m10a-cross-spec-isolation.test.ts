@@ -139,6 +139,7 @@ describe("the sweep has something to sweep", () => {
       "src/specs/shaman/enhancement",
       "src/specs/shaman/restoration",
       "src/specs/warlock/affliction",
+      "src/specs/warlock/demonology",
       "src/specs/warlock/destruction",
       "src/specs/warrior/arms",
       "src/specs/warrior/fury",
@@ -172,6 +173,7 @@ describe("the sweep has something to sweep", () => {
     expect(existsSync("src/specs/mage/fire/registration.ts")).toBe(true);
     expect(existsSync("src/specs/evoker/devastation/registration.ts")).toBe(true);
     expect(existsSync("src/specs/demonhunter/vengeance/registration.ts")).toBe(true);
+    expect(existsSync("src/specs/warlock/demonology/registration.ts")).toBe(true);
     expect(existsSync("src/specs/rogue/outlaw/registration.ts")).toBe(true);
     expect(existsSync("src/specs/shaman/enhancement/registration.ts")).toBe(true);
     expect(existsSync("src/specs/paladin/retribution/registration.ts")).toBe(true);
@@ -269,6 +271,7 @@ describe("shared code reaches specializations only through the registration boun
       "src/specs/shaman/enhancement/registration.js",
       "src/specs/shaman/restoration/registration.js",
       "src/specs/warlock/affliction/registration.js",
+      "src/specs/warlock/demonology/registration.js",
       "src/specs/warlock/destruction/registration.js",
       "src/specs/warrior/arms/registration.js",
       "src/specs/warrior/fury/registration.js",

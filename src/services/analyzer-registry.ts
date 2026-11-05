@@ -97,6 +97,7 @@ import { MARKSMANSHIP_HUNTER_REGISTRATION } from "../specs/hunter/marksmanship/r
 import { FIRE_MAGE_REGISTRATION } from "../specs/mage/fire/registration.js";
 import { DEVASTATION_EVOKER_REGISTRATION } from "../specs/evoker/devastation/registration.js";
 import { VENGEANCE_DEMON_HUNTER_REGISTRATION } from "../specs/demonhunter/vengeance/registration.js";
+import { DEMONOLOGY_WARLOCK_REGISTRATION } from "../specs/warlock/demonology/registration.js";
 import { DESTRUCTION_WARLOCK_REGISTRATION } from "../specs/warlock/destruction/registration.js";
 import { OUTLAW_ROGUE_REGISTRATION } from "../specs/rogue/outlaw/registration.js";
 import { SUBTLETY_ROGUE_REGISTRATION } from "../specs/rogue/subtlety/registration.js";
@@ -539,6 +540,8 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   DEVASTATION_EVOKER_REGISTRATION,
   // INTERNAL_ONLY since ONB-X3: its own representative, with no retained evidence. No decision of it resolves.
   VENGEANCE_DEMON_HUNTER_REGISTRATION,
+  // INTERNAL_ONLY since ONB-X4: its own representative, and the first consumer of the shared pet mapping. No decision of it resolves.
+  DEMONOLOGY_WARLOCK_REGISTRATION,
 ]);
 
 /**

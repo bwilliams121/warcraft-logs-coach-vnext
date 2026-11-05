@@ -98,7 +98,8 @@ export type SpecId =
   | "hunter/marksmanship"
   | "mage/fire"
   | "evoker/devastation"
-  | "demonhunter/vengeance";
+  | "demonhunter/vengeance"
+  | "warlock/demonology";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -135,6 +136,7 @@ export const SPEC_IDS = Object.freeze([
   "mage/fire",
   "evoker/devastation",
   "demonhunter/vengeance",
+  "warlock/demonology",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -302,6 +304,9 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  *
  * Vengeance Demon Hunter arrived here in ONB-X3, its own representative, a tank on the observed-decision pattern. No decision of it resolves on a synthetic build, and no retained capture
  * holds one of its events, so its evidence gap is on ONB-EV.
+ *
+ * Demonology Warlock arrived here in ONB-X4, its own representative and the first consumer of the shared pet mapping (ONB-S6). No decision of it resolves on its seven
+ * retained subjects.
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
@@ -326,6 +331,7 @@ export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "mage/fire",
   "evoker/devastation",
   "demonhunter/vengeance",
+  "warlock/demonology",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];
