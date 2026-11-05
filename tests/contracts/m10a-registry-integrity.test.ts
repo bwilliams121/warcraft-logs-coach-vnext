@@ -138,6 +138,7 @@ describe("the production catalog", () => {
       ["hunter-marksmanship-observed-decisions", "hunter/marksmanship", "INTERNAL_ONLY"],
       ["mage-fire-observed-decisions", "mage/fire", "INTERNAL_ONLY"],
       ["evoker-devastation-observed-decisions", "evoker/devastation", "INTERNAL_ONLY"],
+      ["demonhunter-vengeance-observed-decisions", "demonhunter/vengeance", "INTERNAL_ONLY"],
     ]);
     // The public set is DERIVED from the rows' exposure, never hand-listed:
     // six of seven rows in HEAL-A (Restoration Shaman was INTERNAL_ONLY), all
@@ -205,7 +206,7 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
     const rows = catalog.registrations as AnalyzerRegistration[];
     expect(() => rows.push({ ...rogue, analyzerId: "second" })).toThrow(TypeError);
     expect(() => rows.push({ ...paladin, analyzerId: "third" })).toThrow(TypeError);
-    expect(catalog.registrations).toHaveLength(33);
+    expect(catalog.registrations).toHaveLength(34);
   });
 
   it("exposure cannot be flipped back to INTERNAL_ONLY", () => {

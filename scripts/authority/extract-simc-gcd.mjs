@@ -5408,6 +5408,256 @@ const HUNTER_MARKSMANSHIP_FACTS = {
   ],
 };
 
+/**
+ * The Vengeance Demon Hunter facts (ONB-X3).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the pinned Vengeance list
+ * (apl/apl_demon_hunter.cpp `vengeance`) executes. Facts a reader should not have to rediscover:
+ *
+ *   - NO CAST TIME. No row has a positive `_cast_time`. Fel Devastation is the one channel.
+ *   - DEMON SPIKES, DISRUPT, INFERNAL STRIKE, METAMORPHOSIS AND VENGEFUL RETREAT ARE `_gcd` 0, SO THEY ARE NON_GCD.
+ *   - FIERY BRAND IS `_gcd` 1500. `use_off_gcd` is on its constructor, and the lane reads the record.
+ *   - FELBLADE IS `_gcd` 500, on the GCD lane.
+ *   - REAVER'S GLAIVE IS 1283344 HERE. The Havoc row is 442294.
+ *   - THE RACIAL, POTION, ITEM AND EXTERNAL-BUFF TOKENS ARE NOT BOUND.
+ */
+const DEMONHUNTER_VENGEANCE_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 203720, displayNameEn: "Demon Spikes", baseGcdMs: 0 },
+    { abilityGameId: 183752, displayNameEn: "Disrupt", baseGcdMs: 0 },
+    { abilityGameId: 212084, displayNameEn: "Fel Devastation", baseGcdMs: 1500 },
+    { abilityGameId: 232893, displayNameEn: "Felblade", baseGcdMs: 500 },
+    { abilityGameId: 204021, displayNameEn: "Fiery Brand", baseGcdMs: 1500 },
+    { abilityGameId: 263642, displayNameEn: "Fracture", baseGcdMs: 1500 },
+    { abilityGameId: 258920, displayNameEn: "Immolation Aura", baseGcdMs: 1500 },
+    { abilityGameId: 189110, displayNameEn: "Infernal Strike", baseGcdMs: 0 },
+    { abilityGameId: 187827, displayNameEn: "Metamorphosis", baseGcdMs: 0 },
+    { abilityGameId: 1283344, displayNameEn: "Reaver's Glaive", baseGcdMs: 1500 },
+    { abilityGameId: 204596, displayNameEn: "Sigil of Flame", baseGcdMs: 1500 },
+    { abilityGameId: 390163, displayNameEn: "Sigil of Spite", baseGcdMs: 1500 },
+    { abilityGameId: 207407, displayNameEn: "Soul Carver", baseGcdMs: 1500 },
+    { abilityGameId: 228477, displayNameEn: "Soul Cleave", baseGcdMs: 1500 },
+    { abilityGameId: 247454, displayNameEn: "Spirit Bomb", baseGcdMs: 1500 },
+    { abilityGameId: 204157, displayNameEn: "Throw Glaive", baseGcdMs: 1500 },
+    { abilityGameId: 198793, displayNameEn: "Vengeful Retreat", baseGcdMs: 0 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "demon_spikes",
+      candidateAbilityGameIds: [203720],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+      symbol: "demon_hunter_t::create_action / demon_spikes_t",
+      startLine: 9735,
+      endLine: 9736,
+      sourceNote:
+        'create_action dispatches "demon_spikes" to demon_spikes_t: built on p->spec.demon_spikes (:3877), which is find_specialization_spell( "Demon Spikes" ) at :10853. _gcd 0, use_off_gcd.',
+    },
+    {
+      simcToken: "disrupt",
+      candidateAbilityGameIds: [183752],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+      symbol: "demon_hunter_t::create_action / disrupt_t",
+      startLine: 9737,
+      endLine: 9738,
+      sourceNote:
+        'create_action dispatches "disrupt" to disrupt_t: built on p->spell.disrupt (:3905), which is find_class_spell( "Disrupt" ) at :10768. _gcd 0.',
+    },
+    {
+      simcToken: "fel_devastation",
+      candidateAbilityGameIds: [212084],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+      symbol: "demon_hunter_t::create_action / fel_devastation_t",
+      startLine: 9741,
+      endLine: 9742,
+      sourceNote:
+        'create_action dispatches "fel_devastation" to fel_devastation_t: built on p->talent.vengeance.fel_devastation (:4160); channeled = true at :4165.',
+    },
+    {
+      simcToken: "felblade",
+      candidateAbilityGameIds: [232893],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+      symbol: "demon_hunter_t::create_action / felblade_t",
+      startLine: 9802,
+      endLine: 9803,
+      sourceNote:
+        'create_action dispatches "felblade" to felblade_t: built on p->talent.demon_hunter.felblade (:7876).',
+    },
+    {
+      simcToken: "fiery_brand",
+      candidateAbilityGameIds: [204021],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+      symbol: "demon_hunter_t::create_action / fiery_brand_t",
+      startLine: 9743,
+      endLine: 9744,
+      sourceNote:
+        'create_action dispatches "fiery_brand" to fiery_brand_t: built on p->talent.vengeance.fiery_brand (:4360). use_off_gcd is on its constructor and its _gcd is 1500, so its lane is GCD_CONSUMING.',
+    },
+    {
+      simcToken: "fracture",
+      candidateAbilityGameIds: [263642],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+      symbol: "demon_hunter_t::create_action / fracture_t",
+      startLine: 9806,
+      endLine: 9807,
+      sourceNote:
+        'create_action dispatches "fracture" to fracture_t: built on p->spec.fracture (:8040), which is find_spell( 263642, DEMON_HUNTER_VENGEANCE ) at :10856.',
+    },
+    {
+      simcToken: "immolation_aura",
+      candidateAbilityGameIds: [258920],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+      symbol: "demon_hunter_t::create_action / immolation_aura_t",
+      startLine: 9747,
+      endLine: 9748,
+      sourceNote:
+        'create_action dispatches "immolation_aura" to immolation_aura_t: built on p->spell.immolation_aura (:4803).',
+    },
+    {
+      simcToken: "infernal_strike",
+      candidateAbilityGameIds: [189110],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+      symbol: "demon_hunter_t::create_action / infernal_strike_t",
+      startLine: 9745,
+      endLine: 9746,
+      sourceNote:
+        'create_action dispatches "infernal_strike" to infernal_strike_t: built on p->spec.infernal_strike (:4577), which is find_specialization_spell( "Infernal Strike" ) at :10854. _gcd 0.',
+    },
+    {
+      simcToken: "metamorphosis",
+      candidateAbilityGameIds: [187827],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+      symbol: "demon_hunter_t::create_action / metamorphosis_t",
+      startLine: 9749,
+      endLine: 9750,
+      sourceNote:
+        'create_action dispatches "metamorphosis" to metamorphosis_t: built on p->spec.metamorphosis (:4903); for Vengeance spec.metamorphosis = find_specialization_spell( "Metamorphosis" ) at :10799. _gcd 0.',
+    },
+    {
+      simcToken: "reavers_glaive",
+      candidateAbilityGameIds: [1283344],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+      symbol: "demon_hunter_t::create_action / reavers_glaive_t",
+      startLine: 9816,
+      endLine: 9817,
+      sourceNote:
+        'create_action dispatches "reavers_glaive" to reavers_glaive_t: built on p->hero_spec.reavers_glaive (:8432); for Vengeance that is talent_spell_lookup( talent.aldrachi_reaver.art_of_the_glaive, 1283344 ) at :11322, not the Havoc row 442294.',
+    },
+    {
+      simcToken: "sigil_of_flame",
+      candidateAbilityGameIds: [204596],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+      symbol: "demon_hunter_t::create_action / sigil_of_flame_t",
+      startLine: 9753,
+      endLine: 9754,
+      sourceNote:
+        'create_action dispatches "sigil_of_flame" to sigil_of_flame_t: built on p->spec.sigil_of_flame (:4479), which is find_spell( 204596, DEMON_HUNTER_VENGEANCE ) at :11261.',
+    },
+    {
+      simcToken: "sigil_of_spite",
+      candidateAbilityGameIds: [390163],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+      symbol: "demon_hunter_t::create_action / sigil_of_spite_t",
+      startLine: 9757,
+      endLine: 9758,
+      sourceNote:
+        'create_action dispatches "sigil_of_spite" to sigil_of_spite_t: built on p->talent.vengeance.sigil_of_spite (:5470).',
+    },
+    {
+      simcToken: "soul_carver",
+      candidateAbilityGameIds: [207407],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+      symbol: "demon_hunter_t::create_action / soul_carver_t",
+      startLine: 9814,
+      endLine: 9815,
+      sourceNote:
+        'create_action dispatches "soul_carver" to soul_carver_t: built on p->talent.vengeance.soul_carver (:8686).',
+    },
+    {
+      simcToken: "soul_cleave",
+      candidateAbilityGameIds: [228477],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+      symbol: "demon_hunter_t::create_action / soul_cleave_t",
+      startLine: 9808,
+      endLine: 9809,
+      sourceNote:
+        'create_action dispatches "soul_cleave" to soul_cleave_t: built on p->spec.soul_cleave (:8199), which is find_specialization_spell( "Soul Cleave" ) at :10855.',
+    },
+    {
+      simcToken: "spirit_bomb",
+      candidateAbilityGameIds: [247454],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+      symbol: "demon_hunter_t::create_action / spirit_bomb_t",
+      startLine: 9755,
+      endLine: 9756,
+      sourceNote:
+        'create_action dispatches "spirit_bomb" to spirit_bomb_t: built on p->talent.vengeance.spirit_bomb (:5379).',
+    },
+    {
+      simcToken: "throw_glaive",
+      candidateAbilityGameIds: [204157],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+      symbol: "demon_hunter_t::create_action / throw_glaive_t",
+      startLine: 9810,
+      endLine: 9811,
+      sourceNote:
+        'create_action dispatches "throw_glaive" to throw_glaive_t: built on p->spell.throw_glaive (:8311).',
+    },
+    {
+      simcToken: "vengeful_retreat",
+      candidateAbilityGameIds: [198793],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+      symbol: "demon_hunter_t::create_action / vengeful_retreat_t",
+      startLine: 9812,
+      endLine: 9813,
+      sourceNote:
+        'create_action dispatches "vengeful_retreat" to vengeful_retreat_t: built on p->talent.demon_hunter.vengeful_retreat (:8589). _gcd 0.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "auto_attack",
+      triggerGcdMs: 0,
+      sourcePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+      symbol: "auto_attack_t::auto_attack_t",
+      line: 7006,
+      sourceNote:
+        'auto_attack_t is built on the spell-less demon_hunter_attack_t( "auto_attack", p, spell_data_t::nil() ) base ' +
+        "(sc_demon_hunter.cpp:7002-7003) and its constructor assigns trigger_gcd = timespan_t::zero() at :7006.",
+    },
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
 const EVOKER_SOURCES = {
   spellData: "engine/dbc/generated/sc_spell_data.inc",
   classSpells: "engine/dbc/generated/class_spells.inc",
@@ -6823,6 +7073,21 @@ export const TARGETS = {
     ],
     requiredFacts: HUNTER_MARKSMANSHIP_FACTS,
     defaultOut: "src/data/game/hunter-marksmanship-gcd-semantics.json",
+  },
+  "demonhunter-vengeance": {
+    datasetId: "SIMC_DBC_DEMONHUNTER_VENGEANCE_GCD_SEMANTICS",
+    classId: 12,
+    className: "Demon Hunter",
+    sources: DEMONHUNTER_HAVOC_SOURCES,
+    classModulePath: DEMONHUNTER_HAVOC_SOURCES.classModule,
+    handReviewedPaths: [
+      DEMONHUNTER_HAVOC_SOURCES.classModule,
+      DEMONHUNTER_HAVOC_SOURCES.racialSpells,
+      DEMONHUNTER_HAVOC_SOURCES.playerModule,
+      DEMONHUNTER_HAVOC_SOURCES.consumableModule,
+    ],
+    requiredFacts: DEMONHUNTER_VENGEANCE_FACTS,
+    defaultOut: "src/data/game/demonhunter-vengeance-gcd-semantics.json",
   },
   "evoker-devastation": {
     datasetId: "SIMC_DBC_EVOKER_DEVASTATION_GCD_SEMANTICS",

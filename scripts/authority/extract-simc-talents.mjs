@@ -2291,6 +2291,119 @@ const HUNTER_MARKSMANSHIP_TARGET = {
 };
 
 /**
+ * The Vengeance Demon Hunter profile (ONB-X3): the talents the pinned list reads as `talent.<name>`, and the talents an action of
+ * that list is built on (an action on `not_found()` is background, action.cpp:541-549).
+ */
+const DEMONHUNTER_VENGEANCE_TARGET = {
+  datasetId: "SIMC_TRAIT_DEMONHUNTER_VENGEANCE_TALENTS",
+  classId: 12,
+  specId: 581,
+  defaultOut: "src/data/game/demonhunter-vengeance-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node, as every earlier target recorded." +
+    ' NOT corroborated for Vengeance Demon Hunter: no retained capture holds one of its combatant-info events (agent/architecture.md "ONB-X3").',
+  requiredTalents: [
+    {
+      simcName: "art_of_the_glaive",
+      displayNameEn: "Art of the Glaive",
+      tree: "HERO",
+      binding:
+        'sc_demon_hunter.cpp:10157 buff.art_of_the_glaive_first = make_buff( this, "art_of_the_glaive_first", talent.aldrachi_reaver.art_of_the_glaive ); the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "charred_flesh",
+      displayNameEn: "Charred Flesh",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:11094 talent.vengeance.charred_flesh = find_talent_spell( talent_tree::SPECIALIZATION, "Charred Flesh" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "fallout",
+      displayNameEn: "Fallout",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:11072 talent.vengeance.fallout = find_talent_spell( talent_tree::SPECIALIZATION, "Fallout" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "fel_devastation",
+      displayNameEn: "Fel Devastation",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:11047 talent.vengeance.fel_devastation = find_talent_spell( talent_tree::SPECIALIZATION, "Fel Devastation" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "felblade",
+      displayNameEn: "Felblade",
+      tree: "CLASS",
+      binding:
+        'sc_demon_hunter.cpp:10869 talent.demon_hunter.felblade = find_talent_spell( talent_tree::CLASS, "Felblade" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "fiery_brand",
+      displayNameEn: "Fiery Brand",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:11050 talent.vengeance.fiery_brand = find_talent_spell( talent_tree::SPECIALIZATION, "Fiery Brand" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "fiery_demise",
+      displayNameEn: "Fiery Demise",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:11083 talent.vengeance.fiery_demise = find_talent_spell( talent_tree::SPECIALIZATION, "Fiery Demise" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "sigil_of_spite",
+      displayNameEn: "Sigil of Spite",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:11064 talent.vengeance.sigil_of_spite = find_talent_spell( talent_tree::SPECIALIZATION, "Sigil of Spite" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "soul_carver",
+      displayNameEn: "Soul Carver",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:11097 talent.vengeance.soul_carver = find_talent_spell( talent_tree::SPECIALIZATION, "Soul Carver" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "soul_sigils",
+      displayNameEn: "Soul Sigils",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:11076 talent.vengeance.soul_sigils = find_talent_spell( talent_tree::SPECIALIZATION, "Soul Sigils" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "spirit_bomb",
+      displayNameEn: "Spirit Bomb",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:11049 talent.vengeance.spirit_bomb = find_talent_spell( talent_tree::SPECIALIZATION, "Spirit Bomb" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "unhindered_assault",
+      displayNameEn: "Unhindered Assault",
+      tree: "HERO",
+      binding:
+        'sc_demon_hunter.cpp:11114 talent.aldrachi_reaver.unhindered_assault = find_talent_spell( talent_tree::HERO, "Unhindered Assault" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "vengeful_retreat",
+      displayNameEn: "Vengeful Retreat",
+      tree: "CLASS",
+      binding:
+        'sc_demon_hunter.cpp:10868 talent.demon_hunter.vengeful_retreat = find_talent_spell( talent_tree::CLASS, "Vengeful Retreat" );; the pinned list reads it or an action of the list is built on it',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data`, the same ids Havoc and Devourer pin.
+    { simcName: "aldrachi_reaver", subTreeId: 35 },
+    { simcName: "annihilator", subTreeId: 124 },
+  ],
+};
+
+/**
  * The Devastation Evoker profile (ONB-X2): the talents the pinned list reads as `talent.<name>`, and the talents an action of
  * that list is built on (an action on `not_found()` is background, action.cpp:541-549).
  */
@@ -3565,6 +3678,7 @@ export const TARGETS = {
   "mage-frost": MAGE_FROST_TARGET,
   "warlock-affliction": WARLOCK_AFFLICTION_TARGET,
   "hunter-marksmanship": HUNTER_MARKSMANSHIP_TARGET,
+  "demonhunter-vengeance": DEMONHUNTER_VENGEANCE_TARGET,
   "evoker-devastation": EVOKER_DEVASTATION_TARGET,
   "mage-fire": MAGE_FIRE_TARGET,
   "warlock-destruction": WARLOCK_DESTRUCTION_TARGET,

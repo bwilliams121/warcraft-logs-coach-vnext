@@ -716,6 +716,8 @@ as before.
 
 The pinned source root for this target adds `engine/class_modules/apl/druid/feral_apl.inc` (17,108 bytes), `engine/class_modules/apl/druid/druid.cpp` (926 bytes, both as the M11-A3 audit recorded them) and `engine/class_modules/sc_druid.cpp` (479,886 bytes, `59227a2f...`).
 
+`demonhunter-vengeance` was extracted in ONB-X3 (203 actions in 16 lists), on the batch path and the two sibling extractors, with `PTR_MARKERS_EMPTY` as Devourer and Havoc have it. Its talent note states the id space as uncorroborated, because no retained capture holds one of its combatant-info events.
+
 `evoker-devastation` was extracted in ONB-X2 (86 actions in 8 lists), on the batch path and the two sibling extractors, adding `APL_EVOKER` and `EVOKER_DISPATCH` at the M11-A3 hashes. Its policy is new: `PTR_STUB_NEVER_DISPATCHED`, because `apl_evoker.cpp` holds `void devastation_ptr( player_t* )` with an empty body between its markers, and `evoker_t::init_action_list` calls only `devastation`. The policy checks exactly that shape, and a body or a dispatch fails it. The pinned source root is rebuilt offline by `.probe/onbx2/extract.sh` from files already retained.
 
 `mage-fire` was extracted in ONB-X1 (88 actions in 8 lists), on the batch path and the two sibling extractors, with no extractor change but the target. It is `NO_PTR_REGION`, in `mage_t::init_action_list`, on the sources ONB-D3 pinned. The pinned source root is rebuilt offline by `.probe/onbx1`'s steps from files already on disk.

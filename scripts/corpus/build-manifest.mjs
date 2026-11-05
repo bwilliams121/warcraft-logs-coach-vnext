@@ -7505,6 +7505,44 @@ const BREWMASTER_CASES = [
     "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Devastation Evoker list.",
     { related: ["tests/unit/specs/onb-d3-devastation-evoker.test.ts"] },
   ),
+  // ---- SPEC_VENGEANCE_DEMON_HUNTER (ONB-X3, INTERNAL_ONLY) ---
+  kase(
+    "application-service.vengeance-demon-hunter-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Vengeance Demon Hunter registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "demonhunter/vengeance",
+        expected: {
+          internalAnalyzerId: "demonhunter-vengeance-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    'Vengeance Demon Hunter is registered INTERNAL_ONLY in ONB-X3, its own representative. No decision of it resolves, and no retained capture holds one of its events, so its gap is on ONB-EV (agent/follow-ups.md "After ONB-X3").',
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-vengeance-demon-hunter.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_VENGEANCE_DEMON_HUNTER",
+    "src/specs/demonhunter/vengeance/observed-analysis.ts analyzeObservedVengeanceDemonHunterDecisions (the spec gate)",
+    "The Vengeance Demon Hunter facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_VENGEANCE_DEMON_HUNTER.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Vengeance Demon Hunter list.",
+    { related: ["tests/unit/specs/onb-x3-vengeance-demon-hunter.test.ts"] },
+  ),
   // ---- SPEC_OUTLAW_ROGUE (ONB-C2, INTERNAL_ONLY) ---
   kase(
     "application-service.outlaw-rogue-registration-is-internal-only",

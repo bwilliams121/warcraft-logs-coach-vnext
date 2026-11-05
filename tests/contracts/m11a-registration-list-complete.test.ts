@@ -267,6 +267,11 @@ describe("what the tree registers today", () => {
         "INTERNAL_ONLY",
       ],
       ["src/specs/demonhunter/havoc/registration.ts", "HAVOC_DEMON_HUNTER_REGISTRATION", "PUBLIC"],
+      [
+        "src/specs/demonhunter/vengeance/registration.ts",
+        "VENGEANCE_DEMON_HUNTER_REGISTRATION",
+        "INTERNAL_ONLY",
+      ],
       ["src/specs/druid/balance/registration.ts", "BALANCE_DRUID_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/druid/feral/registration.ts", "FERAL_DRUID_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/druid/restoration/registration.ts", "RESTORATION_DRUID_REGISTRATION", "INTERNAL_ONLY"],

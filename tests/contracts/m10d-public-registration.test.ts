@@ -91,6 +91,7 @@ describe("the five sites agree", () => {
       "hunter/marksmanship",
       "mage/fire",
       "evoker/devastation",
+      "demonhunter/vengeance",
     ]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
@@ -184,6 +185,7 @@ describe("the five sites agree", () => {
       ["hunter/marksmanship", "INTERNAL_ONLY"],
       ["mage/fire", "INTERNAL_ONLY"],
       ["evoker/devastation", "INTERNAL_ONLY"],
+      ["demonhunter/vengeance", "INTERNAL_ONLY"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -305,6 +307,7 @@ describe("the complete-catalog helper", () => {
       "hunter-marksmanship-observed-decisions": 0,
       "mage-fire-observed-decisions": 0,
       "evoker-devastation-observed-decisions": 0,
+      "demonhunter-vengeance-observed-decisions": 0,
     });
   });
 });

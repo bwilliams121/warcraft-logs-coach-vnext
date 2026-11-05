@@ -97,7 +97,8 @@ export type SpecId =
   | "warlock/affliction"
   | "hunter/marksmanship"
   | "mage/fire"
-  | "evoker/devastation";
+  | "evoker/devastation"
+  | "demonhunter/vengeance";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -133,6 +134,7 @@ export const SPEC_IDS = Object.freeze([
   "hunter/marksmanship",
   "mage/fire",
   "evoker/devastation",
+  "demonhunter/vengeance",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -297,6 +299,9 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  *
  * Devastation Evoker arrived here in ONB-X2, its own representative on the shared cast anchor. No decision of it resolves, on its three retained
  * subjects or on a synthetic build. The unsupported-path subject moved from it to Beast Mastery Hunter the same day.
+ *
+ * Vengeance Demon Hunter arrived here in ONB-X3, its own representative, a tank on the observed-decision pattern. No decision of it resolves on a synthetic build, and no retained capture
+ * holds one of its events, so its evidence gap is on ONB-EV.
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
@@ -320,6 +325,7 @@ export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "hunter/marksmanship",
   "mage/fire",
   "evoker/devastation",
+  "demonhunter/vengeance",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

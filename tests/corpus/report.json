@@ -797,6 +797,15 @@
       "assertions": 1,
       "cases": 1,
       "failed": 0,
+      "kindsExercised": ["SPEC_VENGEANCE_DEMON_HUNTER.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_VENGEANCE_DEMON_HUNTER",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
       "kindsExercised": ["SPEC_OUTLAW_ROGUE.SPEC_GATE"],
       "notExecuted": 0,
       "owningLayer": "SPEC_OUTLAW_ROGUE",
@@ -812,13 +821,13 @@
       "passed": 1
     },
     {
-      "assertions": 43,
-      "cases": 39,
+      "assertions": 44,
+      "cases": 40,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 43
+      "passed": 44
     },
     {
       "assertions": 14,
@@ -1396,6 +1405,20 @@
       "caseId": "application-service.unsupported-spec-runs-no-analyzer-and-retrieves-for-preparation-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.vengeance-demon-hunter-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
       "artifactId": "wcl-blood-death-knight-a7r6-rotational-45s",
@@ -7606,6 +7629,20 @@
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_VENGEANCE_DEMON_HUNTER.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-vengeance-demon-hunter.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_VENGEANCE_DEMON_HUNTER",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
       "artifactId": "synthetic.graphql-page-sequence-two-pages",
       "assertions": [
         {
@@ -7939,6 +7976,7 @@
     "SIMC_APL_DEATHKNIGHT_FROST": "simc-33622e9d-1",
     "SIMC_APL_DEMONHUNTER_DEVOURER": "simc-33622e9d-1",
     "SIMC_APL_DEMONHUNTER_HAVOC": "simc-33622e9d-1",
+    "SIMC_APL_DEMONHUNTER_VENGEANCE": "simc-33622e9d-1",
     "SIMC_APL_DRUID_BALANCE": "simc-33622e9d-1",
     "SIMC_APL_DRUID_FERAL": "simc-33622e9d-1",
     "SIMC_APL_EVOKER_DEVASTATION": "simc-33622e9d-1",
@@ -7968,13 +8006,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 834,
-    "cases": 239,
+    "assertions": 836,
+    "cases": 241,
     "declared": 0,
-    "executable": 834,
+    "executable": 836,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 834
+    "passed": 836
   }
 }

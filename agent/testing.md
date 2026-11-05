@@ -5754,3 +5754,15 @@ Offline only, not committed: the census (`.probe/onbx2/census.cjs`, Mortal Strik
 No production code changed, and no assertion. `tests/contracts/m11-promotion-evidence-gate.test.ts` keeps its ONB-X2 gate search (no qualifying assertion, `evidenceReady` false), and `tests/unit/analysis-composition-refusals.test.ts` its Evoker/Devastation row (SPEC_NOT_SUPPORTED, one retrieval for preparation alone, no dispatch), each comment now naming the outcome. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, the `onb-x2` suite).
 
 Offline only, not committed: the census (`.probe/onbx2p/census.cjs`, Mortal Strike as its positive control for casts and the specID distribution as its control for combatant info), the resolution of its sources against each report's actors (`.probe/onbx2p/actors.cjs`), and the replay of the subjects (`.probe/onbx2p/m/measure.baseline.ts`). They give the results in agent/architecture.md "ONB-X2P".
+
+# ONB-X3: Vengeance Demon Hunter
+
+`tests/unit/specs/onb-x3-vengeance-demon-hunter.test.ts`, synthetic throughout, since nothing real exists to replay. The row is internal only and refused publicly; it refuses another specialization first; a capture with no combatant info refuses; the datasets load; every in-domain line condition parses whole.
+
+The tank's own: the offensive authority governs one domain, and active mitigation, defensive cooldowns, self healing, resource spending and interrupts each resolve `NO_PINNED_AUTHORITY_FOR_DOMAIN` and say so; a Demon Spikes, Metamorphosis, Infernal Strike or Disrupt press is no decision; Demon Spikes down, in combat, never selects; a Fiery Brand or Soul Cleave has no verdict.
+
+The negatives: over each hero tree and none, no decision resolves; every query refuses first at `default[16] auto_attack`, with Disrupt open behind it; each root scan's stop; an unresolved tree closes nothing; the enemy count given as 1 moves nothing; no off-GCD line but `auto_attack` has a contract. The variable programme: its `%` refuses to parse; every refused value contains `%` or `trinket.`, and the list of them is pinned; `time_to_next_glaive` stays open with every other input given; `cycling_variable` and `variable.execute` decide nothing. Fel Devastation is excluded; Havoc's Reaver's Glaive binds nothing; Fury at its maximum is not waste; a lone talent absent is UNKNOWN; each hero tree proves only the other's talents absent; and the artifact states its id space as uncorroborated.
+
+`m11d2c-pinned-extraction-preflight` holds the new target. Two corpus cases, as for Outlaw, and `tests/contracts/m11-promotion-evidence-gate.test.ts` pins that the gate search finds nothing. `m11a2-spec-module-conformance` holds it in the retained-only exception, with its class proven through committed Havoc.
+
+Offline only, not committed: the census (`.probe/onbx3/census.cjs`, Mortal Strike as its positive control) and the synthetic measure (`.probe/onbx3/m/`). No replay exists, because nothing is retained.

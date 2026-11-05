@@ -212,6 +212,7 @@ describe("a Blood Death Knight alone", () => {
       "hunter-marksmanship-observed-decisions": 0,
       "mage-fire-observed-decisions": 0,
       "evoker-devastation-observed-decisions": 0,
+      "demonhunter-vengeance-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
     expectBloodCell(cellOf(run.aggregate.cells, BLOOD_DK));
@@ -273,6 +274,7 @@ describe("a mixed roster — all four supported specializations plus Beast Maste
       "hunter-marksmanship-observed-decisions": 0,
       "mage-fire-observed-decisions": 0,
       "evoker-devastation-observed-decisions": 0,
+      "demonhunter-vengeance-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
   });
