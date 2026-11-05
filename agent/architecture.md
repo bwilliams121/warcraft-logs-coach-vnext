@@ -13901,6 +13901,46 @@ No `CAST_EVIDENCE_CONFLICT` and no `BEGINCAST_NOT_OBSERVED`: every Prismatic Bol
 
 **No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse both rows. A public request for either is SPEC_NOT_SUPPORTED, exactly as before.
 
+## ONB-D3P — Arcane Mage and Frost Mage public promotion: not promoted
+
+Autopilot queue entry ONB-D3P. Public contract: declared EXPECTED; actual change NONE, because nothing passes. No Warcraft Logs request and no new evidence.
+
+**The outcome.** Neither passes the rotational promotion gates, so each stays INTERNAL_ONLY (onboarding rule 4). The gates are not weakened and gain no subject. This is not an owner stop: rule 4 decides it, and no new decision is needed to record that. ONB-EV, already the owner's, would give Frost a subject and resolve nothing by itself. ONB-S3, also the owner's, moves neither.
+
+**Why neither can pass.** OBSERVATION needs a real MATCH and real resolved decisions over several distinct action tokens, and DISCRIMINATION needs a real REJECTED or a control that flips a real MATCH. Both start from a real resolved decision. Replaying the retained pages through production ingestion and each facade over a fake transport, at this tranche's base commit:
+
+| Subject | Spec, hero tree | Retained span | Result | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| b1PmaKrd6CDfzngc fight 48 actor 121 | Arcane, Sunfury | whole fight, 345.2 s | ANALYZED | 246 | 0 | 0 | 246 | 26 |
+| b1PmaKrd6CDfzngc fight 48 actor 7 | Arcane, Sunfury | whole fight | ANALYZED | 238 | 0 | 0 | 238 | 33 |
+| gtKb2xHn87pNcFfW fight 22 actor 1 | Arcane, Sunfury | whole fight, 284.8 s | ANALYZED | 204 | 0 | 0 | 204 | 21 |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 3 | Arcane, Sunfury | first 165 s of 424.5 s | ANALYZED | 116 | 0 | 0 | 116 | 13 |
+| rXAfw9t1q8YpmkKD fight 13 actor 3 | Arcane, Sunfury | first 165 s of 271.8 s | ANALYZED | 117 | 0 | 0 | 117 | 13 |
+| rXAfw9t1q8YpmkKD fight 13 actor 4 | Arcane, Sunfury | first 165 s | ANALYZED | 118 | 0 | 0 | 118 | 11 |
+| Gw2kXrTfLWcDdhFY fight 1 actor 11 (M13-A) | Arcane, not resolved | filtered casts, 146.5 s | `PROFILE_NOT_RESOLVED` | none | none | none | none | none |
+| Gw2kXrTfLWcDdhFY fight 1 actor 6 (M13-A) | Frost, not resolved | filtered casts, 146.5 s | `PROFILE_NOT_RESOLVED` | none | none | none | none | none |
+
+Arcane 1,039, all UNKNOWN. Frost none: its one replayable source refuses, as ONB-D3 said it would without having run it. Compared field by field with the output file saved during ONB-D3, every Arcane count, stop, anchor and `unpairedBegins` is identical.
+
+**Where Arcane stops, unchanged:** the root scan at `cooldowns[4] evocation` on its unresolved talent, all 1,039, with the engine's own refusal at `default[0] counterspell` on the 875 anchored decisions. An established anchor does not change this. Frost's stops at `cds[17]` and `cds[23] ray_of_frost` remain readings of a synthetic build, and no real decision backs them.
+
+**The census found nothing more.** It parsed every JSON file over 500 bytes under `.probe/` and `tests/`, skipping tool output and worktree copies (5,699 parsed of 5,700), for events of the ability ids the retained contexts' master data names as the two families' signature abilities. Mortal Strike, the positive control, has 559 casts. The aggregated hits are byte-identical to ONB-D3's. Every source holding one was resolved against its report's actors:
+
+| Source | What it is | Result |
+| --- | --- | --- |
+| The six ANALYZED subjects above | Arcane, with combatant info | their own |
+| Gw2k actors 6 and 11 (M13-A) | Frost and Arcane, in a filtered capture with no combatant info | refused, above |
+| gBMCKxyY7dQDRZav fight 33 actor 142 | Frost Mage | one Blizzard cast, in `.probe/m11g2/diagnose.json` |
+| A7R6 42, gtKb 41, rXAf 130, b1Pm 49 | Mirror Image pets | 126 Frostbolt 59638 casts, none of them this specialization's decisions |
+
+**Actor 142 is not a subject, and the record now says why.** ONB-D3 called it one cast in a two-second page. That file also holds actor 142's combatant info with specID 64, so "no retained subject with combatant info" could be read as false. It is eleven aliased probes of the filter syntax, each capped at 20 events, so its events do not form a retained span of the fight and no page chain can be replayed from it. One cast could not meet OBSERVATION's several tokens in any case. Frost's evidence gap stands: no retained span of a Frost Mage's casts carries combatant info.
+
+**The evidence differs by specialization, and only one has a gap.** Frost stays on ONB-EV, as ONB-D3 recorded, since a real subject must come first; a subject alone resolves nothing, because the `interrupt_if` option stops the scan on both hero trees' synthetic builds. Arcane is not added: more subjects would resolve nothing, because the list stops before any input a subject could supply. A promotion would still need more Arcane evidence, since all six are Sunfury, and three subjects hold only the fight's first 165 s (agent/follow-ups.md "After ONB-D3").
+
+**What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists both; the gate search finds no qualifying assertion and `evidenceReady` false for each (`m11-promotion-evidence-gate`, from ONB-D3, its comments now naming the outcome); and a public request for each is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which now holds them). A public request still runs preparation and reports partial coverage. Nothing reads as clean play. The replay and census are offline and not committed.
+
+**What a later promotion must do.** Each specialization answers its own first question: for Arcane, whether an interrupt with no castable target can be stepped past, then `fight_remains`, `prev_gcd`, `cancel_action` and Evocation's talent; for Frost, a real subject (ONB-EV), then how `interrupt_if` and its sibling options are read, since each only ends a channel. Each binds its own stacks with their reaction bound, measures its unmeasured hero trees and spells or refuses them, and answers the anchor's limits (agent/follow-ups.md "After ONB-D3"). A new public entry then promotes it through the unchanged gates by the five-site promotion. No such entry is queued.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

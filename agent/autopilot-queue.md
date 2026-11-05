@@ -1874,11 +1874,13 @@ mergeSha: 9cb1d8282a365cdff832ea99c59f01c8a548084d
 ### ONB-D3: Arcane Mage and Frost Mage (internal, Cohort D)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-D1
 branch: autopilot/onb-d3
 wcl: NONE
 publicContract: NONE
+pr: 73
+mergeSha: 629665d9e4e9d25716cebc9d420f264df47f3362
 ```
 
 **Scope.** Cohort D casters with charge/proc state and numeric `react` (the
@@ -1890,11 +1892,14 @@ Frost Mage's must be verified, or it is recorded for ONB-EV.
 ### ONB-D3P: Arcane Mage and Frost Mage (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-D3
+branch: autopilot/onb-d3p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** Neither passes the rotational promotion gates, so each stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Arcane's six retained subjects, replayed offline, give 1,039 decisions, with 0 MATCH, 0 REJECTED and every decision UNKNOWN. Frost's only replayable source, the filtered M13-A actor 6, refuses `PROFILE_NOT_RESOLVED`, so Frost stays on ONB-EV. A census of 5,699 retained files finds no new subject. ONB-S3 alone moves neither. A promotion after each one's own inputs is a new public entry through the unchanged gates (agent/architecture.md "ONB-D3P"; agent/follow-ups.md "After ONB-D3").
 
 ### ONB-D4: Affliction Warlock and Marksmanship Hunter (internal, Cohort D)
 

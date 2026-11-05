@@ -33,6 +33,8 @@ current total (5,748,495 bytes), with what each row buys.
 
 **Raised:** ONB-D3 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.
 
+**ONB-D3P (2026-11-04): not promoted.** The gate search finds nothing for either (`m11-promotion-evidence-gate`). A census of retained JSON files finds no new subject, and a replay at that base gives the same 1,039 Arcane UNKNOWN. M13-A's Frost and Arcane actors, replayed, both refuse `PROFILE_NOT_RESOLVED`. No new public entry is queued; one must follow this list (agent/architecture.md "ONB-D3P").
+
 **Frost Mage is on ONB-EV; Arcane is not.** Six Arcane subjects are retained with combatant info, all Sunfury. No Frost Mage subject is: its only real casts are the filtered M13-A actor 6, with no combatant info (agent/architecture.md "ONB-D3"). A Frost promotion needs a real subject first, and the stops recorded for it are synthetic until then.
 
 **ONB-S3 alone moves neither of them.** Neither dispatches on the enemy count:

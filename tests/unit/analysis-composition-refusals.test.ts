@@ -210,6 +210,10 @@ describe("an unsupported specialization", () => {
       ["Shaman", "Elemental"],
       ["Druid", "Balance"],
       ["Priest", "Shadow"],
+      // Registered INTERNAL_ONLY in ONB-D3, not promoted by ONB-D3P. "Mage" is the token both registrations name;
+      // another spelling would pass here for the wrong reason. Frost is also a Death Knight's row, above.
+      ["Mage", "Arcane"],
+      ["Mage", "Frost"],
     ]) {
       const { analyze, ingest, deps } = spies(className, specName);
       const result = await analyzeFight(REQUEST, deps);
