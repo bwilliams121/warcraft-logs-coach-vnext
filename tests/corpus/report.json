@@ -779,6 +779,15 @@
       "assertions": 1,
       "cases": 1,
       "failed": 0,
+      "kindsExercised": ["SPEC_FIRE_MAGE.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_FIRE_MAGE",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
       "kindsExercised": ["SPEC_OUTLAW_ROGUE.SPEC_GATE"],
       "notExecuted": 0,
       "owningLayer": "SPEC_OUTLAW_ROGUE",
@@ -794,13 +803,13 @@
       "passed": 1
     },
     {
-      "assertions": 41,
-      "cases": 37,
+      "assertions": 42,
+      "cases": 38,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 41
+      "passed": 42
     },
     {
       "assertions": 14,
@@ -953,6 +962,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.devastation-evoker-subject-is-unsupported-on-the-same-evidence",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
           "ordinal": 0,
           "status": "PASSED"
@@ -1023,13 +1046,13 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
-          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
           "ordinal": 0,
           "status": "PASSED"
         }
       ],
       "authority": null,
-      "caseId": "application-service.fire-mage-subject-is-unsupported-on-the-same-evidence",
+      "caseId": "application-service.fire-mage-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -3298,7 +3321,7 @@
         }
       ],
       "authority": null,
-      "caseId": "public-contract.analysis-parity-for-the-fire-mage-subject",
+      "caseId": "public-contract.analysis-parity-for-the-devastation-evoker-subject",
       "owningLayer": "PUBLIC_CONTRACT",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -5817,6 +5840,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_FIRE_MAGE.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-fire-mage.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_FIRE_MAGE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_FROST_DEATH_KNIGHT.SPEC_GATE",
           "ordinal": 0,
           "status": "PASSED"
@@ -7869,6 +7906,7 @@
     "SIMC_APL_DRUID_FERAL": "simc-33622e9d-1",
     "SIMC_APL_HUNTER_MARKSMANSHIP": "simc-33622e9d-1",
     "SIMC_APL_MAGE_ARCANE": "simc-33622e9d-1",
+    "SIMC_APL_MAGE_FIRE": "simc-33622e9d-1",
     "SIMC_APL_MAGE_FROST": "simc-33622e9d-1",
     "SIMC_APL_MONK_BREWMASTER": "simc-33622e9d-1",
     "SIMC_APL_PALADIN_PROTECTION": "simc-33622e9d-1",
@@ -7892,13 +7930,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 830,
-    "cases": 235,
+    "assertions": 832,
+    "cases": 237,
     "declared": 0,
-    "executable": 830,
+    "executable": 832,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 830
+    "passed": 832
   }
 }

@@ -2291,6 +2291,133 @@ const HUNTER_MARKSMANSHIP_TARGET = {
 };
 
 /**
+ * The Fire Mage profile (ONB-X1): the talents the pinned list reads as `talent.<name>`, and the talents an action of
+ * that list is built on (an action on `not_found()` is background, action.cpp:541-549).
+ */
+const MAGE_FIRE_TARGET = {
+  datasetId: "SIMC_TRAIT_MAGE_FIRE_TALENTS",
+  classId: 8,
+  specId: 63,
+  defaultOut: "src/data/game/mage-fire-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node, as every earlier target recorded." +
+    ' Corroborated for Fire Mage on its one retained subject, whose observed tree resolves a hero tree and the pinned list\'s talents by these keys (agent/architecture.md "ONB-X1").',
+  requiredTalents: [
+    {
+      simcName: "blast_zone",
+      displayNameEn: "Blast Zone",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6096 talents.blast_zone = find_talent_spell( talent_tree::SPECIALIZATION, "Blast Zone" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "burnout",
+      displayNameEn: "Burnout",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6117 talents.burnout = find_talent_spell( talent_tree::SPECIALIZATION, "Burnout" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "combustion",
+      displayNameEn: "Combustion",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6079 talents.combustion = find_talent_spell( talent_tree::SPECIALIZATION, "Combustion" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "fire_blast",
+      displayNameEn: "Fire Blast",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6073 talents.fire_blast = find_talent_spell( talent_tree::SPECIALIZATION, "Fire Blast" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "firestarter",
+      displayNameEn: "Firestarter",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6074 talents.firestarter = find_talent_spell( talent_tree::SPECIALIZATION, "Firestarter" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "frostfire_bolt",
+      displayNameEn: "Frostfire Bolt",
+      tree: "HERO",
+      binding:
+        "sc_mage.cpp:6184 talents.frostfire_bolt = find_talent_spell( talent_tree::HERO, 431044 );; the pinned list reads it or an action of the list is built on it",
+    },
+    {
+      simcName: "fuel_the_fire",
+      displayNameEn: "Fuel the Fire",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6080 talents.fuel_the_fire = find_talent_spell( talent_tree::SPECIALIZATION, "Fuel the Fire" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "meteor",
+      displayNameEn: "Meteor",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6084 talents.meteor = find_talent_spell( talent_tree::SPECIALIZATION, "Meteor" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "pyroblast",
+      displayNameEn: "Pyroblast",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6071 talents.pyroblast = find_talent_spell( talent_tree::SPECIALIZATION, "Pyroblast" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "pyroclasm",
+      displayNameEn: "Pyroclasm",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6121 talents.pyroclasm = find_talent_spell( talent_tree::SPECIALIZATION, "Pyroclasm" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "scald",
+      displayNameEn: "Scald",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6093 talents.scald = find_talent_spell( talent_tree::SPECIALIZATION, "Scald" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "scorch",
+      displayNameEn: "Scorch",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6086 talents.scorch = find_talent_spell( talent_tree::SPECIALIZATION, "Scorch" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "spellfire_spheres",
+      displayNameEn: "Spellfire Spheres",
+      tree: "HERO",
+      binding:
+        'sc_mage.cpp:6232 talents.spellfire_spheres = find_talent_spell( talent_tree::HERO, "Spellfire Spheres" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "spontaneous_combustion",
+      displayNameEn: "Spontaneous Combustion",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6100 talents.spontaneous_combustion = find_talent_spell( talent_tree::SPECIALIZATION, "Spontaneous Combustion" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "sunfury_execution",
+      displayNameEn: "Sunfury Execution",
+      tree: "HERO",
+      binding:
+        'sc_mage.cpp:6247 talents.sunfury_execution = find_talent_spell( talent_tree::HERO, "Sunfury Execution" );; the pinned list reads it or an action of the list is built on it',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data` (trait_data.inc:4406-4408).
+    { simcName: "sunfury", subTreeId: 39 },
+    { simcName: "frostfire", subTreeId: 41 },
+  ],
+};
+
+/**
  * The Destruction Warlock profile (ONB-D1): the talents the pinned Destruction list reads as
  * `talent.<name>`, the talents an action of that list is built on (an action on `not_found()` is
  * background, action.cpp:541-549). The hero sub-trees are Hellcaller (58) and Diabolist (59).
@@ -3283,6 +3410,7 @@ export const TARGETS = {
   "mage-frost": MAGE_FROST_TARGET,
   "warlock-affliction": WARLOCK_AFFLICTION_TARGET,
   "hunter-marksmanship": HUNTER_MARKSMANSHIP_TARGET,
+  "mage-fire": MAGE_FIRE_TARGET,
   "warlock-destruction": WARLOCK_DESTRUCTION_TARGET,
   "rogue-subtlety": ROGUE_SUBTLETY_TARGET,
   "monk-brewmaster": MONK_BREWMASTER_TARGET,

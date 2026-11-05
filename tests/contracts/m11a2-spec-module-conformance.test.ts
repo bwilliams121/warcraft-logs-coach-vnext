@@ -177,6 +177,8 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
   "shaman/elemental": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 8 },
   // ONB-D3: actor 3 of the same context, an Arcane Mage.
   "mage/arcane": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 3 },
+  // ONB-X1: actor 17 of the same fight, its Fire Mage and the unsupported subject until this tranche.
+  "mage/fire": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 17 },
   // ONB-D3: actor 6 of the M13-A fight context, the Frost Mage the committed evidence archive
   // context reports. That capture's casts are filtered and carry no combatant info.
   "mage/frost": {
@@ -522,6 +524,7 @@ describe("what the tree exports today", () => {
       ["PRESERVATION_EVOKER_MODULE", "evoker/preservation", "PUBLIC", 0],
       ["MARKSMANSHIP_HUNTER_MODULE", "hunter/marksmanship", "INTERNAL_ONLY", 0],
       ["ARCANE_MAGE_MODULE", "mage/arcane", "INTERNAL_ONLY", 0],
+      ["FIRE_MAGE_MODULE", "mage/fire", "INTERNAL_ONLY", 0],
       ["FROST_MAGE_MODULE", "mage/frost", "INTERNAL_ONLY", 0],
       ["BREWMASTER_MONK_MODULE", "monk/brewmaster", "PUBLIC", 0],
       ["MISTWEAVER_MONK_MODULE", "monk/mistweaver", "PUBLIC", 0],

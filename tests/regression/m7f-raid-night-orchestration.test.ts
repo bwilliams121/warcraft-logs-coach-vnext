@@ -41,17 +41,17 @@ import type { RaidNightRunResult } from "../../src/services/raid-night-runner.js
 /** A second supported Rogue, so "many players on one fight" is a real case. */
 const ROGUE_B = 23;
 /**
- * The canonical UNSUPPORTED participant: Mage/Fire, A7R6 fight 7 actor 17
+ * The canonical UNSUPPORTED participant: Evoker/Devastation, A7R6 fight 7 actor 11
  * per the committed fight-context artifact. (Until M10-D this file used
  * source 7 with spec "Protection" and the fixture's default class, which
  * spelled the impossible identity Rogue/Protection; Protection Paladin is
  * supported now and a real unsupported class/spec pair takes its place.)
  */
-const FIRE_MAGE = 17;
+const DEVASTATION_EVOKER = 11;
 const ZERO_ID = 0;
 
-/** The fixture's class for each player: Mage for the Fire participant, Rogue otherwise. */
-const classNameFor = (sourceId: number): string => (sourceId === FIRE_MAGE ? "Mage" : "Rogue");
+/** The fixture's class for each player: Evoker for the Devastation participant, Rogue otherwise. */
+const classNameFor = (sourceId: number): string => (sourceId === DEVASTATION_EVOKER ? "Evoker" : "Rogue");
 
 function aggregateOf(run: RaidNightRunResult): RaidNightAnalysis {
   if (!run.ok) throw new Error(`expected success, got ${run.error.code}: ${run.error.message}`);
@@ -128,14 +128,14 @@ describe("one ingestion per needed fight, never one per player", () => {
 
 describe("zero ingestion when no selected player needs it", () => {
   it("retrieves an all-unsupported fight once, for consumable status (PREP-3)", async () => {
-    // Fire Mage has no registered analyzer, but a present player always
+    // Devastation Evoker has no registered analyzer, but a present player always
     // needs the fight: every report carries their consumable status (owner
     // decision PREP-3). Until PREP-3 this pull was skipped.
     const snapshot = assassinationSnapshot({
       fightIds: [1],
-      sourceIds: [FIRE_MAGE],
+      sourceIds: [DEVASTATION_EVOKER],
       classNameFor,
-      specNameFor: () => "Fire",
+      specNameFor: () => "Devastation",
     });
     const ports = fakePorts({ snapshot });
 
@@ -172,11 +172,12 @@ describe("zero ingestion when no selected player needs it", () => {
   it("retrieves once for a mix of absent and unsupported (the unsupported player is present)", async () => {
     const snapshot = assassinationSnapshot({
       fightIds: [1],
-      sourceIds: [FIRE_MAGE, M5D2_ACTOR],
+      sourceIds: [DEVASTATION_EVOKER, M5D2_ACTOR],
       classNameFor,
-      // The present Rogue is absent and the Fire Mage is unsupported; the
+      // The present Rogue is absent and the Devastation Evoker is unsupported; the
       // Rogue's own spec string is still Assassination.
-      specNameFor: (_fightId, sourceId) => (sourceId === FIRE_MAGE ? "Fire" : "Assassination"),
+      specNameFor: (_fightId, sourceId) =>
+        sourceId === DEVASTATION_EVOKER ? "Devastation" : "Assassination",
       absentOn: new Map([[1, [M5D2_ACTOR]]]),
     });
     const ports = fakePorts({ snapshot });
@@ -192,9 +193,10 @@ describe("zero ingestion when no selected player needs it", () => {
     // evidence, and the unsupported ones ride along at no extra cost.
     const snapshot = assassinationSnapshot({
       fightIds: [1],
-      sourceIds: [FIRE_MAGE, M5D2_ACTOR],
+      sourceIds: [DEVASTATION_EVOKER, M5D2_ACTOR],
       classNameFor,
-      specNameFor: (_fightId, sourceId) => (sourceId === FIRE_MAGE ? "Fire" : "Assassination"),
+      specNameFor: (_fightId, sourceId) =>
+        sourceId === DEVASTATION_EVOKER ? "Devastation" : "Assassination",
     });
     const ports = fakePorts({ snapshot });
 
@@ -234,9 +236,10 @@ describe("a mixed roster keeps every status distinct", () => {
   it("analyzes the supported player, reports the rest truthfully", async () => {
     const snapshot = assassinationSnapshot({
       fightIds: [1, 2],
-      sourceIds: [FIRE_MAGE, M5D2_ACTOR, ROGUE_B],
+      sourceIds: [DEVASTATION_EVOKER, M5D2_ACTOR, ROGUE_B],
       classNameFor,
-      specNameFor: (_fightId, sourceId) => (sourceId === FIRE_MAGE ? "Fire" : "Assassination"),
+      specNameFor: (_fightId, sourceId) =>
+        sourceId === DEVASTATION_EVOKER ? "Devastation" : "Assassination",
       absentOn: new Map([[2, [ROGUE_B]]]),
     });
     const ports = fakePorts({ snapshot });
@@ -417,14 +420,18 @@ describe("revision integrity fails closed at every stage", () => {
 describe("the source filter", () => {
   const snapshot = assassinationSnapshot({
     fightIds: [1],
-    sourceIds: [ZERO_ID, FIRE_MAGE, M5D2_ACTOR],
+    sourceIds: [ZERO_ID, DEVASTATION_EVOKER, M5D2_ACTOR],
   });
 
   it("defaults to every player in the selected fights", async () => {
     const ports = fakePorts({ snapshot });
     const aggregate = aggregateOf(await runNight({ reportCode: REPORT_CODE, fightIds: [1] }, ports));
     expect(aggregate.coverage.cellsTotal).toBe(3);
-    expect(aggregate.roster.map((player) => player.sourceId)).toEqual([ZERO_ID, FIRE_MAGE, M5D2_ACTOR]);
+    expect(aggregate.roster.map((player) => player.sourceId)).toEqual([
+      ZERO_ID,
+      DEVASTATION_EVOKER,
+      M5D2_ACTOR,
+    ]);
   });
 
   it("narrows the matrix to the requested players", async () => {
@@ -472,7 +479,7 @@ describe("the source filter", () => {
   });
 
   it("keeps two players sharing a name distinct", async () => {
-    const shared = assassinationSnapshot({ fightIds: [1], sourceIds: [FIRE_MAGE, M5D2_ACTOR] });
+    const shared = assassinationSnapshot({ fightIds: [1], sourceIds: [DEVASTATION_EVOKER, M5D2_ACTOR] });
     const named = {
       ...shared,
       players: shared.players.map((player) => ({ ...player, name: "SameName" })),
@@ -482,7 +489,7 @@ describe("the source filter", () => {
     const aggregate = aggregateOf(await runNight({ reportCode: REPORT_CODE, fightIds: [1] }, ports));
     expect(aggregate.roster.every((player) => player.name === "SameName")).toBe(true);
     expect(aggregate.roster.map((player) => player.playerKey)).toEqual([
-      `${REPORT_CODE}:17`,
+      `${REPORT_CODE}:11`,
       `${REPORT_CODE}:19`,
     ]);
   });

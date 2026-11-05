@@ -206,7 +206,7 @@ describe("nothing missing resolves", () => {
   it("keeps an unusable identity distinct from an unsupported one", () => {
     // One is a data problem, the other a coverage limit. They need different
     // remedies, so they must not share a reason.
-    expect(outcome("", "Assassination")).not.toBe(outcome("Mage", "Fire"));
+    expect(outcome("", "Assassination")).not.toBe(outcome("Evoker", "Devastation"));
   });
 });
 
@@ -223,7 +223,7 @@ describe("no unsupported identity falls through to a supported specialization", 
     // Restoration Druid: registered INTERNAL_ONLY, never publicly resolvable.
     ["Druid", "Restoration"],
     // The canonical captured unsupported identity: A7R6 fight 7, actor 4.
-    ["Mage", "Fire"],
+    ["Evoker", "Devastation"],
     // Other real specs.
     ["Evoker", "Devastation"],
     // Discipline Priest: registered INTERNAL_ONLY since HEAL-B3, never publicly resolvable.
@@ -312,17 +312,17 @@ describe("prototype keys cannot masquerade as a specialization", () => {
 
 describe("a refusal discloses what it saw", () => {
   it("reports the normalized pair that failed", () => {
-    const result = resolve("  Mage ", "Fire");
+    const result = resolve("  Evoker ", "Devastation");
 
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.observed).toEqual({ className: "mage", specName: "fire" });
+    expect(result.observed).toEqual({ className: "evoker", specName: "devastation" });
   });
 
   it("carries no spec id on the failure branch", () => {
     // Structural: there is no variant returning a usable id alongside a
     // failure, so a caller cannot read one out of a refusal.
-    const result = resolve("Mage", "Fire");
+    const result = resolve("Evoker", "Devastation");
 
     expect("specId" in result).toBe(false);
   });

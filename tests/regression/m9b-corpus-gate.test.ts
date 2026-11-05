@@ -63,7 +63,7 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // added the four steady-state segments, the bundle compositions and the
     // evaluator over the composed 165 s fight: twelve cases and seventy-three
     // assertions; M10-D's public Protection integration added three cases
-    // and four assertions (the Fire Mage through the service and both
+    // and four assertions (the Devastation Evoker through the service and both
     // transports, the mixed-roster raid night, and actor 4's identity) and
     // repurposed four cases in place; M11-A4 added the four Retribution
     // Paladin slices and sixteen cases with sixty-eight assertions (the
@@ -125,7 +125,7 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // then pinned. M11-C3a re-pinned the Brewmaster measurement (5 MATCH /
     // 0 REJECTED / 10 UNKNOWN once Breath of Fire's Keg Smash reset is an
     // observable CAST_BY_ACTOR signature) and added two assertions: Breath of
-    // Fire's readiness where the proof stands and where the reset withholds it.
+    // Devastation's readiness where the proof stands and where the reset withholds it.
     // M11-C4 added three cases and nine assertions over the Brewmaster
     // evidence-closure capture: the 20–165 s segment's normalization census
     // (five), the two-part 165 s bundle composition (one) and the unchanged
@@ -161,9 +161,9 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // assertions: the same pair for the INTERNAL_ONLY Discipline Priest
     // registration. HEAL-B4 added two cases and two assertions: the same pair
     // for the INTERNAL_ONLY Preservation Evoker registration.
-    expect(result.summary.cases).toBe(235);
-    expect(result.summary.assertions).toBe(830);
-    expect(result.summary.passed).toBe(830);
+    expect(result.summary.cases).toBe(237);
+    expect(result.summary.assertions).toBe(832);
+    expect(result.summary.passed).toBe(832);
   });
 
   it("covers every layer", async () => {

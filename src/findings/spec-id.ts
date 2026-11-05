@@ -95,7 +95,8 @@ export type SpecId =
   | "mage/arcane"
   | "mage/frost"
   | "warlock/affliction"
-  | "hunter/marksmanship";
+  | "hunter/marksmanship"
+  | "mage/fire";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -129,6 +130,7 @@ export const SPEC_IDS = Object.freeze([
   "mage/frost",
   "warlock/affliction",
   "hunter/marksmanship",
+  "mage/fire",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -287,6 +289,9 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  *
  * Affliction Warlock and Marksmanship Hunter arrived here in ONB-D4, the last two Cohort D followers on the shared cast anchor. No
  * decision of either resolves, and neither has a retained subject with combatant info.
+ *
+ * Fire Mage arrived here in ONB-X1, its own representative on the shared cast anchor. No decision of it resolves, on its one retained
+ * subject or on a synthetic build. The unsupported-path subject moved from it to Devastation Evoker the same day.
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
@@ -308,6 +313,7 @@ export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "mage/frost",
   "warlock/affliction",
   "hunter/marksmanship",
+  "mage/fire",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

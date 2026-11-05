@@ -89,6 +89,7 @@ describe("the five sites agree", () => {
       "mage/frost",
       "warlock/affliction",
       "hunter/marksmanship",
+      "mage/fire",
     ]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
@@ -180,6 +181,7 @@ describe("the five sites agree", () => {
       ["mage/frost", "INTERNAL_ONLY"],
       ["warlock/affliction", "INTERNAL_ONLY"],
       ["hunter/marksmanship", "INTERNAL_ONLY"],
+      ["mage/fire", "INTERNAL_ONLY"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -299,6 +301,7 @@ describe("the complete-catalog helper", () => {
       "mage-frost-observed-decisions": 0,
       "warlock-affliction-observed-decisions": 0,
       "hunter-marksmanship-observed-decisions": 0,
+      "mage-fire-observed-decisions": 0,
     });
   });
 });

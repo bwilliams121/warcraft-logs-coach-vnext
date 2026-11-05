@@ -5409,6 +5409,129 @@ const HUNTER_MARKSMANSHIP_FACTS = {
 };
 
 /**
+ * The Fire Mage facts (ONB-X1).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the pinned Fire list
+ * (apl/mage.cpp `fire`) executes. Facts a reader should not have to rediscover:
+ *
+ *   - COMBUSTION AND FIRE BLAST ARE `_gcd` 0, SO THEY ARE NON_GCD. Each carries `use_off_gcd=1` and `use_while_casting=1`.
+ *   - FIRE BLAST BINDS THE TALENT'S ROW ONLY. Its talent replaces the class spell 319836 (trait_data.inc:1738), which is `_gcd` 1500. The action profile reads that.
+ *   - FIREBALL BINDS TWO ROWS. create_action builds frostfire_bolt for the token when the talent is taken (sc_mage.cpp:5673), and both
+ *     rows are _gcd 1500, so the lane does not depend on which.
+ *   - FLAMESTRIKE BINDS TWO ROWS, the talent's choice of flamestrike_1 and flamestrike_2 (sc_mage.cpp:6075-6076), both _gcd 1500.
+ *   - METEOR 117588 AND FIRE BLAST 57984 ARE A SHAMAN'S FIRE ELEMENTAL, another family and no row here.
+ *   - THE RACIAL, POTION, ITEM AND EXTERNAL-BUFF TOKENS ARE NOT BOUND. Arcane Intellect and Mirror Image appear only in precombat.
+ */
+const MAGE_FIRE_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 190319, displayNameEn: "Combustion", baseGcdMs: 0 },
+    { abilityGameId: 108853, displayNameEn: "Fire Blast", baseGcdMs: 0 },
+    { abilityGameId: 133, displayNameEn: "Fireball", baseGcdMs: 1500 },
+    { abilityGameId: 431044, displayNameEn: "Frostfire Bolt", baseGcdMs: 1500 },
+    { abilityGameId: 2120, displayNameEn: "Flamestrike", baseGcdMs: 1500 },
+    { abilityGameId: 1254851, displayNameEn: "Flamestrike", baseGcdMs: 1500 },
+    { abilityGameId: 153561, displayNameEn: "Meteor", baseGcdMs: 1500 },
+    { abilityGameId: 11366, displayNameEn: "Pyroblast", baseGcdMs: 1500 },
+    { abilityGameId: 2948, displayNameEn: "Scorch", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "combustion",
+      candidateAbilityGameIds: [190319],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / combustion_t",
+      startLine: 5689,
+      endLine: 5689,
+      sourceNote:
+        'create_action dispatches "combustion" to combustion_t: built on p->talents.combustion (:3500); talents.combustion = find_talent_spell at :6079. _gcd 0, usable_while_casting.',
+    },
+    {
+      simcToken: "fire_blast",
+      candidateAbilityGameIds: [108853],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / fire_blast_t",
+      startLine: 5713,
+      endLine: 5713,
+      sourceNote:
+        'create_action dispatches "fire_blast" to fire_blast_t: built on p->talents.fire_blast when taken, else the class spell 319836 (:4528); talents.fire_blast = find_talent_spell at :6073. Only the talent\'s row is bound: the class row is _gcd 1500, a lane this binding does not claim.',
+    },
+    {
+      simcToken: "fireball",
+      candidateAbilityGameIds: [133, 431044],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / fireball_t",
+      startLine: 5690,
+      endLine: 5690,
+      sourceNote:
+        'create_action dispatches "fireball" to fireball_t: built on p->talents.frostfire_bolt when talented, else p->find_specialization_spell( "Fireball" ) (:3721); create_action redirects the token at :5673.',
+    },
+    {
+      simcToken: "flamestrike",
+      candidateAbilityGameIds: [2120, 1254851],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / flamestrike_t",
+      startLine: 5691,
+      endLine: 5691,
+      sourceNote:
+        'create_action dispatches "flamestrike" to flamestrike_t: built on talents.flamestrike_1 or talents.flamestrike_2 (:3829), a talent\'s choice of two rows on one specialization. Both rows are _gcd 1500.',
+    },
+    {
+      simcToken: "meteor",
+      candidateAbilityGameIds: [153561],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / meteor_t",
+      startLine: 5692,
+      endLine: 5692,
+      sourceNote:
+        'create_action dispatches "meteor" to meteor_t: built on p->talents.meteor for the token (:4668); talents.meteor = find_talent_spell at :6084.',
+    },
+    {
+      simcToken: "pyroblast",
+      candidateAbilityGameIds: [11366],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / pyroblast_t",
+      startLine: 5693,
+      endLine: 5693,
+      sourceNote:
+        'create_action dispatches "pyroblast" to pyroblast_t: built on p->talents.pyroblast (:4868); talents.pyroblast = find_talent_spell at :6071.',
+    },
+    {
+      simcToken: "scorch",
+      candidateAbilityGameIds: [2948],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / scorch_t",
+      startLine: 5694,
+      endLine: 5694,
+      sourceNote:
+        'create_action dispatches "scorch" to scorch_t: built on p->talents.scorch (:5003); talents.scorch = find_talent_spell at :6086.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
+/**
  * The Destruction Warlock facts (ONB-D1).
  *
  * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the
@@ -6468,6 +6591,21 @@ export const TARGETS = {
     ],
     requiredFacts: HUNTER_MARKSMANSHIP_FACTS,
     defaultOut: "src/data/game/hunter-marksmanship-gcd-semantics.json",
+  },
+  "mage-fire": {
+    datasetId: "SIMC_DBC_MAGE_FIRE_GCD_SEMANTICS",
+    classId: 8,
+    className: "Mage",
+    sources: MAGE_SOURCES,
+    classModulePath: MAGE_SOURCES.classModule,
+    handReviewedPaths: [
+      MAGE_SOURCES.classModule,
+      MAGE_SOURCES.racialSpells,
+      MAGE_SOURCES.playerModule,
+      MAGE_SOURCES.consumableModule,
+    ],
+    requiredFacts: MAGE_FIRE_FACTS,
+    defaultOut: "src/data/game/mage-fire-gcd-semantics.json",
   },
   "warlock-destruction": {
     datasetId: "SIMC_DBC_WARLOCK_DESTRUCTION_GCD_SEMANTICS",

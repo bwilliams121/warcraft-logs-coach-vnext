@@ -13,7 +13,7 @@
  *     7   Paladin / Protection    ANALYZED — the real M10-C evidence
  *     19  Rogue / Assassination   the analyzer runs and must answer for the
  *                                 absence of its own evidence TRUTHFULLY
- *     17  Mage / Fire             SPEC_NOT_SUPPORTED — no analyzer exists
+ *     11  Evoker / Devastation             SPEC_NOT_SUPPORTED — no analyzer exists
  *     14  Death Knight / Blood    absent from the pull
  *
  * Nothing is relabelled and no Rogue event is manufactured. Actor 19's cell is
@@ -26,7 +26,7 @@
  *
  * Roster discovery once, ingestion once for the one fight, revision confirmed
  * once, each supported player's analyzer exactly once and the right one, no
- * analyzer for Fire, every cell's kind/status/spec preserved, the Protection
+ * analyzer for Devastation, every cell's kind/status/spec preserved, the Protection
  * cell carrying the same totals the single-fight service publishes for the
  * same evidence, and encounter/comparison context changing none of it.
  */
@@ -59,20 +59,20 @@ const PROT_OPENER = "wcl-protection-paladin-a7r6-opener";
 const FIGHT_ID = 7;
 const PALADIN = 7;
 const ROGUE = 19;
-const FIRE_MAGE = CURRENT_UNSUPPORTED_SUBJECT.sourceId;
+const DEVASTATION_EVOKER = CURRENT_UNSUPPORTED_SUBJECT.sourceId;
 const BLOOD_DK = 14;
-const ROSTER = [PALADIN, ROGUE, FIRE_MAGE, BLOOD_DK] as const;
+const ROSTER = [PALADIN, ROGUE, DEVASTATION_EVOKER, BLOOD_DK] as const;
 
 const CLASS_OF: Readonly<Record<number, string>> = {
   [PALADIN]: "Paladin",
   [ROGUE]: "Rogue",
-  [FIRE_MAGE]: CURRENT_UNSUPPORTED_SUBJECT.expectedClassName,
+  [DEVASTATION_EVOKER]: CURRENT_UNSUPPORTED_SUBJECT.expectedClassName,
   [BLOOD_DK]: "DeathKnight",
 };
 const SPEC_OF: Readonly<Record<number, string>> = {
   [PALADIN]: "Protection",
   [ROGUE]: "Assassination",
-  [FIRE_MAGE]: CURRENT_UNSUPPORTED_SUBJECT.expectedSpecName,
+  [DEVASTATION_EVOKER]: CURRENT_UNSUPPORTED_SUBJECT.expectedSpecName,
   [BLOOD_DK]: "Blood",
 };
 
@@ -171,7 +171,7 @@ describe("a mixed roster over the real A7R6 opener", () => {
     expect(rogue.specName).toBe("Assassination");
     expect(rogue.status).toBe("PROFILE_NOT_RESOLVED");
 
-    const fire = cellOf(cells, FIRE_MAGE);
+    const fire = cellOf(cells, DEVASTATION_EVOKER);
     expect(fire.kind).toBe("NOT_ANALYZED");
     if (fire.kind !== "NOT_ANALYZED") return;
     expect(fire.specName).toBe(CURRENT_UNSUPPORTED_SUBJECT.expectedSpecName);

@@ -79,7 +79,7 @@ row).
 | `demonhunter/devourer` | C — INTERNAL_ONLY since ONB-B3 | local raw (gtKb fight 22 actor 32, whole fight; rXAf fight 13 actors 20 and 79, first 165 s) | audited | PARTIAL | `reap-soul-threshold` |
 | `rogue/outlaw` | C — INTERNAL_ONLY since ONB-C2 | none (context only: g34m fights 1, 6, 7, actor 17; ONB-EV) | audited | UNASSESSED | — |
 | `mage/arcane` | D — INTERNAL_ONLY since ONB-D3 | local raw (six subjects, all Sunfury) | audited | PARTIAL | `arcane-charge-barrage-timing` |
-| `mage/fire` | D | local raw | blocked | PARTIAL | `combustion-window-fill` |
+| `mage/fire` | D — INTERNAL_ONLY since ONB-X1 | retained raw (A7R6 fight 7 actor 17, first 165 s) | audited | PARTIAL | `combustion-window-fill` |
 | `mage/frost` | D — INTERNAL_ONLY since ONB-D3 | none usable (filtered M13-A actor 6, no combatant info; on ONB-EV) | audited | UNASSESSED | — |
 | `warlock/destruction` | D — INTERNAL_ONLY since ONB-D1 | local raw (A7R6 fight 7 actors 12 and 15, first 165 s, both Hellcaller) | audited | SPECIFIC_QUESTIONS_IDENTIFIED | `ritual-clipping` (ownership unresolved), `immolate-wither-refresh` |
 | `warlock/affliction` | D — INTERNAL_ONLY since ONB-D4 | none usable (filtered M13-A actor 20, no combatant info; on ONB-EV) | audited | UNASSESSED | — |

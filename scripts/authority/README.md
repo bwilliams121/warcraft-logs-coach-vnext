@@ -716,6 +716,8 @@ as before.
 
 The pinned source root for this target adds `engine/class_modules/apl/druid/feral_apl.inc` (17,108 bytes), `engine/class_modules/apl/druid/druid.cpp` (926 bytes, both as the M11-A3 audit recorded them) and `engine/class_modules/sc_druid.cpp` (479,886 bytes, `59227a2f...`).
 
+`mage-fire` was extracted in ONB-X1 (88 actions in 8 lists), on the batch path and the two sibling extractors, with no extractor change but the target. It is `NO_PTR_REGION`, in `mage_t::init_action_list`, on the sources ONB-D3 pinned. The pinned source root is rebuilt offline by `.probe/onbx1`'s steps from files already on disk.
+
 `warlock-affliction` and `hunter-marksmanship` were extracted in ONB-D4 (106 actions in 14 lists, 80 in 8), on the batch path and the two sibling extractors, with no extractor change but the targets. `warlock-affliction` is `NO_PTR_REGION`, in `warlock_t::init_action_list`, on the sources ONB-D1 already pinned. `hunter-marksmanship` is `PTR_BODY_DIFFERS`, in `hunter_t::init_action_list`. The pinned source root adds `engine/class_modules/apl/apl_hunter.cpp` (51,094 bytes, as the M11-A3 audit recorded it) and `engine/class_modules/sc_hunter.cpp` (309,166 bytes, `d576fa22…`).
 
 `mage-arcane` and `mage-frost` were extracted in ONB-D3 (51 actions in 5 lists, 71 in 6), on the batch path and the two sibling extractors, with no extractor change but the targets. Both are `NO_PTR_REGION`, in `mage_t::init_action_list`. The pinned source root adds `engine/class_modules/apl/mage.cpp` (40,053 bytes, as the M11-A3 audit recorded it) and `engine/class_modules/sc_mage.cpp` (262,461 bytes, `8bd38fb5…`).
