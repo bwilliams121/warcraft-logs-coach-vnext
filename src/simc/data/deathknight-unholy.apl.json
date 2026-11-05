@@ -1,0 +1,463 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_DEATHKNIGHT_UNHOLY",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "deathknight",
+    "specName": "unholy"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "UNKNOWN",
+    "sourcePath": "engine/class_modules/apl/apl_death_knight.cpp",
+    "sourceSha256": "e381da691875ceecb8357a76e90fef9e01f3a200c67da7024deff1ca7f728df6",
+    "sourceByteLength": 36557,
+    "regionStartMarker": "//unholy_apl_start",
+    "regionEndMarker": "//unholy_apl_end",
+    "extractedOn": "2026-11-05",
+    "extractorVersion": 1,
+    "regionSha256": "f3f0416905037991772e47995091482795d55b2c8b59751ce094c4bb4e2685cf",
+    "livePtrPolicy": "NO_PTR_REGION",
+    "dispatchSource": {
+      "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+      "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39"
+    }
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "auto_attack",
+          "comment": null,
+          "sourceLine": 348
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "call_action_list,name=variables",
+          "comment": "Choose Action list to run",
+          "sourceLine": 349
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "call_action_list,name=racials",
+          "comment": null,
+          "sourceLine": 350
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "potion,if=(variable.st_planning|variable.adds_remain)&variable.cds_active&(variable.trinket_priority=1&trinket.1.has_use_buff&!trinket.1.proc.mastery.duration>0|variable.trinket_priority=2&trinket.2.has_use_buff&!trinket.2.proc.mastery.duration>0)",
+          "comment": null,
+          "sourceLine": 351
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "call_action_list,name=trinkets",
+          "comment": null,
+          "sourceLine": 352
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "call_action_list,name=cooldowns",
+          "comment": null,
+          "sourceLine": 353
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "call_action_list,name=aoe,if=active_enemies>=3",
+          "comment": null,
+          "sourceLine": 354
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "call_action_list,name=single_target,if=active_enemies<3",
+          "comment": null,
+          "sourceLine": 355
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": null,
+          "sourceLine": 335
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "raise_dead",
+          "comment": null,
+          "sourceLine": 336
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=trinket_1_buffs,value=trinket.1.has_use_buff",
+          "comment": null,
+          "sourceLine": 337
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=trinket_2_buffs,value=trinket.2.has_use_buff",
+          "comment": null,
+          "sourceLine": 338
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=trinket_1_duration,op=setif,value=0,value_else=trinket.1.proc.any_dps.duration,condition=0",
+          "comment": null,
+          "sourceLine": 339
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "variable,name=trinket_2_duration,op=setif,value=0,value_else=trinket.2.proc.any_dps.duration,condition=0",
+          "comment": null,
+          "sourceLine": 340
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "variable,name=trinket_1_high_value,op=setif,value=2,value_else=1,condition=trinket.1.is.treacherous_transmitter",
+          "comment": null,
+          "sourceLine": 341
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "variable,name=trinket_2_high_value,op=setif,value=2,value_else=1,condition=trinket.2.is.treacherous_transmitter",
+          "comment": null,
+          "sourceLine": 342
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "variable,name=trinket_1_sync,op=setif,value=1,value_else=0.5,condition=variable.trinket_1_buffs&talent.dark_transformation&trinket.1.cooldown.duration%%cooldown.dark_transformation.duration=0",
+          "comment": null,
+          "sourceLine": 343
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "variable,name=trinket_2_sync,op=setif,value=1,value_else=0.5,condition=variable.trinket_2_buffs&talent.dark_transformation&trinket.2.cooldown.duration%%cooldown.dark_transformation.duration=0",
+          "comment": null,
+          "sourceLine": 344
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "variable,name=trinket_priority,op=setif,value=2,value_else=1,condition=!variable.trinket_1_buffs&variable.trinket_2_buffs&(trinket.2.has_cooldown|!trinket.1.has_cooldown)|variable.trinket_2_buffs&((trinket.2.cooldown.duration%variable.trinket_2_duration)*(1.5+trinket.2.has_buff.strength)*(variable.trinket_2_sync)*(variable.trinket_2_high_value)*(1+((trinket.2.ilvl-trinket.1.ilvl)%100)))>((trinket.1.cooldown.duration%variable.trinket_1_duration)*(1.5+trinket.1.has_buff.strength)*(variable.trinket_1_sync)*(variable.trinket_1_high_value)*(1+((trinket.1.ilvl-trinket.2.ilvl)%100)))",
+          "comment": null,
+          "sourceLine": 345
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "variable,name=damage_trinket_priority,op=setif,value=2,value_else=1,condition=!variable.trinket_1_buffs&!variable.trinket_2_buffs&trinket.2.ilvl>=trinket.1.ilvl",
+          "comment": null,
+          "sourceLine": 346
+        }
+      ]
+    },
+    {
+      "listName": "aoe",
+      "receiverIdentifier": "aoe",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "death_and_decay,if=talent.cycle_of_death&cooldown.putrefy.charges<cooldown.putrefy.max_charges&(raid_event.adds.exists&raid_event.adds.remains>duration%2|!raid_event.adds.exists&fight_remains>duration%2)&(raid_event.adds.exists&raid_event.adds.count<active_enemies|!raid_event.adds.exists|charges=max_charges|raid_event.adds.remains>cooldown.any_dnd.duration)",
+          "comment": "Aoe Rotation",
+          "sourceLine": 357
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "festering_strike,target_if=min:health.pct,if=talent.festering_scythe&(fight_remains>3|raid_event.adds.exists&raid_event.adds.remains>3)&(buff.festering_scythe.up&(buff.festering_scythe.remains<=3|buff.festering_scythe_tt.remains<3)|!buff.festering_scythe.up&buff.festering_scythe_tt.remains<3)",
+          "comment": null,
+          "sourceLine": 358
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "putrefy,if=buff.dark_transformation.up",
+          "comment": null,
+          "sourceLine": 359
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "soul_reaper,target_if=min:health.pct",
+          "comment": null,
+          "sourceLine": 360
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "epidemic,if=variable.spending_rp&variable.epidemic_prio",
+          "comment": null,
+          "sourceLine": 361
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "death_coil,target_if=min:health.pct,if=variable.spending_rp&!variable.epidemic_prio",
+          "comment": null,
+          "sourceLine": 362
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "festering_strike,target_if=min:health.pct,if=buff.lesser_ghoul_ready.stack=0",
+          "comment": null,
+          "sourceLine": 363
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "scourge_strike,target_if=min:health.pct,if=buff.lesser_ghoul_ready.stack>=1",
+          "comment": null,
+          "sourceLine": 364
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "epidemic,if=variable.epidemic_prio",
+          "comment": null,
+          "sourceLine": 365
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "death_coil,target_if=min:health.pct,if=!variable.epidemic_prio",
+          "comment": null,
+          "sourceLine": 366
+        }
+      ]
+    },
+    {
+      "listName": "cooldowns",
+      "receiverIdentifier": "cooldowns",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "potion,if=(variable.st_planning|variable.adds_remain)&variable.cds_active",
+          "comment": "Cooldowns",
+          "sourceLine": 368
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "invoke_external_buff,name=power_infusion,if=pet.army_ghoul.active|buff.forbidden_knowledge.up|buff.dark_transformation.up",
+          "comment": "Use<a href = 'https://www.wowhead.com/spell=10060/power-infusion'> Power Infusion</ a> while<a href = 'https://www.wowhead.com/spell=1233448/dark-transformation'> Dark Transformation</ a> is up",
+          "sourceLine": 369
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "outbreak,if=(!talent.blightburst|talent.blightburst&(cooldown.putrefy.remains>gcd.max*2|time<5))&(dot.dread_plague.active_dots=0|dot.virulent_plague.active_dots=0)&(fight_remains>gcd.max*2&!raid_event.adds.exists|raid_event.adds.exists&raid_event.adds.remains>gcd.max*2)",
+          "comment": null,
+          "sourceLine": 370
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "army_of_the_dead,if=(variable.st_planning|variable.adds_remain)&(buff.festering_scythe_tt.up|!talent.festering_scythe)",
+          "comment": null,
+          "sourceLine": 371
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "dark_transformation,if=(variable.st_planning|variable.adds_remain)&!buff.blightfall.up&(pet.army_ghoul.active|cooldown.army_of_the_dead.remains>30|!talent.army_of_the_dead)|buff.blightfall.up&(talent.reaping&talent.soul_reaper&debuff.soul_reaper_debuff.up&debuff.soul_reaper_debuff.remains<gcd*2|!talent.soul_reaper&buff.dark_transformation.remains<gcd*2|!talent.reaping&buff.dark_transformation.remains<gcd*2|raid_event.adds.exists&raid_event.adds.remains<3|fight_remains<3)",
+          "comment": null,
+          "sourceLine": 372
+        }
+      ]
+    },
+    {
+      "listName": "racials",
+      "receiverIdentifier": "racials",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "ancestral_call,if=variable.cds_active",
+          "comment": "Racials",
+          "sourceLine": 374
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "arcane_pulse,if=runic_power<20&rune<2",
+          "comment": null,
+          "sourceLine": 375
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "arcane_torrent,if=runic_power<20&rune<2",
+          "comment": null,
+          "sourceLine": 376
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "bag_of_tricks,if=runic_power<20&rune<2",
+          "comment": null,
+          "sourceLine": 377
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "blood_fury,if=buff.dark_transformation.up",
+          "comment": null,
+          "sourceLine": 378
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "berserking,if=variable.cds_active",
+          "comment": null,
+          "sourceLine": 379
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "fireblood,if=variable.cds_active",
+          "comment": null,
+          "sourceLine": 380
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "lights_judgment,if=runic_power<20&rune<2",
+          "comment": null,
+          "sourceLine": 381
+        }
+      ]
+    },
+    {
+      "listName": "single_target",
+      "receiverIdentifier": "single_target",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "festering_strike,if=talent.festering_scythe&fight_remains>10&(buff.festering_scythe.up&(buff.festering_scythe.remains<=3|buff.festering_scythe_tt.remains<3)|!buff.festering_scythe.up&buff.festering_scythe_tt.remains<3)",
+          "comment": "Single Target Rotation",
+          "sourceLine": 383
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "scourge_strike,if=buff.vampiric_strike.up&buff.essence_of_the_blood_queen.up&buff.essence_of_the_blood_queen.remains<gcd*3",
+          "comment": null,
+          "sourceLine": 384
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "putrefy,if=buff.dark_transformation.up&runic_power.deficit>10",
+          "comment": null,
+          "sourceLine": 385
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "scourge_strike,if=runic_power.deficit<90&buff.essence_of_the_blood_queen.up&buff.essence_of_the_blood_queen.stack<buff.essence_of_the_blood_queen.max_stack",
+          "comment": null,
+          "sourceLine": 386
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "death_coil,if=buff.sudden_doom.react",
+          "comment": null,
+          "sourceLine": 387
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "putrefy,if=buff.dark_transformation.up",
+          "comment": null,
+          "sourceLine": 388
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "soul_reaper,target_if=min:health.pct,if=pet.lord_of_the_dead.active&pet.lord_of_the_dead.remains<9|buff.dark_transformation.up&buff.dark_transformation.remains<12|target.health.pct<35",
+          "comment": null,
+          "sourceLine": 389
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "death_coil,if=buff.dark_transformation.up|buff.forbidden_knowledge.up|buff.essence_of_the_blood_queen.remains<5&!buff.vampiric_strike.react",
+          "comment": null,
+          "sourceLine": 390
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "scourge_strike,if=buff.lesser_ghoul_ready.stack>=1&buff.blighted.up",
+          "comment": null,
+          "sourceLine": 391
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "death_coil,if=cooldown.army_of_the_dead.remains>5|runic_power.deficit<50",
+          "comment": null,
+          "sourceLine": 392
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "scourge_strike,if=buff.lesser_ghoul_ready.stack>=1",
+          "comment": null,
+          "sourceLine": 393
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "festering_strike",
+          "comment": null,
+          "sourceLine": 394
+        }
+      ]
+    },
+    {
+      "listName": "trinkets",
+      "receiverIdentifier": "trinkets",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "use_item,slot=trinket1,if=variable.trinket_1_buffs&(variable.trinket_priority=1|!variable.trinket_2_buffs|!trinket.2.has_cooldown)&(trinket.1.cast_time>0&trinket.1.cast_time>cooldown.army_of_the_dead.remains&(!talent.festering_scythe|buff.festering_scythe_tt.up)|trinket.1.cast_time=0&variable.cds_active)",
+          "comment": "Trinkets",
+          "sourceLine": 396
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "use_item,slot=trinket2,if=variable.trinket_2_buffs&(variable.trinket_priority=2|!variable.trinket_1_buffs|!trinket.1.has_cooldown)&(trinket.2.cast_time>0&trinket.2.cast_time>cooldown.army_of_the_dead.remains&(!talent.festering_scythe|buff.festering_scythe_tt.up)|trinket.2.cast_time=0&variable.cds_active)",
+          "comment": null,
+          "sourceLine": 397
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_item,slot=trinket1,if=!variable.trinket_1_buffs&(variable.damage_trinket_priority=1|!variable.trinket_2_buffs|!trinket.2.has_cooldown)",
+          "comment": null,
+          "sourceLine": 398
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "use_item,slot=trinket2,if=!variable.trinket_2_buffs&(variable.damage_trinket_priority=2|!variable.trinket_1_buffs|!trinket.1.has_cooldown)",
+          "comment": null,
+          "sourceLine": 399
+        }
+      ]
+    },
+    {
+      "listName": "variables",
+      "receiverIdentifier": "variables",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "variable,name=spending_rp,value=rune<2|buff.forbidden_knowledge.up&(rune<3|pet.gargoyle.active|buff.essence_of_the_blood_queen.stack>=2)|buff.sudden_doom.react",
+          "comment": "Variables",
+          "sourceLine": 401
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "variable,name=st_planning,op=setif,value=1,value_else=0,condition=active_enemies=1&(!raid_event.adds.exists|!raid_event.adds.in|raid_event.adds.in>15|!raid_event.pull.exists|raid_event.pull.exists&raid_event.pull.in>15)",
+          "comment": null,
+          "sourceLine": 402
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=adds_remain,value=active_enemies>=2&((!raid_event.adds.exists|!raid_event.pull.exists)|raid_event.adds.remains>5|raid_event.pull.remains>5)",
+          "comment": null,
+          "sourceLine": 403
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=cds_active,value=pet.army_ghoul.active|buff.forbidden_knowledge.up|buff.dark_transformation.up&buff.dark_transformation.remains>5",
+          "comment": null,
+          "sourceLine": 404
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=epidemic_prio,value=active_enemies>=3&!buff.forbidden_knowledge.up|active_enemies>=4&buff.forbidden_knowledge.up",
+          "comment": null,
+          "sourceLine": 405
+        }
+      ]
+    }
+  ]
+}

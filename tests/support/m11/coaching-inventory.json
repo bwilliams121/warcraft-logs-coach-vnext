@@ -864,9 +864,9 @@
     {
       "specId": "deathknight/unholy",
       "cohort": "E_PET_AND_VARIABLE_HEAVY",
-      "currentAnalyzerStatus": "UNREGISTERED",
-      "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
-      "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
+      "currentAnalyzerStatus": "INTERNAL_ONLY",
+      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
+      "authorityAuditStatus": "AUTHORITY_AUDITED",
       "deepDiveInventoryStatus": "UNASSESSED",
       "questions": []
     }

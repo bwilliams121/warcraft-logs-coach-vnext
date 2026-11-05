@@ -2239,6 +2239,180 @@ const WARRIOR_SOURCES = {
 const WARRIOR_MODULE_PATH = "engine/class_modules/sc_warrior.cpp";
 
 /**
+ * The Unholy Death Knight facts (ONB-X5).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the pinned Unholy list
+ * (apl_death_knight.cpp `unholy`) executes. Facts a reader should not have to rediscover:
+ *
+ *   - FIVE TOKENS EACH RUN A SECOND SPELL. dark_transformation, death_coil, epidemic, festering_strike and scourge_strike each hold a
+ *     replacement action (sc_death_knight.cpp:6033-6055) that runs while a buff is up, so Blightfall, Necrotic Coil, Graveyard, Festering
+ *     Scythe and Vampiric Strike are those tokens executing. The list names none of the five.
+ *   - DARK TRANSFORMATION'S `_gcd` IS NOT ITS LANE. The record is 1500 ms as extracted, and its constructor sets trigger_gcd = 0_ms
+ *     (:8724). The extractor records the data; deathknight-unholy-gcd-semantics.ts holds the reviewed lane.
+ *   - THE LOG REPORTS IDS NO TOKEN OF THE LIST BINDS. Death Charge 444347, Lichborne 49039 and Anti-Magic Shell 48707 are logged and the list never
+ *     names them, so they have no lane record and are excluded. Raise Dead appears only in precombat.
+ *   - THE LIST'S RACIAL, POTION, ITEM AND EXTERNAL-BUFF TOKENS ARE NOT BOUND. They are outside the rotational domain, and the domain
+ *     boundary refuses them before any lane is read.
+ */
+const DEATHKNIGHT_UNHOLY_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 42650, displayNameEn: "Army of the Dead", baseGcdMs: 1500 },
+    { abilityGameId: 1233448, displayNameEn: "Dark Transformation", baseGcdMs: 1500 },
+    { abilityGameId: 1271967, displayNameEn: "Blightfall", baseGcdMs: 1500 },
+    { abilityGameId: 43265, displayNameEn: "Death and Decay", baseGcdMs: 1500 },
+    { abilityGameId: 47541, displayNameEn: "Death Coil", baseGcdMs: 1500 },
+    { abilityGameId: 1242174, displayNameEn: "Necrotic Coil", baseGcdMs: 1500 },
+    { abilityGameId: 207317, displayNameEn: "Epidemic", baseGcdMs: 1500 },
+    { abilityGameId: 383269, displayNameEn: "Graveyard", baseGcdMs: 1500 },
+    { abilityGameId: 85948, displayNameEn: "Festering Strike", baseGcdMs: 1500 },
+    { abilityGameId: 458128, displayNameEn: "Festering Scythe", baseGcdMs: 1500 },
+    { abilityGameId: 77575, displayNameEn: "Outbreak", baseGcdMs: 1500 },
+    { abilityGameId: 1247378, displayNameEn: "Putrefy", baseGcdMs: 1500 },
+    { abilityGameId: 55090, displayNameEn: "Scourge Strike", baseGcdMs: 1500 },
+    { abilityGameId: 433895, displayNameEn: "Vampiric Strike", baseGcdMs: 1500 },
+    { abilityGameId: 343294, displayNameEn: "Soul Reaper", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "army_of_the_dead",
+      candidateAbilityGameIds: [42650],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / army_of_the_dead_t",
+      startLine: 14401,
+      endLine: 14402,
+      sourceNote:
+        'create_action dispatches "army_of_the_dead" to army_of_the_dead_t: built on p->talent.unholy.army_of_the_dead (:8819); find_talent_spell( SPECIALIZATION, "Army of the Dead" ) at :15034, trait row spell 42650.',
+    },
+    {
+      simcToken: "dark_transformation",
+      candidateAbilityGameIds: [1233448, 1271967],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / dark_transformation_t",
+      startLine: 14403,
+      endLine: 14404,
+      sourceNote:
+        'create_action dispatches "dark_transformation" to dark_transformation_t: built on p->talent.unholy.dark_transformation (:8700); find_talent_spell( SPECIALIZATION, "Dark Transformation" ) at :15018, trait row spell 1233448. The specialization table\'s 325554 "Rank 2" and the buff rows 63560, 344955 and 1235391 are not presses. The constructor sets trigger_gcd = 0_ms (:8724), over the record\'s 1500 ms, a lane src/data/game/deathknight-unholy-gcd-semantics.ts reviews. Under the Blightfall buff its replacement (:8722) runs blightfall_t on spell.blightfall (1271967, :15329), which has no such override, so the token\'s lane depends on the buff. The list holds no blightfall token.',
+    },
+    {
+      simcToken: "death_and_decay",
+      candidateAbilityGameIds: [43265],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / death_and_decay_t",
+      startLine: 14405,
+      endLine: 14406,
+      sourceNote:
+        'create_action dispatches "death_and_decay" to death_and_decay_t: built on p->spec.death_and_decay (:9725); find_spell( 43265 ) at :14810.',
+    },
+    {
+      simcToken: "death_coil",
+      candidateAbilityGameIds: [47541, 1242174],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / death_coil_t",
+      startLine: 14407,
+      endLine: 14408,
+      sourceNote:
+        'create_action dispatches "death_coil" to death_coil_t: built on p->spec.death_coil (:9899); find_class_spell( "Death Coil" ) at :14807, row 47541. Under the Forbidden Knowledge buff the constructor\'s replacement (:9907, the rule at :6033-6055) runs necrotic_coil_t on spell.necrotic_coil_action (1242174, :15336), so an observed Necrotic Coil is this token executing. The list holds no necrotic_coil token.',
+    },
+    {
+      simcToken: "epidemic",
+      candidateAbilityGameIds: [207317, 383269],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / epidemic_t",
+      startLine: 14409,
+      endLine: 14410,
+      sourceNote:
+        'create_action dispatches "epidemic" to epidemic_t: built on p->spec.epidemic (:10370); find_specialization_spell( "Epidemic" ) at :14838, row 207317. Under the Forbidden Knowledge buff the constructor\'s replacement (:10375) runs graveyard_t on spell.graveyard_action (383269, :15339). The list holds no graveyard token.',
+    },
+    {
+      simcToken: "festering_strike",
+      candidateAbilityGameIds: [85948, 458128],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / festering_strike_t",
+      startLine: 14411,
+      endLine: 14412,
+      sourceNote:
+        'create_action dispatches "festering_strike" to festering_strike_t: built on p->spec.festering_strike (:10452); find_specialization_spell( "Festering Strike" ) at :14835, row 85948. Under the Festering Scythe buff the constructor\'s replacement (:10457) runs festering_scythe_t on spell.festering_scythe (458128, :15308). The list holds no festering_scythe token.',
+    },
+    {
+      simcToken: "outbreak",
+      candidateAbilityGameIds: [77575],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / outbreak_t",
+      startLine: 14413,
+      endLine: 14414,
+      sourceNote:
+        'create_action dispatches "outbreak" to outbreak_t: built on p->talent.unholy.outbreak (:11985); find_talent_spell( SPECIALIZATION, "Outbreak" ) at :15011, trait row spell 77575.',
+    },
+    {
+      simcToken: "putrefy",
+      candidateAbilityGameIds: [1247378],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / putrefy_t",
+      startLine: 14417,
+      endLine: 14418,
+      sourceNote:
+        'create_action dispatches "putrefy" to putrefy_t: built on p->talent.unholy.putrefy (:12169); find_talent_spell( SPECIALIZATION, "Putrefy" ) at :15017, trait row spell 1247378. Rows 390220, 1270443 and 1277016 are its damage children, not presses.',
+    },
+    {
+      simcToken: "scourge_strike",
+      candidateAbilityGameIds: [55090, 433895],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / scourge_strike_t",
+      startLine: 14415,
+      endLine: 14416,
+      sourceNote:
+        "create_action dispatches \"scourge_strike\" to scourge_strike_t: built on p->talent.unholy.scourge_strike (:12631); find_talent_spell( SPECIALIZATION, \"Scourge Strike\" ) at :15013, trait row spell 55090. Under the San'layn Vampiric Strike talent the constructor's replacement (:12636) runs vampiric_strike_unholy_t on spell.vampiric_strike (433895, :15372). 445508 is Nazgrim's, a pet's, and no token binds it.",
+    },
+    {
+      simcToken: "soul_reaper",
+      candidateAbilityGameIds: [343294],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / soul_reaper_t",
+      startLine: 14419,
+      endLine: 14420,
+      sourceNote:
+        'create_action dispatches "soul_reaper" to soul_reaper_t: built on p->talent.unholy.soul_reaper (:12659); find_talent_spell( SPECIALIZATION, "Soul Reaper" ) at :15028, trait row spell 343294.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "auto_attack",
+      triggerGcdMs: 0,
+      sourcePath: DK,
+      symbol: "auto_attack_t::auto_attack_t",
+      line: 7753,
+      sourceNote:
+        'auto_attack_t is built on death_knight_melee_attack_t( "auto_attack", p ) with no spell data ' +
+        "(sc_death_knight.cpp:7732-7733) and its constructor assigns trigger_gcd = 0_ms.",
+    },
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
+/**
  * The Frost Death Knight facts (ONB-B2).
  *
  * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of
@@ -7054,6 +7228,21 @@ export const TARGETS = {
     ],
     requiredFacts: DRUID_FERAL_FACTS,
     defaultOut: "src/data/game/druid-feral-gcd-semantics.json",
+  },
+  "deathknight-unholy": {
+    datasetId: "SIMC_DBC_DEATHKNIGHT_UNHOLY_GCD_SEMANTICS",
+    classId: 6,
+    className: "Death Knight",
+    sources: DEATHKNIGHT_BLOOD_SOURCES,
+    classModulePath: DEATHKNIGHT_BLOOD_SOURCES.classModule,
+    handReviewedPaths: [
+      DEATHKNIGHT_BLOOD_SOURCES.classModule,
+      DEATHKNIGHT_BLOOD_SOURCES.racialSpells,
+      DEATHKNIGHT_BLOOD_SOURCES.playerModule,
+      DEATHKNIGHT_BLOOD_SOURCES.consumableModule,
+    ],
+    requiredFacts: DEATHKNIGHT_UNHOLY_FACTS,
+    defaultOut: "src/data/game/deathknight-unholy-gcd-semantics.json",
   },
   "deathknight-frost": {
     datasetId: "SIMC_DBC_DEATHKNIGHT_FROST_GCD_SEMANTICS",

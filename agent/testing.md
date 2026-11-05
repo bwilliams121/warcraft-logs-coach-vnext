@@ -5792,3 +5792,17 @@ Offline only, not committed: the wire probes (`.probe/onbx4/wire.cjs`, `wire2.cj
 No production code changed. One assertion row is new: `tests/unit/analysis-composition-refusals.test.ts` had no row for it, and now holds Warlock/Demonology (SPEC_NOT_SUPPORTED, one retrieval for preparation alone, no dispatch). `tests/contracts/m11-promotion-evidence-gate.test.ts` keeps its ONB-X4 gate search (no qualifying assertion, `evidenceReady` false), its comment now naming the outcome. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, the `onb-x4` suite).
 
 Offline only, not committed: the census (`.probe/onbx4p/census.cjs`, Mortal Strike as its positive control for events and the specID distribution as its control for combatant info), its reading by source (`.probe/onbx4p/census-read.cjs`, `actors.cjs`), and the replays of the subjects (`.probe/onbx4p/m/measure.baseline.ts`, `subjects.baseline.ts`). They give the results in agent/architecture.md "ONB-X4P".
+
+# ONB-X5: Unholy Death Knight
+
+`tests/unit/specs/onb-x5-unholy-death-knight.test.ts`, synthetic throughout, with the real replay offline. The row is internal only and refused publicly; it refuses another specialization first; a capture with no combatant info refuses; the datasets load; every in-domain line condition but `aoe[0]` parses whole; the offensive capability declares its resources and summons.
+
+The replaced spells: Necrotic Coil, Graveyard, Festering Scythe and Vampiric Strike read as their own tokens, so a press of one is an eligible decision and never off the list; a pet's Scourge Strike and a spell's damage children bind nothing. Dark Transformation's record stays 1500 ms and its reviewed lane is off the GCD, so a press of it is excluded and never a decision; a Blightfall takes the GCD and is that token's decision; the token binds both, so its lane is `UNKNOWN_LANE`; and no other record is overridden.
+
+The pets. No row claims a floor or a ceiling. The army ghoul and the lesser ghoul are AMBIGUOUS, never guessed. A summon proves no Lord of the Dead up, and no summon proves none, and a catalog Lord with no stated owner refuses. An undecided presence binds no atom, so its truth is enumerated. A later summon never changes an earlier answer, and missing summon coverage is never an absence, each under a bound only a test can state. The facade attaches a reading to every decision at the cast's own time.
+
+The negatives: over each hero tree and none, no decision resolves; the engine stops at `default[0]`, with the cooldown lines open and the scan stopped on `%`; the enemy count given as 1 moves nothing and is never read as single target; a begin alone is no decision; Runes and Runic Power absent from a cast are unknown, never zero; Runic Power at its maximum is not waste; `time`, `raid_event.*` and `fight_remains` stay open; no aura, plague or charge is read; a lone talent absent from the tree stays UNKNOWN; the racial list returns nothing, Arcane Pulse included.
+
+`m11d2c-pinned-extraction-preflight` holds the new target. Two corpus cases, as for its neighbours, and `tests/contracts/m11-promotion-evidence-gate.test.ts` pins that the gate search finds nothing. `m11a2-spec-module-conformance` proves its identity through the committed rXAf fight 13 context, actor 18.
+
+Offline only, not committed: the census (`.probe/onbx5/census.cjs`, Mortal Strike as its control), the wire probes (`wire.cjs`, `lotd.cjs`, `lotd2.cjs`) and the replay (`.probe/onbx5/m/`).

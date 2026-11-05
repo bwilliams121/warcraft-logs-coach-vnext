@@ -14378,6 +14378,43 @@ Limits: the census does not read JSON files of 500 bytes or less, or log and tex
 
 **What a later promotion must do.** Evidence is not the first gap, so Demonology is not on ONB-EV. It first answers its stops, in order (agent/follow-ups.md "After ONB-X4"): a reviewed aura identity for `buff.dominion_of_argus.up` at `diabolist[1]`, then a reviewed reading of what a complete tree proves for Summon Doomguard's lone node at `diabolist[4]`, and then the possibly-instant casts, which hold 1,245 decisions without an anchor. Pet answers need an owner-approved attribution rule for pets with no stated owner, and the Tyrant and imps need floors. It measures or refuses Soul Harvester, as Havoc refuses Fel-Scarred. Tyrant setup stays a recorded question, and Ritual Clipping stays unresolved. A new public entry then promotes it through the unchanged gates by the five-site promotion, and must first commit its evidence with identity proof, because a PUBLIC module cannot use the retained-only exception. No such entry is queued.
 
+## ONB-X5 — Unholy Death Knight (internal, own representative)
+
+Autopilot queue entry ONB-X5. Public contract: NONE. No Warcraft Logs request. `src/specs/deathknight/unholy/README.md` is the slice in detail.
+
+**What it is.** One specialization registered INTERNAL_ONLY on the observed-decision pattern, with its own pinned list, GCD and talent data, pet rows, resolver, facade and registration. No shared analyzer was introduced, and no shared code changed. It is cloned from Frost's shape, because the two share a class module and read resources the same way, then given Unholy's vocabulary, applicability and pet reading.
+
+**The queue entry's two premises were wrong, and neither changes the plan.** It said no retained events are known. A census of 5,714 retained files finds one real subject (below), with Mortal Strike as its positive control. Its two other hits, gBMCKxyY7dQDRZav fight 33 actors 195 and 199, are 20-event diagnostic samples, not subjects. It also said the list sits on `run_action_list` dispatch, as the M11-D0 cohort's description does, but the pinned list uses `call_action_list` only, and the extractor pins that.
+
+**One real subject, and every decision stays UNKNOWN.** Replayed offline through production ingestion and the facade, at this tranche's base:
+
+| Subject | Hero tree | Span | Eligible | Excluded | MATCH | REJECTED | UNKNOWN |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| rXAf fight 13 actor 18 | Rider of the Apocalypse | first 165 s | 147 | 85 | 0 | 0 | 147 |
+
+The 147 are 58 `scourge_strike`, 53 `death_coil` (32 Death Coil and 21 Necrotic Coil), 18 `festering_strike` (9 and 9 Festering Scythe), 11 `putrefy`, 4 `soul_reaper`, 2 `army_of_the_dead` and 1 `outbreak`. The 85 are 73 swings, 4 Dark Transformations off the GCD, and 8 with no lane record: 2 of the trinket, 2 Anti-Magic Shell, 2 Death Charge, 1 Lichborne and 1 potion. All 77 talent entries name a pinned trait row. No retained subject is San'layn.
+
+**Where it stops.** The engine refuses every decision at `default[0] auto_attack`, whose readiness is unobserved, with Outbreak, Army of the Dead and Dark Transformation open behind it. The root scan's dispatch on the enemy count is then blocked, and it stops at `aoe[0] death_and_decay`, on a `%` the shared parser refuses. ONB-S3 alone moves nothing, since the swing's entry and those three lines come first. A test pins that a given enemy count leaves Outbreak open.
+
+**What ONB-S6 does here.** `src/data/game/deathknight-unholy-pet-semantics.ts` holds the rows, with what each rests on, and `pet-profile.ts` feeds `pet.army_ghoul.active`, `pet.gargoyle.active` and `pet.lord_of_the_dead.active`. **No row proves a floor or a ceiling, so no answer is PRESENT or NOT_PRESENT on any build, and the pets move no decision.**
+
+- **The Lord of the Dead has no ceiling, because the wire contradicts the pinned one.** The spawner's default is Lord of the Dead's second effect, 15,000 ms (`sc_death_knight.cpp` `pets.lord_of_the_dead.set_default_duration`), and 1292072's own duration is 20,000 ms. Of the 13 retained summons, the 12 that end inside the capture log a death 15,021 to 16,173 ms later, and completed casts run to 15,349 ms, begins to 15,494 ms. A 15,000 ms ceiling would be false. Neither number is claimed: dead actors can source delayed damage (M11-ED). It has no floor either, since nothing proves an encounter cannot kill one. On the retained fight its answers are `OWNERSHIP_NOT_STATED` as well, because actor 273 has that gameID and no stated owner.
+- **The army ghouls cannot be told apart from any other Lesser Ghoul.** Army of the Dead's 1294026 and the ordinary 275430 summon the same NPC, 237409, and the retained actor 90 takes summons by those two and by 1282535 and 1294029, which the pinned data does not name. Mapping `army_ghoul` alone to that gameID would call every ordinary ghoul an army. `lesser_ghoul` is declared as a second entity on it, though the list never reads it, so the shared state's own rule reports both `AMBIGUOUS`.
+- **The Gargoyle is uncorroborated.** 27829 comes from 49206's summon effect, and no retained catalog holds that actor. The row pins no start, so its answer is `INSTANCE_START_NOT_PINNED`. A build that proves Summon Gargoyle not taken could prove its absence from the talent, since the module spawns one only under it. That is not bound: it would move nothing today, and it is recorded in "After ONB-X5".
+
+**Decisions.**
+
+1. **A decision's instant is its cast.** Every press the list names has a pinned `_cast_time` of zero, replacements included, and the subject logs no begin at all. So the shared cast anchor has nothing to do, and resources and pets are read at the cast's own millisecond.
+2. **Five tokens bind their replacements too.** `dark_transformation`, `death_coil`, `epidemic`, `festering_strike` and `scourge_strike` each hold a replacement action (`sc_death_knight.cpp:6033-6055`) that runs while a buff is up, the shape Blood's `heart_strike` already binds for Vampiric Strike. Left unbound, Necrotic Coil and Festering Scythe would be excluded as off the list, when they are this list's own presses. The wire agrees: all 21 Necrotic Coils fall inside a logged Forbidden Knowledge window and none of the 32 Death Coils does, and all 9 Festering Scythes fall inside a logged 1241077 window. Blightfall, Graveyard and Vampiric Strike have no retained press, so they rest on the pinned module alone.
+3. **Dark Transformation's lane is its constructor's, and its token has none.** Its record says 1500 ms, and `dark_transformation_t` sets `trigger_gcd = 0_ms` (`sc_death_knight.cpp:8724`). `deathknight-unholy-gcd-semantics.ts` keeps the extracted number and states the reviewed lane in one table, so the shared index and the extractor stay as they are. The wire agrees: all four retained presses land 3 to 482 ms after the press before them. Blightfall (:8722) takes the data's 1500 ms, so the token's two records disagree, and by the shared rule that a token's lane needs every candidate to agree it is `UNKNOWN_LANE`, which the engine refuses rather than guesses. A press of Dark Transformation is excluded `NON_GCD_ACTION`, and a press of Blightfall is that token's decision.
+4. **Arcane Pulse is classified in this specialization's boundary.** It is a `racial_spell_t` the shared table does not list, and `racials[1]` presses it by name ahead of every class action. With rune and Runic Power unbound on some casts, it read as a possible winner on 17 decisions. Racial abilities are excluded from analysis, so `domain-boundary.ts` classifies it, as Outlaw and Feral do Shadowmeld. The shared table stays as it is (agent/follow-ups.md "After ONB-A2"), so nothing else moves.
+5. **SUMMONS is declared on the offensive capability** with RESOURCES, so a request deriving its ingestion from the row cannot under-fetch either.
+6. **The list reads no hero talent**, so no hero talent is modelled and no `hero_tree.*` atom is declared. The tree is reported from entry membership and decides nothing. Deathbringer is not an Unholy tree.
+
+**Evidence.** Nothing new is committed, because the replay needs the raw fight and the archive line has about 5 KB left. Every pinned source read was already on disk and matches the recorded hashes.
+
+**No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse the row. A public request is SPEC_NOT_SUPPORTED, exactly as before.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

@@ -364,6 +364,7 @@ describe("the public path analyzes (M11-A5), and the internal path analyzes the 
       "evoker-devastation-observed-decisions": 0,
       "demonhunter-vengeance-observed-decisions": 0,
       "warlock-demonology-observed-decisions": 0,
+      "deathknight-unholy-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
     const document = projectAnalysisResult(result.analysis);

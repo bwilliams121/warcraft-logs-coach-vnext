@@ -815,6 +815,15 @@
       "assertions": 1,
       "cases": 1,
       "failed": 0,
+      "kindsExercised": ["SPEC_UNHOLY_DEATH_KNIGHT.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_UNHOLY_DEATH_KNIGHT",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
       "kindsExercised": ["SPEC_OUTLAW_ROGUE.SPEC_GATE"],
       "notExecuted": 0,
       "owningLayer": "SPEC_OUTLAW_ROGUE",
@@ -830,13 +839,13 @@
       "passed": 1
     },
     {
-      "assertions": 45,
-      "cases": 41,
+      "assertions": 46,
+      "cases": 42,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 45
+      "passed": 46
     },
     {
       "assertions": 14,
@@ -1398,6 +1407,20 @@
       ],
       "authority": null,
       "caseId": "application-service.subtlety-rogue-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.unholy-death-knight-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -7669,6 +7692,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_UNHOLY_DEATH_KNIGHT.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-unholy-death-knight.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_UNHOLY_DEATH_KNIGHT",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_VENGEANCE_DEMON_HUNTER.SPEC_GATE",
           "ordinal": 0,
           "status": "PASSED"
@@ -8011,6 +8048,7 @@
   "pinnedAuthorities": {
     "SIMC_APL_DEATHKNIGHT_BLOOD": "simc-33622e9d-1",
     "SIMC_APL_DEATHKNIGHT_FROST": "simc-33622e9d-1",
+    "SIMC_APL_DEATHKNIGHT_UNHOLY": "simc-33622e9d-1",
     "SIMC_APL_DEMONHUNTER_DEVOURER": "simc-33622e9d-1",
     "SIMC_APL_DEMONHUNTER_HAVOC": "simc-33622e9d-1",
     "SIMC_APL_DEMONHUNTER_VENGEANCE": "simc-33622e9d-1",
@@ -8044,13 +8082,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 838,
-    "cases": 243,
+    "assertions": 840,
+    "cases": 245,
     "declared": 0,
-    "executable": 838,
+    "executable": 840,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 838
+    "passed": 840
   }
 }

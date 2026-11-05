@@ -89,7 +89,7 @@ row).
 | `druid/balance` | D — INTERNAL_ONLY since ONB-D2 | local raw (three subjects, all Elune's Chosen) | audited | PARTIAL | `astral-power-capping` |
 | `evoker/devastation` | D — INTERNAL_ONLY since ONB-X2 | retained raw (A7R6 fight 7 actor 11, first 165 s; b1Pm fight 48 actor 16 and gtKb fight 22 actor 33, whole fights) | audited | PARTIAL | `empower-cast-usage` |
 | `hunter/marksmanship` | D — INTERNAL_ONLY since ONB-D4 | none usable (filtered M13-A actors 14 and 18, no combatant info; on ONB-EV) | audited | UNASSESSED | — |
-| `deathknight/unholy` | E | none | not yet | UNASSESSED | — |
+| `deathknight/unholy` | E — INTERNAL_ONLY since ONB-X5 | local raw (one subject, Rider of the Apocalypse, first 165 s) | audited | UNASSESSED | — |
 
 Cohorts (from `m11-a3-authority-audit.md` §10): B — instant-cast lists
 without `run_action_list`, gated by target count / `target_if` / charges /

@@ -235,6 +235,7 @@ describe("cross-spec authority access is refused structurally", () => {
       ["evoker/devastation", ["SIMC_APL_EVOKER_DEVASTATION"]],
       ["demonhunter/vengeance", ["SIMC_APL_DEMONHUNTER_VENGEANCE"]],
       ["warlock/demonology", ["SIMC_APL_WARLOCK_DEMONOLOGY"]],
+      ["deathknight/unholy", ["SIMC_APL_DEATHKNIGHT_UNHOLY"]],
     ]);
   });
 });

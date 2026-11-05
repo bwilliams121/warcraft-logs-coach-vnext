@@ -716,6 +716,8 @@ as before.
 
 The pinned source root for this target adds `engine/class_modules/apl/druid/feral_apl.inc` (17,108 bytes), `engine/class_modules/apl/druid/druid.cpp` (926 bytes, both as the M11-A3 audit recorded them) and `engine/class_modules/sc_druid.cpp` (479,886 bytes, `59227a2f...`).
 
+`deathknight-unholy` was extracted in ONB-X5 (64 actions in 8 lists), on the batch path and the two sibling extractors, with `NO_PTR_REGION` as Frost has it. Its pinned source root is Frost's. Its talent note states the id space as corroborated, because the one retained subject's 77 entries each name a pinned trait row. Four of its bindings hold a replacement spell's id too, as Blood's `heart_strike` does.
+
 `warlock-demonology` was extracted in ONB-X4 (61 actions in 6 lists), on the batch path and the two sibling extractors, with `NO_PTR_REGION` as Affliction has it. Its talent note states the id space as corroborated, because all seven retained subjects resolve their talents and Diabolist tree. The dispatch edge for `racials` keeps its `,use_off_gcd=1`, because the extractor pins everything after `if=`.
 
 `demonhunter-vengeance` was extracted in ONB-X3 (203 actions in 16 lists), on the batch path and the two sibling extractors, with `PTR_MARKERS_EMPTY` as Devourer and Havoc have it. Its talent note states the id space as uncorroborated, because no retained capture holds one of its combatant-info events.
