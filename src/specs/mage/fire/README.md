@@ -74,6 +74,8 @@ The engine and the root scan agree on 28 decisions; the other 85 have no anchor,
 
 The queue names Combustion windows and the Heating Up and Hot Streak chain as this specialization's own problem, and it is. It is not reached yet: no scan gets past the dispatch above to a line that reads them, so binding them would change no decision. They stay unbound built-ins, each evaluating UNRESOLVED, and an unread proc never makes a press wrong. What they need is in `agent/follow-ups.md` "After ONB-X1".
 
+**Not promoted by ONB-X1P.** It cannot pass the rotational gates: all 113 decisions stay UNKNOWN. It waits on an authority for `variable.combustion_delay` and the rest of the Combustion dispatch's inputs (agent/architecture.md "ONB-X1P").
+
 ## The evidence
 
 One retained subject, replayed offline through production ingestion: A7R6kxPJ1hC8YQ4w fight 7 actor 17, Sunfury, first 165 s of 424.5 s. 113 decisions, all UNKNOWN, none committed (agent/architecture.md "ONB-X1").

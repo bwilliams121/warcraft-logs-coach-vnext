@@ -1938,11 +1938,13 @@ mergeSha: 72d0d5484977ee6c4ae79b9dd65b2619b0fec819
 ### ONB-X1: Fire Mage (internal, own representative)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-S4
 branch: autopilot/onb-x1
 wcl: NONE
 publicContract: NONE
+pr: 77
+mergeSha: fc86588e7e4b23ee68cee72c1af5d5dc6d9262f7
 ```
 
 **Scope.** A holdout from the M11-D0 census. Combustion windows and
@@ -1954,11 +1956,14 @@ their own. Real evidence is retained.
 ### ONB-X1P: Fire Mage (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-X1
+branch: autopilot/onb-x1p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** It does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Its one retained subject, A7R6 fight 7 actor 17, replayed offline, gives 113 decisions, 0 MATCH, 0 REJECTED, all UNKNOWN, output byte-identical to ONB-X1's. A census of 5,714 retained files finds no new subject, by combatant-info specID as well as by named and pinned ability ids. Evidence is not its gap, so it is not on ONB-EV, and ONB-S3 alone moves nothing. The Mage/Fire public refusal row ONB-X1's migration overwrote is restored. A promotion after its own inputs, first an authority for `variable.combustion_delay`, is a new public entry through the unchanged gates (agent/architecture.md "ONB-X1P"; agent/follow-ups.md "After ONB-X1").
 
 ### ONB-X2: Devastation Evoker (internal, own representative)
 

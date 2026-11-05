@@ -14086,6 +14086,44 @@ The 113 are 76 Pyroblast, 23 Fireball, 9 Scorch and 5 Meteor. The excluded are 5
 
 **No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse the row. A public request for a Fire Mage is SPEC_NOT_SUPPORTED, exactly as before.
 
+## ONB-X1P — Fire Mage public promotion: not promoted
+
+Autopilot queue entry ONB-X1P. Public contract: declared EXPECTED; actual change NONE, because nothing passes. No Warcraft Logs request and no new evidence.
+
+**The outcome.** Fire Mage does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4). The gates are not weakened and gain no subject. This is not an owner stop: rule 4 decides it, and no new decision is needed to record that. ONB-EV would not help, because evidence is not the first gap, and ONB-S3 alone moves nothing.
+
+**Why it cannot pass.** OBSERVATION needs a real MATCH and real resolved decisions over several distinct action tokens, and DISCRIMINATION needs a real REJECTED or a control that flips a real MATCH. Both start from a real resolved decision, and Fire has none. Replaying the only retained subject through production ingestion and the facade over a fake transport, at this tranche's base commit:
+
+| Subject | Hero tree | Span | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 17 | Sunfury | first 165 s of 424.5 s | 113 | 0 | 0 | 113 | 58 |
+
+The replay's output file is byte-identical to the one saved during ONB-X1. 28 of the 113 have an anchor, and each of those stops at `default[7] run_action_list`, the Combustion dispatch. The other 85 have no anchor (`DECISION_ANCHOR_NOT_ESTABLISHED`), and their scans stop at the same line, so an anchor alone would not resolve them. The 113 are 76 Pyroblast, 23 Fireball, 9 Scorch and 5 Meteor. The result is one subject and one hero tree, so it would not measure Frostfire even if it resolved.
+
+**The census found nothing more, by three routes.** It parsed every JSON file over 500 bytes under `.probe/` and `tests/`, skipping tool output and worktree copies (5,714 parsed of 5,715). Mortal Strike, the positive control, has 559 casts.
+
+1. **Combatant info.** The only `combatantinfo` event with specID 63 is actor 17's, in `.probe/m10b-pages.json`. The route can find others: 31 specIDs appear in the distribution, each one a control.
+2. **Named abilities.** Ids the retained contexts' master data names for Fire's abilities.
+3. **Pinned ids.** Every id in `mage-fire-gcd-semantics.json`, independent of any report's master data. ONB-X1's census did not run this route. It adds no hit: the one id the names do not already cover, Flamestrike 1254851, has no cast.
+
+Every source holding a hit was resolved against its report's actors:
+
+| Source | What it is | Result |
+| --- | --- | --- |
+| A7R6 fight 7 actor 17, `m10b` and `m10c5` pages | the subject | replayed, above |
+| A7R6 fight 7 actor 17, `m9c-pages` and its two corpus artifacts | the same subject, a five-page sample of 226 events over 454 ms at 171.4 s, with one Pyroblast | not a new subject |
+| A7R6 actors 24, 33; gtKb actors 51, 54; rXAf actor 37; b1Pm actors 25, 29 | Primal Fire Elemental pets of other players | 117588 and 57984, Meteor and Fire Blast by name only, none of them this specialization's decisions |
+
+The other contexts naming Fire, 24XJ9Nyq7jnfgAMQ fight 23 actor 17, VwGz68yk9gTr7DhH actor 10 and 6gTFNyCYXn3DxWtZ actor 12, hold no hit in any retained file. They name a player and carry no retained cast of that player.
+
+Limits: the census does not read JSON files of 500 bytes or less, or log and text output. Its cast routes match named and pinned ids, so a file holding only other abilities would not appear; the combatant-info route does not depend on them.
+
+**A refusal row ONB-X1 removed is restored.** ONB-X1's sentinel migration rewrote `["Mage", "Fire"]` in `analysis-composition-refusals` to a second `["Evoker", "Devastation"]`, so the public refusal of Fire was not pinned there, and the Evoker row ran twice. Its comment also kept "actor 17" beside the new identity. This tranche drops the duplicate, adds `["Mage", "Fire"]` under its own comment, and corrects the comment to actor 11. No other migrated test file holds such a duplicate or stale pairing, by a search of `tests/` and `scripts/bench/`.
+
+**What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists it; the gate search finds no qualifying assertion and `evidenceReady` false (`m11-promotion-evidence-gate`, from ONB-X1, its comment now naming the outcome); and a public request is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which now holds it). A public request still runs preparation and reports partial coverage. Nothing reads as clean play. The replay and census are offline and not committed.
+
+**What a later promotion must do.** Evidence is not the first gap, so Fire is not on ONB-EV. First it answers what `variable.combustion_delay` means in a real fight, which is an authority question: the pinned list assigns it from a simulation's planned fight length, and using the real length would be hindsight. Then it binds the rest of the Combustion dispatch, then the proc chain behind it. It answers the anchor's limits, measures or refuses Frostfire and Flamestrike, as Havoc refuses Fel-Scarred, and checks its readers of `fightTimeMs`, because decision times are the anchor's (agent/follow-ups.md "After ONB-X1"). A new public entry then promotes it through the unchanged gates by the five-site promotion. No such entry is queued.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and
