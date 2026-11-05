@@ -782,8 +782,9 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
   });
 
   it("ONB-X5: the gate search finds nothing for Unholy Death Knight", async () => {
-    // No decision of it resolves on its one retained subject, and nothing of it is committed as a decision set (agent/architecture.md "ONB-X5").
-    // A later capture that changed this would fail this pin and prompt a new public entry; it would not promote anything by itself.
+    // All 147 decisions of its one retained subject stay UNKNOWN, so it was not promoted (agent/architecture.md
+    // "ONB-X5P"). A later capture that changed this would fail this pin and prompt a new public entry; it would not
+    // promote anything by itself.
     const tiers = await tiersPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "deathknight/unholy");
     if (module === undefined) throw new Error("no module for deathknight/unholy");

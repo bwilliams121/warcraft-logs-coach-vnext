@@ -14415,6 +14415,44 @@ The 147 are 58 `scourge_strike`, 53 `death_coil` (32 Death Coil and 21 Necrotic 
 
 **No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse the row. A public request is SPEC_NOT_SUPPORTED, exactly as before.
 
+## ONB-X5P — Unholy Death Knight public promotion: not promoted
+
+Autopilot queue entry ONB-X5P. Public contract: declared EXPECTED; actual change NONE, because nothing passes. No Warcraft Logs request and no new evidence.
+
+**The outcome.** Unholy Death Knight does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4). The gates are not weakened and gain no subject. This is not an owner stop: rule 4 decides it, and no new decision is needed to record that. Evidence is not its first gap, so it is not on ONB-EV, and ONB-S3 alone moves nothing.
+
+**Why it cannot pass.** OBSERVATION needs a real MATCH and real resolved decisions over several distinct action tokens, and DISCRIMINATION needs a real REJECTED or a control that flips a real MATCH. Both start from a real resolved decision, and Unholy has none. Replaying the one retained subject through production ingestion and the facade over a fake transport, at this tranche's base commit:
+
+| Subject | Hero tree | Span | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| rXAfw9t1q8YpmkKD fight 13 actor 18 | Rider of the Apocalypse | first 165 s | 147 | 0 | 0 | 147 | 85 |
+
+The replay's output file is byte-identical to the one saved during ONB-X5 (sha256 bffc3f80). The engine refuses all 147 at `default[0] auto_attack`, and the root scan of all 147 stops at `aoe[0] death_and_decay`, on a `%` the shared parser refuses. The pet answers on all 147 are UNKNOWN: `army_ghoul` on `ENTITY_MAPPING_AMBIGUOUS`, `gargoyle` on `INSTANCE_START_NOT_PINNED` and `lord_of_the_dead` on `OWNERSHIP_NOT_STATED`. The one subject is Rider of the Apocalypse, so the result would not measure San'layn even if it resolved.
+
+**The census found no other subject, by three routes.** It parsed every JSON file over 500 bytes under `.probe/` and `tests/`, skipping tool output and worktree copies (5,717 parsed of 5,718; the other is `.probe/m11d2c/bad.json`). Mortal Strike, the positive control, has 985 events, 559 of them casts.
+
+1. **Combatant info.** The `combatantinfo` events with specID 252 are 6, naming actor 18 (`m11c4f` pages) and actors 195 and 199 (`m11g2` `diagnose` and `diagnose2`). The route can find others: 31 specIDs appear in the distribution, each one a control.
+2. **Named abilities.** The 17 ids retained contexts' master data give Scourge Strike, Festering Strike, Putrefy, Soul Reaper, Army of the Dead, Dark Transformation, Outbreak and Epidemic.
+3. **Pinned ids.** Every id in `deathknight-unholy-gcd-semantics.json`, 15 of them, read from the file. The census throws if this route or the named route is empty. This route adds Death Coil, Necrotic Coil, Festering Scythe, Graveyard, Blightfall, and two ids a Blood Death Knight also casts, Death and Decay 43265 and Vampiric Strike 433895.
+
+Every source holding a hit was resolved against its report's context:
+
+| Source | What it is | Result |
+| --- | --- | --- |
+| rXAf fight 13 actor 18 (`m11c4f` pages) | the subject | replayed, above |
+| rXAf fight 13 actor 174 (the same files) | its own pet, gameID 221634, owner 18 | 17 pet Scourge Strikes (445508), no decision of its own |
+| gBMCKxyY7dQDRZav fight 33 actors 195 and 199 (`m11g2` `diagnose`, `diagnose2`) | Unholy, by combatant info and context | one Outbreak each in a diagnostic sample of 62 events, not a subject |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 14, gtKb2xHn87pNcFfW fight 22 actor 14, b1PmaKrd6CDfzngc fight 48 actor 15, rXAf fight 13 actor 77, Gw2kXrTfLWcDdhFY fight 1 actor 12, gBMC fight 33 actor 7, xBFW2vymXG1J6qaw fight 64 actor 332, 6xZNA2CjtMrvfXcw fight 31 actor 6 | Blood, by context | Death and Decay and Vampiric Strike only, the two ids that specialization also casts |
+| Actors 40, 58, 86, 44, 364, 15 and 166 of those same reports | each a pet of gameID 27893, owned by the Blood Death Knight above | Vampiric Strike damage only, no cast |
+
+The retained contexts hold 40 rows naming Unholy, over 11 report codes, three of them sanitized stand-ins (`COHORT116AAAAAAA`, `COHORT246AAAAAAA`, `COHORT261AAAAAAA`). Apart from the sources above they hold no event of these ids in any retained file: they name a player and carry none of that player's casts. No source is San'layn.
+
+Limits: the census does not read JSON files of 500 bytes or less, or log and text output. Its ability routes match the ids above only; the combatant-info route does not depend on them. An actor with neither a context nor combatant info, holding none of those ids, would not appear.
+
+**What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists it; the gate search finds no qualifying assertion and `evidenceReady` false (`m11-promotion-evidence-gate`, from ONB-X5, its comment now naming the outcome). One test row is new: a public DeathKnight/Unholy request is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which held no row for it). A public request still runs preparation and reports partial coverage. Nothing reads as clean play. The replay and census are offline and not committed.
+
+**What a later promotion must do.** It first answers its stops, in order (agent/follow-ups.md "After ONB-X5"): the swing's entry at `default[0]`, then Outbreak, Army of the Dead and Dark Transformation at `cooldowns[2]` to `cooldowns[4]`, and then `%` at `aoe[0]` and the enemy count. Pet answers need a bound for the Lord of the Dead, a way to tell army ghouls from other Lesser Ghouls, and an owner-approved attribution rule for pets with no stated owner. It measures or refuses San'layn, as Havoc refuses Fel-Scarred. A second subject and a whole fight need a capture, which is ONB-EV's owner decision. A new public entry then promotes it through the unchanged gates by the five-site promotion, and must first commit its evidence with identity proof, because a PUBLIC module cannot use the retained-only exception. No such entry is queued.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

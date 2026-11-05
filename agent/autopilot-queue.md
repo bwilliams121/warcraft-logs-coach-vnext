@@ -2069,11 +2069,13 @@ mergeSha: 6e08a90d1db7545c53ccc8ce406c6ca831a82c30
 ### ONB-X5: Unholy Death Knight (internal, own representative)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-S2, ONB-S6
 branch: autopilot/onb-x5
 wcl: NONE
 publicContract: NONE
+pr: 85
+mergeSha: e80f30a38727cbfeae74d2c51c0496d2adf01e3b
 ```
 
 **Scope.** A holdout from the M11-D0 census Cohort E, which is pet- and
@@ -2086,11 +2088,14 @@ needed.
 ### ONB-X5P: Unholy Death Knight (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-X5
+branch: autopilot/onb-x5p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** It does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Its one retained subject, Rider of the Apocalypse, replayed offline, gives 147 decisions, 0 MATCH, 0 REJECTED, all UNKNOWN, output byte-identical to ONB-X5's. A census of 5,717 retained files finds no other subject: gBMC fight 33 actors 195 and 199 hold one Outbreak each in a diagnostic sample, and every other hit is a Blood Death Knight's or a pet's. Evidence is not its first gap, so it is not on ONB-EV, and ONB-S3 alone moves nothing. A promotion after its own inputs, first the swing's entry and the three cooldown lines behind it, is a new public entry through the unchanged gates (agent/architecture.md "ONB-X5P"; agent/follow-ups.md "After ONB-X5").
 
 ### ONB-Z: Specialization-onboarding completion matrix
 
