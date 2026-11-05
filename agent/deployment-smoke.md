@@ -710,9 +710,9 @@ Expect 200 and confirm all of:
 
 ## M10-5. REST single fight — unsupported (Arms Warrior)
 
-**Since ONB-X1 the current unsupported subject is actor 11, Evoker / Devastation, in the same fight**
+**Since ONB-X2 the current unsupported subject is actor 20, Hunter / BeastMastery, in the same fight**
 (`tests/support/unsupported-subject.ts`). Use it wherever this checklist says the canonical subject.
-Actor 4 stays `SPEC_NOT_SUPPORTED` publicly while Arms is INTERNAL_ONLY, and so does actor 17, the Fire Mage, the subject from ONB-B1 to ONB-X1. ONB-B1P did not promote Arms, so
+Actor 4 stays `SPEC_NOT_SUPPORTED` publicly while Arms is INTERNAL_ONLY, and so do actor 17, the Fire Mage, the subject from ONB-B1 to ONB-X1, and actor 11, the Devastation Evoker, the subject from ONB-X1 to ONB-X2. ONB-B1P did not promote Arms, so
 the steps below still hold as written.
 
 Costs **1** unit. Same report and fight, actor **4** — Warrior/Arms per the

@@ -16,7 +16,7 @@
  *                                 absence of its own evidence TRUTHFULLY
  *     6   Paladin / Retribution   likewise
  *     19  Rogue / Assassination   likewise
- *     11  Evoker / Devastation             SPEC_NOT_SUPPORTED — no analyzer exists
+ *     20  Hunter / BeastMastery             SPEC_NOT_SUPPORTED — no analyzer exists
  *
  * Nothing is relabelled and no Paladin or Rogue event is manufactured: their
  * cells are their analyzers' own PROFILE_NOT_RESOLVED, never ANALYZED cells
@@ -29,7 +29,7 @@
  *
  * Roster discovery once, ingestion once for the one fight, revision confirmed
  * once, each supported player's analyzer exactly once and the right one, no
- * analyzer for Devastation, every cell's kind/status/spec preserved, the Blood cell
+ * analyzer for Beast Mastery, every cell's kind/status/spec preserved, the Blood cell
  * carrying the same totals the single-fight service publishes for the same
  * evidence with the exclusion tally already projected onto the public
  * vocabulary (OUTSIDE_SUPPORTED_SLICE, never the internal name), the public
@@ -64,21 +64,21 @@ const BLOOD_DK = 14;
 const RETRIBUTION = 6;
 const PROTECTION = 7;
 const ROGUE = 19;
-const DEVASTATION_EVOKER = CURRENT_UNSUPPORTED_SUBJECT.sourceId;
+const BEAST_MASTERY_HUNTER = CURRENT_UNSUPPORTED_SUBJECT.sourceId;
 
 const CLASS_OF: Readonly<Record<number, string>> = {
   [BLOOD_DK]: "DeathKnight",
   [RETRIBUTION]: "Paladin",
   [PROTECTION]: "Paladin",
   [ROGUE]: "Rogue",
-  [DEVASTATION_EVOKER]: CURRENT_UNSUPPORTED_SUBJECT.expectedClassName,
+  [BEAST_MASTERY_HUNTER]: CURRENT_UNSUPPORTED_SUBJECT.expectedClassName,
 };
 const SPEC_OF: Readonly<Record<number, string>> = {
   [BLOOD_DK]: "Blood",
   [RETRIBUTION]: "Retribution",
   [PROTECTION]: "Protection",
   [ROGUE]: "Assassination",
-  [DEVASTATION_EVOKER]: CURRENT_UNSUPPORTED_SUBJECT.expectedSpecName,
+  [BEAST_MASTERY_HUNTER]: CURRENT_UNSUPPORTED_SUBJECT.expectedSpecName,
 };
 
 /** The Blood 45 s totals the single-fight service publishes for this evidence (M11-B10). */
@@ -211,6 +211,7 @@ describe("a Blood Death Knight alone", () => {
       "warlock-affliction-observed-decisions": 0,
       "hunter-marksmanship-observed-decisions": 0,
       "mage-fire-observed-decisions": 0,
+      "evoker-devastation-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
     expectBloodCell(cellOf(run.aggregate.cells, BLOOD_DK));
@@ -227,8 +228,8 @@ describe("a Blood Death Knight alone", () => {
   });
 });
 
-describe("a mixed roster — all four supported specializations plus Devastation — over the Blood slice", () => {
-  const ROSTER = [BLOOD_DK, PROTECTION, RETRIBUTION, ROGUE, DEVASTATION_EVOKER] as const;
+describe("a mixed roster — all four supported specializations plus Beast Mastery — over the Blood slice", () => {
+  const ROSTER = [BLOOD_DK, PROTECTION, RETRIBUTION, ROGUE, BEAST_MASTERY_HUNTER] as const;
 
   it("discovers once, ingests once, confirms the revision once, and runs each supported analyzer exactly once", async () => {
     const { ports, calls } = portsFor(ROSTER);
@@ -271,6 +272,7 @@ describe("a mixed roster — all four supported specializations plus Devastation
       "warlock-affliction-observed-decisions": 0,
       "hunter-marksmanship-observed-decisions": 0,
       "mage-fire-observed-decisions": 0,
+      "evoker-devastation-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
   });
@@ -298,12 +300,12 @@ describe("a mixed roster — all four supported specializations plus Devastation
       expect(cell.status).toBe("PROFILE_NOT_RESOLVED");
     }
 
-    const fire = cellOf(cells, DEVASTATION_EVOKER);
-    expect(fire.kind).toBe("NOT_ANALYZED");
-    if (fire.kind !== "NOT_ANALYZED") return;
-    expect(fire.specName).toBe(CURRENT_UNSUPPORTED_SUBJECT.expectedSpecName);
-    expect(fire.status).toBe("SPEC_NOT_SUPPORTED");
-    expect(fire.detail).toContain("no gameplay analysis was attempted");
+    const unsupported = cellOf(cells, BEAST_MASTERY_HUNTER);
+    expect(unsupported.kind).toBe("NOT_ANALYZED");
+    if (unsupported.kind !== "NOT_ANALYZED") return;
+    expect(unsupported.specName).toBe(CURRENT_UNSUPPORTED_SUBJECT.expectedSpecName);
+    expect(unsupported.status).toBe("SPEC_NOT_SUPPORTED");
+    expect(unsupported.detail).toContain("no gameplay analysis was attempted");
 
     expect(coverage).toMatchObject({
       cellsTotal: 5,
@@ -345,7 +347,7 @@ describe("the Blood cell is the single-fight analysis, unchanged by its neighbou
     );
     const mixed = await runNight(
       { reportCode: REPORT_CODE, fightIds: [FIGHT_ID] },
-      portsFor([BLOOD_DK, PROTECTION, RETRIBUTION, ROGUE, DEVASTATION_EVOKER]).ports,
+      portsFor([BLOOD_DK, PROTECTION, RETRIBUTION, ROGUE, BEAST_MASTERY_HUNTER]).ports,
     );
     if (!alone.ok || !mixed.ok) throw new Error("run failed");
     const aloneCell = cellOf(alone.aggregate.cells, BLOOD_DK);

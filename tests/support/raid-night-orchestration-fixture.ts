@@ -162,7 +162,7 @@ export function corpusCore(
  *
  * WHAT THIS IS FOR. A mixed-specialization raid night over REAL evidence: the
  * A7R6 opener slice describes actor 7 (Protection Paladin); actors 19
- * (Assassination Rogue), 11 (Devastation Evoker) and 14 (Blood Death Knight) are
+ * (Assassination Rogue), 20 (Beast Mastery Hunter) and 14 (Blood Death Knight) are
  * real participants of the same fight per the committed fight-context
  * artifact, and none of their events is in the slice. A raid night over this
  * core therefore analyzes the Paladin for real and must answer TRUTHFULLY for
@@ -347,7 +347,7 @@ export function assassinationSnapshot(options: {
   /**
    * The Warcraft Logs class of each player. Defaults to Rogue. A test naming
    * an unsupported participant must pair a REAL class with a real spec
-   * (Evoker/Devastation), never leave the default and produce "Rogue/Protection".
+   * (Hunter/BeastMastery), never leave the default and produce "Rogue/Protection".
    */
   readonly classNameFor?: (sourceId: number) => string;
   readonly absentOn?: ReadonlyMap<number, readonly number[]>;

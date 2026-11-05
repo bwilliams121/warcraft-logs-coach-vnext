@@ -80,7 +80,8 @@ describe("the current unsupported subject is what the committed capture says it 
   it("names a real specialization of the pinned roster, so it is unsupported and not unreal", () => {
     // A subject that named a spec the game does not have would prove nothing
     // about the unsupported path; the roster says this one exists.
-    expect(rosterSpecialization(CURRENT_UNSUPPORTED_SUBJECT.observedSpecId)).not.toBeNull();
+    expect(rosterSpecialization(CURRENT_UNSUPPORTED_SUBJECT.rosterKey)).not.toBeNull();
+    // The observed string is the wire's pair, lower-cased; it need not equal the roster key.
     expect(CURRENT_UNSUPPORTED_SUBJECT.observedSpecId).toBe(
       `${CURRENT_UNSUPPORTED_SUBJECT.expectedClassName}/${CURRENT_UNSUPPORTED_SUBJECT.expectedSpecName}`.toLowerCase(),
     );
@@ -104,12 +105,16 @@ describe("the current unsupported subject is unsupported everywhere production d
   });
 
   it("MIGRATION GUARD: its spec is not a SpecId in any exposure — migrate the fixture before adding it", () => {
-    const observed = CURRENT_UNSUPPORTED_SUBJECT.observedSpecId;
-    const where = `${observed} is now a SpecId; tests/support/unsupported-subject.ts must be migrated to a specialization outside SPEC_IDS before this id can exist`;
-    expect(isSpecId(observed), where).toBe(false);
-    expect([...SPEC_IDS] as readonly string[], where).not.toContain(observed);
-    expect([...PUBLIC_SPEC_IDS] as readonly string[], where).not.toContain(observed);
-    expect([...INTERNAL_ONLY_SPEC_IDS] as readonly string[], where).not.toContain(observed);
+    for (const observed of [
+      CURRENT_UNSUPPORTED_SUBJECT.observedSpecId,
+      CURRENT_UNSUPPORTED_SUBJECT.rosterKey,
+    ]) {
+      const where = `${observed} is now a SpecId; tests/support/unsupported-subject.ts must be migrated to a specialization outside SPEC_IDS before this id can exist`;
+      expect(isSpecId(observed), where).toBe(false);
+      expect([...SPEC_IDS] as readonly string[], where).not.toContain(observed);
+      expect([...PUBLIC_SPEC_IDS] as readonly string[], where).not.toContain(observed);
+      expect([...INTERNAL_ONLY_SPEC_IDS] as readonly string[], where).not.toContain(observed);
+    }
   });
 
   it("is scoped to the onboarding programme and says so", () => {

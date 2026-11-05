@@ -14124,6 +14124,62 @@ Limits: the census does not read JSON files of 500 bytes or less, or log and tex
 
 **What a later promotion must do.** Evidence is not the first gap, so Fire is not on ONB-EV. First it answers what `variable.combustion_delay` means in a real fight, which is an authority question: the pinned list assigns it from a simulation's planned fight length, and using the real length would be hindsight. Then it binds the rest of the Combustion dispatch, then the proc chain behind it. It answers the anchor's limits, measures or refuses Frostfire and Flamestrike, as Havoc refuses Fel-Scarred, and checks its readers of `fightTimeMs`, because decision times are the anchor's (agent/follow-ups.md "After ONB-X1"). A new public entry then promotes it through the unchanged gates by the five-site promotion. No such entry is queued.
 
+## ONB-X2 — Devastation Evoker (internal, own representative)
+
+Autopilot queue entry ONB-X2. Public contract: NONE. No Warcraft Logs request. `src/specs/evoker/devastation/README.md` is the slice in detail.
+
+**What it is.** One specialization registered INTERNAL_ONLY on the observed-decision pattern, with its own pinned list, GCD and talent data, cast semantics, anchor profile, resolver, facade and registration. It is cloned from Arcane Mage's finished shape, which keeps a channel rule, then given Devastation's own vocabulary, applicability and cast review. No shared analyzer was introduced and no shared analysis code changed. One extractor policy and its artifact vocabulary were added (below).
+
+**The queue's questions, answered.**
+
+1. **Empowered casts: they are channels to the shared anchor, and the rank is left open.** The entry says rank goes by hold time, and "After HEAL-B4" says an empowered spell needs a reviewed definition before a decision involves one. This is that review. `empowered_charge_t` sets `channeled = true` (sc_evoker.cpp:3519), and on all three retained subjects `empowerstart` and `cast` are in one millisecond or one apart, with `empowerend` 485 to 2,340 ms later carrying `empowermentLevel`. A Tip the Scales press is a `cast` alone: the 8 empowered casts with no `empowerstart` beside them each follow one of the 8 Tip the Scales presses, by 177 to 951 ms, and no `empowerstart` lacks a `cast` within 1 ms. So the `cast` is the start, which is exactly what the shared CHANNEL kind says of a channel's `cast`, however long the hold. The moment of the decision does not depend on the hold, so ONB-S4's `CastAnchorProfile` gains no empowered kind. The cast table names the rule `EMPOWERED` so a reader can see it, and the profile maps it to CHANNEL.
+2. **`empower-cast-usage` stays open, and it is not answered by accident.** The question asks whether Fire Breath and Eternity Surge were used as the `es` and `fb` lists select. Each of those lines carries `empower_to`, which the shared action options do not support, so each refuses, and none is reached anyway. `empowerend` stays envelope-only and `empowermentLevel` is not read. So no decision says anything about a rank, and a test pins that the level on the wire changes no comparison. A later MATCH on `fire_breath` would mean the token, never the rank, and the rank needs its own reading of `empowermentLevel` before an `empower_to` line can be evaluated.
+3. **The role stays UNKNOWN.** The roster row is untouched and a test pins it. The declared M11 classification is what places it, as for Preservation and Augmentation.
+4. **Fight 48 is one subject of three.** The inventory named fight 48. The census finds three, below.
+
+**Measured, offline, by replaying the retained subjects through production ingestion.** A census of every retained JSON file over 500 bytes (5,714 parsed of 5,715), reading events of any type, by context, by combatant-info specID 1467 and by ability id, with Mortal Strike as its positive control (559 casts), finds:
+
+| Subject | Hero tree | Span | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 11 | Scalecommander | first 165 s of 424.5 s | 89 | 0 | 0 | 89 | 22 |
+| b1PmaKrd6CDfzngc fight 48 actor 16 | Scalecommander | whole fight, 345.2 s | 191 | 0 | 0 | 191 | 38 |
+| gtKb2xHn87pNcFfW fight 22 actor 33 | Scalecommander | whole fight, 284.8 s, three captures | 160 | 0 | 0 | 160 | 24 |
+
+The 440 are 183 Disintegrate, 89 Living Flame, 39 Eternity Surge, 37 Fire Breath, 31 Azure Sweep, 21 Deep Breath, 16 Unbound Flame, 8 Dragonrage, 6 Verdant Embrace, 4 Pyre, 3 Azure Strike and 3 Emerald Blossom, with the rest of the population excluded by name. No Flameshaper subject is retained. Contexts also name yzH96N8QMkv41bdx fight 32 actor 11 and 24XJ9Nyq7jnfgAMQ fight 23 actor 11, with no events of theirs retained, and the one Disintegrate of A7R6 actor 11 in a committed corpus artifact is the same subject.
+
+**Where it stops.** Every scan on the three subjects runs the same way. The engine refuses at `default[6] quell` (`ONE_SCAN_BLOCKED/NO_DEFINITE_WINNER`): Quell is off the GCD with no contract, and `target.debuff.casting.react` reads an enemy cast nothing reads. The root scan goes on past that to record its own stop: `default[7]` calls `trinkets`, which returns nothing, `default[8]`'s `talent.mass_disintegrate` is TRUE from the observed tree, and `sc[0] deep_breath` stops it, because its `cancel_if` is an option nothing supports (reported as `UNSUPPORTED_TARGETING`). So 351 anchored decisions stop there, and the other 89 have no anchor, with their scans stopping at the same line. On synthetic builds, a Flameshaper tree proves `mass_disintegrate` absent, skips `sc`, and stops at `fs[0] fire_breath`, on `target_if` and `empower_to`. A tree with no hero entry stops at the open dispatch, and a tree missing Quell's talent stops at Quell's own applicability. **ONB-S3 alone moves nothing**: neither first stop reads an enemy count, though `use_pyre_fs`, `es`, `fb` and much of `sc` do behind them.
+
+**The anchors on the 440:**
+
+| Anchor | Count | Spells |
+| --- | ---: | --- |
+| `CHANNEL_START` | 280 | Disintegrate, Deep Breath, Fire Breath and Eternity Surge, all of them |
+| `BEGINCAST_PAIRING_AMBIGUOUS` | 88 | Living Flame, all of them but one |
+| `INSTANT_COMPLETION` | 71 | Azure Sweep, Unbound Flame, Dragonrage, Verdant Embrace, Pyre, Azure Strike, Emerald Blossom |
+| `CAST_TIME_UNKNOWN` | 1 | Living Flame, A7R6, at the edge of its capture |
+
+**The begin does not say which Living Flame it was.** It is the one positive cast time, 2,000 ms, with Burnout 375802 and Lifespark 394552 and 443176 as -100% rows, and no build narrows them. The wire logs a begin in front of an instant press too: the median gap is 0 ms on every subject.
+
+**Requirement C is not met, and why this is not an owner stop.** As for Arms, Destruction, Arcane and Fire. The queue asks for an internal registration, and the fail-closed result is correct. What would change it is listed in agent/follow-ups.md "After ONB-X2". The public decision is ONB-X2P's.
+
+**Decisions.**
+
+1. **No shared analysis code moved.** The list fits the shared timeline and selection as it stands. All 86 actions parse, and every in-domain condition outside precombat parses whole. `src/simc/authority-artifact.ts` gains a policy name and nothing reads it differently.
+2. **A new extractor policy, `PTR_STUB_NEVER_DISPATCHED`.** The evoker module's PTR region is `void devastation_ptr( player_t* )` with an empty body, defined and never called. `NO_PTR_REGION` is false of it because the markers exist, `PTR_MARKERS_EMPTY` is false because a definition exists, and neither of the two body policies fits. The new one checks exactly that shape and fails on anything more, and a test mutates the region both ways. A live build dispatches only `devastation`.
+3. **Eternity Surge and Fire Breath bind their Font of Magic rows too.** `find_spell_override( spell, p->talent.font_of_magic )` can read 382411 and 382266. Every press on the three subjects is the base row, and both rows are `_gcd` 500 and the same rule, so the lane and the anchor do not depend on which.
+4. **500 ms is the pinned `_gcd`, on the GCD lane.** The empowered charge sets `gcd_type` NONE and `min_gcd` to it, so it does not scale. Nothing here reads it as a duration.
+5. **Deep Breath and Disintegrate are channels.** Each constructor sets `channeled` (sc_evoker.cpp:6262, 6362), and no begin is on the wire for either. Each has a guard to `not_found()` on Augmentation's talent, Breath of Eons and Eruption, which no Devastation tree holds, so neither has a guard here.
+6. **Azure Sweep and Unbound Flame are built on literal spells whose `ready()` asks for a buff.** So each is applicable on every build, and readiness is a usability claim this slice does not make. Their buffs 1265871 and 1292323 have no lane and bind no token.
+7. **Off-GCD Hover, Quell and Tip the Scales have no contract.** Tip the Scales writes the buff the empowered lines read, and Hover the buff `sc` and `fs` read, so a contract needs that state bound first.
+8. **`raid_event.*` is declared and unbound, for good reason.** It is a simulation's script. It sits on 11 in-domain lines and a real fight has no schedule to read.
+9. **The class-tree talents are tagged CLASS.** Ancient Flame, Scarlet Adaptation, Tip the Scales and Verdant Embrace are on the class tree, and the extractor refuses them under SPECIALIZATION.
+
+**The unsupported-path subject moved.** The fixture's guard demands that the subject is not a `SpecId`, so `tests/support/unsupported-subject.ts` moved from Devastation Evoker, A7R6 fight 7 actor 11, to that fight's Beast Mastery Hunter, actor 20, before `evoker/devastation` was added: the same committed capture, with the identity read from its master data. The wire says `BeastMastery`, which the service lower-cases to the observed `hunter/beastmastery`, and the roster's key is `hunter/beast_mastery`. So the fixture now holds both, as `observedSpecId` and `rosterKey`, and the guard watches both, so it fires on the id the build would actually add. The corpus cases that pin it by coordinates were renamed, the expected player name is `Actor20`, and two order-sensitive pins changed because 20 sorts after 19. Devastation's own refusal row stays in `analysis-composition-refusals` and `spec-identity`, and `spec-identity`'s row ONB-X1's rewrite duplicated is one row again. **This is the last unregistered specialization A7R6 fight 7 holds**, so ONB-T2 owes a migration to another committed context, with a new corpus artifact.
+
+**Evidence.** Nothing new is committed. The subjects' events are retained raw and would pin nothing the synthetic tests do not. `apl_evoker.cpp` matches the M11-A3 hash, and `sc_evoker.cpp` is read at the same commit.
+
+**No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse the row. A public request for a Devastation Evoker is SPEC_NOT_SUPPORTED, exactly as before.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

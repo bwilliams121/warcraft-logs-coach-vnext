@@ -53,6 +53,7 @@ import * as frostMage from "./executors/spec-frost-mage.js";
 import * as afflictionWarlock from "./executors/spec-affliction-warlock.js";
 import * as marksmanshipHunter from "./executors/spec-marksmanship-hunter.js";
 import * as fireMage from "./executors/spec-fire-mage.js";
+import * as devastationEvoker from "./executors/spec-devastation-evoker.js";
 import * as outlawRogue from "./executors/spec-outlaw-rogue.js";
 import * as enhancementShaman from "./executors/spec-enhancement-shaman.js";
 import * as sharedEngine from "./executors/shared-decision-engine.js";
@@ -715,6 +716,8 @@ export async function executeAssertion(
       return marksmanshipHunter.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_FIRE_MAGE.SPEC_GATE":
       return fireMage.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_DEVASTATION_EVOKER.SPEC_GATE":
+      return devastationEvoker.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_OUTLAW_ROGUE.SPEC_GATE":
       return outlawRogue.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE":
@@ -865,6 +868,7 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_AFFLICTION_WARLOCK.SPEC_GATE",
   "SPEC_MARKSMANSHIP_HUNTER.SPEC_GATE",
   "SPEC_FIRE_MAGE.SPEC_GATE",
+  "SPEC_DEVASTATION_EVOKER.SPEC_GATE",
   "SPEC_OUTLAW_ROGUE.SPEC_GATE",
   "SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE",
   "SPEC_PRESERVATION_EVOKER.REGISTRATION_RESULT",

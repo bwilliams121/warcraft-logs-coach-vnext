@@ -206,7 +206,7 @@ describe("nothing missing resolves", () => {
   it("keeps an unusable identity distinct from an unsupported one", () => {
     // One is a data problem, the other a coverage limit. They need different
     // remedies, so they must not share a reason.
-    expect(outcome("", "Assassination")).not.toBe(outcome("Evoker", "Devastation"));
+    expect(outcome("", "Assassination")).not.toBe(outcome("Hunter", "BeastMastery"));
   });
 });
 
@@ -222,10 +222,11 @@ describe("no unsupported identity falls through to a supported specialization", 
     ["Druid", "Holy"],
     // Restoration Druid: registered INTERNAL_ONLY, never publicly resolvable.
     ["Druid", "Restoration"],
-    // The canonical captured unsupported identity: A7R6 fight 7, actor 4.
+    // The canonical captured unsupported identity: A7R6 fight 7, actor 20.
+    ["Hunter", "BeastMastery"],
+    // Devastation Evoker: registered INTERNAL_ONLY since ONB-X2, never publicly resolvable.
     ["Evoker", "Devastation"],
     // Other real specs.
-    ["Evoker", "Devastation"],
     // Discipline Priest: registered INTERNAL_ONLY since HEAL-B3, never publicly resolvable.
     ["Priest", "Discipline"],
     ["Death Knight", "Blood"],
@@ -312,17 +313,17 @@ describe("prototype keys cannot masquerade as a specialization", () => {
 
 describe("a refusal discloses what it saw", () => {
   it("reports the normalized pair that failed", () => {
-    const result = resolve("  Evoker ", "Devastation");
+    const result = resolve("  Hunter ", "BeastMastery");
 
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.observed).toEqual({ className: "evoker", specName: "devastation" });
+    expect(result.observed).toEqual({ className: "hunter", specName: "beastmastery" });
   });
 
   it("carries no spec id on the failure branch", () => {
     // Structural: there is no variant returning a usable id alongside a
     // failure, so a caller cannot read one out of a refusal.
-    const result = resolve("Evoker", "Devastation");
+    const result = resolve("Hunter", "BeastMastery");
 
     expect("specId" in result).toBe(false);
   });

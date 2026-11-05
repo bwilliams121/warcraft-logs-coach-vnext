@@ -2242,8 +2242,8 @@ const PP = "wcl-protection-paladin-a7r6-opener";
 const PP_GAP = "wcl-protection-paladin-a7r6-opener.gap-before-2010000";
 const A7R6_CONTEXT = "wcl-fight-context-a7r6-fight-7";
 const TANK = 7;
-/** A7R6 fight 7 actor 11 — Evoker/Devastation per the committed fight-context artifact: the canonical UNSUPPORTED identity since ONB-B1. */
-const DEVASTATION_EVOKER = 11;
+/** A7R6 fight 7 actor 20 — Hunter/BeastMastery per the committed fight-context artifact: the canonical UNSUPPORTED identity since ONB-B1. */
+const BEAST_MASTERY_HUNTER = 20;
 const PROT_ANALYZER = "paladin-protection-observed-decisions";
 const PROT_ANALYZED_ENVELOPE = {
   status: "ANALYZED",
@@ -7467,6 +7467,44 @@ const BREWMASTER_CASES = [
     "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Fire Mage list.",
     { related: ["tests/unit/specs/onb-d3-fire-mage.test.ts"] },
   ),
+  // ---- SPEC_DEVASTATION_EVOKER (ONB-X2, INTERNAL_ONLY) ---
+  kase(
+    "application-service.devastation-evoker-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Devastation Evoker registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "evoker/devastation",
+        expected: {
+          internalAnalyzerId: "evoker-devastation-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    'Devastation Evoker is registered INTERNAL_ONLY in ONB-X2, its own representative on the shared cast anchor. No decision of it resolves. Its three retained subjects are replayed offline and not committed (agent/follow-ups.md "After ONB-X2").',
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-devastation-evoker.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_DEVASTATION_EVOKER",
+    "src/specs/evoker/devastation/observed-analysis.ts analyzeObservedDevastationEvokerDecisions (the spec gate)",
+    "The Devastation Evoker facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_DEVASTATION_EVOKER.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Devastation Evoker list.",
+    { related: ["tests/unit/specs/onb-d3-devastation-evoker.test.ts"] },
+  ),
   // ---- SPEC_OUTLAW_ROGUE (ONB-C2, INTERNAL_ONLY) ---
   kase(
     "application-service.outlaw-rogue-registration-is-internal-only",
@@ -8345,7 +8383,7 @@ const RET_CASES = [
     RET45,
     "PUBLIC_CONTRACT",
     "src/contracts/raid-night-contract.ts; src/services/raid-night-service.ts; /v1/raid-night; analyze_raid_night",
-    "One raid-night request over the Retribution 45 s slice served as ONE core, with a roster of four real participants of A7R6 fight 7: the Retribution Paladin (actor 6) is ANALYZED under paladin/retribution; the Protection Paladin (actor 7) and the Assassination Rogue (actor 19) have none of their evidence in the slice and their analyzers answer PROFILE_NOT_RESOLVED; the Devastation Evoker (actor 11) is SPEC_NOT_SUPPORTED. One document on REST and MCP, one ingestion per transport.",
+    "One raid-night request over the Retribution 45 s slice served as ONE core, with a roster of four real participants of A7R6 fight 7: the Retribution Paladin (actor 6) is ANALYZED under paladin/retribution; the Protection Paladin (actor 7) and the Assassination Rogue (actor 19) have none of their evidence in the slice and their analyzers answer PROFILE_NOT_RESOLVED; the Beast Mastery Hunter (actor 20) is SPEC_NOT_SUPPORTED. One document on REST and MCP, one ingestion per transport.",
     [
       a("PUBLIC_CONTRACT.REST_MCP_PARITY", {
         document: "RAID_NIGHT",
@@ -8356,7 +8394,7 @@ const RET_CASES = [
             { sourceId: RET, className: "Paladin", specName: "Retribution", absent: false },
             { sourceId: TANK, className: "Paladin", specName: "Protection", absent: false },
             { sourceId: 19, className: "Rogue", specName: "Assassination", absent: false },
-            { sourceId: DEVASTATION_EVOKER, className: "Evoker", specName: "Devastation", absent: false },
+            { sourceId: BEAST_MASTERY_HUNTER, className: "Hunter", specName: "BeastMastery", absent: false },
           ],
         },
         expected: {
@@ -8365,7 +8403,7 @@ const RET_CASES = [
             { sourceId: RET, kind: "ANALYZED", specId: "paladin/retribution" },
             { sourceId: TANK, kind: "NOT_ANALYZED", status: "PROFILE_NOT_RESOLVED" },
             { sourceId: 19, kind: "NOT_ANALYZED", status: "PROFILE_NOT_RESOLVED" },
-            { sourceId: DEVASTATION_EVOKER, kind: "NOT_ANALYZED", status: "SPEC_NOT_SUPPORTED" },
+            { sourceId: BEAST_MASTERY_HUNTER, kind: "NOT_ANALYZED", status: "SPEC_NOT_SUPPORTED" },
           ],
         },
       }),
@@ -9894,11 +9932,11 @@ const CASES = [
     D2,
     "PUBLIC_CONTRACT",
     "src/contracts/analysis-contract.ts (SPEC_NOT_SUPPORTED variant); src/services/analysis-service.ts",
-    "Identified as a Devastation Evoker, the same actor over the same artifact yields SPEC_NOT_SUPPORTED on both transports — a well-formed document with specialization.specId null and analyzerId null that says gameplay analysis was not attempted, identical on REST and MCP.",
+    "Identified as a Beast Mastery Hunter, the same actor over the same artifact yields SPEC_NOT_SUPPORTED on both transports — a well-formed document with specialization.specId null and analyzerId null that says gameplay analysis was not attempted, identical on REST and MCP.",
     [
       a("PUBLIC_CONTRACT.REST_MCP_PARITY", {
         document: "ANALYSIS",
-        subject: { actorId: 19, className: "Evoker", specName: "Devastation" },
+        subject: { actorId: 19, className: "Hunter", specName: "BeastMastery" },
         expected: { status: "SPEC_NOT_SUPPORTED", specId: null, analyzerId: null },
       }),
     ],
@@ -10751,10 +10789,10 @@ const CASES = [
     D2,
     "APPLICATION_SERVICE",
     "src/services/analysis-service.ts unsupportedSpec; spec-identity.ts",
-    "The same actor identified as Evoker/Devastation — the canonical unsupported identity, a real participant of the same A7R6 kill — yields SPEC_NOT_SUPPORTED from the service with no spec and no analyzer. The fight is retrieved once, for the shared preparation producer alone (PREP-2), so the scope is PLAYER_CONTEXT: the report still carries consumable status, and the status is explicit rather than an empty report.",
+    "The same actor identified as Hunter/BeastMastery — the canonical unsupported identity, a real participant of the same A7R6 kill — yields SPEC_NOT_SUPPORTED from the service with no spec and no analyzer. The fight is retrieved once, for the shared preparation producer alone (PREP-2), so the scope is PLAYER_CONTEXT: the report still carries consumable status, and the status is explicit rather than an empty report.",
     [
       a("APPLICATION_SERVICE.FIGHT_ANALYSIS", {
-        subject: { actorId: 19, className: "Evoker", specName: "Devastation" },
+        subject: { actorId: 19, className: "Hunter", specName: "BeastMastery" },
         expected: { status: "SPEC_NOT_SUPPORTED", specId: null, analyzerId: null, scope: "PLAYER_CONTEXT" },
       }),
     ],
@@ -10878,12 +10916,12 @@ const CASES = [
       // M10-D: the canonical UNSUPPORTED identity, machine-pinned from the same capture.
       a("WCL_TRANSPORT.FIGHT_IDENTITY", {
         fightId: 7,
-        sourceId: DEVASTATION_EVOKER,
+        sourceId: BEAST_MASTERY_HUNTER,
         expected: {
           ok: true,
-          className: "Evoker",
-          specName: "Devastation",
-          playerName: "Actor11",
+          className: "Hunter",
+          specName: "BeastMastery",
+          playerName: "Actor20",
           reportRevision: 30,
           logVersion: 17,
           gameVersion: 1,
@@ -10891,7 +10929,7 @@ const CASES = [
       }),
     ],
     ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
-    "Identity is read from masterData subType and friendlySpecs at the roster index and from nothing else. A Protection Paladin and a Retribution Paladin in one kill resolve to different specializations from one class, and the tank's own pet is refused as a subject. Actor 11 is the Devastation Evoker every unsupported-path case names since M10-D: a real participant of this kill, not an invented pair.",
+    "Identity is read from masterData subType and friendlySpecs at the roster index and from nothing else. A Protection Paladin and a Retribution Paladin in one kill resolve to different specializations from one class, and the tank's own pet is refused as a subject. Actor 20 is the Beast Mastery Hunter every unsupported-path case names since M10-D: a real participant of this kill, not an invented pair.",
     { related: ["tests/unit/wcl-identity.test.ts", "tests/unit/spec-identity.test.ts"] },
   ),
   kase(
@@ -11344,14 +11382,14 @@ const CASES = [
     },
   ),
   kase(
-    "application-service.devastation-evoker-subject-is-unsupported-on-the-same-evidence",
+    "application-service.beast-mastery-hunter-subject-is-unsupported-on-the-same-evidence",
     PP,
     "APPLICATION_SERVICE",
     "src/services/analysis-service.ts unsupportedSpec; spec-identity.ts",
-    "Actor 11 of the same fight, the Devastation Evoker the committed context proves, yields SPEC_NOT_SUPPORTED from the service with no spec and no analyzer. The fight is retrieved for the shared preparation producer alone (PREP-2), so the scope is PLAYER_CONTEXT; the slice holds none of actor 11's events, which leaves its consumable status UNKNOWN rather than zero.",
+    "Actor 20 of the same fight, the Beast Mastery Hunter the committed context proves, yields SPEC_NOT_SUPPORTED from the service with no spec and no analyzer. The fight is retrieved for the shared preparation producer alone (PREP-2), so the scope is PLAYER_CONTEXT; the slice holds none of actor 20's events, which leaves its consumable status UNKNOWN rather than zero.",
     [
       a("APPLICATION_SERVICE.FIGHT_ANALYSIS", {
-        subject: { actorId: DEVASTATION_EVOKER, className: "Evoker", specName: "Devastation" },
+        subject: { actorId: BEAST_MASTERY_HUNTER, className: "Hunter", specName: "BeastMastery" },
         expected: { status: "SPEC_NOT_SUPPORTED", specId: null, analyzerId: null, scope: "PLAYER_CONTEXT" },
       }),
     ],
@@ -11387,15 +11425,15 @@ const CASES = [
     },
   ),
   kase(
-    "public-contract.analysis-parity-for-the-devastation-evoker-subject",
+    "public-contract.analysis-parity-for-the-beast-mastery-hunter-subject",
     PP,
     "PUBLIC_CONTRACT",
     "src/contracts/analysis-contract.ts (SPEC_NOT_SUPPORTED variant); src/api/worker.ts; src/mcp/tools/analyze-warcraft-log.ts",
-    "Actor 11 of the same fight, the Devastation Evoker, yields SPEC_NOT_SUPPORTED on both transports — one well-formed document with specialization.specId null and analyzerId null, identical on REST and MCP, schema-valid under warcraft-logs-coach.analysis/1.",
+    "Actor 20 of the same fight, the Beast Mastery Hunter, yields SPEC_NOT_SUPPORTED on both transports — one well-formed document with specialization.specId null and analyzerId null, identical on REST and MCP, schema-valid under warcraft-logs-coach.analysis/1.",
     [
       a("PUBLIC_CONTRACT.REST_MCP_PARITY", {
         document: "ANALYSIS",
-        subject: { actorId: DEVASTATION_EVOKER, className: "Evoker", specName: "Devastation" },
+        subject: { actorId: BEAST_MASTERY_HUNTER, className: "Hunter", specName: "BeastMastery" },
         expected: { status: "SPEC_NOT_SUPPORTED", specId: null, analyzerId: null },
       }),
     ],
@@ -11413,7 +11451,7 @@ const CASES = [
     PP,
     "PUBLIC_CONTRACT",
     "src/contracts/raid-night-contract.ts; src/services/raid-night-service.ts; /v1/raid-night; analyze_raid_night",
-    "One raid-night request over the A7R6 opener served as ONE core, with a roster of four real participants of that fight: the Protection Paladin (actor 7) is ANALYZED under paladin/protection; the Assassination Rogue (actor 19) has none of its evidence in the slice and its analyzer answers PROFILE_NOT_RESOLVED; the Devastation Evoker (actor 11) is SPEC_NOT_SUPPORTED; the Blood Death Knight (actor 14) is ABSENT. One document on REST and MCP, one ingestion.",
+    "One raid-night request over the A7R6 opener served as ONE core, with a roster of four real participants of that fight: the Protection Paladin (actor 7) is ANALYZED under paladin/protection; the Assassination Rogue (actor 19) has none of its evidence in the slice and its analyzer answers PROFILE_NOT_RESOLVED; the Beast Mastery Hunter (actor 20) is SPEC_NOT_SUPPORTED; the Blood Death Knight (actor 14) is ABSENT. One document on REST and MCP, one ingestion.",
     [
       a("PUBLIC_CONTRACT.REST_MCP_PARITY", {
         document: "RAID_NIGHT",
@@ -11423,7 +11461,7 @@ const CASES = [
           participants: [
             { sourceId: TANK, className: "Paladin", specName: "Protection", absent: false },
             { sourceId: 19, className: "Rogue", specName: "Assassination", absent: false },
-            { sourceId: DEVASTATION_EVOKER, className: "Evoker", specName: "Devastation", absent: false },
+            { sourceId: BEAST_MASTERY_HUNTER, className: "Hunter", specName: "BeastMastery", absent: false },
             { sourceId: 14, className: "DeathKnight", specName: "Blood", absent: true },
           ],
         },
@@ -11432,7 +11470,7 @@ const CASES = [
           cells: [
             { sourceId: TANK, kind: "ANALYZED", specId: "paladin/protection" },
             { sourceId: 19, kind: "NOT_ANALYZED", status: "PROFILE_NOT_RESOLVED" },
-            { sourceId: DEVASTATION_EVOKER, kind: "NOT_ANALYZED", status: "SPEC_NOT_SUPPORTED" },
+            { sourceId: BEAST_MASTERY_HUNTER, kind: "NOT_ANALYZED", status: "SPEC_NOT_SUPPORTED" },
             { sourceId: 14, kind: "ABSENT" },
           ],
         },

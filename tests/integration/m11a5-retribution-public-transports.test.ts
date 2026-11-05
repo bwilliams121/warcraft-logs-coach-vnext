@@ -14,7 +14,7 @@
  *             to the REST body (the established parity definition), and the
  *             tool's description communicates the narrow scope.
  *   BEFORE    until M11-A5 the same request answered SPEC_NOT_SUPPORTED on
- *             both transports; the Devastation Evoker still does, unchanged.
+ *             both transports; the Beast Mastery Hunter still does, unchanged.
  */
 
 import { describe, expect, it } from "vitest";
@@ -191,6 +191,7 @@ describe("REST: a real Retribution Paladin identity resolves publicly", () => {
       "warlock-affliction-observed-decisions": 0,
       "hunter-marksmanship-observed-decisions": 0,
       "mage-fire-observed-decisions": 0,
+      "evoker-devastation-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
     const parsed = PublicAnalysisResultSchema.safeParse(rest.body);
@@ -252,7 +253,7 @@ describe("REST: a real Retribution Paladin identity resolves publicly", () => {
     }
   });
 
-  it("the Devastation Evoker over the same evidence is still SPEC_NOT_SUPPORTED, and runs no analyzer", async () => {
+  it("the Beast Mastery Hunter over the same evidence is still SPEC_NOT_SUPPORTED, and runs no analyzer", async () => {
     const runner = localRunner({
       sourceId: CURRENT_UNSUPPORTED_SUBJECT.sourceId,
       className: CURRENT_UNSUPPORTED_SUBJECT.expectedClassName,

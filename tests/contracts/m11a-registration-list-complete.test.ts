@@ -271,6 +271,7 @@ describe("what the tree registers today", () => {
       ["src/specs/druid/feral/registration.ts", "FERAL_DRUID_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/druid/restoration/registration.ts", "RESTORATION_DRUID_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/evoker/augmentation/registration.ts", "AUGMENTATION_EVOKER_REGISTRATION", "PUBLIC"],
+      ["src/specs/evoker/devastation/registration.ts", "DEVASTATION_EVOKER_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/evoker/preservation/registration.ts", "PRESERVATION_EVOKER_REGISTRATION", "PUBLIC"],
       ["src/specs/hunter/marksmanship/registration.ts", "MARKSMANSHIP_HUNTER_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/mage/arcane/registration.ts", "ARCANE_MAGE_REGISTRATION", "INTERNAL_ONLY"],

@@ -93,7 +93,7 @@ describe("preparation runs with every analyzed request", () => {
 });
 
 describe("an unsupported specialization (PREP-2: retrieved for preparation alone)", () => {
-  const evoker = identityFor("Devastation", "Evoker");
+  const evoker = identityFor("BeastMastery", "Hunter");
 
   it("retrieves the fight once with the producer's own requirement, assesses it, and runs no analyzer", async () => {
     const { serviceDeps, ingest } = deps(ANALYZER_REGISTRATIONS, evoker);

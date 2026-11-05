@@ -5408,6 +5408,238 @@ const HUNTER_MARKSMANSHIP_FACTS = {
   ],
 };
 
+const EVOKER_SOURCES = {
+  spellData: "engine/dbc/generated/sc_spell_data.inc",
+  classSpells: "engine/dbc/generated/class_spells.inc",
+  clientDataVersion: "engine/dbc/generated/client_data_version.inc",
+  spellDataLayout: "engine/dbc/spell_data.hpp",
+  // HASHED, NEVER PARSED: the class module every token binding is a hand-reviewed reading of.
+  classModule: "engine/class_modules/sc_evoker.cpp",
+  // HASHED, NEVER PARSED. Present because every target hashes the same shared sources.
+  racialSpells: "engine/dbc/generated/racial_spells.inc",
+  playerModule: "engine/player/player.cpp",
+  consumableModule: "engine/player/consumable.cpp",
+};
+
+const EVOKER_MODULE_PATH = "engine/class_modules/sc_evoker.cpp";
+
+/**
+ * The Devastation Evoker facts (ONB-X2).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the pinned Devastation list
+ * (apl/apl_evoker.cpp `devastation`) executes. Facts a reader should not have to rediscover:
+ *
+ *   - FIRE BREATH AND ETERNITY SURGE ARE `_gcd` 500, on the GCD lane. The empowered charge sets gcd_type NONE and min_gcd to it (sc_evoker.cpp:2042). Each binds its Font of Magic row too.
+ *   - DEEP BREATH BINDS TWO ROWS, 357210 and Maneuverability's 433874, both _gcd 1500.
+ *   - HOVER, QUELL AND TIP THE SCALES ARE `_gcd` 0, SO THEY ARE NON_GCD.
+ *   - AZURE SWEEP 1265871 AND UNBOUND FLAME 1292323 ARE THEIR BUFFS, _gcd 0, and no row here. 1265872 and 1292321 are the actions.
+ *   - THE RACIAL, POTION, ITEM AND EXTERNAL-BUFF TOKENS ARE NOT BOUND.
+ */
+const EVOKER_DEVASTATION_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 362969, displayNameEn: "Azure Strike", baseGcdMs: 1500 },
+    { abilityGameId: 1265872, displayNameEn: "Azure Sweep", baseGcdMs: 1500 },
+    { abilityGameId: 357210, displayNameEn: "Deep Breath", baseGcdMs: 1500 },
+    { abilityGameId: 433874, displayNameEn: "Deep Breath", baseGcdMs: 1500 },
+    { abilityGameId: 356995, displayNameEn: "Disintegrate", baseGcdMs: 1500 },
+    { abilityGameId: 375087, displayNameEn: "Dragonrage", baseGcdMs: 1500 },
+    { abilityGameId: 355913, displayNameEn: "Emerald Blossom", baseGcdMs: 1500 },
+    { abilityGameId: 359073, displayNameEn: "Eternity Surge", baseGcdMs: 500 },
+    { abilityGameId: 382411, displayNameEn: "Eternity Surge", baseGcdMs: 500 },
+    { abilityGameId: 357208, displayNameEn: "Fire Breath", baseGcdMs: 500 },
+    { abilityGameId: 382266, displayNameEn: "Fire Breath", baseGcdMs: 500 },
+    { abilityGameId: 358267, displayNameEn: "Hover", baseGcdMs: 0 },
+    { abilityGameId: 361469, displayNameEn: "Living Flame", baseGcdMs: 1500 },
+    { abilityGameId: 357211, displayNameEn: "Pyre", baseGcdMs: 1500 },
+    { abilityGameId: 351338, displayNameEn: "Quell", baseGcdMs: 0 },
+    { abilityGameId: 370553, displayNameEn: "Tip the Scales", baseGcdMs: 0 },
+    { abilityGameId: 1292321, displayNameEn: "Unbound Flame", baseGcdMs: 1500 },
+    { abilityGameId: 360995, displayNameEn: "Verdant Embrace", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "azure_strike",
+      candidateAbilityGameIds: [362969],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: EVOKER_MODULE_PATH,
+      symbol: "create_action / azure_strike_t",
+      startLine: 10941,
+      endLine: 10941,
+      sourceNote:
+        'create_action dispatches "azure_strike" to azure_strike_t: built on p->find_class_spell( "Azure Strike" ) (:5584).',
+    },
+    {
+      simcToken: "azure_sweep",
+      candidateAbilityGameIds: [1265872],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: EVOKER_MODULE_PATH,
+      symbol: "create_action / azure_sweep_t",
+      startLine: 10943,
+      endLine: 10943,
+      sourceNote:
+        'create_action dispatches "azure_sweep" to azure_sweep_t: built on p->talent.azure_sweep_spell (:5602), which is find_spell( 1265872 ) at :10027; ready() asks for its buff.',
+    },
+    {
+      simcToken: "deep_breath",
+      candidateAbilityGameIds: [357210, 433874],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: EVOKER_MODULE_PATH,
+      symbol: "create_action / deep_breath_t",
+      startLine: 10945,
+      endLine: 10945,
+      sourceNote:
+        'create_action dispatches "deep_breath" to deep_breath_t: built on the Maneuverability row 433874 when that hero talent is taken, else p->find_class_spell( "Deep Breath" ) 357210 (:6253), and on not_found() only with breath_of_eons, which no Devastation build has. Both rows are _gcd 1500, so the lane does not depend on which.',
+    },
+    {
+      simcToken: "disintegrate",
+      candidateAbilityGameIds: [356995],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: EVOKER_MODULE_PATH,
+      symbol: "create_action / disintegrate_t",
+      startLine: 10947,
+      endLine: 10947,
+      sourceNote:
+        'create_action dispatches "disintegrate" to disintegrate_t: built on p->find_class_spell( "Disintegrate" ) (:6353), and on not_found() only with eruption, which no Devastation build has.',
+    },
+    {
+      simcToken: "dragonrage",
+      candidateAbilityGameIds: [375087],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: EVOKER_MODULE_PATH,
+      symbol: "create_action / dragonrage_t",
+      startLine: 10949,
+      endLine: 10949,
+      sourceNote:
+        'create_action dispatches "dragonrage" to dragonrage_t: built on p->talent.dragonrage (:7336).',
+    },
+    {
+      simcToken: "emerald_blossom",
+      candidateAbilityGameIds: [355913],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: EVOKER_MODULE_PATH,
+      symbol: "create_action / emerald_blossom_t",
+      startLine: 10973,
+      endLine: 10973,
+      sourceNote:
+        'create_action dispatches "emerald_blossom" to emerald_blossom_t: built on p->spec.emerald_blossom (:4343), which is find_spell( 355913 ) at :9970.',
+    },
+    {
+      simcToken: "eternity_surge",
+      candidateAbilityGameIds: [359073, 382411],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: EVOKER_MODULE_PATH,
+      symbol: "create_action / eternity_surge_t",
+      startLine: 10951,
+      endLine: 10951,
+      sourceNote:
+        'create_action dispatches "eternity_surge" to eternity_surge_t: built on p->talent.eternity_surge (:5508), and find_spell_override( spell, p->talent.font_of_magic ) reads the Font of Magic row (:3509). Both rows are _gcd 500, so the lane does not depend on which.',
+    },
+    {
+      simcToken: "fire_breath",
+      candidateAbilityGameIds: [357208, 382266],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: EVOKER_MODULE_PATH,
+      symbol: "create_action / fire_breath_t",
+      startLine: 10955,
+      endLine: 10955,
+      sourceNote:
+        'create_action dispatches "fire_breath" to fire_breath_t: built on p->find_class_spell( "Fire Breath" ) (:5339), and find_spell_override( spell, p->talent.font_of_magic ) reads the Font of Magic row (:3509). Both rows are _gcd 500, so the lane does not depend on which.',
+    },
+    {
+      simcToken: "hover",
+      candidateAbilityGameIds: [358267],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: EVOKER_MODULE_PATH,
+      symbol: "create_action / hover_t",
+      startLine: 10957,
+      endLine: 10957,
+      sourceNote:
+        'create_action dispatches "hover" to hover_t: built on p->find_class_spell( "Hover" ) (:6730). _gcd 0, usable_while_casting.',
+    },
+    {
+      simcToken: "living_flame",
+      candidateAbilityGameIds: [361469],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: EVOKER_MODULE_PATH,
+      symbol: "create_action / living_flame_t",
+      startLine: 10961,
+      endLine: 10961,
+      sourceNote:
+        'create_action dispatches "living_flame" to living_flame_t: built on p->find_class_spell( "Living Flame" ) (:6790).',
+    },
+    {
+      simcToken: "pyre",
+      candidateAbilityGameIds: [357211],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: EVOKER_MODULE_PATH,
+      symbol: "create_action / pyre_t",
+      startLine: 10965,
+      endLine: 10965,
+      sourceNote: 'create_action dispatches "pyre" to pyre_t: built on p->talent.pyre (:7189).',
+    },
+    {
+      simcToken: "quell",
+      candidateAbilityGameIds: [351338],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: EVOKER_MODULE_PATH,
+      symbol: "create_action / quell_t",
+      startLine: 10967,
+      endLine: 10967,
+      sourceNote:
+        'create_action dispatches "quell" to quell_t: built on p->talent.quell (:7029). _gcd 0, use_off_gcd.',
+    },
+    {
+      simcToken: "tip_the_scales",
+      candidateAbilityGameIds: [370553],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: EVOKER_MODULE_PATH,
+      symbol: "create_action / tip_the_scales_t",
+      startLine: 10969,
+      endLine: 10969,
+      sourceNote:
+        'create_action dispatches "tip_the_scales" to tip_the_scales_t: built on p->talent.tip_the_scales (:7079). _gcd 0.',
+    },
+    {
+      simcToken: "unbound_flame",
+      candidateAbilityGameIds: [1292321],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: EVOKER_MODULE_PATH,
+      symbol: "create_action / unbound_flame_t",
+      startLine: 10995,
+      endLine: 10995,
+      sourceNote:
+        'create_action dispatches "unbound_flame" to unbound_flame_t: built on p->talent.unbound_flame_spell (:7383), which is find_spell( 1292321 ) at :10068. create_action builds it from client data 12.1.0, which this data is.',
+    },
+    {
+      simcToken: "verdant_embrace",
+      candidateAbilityGameIds: [360995],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: EVOKER_MODULE_PATH,
+      symbol: "create_action / verdant_embrace_t",
+      startLine: 10971,
+      endLine: 10971,
+      sourceNote:
+        'create_action dispatches "verdant_embrace" to verdant_embrace_t: built on p->talent.verdant_embrace (:4471).',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
 /**
  * The Fire Mage facts (ONB-X1).
  *
@@ -6591,6 +6823,21 @@ export const TARGETS = {
     ],
     requiredFacts: HUNTER_MARKSMANSHIP_FACTS,
     defaultOut: "src/data/game/hunter-marksmanship-gcd-semantics.json",
+  },
+  "evoker-devastation": {
+    datasetId: "SIMC_DBC_EVOKER_DEVASTATION_GCD_SEMANTICS",
+    classId: 13,
+    className: "Evoker",
+    sources: EVOKER_SOURCES,
+    classModulePath: EVOKER_SOURCES.classModule,
+    handReviewedPaths: [
+      EVOKER_SOURCES.classModule,
+      EVOKER_SOURCES.racialSpells,
+      EVOKER_SOURCES.playerModule,
+      EVOKER_SOURCES.consumableModule,
+    ],
+    requiredFacts: EVOKER_DEVASTATION_FACTS,
+    defaultOut: "src/data/game/evoker-devastation-gcd-semantics.json",
   },
   "mage-fire": {
     datasetId: "SIMC_DBC_MAGE_FIRE_GCD_SEMANTICS",

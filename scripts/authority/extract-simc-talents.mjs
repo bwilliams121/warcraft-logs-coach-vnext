@@ -2291,6 +2291,161 @@ const HUNTER_MARKSMANSHIP_TARGET = {
 };
 
 /**
+ * The Devastation Evoker profile (ONB-X2): the talents the pinned list reads as `talent.<name>`, and the talents an action of
+ * that list is built on (an action on `not_found()` is background, action.cpp:541-549).
+ */
+const EVOKER_DEVASTATION_TARGET = {
+  datasetId: "SIMC_TRAIT_EVOKER_DEVASTATION_TALENTS",
+  classId: 13,
+  specId: 1467,
+  defaultOut: "src/data/game/evoker-devastation-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node, as every earlier target recorded." +
+    ' Corroborated for Devastation Evoker on its three retained subjects, whose observed trees resolve a hero tree and the pinned list\'s talents by these keys (agent/architecture.md "ONB-X2").',
+  requiredTalents: [
+    {
+      simcName: "ancient_flame",
+      displayNameEn: "Ancient Flame",
+      tree: "CLASS",
+      binding:
+        'sc_evoker.cpp:10005 talent.ancient_flame = CT( "Ancient Flame" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "animosity",
+      displayNameEn: "Animosity",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_evoker.cpp:10031 talent.animosity = ST( "Animosity" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "charged_blast",
+      displayNameEn: "Charged Blast",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_evoker.cpp:10041 talent.charged_blast = ST( "Charged Blast" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "dragonrage",
+      displayNameEn: "Dragonrage",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_evoker.cpp:10023 talent.dragonrage = ST( "Dragonrage" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "eternity_surge",
+      displayNameEn: "Eternity Surge",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_evoker.cpp:10020 talent.eternity_surge = ST( "Eternity Surge" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "eternitys_span",
+      displayNameEn: "Eternity's Span",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_evoker.cpp:10035 talent.eternitys_span = ST( "Eternity\'s Span" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "feed_the_flames",
+      displayNameEn: "Feed the Flames",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_evoker.cpp:10048 talent.feed_the_flames = ST( "Feed the Flames" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "imminent_destruction",
+      displayNameEn: "Imminent Destruction",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_evoker.cpp:10056 talent.imminent_destruction = ST( "Imminent Destruction" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "legacy_of_the_lifebinder",
+      displayNameEn: "Legacy of the Lifebinder",
+      tree: "HERO",
+      binding:
+        'sc_evoker.cpp:10214 talent.flameshaper.legacy_of_the_lifebinder = HT( "Legacy of the Lifebinder" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "mass_disintegrate",
+      displayNameEn: "Mass Disintegrate",
+      tree: "HERO",
+      binding:
+        'sc_evoker.cpp:10228 talent.scalecommander.mass_disintegrate = HT( "Mass Disintegrate" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "pyre",
+      displayNameEn: "Pyre",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_evoker.cpp:10016 talent.pyre = ST( "Pyre" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "quell",
+      displayNameEn: "Quell",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_evoker.cpp:9991 talent.quell = CT( "Quell" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "scarlet_adaptation",
+      displayNameEn: "Scarlet Adaptation",
+      tree: "CLASS",
+      binding:
+        'sc_evoker.cpp:9990 talent.scarlet_adaptation = CT( "Scarlet Adaptation" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "scorching_embers",
+      displayNameEn: "Scorching Embers",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_evoker.cpp:10057 talent.scorching_embers = ST( "Scorching Embers" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "slipstream",
+      displayNameEn: "Slipstream",
+      tree: "HERO",
+      binding:
+        'sc_evoker.cpp:10251 talent.scalecommander.slipstream = HT( "Slipstream" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "star_salvo",
+      displayNameEn: "Star Salvo",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_evoker.cpp:10044 talent.star_salvo = ST( "Star Salvo" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "tip_the_scales",
+      displayNameEn: "Tip the Scales",
+      tree: "CLASS",
+      binding:
+        'sc_evoker.cpp:9995 talent.tip_the_scales = CT( "Tip the Scales" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "verdant_embrace",
+      displayNameEn: "Verdant Embrace",
+      tree: "CLASS",
+      binding:
+        'sc_evoker.cpp:9985 talent.verdant_embrace = CT( "Verdant Embrace" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "volatility",
+      displayNameEn: "Volatility",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_evoker.cpp:10021 talent.volatility = ST( "Volatility" );; the pinned list reads it or an action of the list is built on it',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data` (trait_data.inc:4403-4404).
+    { simcName: "scalecommander", subTreeId: 36 },
+    { simcName: "flameshaper", subTreeId: 37 },
+  ],
+};
+
+/**
  * The Fire Mage profile (ONB-X1): the talents the pinned list reads as `talent.<name>`, and the talents an action of
  * that list is built on (an action on `not_found()` is background, action.cpp:541-549).
  */
@@ -3410,6 +3565,7 @@ export const TARGETS = {
   "mage-frost": MAGE_FROST_TARGET,
   "warlock-affliction": WARLOCK_AFFLICTION_TARGET,
   "hunter-marksmanship": HUNTER_MARKSMANSHIP_TARGET,
+  "evoker-devastation": EVOKER_DEVASTATION_TARGET,
   "mage-fire": MAGE_FIRE_TARGET,
   "warlock-destruction": WARLOCK_DESTRUCTION_TARGET,
   "rogue-subtlety": ROGUE_SUBTLETY_TARGET,

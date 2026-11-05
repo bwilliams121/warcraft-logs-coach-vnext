@@ -95,6 +95,7 @@ import { FROST_MAGE_REGISTRATION } from "../specs/mage/frost/registration.js";
 import { AFFLICTION_WARLOCK_REGISTRATION } from "../specs/warlock/affliction/registration.js";
 import { MARKSMANSHIP_HUNTER_REGISTRATION } from "../specs/hunter/marksmanship/registration.js";
 import { FIRE_MAGE_REGISTRATION } from "../specs/mage/fire/registration.js";
+import { DEVASTATION_EVOKER_REGISTRATION } from "../specs/evoker/devastation/registration.js";
 import { DESTRUCTION_WARLOCK_REGISTRATION } from "../specs/warlock/destruction/registration.js";
 import { OUTLAW_ROGUE_REGISTRATION } from "../specs/rogue/outlaw/registration.js";
 import { SUBTLETY_ROGUE_REGISTRATION } from "../specs/rogue/subtlety/registration.js";
@@ -533,6 +534,8 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   MARKSMANSHIP_HUNTER_REGISTRATION,
   // INTERNAL_ONLY since ONB-X1: its own representative. No decision of it resolves.
   FIRE_MAGE_REGISTRATION,
+  // INTERNAL_ONLY since ONB-X2: its own representative. No decision of it resolves.
+  DEVASTATION_EVOKER_REGISTRATION,
 ]);
 
 /**

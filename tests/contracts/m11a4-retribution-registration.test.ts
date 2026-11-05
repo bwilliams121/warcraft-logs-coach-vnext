@@ -361,6 +361,7 @@ describe("the public path analyzes (M11-A5), and the internal path analyzes the 
       "warlock-affliction-observed-decisions": 0,
       "hunter-marksmanship-observed-decisions": 0,
       "mage-fire-observed-decisions": 0,
+      "evoker-devastation-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
     const document = projectAnalysisResult(result.analysis);
