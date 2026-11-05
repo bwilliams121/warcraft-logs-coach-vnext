@@ -14180,6 +14180,46 @@ The 440 are 183 Disintegrate, 89 Living Flame, 39 Eternity Surge, 37 Fire Breath
 
 **No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse the row. A public request for a Devastation Evoker is SPEC_NOT_SUPPORTED, exactly as before.
 
+## ONB-X2P — Devastation Evoker public promotion: not promoted
+
+Autopilot queue entry ONB-X2P. Public contract: declared EXPECTED; actual change NONE, because nothing passes. No Warcraft Logs request and no new evidence.
+
+**The outcome.** Devastation Evoker does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4). The gates are not weakened and gain no subject. This is not an owner stop: rule 4 decides it, and no new decision is needed to record that. ONB-EV would not help, because evidence is not the first gap, and ONB-S3 alone moves nothing.
+
+**Why it cannot pass.** OBSERVATION needs a real MATCH and real resolved decisions over several distinct action tokens, and DISCRIMINATION needs a real REJECTED or a control that flips a real MATCH. Both start from a real resolved decision, and Devastation has none. Replaying the three retained subjects through production ingestion and the facade over a fake transport, at this tranche's base commit:
+
+| Subject | Hero tree | Span | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 11 | Scalecommander | first 165 s of 424.5 s | 89 | 0 | 0 | 89 | 22 |
+| b1PmaKrd6CDfzngc fight 48 actor 16 | Scalecommander | whole, 345.2 s | 191 | 0 | 0 | 191 | 38 |
+| gtKb2xHn87pNcFfW fight 22 actor 33 | Scalecommander | whole, 284.8 s | 160 | 0 | 0 | 160 | 24 |
+
+The replay's output file is byte-identical to the one saved during ONB-X2. 351 of the 440 have an anchor (280 at a channel's start, 71 at an instant's completion), and on each of those the engine refuses at `default[6] quell`. The other 89 have no anchor (88 Living Flame `BEGINCAST_PAIRING_AMBIGUOUS`, 1 `CAST_TIME_UNKNOWN`). The root scan of all 440 stops at `sc[0] deep_breath`, on its `cancel_if`, so an anchor alone would not resolve the 89. The 440 are 183 Disintegrate, 89 Living Flame, 39 Eternity Surge, 37 Fire Breath, 31 Azure Sweep, 21 Deep Breath, 16 Unbound Flame, 8 Dragonrage, 6 Verdant Embrace, 4 Pyre, 3 Emerald Blossom and 3 Azure Strike. Every subject is Scalecommander, so the result would not measure Flameshaper even if it resolved.
+
+**The census found nothing more, by three routes.** It parsed every JSON file over 500 bytes under `.probe/` and `tests/`, skipping tool output and worktree copies (5,714 parsed of 5,715). Mortal Strike, the positive control, has 559 casts.
+
+1. **Combatant info.** The `combatantinfo` events with specID 1467 are exactly three: actors 11, 16 and 33 of the subjects above, in `.probe/m10b-pages.json`, `.probe/m11e2/pages.json` and `.probe/m9c2-opener-pages.json`. The route can find others: 31 specIDs appear in the distribution, each one a control.
+2. **Named abilities.** Ids the retained contexts' master data names for Devastation's abilities, plus the Font of Magic rows.
+3. **Pinned ids.** Every id in `evoker-devastation-gcd-semantics.json`, independent of any report's master data. ONB-X2's census left this route's file list empty, so it did not run. The route adds only ids every Evoker shares: Hover, Emerald Blossom and Verdant Embrace, the sources of which are in the table below.
+
+Every source holding a hit was resolved against its report's actors:
+
+| Source | What it is | Result |
+| --- | --- | --- |
+| A7R6 actor 11 (`m10b`, `m10c5` pages), b1Pm actor 16 (`m11e2`), gtKb actor 33 (`m9c2-opener`, `m11c4`, `m11c4b`) | the subjects | replayed, above |
+| A7R6 actor 11, one Disintegrate in `wcl-assassination-envenom-combo-points.json` | the same subject, in a 14-event corpus artifact | not a new subject |
+| A7R6 actor 50, gtKb actor 71, b1Pm actor 46 | Dracthyr Commando pets, owned by the three subjects | 1236943, Deep Breath by name only, not a player's decision |
+| A7R6 actor 5, gtKb actor 15, rXAf actor 17, M13-A actor 8, G2 cohort261 actor 98 | Preservation Evokers | abilities every Evoker shares, none of them this specialization's signatures |
+| rXAf actor 14, M13-A actor 1, G2 diagnose actor 189, rXAf actor 178 (Future Self, owned by actor 14) | Augmentation Evokers and a pet | the same |
+
+The other contexts naming Devastation, yzH96N8QMkv41bdx fight 32 actor 11, 24XJ9Nyq7jnfgAMQ fight 23 actor 11 and qJ1pgB49ZrRNVmCd fight 6, hold no hit in any retained file. They name a player and carry no retained cast of that player.
+
+Limits: the census does not read JSON files of 500 bytes or less, or log and text output. Its cast routes match named and pinned ids, so a file holding only other abilities would not appear; the combatant-info route does not depend on them.
+
+**What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists it; the gate search finds no qualifying assertion and `evidenceReady` false (`m11-promotion-evidence-gate`, from ONB-X2, its comment now naming the outcome); and a public request is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, whose row ONB-X2 kept, its comment now naming this outcome). A public request still runs preparation and reports partial coverage. Nothing reads as clean play. The replay and census are offline and not committed.
+
+**What a later promotion must do.** Evidence is not the first gap, so Devastation is not on ONB-EV. It first answers the two first stops: `default[6] quell`, an enemy cast's interruptibility or a contract that lets a scan step past an off-GCD interrupt, and `sc[0] deep_breath`, a reviewed reading of `cancel_if`, which is a shared decision. Then comes `sc[1] dragonrage`, whose `target.time_to_die` is predictive and whose `raid_event.*` has no meaning in a real fight, a decision and not a mechanical step. It answers `empower-cast-usage` and the anchor's limits, measures or refuses Flameshaper, as Havoc refuses Fel-Scarred, and checks its readers of `fightTimeMs`, because decision times are the anchor's (agent/follow-ups.md "After ONB-X2"). A new public entry then promotes it through the unchanged gates by the five-site promotion. No such entry is queued.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and
