@@ -51,7 +51,7 @@ const identity: FightIdentity = {
   report: { code: "aBcDeFgH12345678", revision: 1, startTime: 0, endTime: 1 },
   data: { logVersion: 17, gameVersion: 1 },
   fight: { id: 7, name: "Boss", encounterId: 1, difficulty: 16, startTime: START, endTime: END },
-  player: { sourceId: PLAYER, name: "Player", className: "Mage", specName: "Fire" },
+  player: { sourceId: PLAYER, name: "Player", className: "Evoker", specName: "Devastation" },
 };
 
 function unsupportedWith(preparation: PreparationOutcome): FightAnalysis {
@@ -60,7 +60,7 @@ function unsupportedWith(preparation: PreparationOutcome): FightAnalysis {
     specId: null,
     analyzerId: null,
     scope: "PLAYER_CONTEXT",
-    analysis: specNotSupported("mage/fire"),
+    analysis: specNotSupported("evoker/devastation"),
     observedDecisions: null,
     preparation,
   };

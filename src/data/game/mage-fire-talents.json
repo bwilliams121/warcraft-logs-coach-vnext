@@ -1,0 +1,423 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_TRAIT_MAGE_FIRE_TALENTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
+    "extractedOn": "2026-11-05",
+    "extractorVersion": 1,
+    "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals trait_data_t::id_node, as every earlier target recorded. Corroborated for Fire Mage on its one retained subject, whose observed tree resolves a hero tree and the pinned list's talents by these keys (agent/architecture.md \"ONB-X1\").",
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "talents": [
+    {
+      "simcName": "blast_zone",
+      "displayNameEn": "Blast Zone",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 109400,
+      "traitEntryId": 135608,
+      "talentSpellId": 416719,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6096 talents.blast_zone = find_talent_spell( talent_tree::SPECIALIZATION, \"Blast Zone\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "burnout",
+      "displayNameEn": "Burnout",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 110088,
+      "traitEntryId": 136589,
+      "talentSpellId": 1271177,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6117 talents.burnout = find_talent_spell( talent_tree::SPECIALIZATION, \"Burnout\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "combustion",
+      "displayNameEn": "Combustion",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 100995,
+      "traitEntryId": 124756,
+      "talentSpellId": 190319,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6079 talents.combustion = find_talent_spell( talent_tree::SPECIALIZATION, \"Combustion\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "fire_blast",
+      "displayNameEn": "Fire Blast",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 100989,
+      "traitEntryId": 124750,
+      "talentSpellId": 108853,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6073 talents.fire_blast = find_talent_spell( talent_tree::SPECIALIZATION, \"Fire Blast\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "firestarter",
+      "displayNameEn": "Firestarter",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 110321,
+      "traitEntryId": 136878,
+      "talentSpellId": 205026,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6074 talents.firestarter = find_talent_spell( talent_tree::SPECIALIZATION, \"Firestarter\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "frostfire_bolt",
+      "displayNameEn": "Frostfire Bolt",
+      "tree": "HERO",
+      "traitNodeId": 109956,
+      "traitEntryId": 136441,
+      "talentSpellId": 431044,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6184 talents.frostfire_bolt = find_talent_spell( talent_tree::HERO, 431044 );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "fuel_the_fire",
+      "displayNameEn": "Fuel the Fire",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 109406,
+      "traitEntryId": 135615,
+      "talentSpellId": 416094,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6080 talents.fuel_the_fire = find_talent_spell( talent_tree::SPECIALIZATION, \"Fuel the Fire\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "meteor",
+      "displayNameEn": "Meteor",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101021,
+      "traitEntryId": 124786,
+      "talentSpellId": 153561,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6084 talents.meteor = find_talent_spell( talent_tree::SPECIALIZATION, \"Meteor\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "pyroblast",
+      "displayNameEn": "Pyroblast",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 100998,
+      "traitEntryId": 124759,
+      "talentSpellId": 11366,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6071 talents.pyroblast = find_talent_spell( talent_tree::SPECIALIZATION, \"Pyroblast\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "pyroclasm",
+      "displayNameEn": "Pyroclasm",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101015,
+      "traitEntryId": 124778,
+      "talentSpellId": 269650,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6121 talents.pyroclasm = find_talent_spell( talent_tree::SPECIALIZATION, \"Pyroclasm\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "scald",
+      "displayNameEn": "Scald",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 109408,
+      "traitEntryId": 135617,
+      "talentSpellId": 450746,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6093 talents.scald = find_talent_spell( talent_tree::SPECIALIZATION, \"Scald\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "scorch",
+      "displayNameEn": "Scorch",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 110322,
+      "traitEntryId": 136879,
+      "talentSpellId": 2948,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6086 talents.scorch = find_talent_spell( talent_tree::SPECIALIZATION, \"Scorch\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "spellfire_spheres",
+      "displayNameEn": "Spellfire Spheres",
+      "tree": "HERO",
+      "traitNodeId": 94647,
+      "traitEntryId": 117250,
+      "talentSpellId": 448601,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6232 talents.spellfire_spheres = find_talent_spell( talent_tree::HERO, \"Spellfire Spheres\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "spontaneous_combustion",
+      "displayNameEn": "Spontaneous Combustion",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 109412,
+      "traitEntryId": 135622,
+      "talentSpellId": 451875,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6100 talents.spontaneous_combustion = find_talent_spell( talent_tree::SPECIALIZATION, \"Spontaneous Combustion\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "sunfury_execution",
+      "displayNameEn": "Sunfury Execution",
+      "tree": "HERO",
+      "traitNodeId": 94650,
+      "traitEntryId": 123867,
+      "talentSpellId": 449349,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 117253,
+          "displayNameEn": "Savor the Moment",
+          "talentSpellId": 449412
+        }
+      ],
+      "binding": "sc_mage.cpp:6247 talents.sunfury_execution = find_talent_spell( talent_tree::HERO, \"Sunfury Execution\" );; the pinned list reads it or an action of the list is built on it"
+    }
+  ],
+  "heroTrees": [
+    {
+      "simcName": "sunfury",
+      "subTreeId": 39,
+      "entries": [
+        {
+          "traitEntryId": 117246,
+          "traitNodeId": 94643,
+          "displayNameEn": "Ashes of Inspiration",
+          "talentSpellId": 1260272
+        },
+        {
+          "traitEntryId": 117247,
+          "traitNodeId": 94644,
+          "displayNameEn": "Burden of Power",
+          "talentSpellId": 451035
+        },
+        {
+          "traitEntryId": 117248,
+          "traitNodeId": 94645,
+          "displayNameEn": "Codex of the Sunstriders",
+          "talentSpellId": 449382
+        },
+        {
+          "traitEntryId": 117249,
+          "traitNodeId": 94646,
+          "displayNameEn": "Memory of Al'ar",
+          "talentSpellId": 449619
+        },
+        {
+          "traitEntryId": 117250,
+          "traitNodeId": 94647,
+          "displayNameEn": "Spellfire Spheres",
+          "talentSpellId": 448601
+        },
+        {
+          "traitEntryId": 117251,
+          "traitNodeId": 94648,
+          "displayNameEn": "Rondurmancy",
+          "talentSpellId": 449596
+        },
+        {
+          "traitEntryId": 117252,
+          "traitNodeId": 94649,
+          "displayNameEn": "Merely a Setback",
+          "talentSpellId": 449330
+        },
+        {
+          "traitEntryId": 117253,
+          "traitNodeId": 94650,
+          "displayNameEn": "Savor the Moment",
+          "talentSpellId": 449412
+        },
+        {
+          "traitEntryId": 117254,
+          "traitNodeId": 94651,
+          "displayNameEn": "Lessons in Debilitation",
+          "talentSpellId": 449627
+        },
+        {
+          "traitEntryId": 117255,
+          "traitNodeId": 94652,
+          "displayNameEn": "Invocation: Arcane Phoenix",
+          "talentSpellId": 448658
+        },
+        {
+          "traitEntryId": 117256,
+          "traitNodeId": 94653,
+          "displayNameEn": "Mana Cascade",
+          "talentSpellId": 449293
+        },
+        {
+          "traitEntryId": 123867,
+          "traitNodeId": 94650,
+          "displayNameEn": "Sunfury Execution",
+          "talentSpellId": 449349
+        },
+        {
+          "traitEntryId": 134249,
+          "traitNodeId": 94651,
+          "displayNameEn": "Explosive Potential",
+          "talentSpellId": 1246030
+        },
+        {
+          "traitEntryId": 135598,
+          "traitNodeId": 94649,
+          "displayNameEn": "Time Twist",
+          "talentSpellId": 1255166
+        },
+        {
+          "traitEntryId": 135924,
+          "traitNodeId": 109673,
+          "displayNameEn": "Spellfire Salvo",
+          "talentSpellId": 1260616
+        },
+        {
+          "traitEntryId": 135925,
+          "traitNodeId": 109674,
+          "displayNameEn": "Pyrocosm",
+          "talentSpellId": 1260673
+        },
+        {
+          "traitEntryId": 135926,
+          "traitNodeId": 109675,
+          "displayNameEn": "Glorious Incandescence",
+          "talentSpellId": 449394
+        }
+      ]
+    },
+    {
+      "simcName": "frostfire",
+      "subTreeId": 41,
+      "entries": [
+        {
+          "traitEntryId": 117235,
+          "traitNodeId": 94632,
+          "displayNameEn": "Flash Freezeburn",
+          "talentSpellId": 431178
+        },
+        {
+          "traitEntryId": 117236,
+          "traitNodeId": 94633,
+          "displayNameEn": "Elemental Affinity",
+          "talentSpellId": 431067
+        },
+        {
+          "traitEntryId": 117237,
+          "traitNodeId": 94634,
+          "displayNameEn": "Dualcasting Adept",
+          "talentSpellId": 1248014
+        },
+        {
+          "traitEntryId": 117238,
+          "traitNodeId": 94635,
+          "displayNameEn": "Isothermic Core",
+          "talentSpellId": 431095
+        },
+        {
+          "traitEntryId": 117240,
+          "traitNodeId": 94637,
+          "displayNameEn": "Blast Radius",
+          "talentSpellId": 1248016
+        },
+        {
+          "traitEntryId": 117241,
+          "traitNodeId": 94638,
+          "displayNameEn": "Heat Sink",
+          "talentSpellId": 1248002
+        },
+        {
+          "traitEntryId": 117242,
+          "traitNodeId": 94639,
+          "displayNameEn": "Frostfire Infusion",
+          "talentSpellId": 431166
+        },
+        {
+          "traitEntryId": 117243,
+          "traitNodeId": 94640,
+          "displayNameEn": "Thermal Conditioning",
+          "talentSpellId": 431117
+        },
+        {
+          "traitEntryId": 117244,
+          "traitNodeId": 94641,
+          "displayNameEn": "Frostfire Empowerment",
+          "talentSpellId": 431176
+        },
+        {
+          "traitEntryId": 117245,
+          "traitNodeId": 94642,
+          "displayNameEn": "Imbued Warding",
+          "talentSpellId": 431066
+        },
+        {
+          "traitEntryId": 117775,
+          "traitNodeId": 94633,
+          "displayNameEn": "Flame and Frost",
+          "talentSpellId": 431112
+        },
+        {
+          "traitEntryId": 117776,
+          "traitNodeId": 94642,
+          "displayNameEn": "Meltdown",
+          "talentSpellId": 431131
+        },
+        {
+          "traitEntryId": 134441,
+          "traitNodeId": 94640,
+          "displayNameEn": "Severe Temperatures",
+          "talentSpellId": 431189
+        },
+        {
+          "traitEntryId": 135921,
+          "traitNodeId": 109670,
+          "displayNameEn": "Elemental Conduit",
+          "talentSpellId": 1262845
+        },
+        {
+          "traitEntryId": 135922,
+          "traitNodeId": 109671,
+          "displayNameEn": "Molten Chill",
+          "talentSpellId": 1262844
+        },
+        {
+          "traitEntryId": 135923,
+          "traitNodeId": 109672,
+          "displayNameEn": "Duality",
+          "talentSpellId": 1262843
+        },
+        {
+          "traitEntryId": 136441,
+          "traitNodeId": 109956,
+          "displayNameEn": "Frostfire Bolt",
+          "talentSpellId": 431044
+        }
+      ]
+    }
+  ]
+}

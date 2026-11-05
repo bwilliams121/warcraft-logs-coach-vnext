@@ -24,7 +24,7 @@ const ANALYSIS: FightAnalysis = {
   specId: null,
   analyzerId: null,
   scope: null,
-  // The observed identity of a specialization no analyzer covers (Mage/Fire
+  // The observed identity of a specialization no analyzer covers (Evoker/Devastation
   // since M10-D made Protection Paladin public). A fixture label only.
   analysis: specNotSupported(CURRENT_UNSUPPORTED_SUBJECT.observedSpecId),
   preparation: PREPARATION_NOT_ASSESSED,

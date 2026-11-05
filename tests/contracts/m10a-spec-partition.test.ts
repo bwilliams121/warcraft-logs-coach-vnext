@@ -111,6 +111,7 @@ describe("the known specialization ids are exactly partitioned", () => {
       "mage/frost",
       "warlock/affliction",
       "hunter/marksmanship",
+      "mage/fire",
     ]);
     for (const id of INTERNAL_ONLY_SPEC_IDS) {
       expect(isSpecId(id), id).toBe(true);
@@ -124,7 +125,7 @@ describe("the known specialization ids are exactly partitioned", () => {
     expect(isSpecId("evoker/augmentation")).toBe(true);
     expect(requirePublicSpecId("evoker/augmentation")).toBe("evoker/augmentation");
     // The narrowing boundary still refuses a name that is no specialization at all.
-    expect(() => requirePublicSpecId("mage/fire" as never)).toThrow(InternalSpecExposureError);
+    expect(() => requirePublicSpecId("evoker/devastation" as never)).toThrow(InternalSpecExposureError);
     for (const id of PUBLIC_SPEC_IDS) expect(isPublicSpecId(id), id).toBe(true);
     expect(requirePublicSpecId("monk/brewmaster")).toBe("monk/brewmaster");
   });
@@ -142,7 +143,7 @@ describe("the known specialization ids are exactly partitioned", () => {
       "Monk/Mistweaver",
       "monk/windwalker",
       "Monk/Brewmaster",
-      "mage/fire",
+      "evoker/devastation",
       "constructor",
     ]) {
       expect(isSpecId(value), value).toBe(false);
@@ -161,10 +162,10 @@ describe("the public contract names exactly the public half", () => {
       identity: {
         report: { code: "abc", revision: 1 },
         fight: { id: 1, name: "x", encounterId: 1, difficulty: 5, startTimeMs: 0, endTimeMs: 1 },
-        player: { sourceId: 1, name: "p", className: "Mage", specName: "Fire" },
+        player: { sourceId: 1, name: "p", className: "Evoker", specName: "Devastation" },
         data: { logVersion: 17, gameVersion: 1 },
       },
-      specialization: { specId: "mage/fire", gameplaySupported: false },
+      specialization: { specId: "evoker/devastation", gameplaySupported: false },
       capability: {
         analysisKind: "OBSERVED_DECISION_AUTHORITY_VERIFICATION",
         matchMeaning: "AUTHORITY_COMPATIBLE_ONLY",
@@ -210,10 +211,10 @@ describe("the public contract names exactly the public half", () => {
       ok: true,
       specId: "paladin/retribution",
     });
-    const fire = resolveSpecIdentity({ className: "Mage", specName: "Fire" });
-    expect(fire.ok).toBe(false);
-    if (fire.ok) return;
-    expect(fire.reason).toBe("UNSUPPORTED_SPECIALIZATION");
+    const devastation = resolveSpecIdentity({ className: "Evoker", specName: "Devastation" });
+    expect(devastation.ok).toBe(false);
+    if (devastation.ok) return;
+    expect(devastation.reason).toBe("UNSUPPORTED_SPECIALIZATION");
   });
 });
 
@@ -229,7 +230,7 @@ describe("narrowing to a public id", () => {
     // an id the build does not know at all — cast through the type, exactly
     // as a defect would arrive at runtime. The error must be the typed one,
     // and the function must not return anything.
-    const foreign = "mage/fire" as unknown as SpecId;
+    const foreign = "evoker/devastation" as unknown as SpecId;
     expect(() => requirePublicSpecId(foreign)).toThrow(InternalSpecExposureError);
     let returned: unknown = "not-called";
     try {
@@ -245,9 +246,9 @@ describe("narrowing to a public id", () => {
     const rogue = analyzedFightAnalysis({ fightId: 1, sourceId: 7, comparisons: [] });
     const foreign: FightAnalysis = {
       ...rogue,
-      specId: "mage/fire" as unknown as SpecId,
+      specId: "evoker/devastation" as unknown as SpecId,
       analyzerId: "test-foreign-analyzer",
-      analysis: { ...rogue.analysis, specId: "mage/fire" as unknown as SpecId },
+      analysis: { ...rogue.analysis, specId: "evoker/devastation" as unknown as SpecId },
     };
 
     expect(() => projectAnalysisResult(foreign)).toThrow(InternalSpecExposureError);
@@ -257,9 +258,9 @@ describe("narrowing to a public id", () => {
     const rogue = analyzedFightAnalysis({ fightId: 1, sourceId: 7, comparisons: [] });
     const foreign: FightAnalysis = {
       ...rogue,
-      specId: "mage/fire" as unknown as SpecId,
+      specId: "evoker/devastation" as unknown as SpecId,
       analyzerId: "test-foreign-analyzer",
-      analysis: { status: "INSUFFICIENT_EVIDENCE", specId: "mage/fire", detail: "fixture" },
+      analysis: { status: "INSUFFICIENT_EVIDENCE", specId: "evoker/devastation", detail: "fixture" },
       observedDecisions: null,
     };
     expect(() => projectAnalysisResult(foreign)).toThrow(InternalSpecExposureError);
@@ -274,7 +275,7 @@ describe("narrowing to a public id", () => {
       specId: null,
       analyzerId: null,
       scope: null,
-      analysis: { status: "SPEC_NOT_SUPPORTED", specId: "mage/fire", detail: "no analyzer" },
+      analysis: { status: "SPEC_NOT_SUPPORTED", specId: "evoker/devastation", detail: "no analyzer" },
       observedDecisions: null,
     };
     const projected = projectAnalysisResult(unsupported);

@@ -173,7 +173,7 @@ describe("an unsupported specialization", () => {
   });
 
   it("refuses every unsupported specialization the same way", async () => {
-    // Mage/Fire is the canonical captured unsupported identity (A7R6 fight 7,
+    // Evoker/Devastation is the canonical captured unsupported identity (A7R6 fight 7,
     // actor 17); the others are stated names. Paladin/Protection is NOT in this
     // list: it has been supported since M10-D. Paladin/Retribution is NOT in
     // it either, since M11-A5, and Paladin/Holy is not since HEAL-B1P: every Paladin
@@ -185,7 +185,7 @@ describe("an unsupported specialization", () => {
       ["Rogue", "Subtlety"],
       // Evoker/Augmentation is NOT in this list since M13-F; Devastation is the Evoker miss.
       ["Evoker", "Devastation"],
-      ["Mage", "Fire"],
+      ["Evoker", "Devastation"],
       // Registered INTERNAL_ONLY in ONB-A2, not promoted by ONB-A2P, like Rogue/Subtlety above.
       ["Warrior", "Fury"],
       ["Warrior", "Protection"],

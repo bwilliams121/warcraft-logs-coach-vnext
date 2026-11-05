@@ -29,6 +29,33 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After ONB-X1: what the Fire Mage slice does not establish
+
+**Raised:** ONB-X1 (2026-11-05). Coverage, not soundness: every decision is UNKNOWN.
+
+**Fire Mage is not on ONB-EV.** One subject is retained with combatant info, Sunfury, first 165 s (agent/architecture.md "ONB-X1"). ONB-S3 alone moves nothing, since the first stop reads no enemy count.
+
+**What the Combustion dispatch needs, in order, before any line behind it is read:**
+
+- **`variable.combustion_delay`.** It is assigned in precombat from `expected_combat_length`, a simulation's planned fight length, by way of `%`. The list's comment says it stands in for a boss reaching 90% health, so a real fight would need its own answer rather than this value, and that is an authority question. Taking the real fight length would be hindsight.
+- **The Combustion and Meteor cooldowns, `time` and `gcd.max`.** No cooldown, charge or clock is derived. Combustion's reduction effects were not reviewed.
+- **`buff.combustion.up`.** No aura identity is pinned.
+- **`variable.combustion_precast_time`**, which reads cast times and so haste, `scorch_execute.active`, a target health reading, and Pyroclasm.
+
+**The proc chain comes after that, and has its own limits:**
+
+- **Hot Streak, Heating Up, Pyroclasm, Heat Shimmer and Hyperthermia** are read by every rotation list. None is bound. The subject's Hot Streak and Heating Up transitions are on the wire, so this is implementation rather than evidence.
+- **`hot_streak_spells_in_flight`** counts spells that have not landed. Whether one of them crits is unknown to a player and to a log at the decision, so a line reading it may stay UNKNOWN for good. `prev_gcd.1.scorch&buff.heating_up.react&time-action.scorch.last_used<0.2` is the list's own stand-in for a guaranteed crit, and needs a reading of its own.
+- **A Hot Streak window is the cheapest anchor gain.** 76 Pyroblast decisions are ambiguous, 62 of them with a begin under 100 ms before the completion. Hot Streak up at the begin could prove an instant, and its absence could prove a hard cast, if the aura's edges are proven against the press. The same goes for Heat Shimmer and Scorch. Deliberately not done, and pinned by a test.
+
+**The anchor's limits, as measured:** Scorch is UNKNOWN on every build, 9 decisions. No exact cast time exists, since haste at a decision is not established. An off-GCD Fire Blast or Combustion inside a cast is excluded from the population, and the `fireblast` list's `use_while_casting` decisions, 54 of the casts, are not evaluated at all.
+
+**Unmeasured.** No Frostfire subject is retained, so `ff_combustion` and `ff_filler`, Frostfire Bolt 431044 and the `talent.frostfire_bolt` branch are unmeasured. No retained subject casts Flamestrike. A promotion must measure these or refuse them, as Havoc refuses Fel-Scarred.
+
+**Decision times are the anchor's**, as for Destruction, so a public promotion must check its readers of `fightTimeMs`.
+
+---
+
 ## After ONB-D4: what the Affliction and Marksmanship slices do not establish
 
 **Raised:** ONB-D4 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN, and no real decision exists.

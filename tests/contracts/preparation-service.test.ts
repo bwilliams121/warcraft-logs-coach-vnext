@@ -93,10 +93,10 @@ describe("preparation runs with every analyzed request", () => {
 });
 
 describe("an unsupported specialization (PREP-2: retrieved for preparation alone)", () => {
-  const mage = identityFor("Fire", "Mage");
+  const evoker = identityFor("Devastation", "Evoker");
 
   it("retrieves the fight once with the producer's own requirement, assesses it, and runs no analyzer", async () => {
-    const { serviceDeps, ingest } = deps(ANALYZER_REGISTRATIONS, mage);
+    const { serviceDeps, ingest } = deps(ANALYZER_REGISTRATIONS, evoker);
     const result = await analyzeFight(request, serviceDeps);
     if (!result.ok) throw new Error(result.error.message);
     expect(result.analysis.analysis.status).toBe("SPEC_NOT_SUPPORTED");
@@ -111,7 +111,7 @@ describe("an unsupported specialization (PREP-2: retrieved for preparation alone
   });
 
   it("a retrieval failure keeps the unsupported answer and discloses NOT_ASSESSED (RETRIEVAL_FAILED)", async () => {
-    const { serviceDeps, ingest } = deps(ANALYZER_REGISTRATIONS, mage);
+    const { serviceDeps, ingest } = deps(ANALYZER_REGISTRATIONS, evoker);
     ingest.mockImplementation(
       async () => ({ ok: false, failure: { reason: "UPSTREAM_UNAVAILABLE" } }) as never,
     );
@@ -123,7 +123,7 @@ describe("an unsupported specialization (PREP-2: retrieved for preparation alone
   });
 
   it("a report replaced between preflight and retrieval is not assessed", async () => {
-    const { serviceDeps, ingest } = deps(ANALYZER_REGISTRATIONS, mage);
+    const { serviceDeps, ingest } = deps(ANALYZER_REGISTRATIONS, evoker);
     const replaced = { ...fight, report: { ...fight.report, revision: fight.report.revision + 1 } };
     ingest.mockImplementation(async () => ({ ok: true, fight: replaced, rateLimit: undefined }));
     const result = await analyzeFight(request, serviceDeps);

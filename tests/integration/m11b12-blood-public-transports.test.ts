@@ -15,7 +15,7 @@
  *             tool's description communicates the narrow scope and the
  *             validated hero tree.
  *   BEFORE    until M11-B12 the same request answered SPEC_NOT_SUPPORTED on
- *             both transports; the Fire Mage still does, unchanged.
+ *             both transports; the Devastation Evoker still does, unchanged.
  *   AUTH      the generic bearer behaviour is untouched by the new
  *             specialization: no token, no analysis, and no leak of either
  *             token.
@@ -198,6 +198,7 @@ describe("REST: a real Blood Death Knight identity resolves publicly", () => {
       "mage-frost-observed-decisions": 0,
       "warlock-affliction-observed-decisions": 0,
       "hunter-marksmanship-observed-decisions": 0,
+      "mage-fire-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
     const parsed = PublicAnalysisResultSchema.safeParse(rest.body);
@@ -282,7 +283,7 @@ describe("REST: a real Blood Death Knight identity resolves publicly", () => {
     }
   });
 
-  it("the Fire Mage over the same evidence is still SPEC_NOT_SUPPORTED, and runs no analyzer", async () => {
+  it("the Devastation Evoker over the same evidence is still SPEC_NOT_SUPPORTED, and runs no analyzer", async () => {
     const runner = localRunner({
       sourceId: CURRENT_UNSUPPORTED_SUBJECT.sourceId,
       className: CURRENT_UNSUPPORTED_SUBJECT.expectedClassName,

@@ -1924,11 +1924,13 @@ for ONB-EV if needed.
 ### ONB-D4P: Affliction Warlock and Marksmanship Hunter (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-D4
 branch: autopilot/onb-d4p
 wcl: NONE
 publicContract: EXPECTED
+pr: 76
+mergeSha: 72d0d5484977ee6c4ae79b9dd65b2619b0fec819
 ```
 
 **Outcome.** Neither passes the rotational promotion gates, so each stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Neither has a resolved decision: the only retained casts, the filtered M13-A actors 20, 14 and 18, refuse `PROFILE_NOT_RESOLVED` when replayed offline. A census of 5,711 retained files finds no new subject, by combatant-info specID as well as by ability id, so both stay on ONB-EV. ONB-S3 alone moves neither. A promotion after each one's own inputs is a new public entry through the unchanged gates (agent/architecture.md "ONB-D4P"; agent/follow-ups.md "After ONB-D4").
@@ -1936,8 +1938,9 @@ publicContract: EXPECTED
 ### ONB-X1: Fire Mage (internal, own representative)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-S4
+branch: autopilot/onb-x1
 wcl: NONE
 publicContract: NONE
 ```
@@ -1945,6 +1948,8 @@ publicContract: NONE
 **Scope.** A holdout from the M11-D0 census. Combustion windows and
 crit-proc chains (Heating Up and Hot Streak) need proc-state handling of
 their own. Real evidence is retained.
+
+**Outcome.** Registered INTERNAL_ONLY, and no decision resolves. Its one retained subject, A7R6 fight 7 actor 17 (Sunfury, first 165 s), gives 113 decisions, 0 MATCH, 0 REJECTED, all UNKNOWN, every root scan stopping at `default[7]`, the Combustion dispatch, on the cooldowns, the clock and `variable.combustion_delay`, which reads a simulation's planned fight length. No line reading Hot Streak or Heating Up is reached, so the proc chain stays unread, and a test pins that it never decides anything. No shared code changed, and ONB-S3 alone moves nothing. The unsupported-path subject moved to that fight's Devastation Evoker, actor 11 (agent/architecture.md "ONB-X1"; agent/follow-ups.md "After ONB-X1").
 
 ### ONB-X1P: Fire Mage (public)
 
@@ -1967,7 +1972,8 @@ publicContract: NONE
 **Scope.** A holdout. It has empowered casts (rank by hold time) and a
 roster role left UNKNOWN by the pinned data; use the declared M11
 classification. `empower-cast-usage` is a recorded question. Real evidence
-is retained (fight 48).
+is retained (fight 48). The unsupported-path subject is this specialization's
+A7R6 actor 11 since ONB-X1, so migrate it first (`tests/support/unsupported-subject.ts`).
 
 ### ONB-X2P: Devastation Evoker (public)
 

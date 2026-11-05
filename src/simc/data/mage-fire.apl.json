@@ -1,0 +1,607 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_MAGE_FIRE",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "mage",
+    "specName": "fire"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "UNKNOWN",
+    "sourcePath": "engine/class_modules/apl/mage.cpp",
+    "sourceSha256": "b0310f97988f53af34507015d8adda68606c2401466f534430c876676b72c578",
+    "sourceByteLength": 40053,
+    "regionStartMarker": "//fire_apl_start",
+    "regionEndMarker": "//fire_apl_end",
+    "extractedOn": "2026-11-05",
+    "extractorVersion": 1,
+    "regionSha256": "b6b35a8c03a28003d9021aa374dda24aa28dba6e02d4711077be06a252c9973f",
+    "livePtrPolicy": "NO_PTR_REGION",
+    "dispatchSource": {
+      "sourcePath": "engine/class_modules/sc_mage.cpp",
+      "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb"
+    }
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "call_action_list,name=cds",
+          "comment": null,
+          "sourceLine": 166
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "variable,name=flamestriking_active,op=set,value=variable.flamestriking&(time>variable.combustion_delay|talent.firestarter&buff.pyroclasm.up&buff.hot_streak.react=0)",
+          "comment": "Turns off flamestriking during Firestarter, but allows Flamestrike with Pyroclasm.",
+          "sourceLine": 167
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=ff_combustion_flamestrike,op=set,if=!talent.spellfire_spheres,value=3+(999*!talent.fuel_the_fire+999*!variable.flamestriking_active)",
+          "comment": "Modifiable target count cutoffs for when to cast Flamestrike. Always turned off if missing Fuel the Fire or during Firestarter.",
+          "sourceLine": 168
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=ff_filler_flamestrike,op=set,if=!talent.spellfire_spheres,value=3+(999*!talent.fuel_the_fire+999*!variable.flamestriking_active)",
+          "comment": null,
+          "sourceLine": 169
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=sf_combustion_flamestrike,op=set,if=talent.spellfire_spheres,value=3+(999*!talent.fuel_the_fire+999*!variable.flamestriking_active)",
+          "comment": null,
+          "sourceLine": 170
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "variable,name=sf_filler_flamestrike,op=set,if=talent.spellfire_spheres,value=3+(999*!talent.fuel_the_fire+999*!variable.flamestriking_active)",
+          "comment": null,
+          "sourceLine": 171
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "run_action_list,name=ff_combustion,if=talent.frostfire_bolt&((time>=variable.combustion_delay)&(cooldown.combustion.remains<=variable.combustion_precast_time|buff.combustion.up|cooldown.combustion.ready))",
+          "comment": "Combustion is delayed 18 seconds on pull for all Firestarter builds to simulate realistic timings for when a boss drops below 90% HP.",
+          "sourceLine": 172
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "run_action_list,name=sf_combustion,if=!talent.frostfire_bolt&((time>=variable.combustion_delay)&(cooldown.combustion.remains<=variable.combustion_precast_time+gcd.max*(talent.sunfury_execution&cooldown.meteor.remains<gcd.max)|buff.combustion.up|cooldown.combustion.ready))",
+          "comment": null,
+          "sourceLine": 173
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "run_action_list,name=ff_filler,if=talent.frostfire_bolt",
+          "comment": null,
+          "sourceLine": 174
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "run_action_list,name=sf_filler",
+          "comment": null,
+          "sourceLine": 175
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "arcane_intellect",
+          "comment": null,
+          "sourceLine": 156
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "variable,name=cast_remains_time,value=0.2",
+          "comment": null,
+          "sourceLine": 157
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=flamestriking,op=reset,default=1",
+          "comment": "flamestriking is the on/off switch, overridable via apl_variable.flamestriking=0",
+          "sourceLine": 158
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=combustion_delay,value=(18*talent.firestarter)-(10*(expected_combat_length<60)+10*(expected_combat_length<30))-10*(((expected_combat_length%%60)>=25)&((expected_combat_length%%60)<=40))",
+          "comment": "Delay Combustion if playing Firestarter until the target is >=90% HP unless it means losing casts of Combustion. Do not do so if fight length is short.",
+          "sourceLine": 159
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=steroid_trinket_equipped,op=set,value=equipped.freightrunners_flask|equipped.emberwing_feather|equipped.vaelgors_final_stare|equipped.galactic_gladiators_badge_of_ferocity|equipped.nevermelting_ice_crystal|equipped.ever_collapsing_void_fissure|equipped.signet_of_the_priory|equipped.sealed_chaos_urn|equipped.stormbound_emblem_of_dazar|equipped.hex_lords_dooming_idol|equipped.vile_vial_of_volatile_venom|equipped.venomous_gladiators_badge_of_ferocity",
+          "comment": null,
+          "sourceLine": 160
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "variable,name=nonsteroid_trinket_equipped,op=set,value=equipped.wraps_of_cosmic_madness|equipped.astalors_anguish_agitator|equipped.font_of_venomous_rage|equipped.vexhuls_everflowing_gland|equipped.spiritrending_poison|equipped.ophidian_bone_whistle",
+          "comment": null,
+          "sourceLine": 161
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": null,
+          "sourceLine": 162
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "mirror_image",
+          "comment": null,
+          "sourceLine": 163
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "pyroblast",
+          "comment": null,
+          "sourceLine": 164
+        }
+      ]
+    },
+    {
+      "listName": "cds",
+      "receiverIdentifier": "cds",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "variable,name=combustion_precast_time,value=(action.scorch.cast_time*!buff.pyroclasm.up*scorch_execute.active)+(action.fireball.cast_time*!buff.pyroclasm.up*!scorch_execute.active)+(action.pyroblast.cast_time*buff.pyroclasm.up)-variable.cast_remains_time",
+          "comment": null,
+          "sourceLine": 177
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "potion,if=time>=(8*(talent.firestarter&talent.spellfire_spheres))|buff.combustion.remains>6|fight_remains<35",
+          "comment": "Use Potion on pull. Delay by about 8 seconds if playing with Firestarter as Sunfury.",
+          "sourceLine": 178
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_item,name=vile_vial_of_volatile_venom,if=buff.combustion.remains>6|fight_remains<20",
+          "comment": null,
+          "sourceLine": 179
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "use_item,name=stormbound_emblem_of_dazar,if=time>=variable.combustion_delay&cooldown.combustion.remains<2&buff.combustion.down&(buff.bloodlust.down|gcd.max>0.76&!equipped.hex_lords_dooming_idol&(!equipped.vile_vial_of_volatile_venom|trinket.1.is.vile_vial_of_volatile_venom&trinket.1.cooldown.remains>20|trinket.2.is.vile_vial_of_volatile_venom&trinket.2.cooldown.remains>20))|fight_remains<25",
+          "comment": null,
+          "sourceLine": 180
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "use_item,name=sethraliss_defiled_relic,if=buff.combustion.remains>6|fight_remains<20",
+          "comment": null,
+          "sourceLine": 181
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "use_item,name=hex_lords_dooming_idol,if=buff.combustion.remains>6|fight_remains<30",
+          "comment": null,
+          "sourceLine": 182
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "use_item,name=vaelgors_final_stare,if=buff.combustion.remains>6|fight_remains<20",
+          "comment": null,
+          "sourceLine": 183
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "use_item,name=emberwing_feather,if=buff.combustion.remains>6|fight_remains<20",
+          "comment": null,
+          "sourceLine": 184
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "use_item,name=venomous_gladiators_badge_of_ferocity,if=buff.combustion.remains>6|fight_remains<20",
+          "comment": null,
+          "sourceLine": 185
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "use_item,name=galactic_gladiators_badge_of_ferocity,if=buff.combustion.remains>6|fight_remains<20",
+          "comment": null,
+          "sourceLine": 186
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "use_item,name=ever_collapsing_void_fissure,if=buff.combustion.remains>6|fight_remains<20",
+          "comment": null,
+          "sourceLine": 187
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "use_item,name=freightrunners_flask,if=buff.combustion.remains>6|fight_remains<20",
+          "comment": null,
+          "sourceLine": 188
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "use_items,if=variable.nonsteroid_trinket_equipped&(time>variable.combustion_delay&cooldown.combustion.remains>20|time<=variable.combustion_delay&(variable.combustion_delay>=18|!variable.steroid_trinket_equipped))&buff.combustion.down&buff.hyperthermia.down",
+          "comment": "Non-steroid trinkets are used outside cooldowns. They can be used on pull if Combustion is delayed an ample amount of time or you don't have a steroid trinket equipped.",
+          "sourceLine": 189
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "ancestral_call,if=buff.combustion.remains>6|fight_remains<20",
+          "comment": null,
+          "sourceLine": 190
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "berserking,if=buff.combustion.remains>6|fight_remains<20",
+          "comment": null,
+          "sourceLine": 191
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "blood_fury,if=buff.combustion.remains>6|fight_remains<20",
+          "comment": null,
+          "sourceLine": 192
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "fireblood,if=buff.combustion.remains>6|fight_remains<10",
+          "comment": null,
+          "sourceLine": 193
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "invoke_external_buff,name=power_infusion,if=buff.power_infusion.down&(buff.combustion.remains>6|fight_remains<25)",
+          "comment": null,
+          "sourceLine": 194
+        }
+      ]
+    },
+    {
+      "listName": "fireblast",
+      "receiverIdentifier": "fireblast",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "fire_blast,use_off_gcd=1,use_while_casting=1,if=cooldown_react&cooldown.fire_blast.charges_fractional>=2.9&talent.firestarter",
+          "comment": "Cast Fire Blast if close to overcapping charges. This can result in casting Fire Blast twice during one cast, if you have ample time left of your cast.",
+          "sourceLine": 196
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "fire_blast,use_off_gcd=1,use_while_casting=1,if=cooldown_react&!buff.hot_streak.react&(buff.combustion.up|buff.hyperthermia.up)&(hot_streak_spells_in_flight+buff.heating_up.react=1)&gcd.remains<gcd.max",
+          "comment": "During Combustion/Hyperthermia, spend Fire Blasts with Heating Up.",
+          "sourceLine": 197
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "fire_blast,use_off_gcd=1,use_while_casting=1,if=cooldown_react&!buff.hot_streak.react&action.pyroblast.executing&buff.pyroclasm.up&gcd.remains<gcd.max",
+          "comment": "Cast Fire Blast during a hardcasted Pyroblast with Pyroclasm. Doing this can result in casting Fire Blast twice during one cast.",
+          "sourceLine": 198
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "fire_blast,use_off_gcd=1,use_while_casting=1,if=cooldown_react&!buff.hot_streak.react&(action.fireball.executing&action.fireball.execute_remains>0.1|buff.pyroclasm.react&action.pyroblast.executing&action.pyroblast.execute_remains>0.1|action.flamestrike.executing&action.flamestrike.execute_remains>0.1)&(!scorch_execute.active|!talent.scorch)&buff.heating_up.react&(hot_streak_spells_in_flight+buff.heating_up.react=1)&gcd.remains<gcd.max",
+          "comment": "During non-execute filler, use Fire Blast with Heating Up while hardcasting Fireball/Frostfire Bolt/Pyroblast/Flamestrike.",
+          "sourceLine": 199
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "fire_blast,use_off_gcd=1,use_while_casting=1,if=cooldown_react&!buff.hot_streak.react&scorch_execute.active&(hot_streak_spells_in_flight+buff.heating_up.react=0)&(action.scorch.executing&buff.heat_shimmer.down|action.pyroblast.executing&buff.pyroclasm.up&set_bonus.midnight_season_2_2pc)&gcd.remains<gcd.max",
+          "comment": "During execute, spend Fire Blasts while casting Scorch, or consuming Pyroclasm with 12.1 2pc, if you don't have Heating Up.",
+          "sourceLine": 200
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "fire_blast,use_off_gcd=1,use_while_casting=1,if=cooldown_react&!buff.hot_streak.react&time<variable.combustion_delay&(talent.firestarter|action.fireball.executing&action.fireball.execute_remains>0.1|buff.pyroclasm.react&action.pyroblast.executing&action.pyroblast.execute_remains>0.1)&(hot_streak_spells_in_flight+buff.heating_up.react=1)&gcd.remains<gcd.max&cooldown.combustion.ready",
+          "comment": "While delaying Combustion on pull (Firestarter or not), spend Fire Blasts with Heating Up freely. If not playing Firestarter, only do so during hardcasts.",
+          "sourceLine": 201
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "fire_blast,use_off_gcd=1,use_while_casting=1,if=cooldown_react&(time>=variable.combustion_delay&(cooldown.combustion.remains<=variable.combustion_precast_time))&buff.combustion.down&talent.spontaneous_combustion&(action.scorch.executing|action.fireball.executing|action.pyroblast.executing|action.flamestrike.executing)",
+          "comment": "When talented into Spontaneous Combustion, spend all Fire Blasts during the pre-cast going into Combustion regardless of Heating Up / Hot Streak status.",
+          "sourceLine": 202
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "fire_blast,use_off_gcd=1,use_while_casting=1,if=fight_remains<1",
+          "comment": "Spend all available Fire Blasts if fight is ending.",
+          "sourceLine": 203
+        }
+      ]
+    },
+    {
+      "listName": "ff_combustion",
+      "receiverIdentifier": "ff_combustion",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "combustion,use_off_gcd=1,use_while_casting=1,if=buff.combustion.down&action.fireball.executing&(action.fireball.execute_remains<variable.cast_remains_time)|action.meteor.in_flight&(action.meteor.in_flight_remains<0.3)|action.pyroblast.executing&(action.pyroblast.execute_remains<variable.cast_remains_time)|prev_gcd.1.meteor",
+          "comment": null,
+          "sourceLine": 205
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "flamestrike,if=buff.pyroclasm.up&!buff.hot_streak.react&buff.combustion.down&active_enemies>=variable.ff_combustion_flamestrike",
+          "comment": "Precast into Combustion. Prioritize Pyroclasm if available.",
+          "sourceLine": 206
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "pyroblast,if=buff.pyroclasm.up&!buff.hot_streak.react&buff.combustion.down",
+          "comment": null,
+          "sourceLine": 207
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "fireball,if=buff.combustion.down",
+          "comment": null,
+          "sourceLine": 208
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "meteor,if=talent.burnout&buff.combustion.remains<8|!talent.burnout&buff.combustion.remains>2",
+          "comment": "Meteor is used towards the end of Combustion to maximize the Ignite bank for Burnout. If not playing Burnout, just make sure the Meteor lands during Combustion at any time.",
+          "sourceLine": 209
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "flamestrike,if=buff.hot_streak.react&active_enemies>=variable.ff_combustion_flamestrike",
+          "comment": "Spend Hot Streaks on Pyroblast in ST or Flamestrike in AoE.",
+          "sourceLine": 210
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "pyroblast,if=buff.hot_streak.react",
+          "comment": null,
+          "sourceLine": 211
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "flamestrike,if=buff.pyroclasm.up&cast_time<buff.combustion.remains&active_enemies>=(variable.ff_filler_flamestrike-1)",
+          "comment": "Make sure Pyroclasm FINISHES its cast before Combustion ends.",
+          "sourceLine": 212
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "pyroblast,if=buff.pyroclasm.up&cast_time<buff.combustion.remains",
+          "comment": null,
+          "sourceLine": 213
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "scorch,if=buff.heat_shimmer.react|talent.scald&scorch_execute.active&buff.frostfire_empowerment.down",
+          "comment": null,
+          "sourceLine": 214
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "fireball",
+          "comment": null,
+          "sourceLine": 215
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "call_action_list,name=fireblast,if=!talent.pyroclasm|(buff.pyroclasm.stack<2|action.pyroblast.executing&action.pyroblast.execute_remains>0.2&buff.pyroclasm.stack=2|cooldown.fire_blast.charges_fractional>=2.9|buff.combustion.remains<action.pyroblast.cast_time)&(active_enemies<variable.sf_combustion_flamestrike|buff.pyroclasm.down|!action.flamestrike.executing)",
+          "comment": null,
+          "sourceLine": 216
+        }
+      ]
+    },
+    {
+      "listName": "ff_filler",
+      "receiverIdentifier": "ff_filler",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "meteor,if=time>=(variable.combustion_delay-gcd.max)",
+          "comment": "Cast Meteor on CD starting from the precast of your first Combustion.",
+          "sourceLine": 218
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "flamestrike,if=(buff.hot_streak.react&(cooldown.combustion.remains>=5|time<variable.combustion_delay))&active_enemies>=variable.ff_filler_flamestrike",
+          "comment": "Hold Hot Streak if Combustion is coming up soon. Do not hold if intentionally delaying Combustion.",
+          "sourceLine": 219
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "pyroblast,if=buff.hot_streak.react&(cooldown.combustion.remains>=(5-5*buff.pyroclasm.up)|time<variable.combustion_delay)",
+          "comment": null,
+          "sourceLine": 220
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "flamestrike,if=(buff.pyroclasm.up&cooldown.combustion.remains>12|buff.pyroclasm.stack=2)&active_enemies>=variable.ff_filler_flamestrike",
+          "comment": "Spend Pyroclasm immediately if you have 2 stacks available. Otherwise, hold one stack if it lasts until Combustion comes up.",
+          "sourceLine": 221
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "pyroblast,if=buff.pyroclasm.up&cooldown.combustion.remains>12|buff.pyroclasm.stack=2",
+          "comment": null,
+          "sourceLine": 222
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "scorch,if=buff.heat_shimmer.react",
+          "comment": null,
+          "sourceLine": 223
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "fireball",
+          "comment": null,
+          "sourceLine": 224
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "call_action_list,name=fireblast",
+          "comment": null,
+          "sourceLine": 225
+        }
+      ]
+    },
+    {
+      "listName": "sf_combustion",
+      "receiverIdentifier": "sf_combustion",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "combustion,use_off_gcd=1,use_while_casting=1,if=action.scorch.executing&(action.scorch.execute_remains<variable.cast_remains_time)|action.fireball.executing&(action.fireball.execute_remains<variable.cast_remains_time)|action.pyroblast.executing&(action.pyroblast.execute_remains<variable.cast_remains_time)&!cooldown.meteor.ready|action.flamestrike.executing&(action.flamestrike.execute_remains<variable.cast_remains_time)|action.meteor.in_flight&action.meteor.in_flight_remains<0.3&(action.pyroblast.executing|action.flamestrike.executing|buff.pyroclasm.down)",
+          "comment": null,
+          "sourceLine": 227
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "flamestrike,if=buff.combustion.down&buff.hot_streak.react&active_enemies>=variable.sf_combustion_flamestrike",
+          "comment": "Spend Hot Streak before going into your precast.",
+          "sourceLine": 228
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "pyroblast,if=buff.combustion.down&buff.hot_streak.react",
+          "comment": null,
+          "sourceLine": 229
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "meteor,if=buff.combustion.down&talent.sunfury_execution",
+          "comment": "Precast one of these into Combustion.",
+          "sourceLine": 230
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "flamestrike,if=active_enemies>=variable.sf_combustion_flamestrike&(buff.combustion.down&!buff.hot_streak.react&buff.pyroclasm.up)",
+          "comment": null,
+          "sourceLine": 231
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "pyroblast,if=buff.combustion.down&!buff.hot_streak.react&buff.pyroclasm.up",
+          "comment": null,
+          "sourceLine": 232
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "scorch,if=buff.combustion.down&(scorch_execute.active|active_enemies>=4)",
+          "comment": null,
+          "sourceLine": 233
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "fireball,if=buff.combustion.down&(!prev_gcd.1.meteor|buff.bloodlust.down)",
+          "comment": null,
+          "sourceLine": 234
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "meteor,if=buff.combustion.remains>2",
+          "comment": "Make sure Meteor lands during Combustion.",
+          "sourceLine": 235
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "flamestrike,if=(buff.hot_streak.react|prev_gcd.1.scorch&buff.heating_up.react&time-action.scorch.last_used<0.2)&active_enemies>=variable.sf_combustion_flamestrike",
+          "comment": "Spend Hot Streaks on Pyroblast in ST or Flamestrike in AoE. The Scorch condition is simply to simulate predictable guaranteed crits during Combustion.",
+          "sourceLine": 236
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "pyroblast,if=buff.hot_streak.react|prev_gcd.1.scorch&buff.heating_up.react&time-action.scorch.last_used<0.2",
+          "comment": null,
+          "sourceLine": 237
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "flamestrike,if=buff.pyroclasm.react&cast_time<buff.combustion.remains&active_enemies>=variable.sf_combustion_flamestrike",
+          "comment": "Make sure Pyroclasm FINISHES its cast before Combustion ends.",
+          "sourceLine": 238
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "pyroblast,if=buff.pyroclasm.react&cast_time<buff.combustion.remains",
+          "comment": null,
+          "sourceLine": 239
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "scorch",
+          "comment": null,
+          "sourceLine": 240
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "call_action_list,name=fireblast,if=!talent.pyroclasm|(buff.pyroclasm.stack<2|action.pyroblast.executing&action.pyroblast.execute_remains>0.2&buff.pyroclasm.stack=2|cooldown.fire_blast.charges_fractional>=2.9|buff.combustion.remains<action.pyroblast.cast_time)&(active_enemies<variable.sf_combustion_flamestrike|buff.pyroclasm.down|!action.flamestrike.executing)",
+          "comment": "We prioritize starting to cast Pyroclasm (on 2 stacks) over Fire Blast if there's no risk of overcapping. In AoE, we also do not want to cast Fire Blast during a hardcast Flamestrike.",
+          "sourceLine": 241
+        }
+      ]
+    },
+    {
+      "listName": "sf_filler",
+      "receiverIdentifier": "sf_filler",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "meteor,if=talent.blast_zone&time>variable.combustion_delay",
+          "comment": "Meteor is used immediately when ready after the first Combustion, if you have Blast Zone.",
+          "sourceLine": 243
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "flamestrike,if=(buff.hot_streak.react|prev_gcd.1.scorch&buff.heating_up.react&time-action.scorch.last_used<0.2|buff.hyperthermia.up)&active_enemies>=variable.sf_filler_flamestrike",
+          "comment": "Spend Hot Streaks on Pyroblast in ST or Flamestrike in AoE. The Scorch condition is simply to simulate predictable guaranteed crits during execute.",
+          "sourceLine": 244
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "pyroblast,if=buff.hot_streak.react|prev_gcd.1.scorch&buff.heating_up.react&time-action.scorch.last_used<0.2|buff.hyperthermia.up",
+          "comment": null,
+          "sourceLine": 245
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "flamestrike,if=buff.pyroclasm.up&active_enemies>=variable.sf_filler_flamestrike",
+          "comment": "Spend Pyroclasm immediately.",
+          "sourceLine": 246
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "pyroblast,if=buff.pyroclasm.up",
+          "comment": null,
+          "sourceLine": 247
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "scorch,if=talent.scald&scorch_execute.active|buff.heat_shimmer.react&(firestarter.active|prev_gcd.1.pyroblast|prev_gcd.1.flamestrike)",
+          "comment": "Cast Scorch in execute or with a Heat Shimmer proc.",
+          "sourceLine": 248
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "fireball",
+          "comment": null,
+          "sourceLine": 249
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "call_action_list,name=fireblast",
+          "comment": null,
+          "sourceLine": 250
+        }
+      ]
+    }
+  ]
+}

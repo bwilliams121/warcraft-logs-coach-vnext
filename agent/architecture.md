@@ -14036,6 +14036,56 @@ Limits: the census does not read JSON files of 500 bytes or less, or log and tex
 
 **What a later promotion must do.** Each needs a real subject with combatant info first (ONB-EV). Then each answers its own first question: for Affliction, a player-knowable reading of `fight_remains` and Drain Soul's talent; for Marksmanship, whether a line gated on `fight_style.dungeonroute` can be stepped past on a raid fight, which waits on a difficulty authority, then a reviewed `auto_shot` contract. Each binds its own state, measures its hero trees and spells or refuses them, and answers the anchor's limits (agent/follow-ups.md "After ONB-D4"). A new public entry then promotes it through the unchanged gates by the five-site promotion. No such entry is queued.
 
+## ONB-X1 — Fire Mage (internal, own representative)
+
+Autopilot queue entry ONB-X1. Public contract: NONE. No Warcraft Logs request. `src/specs/mage/fire/README.md` is the slice in detail.
+
+**What it is.** One specialization registered INTERNAL_ONLY on the observed-decision pattern, with its own pinned list, GCD and talent data, cast semantics, anchor profile, resolver, facade and registration. No shared analyzer was introduced, and no shared code changed. It is cloned from Arcane Mage's finished shape, then given Fire's own vocabulary, applicability and cast review.
+
+**The queue's question, answered by measurement: Hot Streak needs no handling yet.** The entry says Combustion windows and the Heating Up and Hot Streak chain need proc-state handling of their own. They will. But every scan stops at the Combustion dispatch, which reads none of them directly and is above every line that does, so a proc binding here would be code no decision reaches. So nothing reads those auras, and tests pin that an unread proc never decides anything. The dispatch needs its own inputs first (below).
+
+**Measured, offline, by replaying the retained subject through production ingestion.** A census of every retained JSON file over 500 bytes (5,714 parsed of 5,715), reading events of any type, by context, by combatant-info specID 63 and by ability id, with Mortal Strike as its positive control (559 casts), finds one subject:
+
+| Subject | Hero tree | Span | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 17 | Sunfury | first 165 s of 424.5 s | 113 | 0 | 0 | 113 | 58 |
+
+The 113 are 76 Pyroblast, 23 Fireball, 9 Scorch and 5 Meteor. The excluded are 52 Fire Blast and 2 Combustion, off the GCD, and 3 Shimmer and 1 Blazing Barrier, with no lane. Contexts also name 24XJ9Nyq7jnfgAMQ fight 23 actor 17, VwGz68yk9gTr7DhH fights 3 and 4 actor 10, and 6gTFNyCYXn3DxWtZ actor 12, with no events of theirs retained. No Frostfire subject is retained. The other Meteor and Fire Blast hits are the Primal Fire Elemental's 117588 and 57984 (A7R6 actors 24 and 33 are such pets), a Shaman's, and a trap for the next census.
+
+**Where it stops.** Every root scan, at `default[7] run_action_list`, with blocker `UNDECIDED_RUN_GATE`: `default[0]` returns with no action, `default[6]` is proven skipped because a Sunfury tree disproves `talent.frostfire_bolt`, and `default[7]`, the `sf_combustion` dispatch, stays open on `time`, `variable.combustion_delay`, the Combustion and Meteor cooldowns, `gcd.max` and `buff.combustion.up`. A Frostfire build and a build with no hero entry stop one line earlier, at `default[6]`, on the same inputs (synthetic). The list dispatches on no enemy count at that point, so **ONB-S3 alone moves nothing**.
+
+**The delay is its own question.** `variable.combustion_delay` is assigned in precombat from `expected_combat_length`, a simulation's planned fight length, by way of `%`, which the parser does not read. A real fight has no planned length a player could know, and using the real one is hindsight. So it stays UNKNOWN, and a test shows that stating the clock alone does not close the dispatch. This is the first thing a Fire promotion has to settle, and it is not a mechanical one: the list comment says the delay simulates a boss reaching 90% health.
+
+**The anchors on the 113:**
+
+| Anchor | Count | Spells |
+| --- | ---: | --- |
+| `BEGINCAST_PAIRING_AMBIGUOUS` | 85 | Pyroblast, 76, all of them; Scorch, 9, all of them |
+| `OBSERVED_BEGINCAST` | 23 | Fireball, all of them |
+| `INSTANT_COMPLETION` | 5 | Meteor |
+
+**The begin does not say which Pyroblast it was.** Every Pyroblast and every Scorch has a begin, and 62 of the 76 Pyroblast begins and 4 of the 9 Scorch begins are under 100 ms before the completion, 0 ms at the median for Pyroblast. So the wire logs a begin in front of an instant press too, and the shared rule that such a begin is a candidate and never the moment is right here, not only cautious. Fireball's are 930 to 1,322 ms. The subject's Hot Streak (58 applied, 58 removed) and Heating Up (62, 61) are on the wire, so the aura could separate them later.
+
+**Requirement C is not met, and why this is not an owner stop.** As for Arms, Destruction and Arcane. The queue asks for an internal registration, and the fail-closed result is correct. What would change it is listed in agent/follow-ups.md "After ONB-X1". The public decision is ONB-X1P's.
+
+**Decisions.**
+
+1. **Nothing shared moved.** The list fits the shared timeline and selection as it stands. All 88 actions parse, and every in-domain condition outside precombat parses whole.
+2. **The proc chain is unread, deliberately.** See above. `buff.hot_streak.react`, `buff.heating_up.react`, `buff.pyroclasm.*`, `buff.heat_shimmer.react` and `hot_streak_spells_in_flight` stay unbound, and each evaluates UNRESOLVED, including the numeric `react` forms.
+3. **Pyroblast, Flamestrike, Scorch and Frostfire Bolt stay possibly instant on every build.** Hot Streak is baseline (`specialization_spells.inc` row 195283), so no build excludes it for the first two. A talent reading could narrow Scorch and Frostfire Bolt. Fireball 133 has no -100% row, so it is a hard cast. Flame Accelerant's rows reach -80% at most.
+4. **Fireball's two rows have different executions.** The token builds Frostfire Bolt when talented (sc_mage.cpp:5673). Both are `_gcd` 1500, so the lane does not depend on which, as for Frost's Frostbolt.
+5. **Fire Blast reads its talent two ways.** Taken, the action is on row 108853, off the GCD. Not taken, it is on the class spell 319836, `_gcd` 1500 (sc_mage.cpp:4528). Only the talent's row is bound, and proven-absent stays UNKNOWN rather than background, because the action still exists. The class row has no lane, so a cast of it is excluded and never judged.
+6. **Flamestrike is never resolved.** Its talent is a choice of two rows, like Blizzard, so its applicability stays UNKNOWN. Both rows have the same -100% rows.
+7. **No channel is reviewed.** The pinned list presses none, so the `CHANNEL` cast rule Arcane has is removed, and no row claims one.
+8. **`scorch_execute.active` and `firestarter.active` stay unbound.** Each reads the target's health (sc_mage.cpp:6909-6913), which nothing here reads.
+9. **The extractor targets are plain.** `mage-fire` is `NO_PTR_REGION` in `engine/class_modules/apl/mage.cpp`, on the sources ONB-D3 pinned, and the dispatch is `mage_t::init_action_list`. No extractor changed but for the new target. `forbiddenTokens` holds only `swap_action_list`, because the list uses `run_action_list`.
+
+**The unsupported-path subject moved.** The fixture's guard demands that the subject is not a `SpecId`, so `tests/support/unsupported-subject.ts` moved from Fire Mage, A7R6 fight 7 actor 17, to that fight's Devastation Evoker, actor 11, before `mage/fire` was added: the same committed capture, with the identity read from its master data. The corpus cases that pin it by coordinates were renamed, and the expected player name is `Actor11`. ONB-X2 owes the same migration, to that fight's Beast Mastery Hunter, actor 20, the last one it holds. Its spelling `BeastMastery` does not lower-case to its roster key `hunter/beast_mastery`, so the guard's spelling check will need that mapping.
+
+**Evidence.** Nothing new is committed. The subject's events are retained raw and would pin nothing the synthetic tests do not. Every pinned source read was already on disk and matches the M11-A3 hashes.
+
+**No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse the row. A public request for a Fire Mage is SPEC_NOT_SUPPORTED, exactly as before.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

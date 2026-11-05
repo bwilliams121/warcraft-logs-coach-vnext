@@ -274,6 +274,7 @@ describe("what the tree registers today", () => {
       ["src/specs/evoker/preservation/registration.ts", "PRESERVATION_EVOKER_REGISTRATION", "PUBLIC"],
       ["src/specs/hunter/marksmanship/registration.ts", "MARKSMANSHIP_HUNTER_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/mage/arcane/registration.ts", "ARCANE_MAGE_REGISTRATION", "INTERNAL_ONLY"],
+      ["src/specs/mage/fire/registration.ts", "FIRE_MAGE_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/mage/frost/registration.ts", "FROST_MAGE_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/monk/brewmaster/registration.ts", "BREWMASTER_MONK_REGISTRATION", "PUBLIC"],
       ["src/specs/monk/mistweaver/registration.ts", "MISTWEAVER_MONK_REGISTRATION", "PUBLIC"],

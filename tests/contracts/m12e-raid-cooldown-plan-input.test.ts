@@ -171,7 +171,7 @@ describe("the service discloses a supplied plan and evaluates none of it", () =>
   it("an unsupported specialization still discloses the plan, beside SPEC_NOT_SUPPORTED", async () => {
     const result = await analyzed(
       { ...D2_REQUEST, raidCooldownPlan: STRUCTURED_PLAN },
-      { className: "Mage", specName: "Fire" },
+      { className: "Evoker", specName: "Devastation" },
     );
     expect(result.state).toBe("SPEC_NOT_SUPPORTED");
     const document = projectAnalysisResult(result.analysis);

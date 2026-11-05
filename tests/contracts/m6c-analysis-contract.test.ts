@@ -226,7 +226,7 @@ describe("the schema is strict rather than permissive", () => {
         startTimeMs: 0,
         endTimeMs: 1000,
       },
-      player: { sourceId: 19, name: "Fixtureplayer", className: "Mage", specName: "Fire" },
+      player: { sourceId: 19, name: "Fixtureplayer", className: "Evoker", specName: "Devastation" },
       data: { logVersion: 17, gameVersion: 1 },
     },
     specialization: { specId: null, gameplaySupported: false },
@@ -283,12 +283,12 @@ describe("the schema is strict rather than permissive", () => {
   });
 
   it("rejects a fabricated specialization id", () => {
-    // `mage/fire` is not a spec this build recognizes. Publishing it would
+    // `evoker/devastation` is not a spec this build recognizes. Publishing it would
     // claim recognition the engine does not have. (Until M10-D this test used
     // `paladin/protection`, which the enum now legitimately carries.)
     const fabricated = {
       ...MINIMAL_UNANALYZED,
-      specialization: { specId: "mage/fire", gameplaySupported: false },
+      specialization: { specId: "evoker/devastation", gameplaySupported: false },
     };
     expect(PublicAnalysisResultSchema.safeParse(fabricated).success).toBe(false);
   });

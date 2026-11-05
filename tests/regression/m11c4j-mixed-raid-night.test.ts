@@ -197,6 +197,7 @@ const NO_CALLS = {
   "mage-frost-observed-decisions": 0,
   "warlock-affliction-observed-decisions": 0,
   "hunter-marksmanship-observed-decisions": 0,
+  "mage-fire-observed-decisions": 0,
   "rogue-outlaw-observed-decisions": 0,
 };
 
