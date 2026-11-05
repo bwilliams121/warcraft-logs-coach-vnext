@@ -4,59 +4,59 @@ Rolling file: overwritten for each review cycle.
 
 ## Change
 
-ONB-X5: Unholy Death Knight (internal, own representative). Branch `autopilot/onb-x5`, from main at 6e08a90. **Registered INTERNAL_ONLY, 0 MATCH, 0 REJECTED, 147 UNKNOWN over one real subject. It reads the ONB-S6 pet state, and those readings move no decision.**
+ONB-X5P: Unholy Death Knight (public). Branch `autopilot/onb-x5p`, from main at e80f30a. **Outcome: not promoted. It stays INTERNAL_ONLY, because it cannot pass the rotational gates: all 147 decisions of its one retained subject stay UNKNOWN.**
 
-- **Warcraft Logs: NONE.** No request or probe. Every replay and wire probe reads retained files offline.
-- **Public contract: NONE.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed. A public DeathKnight/Unholy request stays SPEC_NOT_SUPPORTED.
-- **Shared production code: only the additive registration rows** (`src/findings/spec-id.ts`, `src/services/analyzer-registry.ts`). No engine, parser or shared-evaluator change.
-- **Queue bookkeeping:** ONB-X4P is recorded MERGED (PR #84, 6e08a90d…), and ONB-X5 is set to PR_OPEN. The supervisor's whole merged list was compared by script (see Validation).
+- **Warcraft Logs: NONE.** No request or probe. The replay and the census read retained files offline.
+- **Public contract: declared EXPECTED, actual change NONE**, because nothing passes. Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed. A public DeathKnight/Unholy request is SPEC_NOT_SUPPORTED, as before, with preparation and partial coverage.
+- **Production code: no change.** The only file under `src/` is the specialization's README.
+- **Tests:** one new assertion row, DeathKnight/Unholy in `analysis-composition-refusals`, which had none. The gate-search pin only has its comment changed. No assertion is weakened.
+- **Queue bookkeeping:** ONB-X5 is recorded MERGED (PR #85, e80f30a3…), and ONB-X5P is set to PR_OPEN. The supervisor's whole merged list was compared by script (see Validation).
 
 ## The things to check first
 
-**0. The first review's two findings are fixed.** Dark Transformation's lane is now its constructor's: `src/data/game/deathknight-unholy-gcd-semantics.ts` holds `UNHOLY_DEATH_KNIGHT_CONSTRUCTOR_LANES` (1233448 is NON_GCD), and `baseGcdMs` stays 1500 as extracted. `dark_transformation` now binds Blightfall 1271967 too, which keeps the data's 1500 ms, so the token's lane is `UNKNOWN_LANE`. A press of Dark Transformation is excluded `NON_GCD_ACTION`, and a press of Blightfall is the token's decision. The wire agrees: all four retained presses land 3 to 482 ms after the press before them. I grepped `trigger_gcd`, `gcd_type` and `set_replacement_action` over the whole module, and no other press of this list is overridden or replaced. The shared index and the extractor are unchanged. Is one reviewed table in this specialization's data the right place, given the shared rule still decides the token?
+**1. Is "not promoted" right, and is it not an owner stop?** Onboarding rule 4 says a public entry that cannot pass stays INTERNAL_ONLY. OBSERVATION needs a real MATCH and DISCRIMINATION a real REJECTED or a control flipping a real MATCH, and there is no real resolved decision. The precedents are ONB-X1P, ONB-X2P and ONB-X4P. The gates are not touched.
 
-**1. The replacement bindings.** `death_coil` binds 47541 and Necrotic Coil 1242174, `epidemic` binds 207317 and Graveyard 383269, `festering_strike` binds 85948 and Festering Scythe 458128, `scourge_strike` binds 55090 and Vampiric Strike 433895 (`scripts/authority/extract-simc-gcd.mjs`, `DEATHKNIGHT_UNHOLY_FACTS`). Each constructor calls `set_replacement_action` (`sc_death_knight.cpp:6033-6055`) under a buff, and the list names none of the four. It is the shape Blood's `heart_strike` already has for Vampiric Strike. On the subject all 21 Necrotic Coils fall inside a logged Forbidden Knowledge window and none of the 32 Death Coils does, and all 9 Festering Scythes fall inside a logged 1241077 window (`.probe/onbx5/samems.cjs`). Graveyard and Vampiric Strike have no retained press, so they rest on the pinned module alone. Left unbound they would be excluded as off the list. Is treating a replacement press as that token's decision correct? No verdict rests on it today.
+**2. Is it right to leave it off ONB-EV?** One real subject exists, and it stops on inputs before evidence: the engine refuses every decision at `default[0] auto_attack`, with Outbreak, Army of the Dead and Dark Transformation open behind it. Fire Mage, also with one retained subject, stayed off ONB-EV the same way (ONB-X1P). A second subject, a whole fight and San'layn would each need a capture, and those are recorded for a later promotion as ONB-EV's owner decision.
 
-**2. `pet.army_ghoul.active` is AMBIGUOUS by a declared second entity.** `src/data/game/deathknight-unholy-pet-semantics.ts`. 1294026 (Army) and 275430 (ordinary) both summon NPC 237409, and the retained actor 90 takes all of them. So I declared `lesser_ghoul` on the same gameID, though the list never reads it, to make the shared state report both `ENTITY_MAPPING_AMBIGUOUS`, its documented rule for this. Alternatives: map `army_ghoul` to it alone, which calls every ordinary ghoul an army, or declare no row and leave the truth unbound. Is the declared second entity the right use of that rule?
-
-**3. No floor and no ceiling on any row.** The spawner's Lord of the Dead default is 15,000 ms, 1292072's duration is 20,000 ms, and the 12 retained lives that end in the capture log a death 15,021 to 16,173 ms later, with completed casts to 15,349 ms and begins to 15,494 ms. So 15,000 is contradicted, and I claim nothing else: delayed damage means an observed end bounds nothing. The cost is that nothing is ever PRESENT or NOT_PRESENT. A test states a bound only it can state, to show the path binds and that later events change nothing. Is that too conservative, or correctly so?
-
-**4. The Gargoyle row, with no wire evidence.** 27829 comes from 49206's summon effect, and no retained catalog holds that actor. `instancesBeginWithSummon` is false, so its answer is always `INSTANCE_START_NOT_PINNED`. It adds a row with a data-only gameID so every `pet.*.active` atom has one reading path. Would no row be better? The alternative also leaves the truth unbound.
-
-**5. Arcane Pulse classified in this specialization's boundary.** `src/specs/deathknight/unholy/domain-boundary.ts`. It is a `racial_spell_t` the shared table does not list, and `racials[1]` reads ahead of every class action. Before this, the `racials` dispatch read `CALL_MAY_SELECT` on 17 decisions. Racial abilities are excluded from analysis, and Outlaw and Feral classify Shadowmeld the same way, so I did not touch the shared table ("After ONB-A2" calls that a shared decision). Frost's list has the token at a line its real scans do not reach, so Frost is unchanged. Is a local row right here, given the racial sits in front of every class action?
-
-**6. A decision's instant is its cast, with no cast anchor.** `observed-analysis.ts` reads resources and pets at the cast's own millisecond. Every token's rows, replacements included, have `_cast_time` 0, and the subject logs no begin of any spell. Frost has the same shape. Should a begin of one of these spells, if a later capture holds one, change anything? Today it would be ignored, and only a COMPLETE cast is a decision.
-
-**7. Two premises of the queue entry were wrong, and the queue keeps its text with an outcome note.** It says no retained events are known and that the list uses `run_action_list`. A census finds rXAf fight 13 actor 18, and the pinned list has `call_action_list` only (the extractor pins it, and `forbiddenTokens` holds `run_action_list`).
-
-**8. One boundary-guard exemption.** `m5-boundary-and-vocabulary` bans the text `presenceAt` outside declared modules. `pet-profile.ts` calls the shared pet state's method of that name, as Demonology's does, so it is declared with a comment.
-
-**9. No hero model.** The list reads no `hero_tree.*` and no hero talent, and no action is built on one. So the resolver has no hero atoms and the facade drops Frost's "disproved by tree" step, while `build.heroTree` still reports the tree from entry membership. Is dropping it right, or does the shared shape want it kept?
+**3. Is the census sound?** Its named and pinned routes are not empty (17 and 15 ids), and it throws if either is. Its pinned route includes two ids a Blood Death Knight also casts, Death and Decay 43265 and Vampiric Strike 433895, so most of its hits are not Unholy's. I resolved every source holding a hit to its report's context rather than reading the id as the specialization. See `.probe/onbx5p/actors.txt` and `actors2.cjs`.
 
 ## The evidence
 
-One subject, Rider of the Apocalypse, replayed offline through production ingestion and the facade (`.probe/onbx5/m/`). `rXAf` is rXAfw9t1q8YpmkKD. No retained subject is San'layn.
+**Replay** (`.probe/onbx5p/m/`): one subject, rXAf fight 13 actor 18, first 165 s, Rider of the Apocalypse. 147 eligible, 0 MATCH, 0 REJECTED, 147 UNKNOWN, 85 excluded. `out.json` is byte-identical to ONB-X5's (sha256 bffc3f80…). Engine: all 147 `ROTATIONAL_GCD_UNKNOWN` at `default[0] auto_attack`. Root scan: all 147 at `aoe[0] death_and_decay`, on `%`. Pets: all 147 UNKNOWN, `army_ghoul` `ENTITY_MAPPING_AMBIGUOUS`, `gargoyle` `INSTANCE_START_NOT_PINNED`, `lord_of_the_dead` `OWNERSHIP_NOT_STATED`.
 
-| Subject | Span | Eligible | Excluded | MATCH | REJECTED | UNKNOWN |
-| --- | --- | ---: | ---: | ---: | ---: | ---: |
-| rXAf f13 a18 | first 165 s | 147 | 85 | 0 | 0 | 147 |
+**Census** (`.probe/onbx5p/census.cjs`, `census.txt`, `census-read.txt`, `actors.txt`): 5,718 JSON files, 5,717 parsed (the unparsed one is `.probe/m11d2c/bad.json`). Controls: Mortal Strike, 985 events, 559 casts; 31 specIDs in combatant info.
 
-Engine: `ONE_SCAN_BLOCKED/NO_DEFINITE_WINNER @ default[0] auto_attack` on all 147. Root scan: undecided at `default[0]`, `cooldowns[2] outbreak`, `[3] army_of_the_dead`, `[4] dark_transformation` (`UNKNOWN_LANE`); `default[6] -> aoe` BLOCKED; stops at `aoe[0] death_and_decay`, `UNSUPPORTED_EXPRESSION:UNSUPPORTED_OPERATOR:%`. Pet readings: `army_ghoul` UNKNOWN `ENTITY_MAPPING_AMBIGUOUS`, `gargoyle` UNKNOWN `INSTANCE_START_NOT_PINNED`, `lord_of_the_dead` UNKNOWN `OWNERSHIP_NOT_STATED`, 147 each. `rune` known at 85, `runic_power` at 53. All 77 talent entries name a pinned trait row.
+- Combatant info with specID 252: 6 events, naming actor 18 and gBMC fight 33 actors 195 and 199 (`m11g2` `diagnose`, `diagnose2`).
+- gBMC actors 195 and 199: one Outbreak cast and one resource change each, in a 62-event diagnostic sample, so neither is a subject.
+- rXAf actor 174: actor 18's own pet (gameID 221634), 17 Scourge Strikes under the pet's id 445508.
+- Death and Decay and Vampiric Strike elsewhere: A7R6 f7 a14, gtKb f22 a14, b1Pm f48 a15, rXAf f13 a77, Gw2k f1 a12, gBMC f33 a7, xBFW f64 a332 and 6xZN f31 a6, each Blood by context. Vampiric Strike damage from actors 40, 58, 86, 44, 364, 15 and 166, each a gameID 27893 pet of one of those.
+- The retained contexts hold 40 rows naming Unholy, over 11 report codes, three of them sanitized stand-ins. Apart from these sources they hold no event of these ids. No source is San'layn.
 
-Census: 5,714 parsed files of 5,715, control Mortal Strike 559 casts. Only rXAf actor 18 is a subject. `gBMCKxyY7dQDRZav` fight 33 actors 195 and 199 are 20-event diagnostic samples.
+Limits: it does not read JSON files of 500 bytes or less, or log and text output. Ability routes match those ids only; the combatant-info route does not depend on them. An actor with no context, no combatant info and none of those ids would not appear.
+
+## Decisions a reviewer might reject
+
+1. **A new test row in a "not promoted" entry.** The refusal list held no Unholy row, and ONB-X3P and ONB-X4P each added their own, so this adds it. It runs through the same loop and asserts SPEC_NOT_SUPPORTED, one retrieval and no dispatch.
+2. **No code for the first stops.** The swing's entry, the three cooldown lines and the rest stay recorded in "After ONB-X5" as inputs to a later entry.
+3. **No new public entry queued**, matching ONB-X1P, ONB-X2P and ONB-X4P. The architecture section says what one must do.
+4. **The diagnostics were not replayed.** gBMC actors 195 and 199 have one cast each of a press the list names, and no page chain, so they are not subjects. They could not supply several action tokens even if one resolved.
+
+## What changed
+
+- Docs: `agent/architecture.md` "ONB-X5P", `agent/follow-ups.md` "After ONB-X5", `agent/spec-onboarding-inventory.md`, `agent/testing.md`, `agent/autopilot-queue.md`, `agent/review-request.md`, `src/specs/deathknight/unholy/README.md`.
+- Tests: `tests/unit/analysis-composition-refusals.test.ts` (one row), `tests/contracts/m11-promotion-evidence-gate.test.ts` (comment).
 
 ## Validation run
 
 - `npm run typecheck`: clean. `npm run format:check`: clean. `git diff --check`: clean.
-- `npm run test:corpus -- --write-report`: PASSED. `npm run test:evidence -- --write-report`: PASSED. Both ran in sequence, with no suite beside them.
-- `scripts/bench/m10d-public-invariance.bench.ts`: passed.
-- Full suite, parallel, 60 s timeout: 18,979 tests, 18,977 passed, 2 failed: `m9b-corpus-harness` SPEC_PROTECTION_PALADIN and `runner-service-queue` W. Both are on the recorded list of parallel-load failures, and this change touches none of their code. Both pass rerun without the full suite beside them (68 passed (68)), so I infer load. The whole suite has not run clean in one pass.
-- Real replay rerun on the final code: rXAf fight 13 actor 18, 147 eligible, 85 excluded, 0 MATCH, 0 REJECTED, 147 UNKNOWN.
-- Queue compared by script with the supervisor's whole merged list: 65 compared, 1 written (ONB-X4P), 0 missing, and a second run wrote nothing.
+- `npm run test:corpus`: PASSED. `npm run test:evidence`: PASSED. Both ran in sequence, with no suite beside them.
+- Full suite, parallel, 60 s timeout: 18,979 tests, 18,977 passed, 2 failed: `m9b-corpus-harness` SPEC_PROTECTION_PALADIN and `runner-and-parser` "U. the per-job directory is removed" (expected 175 to be 174). The first is on the recorded list of parallel-load failures. The second is not on that list: it counts job directories in the shared OS temp directory before and after its own runs, so I infer another worker's job was alive between the counts, which I did not observe directly. This change touches neither's code. Both pass rerun without the full suite beside them. The whole suite has not run clean in one pass.
+- `analysis-composition-refusals`, `m11-promotion-evidence-gate` and the `onb-x5` suite, with `m10a-spec-partition` and `m10d-public-registration`, rerun together: 162 passed (162), 5 files. `m9b-corpus-harness`, `runner-service-queue`, `m10a-spec-partition` and `m10d-public-registration`: 100 passed (100), 4 files. `runner-and-parser`, alone: 23 passed (23).
+- Queue compared by script with the supervisor's whole merged list: 66 compared, 1 written (ONB-X5), 0 missing, and a second run wrote nothing.
 - No network to Warcraft Logs.
 
 ## What is not here
 
-No promotion, no public change, no new evidence, no shared parser or engine change, no Warcraft Logs request.
+No promotion, no public change, no new evidence, no production change, no Warcraft Logs request.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

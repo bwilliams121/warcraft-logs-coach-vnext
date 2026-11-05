@@ -226,6 +226,8 @@ describe("an unsupported specialization", () => {
       ["Mage", "Fire"],
       // Registered INTERNAL_ONLY in ONB-X4, not promoted by ONB-X4P. The same class token as Warlock/Destruction above.
       ["Warlock", "Demonology"],
+      // Registered INTERNAL_ONLY in ONB-X5, not promoted by ONB-X5P. The same class token as DeathKnight/Frost above.
+      ["DeathKnight", "Unholy"],
     ]) {
       const { analyze, ingest, deps } = spies(className, specName);
       const result = await analyzeFight(REQUEST, deps);

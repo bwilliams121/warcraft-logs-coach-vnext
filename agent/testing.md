@@ -5806,3 +5806,9 @@ The negatives: over each hero tree and none, no decision resolves; the engine st
 `m11d2c-pinned-extraction-preflight` holds the new target. Two corpus cases, as for its neighbours, and `tests/contracts/m11-promotion-evidence-gate.test.ts` pins that the gate search finds nothing. `m11a2-spec-module-conformance` proves its identity through the committed rXAf fight 13 context, actor 18.
 
 Offline only, not committed: the census (`.probe/onbx5/census.cjs`, Mortal Strike as its control), the wire probes (`wire.cjs`, `lotd.cjs`, `lotd2.cjs`) and the replay (`.probe/onbx5/m/`).
+
+# ONB-X5P: Unholy Death Knight, not promoted
+
+No production code changed. One assertion row is new: `tests/unit/analysis-composition-refusals.test.ts` had no row for it, and now holds DeathKnight/Unholy (SPEC_NOT_SUPPORTED, one retrieval for preparation alone, no dispatch). `tests/contracts/m11-promotion-evidence-gate.test.ts` keeps its ONB-X5 gate search (no qualifying assertion, `evidenceReady` false), its comment now naming the outcome. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, the `onb-x5` suite).
+
+Offline only, not committed: the census (`.probe/onbx5p/census.cjs`, Mortal Strike as its positive control for events and the specID distribution as its control for combatant info), its reading by source (`.probe/onbx5p/census-read.cjs`, `actors.cjs`, `actors2.cjs`), and the replay of the subject (`.probe/onbx5p/m/measure.baseline.ts`). They give the results in agent/architecture.md "ONB-X5P".
