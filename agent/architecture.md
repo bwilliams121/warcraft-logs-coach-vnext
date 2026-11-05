@@ -13995,6 +13995,47 @@ Drain Soul, Seed of Corruption, Corruption, Black Arrow, Wailing Arrow and Multi
 
 **No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse both rows. A public request for either is SPEC_NOT_SUPPORTED, exactly as before.
 
+## ONB-D4P — Affliction Warlock and Marksmanship Hunter public promotion: not promoted
+
+Autopilot queue entry ONB-D4P. Public contract: declared EXPECTED; actual change NONE, because nothing passes. No Warcraft Logs request and no new evidence.
+
+**The outcome.** Neither passes the rotational promotion gates, so each stays INTERNAL_ONLY (onboarding rule 4). The gates are not weakened and gain no subject. This is not an owner stop: rule 4 decides it, and no new decision is needed to record that. ONB-EV, already the owner's, would give each a subject and resolve nothing by itself. ONB-S3, also the owner's, moves neither.
+
+**Why neither can pass.** OBSERVATION needs a real MATCH and real resolved decisions over several distinct action tokens, and DISCRIMINATION needs a real REJECTED or a control that flips a real MATCH. Both start from a real resolved decision, and neither specialization has one. Replaying the only retained casts through production ingestion and each facade over a fake transport, at this tranche's base commit:
+
+| Subject | Spec | Retained span | Result | Eligible | MATCH | REJECTED | UNKNOWN |
+| --- | --- | --- | --- | ---: | ---: | ---: | ---: |
+| Gw2kXrTfLWcDdhFY fight 1 actor 20 (M13-A) | Affliction, not resolved | filtered casts, 146.5 s | `PROFILE_NOT_RESOLVED` | none | none | none | none |
+| Gw2kXrTfLWcDdhFY fight 1 actor 14 (M13-A) | Marksmanship, not resolved | filtered casts, 146.5 s | `PROFILE_NOT_RESOLVED` | none | none | none | none |
+| Gw2kXrTfLWcDdhFY fight 1 actor 18 (M13-A) | Marksmanship, not resolved | filtered casts, 146.5 s | `PROFILE_NOT_RESOLVED` | none | none | none | none |
+
+The replay's output file is byte-identical to the one saved during ONB-D4. A refusal is no decision at all, so these are not UNKNOWN decisions: the facade never reaches the list.
+
+**The census found nothing more, by three routes.** It parsed every JSON file over 500 bytes under `.probe/` and `tests/`, skipping tool output and worktree copies (5,711 parsed of 5,712). Mortal Strike, the positive control, has 559 casts.
+
+1. **Combatant info.** No `combatantinfo` event in any parsed file has specID 265 or 254. The route can find one: 31 other specIDs appear, Frost Mage's 64 among them, the row ONB-D3P had to explain. So the ONB-D3P question, a combatant-info row sitting in a diagnosis file, does not arise for these two.
+2. **Named abilities.** Ids the retained contexts' master data names as the two specializations' signature abilities.
+3. **Pinned ids.** Every id in the two specializations' GCD data, independent of any report's master data. ONB-D4 did not use this route. Of its hits, only Shadow Bolt 686 is new.
+
+Every source holding a hit was resolved against its report's actors:
+
+| Source | What it is | Result |
+| --- | --- | --- |
+| Gw2k actors 20, 14 and 18 (M13-A) | Affliction and Marksmanship, in a filtered capture with no combatant info | refused, above |
+| Gw2k actor 19 (M13-A) | Demonology | 23 Shadow Bolt, none of them this specialization's decisions |
+| gtKb fight 22 actors 3, 7 and 10; rXAf fight 13 actors 6 and 22; b1Pm fight 48 actors 11 and 14 | Demonology | Shadow Bolt, a shared ability, none of them this specialization's decisions |
+| A7R6 fight 7 actors 12 and 15 | Destruction, as ONB-D4 recorded | Malevolence and Wither, shared hero abilities |
+
+The other contexts naming these specializations, FPp6xjkNC9R4LrVh fight 10 actor 15 and 8dTmPvCzHfpkrF23 fight 3 actor 10 among them, hold no hit in any retained file. They name a player and carry no retained cast of that player.
+
+Limits: the census does not read JSON files of 500 bytes or less, or log and text output. Its cast routes match named and pinned ids, so a file holding only other abilities would not appear; the combatant-info route does not depend on them.
+
+**The evidence gap is each one's first gap, and it is not its only one.** Both stay on ONB-EV, as ONB-D4 recorded, since a real subject must come first. A subject alone resolves nothing. On synthetic builds, Affliction stops in `end_of_fight` on `fight_remains` and Drain Soul's talent, and Marksmanship stops at `default[2] retarget` on its `target_if`. Those stops remain readings of synthetic builds, and no real decision backs them. ONB-S3 alone moves neither.
+
+**What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists both; the gate search finds no qualifying assertion and `evidenceReady` false for each (`m11-promotion-evidence-gate`, from ONB-D4, its comments now naming the outcome); and a public request for each is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which now holds them). A public request still runs preparation and reports partial coverage. Nothing reads as clean play. The replay and census are offline and not committed.
+
+**What a later promotion must do.** Each needs a real subject with combatant info first (ONB-EV). Then each answers its own first question: for Affliction, a player-knowable reading of `fight_remains` and Drain Soul's talent; for Marksmanship, whether a line gated on `fight_style.dungeonroute` can be stepped past on a raid fight, which waits on a difficulty authority, then a reviewed `auto_shot` contract. Each binds its own state, measures its hero trees and spells or refuses them, and answers the anchor's limits (agent/follow-ups.md "After ONB-D4"). A new public entry then promotes it through the unchanged gates by the five-site promotion. No such entry is queued.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

@@ -214,6 +214,10 @@ describe("an unsupported specialization", () => {
       // another spelling would pass here for the wrong reason. Frost is also a Death Knight's row, above.
       ["Mage", "Arcane"],
       ["Mage", "Frost"],
+      // Registered INTERNAL_ONLY in ONB-D4, not promoted by ONB-D4P. Each class token is the one its registration names;
+      // another spelling would pass here for the wrong reason.
+      ["Warlock", "Affliction"],
+      ["Hunter", "Marksmanship"],
     ]) {
       const { analyze, ingest, deps } = spies(className, specName);
       const result = await analyzeFight(REQUEST, deps);

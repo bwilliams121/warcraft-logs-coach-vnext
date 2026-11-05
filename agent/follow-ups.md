@@ -33,7 +33,9 @@ current total (5,748,495 bytes), with what each row buys.
 
 **Raised:** ONB-D4 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN, and no real decision exists.
 
-**Both are on ONB-EV.** Their only real casts are the filtered M13-A actors 20, 14 and 18, which refuse `PROFILE_NOT_RESOLVED` for want of combatant info (agent/architecture.md "ONB-D4"). A promotion needs a real subject first, and the stops recorded here are synthetic until then. ONB-D4P should expect "not promoted".
+**ONB-D4P (2026-11-05): not promoted.** The gate search finds nothing for either (`m11-promotion-evidence-gate`). A census of retained JSON files finds no new subject, by combatant-info specID as well as by named and pinned ability ids, and M13-A's three actors, replayed at that base, refuse as before. No new public entry is queued; one must follow this list (agent/architecture.md "ONB-D4P").
+
+**Both are on ONB-EV.** Their only real casts are the filtered M13-A actors 20, 14 and 18, which refuse `PROFILE_NOT_RESOLVED` for want of combatant info (agent/architecture.md "ONB-D4"). A promotion needs a real subject first, and the stops recorded here are synthetic until then.
 
 **ONB-S3 alone moves neither of them:**
 

@@ -63,6 +63,8 @@ The rows are hand-reviewed readings of the pinned `_cast_time` and of every cast
 | `HC_cleave[1]`, `SH_cleave[1] seed_of_corruption` | past those, with Drain Soul proven not taken, every rotation line open, then a condition with too many unresolved atoms to enumerate. Synthetic |
 | the rotation lists | DoT windows, Nightfall, Soul Shards, the Darkglare and the enemy count; `target_if`, `cycle_targets`, `chain`, `early_chain_if` and `interrupt_if` options no one reads |
 
+**Not promoted by ONB-D4P.** It cannot pass the rotational gates, and it waits on a real subject (ONB-EV), then a player-knowable reading of `fight_remains`, Drain Soul's talent and the inputs behind them (agent/architecture.md "ONB-D4P").
+
 ## The evidence
 
 None usable, so Affliction is on ONB-EV. Its only real casts are the filtered M13-A capture's actor 20 (116 casts, 91 begins, no combatant info), which refuses `PROFILE_NOT_RESOLVED` when replayed (agent/architecture.md "ONB-D4"). Every stop above comes from a synthetic build, and the talent keys are uncorroborated on real evidence. Those casts do corroborate two readings: Malefic Grasp logs 1261153, and Dark Harvest and Malefic Grasp log `cast` with no begin.

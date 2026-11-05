@@ -1906,11 +1906,13 @@ mergeSha: 9b771666d37d25a1ee0ce9930fda1cb93bdec896
 ### ONB-D4: Affliction Warlock and Marksmanship Hunter (internal, Cohort D)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-D1
 branch: autopilot/onb-d4
 wcl: NONE
 publicContract: NONE
+pr: 75
+mergeSha: 7c8920653da2af6709400b70a588834dfd54f481
 ```
 
 **Scope.** Cohort D casters with multi-DoT (Affliction) or cast-time
@@ -1922,11 +1924,14 @@ for ONB-EV if needed.
 ### ONB-D4P: Affliction Warlock and Marksmanship Hunter (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-D4
+branch: autopilot/onb-d4p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** Neither passes the rotational promotion gates, so each stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Neither has a resolved decision: the only retained casts, the filtered M13-A actors 20, 14 and 18, refuse `PROFILE_NOT_RESOLVED` when replayed offline. A census of 5,711 retained files finds no new subject, by combatant-info specID as well as by ability id, so both stay on ONB-EV. ONB-S3 alone moves neither. A promotion after each one's own inputs is a new public entry through the unchanged gates (agent/architecture.md "ONB-D4P"; agent/follow-ups.md "After ONB-D4").
 
 ### ONB-X1: Fire Mage (internal, own representative)
 
