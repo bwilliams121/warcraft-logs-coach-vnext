@@ -777,8 +777,9 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
   });
 
   it("ONB-D4: the gate search finds nothing for Affliction Warlock", async () => {
-    // No decision of it resolves on real evidence, and nothing of it is committed as a decision set (agent/architecture.md "ONB-D4").
-    // A later capture that changed this would fail this pin and prompt a new public entry; it would not promote anything by itself.
+    // Its only replayable source refuses for want of combatant info, so it was not promoted (agent/architecture.md
+    // "ONB-D4P"). A later capture that changed this would fail this pin and prompt a new public entry; it would not
+    // promote anything by itself.
     const tiers = await tiersPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "warlock/affliction");
     if (module === undefined) throw new Error("no module for warlock/affliction");
@@ -788,8 +789,9 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
   });
 
   it("ONB-D4: the gate search finds nothing for Marksmanship Hunter", async () => {
-    // No decision of it resolves on real evidence, and nothing of it is committed as a decision set (agent/architecture.md "ONB-D4").
-    // A later capture that changed this would fail this pin and prompt a new public entry; it would not promote anything by itself.
+    // Its only replayable sources refuse for want of combatant info, so it was not promoted (agent/architecture.md
+    // "ONB-D4P"). A later capture that changed this would fail this pin and prompt a new public entry; it would not
+    // promote anything by itself.
     const tiers = await tiersPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "hunter/marksmanship");
     if (module === undefined) throw new Error("no module for hunter/marksmanship");

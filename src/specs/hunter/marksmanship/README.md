@@ -63,6 +63,8 @@ The rows are hand-reviewed readings of the pinned `_cast_time` and of every cast
 | `sentaoe[0]`, `draoe[0] explosive_shot` | past that, the area dispatch open on the enemy count, and the line's `target_if` refused. Synthetic |
 | the rotation lists | Focus, Precise Shots, Trick Shots, Lock and Load, Bulletstorm, the marks and charges; `target_if` on most lines |
 
+**Not promoted by ONB-D4P.** It cannot pass the rotational gates, and it waits on a real subject (ONB-EV), then how a line gated on `fight_style.dungeonroute` is read on a raid fight and the inputs behind it (agent/architecture.md "ONB-D4P").
+
 ## The evidence
 
 None usable, so Marksmanship is on ONB-EV. Its only real casts are the filtered M13-A capture's actors 14 (83 casts, 25 begins) and 18 (93, 28), with no combatant info, which refuse `PROFILE_NOT_RESOLVED` when replayed (agent/architecture.md "ONB-D4"). Every stop above comes from a synthetic build, and the talent keys are uncorroborated on real evidence. Those casts do corroborate two readings: Moonlight Chakram logs 1264949, and Rapid Fire logs `cast` with no begin.

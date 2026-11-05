@@ -5712,3 +5712,9 @@ Each list's own. Affliction: the synthetic stop at `end_of_fight[2] drain_soul` 
 Four corpus cases, two per spec, as for ONB-D3, and `tests/contracts/m11-promotion-evidence-gate.test.ts` pins that the gate search finds nothing for each. `m11d2c-pinned-extraction-preflight` holds the two new targets.
 
 Offline only, not committed: the census (`.probe/onbd4/census.cjs`, Mortal Strike as its positive control), the replay of the filtered M13-A subjects through production ingestion (`.probe/onbd4/m/`), and the class-mask reading of cast-time effects (`.probe/onbd4/rows.cjs`). The real extractor preflight runs only against a local pinned source root, as for every pinned target.
+
+# ONB-D4P: Affliction Warlock and Marksmanship Hunter, not promoted
+
+No production code changed. `tests/unit/analysis-composition-refusals.test.ts` holds Warlock/Affliction and Hunter/Marksmanship: SPEC_NOT_SUPPORTED, one retrieval for preparation alone, no dispatch. The class token is the one each registration's `wclClassName` names, so each row reaches the identity table's real lookup rather than failing on a misspelling. `tests/contracts/m11-promotion-evidence-gate.test.ts` keeps its ONB-D4 gate searches (no qualifying assertion, `evidenceReady` false), their comments now naming the outcome. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, the two `onb-d4-*` suites).
+
+Offline only, not committed: the census (`.probe/onbd4p/census.cjs`, Mortal Strike as its positive control for casts and the specID distribution as its control for combatant info), the resolution of its sources against each report's actors (`.probe/onbd4p/actors.cjs`, `actors2.cjs`), and the replay of M13-A's three actors (`.probe/onbd4p/m/subjects.baseline.ts`). They give the results in agent/architecture.md "ONB-D4P".
