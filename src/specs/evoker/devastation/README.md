@@ -87,7 +87,7 @@ So the `cast` is the start, and the shared CHANNEL kind already says that of a c
 
 351 decisions are anchored and stop there; the other 89 have no anchor, so the scan's answer is not read either.
 
-**Not promoted yet.** ONB-X2P makes that decision.
+**Not promoted by ONB-X2P.** It cannot pass the rotational gates: all 440 decisions stay UNKNOWN. It waits on the Quell and `cancel_if` first stops and the inputs behind them (agent/architecture.md "ONB-X2P").
 
 ## The evidence
 

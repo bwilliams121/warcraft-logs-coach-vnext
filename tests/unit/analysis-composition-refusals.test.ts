@@ -184,7 +184,8 @@ describe("an unsupported specialization", () => {
       ["Rogue", "Outlaw"],
       ["Rogue", "Subtlety"],
       ["Hunter", "BeastMastery"],
-      // Evoker/Augmentation is NOT in this list since M13-F. Devastation is the Evoker miss, INTERNAL_ONLY since ONB-X2.
+      // Evoker/Augmentation is NOT in this list since M13-F. Devastation is the Evoker miss, registered INTERNAL_ONLY in
+      // ONB-X2, not promoted by ONB-X2P.
       ["Evoker", "Devastation"],
       // Registered INTERNAL_ONLY in ONB-A2, not promoted by ONB-A2P, like Rogue/Subtlety above.
       ["Warrior", "Fury"],

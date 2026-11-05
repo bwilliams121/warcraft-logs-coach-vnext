@@ -33,6 +33,8 @@ current total (5,748,495 bytes), with what each row buys.
 
 **Raised:** ONB-X2 (2026-11-05). Coverage, not soundness: every decision is UNKNOWN.
 
+**ONB-X2P (2026-11-05): not promoted.** The gate search finds nothing (`m11-promotion-evidence-gate`). The three retained subjects, replayed at that base, give the same 440 UNKNOWN, and a census of retained JSON files finds no new subject, by combatant-info specID as well as by named and pinned ability ids. No new public entry is queued; one must follow this list (agent/architecture.md "ONB-X2P").
+
 **Devastation Evoker is not on ONB-EV.** Three subjects are retained with combatant info, two of them whole fights (agent/architecture.md "ONB-X2"). ONB-S3 alone moves nothing, since neither first stop reads an enemy count.
 
 **What Scalecommander needs, in order, before any line behind it is read:**

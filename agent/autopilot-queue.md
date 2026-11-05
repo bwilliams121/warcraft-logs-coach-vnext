@@ -1970,11 +1970,13 @@ mergeSha: 14d5fea94f84c043fd930c040143d113cd91fc14
 ### ONB-X2: Devastation Evoker (internal, own representative)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-S4
 branch: autopilot/onb-x2
 wcl: NONE
 publicContract: NONE
+pr: 79
+mergeSha: ff71a4f10747418e84c13b40bdd62c04879f9d47
 ```
 
 **Scope.** A holdout. It has empowered casts (rank by hold time) and a
@@ -1988,11 +1990,14 @@ A7R6 actor 11 since ONB-X1, so migrate it first (`tests/support/unsupported-subj
 ### ONB-X2P: Devastation Evoker (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-X2
+branch: autopilot/onb-x2p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** It does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Its three retained subjects, all Scalecommander, replayed offline, give 440 decisions, 0 MATCH, 0 REJECTED, all UNKNOWN, output byte-identical to ONB-X2's. A census of 5,714 retained files finds no new subject, by combatant-info specID as well as by named and pinned ability ids. Evidence is not its gap, so it is not on ONB-EV, and ONB-S3 alone moves nothing. A promotion after its own inputs, first the Quell and `cancel_if` stops, is a new public entry through the unchanged gates (agent/architecture.md "ONB-X2P"; agent/follow-ups.md "After ONB-X2").
 
 ### ONB-X3: Vengeance Demon Hunter (internal, own representative)
 
