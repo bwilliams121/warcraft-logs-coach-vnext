@@ -33,6 +33,8 @@ current total (5,748,495 bytes), with what each row buys.
 
 **Raised:** ONB-X3 (2026-11-05). Coverage, not soundness: every decision is UNKNOWN.
 
+**ONB-X3P (2026-11-05): not promoted.** The gate search finds nothing (`m11-promotion-evidence-gate`), and a wider census, of any event type, finds no event of a signature ability and no specID 581 in 5,714 parsed files. A new public entry must follow ONB-EV and the list below, and no such entry is queued (agent/architecture.md "ONB-X3P").
+
 **It is on ONB-EV.** No retained capture holds a cast or combatant info of this specialization, and the contexts naming it are uncommitted (agent/architecture.md "ONB-X3"). A capture alone would not resolve a decision either: everything below stands first. The first thing a capture must check is what the synthetic builds assume: the talent id space, the wire's cast shape, whether a logged Fel Devastation `cast` is the channel's start, and whether Fury appears on Fracture and Soul Cleave.
 
 **What it needs, in order, before any rotation line is read:**

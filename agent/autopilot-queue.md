@@ -2004,11 +2004,13 @@ mergeSha: 278c1ef74b750463123ffec587d0f94f98bc2298
 ### ONB-X3: Vengeance Demon Hunter (internal, own representative)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-S1, ONB-S2
 branch: autopilot/onb-x3
 wcl: NONE
 publicContract: NONE
+pr: 81
+mergeSha: 2a4f456bf33bcbe29af8593f3bb1a125080a04ed
 ```
 
 **Scope.** A holdout. Its in-combat variable programme combines `%`,
@@ -2021,11 +2023,14 @@ is known, so record it for ONB-EV if needed.
 ### ONB-X3P: Vengeance Demon Hunter (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-X3
+branch: autopilot/onb-x3p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** It does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. A census of 5,714 retained files finds no specID 581 and no event, of any type, of its signature abilities, so there is nothing to replay and it stays on ONB-EV. A capture alone would resolve nothing either: every query refuses first at `auto_attack`, with Disrupt, Infernal Strike and Demon Spikes open behind it, and ONB-S3 alone moves nothing. A promotion is a new public entry through the unchanged gates (agent/architecture.md "ONB-X3P"; agent/follow-ups.md "After ONB-X3").
 
 ### ONB-X4: Demonology Warlock (internal, own representative)
 
