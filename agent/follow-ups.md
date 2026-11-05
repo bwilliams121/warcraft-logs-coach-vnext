@@ -33,6 +33,8 @@ current total (5,748,495 bytes), with what each row buys.
 
 **Raised:** ONB-X1 (2026-11-05). Coverage, not soundness: every decision is UNKNOWN.
 
+**ONB-X1P (2026-11-05): not promoted.** The gate search finds nothing (`m11-promotion-evidence-gate`). The retained subject, replayed at that base, gives the same 113 UNKNOWN, and a census of retained JSON files finds no new subject, by combatant-info specID as well as by named and pinned ability ids. No new public entry is queued; one must follow this list (agent/architecture.md "ONB-X1P").
+
 **Fire Mage is not on ONB-EV.** One subject is retained with combatant info, Sunfury, first 165 s (agent/architecture.md "ONB-X1"). ONB-S3 alone moves nothing, since the first stop reads no enemy count.
 
 **What the Combustion dispatch needs, in order, before any line behind it is read:**

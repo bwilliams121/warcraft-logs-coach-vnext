@@ -5730,3 +5730,9 @@ Two corpus cases, as for ONB-D3, and `tests/contracts/m11-promotion-evidence-gat
 The unsupported subject's migration to Devastation Evoker, A7R6 fight 7 actor 11, is proved by `tests/contracts/m11a2-unsupported-subject.test.ts` from the committed context, and by the corpus cases that pin it. No assertion about the unsupported path was weakened: each states the new identity.
 
 Offline only, not committed: the census (`.probe/onbx1/census.cjs`, Mortal Strike as its positive control), the replay through production ingestion (`.probe/onbx1/m/`), the class-mask reading of cast-time effects (`.probe/onbx1/rows.cjs`), and the begin-to-completion gaps (`.probe/onbx1/verify.cjs`).
+
+# ONB-X1P: Fire Mage, not promoted
+
+No production code changed. `tests/unit/analysis-composition-refusals.test.ts` holds Mage/Fire again: SPEC_NOT_SUPPORTED, one retrieval for preparation alone, no dispatch. ONB-X1's sentinel migration had rewritten that row to a duplicate Evoker/Devastation; the duplicate is gone, and the list's comment names actor 11. `Mage` is the token the registration's `wclClassName` names, so the row reaches the identity table's real lookup rather than failing on a misspelling. `tests/contracts/m11-promotion-evidence-gate.test.ts` keeps its ONB-X1 gate search (no qualifying assertion, `evidenceReady` false), its comment now naming the outcome. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, the `onb-x1` suite).
+
+Offline only, not committed: the census (`.probe/onbx1p/census.cjs`, Mortal Strike as its positive control for casts and the specID distribution as its control for combatant info), the resolution of its sources against each report's actors (`.probe/onbx1p/actors.cjs`, `samples.cjs`, `samples2.cjs`), and the replay of the subject (`.probe/onbx1p/m/measure.baseline.ts`). They give the results in agent/architecture.md "ONB-X1P".
