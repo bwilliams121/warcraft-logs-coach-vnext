@@ -1,0 +1,312 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_WARLOCK_AFFLICTION_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "byteLength": 210927
+      },
+      {
+        "path": "engine/class_modules/warlock/sc_warlock_init.cpp",
+        "sha256": "8e1eae332a7be9607a4bde41640411183ecef8e00fddd1ab611c9d5fe8241d4c",
+        "byteLength": 95724
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 172,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Corruption"
+    },
+    {
+      "abilityGameId": 686,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Shadow Bolt"
+    },
+    {
+      "abilityGameId": 980,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Agony"
+    },
+    {
+      "abilityGameId": 27243,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Seed of Corruption"
+    },
+    {
+      "abilityGameId": 48181,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Haunt"
+    },
+    {
+      "abilityGameId": 198590,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Drain Soul"
+    },
+    {
+      "abilityGameId": 205180,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Summon Darkglare"
+    },
+    {
+      "abilityGameId": 442726,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Malevolence"
+    },
+    {
+      "abilityGameId": 445468,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Wither"
+    },
+    {
+      "abilityGameId": 1257052,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Dark Harvest"
+    },
+    {
+      "abilityGameId": 1259790,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Unstable Affliction"
+    },
+    {
+      "abilityGameId": 1261153,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Malefic Grasp"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "agony",
+      "candidateAbilityGameIds": [980],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / agony_t",
+        "startLine": 5874,
+        "endLine": 5874,
+        "sourceNote": "create_action dispatches \"agony\" to agony_t: built on p->talents.agony (:1411); find_talent_spell( SPECIALIZATION, \"Agony\" ) at sc_warlock_init.cpp:129.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "corruption",
+      "candidateAbilityGameIds": [172],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / corruption_t",
+        "startLine": 5858,
+        "endLine": 5858,
+        "sourceNote": "create_action dispatches \"corruption\" to corruption_t: built on !p->hero.wither.ok() ? p->warlock_base.corruption : not_found (:785); find_class_spell( \"Corruption\" ) at sc_warlock_init.cpp:22, class_spells.inc row 172.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "dark_harvest",
+      "candidateAbilityGameIds": [1257052],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / dark_harvest_t",
+        "startLine": 5886,
+        "endLine": 5886,
+        "sourceNote": "create_action dispatches \"dark_harvest\" to dark_harvest_t: built on p->talents.dark_harvest (:2461), channeled; find_talent_spell( SPECIALIZATION, \"Dark Harvest\" ) at sc_warlock_init.cpp:164.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "drain_soul",
+      "candidateAbilityGameIds": [198590],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / drain_soul_t",
+        "startLine": 5880,
+        "endLine": 5880,
+        "sourceNote": "create_action dispatches \"drain_soul\" to drain_soul_t: built on p->talents.drain_soul.ok() ? p->talents.drain_soul_dot : not_found (:2281), channeled; talents.drain_soul_dot = conditional_spell_lookup( talents.drain_soul.ok(), 198590 ) at sc_warlock_init.cpp:149.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "haunt",
+      "candidateAbilityGameIds": [48181],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / haunt_t",
+        "startLine": 5884,
+        "endLine": 5884,
+        "sourceNote": "create_action dispatches \"haunt\" to haunt_t: built on p->talents.haunt (:2390); find_talent_spell( SPECIALIZATION, \"Haunt\" ) at sc_warlock_init.cpp:142.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "malefic_grasp",
+      "candidateAbilityGameIds": [1261153],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / malefic_grasp_t",
+        "startLine": 5882,
+        "endLine": 5882,
+        "sourceNote": "create_action dispatches \"malefic_grasp\" to malefic_grasp_t: built on p->talents.malefic_grasp.ok() ? p->talents.malefic_grasp_2 : not_found (:2100), channeled; talents.malefic_grasp_2 = conditional_spell_lookup( talents.malefic_grasp.ok(), 1261153 ) at sc_warlock_init.cpp:182.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "malevolence",
+      "candidateAbilityGameIds": [442726],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / malevolence_t",
+        "startLine": 5962,
+        "endLine": 5962,
+        "sourceNote": "create_action dispatches \"malevolence\" to malevolence_t: built on p->hero.malevolence (:1298), whose trigger_gcd and cooldown it reads from hero.malevolence_buff, conditional_spell_lookup( hero.malevolence.ok(), 442726 ) at sc_warlock_init.cpp:635.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "seed_of_corruption",
+      "candidateAbilityGameIds": [27243],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / seed_of_corruption_t",
+        "startLine": 5888,
+        "endLine": 5888,
+        "sourceNote": "create_action dispatches \"seed_of_corruption\" to seed_of_corruption_t: built on p->talents.seed_of_corruption (:1782); find_talent_spell( SPECIALIZATION, \"Seed of Corruption\" ) at sc_warlock_init.cpp:135.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "shadow_bolt",
+      "candidateAbilityGameIds": [686],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / shadow_bolt_t",
+        "startLine": 5860,
+        "endLine": 5860,
+        "sourceNote": "create_action dispatches \"shadow_bolt\" to shadow_bolt_t: built on p->talents.drain_soul.ok() ? not_found : p->warlock_base.shadow_bolt (:829); find_class_spell( \"Shadow Bolt\" ) at sc_warlock_init.cpp:23, class_spells.inc row 686.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "summon_darkglare",
+      "candidateAbilityGameIds": [205180],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / summon_darkglare_t",
+        "startLine": 5878,
+        "endLine": 5878,
+        "sourceNote": "create_action dispatches \"summon_darkglare\" to summon_darkglare_t: built on p->talents.summon_darkglare (:2423); find_talent_spell( SPECIALIZATION, \"Summon Darkglare\" ) at sc_warlock_init.cpp:169.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "unstable_affliction",
+      "candidateAbilityGameIds": [1259790],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / unstable_affliction_t",
+        "startLine": 5876,
+        "endLine": 5876,
+        "sourceNote": "create_action dispatches \"unstable_affliction\" to unstable_affliction_t: built on p->talents.unstable_affliction (:1500); find_talent_spell( SPECIALIZATION, \"Unstable Affliction\" ) at sc_warlock_init.cpp:132.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "wither",
+      "candidateAbilityGameIds": [445468],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / wither_t",
+        "startLine": 5959,
+        "endLine": 5959,
+        "sourceNote": "create_action dispatches \"wither\" to wither_t: built on p->hero.wither.ok() ? p->hero.wither_direct : not_found (:1189); hero.wither_direct = conditional_spell_lookup( hero.wither.ok(), 445468 ) at sc_warlock_init.cpp:605.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

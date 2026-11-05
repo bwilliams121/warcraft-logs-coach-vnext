@@ -118,6 +118,7 @@ describe("the sweep has something to sweep", () => {
       "src/specs/druid/restoration",
       "src/specs/evoker/augmentation",
       "src/specs/evoker/preservation",
+      "src/specs/hunter/marksmanship",
       "src/specs/mage/arcane",
       "src/specs/mage/frost",
       "src/specs/monk/brewmaster",
@@ -134,6 +135,7 @@ describe("the sweep has something to sweep", () => {
       "src/specs/shaman/elemental",
       "src/specs/shaman/enhancement",
       "src/specs/shaman/restoration",
+      "src/specs/warlock/affliction",
       "src/specs/warlock/destruction",
       "src/specs/warrior/arms",
       "src/specs/warrior/fury",
@@ -162,6 +164,8 @@ describe("the sweep has something to sweep", () => {
     expect(existsSync("src/specs/priest/shadow/registration.ts")).toBe(true);
     expect(existsSync("src/specs/mage/arcane/registration.ts")).toBe(true);
     expect(existsSync("src/specs/mage/frost/registration.ts")).toBe(true);
+    expect(existsSync("src/specs/warlock/affliction/registration.ts")).toBe(true);
+    expect(existsSync("src/specs/hunter/marksmanship/registration.ts")).toBe(true);
     expect(existsSync("src/specs/rogue/outlaw/registration.ts")).toBe(true);
     expect(existsSync("src/specs/shaman/enhancement/registration.ts")).toBe(true);
     expect(existsSync("src/specs/paladin/retribution/registration.ts")).toBe(true);
@@ -238,6 +242,7 @@ describe("shared code reaches specializations only through the registration boun
       "src/specs/druid/restoration/registration.js",
       "src/specs/evoker/augmentation/registration.js",
       "src/specs/evoker/preservation/registration.js",
+      "src/specs/hunter/marksmanship/registration.js",
       "src/specs/mage/arcane/registration.js",
       "src/specs/mage/frost/registration.js",
       "src/specs/monk/brewmaster/registration.js",
@@ -254,6 +259,7 @@ describe("shared code reaches specializations only through the registration boun
       "src/specs/shaman/elemental/registration.js",
       "src/specs/shaman/enhancement/registration.js",
       "src/specs/shaman/restoration/registration.js",
+      "src/specs/warlock/affliction/registration.js",
       "src/specs/warlock/destruction/registration.js",
       "src/specs/warrior/arms/registration.js",
       "src/specs/warrior/fury/registration.js",

@@ -29,6 +29,33 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After ONB-D4: what the Affliction and Marksmanship slices do not establish
+
+**Raised:** ONB-D4 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN, and no real decision exists.
+
+**Both are on ONB-EV.** Their only real casts are the filtered M13-A actors 20, 14 and 18, which refuse `PROFILE_NOT_RESOLVED` for want of combatant info (agent/architecture.md "ONB-D4"). A promotion needs a real subject first, and the stops recorded here are synthetic until then. ONB-D4P should expect "not promoted".
+
+**ONB-S3 alone moves neither of them:**
+
+- **Affliction.** `end_of_fight[0]` and `[1]` read `soul_shard`, `fight_remains` and the enemy count. `fight_remains` is PREDICTIVE, so a player-knowable estimate is its own question. `end_of_fight[2] drain_soul` then needs its talent. Past that, each tree's dispatch reads the count, and each rotation list reads DoT windows, Nightfall, Soul Shards and the Darkglare. `SH_cleave[1]` and `HC_cleave[1]` have too many unresolved atoms to enumerate.
+- **Marksmanship.** `default[2] retarget` stops every scan on its `target_if`. Whether a line gated on `fight_style.dungeonroute` can be stepped past on a raid fight is the first question, and M11-F recorded that `fight_style` waits on a difficulty authority. Then `default[3] auto_shot` needs a reviewed contract, as Arms has. Then the area dispatches read the count, and every rotation line reads `target_if`, Precise Shots, Bulletstorm, marks and charges.
+
+**Each one's own state.** Affliction reads the windows of Agony, Corruption, Wither, Unstable Affliction and Seed of Corruption, `active_dot.agony`, Nightfall and Shard Instability stacks, Soul Shards, `pet.darkglare`, in-flight Seed and `prev`. Marksmanship reads Focus, Aimed Shot's charges (`full_recharge_time`), Precise Shots, Trick Shots, Lock and Load, Bulletstorm, Bullseye, the Spotter's and Sentinel's marks, and in-flight Aimed Shot. No aura identity, DoT window, stack or charge model is pinned for either. Soul Shards and Focus have no wire contract row, and a reading needs an anchor-time model.
+
+**The anchor's limits, unmeasured here:**
+
+- **Shadow Bolt, Seed of Corruption and Unstable Affliction are UNKNOWN on every build, and so is Aimed Shot.** Those four are most of each list's presses, so most hard-cast decisions would be `BEGINCAST_PAIRING_AMBIGUOUS` until a talent reading narrows them. Nightfall and Shard Instability are talents, and so is Lock and Load. Shadowy Inspiration is in neither the pinned module nor the talent data, so it would need its own proof.
+- **No exact cast time.** Haste at a decision is not established.
+- **A channel's end is not read.** No bound is claimed for Dark Harvest, Drain Soul, Malefic Grasp or Rapid Fire, and the lists' own `chain`, `early_chain_if` and `interrupt_if` end them, so occupancy after each is UNKNOWN to the next cast start. Those options are refused today, and reading them is the shared question Frost Mage's `interrupt_if` raised.
+
+**Unmeasured hero trees and spells.** Every row is unmeasured against a resolved build. The filtered casts suggest Hellcaller and Sentinel by what they press, which is no proof of a build. A promotion must measure each tree or refuse it, as Havoc refuses Fel-Scarred.
+
+**Pins that want a look at promotion.** `variable.cds_active` and `variable.darkglare_active` feed nothing in domain. `cycling_variable` is a fold over targets. Marksmanship's PTR twin differs, so a move to a PTR build is a new extraction, not a reuse.
+
+**Decision times are the anchor's**, as for Destruction, so a public promotion must check its readers of `fightTimeMs`.
+
+---
+
 ## After ONB-D3: what the Arcane and Frost Mage slices do not establish
 
 **Raised:** ONB-D3 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.

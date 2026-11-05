@@ -66,6 +66,8 @@ import pinnedBalanceDruidApl from "../../../src/simc/data/druid-balance.apl.json
 import pinnedShadowPriestApl from "../../../src/simc/data/priest-shadow.apl.json";
 import pinnedArcaneMageApl from "../../../src/simc/data/mage-arcane.apl.json";
 import pinnedFrostMageApl from "../../../src/simc/data/mage-frost.apl.json";
+import pinnedAfflictionWarlockApl from "../../../src/simc/data/warlock-affliction.apl.json";
+import pinnedMarksmanshipHunterApl from "../../../src/simc/data/hunter-marksmanship.apl.json";
 import pinnedOutlawRogueApl from "../../../src/simc/data/rogue-outlaw.apl.json";
 import pinnedEnhancementShamanApl from "../../../src/simc/data/shaman-enhancement.apl.json";
 import { AUTHORITY_DOMAINS, AUTHORITY_RESOLUTION_OUTCOMES } from "../../../src/findings/authority-domain.js";
@@ -422,6 +424,8 @@ export const OWNING_LAYERS = {
   SPEC_SHADOW_PRIEST: ["src/specs/priest/shadow/"],
   SPEC_ARCANE_MAGE: ["src/specs/mage/arcane/"],
   SPEC_FROST_MAGE: ["src/specs/mage/frost/"],
+  SPEC_AFFLICTION_WARLOCK: ["src/specs/warlock/affliction/"],
+  SPEC_MARKSMANSHIP_HUNTER: ["src/specs/hunter/marksmanship/"],
   SPEC_OUTLAW_ROGUE: ["src/specs/rogue/outlaw/"],
   SPEC_ENHANCEMENT_SHAMAN: ["src/specs/shaman/enhancement/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
@@ -475,6 +479,8 @@ export const SPEC_LAYER_OF = {
   "priest/shadow": "SPEC_SHADOW_PRIEST",
   "mage/arcane": "SPEC_ARCANE_MAGE",
   "mage/frost": "SPEC_FROST_MAGE",
+  "warlock/affliction": "SPEC_AFFLICTION_WARLOCK",
+  "hunter/marksmanship": "SPEC_MARKSMANSHIP_HUNTER",
   "rogue/outlaw": "SPEC_OUTLAW_ROGUE",
   "shaman/enhancement": "SPEC_ENHANCEMENT_SHAMAN",
 } as const satisfies Record<SpecId, OwningLayer>;
@@ -3478,6 +3484,32 @@ export const ASSERTION_KINDS = {
       "The Frost Mage facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
   },
 
+  // ---- SPEC_AFFLICTION_WARLOCK (ONB-D4, INTERNAL_ONLY) ---
+  "SPEC_AFFLICTION_WARLOCK.SPEC_GATE": {
+    owningLayer: "SPEC_AFFLICTION_WARLOCK",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Affliction Warlock facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
+  },
+
+  // ---- SPEC_MARKSMANSHIP_HUNTER (ONB-D4, INTERNAL_ONLY) ---
+  "SPEC_MARKSMANSHIP_HUNTER.SPEC_GATE": {
+    owningLayer: "SPEC_MARKSMANSHIP_HUNTER",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Marksmanship Hunter facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
+  },
+
   // ---- SPEC_OUTLAW_ROGUE (ONB-C2, INTERNAL_ONLY) ---
   "SPEC_OUTLAW_ROGUE.SPEC_GATE": {
     owningLayer: "SPEC_OUTLAW_ROGUE",
@@ -4320,6 +4352,8 @@ export const PINNED_AUTHORITY_REVISIONS: Readonly<Record<string, string>> = {
   [pinnedShadowPriestApl.authorityId]: pinnedShadowPriestApl.artifactRevision,
   [pinnedArcaneMageApl.authorityId]: pinnedArcaneMageApl.artifactRevision,
   [pinnedFrostMageApl.authorityId]: pinnedFrostMageApl.artifactRevision,
+  [pinnedAfflictionWarlockApl.authorityId]: pinnedAfflictionWarlockApl.artifactRevision,
+  [pinnedMarksmanshipHunterApl.authorityId]: pinnedMarksmanshipHunterApl.artifactRevision,
   [pinnedOutlawRogueApl.authorityId]: pinnedOutlawRogueApl.artifactRevision,
   [pinnedEnhancementShamanApl.authorityId]: pinnedEnhancementShamanApl.artifactRevision,
 };

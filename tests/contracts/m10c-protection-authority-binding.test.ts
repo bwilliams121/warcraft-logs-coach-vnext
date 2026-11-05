@@ -229,6 +229,8 @@ describe("cross-spec authority access is refused structurally", () => {
       ["priest/shadow", ["SIMC_APL_PRIEST_SHADOW"]],
       ["mage/arcane", ["SIMC_APL_MAGE_ARCANE"]],
       ["mage/frost", ["SIMC_APL_MAGE_FROST"]],
+      ["warlock/affliction", ["SIMC_APL_WARLOCK_AFFLICTION"]],
+      ["hunter/marksmanship", ["SIMC_APL_HUNTER_MARKSMANSHIP"]],
     ]);
   });
 });

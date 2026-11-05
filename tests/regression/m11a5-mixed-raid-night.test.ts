@@ -196,6 +196,8 @@ describe("a Retribution Paladin alone", () => {
       "priest-shadow-observed-decisions": 0,
       "mage-arcane-observed-decisions": 0,
       "mage-frost-observed-decisions": 0,
+      "warlock-affliction-observed-decisions": 0,
+      "hunter-marksmanship-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
     expectRetributionCell(cellOf(run.aggregate.cells, RETRIBUTION));
@@ -253,6 +255,8 @@ describe("a mixed roster — Assassination, Protection, Retribution, Fire and an
       "priest-shadow-observed-decisions": 0,
       "mage-arcane-observed-decisions": 0,
       "mage-frost-observed-decisions": 0,
+      "warlock-affliction-observed-decisions": 0,
+      "hunter-marksmanship-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
   });

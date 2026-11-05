@@ -1,0 +1,751 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_WARLOCK_AFFLICTION",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "warlock",
+    "specName": "affliction"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "UNKNOWN",
+    "sourcePath": "engine/class_modules/apl/warlock.cpp",
+    "sourceSha256": "09f2bb54304a3886a87aae18931bf2214f56882a88c074c7e77f730ed3e51bda",
+    "sourceByteLength": 33759,
+    "regionStartMarker": "//affliction_apl_start",
+    "regionEndMarker": "//affliction_apl_end",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "regionSha256": "ff8a30d2009b5775069f4d006348398b6381fccb266519289ae43ca176eb6c51",
+    "livePtrPolicy": "NO_PTR_REGION",
+    "dispatchSource": {
+      "sourcePath": "engine/class_modules/warlock/sc_warlock_init.cpp",
+      "sourceSha256": "8e1eae332a7be9607a4bde41640411183ecef8e00fddd1ab611c9d5fe8241d4c"
+    }
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "call_action_list,name=variables",
+          "comment": null,
+          "sourceLine": 86
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "call_action_list,name=end_of_fight",
+          "comment": null,
+          "sourceLine": 87
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "call_action_list,name=ogcd",
+          "comment": null,
+          "sourceLine": 88
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "call_action_list,name=items",
+          "comment": null,
+          "sourceLine": 89
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "call_action_list,name=soul_harvester,if=hero_tree.soul_harvester",
+          "comment": null,
+          "sourceLine": 90
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "call_action_list,name=hellcaller,if=hero_tree.hellcaller",
+          "comment": null,
+          "sourceLine": 91
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "malefic_grasp,chain=1,early_chain_if=buff.nightfall.react,if=pet.darkglare.active",
+          "comment": null,
+          "sourceLine": 92
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "drain_soul,chain=1,early_chain_if=buff.nightfall.react,interrupt_if=tick_time>0.5",
+          "comment": null,
+          "sourceLine": 93
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "shadow_bolt",
+          "comment": null,
+          "sourceLine": 94
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "summon_pet",
+          "comment": null,
+          "sourceLine": 77
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "variable,name=trinket_1_buffs,value=(trinket.1.has_buff.intellect|trinket.1.has_buff.mastery|trinket.1.has_buff.versatility|trinket.1.has_buff.haste|trinket.1.has_buff.crit|trinket.1.is.signet_of_the_priory)&(trinket.1.cooldown.duration>=20)",
+          "comment": null,
+          "sourceLine": 78
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=trinket_2_buffs,value=(trinket.2.has_buff.intellect|trinket.2.has_buff.mastery|trinket.2.has_buff.versatility|trinket.2.has_buff.haste|trinket.2.has_buff.crit|trinket.2.is.signet_of_the_priory)&(trinket.2.cooldown.duration>=20)",
+          "comment": null,
+          "sourceLine": 79
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": null,
+          "sourceLine": 80
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "grimoire_of_sacrifice,if=talent.grimoire_of_sacrifice",
+          "comment": null,
+          "sourceLine": 81
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "seed_of_corruption,if=(hero_tree.soul_harvester&active_enemies>1)|active_enemies>2",
+          "comment": null,
+          "sourceLine": 82
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "haunt,if=active_enemies<2|(hero_tree.hellcaller&active_enemies<3)",
+          "comment": null,
+          "sourceLine": 83
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "potion,if=potion.liquid_luster",
+          "comment": null,
+          "sourceLine": 84
+        }
+      ]
+    },
+    {
+      "listName": "soul_harvester",
+      "receiverIdentifier": "soul_harvester",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "call_action_list,name=SH_st,if=active_enemies=1",
+          "comment": null,
+          "sourceLine": 96
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "call_action_list,name=SH_cleave,if=active_enemies=2",
+          "comment": null,
+          "sourceLine": 97
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "call_action_list,name=SH_aoe,if=active_enemies>2",
+          "comment": null,
+          "sourceLine": 98
+        }
+      ]
+    },
+    {
+      "listName": "hellcaller",
+      "receiverIdentifier": "hellcaller",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "call_action_list,name=HC_st,if=active_enemies=1",
+          "comment": null,
+          "sourceLine": 100
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "call_action_list,name=HC_cleave,if=active_enemies=2",
+          "comment": null,
+          "sourceLine": 101
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "call_action_list,name=HC_aoe,if=active_enemies>2",
+          "comment": null,
+          "sourceLine": 102
+        }
+      ]
+    },
+    {
+      "listName": "items",
+      "receiverIdentifier": "items",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "use_item,name=stormbound_emblem_of_dazar,if=cooldown.summon_darkglare.remains<=4&dot.agony.remains&(dot.corruption.remains|dot.wither.remains)&cooldown.dark_harvest.remains>1",
+          "comment": null,
+          "sourceLine": 104
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "use_item,name=galactic_gladiators_badge_of_ferocity,if=(buff.malevolence.up|pet.darkglare.active)|fight_remains<20",
+          "comment": null,
+          "sourceLine": 105
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_item,name=hex_lords_dooming_idol,if=pet.darkglare.active|buff.hex_lords_doom.stack>19|fight_remains<=30",
+          "comment": null,
+          "sourceLine": 106
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "use_items,if=(buff.malevolence.up|pet.darkglare.active)|fight_remains<20",
+          "comment": null,
+          "sourceLine": 107
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "use_item,use_off_gcd=1,slot=main_hand",
+          "comment": null,
+          "sourceLine": 108
+        }
+      ]
+    },
+    {
+      "listName": "ogcd",
+      "receiverIdentifier": "ogcd",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "potion,use_off_gcd=1,if=variable.cds_active|fight_remains<32",
+          "comment": null,
+          "sourceLine": 110
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "invoke_external_buff,name=power_infusion,if=variable.cds_active|fight_remains<16",
+          "comment": null,
+          "sourceLine": 111
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "berserking,use_off_gcd=1,if=variable.cds_active|fight_remains<14",
+          "comment": null,
+          "sourceLine": 112
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "blood_fury,use_off_gcd=1,if=variable.cds_active|fight_remains<17",
+          "comment": null,
+          "sourceLine": 113
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "fireblood,use_off_gcd=1,if=variable.cds_active|fight_remains<10",
+          "comment": null,
+          "sourceLine": 114
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "ancestral_call,use_off_gcd=1,if=variable.cds_active|fight_remains<17",
+          "comment": null,
+          "sourceLine": 115
+        }
+      ]
+    },
+    {
+      "listName": "SH_st",
+      "receiverIdentifier": "SH_st",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "haunt",
+          "comment": null,
+          "sourceLine": 117
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "agony,if=remains<3",
+          "comment": null,
+          "sourceLine": 118
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "corruption,if=remains<3",
+          "comment": null,
+          "sourceLine": 119
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "dark_harvest,if=soul_shard<3&execute_time<(dot.agony.remains<?dot.corruption.remains)&(!talent.cascading_calamity|buff.cascading_calamity.remains)&(!set_bonus.midnight_season_2_4pc|buff.unstable_empowerment.remains)",
+          "comment": null,
+          "sourceLine": 120
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "summon_darkglare,if=cooldown.dark_harvest.remains",
+          "comment": null,
+          "sourceLine": 121
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "malefic_grasp,if=buff.nightfall.react>1|pet.darkglare.remains<gcd",
+          "comment": null,
+          "sourceLine": 122
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "drain_soul,if=buff.nightfall.react>1",
+          "comment": null,
+          "sourceLine": 123
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "shadow_bolt,if=buff.nightfall.react>1",
+          "comment": null,
+          "sourceLine": 124
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "seed_of_corruption,if=set_bonus.midnight_season_2_4pc&talent.siphon_life&buff.shard_instability.react",
+          "comment": null,
+          "sourceLine": 125
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "unstable_affliction,if=soul_shard|buff.shard_instability.react",
+          "comment": null,
+          "sourceLine": 126
+        }
+      ]
+    },
+    {
+      "listName": "SH_aoe",
+      "receiverIdentifier": "SH_aoe",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "haunt",
+          "comment": null,
+          "sourceLine": 128
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "seed_of_corruption,if=(!dot.corruption.ticking|dot.corruption.refreshable)&!dot.seed_of_corruption.ticking&!prev.seed_of_corruption&!action.seed_of_corruption.in_flight",
+          "comment": null,
+          "sourceLine": 129
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "dark_harvest",
+          "comment": null,
+          "sourceLine": 130
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "seed_of_corruption,target_if=!dot.unstable_affliction.ticking&buff.succulent_soul.remains,if=set_bonus.midnight_season_2_4pc&active_enemies<=5",
+          "comment": null,
+          "sourceLine": 131
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "agony,target_if=min:remains,if=active_dot.agony<12&remains<5",
+          "comment": null,
+          "sourceLine": 132
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "summon_darkglare",
+          "comment": null,
+          "sourceLine": 133
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "malefic_grasp,if=buff.nightfall.react>1&active_enemies<=6",
+          "comment": null,
+          "sourceLine": 134
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "shadow_bolt,if=buff.nightfall.react>1&active_enemies<=7",
+          "comment": null,
+          "sourceLine": 135
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "seed_of_corruption,if=talent.sow_the_seeds|active_enemies>5",
+          "comment": null,
+          "sourceLine": 136
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "unstable_affliction",
+          "comment": null,
+          "sourceLine": 137
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "agony,target_if=min:remains,if=remains<duration*0.5",
+          "comment": null,
+          "sourceLine": 138
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "malefic_grasp,if=pet.darkglare.remains<gcd",
+          "comment": null,
+          "sourceLine": 139
+        }
+      ]
+    },
+    {
+      "listName": "SH_cleave",
+      "receiverIdentifier": "SH_cleave",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "haunt",
+          "comment": null,
+          "sourceLine": 141
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "seed_of_corruption,if=(!dot.corruption.ticking|dot.corruption.refreshable)&!dot.seed_of_corruption.ticking&!prev.seed_of_corruption&!action.seed_of_corruption.in_flight",
+          "comment": null,
+          "sourceLine": 142
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "agony,target_if=refreshable",
+          "comment": null,
+          "sourceLine": 143
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "dark_harvest",
+          "comment": null,
+          "sourceLine": 144
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "summon_darkglare",
+          "comment": null,
+          "sourceLine": 145
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "seed_of_corruption,target_if=!dot.unstable_affliction.ticking,if=buff.succulent_soul.remains&talent.sow_the_seeds&!pet.darkglare.active",
+          "comment": null,
+          "sourceLine": 146
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "seed_of_corruption,if=talent.sow_the_seeds&!pet.darkglare.active",
+          "comment": null,
+          "sourceLine": 147
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "unstable_affliction,cycle_targets=1,if=!ticking&buff.succulent_soul.remains",
+          "comment": null,
+          "sourceLine": 148
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "unstable_affliction",
+          "comment": null,
+          "sourceLine": 149
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "malefic_grasp,if=buff.nightfall.react>1|pet.darkglare.remains<gcd",
+          "comment": null,
+          "sourceLine": 150
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "drain_soul,if=buff.nightfall.react>1",
+          "comment": null,
+          "sourceLine": 151
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "shadow_bolt,if=buff.nightfall.react>1",
+          "comment": null,
+          "sourceLine": 152
+        }
+      ]
+    },
+    {
+      "listName": "HC_st",
+      "receiverIdentifier": "HC_st",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "haunt",
+          "comment": null,
+          "sourceLine": 154
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "agony,if=refreshable",
+          "comment": null,
+          "sourceLine": 155
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "wither,if=refreshable",
+          "comment": null,
+          "sourceLine": 156
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "dark_harvest,if=execute_time<(dot.agony.remains<?dot.corruption.remains)",
+          "comment": null,
+          "sourceLine": 157
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "malevolence",
+          "comment": null,
+          "sourceLine": 158
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "malefic_grasp,if=buff.nightfall.react>1|pet.darkglare.remains<gcd",
+          "comment": null,
+          "sourceLine": 159
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "drain_soul,if=buff.nightfall.react>1",
+          "comment": null,
+          "sourceLine": 160
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "shadow_bolt,if=buff.nightfall.react>1",
+          "comment": null,
+          "sourceLine": 161
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "unstable_affliction,if=pet.darkglare.remains|buff.malevolence.remains|soul_shard>4|buff.shard_instability.react|buff.cascading_calamity.remains<gcd.max",
+          "comment": null,
+          "sourceLine": 162
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "summon_darkglare",
+          "comment": null,
+          "sourceLine": 163
+        }
+      ]
+    },
+    {
+      "listName": "HC_aoe",
+      "receiverIdentifier": "HC_aoe",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "haunt",
+          "comment": null,
+          "sourceLine": 165
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "seed_of_corruption,if=(!dot.wither.ticking|dot.wither.refreshable)&!dot.seed_of_corruption.ticking&!prev.seed_of_corruption&!action.seed_of_corruption.in_flight",
+          "comment": null,
+          "sourceLine": 166
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "dark_harvest",
+          "comment": null,
+          "sourceLine": 167
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "agony,target_if=min:remains,if=active_dot.agony<14&remains<5",
+          "comment": null,
+          "sourceLine": 168
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "summon_darkglare",
+          "comment": null,
+          "sourceLine": 169
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "malevolence",
+          "comment": null,
+          "sourceLine": 170
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "seed_of_corruption,if=talent.sow_the_seeds|active_enemies>5",
+          "comment": null,
+          "sourceLine": 171
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "unstable_affliction",
+          "comment": null,
+          "sourceLine": 172
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "agony,target_if=min:remains,if=remains<5",
+          "comment": null,
+          "sourceLine": 173
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "malefic_grasp,if=pet.darkglare.remains<gcd",
+          "comment": null,
+          "sourceLine": 174
+        }
+      ]
+    },
+    {
+      "listName": "HC_cleave",
+      "receiverIdentifier": "HC_cleave",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "haunt",
+          "comment": null,
+          "sourceLine": 176
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "seed_of_corruption,if=talent.sow_the_seeds&!dot.wither.ticking&!dot.seed_of_corruption.ticking&!prev.seed_of_corruption&!action.seed_of_corruption.in_flight",
+          "comment": null,
+          "sourceLine": 177
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "wither,target_if=min:remains,if=remains<5&!(action.seed_of_corruption.in_flight|dot.seed_of_corruption.remains>0)&fight_remains>remains+5",
+          "comment": null,
+          "sourceLine": 178
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "agony,target_if=refreshable",
+          "comment": null,
+          "sourceLine": 179
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "dark_harvest",
+          "comment": null,
+          "sourceLine": 180
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "summon_darkglare",
+          "comment": null,
+          "sourceLine": 181
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "malevolence",
+          "comment": null,
+          "sourceLine": 182
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "malefic_grasp,if=pet.darkglare.remains<gcd",
+          "comment": null,
+          "sourceLine": 183
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "unstable_affliction",
+          "comment": null,
+          "sourceLine": 184
+        }
+      ]
+    },
+    {
+      "listName": "end_of_fight",
+      "receiverIdentifier": "end_of_fight",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "unstable_affliction,if=soul_shard&fight_remains<8&active_enemies<3",
+          "comment": null,
+          "sourceLine": 186
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "seed_of_corruption,if=soul_shard&fight_remains<8&active_enemies>2",
+          "comment": null,
+          "sourceLine": 187
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "drain_soul,if=buff.nightfall.react&fight_remains<5",
+          "comment": null,
+          "sourceLine": 188
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "shadow_bolt,if=buff.nightfall.react&fight_remains<5",
+          "comment": null,
+          "sourceLine": 189
+        }
+      ]
+    },
+    {
+      "listName": "variables",
+      "receiverIdentifier": "variables",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "variable,name=cds_active,op=set,value=!talent.summon_darkglare|pet.darkglare.remains",
+          "comment": null,
+          "sourceLine": 191
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "variable,name=darkglare_active,op=set,value=pet.darkglare.active|(cooldown.summon_darkglare.duration-cooldown.summon_darkglare.remains)<20",
+          "comment": null,
+          "sourceLine": 192
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "cycling_variable,name=min_agony,op=min,value=dot.agony.remains+(99*!dot.agony.remains)",
+          "comment": null,
+          "sourceLine": 193
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=malevolence_from_cast,value=0,op=set,if=buff.malevolence.up=0",
+          "comment": null,
+          "sourceLine": 194
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=malevolence_from_cast,value=1,op=set,if=prev_gcd.1.malevolence",
+          "comment": null,
+          "sourceLine": 195
+        }
+      ]
+    }
+  ]
+}

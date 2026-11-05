@@ -755,6 +755,8 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
       "priest/shadow",
       "mage/arcane",
       "mage/frost",
+      "warlock/affliction",
+      "hunter/marksmanship",
     ]);
     const internal = PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY");
     expect(internal.map((row) => row.specId)).toEqual([...INTERNAL_ONLY_SPEC_IDS]);
@@ -772,6 +774,28 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
       expect(readiness.qualifyingAssertions, specId).toEqual([]);
       expect(readiness.evidenceReady, specId).toBe(false);
     }
+  });
+
+  it("ONB-D4: the gate search finds nothing for Affliction Warlock", async () => {
+    // No decision of it resolves on real evidence, and nothing of it is committed as a decision set (agent/architecture.md "ONB-D4").
+    // A later capture that changed this would fail this pin and prompt a new public entry; it would not promote anything by itself.
+    const tiers = await tiersPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "warlock/affliction");
+    if (module === undefined) throw new Error("no module for warlock/affliction");
+    const readiness = evaluate(tiers, "warlock/affliction", "INTERNAL_ONLY", internalPairing(module));
+    expect(readiness.qualifyingAssertions).toEqual([]);
+    expect(readiness.evidenceReady).toBe(false);
+  });
+
+  it("ONB-D4: the gate search finds nothing for Marksmanship Hunter", async () => {
+    // No decision of it resolves on real evidence, and nothing of it is committed as a decision set (agent/architecture.md "ONB-D4").
+    // A later capture that changed this would fail this pin and prompt a new public entry; it would not promote anything by itself.
+    const tiers = await tiersPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "hunter/marksmanship");
+    if (module === undefined) throw new Error("no module for hunter/marksmanship");
+    const readiness = evaluate(tiers, "hunter/marksmanship", "INTERNAL_ONLY", internalPairing(module));
+    expect(readiness.qualifyingAssertions).toEqual([]);
+    expect(readiness.evidenceReady).toBe(false);
   });
 
   it("ONB-D3: the gate search finds nothing for Arcane Mage", async () => {
