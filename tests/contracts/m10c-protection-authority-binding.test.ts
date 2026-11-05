@@ -227,6 +227,8 @@ describe("cross-spec authority access is refused structurally", () => {
       ["shaman/elemental", ["SIMC_APL_SHAMAN_ELEMENTAL"]],
       ["druid/balance", ["SIMC_APL_DRUID_BALANCE"]],
       ["priest/shadow", ["SIMC_APL_PRIEST_SHADOW"]],
+      ["mage/arcane", ["SIMC_APL_MAGE_ARCANE"]],
+      ["mage/frost", ["SIMC_APL_MAGE_FROST"]],
     ]);
   });
 });

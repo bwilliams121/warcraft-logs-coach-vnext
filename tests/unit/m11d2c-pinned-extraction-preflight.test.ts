@@ -777,7 +777,7 @@ const EARLIER = [
 ];
 
 describe("the registry", () => {
-  it("holds exactly the five earlier targets, the eight D2-C targets, ONB-B2's Enhancement, ONB-C1's Feral, ONB-C2's Outlaw, ONB-D1's Destruction and ONB-D2's three", () => {
+  it("holds exactly the five earlier targets, the eight D2-C targets, ONB-B2's Enhancement, ONB-C1's Feral, ONB-C2's Outlaw, ONB-D1's Destruction, ONB-D2's three and ONB-D3's two", () => {
     // ONB-B2 is the audit this entry waited for: its list is a class method (onb-b2-class-method-extraction).
     // ONB-C1's list is an included file with a separate PTR file (onb-c1-included-file-extraction).
     expect(Object.keys(TARGETS).sort()).toEqual(
@@ -791,6 +791,8 @@ describe("the registry", () => {
         "shaman-elemental",
         "druid-balance",
         "priest-shadow",
+        "mage-arcane",
+        "mage-frost",
       ].sort(),
     );
   });

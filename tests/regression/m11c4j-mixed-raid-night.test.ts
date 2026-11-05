@@ -193,6 +193,8 @@ const NO_CALLS = {
   "shaman-elemental-observed-decisions": 0,
   "druid-balance-observed-decisions": 0,
   "priest-shadow-observed-decisions": 0,
+  "mage-arcane-observed-decisions": 0,
+  "mage-frost-observed-decisions": 0,
   "rogue-outlaw-observed-decisions": 0,
 };
 

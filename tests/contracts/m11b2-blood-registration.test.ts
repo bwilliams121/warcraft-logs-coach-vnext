@@ -127,6 +127,8 @@ describe("identity and partition", () => {
       "shaman/elemental",
       "druid/balance",
       "priest/shadow",
+      "mage/arcane",
+      "mage/frost",
     ]);
     expect(PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");

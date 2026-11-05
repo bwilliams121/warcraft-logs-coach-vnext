@@ -1,0 +1,385 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_TRAIT_MAGE_FROST_TALENTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals trait_data_t::id_node, as every earlier target recorded. No retained Frost Mage subject carries combatant info, so nothing corroborates these keys for Frost on real evidence (agent/architecture.md \"ONB-D3\").",
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "talents": [
+    {
+      "simcName": "cone_of_frost",
+      "displayNameEn": "Cone of Frost",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 62174,
+      "traitEntryId": 80239,
+      "talentSpellId": 1247090,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6153 talents.cone_of_frost = find_talent_spell( talent_tree::SPECIALIZATION, \"Cone of Frost\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "crystalline_refraction",
+      "displayNameEn": "Crystalline Refraction",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 110283,
+      "traitEntryId": 136837,
+      "talentSpellId": 1247544,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6170 talents.crystalline_refraction = find_talent_spell( talent_tree::SPECIALIZATION, \"Crystalline Refraction\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "flurry",
+      "displayNameEn": "Flurry",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 62178,
+      "traitEntryId": 80243,
+      "talentSpellId": 44614,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6135 talents.flurry = find_talent_spell( talent_tree::SPECIALIZATION, \"Flurry\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "freezing_rain",
+      "displayNameEn": "Freezing Rain",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 108860,
+      "traitEntryId": 134416,
+      "talentSpellId": 270233,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6152 talents.freezing_rain = find_talent_spell( talent_tree::SPECIALIZATION, \"Freezing Rain\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "freezing_winds",
+      "displayNameEn": "Freezing Winds",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 108853,
+      "traitEntryId": 134409,
+      "talentSpellId": 1216953,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6167 talents.freezing_winds = find_talent_spell( talent_tree::SPECIALIZATION, \"Freezing Winds\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "frostfire_bolt",
+      "displayNameEn": "Frostfire Bolt",
+      "tree": "HERO",
+      "traitNodeId": 94636,
+      "traitEntryId": 117239,
+      "talentSpellId": 431044,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6184 talents.frostfire_bolt = find_talent_spell( talent_tree::HERO, 431044 );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "frozen_orb",
+      "displayNameEn": "Frozen Orb",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 62177,
+      "traitEntryId": 80242,
+      "talentSpellId": 84714,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6138 talents.frozen_orb = find_talent_spell( talent_tree::SPECIALIZATION, \"Frozen Orb\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "ice_lance",
+      "displayNameEn": "Ice Lance",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 62176,
+      "traitEntryId": 80241,
+      "talentSpellId": 30455,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6126 talents.ice_lance = find_talent_spell( talent_tree::SPECIALIZATION, \"Ice Lance\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "ice_nova",
+      "displayNameEn": "Ice Nova",
+      "tree": "CLASS",
+      "traitNodeId": 62087,
+      "traitEntryId": 134199,
+      "talentSpellId": 157997,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 80143,
+          "displayNameEn": "Freezing Cold",
+          "talentSpellId": 386763
+        }
+      ],
+      "binding": "sc_mage.cpp:5999 talents.ice_nova = find_talent_spell( talent_tree::CLASS, \"Ice Nova\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "ray_of_frost",
+      "displayNameEn": "Ray of Frost",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 62153,
+      "traitEntryId": 80216,
+      "talentSpellId": 205021,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6142 talents.ray_of_frost = find_talent_spell( talent_tree::SPECIALIZATION, \"Ray of Frost\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "wintertide",
+      "displayNameEn": "Wintertide",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 62173,
+      "traitEntryId": 80237,
+      "talentSpellId": 378406,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 136880,
+          "displayNameEn": "White Out",
+          "talentSpellId": 1281638
+        }
+      ],
+      "binding": "sc_mage.cpp:6159 talents.wintertide = find_talent_spell( talent_tree::SPECIALIZATION, \"Wintertide\" );; the pinned list reads it or an action of the list is built on it"
+    }
+  ],
+  "heroTrees": [
+    {
+      "simcName": "spellslinger",
+      "subTreeId": 40,
+      "entries": [
+        {
+          "traitEntryId": 117257,
+          "traitNodeId": 94654,
+          "displayNameEn": "Splinterstorm",
+          "talentSpellId": 443783
+        },
+        {
+          "traitEntryId": 117258,
+          "traitNodeId": 94655,
+          "displayNameEn": "Spellfrost Teachings",
+          "talentSpellId": 444986
+        },
+        {
+          "traitEntryId": 117259,
+          "traitNodeId": 94656,
+          "displayNameEn": "Controlled Instincts",
+          "talentSpellId": 444483
+        },
+        {
+          "traitEntryId": 117261,
+          "traitNodeId": 94658,
+          "displayNameEn": "Archmage's Wrath",
+          "talentSpellId": 444968
+        },
+        {
+          "traitEntryId": 117262,
+          "traitNodeId": 94659,
+          "displayNameEn": "Slippery Slinging",
+          "talentSpellId": 444752
+        },
+        {
+          "traitEntryId": 117263,
+          "traitNodeId": 94660,
+          "displayNameEn": "Reactive Barrier",
+          "talentSpellId": 444827
+        },
+        {
+          "traitEntryId": 117264,
+          "traitNodeId": 94661,
+          "displayNameEn": "Splintering Orbs",
+          "talentSpellId": 444256
+        },
+        {
+          "traitEntryId": 117265,
+          "traitNodeId": 94662,
+          "displayNameEn": "Augury Abounds",
+          "talentSpellId": 1280165
+        },
+        {
+          "traitEntryId": 117266,
+          "traitNodeId": 94663,
+          "displayNameEn": "Force of Will",
+          "talentSpellId": 444719
+        },
+        {
+          "traitEntryId": 117267,
+          "traitNodeId": 94664,
+          "displayNameEn": "Splintering Sorcery",
+          "talentSpellId": 443739
+        },
+        {
+          "traitEntryId": 123417,
+          "traitNodeId": 94660,
+          "displayNameEn": "Phantasmal Image",
+          "talentSpellId": 444784
+        },
+        {
+          "traitEntryId": 123418,
+          "traitNodeId": 94659,
+          "displayNameEn": "Look Again",
+          "talentSpellId": 444756
+        },
+        {
+          "traitEntryId": 128267,
+          "traitNodeId": 94657,
+          "displayNameEn": "Signature Spell",
+          "talentSpellId": 470021
+        },
+        {
+          "traitEntryId": 135918,
+          "traitNodeId": 109667,
+          "displayNameEn": "Polished Focus",
+          "talentSpellId": 1261082
+        },
+        {
+          "traitEntryId": 135919,
+          "traitNodeId": 109668,
+          "displayNameEn": "Infused Splinters",
+          "talentSpellId": 1261080
+        },
+        {
+          "traitEntryId": 135920,
+          "traitNodeId": 109669,
+          "displayNameEn": "Attuned Familiar",
+          "talentSpellId": 1261106
+        },
+        {
+          "traitEntryId": 135946,
+          "traitNodeId": 109669,
+          "displayNameEn": "Shifting Shards",
+          "talentSpellId": 444675
+        }
+      ]
+    },
+    {
+      "simcName": "frostfire",
+      "subTreeId": 41,
+      "entries": [
+        {
+          "traitEntryId": 117235,
+          "traitNodeId": 94632,
+          "displayNameEn": "Flash Freezeburn",
+          "talentSpellId": 431178
+        },
+        {
+          "traitEntryId": 117236,
+          "traitNodeId": 94633,
+          "displayNameEn": "Elemental Affinity",
+          "talentSpellId": 431067
+        },
+        {
+          "traitEntryId": 117237,
+          "traitNodeId": 94634,
+          "displayNameEn": "Dualcasting Adept",
+          "talentSpellId": 1248014
+        },
+        {
+          "traitEntryId": 117238,
+          "traitNodeId": 94635,
+          "displayNameEn": "Isothermic Core",
+          "talentSpellId": 431095
+        },
+        {
+          "traitEntryId": 117239,
+          "traitNodeId": 94636,
+          "displayNameEn": "Frostfire Bolt",
+          "talentSpellId": 431044
+        },
+        {
+          "traitEntryId": 117240,
+          "traitNodeId": 94637,
+          "displayNameEn": "Blast Radius",
+          "talentSpellId": 1248016
+        },
+        {
+          "traitEntryId": 117241,
+          "traitNodeId": 94638,
+          "displayNameEn": "Heat Sink",
+          "talentSpellId": 1248002
+        },
+        {
+          "traitEntryId": 117242,
+          "traitNodeId": 94639,
+          "displayNameEn": "Frostfire Infusion",
+          "talentSpellId": 431166
+        },
+        {
+          "traitEntryId": 117243,
+          "traitNodeId": 94640,
+          "displayNameEn": "Thermal Conditioning",
+          "talentSpellId": 431117
+        },
+        {
+          "traitEntryId": 117244,
+          "traitNodeId": 94641,
+          "displayNameEn": "Frostfire Empowerment",
+          "talentSpellId": 431176
+        },
+        {
+          "traitEntryId": 117245,
+          "traitNodeId": 94642,
+          "displayNameEn": "Imbued Warding",
+          "talentSpellId": 431066
+        },
+        {
+          "traitEntryId": 117775,
+          "traitNodeId": 94633,
+          "displayNameEn": "Flame and Frost",
+          "talentSpellId": 431112
+        },
+        {
+          "traitEntryId": 117776,
+          "traitNodeId": 94642,
+          "displayNameEn": "Meltdown",
+          "talentSpellId": 431131
+        },
+        {
+          "traitEntryId": 134441,
+          "traitNodeId": 94640,
+          "displayNameEn": "Severe Temperatures",
+          "talentSpellId": 431189
+        },
+        {
+          "traitEntryId": 135921,
+          "traitNodeId": 109670,
+          "displayNameEn": "Elemental Conduit",
+          "talentSpellId": 1262845
+        },
+        {
+          "traitEntryId": 135922,
+          "traitNodeId": 109671,
+          "displayNameEn": "Molten Chill",
+          "talentSpellId": 1262844
+        },
+        {
+          "traitEntryId": 135923,
+          "traitNodeId": 109672,
+          "displayNameEn": "Duality",
+          "talentSpellId": 1262843
+        }
+      ]
+    }
+  ]
+}

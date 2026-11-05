@@ -5009,6 +5009,37 @@
   ],
   "cases": [
     {
+      "caseId": "application-service.arcane-mage-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Arcane Mage registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "mage/arcane",
+            "expected": {
+              "internalAnalyzerId": "mage-arcane-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Arcane Mage is registered INTERNAL_ONLY in ONB-D3, a Cohort D follower on the shared cast anchor. No decision of it resolves. Its retained subjects are replayed offline and not committed (agent/follow-ups.md \"After ONB-D3\")."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
+      ]
+    },
+    {
       "caseId": "application-service.arms-warrior-registration-is-internal-only",
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "APPLICATION_SERVICE",
@@ -5475,6 +5506,37 @@
       "rationale": {
         "basis": ["OWNED_CONTRACT"],
         "text": "Frost Death Knight is registered INTERNAL_ONLY in ONB-B2. No decision of its two retained subjects resolves: each stops on Reaper's Mark's target_if, and behind that every rotation list sits on the enemy count, the ONB-S3 owner decision. So a public request must keep receiving SPEC_NOT_SUPPORTED."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
+      ]
+    },
+    {
+      "caseId": "application-service.frost-mage-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Frost Mage registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "mage/frost",
+            "expected": {
+              "internalAnalyzerId": "mage-frost-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Frost Mage is registered INTERNAL_ONLY in ONB-D3, a Cohort D follower on the shared cast anchor. No decision of it resolves. No retained subject of it has combatant info, so it is on ONB-EV (agent/follow-ups.md \"After ONB-D3\")."
       },
       "authority": null,
       "limitations": [],
@@ -11380,6 +11442,29 @@
         "tests/contracts/m5c3c3b-engine-scope.test.ts",
         "tests/contracts/m10c-cross-spec-isolation.test.ts"
       ]
+    },
+    {
+      "caseId": "spec-arcane-mage.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_ARCANE_MAGE",
+      "contractUnderTest": "src/specs/mage/arcane/observed-analysis.ts analyzeObservedArcaneMageDecisions (the spec gate)",
+      "purpose": "The Arcane Mage facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_ARCANE_MAGE.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Arcane Mage list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-d3-arcane-mage.test.ts"]
     },
     {
       "caseId": "spec-arms-warrior.the-facade-refuses-every-other-specialization",
@@ -20739,6 +20824,29 @@
       "authority": null,
       "limitations": [],
       "relatedTests": ["tests/unit/specs/onb-b1-frost-death-knight.test.ts"]
+    },
+    {
+      "caseId": "spec-frost-mage.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_FROST_MAGE",
+      "contractUnderTest": "src/specs/mage/frost/observed-analysis.ts analyzeObservedFrostMageDecisions (the spec gate)",
+      "purpose": "The Frost Mage facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_FROST_MAGE.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Frost Mage list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-d3-frost-mage.test.ts"]
     },
     {
       "caseId": "spec-fury-warrior.the-facade-refuses-every-other-specialization",

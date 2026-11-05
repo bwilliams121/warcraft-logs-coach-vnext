@@ -1222,7 +1222,7 @@ status: OWNER_DECISION_REQUIRED
 dependsOn: none
 wcl: NONE
 publicContract: NONE
-ownerDecision: Authorize one bounded, neutral, deterministic Warcraft Logs evidence campaign for the specializations that have no retained, already-authorized real evidence. Known today: Fury Warrior, Protection Warrior, Outlaw Rogue, Survival Hunter and Vengeance Demon Hunter appear in no committed fight context, and onboarding tranches append any further spec whose review finds its evidence inadequate. Appended by ONB-B2: Enhancement Shaman (the only retained events are the filtered M13-A casts of actor 7, with no combatant info, so its talents never resolve). Appended by HEAL-B1P, and corrected by HEAL-B4P: Restoration Druid needs no campaign (its whole-fight events in gtKb2xHn87pNcFfW fight 22, actor 2, are in the retained M9-C2, M11-C4 and M11-C4b captures, which HEAL-B1P's census did not read; agent/follow-ups.md "After HEAL-B4P"). Appended by HEAL-B3: Discipline Priest (committed evidence is a filtered M13-A cast capture, actor 9, and Atonement applications by the G2 cohort246 fight 33 actor 88 onto another player; no committed or retained capture holds its whole-fight casts or any Atonement heal event, and fight 48 has no Discipline Priest, so HEAL-B3P cannot meet the healer promotion gate). (Preservation Evoker, appended by HEAL-B4, was removed by HEAL-B4P: it passed the gate on retained evidence.) Appended by ONB-A2: Subtlety Rogue (committed evidence is 150 filtered M13-A casts of actor 17, with no combatant info, auras or resources, so its talents never resolve); its census also found Fury and Protection Warrior only in retained fight contexts, with no event. The proposal is the smallest campaign: per spec, the first public raid fight in a fixed order containing it, with its actor slice (casts, auras, resources, combatant info), and no ranking or comparison data. Confirmed by ONB-C2: Outlaw Rogue, whose only context is the uncommitted g34mvXTKLMJ2Nfwr fights 1, 6 and 7, actor 17, with no event retained.
+ownerDecision: Authorize one bounded, neutral, deterministic Warcraft Logs evidence campaign for the specializations that have no retained, already-authorized real evidence. Known today: Fury Warrior, Protection Warrior, Outlaw Rogue, Survival Hunter and Vengeance Demon Hunter appear in no committed fight context, and onboarding tranches append any further spec whose review finds its evidence inadequate. Appended by ONB-B2: Enhancement Shaman (the only retained events are the filtered M13-A casts of actor 7, with no combatant info, so its talents never resolve). Appended by HEAL-B1P, and corrected by HEAL-B4P: Restoration Druid needs no campaign (its whole-fight events in gtKb2xHn87pNcFfW fight 22, actor 2, are in the retained M9-C2, M11-C4 and M11-C4b captures, which HEAL-B1P's census did not read; agent/follow-ups.md "After HEAL-B4P"). Appended by HEAL-B3: Discipline Priest (committed evidence is a filtered M13-A cast capture, actor 9, and Atonement applications by the G2 cohort246 fight 33 actor 88 onto another player; no committed or retained capture holds its whole-fight casts or any Atonement heal event, and fight 48 has no Discipline Priest, so HEAL-B3P cannot meet the healer promotion gate). (Preservation Evoker, appended by HEAL-B4, was removed by HEAL-B4P: it passed the gate on retained evidence.) Appended by ONB-A2: Subtlety Rogue (committed evidence is 150 filtered M13-A casts of actor 17, with no combatant info, auras or resources, so its talents never resolve); its census also found Fury and Protection Warrior only in retained fight contexts, with no event. The proposal is the smallest campaign: per spec, the first public raid fight in a fixed order containing it, with its actor slice (casts, auras, resources, combatant info), and no ranking or comparison data. Confirmed by ONB-C2: Outlaw Rogue, whose only context is the uncommitted g34mvXTKLMJ2Nfwr fights 1, 6 and 7, actor 17, with no event retained. Appended by ONB-D3: Frost Mage (the only real casts are 103 filtered M13-A casts of actor 6, with no combatant info, and one cast in a two-second page, so nothing has met real evidence).
 ```
 
 **Direction.** The owner's onboarding evidence policy: neutral,
@@ -1860,11 +1860,13 @@ evidence is retained for all three.
 ### ONB-D2P: Elemental Shaman, Balance Druid and Shadow Priest (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-D2
 branch: autopilot/onb-d2p
 wcl: NONE
 publicContract: EXPECTED
+pr: 72
+mergeSha: 9cb1d8282a365cdff832ea99c59f01c8a548084d
 ```
 
 **Outcome.** None of the three passes the rotational promotion gates, so each stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Their twelve retained subjects, replayed offline, give 1,210 Elemental, 287 Balance and 356 Shadow decisions, with 0 MATCH, 0 REJECTED and every decision UNKNOWN, and a census of 5,691 retained files finds no new subject. Evidence is not their gap, so none is on ONB-EV, and ONB-S3 alone moves none of them. A promotion after each one's own inputs is a new public entry through the unchanged gates (agent/architecture.md "ONB-D2P"; agent/follow-ups.md "After ONB-D2").
@@ -1872,8 +1874,9 @@ publicContract: EXPECTED
 ### ONB-D3: Arcane Mage and Frost Mage (internal, Cohort D)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-D1
+branch: autopilot/onb-d3
 wcl: NONE
 publicContract: NONE
 ```
@@ -1881,6 +1884,8 @@ publicContract: NONE
 **Scope.** Cohort D casters with charge/proc state and numeric `react` (the
 M11-D1 fix). Arcane's real evidence is retained (fight 48, actor 121).
 Frost Mage's must be verified, or it is recorded for ONB-EV.
+
+**Outcome.** Both are registered INTERNAL_ONLY, and no decision of either resolves. 1,039 Arcane decisions (six retained subjects, all Sunfury) are refused at Counterspell, off the GCD on the list's first line with no contract, and the scan stops at Evocation's unresolved talent. Frost Mage has no retained subject with combatant info, so it is on ONB-EV, and on a synthetic build it stops at the `interrupt_if` option of a Ray of Frost line. Numeric `react` stays UNKNOWN with no stack behind it. No shared code changed, and ONB-S3 alone moves neither (agent/architecture.md "ONB-D3"; agent/follow-ups.md "After ONB-D3").
 
 ### ONB-D3P: Arcane Mage and Frost Mage (public)
 

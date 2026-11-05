@@ -13841,6 +13841,66 @@ So no new subject exists, and nothing changes "no Stormbringer, Keeper of the Gr
 
 **What a later promotion must do.** Each specialization answers its own first question before the enemy count matters: for Elemental, how a movement option is stepped past without claiming anything about movement, then its off-GCD lines; for Balance, `variable.opener` and Celestial Alignment's aura; for Shadow, `target_if` scoring, predictive state and Power Infusion's contract. The owner decides ONB-S3, which all three then meet. Each binds its own resource, measures its unmeasured hero trees and spells or refuses them, and answers the anchor's limits (agent/follow-ups.md "After ONB-D2"). A new public entry then promotes it through the unchanged gates by the five-site promotion. No such entry is queued.
 
+## ONB-D3 — Arcane Mage and Frost Mage (internal, Cohort D)
+
+Autopilot queue entry ONB-D3. Public contract: NONE. No Warcraft Logs request. `src/specs/mage/arcane/README.md` and `src/specs/mage/frost/README.md` are the slices in detail.
+
+**What it is.** Two specializations registered INTERNAL_ONLY on the same observed-decision pattern, each with its own pinned list, GCD and talent data, cast semantics, anchor profile, resolver, facade and registration. No shared analyzer was introduced, no shared code changed, and no decision resolves. Mana is named and stays unbound. Arcane Charges and every proc are auras here, and no aura identity is pinned.
+
+**Measured, offline, by replaying retained captures through production ingestion.** A census of every retained JSON file over 500 bytes (5,694 parsed of 5,695), reading events of any type, with Mortal Strike as its positive control (559 casts), and with each source resolved against its report's actors, finds six Arcane subjects holding casts and combatant info. Every one ANALYZED, with 0 MATCH and 0 REJECTED:
+
+| Subject | Hero tree | Span | Eligible | UNKNOWN | Excluded |
+| --- | --- | --- | ---: | ---: | ---: |
+| b1PmaKrd6CDfzngc fight 48 actor 121 | Sunfury | whole fight, 345.2 s | 246 | 246 | 26 |
+| b1PmaKrd6CDfzngc fight 48 actor 7 | Sunfury | whole fight | 238 | 238 | 33 |
+| gtKb2xHn87pNcFfW fight 22 actor 1 | Sunfury | whole fight, 284.8 s | 204 | 204 | 21 |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 3 | Sunfury | first 165 s of 424.5 s | 116 | 116 | 13 |
+| rXAfw9t1q8YpmkKD fight 13 actor 3 | Sunfury | first 165 s of 271.8 s | 117 | 117 | 13 |
+| rXAfw9t1q8YpmkKD fight 13 actor 4 | Sunfury | first 165 s | 118 | 118 | 11 |
+
+1,039 decisions. No Spellslinger subject is retained. The filtered M13-A capture's Arcane (actor 11) has no combatant info, so it would refuse.
+
+**Frost Mage has no subject, so it is on ONB-EV.** The only real Frost Mage casts retained are the filtered M13-A capture's actor 6 (103 casts over 146.5 s, no combatant info, so its talents never resolve and it would refuse), and one cast of gBMCKxyY7dQDRZav fight 33 actor 142 in a two-second diagnosis page. The contexts naming a Frost Mage (2xptYq89Tb631Hmg fight 17 actor 44, yzH96N8QMkv41bdx fight 32 actor 118) hold no event. The census's other "Frost" hits are not this specialization: Frost Death Knights in the contexts, and Mirror Image pets casting Frostbolt 59638 under four reports' pet actors (126 casts), resolved against each report's master data. So Frost is registered on the pinned list alone, and every statement about its stops below is a synthetic reading. Its talent keys are uncorroborated on real evidence, and its data says so.
+
+**Where each stops:**
+
+| Spec | Engine refusal | Root scan stops at | On |
+| --- | --- | --- | --- |
+| Arcane, all 875 anchored decisions | `default[0] counterspell` | `cooldowns[4] evocation` | Counterspell is the list's first line, unconditional, off the GCD, with no contract. Evocation's talent is on a choice node the observed trees do not resolve, on all six subjects. Earlier lines stay open as candidates: `default[12] arcane_barrage` on `fight_remains` (PREDICTIVE), `gcd.max` and Arcane Charge; `cooldowns[1] touch_of_the_magi`, `[2] arcane_surge`, `[3] cancel_action` |
+| Frost, Frostfire, synthetic | as the root scan | `cds[17] ray_of_frost` | the options `interrupt_if`, `interrupt_global`, `interrupt_immediate`, which no one reads |
+| Frost, Spellslinger, synthetic | `cds[20] flurry` | `cds[23] ray_of_frost` | the same options, with `cds[20]` to `[22]` open behind `line_cd=9999` |
+
+Neither list dispatches on the enemy count, which appears only inside a rotation list. **ONB-S3 alone moves neither of them.**
+
+**The anchors on Arcane's 1,039 decisions:**
+
+| Anchor | Count | Spells |
+| --- | ---: | --- |
+| `INSTANT_COMPLETION` | 382 | Arcane Barrage, Arcane Orb |
+| `CHANNEL_START` | 364 | Arcane Missiles |
+| `BEGINCAST_PAIRING_AMBIGUOUS` | 160 | Arcane Blast, all of them |
+| `OBSERVED_BEGINCAST` | 129 | Prismatic Bolt, Arcane Surge |
+| `CAST_TIME_UNKNOWN` | 4 | the opening Arcane Surge, at 0.6 to 1.2 s with no begin in the fight, which the list's precombat presses before the pull |
+
+No `CAST_EVIDENCE_CONFLICT` and no `BEGINCAST_NOT_OBSERVED`: every Prismatic Bolt and Arcane Surge after the opener has its begin, and every Arcane Missiles has none, which corroborates the cast review. Arcane Pulse, Evocation and Presence of Mind have no cast by these subjects, so their rows rest on pinned data alone.
+
+**Requirement C is not met, and why this is not an owner stop.** As for Arms and Destruction. The queue asks for an internal registration of each, and the fail-closed result is correct. What would change it is listed in agent/follow-ups.md "After ONB-D3". The queue itself says a missing Frost subject is recorded for ONB-EV, and ONB-EV is already the owner's.
+
+**Decisions.**
+
+1. **Nothing shared moved.** Both lists fit the shared timeline and selection as they stand. Numeric `react` is the M11-D1 evaluation: with no stack behind `buff.clearcasting.react=0` or `buff.arcane_salvo.react>=12` it is UNKNOWN, and a test pins that. `debuff.freezing.react` is no built-in, so it is declared here as a magnitude and stays unbound, never a truth read as 0 or 1.
+2. **Arcane Blast stays possibly instant on every build, even with Presence of Mind proven not taken.** Presence of Mind 205025 is the only -100% row of the family matching it, and all six subjects hold the choice node's other entry. A talent reading could therefore narrow it, but this slice does not make that claim: its 160 decisions would move to `OBSERVED_BEGINCAST` and still stop at the same lines, so it buys no resolved decision. A test pins the refusal, and the follow-up names it.
+3. **Frostbolt's two rows have different executions.** The token builds Frostfire Bolt when talented (sc_mage.cpp:5673). 116 has no -100% row, and 431044 has Frostfire Empowerment 431177, so 116 is a hard cast and 431044 possibly instant. Both are `_gcd` 1500. 468655, a same-named row with no cast time, has no binding.
+4. **Blizzard is never resolved.** Its talent is a choice of two rows, like Earthquake, so its applicability stays UNKNOWN. Both have Freezing Rain's -100% row.
+5. **Two tokens have no binding, on purpose.** `any_blink` builds Shimmer (`_gcd` 0) or Blink (`_gcd` 1500) by talent, so no one lane holds. `cancel_action` stops a channel and starts nothing. Each reads as `UNKNOWN_LANE`, a refusal, never a free step past the line.
+6. **`talent.hand_of_frost_4` is unmodelled.** The list names it, but the pinned module has fields for three, and the talent data has three tiered rows on one node, so the talent extractor could not resolve it. It stays UNKNOWN and is recorded.
+7. **A resource on the wire is not the decision's.** Mana appears on casts at a completion, and a cast-time spell spends it. No wire contract row exists, no capability declares it, and a test shows `mana.pct` stay open under a full bar. Frost's list reads no Mana at all.
+8. **The extractor targets are plain.** Both regions are `NO_PTR_REGION` in `engine/class_modules/apl/mage.cpp`, as the M11-A3 audit hashed it, and the dispatch is `mage_t::init_action_list`. No extractor changed but for the new targets.
+
+**Evidence.** Nothing new is committed. Arcane's events are retained raw and would pin nothing the synthetic tests do not. Every pinned source read was already on disk and matches the M11-A3 hashes.
+
+**No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse both rows. A public request for either is SPEC_NOT_SUPPORTED, exactly as before.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

@@ -29,6 +29,34 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After ONB-D3: what the Arcane and Frost Mage slices do not establish
+
+**Raised:** ONB-D3 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.
+
+**Frost Mage is on ONB-EV; Arcane is not.** Six Arcane subjects are retained with combatant info, all Sunfury. No Frost Mage subject is: its only real casts are the filtered M13-A actor 6, with no combatant info (agent/architecture.md "ONB-D3"). A Frost promotion needs a real subject first, and the stops recorded for it are synthetic until then.
+
+**ONB-S3 alone moves neither of them.** Neither dispatches on the enemy count:
+
+- **Arcane.** `default[0] counterspell`, first and unconditional, off the GCD with no contract, is where the engine refuses. Whether an interrupt with no castable target can be stepped past is the question, and it is the same shape as Elemental's Wind Shear. Then `default[12] arcane_barrage` on `fight_remains`, which is PREDICTIVE; `cooldowns[1] touch_of_the_magi` on `prev_gcd` and Arcane Surge's aura and cooldown; `cooldowns[2] arcane_surge` on Lustrous Gleam; `cooldowns[3] cancel_action`, which has no binding; `cooldowns[4] evocation`, whose talent stays UNKNOWN on all six subjects, then `cooldowns[5] presence_of_mind` on a build that proves Evocation absent. Then `sunfury[0] arcane_missiles` carries `chain=1`, and `spellslinger[3]` carries `interrupt_if`, options no one reads. The count arrives inside those lists, by way of `variable.aoe_count`.
+- **Frost.** `cds[17]` or `cds[23] ray_of_frost`, by hero tree, on `interrupt_if`, `interrupt_global` and `interrupt_immediate`. Reading those options is a shared question: each only ends a channel, and `interrupt_if` holds `tick_time` and `gcd.remains`. On Spellslinger, `cds[20]` to `[22]` stay open behind `line_cd=9999`, and a cast only upper-bounds a line's start. Then the variables `ff_trinket_timing` and `ss_trinket_timing` feed nothing in domain, and the rotation lists read `buff.brain_freeze.react`, `buff.fingers_of_frost.react`, `debuff.freezing.react`, `buff.icicles.react` and the count.
+
+**Each one's own state.** Arcane reads Arcane Charge and Arcane Salvo stacks, Clearcasting, Mana, cooldown charges and `prev_gcd`; Frost reads Brain Freeze, Fingers of Frost, Icicles, Freezing on the enemy and cooldown charges. No aura identity, stack or charge model is pinned for either. Numeric `react` only stays honest if a stack is proven: a promotion must bind those stacks with their reaction bound, not read a truth. Mana has no wire contract row, and a reading needs an anchor-time model.
+
+**The anchor's limits, as measured:**
+
+- **Arcane Blast is UNKNOWN on every build**: 160 decisions ambiguous. Presence of Mind is the only -100% row matching it, and all six subjects hold the choice node's other entry, so a talent reading could narrow it. That is the cheapest anchor gain here, and it resolves no decision by itself.
+- **The opening Arcane Surge** began before the pull on four of six subjects, so it is UNKNOWN (`CAST_TIME_UNKNOWN`).
+- **No exact cast time.** Haste at a decision is not established.
+- **A channel's end is not read.** No bound is claimed for Arcane Missiles, Evocation or Ray of Frost, and the lists themselves cancel them, so occupancy after each is UNKNOWN to the next cast start. Arcane Missiles is 364 of Arcane's decisions.
+
+**Unmeasured hero trees and spells.** No Spellslinger Arcane subject is retained, and no Arcane subject casts Arcane Pulse, Evocation or Presence of Mind. Every Frost row is unmeasured. A promotion must measure these or refuse them, as Havoc refuses Fel-Scarred.
+
+**Pins that want a look at promotion.** `talent.hand_of_frost_4` names a tier the pinned module and talent data do not hold, so a Frostfire list line reads an atom nothing can resolve. `TARGETING_NOT_MODELLED` is the coverage's class for the refused `interrupt_if` and `chain` options, because every unrecognised option falls there; a promotion's reports should not read that as a targeting problem.
+
+**Decision times are the anchor's**, as for Destruction, so a public promotion must check its readers of `fightTimeMs`.
+
+---
+
 ## After ONB-D2: what the Elemental, Balance and Shadow slices do not establish
 
 **Raised:** ONB-D2 (2026-11-04). Coverage, not soundness: every decision is UNKNOWN.

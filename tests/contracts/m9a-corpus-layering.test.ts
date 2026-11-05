@@ -209,6 +209,8 @@ const EXECUTOR_RING = [
   "support/corpus/executors/spec-elemental-shaman.ts",
   "support/corpus/executors/spec-balance-druid.ts",
   "support/corpus/executors/spec-shadow-priest.ts",
+  "support/corpus/executors/spec-arcane-mage.ts",
+  "support/corpus/executors/spec-frost-mage.ts",
   "support/corpus/executors/spec-outlaw-rogue.ts",
   "support/corpus/executors/spec-enhancement-shaman.ts",
   "support/corpus/executors/spec-assassination.ts",

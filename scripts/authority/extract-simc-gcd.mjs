@@ -4686,6 +4686,346 @@ const PRIEST_SHADOW_FACTS = {
   ],
 };
 
+const MAGE_SOURCES = {
+  spellData: "engine/dbc/generated/sc_spell_data.inc",
+  classSpells: "engine/dbc/generated/class_spells.inc",
+  clientDataVersion: "engine/dbc/generated/client_data_version.inc",
+  spellDataLayout: "engine/dbc/spell_data.hpp",
+  // HASHED, NEVER PARSED: the class module every token binding is a hand-reviewed reading of.
+  classModule: "engine/class_modules/sc_mage.cpp",
+  // HASHED, NEVER PARSED. Present because every target hashes the same shared sources.
+  racialSpells: "engine/dbc/generated/racial_spells.inc",
+  playerModule: "engine/player/player.cpp",
+  consumableModule: "engine/player/consumable.cpp",
+};
+
+const MAGE_MODULE_PATH = "engine/class_modules/sc_mage.cpp";
+
+/**
+ * The Arcane Mage facts (ONB-D3).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the pinned Arcane list
+ * (apl/mage.cpp `arcane`) executes. Facts a reader should not have to rediscover:
+ *
+ *   - PRISMATIC BOLT BINDS 1295924, the literal its constructor reads (sc_mage.cpp:2908). Retained subjects log it.
+ *   - ARCANE PULSE BINDS 1241462, the talent's row. Its echo, 1243460, is a triggered copy (_cast_time 0), so it has no lane record here.
+ *   - COUNTERSPELL, TOUCH OF THE MAGI AND PRESENCE OF MIND ARE `_gcd` 0, SO THEY ARE NON_GCD. The last two carry `use_off_gcd=1`.
+ *   - CANCEL_ACTION IS NOT BOUND. It starts nothing: it stops a channel.
+ *   - THE RACIAL, POTION, ITEM AND EXTERNAL-BUFF TOKENS ARE NOT BOUND. Arcane Intellect and Mirror Image appear only in precombat.
+ */
+const MAGE_ARCANE_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 2139, displayNameEn: "Counterspell", baseGcdMs: 0 },
+    { abilityGameId: 44425, displayNameEn: "Arcane Barrage", baseGcdMs: 1500 },
+    { abilityGameId: 30451, displayNameEn: "Arcane Blast", baseGcdMs: 1500 },
+    { abilityGameId: 5143, displayNameEn: "Arcane Missiles", baseGcdMs: 1500 },
+    { abilityGameId: 1241462, displayNameEn: "Arcane Pulse", baseGcdMs: 1500 },
+    { abilityGameId: 153626, displayNameEn: "Arcane Orb", baseGcdMs: 1500 },
+    { abilityGameId: 365350, displayNameEn: "Arcane Surge", baseGcdMs: 1500 },
+    { abilityGameId: 12051, displayNameEn: "Evocation", baseGcdMs: 1500 },
+    { abilityGameId: 205025, displayNameEn: "Presence of Mind", baseGcdMs: 0 },
+    { abilityGameId: 1295924, displayNameEn: "Prismatic Bolt", baseGcdMs: 1500 },
+    { abilityGameId: 321507, displayNameEn: "Touch of the Magi", baseGcdMs: 0 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "counterspell",
+      candidateAbilityGameIds: [2139],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / counterspell_t",
+      startLine: 5711,
+      endLine: 5711,
+      sourceNote:
+        'create_action dispatches "counterspell" to counterspell_t: built on p->find_class_spell( "Counterspell" ) (:3641), class_spells.inc row 2139.',
+    },
+    {
+      simcToken: "arcane_barrage",
+      candidateAbilityGameIds: [44425],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / arcane_barrage_t",
+      startLine: 5677,
+      endLine: 5677,
+      sourceNote:
+        'create_action dispatches "arcane_barrage" to arcane_barrage_t: built on p->find_specialization_spell( "Arcane Barrage" ) (:2684), class_spells.inc row 44425.',
+    },
+    {
+      simcToken: "arcane_blast",
+      candidateAbilityGameIds: [30451],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / arcane_blast_t",
+      startLine: 5678,
+      endLine: 5678,
+      sourceNote:
+        'create_action dispatches "arcane_blast" to arcane_blast_t: built on p->find_specialization_spell( "Arcane Blast" ) (:2832), class_spells.inc row 30451.',
+    },
+    {
+      simcToken: "arcane_missiles",
+      candidateAbilityGameIds: [5143],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / arcane_missiles_t",
+      startLine: 5679,
+      endLine: 5679,
+      sourceNote:
+        'create_action dispatches "arcane_missiles" to arcane_missiles_t: built on p->talents.arcane_missiles (:3184); talents.arcane_missiles = find_talent_spell at :6016.',
+    },
+    {
+      simcToken: "arcane_pulse",
+      candidateAbilityGameIds: [1241462],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / arcane_pulse_t",
+      startLine: 5680,
+      endLine: 5680,
+      sourceNote:
+        'create_action dispatches "arcane_pulse" to arcane_pulse_t: built on p->talents.arcane_pulse (:2974) when not an echo; talents.arcane_pulse = find_talent_spell at :6025.',
+    },
+    {
+      simcToken: "arcane_orb",
+      candidateAbilityGameIds: [153626],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / arcane_orb_t",
+      startLine: 5681,
+      endLine: 5681,
+      sourceNote:
+        'create_action dispatches "arcane_orb" to arcane_orb_t: built on p->talents.arcane_orb (:2604) on the normal path; talents.arcane_orb = find_talent_spell at :6027.',
+    },
+    {
+      simcToken: "arcane_surge",
+      candidateAbilityGameIds: [365350],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / arcane_surge_t",
+      startLine: 5682,
+      endLine: 5682,
+      sourceNote:
+        'create_action dispatches "arcane_surge" to arcane_surge_t: built on p->talents.arcane_surge (:3306); talents.arcane_surge = find_talent_spell at :6026.',
+    },
+    {
+      simcToken: "evocation",
+      candidateAbilityGameIds: [12051],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / evocation_t",
+      startLine: 5683,
+      endLine: 5683,
+      sourceNote:
+        'create_action dispatches "evocation" to evocation_t: built on p->talents.evocation (:3682); talents.evocation = find_talent_spell at :6050.',
+    },
+    {
+      simcToken: "presence_of_mind",
+      candidateAbilityGameIds: [205025],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / presence_of_mind_t",
+      startLine: 5684,
+      endLine: 5684,
+      sourceNote:
+        'create_action dispatches "presence_of_mind" to presence_of_mind_t: built on p->talents.presence_of_mind (:2477); talents.presence_of_mind = find_talent_spell at :6030.',
+    },
+    {
+      simcToken: "prismatic_bolt",
+      candidateAbilityGameIds: [1295924],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / prismatic_bolt_t",
+      startLine: 5685,
+      endLine: 5685,
+      sourceNote:
+        'create_action dispatches "prismatic_bolt" to prismatic_bolt_t: built on p->find_spell( 1295924 ) (:2907). Its ready() refuses without buffs.prismatic_bolt, a usability claim this slice does not make.',
+    },
+    {
+      simcToken: "touch_of_the_magi",
+      candidateAbilityGameIds: [321507],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / touch_of_the_magi_t",
+      startLine: 5686,
+      endLine: 5686,
+      sourceNote:
+        'create_action dispatches "touch_of_the_magi" to touch_of_the_magi_t: built on p->talents.touch_of_the_magi (:5128); talents.touch_of_the_magi = find_talent_spell at :6037.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
+/**
+ * The Frost Mage facts (ONB-D3).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the pinned Frost list
+ * (apl/mage.cpp `frost`) executes. Facts a reader should not have to rediscover:
+ *
+ *   - FROSTBOLT BINDS TWO ROWS. create_action builds frostfire_bolt for the token when the talent is taken (sc_mage.cpp:5673), and both
+ *     rows are _gcd 1500, so the lane does not depend on which.
+ *   - BLIZZARD BINDS TWO ROWS, the talent's choice of blizzard_1 and blizzard_2 (sc_mage.cpp:6128-6129), both _gcd 1500.
+ *   - ANY_BLINK IS NOT BOUND. It builds Shimmer (_gcd 0) or Blink (_gcd 1500) by talent, so no one lane holds, and it sits behind `movement.distance`.
+ *   - MIRROR IMAGE'S PET CASTS FROSTBOLT 59638. It is another actor's cast and no row here.
+ *   - THE RACIAL, POTION, ITEM AND EXTERNAL-BUFF TOKENS ARE NOT BOUND. Arcane Intellect and Summon Water Elemental appear only in precombat.
+ */
+const MAGE_FROST_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 190356, displayNameEn: "Blizzard", baseGcdMs: 1500 },
+    { abilityGameId: 1248829, displayNameEn: "Blizzard", baseGcdMs: 1500 },
+    { abilityGameId: 153595, displayNameEn: "Comet Storm", baseGcdMs: 1500 },
+    { abilityGameId: 120, displayNameEn: "Cone of Cold", baseGcdMs: 1500 },
+    { abilityGameId: 44614, displayNameEn: "Flurry", baseGcdMs: 1500 },
+    { abilityGameId: 116, displayNameEn: "Frostbolt", baseGcdMs: 1500 },
+    { abilityGameId: 431044, displayNameEn: "Frostfire Bolt", baseGcdMs: 1500 },
+    { abilityGameId: 84714, displayNameEn: "Frozen Orb", baseGcdMs: 1500 },
+    { abilityGameId: 199786, displayNameEn: "Glacial Spike", baseGcdMs: 1500 },
+    { abilityGameId: 30455, displayNameEn: "Ice Lance", baseGcdMs: 1500 },
+    { abilityGameId: 157997, displayNameEn: "Ice Nova", baseGcdMs: 1500 },
+    { abilityGameId: 205021, displayNameEn: "Ray of Frost", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "blizzard",
+      candidateAbilityGameIds: [190356, 1248829],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / blizzard_t",
+      startLine: 5697,
+      endLine: 5697,
+      sourceNote:
+        'create_action dispatches "blizzard" to blizzard_t: built on talents.blizzard_1 or talents.blizzard_2 (:3402); find_talent_spell( SPECIALIZATION, 190356 ) and ( SPECIALIZATION, 1248829 ) at :6128-6129.',
+    },
+    {
+      simcToken: "comet_storm",
+      candidateAbilityGameIds: [153595],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / comet_storm_t",
+      startLine: 5699,
+      endLine: 5699,
+      sourceNote:
+        'create_action dispatches "comet_storm" to comet_storm_t: built on p->find_spell( 153595 ) (:3561). Its ready() is a usability claim this slice does not make.',
+    },
+    {
+      simcToken: "cone_of_cold",
+      candidateAbilityGameIds: [120],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / cone_of_cold_t",
+      startLine: 5710,
+      endLine: 5710,
+      sourceNote:
+        'create_action dispatches "cone_of_cold" to cone_of_cold_t: built on p->find_class_spell( "Cone of Cold" ) (:3618), class_spells.inc row 120.',
+    },
+    {
+      simcToken: "flurry",
+      candidateAbilityGameIds: [44614],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / flurry_t",
+      startLine: 5700,
+      endLine: 5700,
+      sourceNote:
+        'create_action dispatches "flurry" to flurry_t: built on p->talents.flurry (:3917); talents.flurry = find_talent_spell at :6135.',
+    },
+    {
+      simcToken: "frostbolt",
+      candidateAbilityGameIds: [116, 431044],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / frostbolt_t",
+      startLine: 5715,
+      endLine: 5715,
+      sourceNote:
+        'create_action dispatches "frostbolt" to frostbolt_t: built on p->talents.frostfire_bolt when talented, else p->find_class_spell( "Frostbolt" ) (:3985); create_action redirects the token at :5673.',
+    },
+    {
+      simcToken: "frozen_orb",
+      candidateAbilityGameIds: [84714],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / frozen_orb_t",
+      startLine: 5701,
+      endLine: 5701,
+      sourceNote:
+        'create_action dispatches "frozen_orb" to frozen_orb_t: built on p->talents.frozen_orb (:4145); talents.frozen_orb = find_talent_spell at :6138.',
+    },
+    {
+      simcToken: "glacial_spike",
+      candidateAbilityGameIds: [199786],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / glacial_spike_t",
+      startLine: 5702,
+      endLine: 5702,
+      sourceNote:
+        'create_action dispatches "glacial_spike" to glacial_spike_t: built on p->find_spell( 199786 ) (:4227).',
+    },
+    {
+      simcToken: "ice_lance",
+      candidateAbilityGameIds: [30455],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / ice_lance_t",
+      startLine: 5703,
+      endLine: 5703,
+      sourceNote:
+        'create_action dispatches "ice_lance" to ice_lance_t: built on p->talents.ice_lance (:4408); talents.ice_lance = find_talent_spell at :6126.',
+    },
+    {
+      simcToken: "ice_nova",
+      candidateAbilityGameIds: [157997],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / ice_nova_t",
+      startLine: 5716,
+      endLine: 5716,
+      sourceNote:
+        'create_action dispatches "ice_nova" to ice_nova_t: built on p->talents.ice_nova (:4492); talents.ice_nova = find_talent_spell at :5999.',
+    },
+    {
+      simcToken: "ray_of_frost",
+      candidateAbilityGameIds: [205021],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MAGE_MODULE_PATH,
+      symbol: "create_action / ray_of_frost_t",
+      startLine: 5704,
+      endLine: 5704,
+      sourceNote:
+        'create_action dispatches "ray_of_frost" to ray_of_frost_t: built on p->talents.ray_of_frost (:4939); talents.ray_of_frost = find_talent_spell at :6142.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
 /**
  * The Destruction Warlock facts (ONB-D1).
  *
@@ -5685,6 +6025,36 @@ export const TARGETS = {
     ],
     requiredFacts: PRIEST_SHADOW_FACTS,
     defaultOut: "src/data/game/priest-shadow-gcd-semantics.json",
+  },
+  "mage-arcane": {
+    datasetId: "SIMC_DBC_MAGE_ARCANE_GCD_SEMANTICS",
+    classId: 8,
+    className: "Mage",
+    sources: MAGE_SOURCES,
+    classModulePath: MAGE_SOURCES.classModule,
+    handReviewedPaths: [
+      MAGE_SOURCES.classModule,
+      MAGE_SOURCES.racialSpells,
+      MAGE_SOURCES.playerModule,
+      MAGE_SOURCES.consumableModule,
+    ],
+    requiredFacts: MAGE_ARCANE_FACTS,
+    defaultOut: "src/data/game/mage-arcane-gcd-semantics.json",
+  },
+  "mage-frost": {
+    datasetId: "SIMC_DBC_MAGE_FROST_GCD_SEMANTICS",
+    classId: 8,
+    className: "Mage",
+    sources: MAGE_SOURCES,
+    classModulePath: MAGE_SOURCES.classModule,
+    handReviewedPaths: [
+      MAGE_SOURCES.classModule,
+      MAGE_SOURCES.racialSpells,
+      MAGE_SOURCES.playerModule,
+      MAGE_SOURCES.consumableModule,
+    ],
+    requiredFacts: MAGE_FROST_FACTS,
+    defaultOut: "src/data/game/mage-frost-gcd-semantics.json",
   },
   "warlock-destruction": {
     datasetId: "SIMC_DBC_WARLOCK_DESTRUCTION_GCD_SEMANTICS",
