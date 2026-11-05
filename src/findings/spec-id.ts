@@ -91,7 +91,9 @@ export type SpecId =
   | "warlock/destruction"
   | "shaman/elemental"
   | "druid/balance"
-  | "priest/shadow";
+  | "priest/shadow"
+  | "mage/arcane"
+  | "mage/frost";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -121,6 +123,8 @@ export const SPEC_IDS = Object.freeze([
   "shaman/elemental",
   "druid/balance",
   "priest/shadow",
+  "mage/arcane",
+  "mage/frost",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -273,6 +277,9 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  *
  * Elemental Shaman, Balance Druid and Shadow Priest arrived here in ONB-D2, Cohort D's followers on the shared cast anchor. No
  * decision of any of them resolves: each list stops on state no retained evidence binds, before or at the enemy count (ONB-S3).
+ *
+ * Arcane Mage and Frost Mage arrived here in ONB-D3, two more Cohort D followers on the shared cast anchor. No decision of
+ * either resolves, and Frost has no retained subject with combatant info.
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
@@ -290,6 +297,8 @@ export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "shaman/elemental",
   "druid/balance",
   "priest/shadow",
+  "mage/arcane",
+  "mage/frost",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

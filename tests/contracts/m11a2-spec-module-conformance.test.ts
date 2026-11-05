@@ -175,6 +175,16 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
   // ONB-D1: actor 12 of the same fight, a Destruction Warlock the committed context reports.
   "warlock/destruction": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 12 },
   "shaman/elemental": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 8 },
+  // ONB-D3: actor 3 of the same context, an Arcane Mage.
+  "mage/arcane": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 3 },
+  // ONB-D3: actor 6 of the M13-A fight context, the Frost Mage the committed evidence archive
+  // context reports. That capture's casts are filtered and carry no combatant info.
+  "mage/frost": {
+    artifactId: "wcl-m13a-fight-context-aug1-fight-1",
+    fightId: 1,
+    sourceId: 6,
+    archive: true,
+  },
   "druid/balance": { artifactId: "wcl-fight-context-gtkb-fight-22", fightId: 22, sourceId: 27 },
   "priest/shadow": { artifactId: "wcl-fight-context-gtkb-fight-22", fightId: 22, sourceId: 29 },
   // ONB-B3: actor 32 of the corpus gtKb fight 22 context, the Devourer Demon Hunter the committed
@@ -497,6 +507,8 @@ describe("what the tree exports today", () => {
       ["AUGMENTATION_EVOKER_MODULE", "evoker/augmentation", "PUBLIC", 0],
       // HEAL-B4: a healer on the same architecture, its roster role UNKNOWN as pinned, INTERNAL_ONLY.
       ["PRESERVATION_EVOKER_MODULE", "evoker/preservation", "PUBLIC", 0],
+      ["ARCANE_MAGE_MODULE", "mage/arcane", "INTERNAL_ONLY", 0],
+      ["FROST_MAGE_MODULE", "mage/frost", "INTERNAL_ONLY", 0],
       ["BREWMASTER_MONK_MODULE", "monk/brewmaster", "PUBLIC", 0],
       ["MISTWEAVER_MONK_MODULE", "monk/mistweaver", "PUBLIC", 0],
       ["HOLY_PALADIN_MODULE", "paladin/holy", "PUBLIC", 0],

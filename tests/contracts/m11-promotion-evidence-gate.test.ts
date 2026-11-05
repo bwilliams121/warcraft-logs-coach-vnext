@@ -753,6 +753,8 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
       "shaman/elemental",
       "druid/balance",
       "priest/shadow",
+      "mage/arcane",
+      "mage/frost",
     ]);
     const internal = PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY");
     expect(internal.map((row) => row.specId)).toEqual([...INTERNAL_ONLY_SPEC_IDS]);
@@ -770,6 +772,28 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
       expect(readiness.qualifyingAssertions, specId).toEqual([]);
       expect(readiness.evidenceReady, specId).toBe(false);
     }
+  });
+
+  it("ONB-D3: the gate search finds nothing for Arcane Mage", async () => {
+    // No decision of it resolves on real evidence, and nothing of it is committed as a decision set (agent/architecture.md "ONB-D3").
+    // A later capture that changed this would fail this pin and prompt a new public entry; it would not promote anything by itself.
+    const tiers = await tiersPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "mage/arcane");
+    if (module === undefined) throw new Error("no module for mage/arcane");
+    const readiness = evaluate(tiers, "mage/arcane", "INTERNAL_ONLY", internalPairing(module));
+    expect(readiness.qualifyingAssertions).toEqual([]);
+    expect(readiness.evidenceReady).toBe(false);
+  });
+
+  it("ONB-D3: the gate search finds nothing for Frost Mage", async () => {
+    // No decision of it resolves on real evidence, and nothing of it is committed as a decision set (agent/architecture.md "ONB-D3").
+    // A later capture that changed this would fail this pin and prompt a new public entry; it would not promote anything by itself.
+    const tiers = await tiersPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "mage/frost");
+    if (module === undefined) throw new Error("no module for mage/frost");
+    const readiness = evaluate(tiers, "mage/frost", "INTERNAL_ONLY", internalPairing(module));
+    expect(readiness.qualifyingAssertions).toEqual([]);
+    expect(readiness.evidenceReady).toBe(false);
   });
 
   it("ONB-D2: the gate search finds nothing for Elemental Shaman", async () => {

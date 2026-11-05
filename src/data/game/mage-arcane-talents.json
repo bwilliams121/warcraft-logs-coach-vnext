@@ -1,0 +1,413 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_TRAIT_MAGE_ARCANE_TALENTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals trait_data_t::id_node, as every earlier target recorded. Corroborated for Arcane Mage on its retained subjects, whose observed trees resolve a hero tree and the pinned list's talents by these keys (agent/architecture.md \"ONB-D3\").",
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "talents": [
+    {
+      "simcName": "arcane_missiles",
+      "displayNameEn": "Arcane Missiles",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102467,
+      "traitEntryId": 126537,
+      "talentSpellId": 5143,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6016 talents.arcane_missiles = find_talent_spell( talent_tree::SPECIALIZATION, \"Arcane Missiles\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "arcane_orb",
+      "displayNameEn": "Arcane Orb",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 104113,
+      "traitEntryId": 128689,
+      "talentSpellId": 153626,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6027 talents.arcane_orb = find_talent_spell( talent_tree::SPECIALIZATION, \"Arcane Orb\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "arcane_pulse",
+      "displayNameEn": "Arcane Pulse",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102439,
+      "traitEntryId": 126509,
+      "talentSpellId": 1241462,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6025 talents.arcane_pulse = find_talent_spell( talent_tree::SPECIALIZATION, \"Arcane Pulse\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "arcane_surge",
+      "displayNameEn": "Arcane Surge",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102449,
+      "traitEntryId": 126519,
+      "talentSpellId": 365350,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6026 talents.arcane_surge = find_talent_spell( talent_tree::SPECIALIZATION, \"Arcane Surge\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "charged_orb",
+      "displayNameEn": "Charged Orb",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102475,
+      "traitEntryId": 126545,
+      "talentSpellId": 384651,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6034 talents.charged_orb = find_talent_spell( talent_tree::SPECIALIZATION, \"Charged Orb\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "evocation",
+      "displayNameEn": "Evocation",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102454,
+      "traitEntryId": 126524,
+      "talentSpellId": 12051,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 136465,
+          "displayNameEn": "Mana Adept",
+          "talentSpellId": 321526
+        }
+      ],
+      "binding": "sc_mage.cpp:6050 talents.evocation = find_talent_spell( talent_tree::SPECIALIZATION, \"Evocation\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "high_voltage",
+      "displayNameEn": "High Voltage",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102472,
+      "traitEntryId": 126542,
+      "talentSpellId": 461248,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 134022,
+          "displayNameEn": "Charged Missiles",
+          "talentSpellId": 461251
+        }
+      ],
+      "binding": "sc_mage.cpp:6063 talents.high_voltage = find_talent_spell( talent_tree::SPECIALIZATION, \"High Voltage\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "orb_barrage",
+      "displayNameEn": "Orb Barrage",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102474,
+      "traitEntryId": 126544,
+      "talentSpellId": 384858,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6067 talents.orb_barrage = find_talent_spell( talent_tree::SPECIALIZATION, \"Orb Barrage\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "orb_mastery",
+      "displayNameEn": "Orb Mastery",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102438,
+      "traitEntryId": 126508,
+      "talentSpellId": 1243435,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6066 talents.orb_mastery = find_talent_spell( talent_tree::SPECIALIZATION, \"Orb Mastery\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "presence_of_mind",
+      "displayNameEn": "Presence of Mind",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102460,
+      "traitEntryId": 126530,
+      "talentSpellId": 205025,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 134025,
+          "displayNameEn": "Slipstream",
+          "talentSpellId": 236457
+        }
+      ],
+      "binding": "sc_mage.cpp:6030 talents.presence_of_mind = find_talent_spell( talent_tree::SPECIALIZATION, \"Presence of Mind\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "spellfire_spheres",
+      "displayNameEn": "Spellfire Spheres",
+      "tree": "HERO",
+      "traitNodeId": 94647,
+      "traitEntryId": 117250,
+      "talentSpellId": 448601,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6232 talents.spellfire_spheres = find_talent_spell( talent_tree::HERO, \"Spellfire Spheres\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "splintering_sorcery",
+      "displayNameEn": "Splintering Sorcery",
+      "tree": "HERO",
+      "traitNodeId": 94664,
+      "traitEntryId": 117267,
+      "talentSpellId": 443739,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6208 talents.splintering_sorcery = find_talent_spell( talent_tree::HERO, \"Splintering Sorcery\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "touch_of_the_magi",
+      "displayNameEn": "Touch of the Magi",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102468,
+      "traitEntryId": 126538,
+      "talentSpellId": 321507,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_mage.cpp:6037 talents.touch_of_the_magi = find_talent_spell( talent_tree::SPECIALIZATION, \"Touch of the Magi\" );; the pinned list reads it or an action of the list is built on it"
+    }
+  ],
+  "heroTrees": [
+    {
+      "simcName": "sunfury",
+      "subTreeId": 39,
+      "entries": [
+        {
+          "traitEntryId": 117246,
+          "traitNodeId": 94643,
+          "displayNameEn": "Ashes of Inspiration",
+          "talentSpellId": 1260272
+        },
+        {
+          "traitEntryId": 117247,
+          "traitNodeId": 94644,
+          "displayNameEn": "Burden of Power",
+          "talentSpellId": 451035
+        },
+        {
+          "traitEntryId": 117248,
+          "traitNodeId": 94645,
+          "displayNameEn": "Codex of the Sunstriders",
+          "talentSpellId": 449382
+        },
+        {
+          "traitEntryId": 117249,
+          "traitNodeId": 94646,
+          "displayNameEn": "Memory of Al'ar",
+          "talentSpellId": 449619
+        },
+        {
+          "traitEntryId": 117250,
+          "traitNodeId": 94647,
+          "displayNameEn": "Spellfire Spheres",
+          "talentSpellId": 448601
+        },
+        {
+          "traitEntryId": 117251,
+          "traitNodeId": 94648,
+          "displayNameEn": "Rondurmancy",
+          "talentSpellId": 449596
+        },
+        {
+          "traitEntryId": 117252,
+          "traitNodeId": 94649,
+          "displayNameEn": "Merely a Setback",
+          "talentSpellId": 449330
+        },
+        {
+          "traitEntryId": 117253,
+          "traitNodeId": 94650,
+          "displayNameEn": "Savor the Moment",
+          "talentSpellId": 449412
+        },
+        {
+          "traitEntryId": 117254,
+          "traitNodeId": 94651,
+          "displayNameEn": "Lessons in Debilitation",
+          "talentSpellId": 449627
+        },
+        {
+          "traitEntryId": 117255,
+          "traitNodeId": 94652,
+          "displayNameEn": "Invocation: Arcane Phoenix",
+          "talentSpellId": 448658
+        },
+        {
+          "traitEntryId": 117256,
+          "traitNodeId": 94653,
+          "displayNameEn": "Mana Cascade",
+          "talentSpellId": 449293
+        },
+        {
+          "traitEntryId": 123867,
+          "traitNodeId": 94650,
+          "displayNameEn": "Sunfury Execution",
+          "talentSpellId": 449349
+        },
+        {
+          "traitEntryId": 134249,
+          "traitNodeId": 94651,
+          "displayNameEn": "Explosive Potential",
+          "talentSpellId": 1246030
+        },
+        {
+          "traitEntryId": 135598,
+          "traitNodeId": 94649,
+          "displayNameEn": "Time Twist",
+          "talentSpellId": 1255166
+        },
+        {
+          "traitEntryId": 135924,
+          "traitNodeId": 109673,
+          "displayNameEn": "Spellfire Salvo",
+          "talentSpellId": 1260616
+        },
+        {
+          "traitEntryId": 135925,
+          "traitNodeId": 109674,
+          "displayNameEn": "Pyrocosm",
+          "talentSpellId": 1260673
+        },
+        {
+          "traitEntryId": 135926,
+          "traitNodeId": 109675,
+          "displayNameEn": "Glorious Incandescence",
+          "talentSpellId": 449394
+        }
+      ]
+    },
+    {
+      "simcName": "spellslinger",
+      "subTreeId": 40,
+      "entries": [
+        {
+          "traitEntryId": 117257,
+          "traitNodeId": 94654,
+          "displayNameEn": "Splinterstorm",
+          "talentSpellId": 443783
+        },
+        {
+          "traitEntryId": 117258,
+          "traitNodeId": 94655,
+          "displayNameEn": "Spellfrost Teachings",
+          "talentSpellId": 444986
+        },
+        {
+          "traitEntryId": 117259,
+          "traitNodeId": 94656,
+          "displayNameEn": "Controlled Instincts",
+          "talentSpellId": 444483
+        },
+        {
+          "traitEntryId": 117261,
+          "traitNodeId": 94658,
+          "displayNameEn": "Archmage's Wrath",
+          "talentSpellId": 444968
+        },
+        {
+          "traitEntryId": 117262,
+          "traitNodeId": 94659,
+          "displayNameEn": "Slippery Slinging",
+          "talentSpellId": 444752
+        },
+        {
+          "traitEntryId": 117263,
+          "traitNodeId": 94660,
+          "displayNameEn": "Reactive Barrier",
+          "talentSpellId": 444827
+        },
+        {
+          "traitEntryId": 117264,
+          "traitNodeId": 94661,
+          "displayNameEn": "Splintering Orbs",
+          "talentSpellId": 444256
+        },
+        {
+          "traitEntryId": 117265,
+          "traitNodeId": 94662,
+          "displayNameEn": "Augury Abounds",
+          "talentSpellId": 1280165
+        },
+        {
+          "traitEntryId": 117266,
+          "traitNodeId": 94663,
+          "displayNameEn": "Force of Will",
+          "talentSpellId": 444719
+        },
+        {
+          "traitEntryId": 117267,
+          "traitNodeId": 94664,
+          "displayNameEn": "Splintering Sorcery",
+          "talentSpellId": 443739
+        },
+        {
+          "traitEntryId": 123417,
+          "traitNodeId": 94660,
+          "displayNameEn": "Phantasmal Image",
+          "talentSpellId": 444784
+        },
+        {
+          "traitEntryId": 123418,
+          "traitNodeId": 94659,
+          "displayNameEn": "Look Again",
+          "talentSpellId": 444756
+        },
+        {
+          "traitEntryId": 128267,
+          "traitNodeId": 94657,
+          "displayNameEn": "Signature Spell",
+          "talentSpellId": 470021
+        },
+        {
+          "traitEntryId": 135918,
+          "traitNodeId": 109667,
+          "displayNameEn": "Polished Focus",
+          "talentSpellId": 1261082
+        },
+        {
+          "traitEntryId": 135919,
+          "traitNodeId": 109668,
+          "displayNameEn": "Infused Splinters",
+          "talentSpellId": 1261080
+        },
+        {
+          "traitEntryId": 135920,
+          "traitNodeId": 109669,
+          "displayNameEn": "Attuned Familiar",
+          "talentSpellId": 1261106
+        },
+        {
+          "traitEntryId": 135946,
+          "traitNodeId": 109669,
+          "displayNameEn": "Shifting Shards",
+          "talentSpellId": 444675
+        }
+      ]
+    }
+  ]
+}

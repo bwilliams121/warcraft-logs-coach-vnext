@@ -73,6 +73,8 @@ describe("every Node-executable layer of the corpus executes clean", () => {
       "SPEC_ELEMENTAL_SHAMAN",
       "SPEC_BALANCE_DRUID",
       "SPEC_SHADOW_PRIEST",
+      "SPEC_ARCANE_MAGE",
+      "SPEC_FROST_MAGE",
       "SPEC_OUTLAW_ROGUE",
       "SPEC_ENHANCEMENT_SHAMAN",
       "APPLICATION_SERVICE",

@@ -1,0 +1,288 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_MAGE_ARCANE_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/sc_mage.cpp",
+        "sha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "byteLength": 262461
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 2139,
+      "baseGcdMs": 0,
+      "displayNameEn": "Counterspell"
+    },
+    {
+      "abilityGameId": 5143,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Arcane Missiles"
+    },
+    {
+      "abilityGameId": 12051,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Evocation"
+    },
+    {
+      "abilityGameId": 30451,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Arcane Blast"
+    },
+    {
+      "abilityGameId": 44425,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Arcane Barrage"
+    },
+    {
+      "abilityGameId": 153626,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Arcane Orb"
+    },
+    {
+      "abilityGameId": 205025,
+      "baseGcdMs": 0,
+      "displayNameEn": "Presence of Mind"
+    },
+    {
+      "abilityGameId": 321507,
+      "baseGcdMs": 0,
+      "displayNameEn": "Touch of the Magi"
+    },
+    {
+      "abilityGameId": 365350,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Arcane Surge"
+    },
+    {
+      "abilityGameId": 1241462,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Arcane Pulse"
+    },
+    {
+      "abilityGameId": 1295924,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Prismatic Bolt"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "counterspell",
+      "candidateAbilityGameIds": [2139],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / counterspell_t",
+        "startLine": 5711,
+        "endLine": 5711,
+        "sourceNote": "create_action dispatches \"counterspell\" to counterspell_t: built on p->find_class_spell( \"Counterspell\" ) (:3641), class_spells.inc row 2139.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "arcane_barrage",
+      "candidateAbilityGameIds": [44425],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / arcane_barrage_t",
+        "startLine": 5677,
+        "endLine": 5677,
+        "sourceNote": "create_action dispatches \"arcane_barrage\" to arcane_barrage_t: built on p->find_specialization_spell( \"Arcane Barrage\" ) (:2684), class_spells.inc row 44425.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "arcane_blast",
+      "candidateAbilityGameIds": [30451],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / arcane_blast_t",
+        "startLine": 5678,
+        "endLine": 5678,
+        "sourceNote": "create_action dispatches \"arcane_blast\" to arcane_blast_t: built on p->find_specialization_spell( \"Arcane Blast\" ) (:2832), class_spells.inc row 30451.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "arcane_missiles",
+      "candidateAbilityGameIds": [5143],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / arcane_missiles_t",
+        "startLine": 5679,
+        "endLine": 5679,
+        "sourceNote": "create_action dispatches \"arcane_missiles\" to arcane_missiles_t: built on p->talents.arcane_missiles (:3184); talents.arcane_missiles = find_talent_spell at :6016.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "arcane_pulse",
+      "candidateAbilityGameIds": [1241462],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / arcane_pulse_t",
+        "startLine": 5680,
+        "endLine": 5680,
+        "sourceNote": "create_action dispatches \"arcane_pulse\" to arcane_pulse_t: built on p->talents.arcane_pulse (:2974) when not an echo; talents.arcane_pulse = find_talent_spell at :6025.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "arcane_orb",
+      "candidateAbilityGameIds": [153626],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / arcane_orb_t",
+        "startLine": 5681,
+        "endLine": 5681,
+        "sourceNote": "create_action dispatches \"arcane_orb\" to arcane_orb_t: built on p->talents.arcane_orb (:2604) on the normal path; talents.arcane_orb = find_talent_spell at :6027.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "arcane_surge",
+      "candidateAbilityGameIds": [365350],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / arcane_surge_t",
+        "startLine": 5682,
+        "endLine": 5682,
+        "sourceNote": "create_action dispatches \"arcane_surge\" to arcane_surge_t: built on p->talents.arcane_surge (:3306); talents.arcane_surge = find_talent_spell at :6026.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "evocation",
+      "candidateAbilityGameIds": [12051],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / evocation_t",
+        "startLine": 5683,
+        "endLine": 5683,
+        "sourceNote": "create_action dispatches \"evocation\" to evocation_t: built on p->talents.evocation (:3682); talents.evocation = find_talent_spell at :6050.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "presence_of_mind",
+      "candidateAbilityGameIds": [205025],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / presence_of_mind_t",
+        "startLine": 5684,
+        "endLine": 5684,
+        "sourceNote": "create_action dispatches \"presence_of_mind\" to presence_of_mind_t: built on p->talents.presence_of_mind (:2477); talents.presence_of_mind = find_talent_spell at :6030.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "prismatic_bolt",
+      "candidateAbilityGameIds": [1295924],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / prismatic_bolt_t",
+        "startLine": 5685,
+        "endLine": 5685,
+        "sourceNote": "create_action dispatches \"prismatic_bolt\" to prismatic_bolt_t: built on p->find_spell( 1295924 ) (:2907). Its ready() refuses without buffs.prismatic_bolt, a usability claim this slice does not make.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "touch_of_the_magi",
+      "candidateAbilityGameIds": [321507],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / touch_of_the_magi_t",
+        "startLine": 5686,
+        "endLine": 5686,
+        "sourceNote": "create_action dispatches \"touch_of_the_magi\" to touch_of_the_magi_t: built on p->talents.touch_of_the_magi (:5128); talents.touch_of_the_magi = find_talent_spell at :6037.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

@@ -563,9 +563,9 @@
     {
       "specId": "mage/arcane",
       "cohort": "D_CAST_ANCHORED",
-      "currentAnalyzerStatus": "UNREGISTERED",
+      "currentAnalyzerStatus": "INTERNAL_ONLY",
       "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
-      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "authorityAuditStatus": "AUTHORITY_AUDITED",
       "deepDiveInventoryStatus": "PARTIAL",
       "questions": [
         {
@@ -625,9 +625,9 @@
     {
       "specId": "mage/frost",
       "cohort": "D_CAST_ANCHORED",
-      "currentAnalyzerStatus": "UNREGISTERED",
+      "currentAnalyzerStatus": "INTERNAL_ONLY",
       "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
-      "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
+      "authorityAuditStatus": "AUTHORITY_AUDITED",
       "deepDiveInventoryStatus": "UNASSESSED",
       "questions": []
     },

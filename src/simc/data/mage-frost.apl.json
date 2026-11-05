@@ -1,0 +1,493 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_MAGE_FROST",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "mage",
+    "specName": "frost"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "UNKNOWN",
+    "sourcePath": "engine/class_modules/apl/mage.cpp",
+    "sourceSha256": "b0310f97988f53af34507015d8adda68606c2401466f534430c876676b72c578",
+    "sourceByteLength": 40053,
+    "regionStartMarker": "//frost_apl_start",
+    "regionEndMarker": "//frost_apl_end",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "regionSha256": "2b69aaf6459a417d6cb97a6f8bf8e75ff8acea3edb020d6ebf46ee10f63cc6cc",
+    "livePtrPolicy": "NO_PTR_REGION",
+    "dispatchSource": {
+      "sourcePath": "engine/class_modules/sc_mage.cpp",
+      "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb"
+    }
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "call_action_list,name=cds",
+          "comment": null,
+          "sourceLine": 271
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "run_action_list,name=frostfire,if=talent.frostfire_bolt",
+          "comment": null,
+          "sourceLine": 272
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "run_action_list,name=spellslinger",
+          "comment": null,
+          "sourceLine": 273
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "arcane_intellect",
+          "comment": null,
+          "sourceLine": 264
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": null,
+          "sourceLine": 265
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "summon_water_elemental",
+          "comment": null,
+          "sourceLine": 266
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "blizzard,if=talent.frostfire_bolt&active_enemies>=(8-3*talent.freezing_winds-2*talent.freezing_rain)|!talent.frostfire_bolt&active_enemies>=(7-2*talent.freezing_winds-2*talent.freezing_rain)",
+          "comment": "Blizzard is only used as a precast when it is also hardcasted in the regular rotation at the given number of enemies.",
+          "sourceLine": 267
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "glacial_spike",
+          "comment": null,
+          "sourceLine": 268
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "frostbolt",
+          "comment": null,
+          "sourceLine": 269
+        }
+      ]
+    },
+    {
+      "listName": "cds",
+      "receiverIdentifier": "cds",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "variable,name=ff_trinket_timing,value=talent.frostfire_bolt&(fight_remains<15|prev_gcd.1.frozen_orb|prev_gcd.1.comet_storm|prev_gcd.1.glacial_spike|cooldown.ray_of_frost.charges>=1&debuff.freezing.react<12&buff.fingers_of_frost.react<2&buff.icicles.react<5&(!buff.frostfire_empowerment.react|active_enemies<=2)&(!buff.brain_freeze.react|buff.thermal_void.up))",
+          "comment": "Frostfire uses potions, items and racials after Frozen Orb, Comet Storm or Glacial Spike, or together with Ray of Frost.",
+          "sourceLine": 275
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "variable,name=ss_trinket_timing,value=!talent.frostfire_bolt&(fight_remains<15|prev_gcd.1.frozen_orb|time>1.5&cooldown.ray_of_frost.charges>=1&debuff.freezing.react<6&!buff.fingers_of_frost.react&buff.icicles.react<=3&(!buff.brain_freeze.react|buff.thermal_void.up))",
+          "comment": "Spellslinger uses potions, items and racials after Frozen Orb or together with Ray of Frost.",
+          "sourceLine": 276
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "invoke_external_buff,name=power_infusion,if=buff.power_infusion.down&(variable.ff_trinket_timing|variable.ss_trinket_timing)",
+          "comment": "Externals.",
+          "sourceLine": 277
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "blood_fury,if=variable.ff_trinket_timing|variable.ss_trinket_timing",
+          "comment": "Racials.",
+          "sourceLine": 278
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "berserking,if=variable.ff_trinket_timing|variable.ss_trinket_timing",
+          "comment": null,
+          "sourceLine": 279
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "fireblood,if=variable.ff_trinket_timing|variable.ss_trinket_timing",
+          "comment": null,
+          "sourceLine": 280
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "ancestral_call,if=variable.ff_trinket_timing|variable.ss_trinket_timing",
+          "comment": null,
+          "sourceLine": 281
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "use_item,name=font_of_venomous_rage,if=cooldown.potion.remains|!potion.potion_of_recklessness",
+          "comment": "Flat-damage on-use trinkets are used immediately, after Potion of Recklessness on combat start.",
+          "sourceLine": 282
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "use_item,name=vexhuls_everflowing_gland,if=cooldown.potion.remains|!potion.potion_of_recklessness",
+          "comment": null,
+          "sourceLine": 283
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "use_item,name=nevermelting_ice_crystal,if=variable.ff_trinket_timing|variable.ss_trinket_timing",
+          "comment": "Haste trinkets are used after using potion (of recklessness). Crit trinkets are used before using potion. Mastery trinkets are used after using potion if Crit is your highest secondary stat, and before otherwise.",
+          "sourceLine": 284
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "use_item,name=freightrunners_flask,if=variable.ff_trinket_timing|variable.ss_trinket_timing",
+          "comment": null,
+          "sourceLine": 285
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "use_item,name=vaelgors_final_stare,if=(variable.ff_trinket_timing|variable.ss_trinket_timing)&(stat.haste_rating>stat.crit_rating|stat.versatility_rating>stat.crit_rating)",
+          "comment": null,
+          "sourceLine": 286
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "potion,if=variable.ff_trinket_timing|variable.ss_trinket_timing|(trinket.font_of_venomous_rage.cooldown.ready|trinket.vexhuls_everflowing_gland.cooldown.ready)&potion.potion_of_recklessness|fight_remains<35",
+          "comment": null,
+          "sourceLine": 287
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "use_item,name=vaelgors_final_stare,if=variable.ff_trinket_timing|variable.ss_trinket_timing",
+          "comment": null,
+          "sourceLine": 288
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "use_item,name=vile_vial_of_volatile_venom,if=variable.ff_trinket_timing|variable.ss_trinket_timing",
+          "comment": null,
+          "sourceLine": 289
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "use_items",
+          "comment": null,
+          "sourceLine": 290
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "use_item,name=hex_lords_dooming_idol,if=variable.ff_trinket_timing|variable.ss_trinket_timing",
+          "comment": null,
+          "sourceLine": 291
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "ray_of_frost,if=talent.frostfire_bolt,interrupt_if=!talent.hand_of_frost_4&active_enemies>=2&tick_time>gcd.remains&(!talent.crystalline_refraction|talent.crystalline_refraction&buff.fingers_of_frost.react=2),interrupt_global=1,interrupt_immediate=1,line_cd=9999",
+          "comment": "Frostfire Opener: precast Frostfire Bolt/Blizzard --> Ray of Frost --> Flurry --> Frozen Orb.",
+          "sourceLine": 292
+        },
+        {
+          "priorityOrdinal": 18,
+          "actionStringVerbatim": "flurry,if=talent.frostfire_bolt&talent.wintertide,line_cd=9999",
+          "comment": null,
+          "sourceLine": 293
+        },
+        {
+          "priorityOrdinal": 19,
+          "actionStringVerbatim": "frozen_orb,if=talent.frostfire_bolt,line_cd=9999",
+          "comment": null,
+          "sourceLine": 294
+        },
+        {
+          "priorityOrdinal": 20,
+          "actionStringVerbatim": "flurry,if=!talent.frostfire_bolt&talent.wintertide,line_cd=9999",
+          "comment": "Spellslinger Opener: precast Frostbolt/Blizzard --> Flurry --> Frozen Orb --> Ray of Frost.",
+          "sourceLine": 295
+        },
+        {
+          "priorityOrdinal": 21,
+          "actionStringVerbatim": "frozen_orb,if=!talent.frostfire_bolt,line_cd=9999",
+          "comment": null,
+          "sourceLine": 296
+        },
+        {
+          "priorityOrdinal": 22,
+          "actionStringVerbatim": "ray_of_frost,if=!talent.frostfire_bolt,line_cd=9999",
+          "comment": null,
+          "sourceLine": 297
+        },
+        {
+          "priorityOrdinal": 23,
+          "actionStringVerbatim": "ray_of_frost,if=fight_remains<12|charges=2,interrupt_if=talent.frostfire_bolt&!talent.hand_of_frost_4&active_enemies>=2&tick_time>gcd.remains&(!talent.crystalline_refraction|talent.crystalline_refraction&buff.fingers_of_frost.react=2),interrupt_global=1,interrupt_immediate=1",
+          "comment": "End-Of-Fight actions and overcap protection.",
+          "sourceLine": 298
+        },
+        {
+          "priorityOrdinal": 24,
+          "actionStringVerbatim": "comet_storm,if=fight_remains<8",
+          "comment": null,
+          "sourceLine": 299
+        }
+      ]
+    },
+    {
+      "listName": "frostfire",
+      "receiverIdentifier": "frostfire",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "glacial_spike,if=buff.glacial_spike.react|time-buff.rapid_refreezing.last_trigger<1.5",
+          "comment": "These Glacial Spike conditions prevent super-human behaviour. Chaincasting 4p proccs as GS --> X --> GS --> X is reasonable, as long as the cast time/gcd of X is longer than 1 second.",
+          "sourceLine": 301
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "comet_storm,if=active_enemies<=2|prev_gcd.2.glacial_spike&(time-buff.rapid_refreezing.last_trigger>1.5|!set_bonus.midnight_season_2_4pc)",
+          "comment": "In AoE, Comet Storm can quickly refill Icicles through the 2pc bonus. Cast it second-to-last after Glacial Spike, allowing time to react to a 4pc proc first.",
+          "sourceLine": 302
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "flurry,if=buff.brain_freeze.react&buff.thermal_void.down",
+          "comment": null,
+          "sourceLine": 303
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "ice_lance,if=buff.fingers_of_frost.react=2",
+          "comment": null,
+          "sourceLine": 304
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "ray_of_frost,if=!talent.hand_of_frost_4,interrupt_if=active_enemies>=2&tick_time>gcd.remains&(!talent.crystalline_refraction|talent.crystalline_refraction&buff.fingers_of_frost.react=2),interrupt_global=1,interrupt_immediate=1",
+          "comment": "Without the final Apex Talent, Ray of Frost is cast at higher priority. Against 2+ targets, cancel Ray of Frost on your next gcd. With Crystalline Refraction, wait until 2 Fingers of Frost before cancelling it.",
+          "sourceLine": 305
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "frozen_orb",
+          "comment": null,
+          "sourceLine": 306
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "blizzard,if=active_enemies>=(8-3*talent.freezing_winds-2*talent.freezing_rain)|active_enemies>=3&buff.freezing_rain.up",
+          "comment": null,
+          "sourceLine": 307
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "ice_lance,if=buff.fingers_of_frost.react&buff.thermal_void.up",
+          "comment": "Single Finger of Frost procs are held unless Thermal Void is active. They may still get spent passively when the enemy has 12+ stacks of Freezing.",
+          "sourceLine": 308
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "ice_lance,if=debuff.freezing.stack>=12",
+          "comment": null,
+          "sourceLine": 309
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "flurry,if=cooldown_react",
+          "comment": null,
+          "sourceLine": 310
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "ice_nova,if=active_enemies>=5&talent.cone_of_frost&!buff.frostfire_empowerment.react&cooldown.ray_of_frost.charges>=1",
+          "comment": null,
+          "sourceLine": 311
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "cone_of_cold,if=active_enemies>=5&talent.cone_of_frost&!buff.frostfire_empowerment.react&cooldown.ray_of_frost.charges>=1",
+          "comment": null,
+          "sourceLine": 312
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "ray_of_frost,if=active_enemies<=2|!buff.frostfire_empowerment.react",
+          "comment": "With the final Apex Talent, spend Frostfire Empowerment in AoE before casting Ray of Frost. This builds Freezing stacks before the following Comet Storm.",
+          "sourceLine": 313
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "glacial_spike",
+          "comment": null,
+          "sourceLine": 314
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "frostbolt",
+          "comment": null,
+          "sourceLine": 315
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "call_action_list,name=movement",
+          "comment": null,
+          "sourceLine": 316
+        }
+      ]
+    },
+    {
+      "listName": "movement",
+      "receiverIdentifier": "movement",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "any_blink,if=movement.distance>5",
+          "comment": null,
+          "sourceLine": 318
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "blizzard,if=buff.freezing_rain.up",
+          "comment": null,
+          "sourceLine": 319
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "ice_nova,if=talent.cone_of_frost",
+          "comment": null,
+          "sourceLine": 320
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "cone_of_cold,if=talent.cone_of_frost",
+          "comment": null,
+          "sourceLine": 321
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "ice_lance",
+          "comment": null,
+          "sourceLine": 322
+        }
+      ]
+    },
+    {
+      "listName": "spellslinger",
+      "receiverIdentifier": "spellslinger",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "comet_storm",
+          "comment": null,
+          "sourceLine": 324
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "flurry,if=buff.brain_freeze.react&buff.thermal_void.down",
+          "comment": null,
+          "sourceLine": 325
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "ice_lance,if=buff.fingers_of_frost.react=2",
+          "comment": null,
+          "sourceLine": 326
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "frozen_orb",
+          "comment": null,
+          "sourceLine": 327
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "glacial_spike,if=buff.glacial_spike.react|time-buff.rapid_refreezing.last_trigger<1.5",
+          "comment": "These Glacial Spike conditions prevent super-human behaviour. Chaincasting 4p proccs as GS --> X --> GS --> X is reasonable, as long as the cast time/gcd of X is longer than 1 second.",
+          "sourceLine": 328
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "blizzard,if=active_enemies>=(5-2*talent.freezing_winds)&buff.freezing_rain.up",
+          "comment": null,
+          "sourceLine": 329
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "ice_lance,if=buff.fingers_of_frost.react",
+          "comment": null,
+          "sourceLine": 330
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "ice_lance,if=debuff.freezing.react>=6",
+          "comment": null,
+          "sourceLine": 331
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "ray_of_frost,if=buff.icicles.react<=3|active_enemies>=3",
+          "comment": "This Ray of Frost optimization improves ressource overflow slightly. It is neutral in AoE.",
+          "sourceLine": 332
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "flurry,if=cooldown_react",
+          "comment": null,
+          "sourceLine": 333
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "ice_nova,if=active_enemies>=4&talent.cone_of_frost",
+          "comment": null,
+          "sourceLine": 334
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "cone_of_cold,if=active_enemies>=4&talent.cone_of_frost",
+          "comment": null,
+          "sourceLine": 335
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "blizzard,if=active_enemies>=(7-2*talent.freezing_winds-2*talent.freezing_rain)",
+          "comment": null,
+          "sourceLine": 336
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "glacial_spike",
+          "comment": null,
+          "sourceLine": 337
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "frostbolt",
+          "comment": null,
+          "sourceLine": 338
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "call_action_list,name=movement",
+          "comment": null,
+          "sourceLine": 339
+        }
+      ]
+    }
+  ]
+}

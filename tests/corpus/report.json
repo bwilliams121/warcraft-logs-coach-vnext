@@ -743,6 +743,24 @@
       "assertions": 1,
       "cases": 1,
       "failed": 0,
+      "kindsExercised": ["SPEC_ARCANE_MAGE.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_ARCANE_MAGE",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_FROST_MAGE.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_FROST_MAGE",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
       "kindsExercised": ["SPEC_OUTLAW_ROGUE.SPEC_GATE"],
       "notExecuted": 0,
       "owningLayer": "SPEC_OUTLAW_ROGUE",
@@ -758,13 +776,13 @@
       "passed": 1
     },
     {
-      "assertions": 37,
-      "cases": 33,
+      "assertions": 39,
+      "cases": 35,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 37
+      "passed": 39
     },
     {
       "assertions": 14,
@@ -777,6 +795,20 @@
     }
   ],
   "cases": [
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.arcane-mage-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
     {
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
@@ -980,6 +1012,20 @@
       ],
       "authority": null,
       "caseId": "application-service.frost-death-knight-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.frost-mage-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -3500,6 +3546,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_ARCANE_MAGE.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-arcane-mage.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_ARCANE_MAGE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_ARMS_WARRIOR.SPEC_GATE",
           "ordinal": 0,
           "status": "PASSED"
@@ -5711,6 +5771,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_FROST_MAGE.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-frost-mage.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_FROST_MAGE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_FURY_WARRIOR.SPEC_GATE",
           "ordinal": 0,
           "status": "PASSED"
@@ -7719,6 +7793,8 @@
     "SIMC_APL_DEMONHUNTER_HAVOC": "simc-33622e9d-1",
     "SIMC_APL_DRUID_BALANCE": "simc-33622e9d-1",
     "SIMC_APL_DRUID_FERAL": "simc-33622e9d-1",
+    "SIMC_APL_MAGE_ARCANE": "simc-33622e9d-1",
+    "SIMC_APL_MAGE_FROST": "simc-33622e9d-1",
     "SIMC_APL_MONK_BREWMASTER": "simc-33622e9d-1",
     "SIMC_APL_PALADIN_PROTECTION": "simc-33622e9d-1",
     "SIMC_APL_PALADIN_RETRIBUTION": "simc-33622e9d-1",
@@ -7740,13 +7816,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 822,
-    "cases": 227,
+    "assertions": 826,
+    "cases": 231,
     "declared": 0,
-    "executable": 822,
+    "executable": 826,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 822
+    "passed": 826
   }
 }

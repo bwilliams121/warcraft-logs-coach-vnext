@@ -85,6 +85,8 @@ describe("the five sites agree", () => {
       "shaman/elemental",
       "druid/balance",
       "priest/shadow",
+      "mage/arcane",
+      "mage/frost",
     ]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
@@ -172,6 +174,8 @@ describe("the five sites agree", () => {
       ["shaman/elemental", "INTERNAL_ONLY"],
       ["druid/balance", "INTERNAL_ONLY"],
       ["priest/shadow", "INTERNAL_ONLY"],
+      ["mage/arcane", "INTERNAL_ONLY"],
+      ["mage/frost", "INTERNAL_ONLY"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -287,6 +291,8 @@ describe("the complete-catalog helper", () => {
       "shaman-elemental-observed-decisions": 0,
       "druid-balance-observed-decisions": 0,
       "priest-shadow-observed-decisions": 0,
+      "mage-arcane-observed-decisions": 0,
+      "mage-frost-observed-decisions": 0,
     });
   });
 });

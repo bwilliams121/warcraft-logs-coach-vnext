@@ -7277,6 +7277,82 @@ const BREWMASTER_CASES = [
     "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Shadow Priest list.",
     { related: ["tests/unit/specs/onb-d2-shadow-priest.test.ts"] },
   ),
+  // ---- SPEC_ARCANE_MAGE (ONB-D3, INTERNAL_ONLY) ---
+  kase(
+    "application-service.arcane-mage-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Arcane Mage registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "mage/arcane",
+        expected: {
+          internalAnalyzerId: "mage-arcane-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    'Arcane Mage is registered INTERNAL_ONLY in ONB-D3, a Cohort D follower on the shared cast anchor. No decision of it resolves. Its retained subjects are replayed offline and not committed (agent/follow-ups.md "After ONB-D3").',
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-arcane-mage.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_ARCANE_MAGE",
+    "src/specs/mage/arcane/observed-analysis.ts analyzeObservedArcaneMageDecisions (the spec gate)",
+    "The Arcane Mage facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_ARCANE_MAGE.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Arcane Mage list.",
+    { related: ["tests/unit/specs/onb-d3-arcane-mage.test.ts"] },
+  ),
+  // ---- SPEC_FROST_MAGE (ONB-D3, INTERNAL_ONLY) ---
+  kase(
+    "application-service.frost-mage-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Frost Mage registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "mage/frost",
+        expected: {
+          internalAnalyzerId: "mage-frost-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    'Frost Mage is registered INTERNAL_ONLY in ONB-D3, a Cohort D follower on the shared cast anchor. No decision of it resolves. No retained subject of it has combatant info, so it is on ONB-EV (agent/follow-ups.md "After ONB-D3").',
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-frost-mage.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_FROST_MAGE",
+    "src/specs/mage/frost/observed-analysis.ts analyzeObservedFrostMageDecisions (the spec gate)",
+    "The Frost Mage facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_FROST_MAGE.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Frost Mage list.",
+    { related: ["tests/unit/specs/onb-d3-frost-mage.test.ts"] },
+  ),
   // ---- SPEC_OUTLAW_ROGUE (ONB-C2, INTERNAL_ONLY) ---
   kase(
     "application-service.outlaw-rogue-registration-is-internal-only",

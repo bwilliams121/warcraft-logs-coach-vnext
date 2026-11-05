@@ -1825,6 +1825,218 @@ const PRIEST_SHADOW_TARGET = {
 };
 
 /**
+ * The Arcane Mage profile (ONB-D3): the talents the pinned list reads as `talent.<name>`, and the talents an action of
+ * that list is built on (an action on `not_found()` is background, action.cpp:541-549).
+ */
+const MAGE_ARCANE_TARGET = {
+  datasetId: "SIMC_TRAIT_MAGE_ARCANE_TALENTS",
+  classId: 8,
+  specId: 62,
+  defaultOut: "src/data/game/mage-arcane-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node, as every earlier target recorded." +
+    ' Corroborated for Arcane Mage on its retained subjects, whose observed trees resolve a hero tree and the pinned list\'s talents by these keys (agent/architecture.md "ONB-D3").',
+  requiredTalents: [
+    {
+      simcName: "arcane_missiles",
+      displayNameEn: "Arcane Missiles",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6016 talents.arcane_missiles = find_talent_spell( talent_tree::SPECIALIZATION, "Arcane Missiles" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "arcane_orb",
+      displayNameEn: "Arcane Orb",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6027 talents.arcane_orb = find_talent_spell( talent_tree::SPECIALIZATION, "Arcane Orb" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "arcane_pulse",
+      displayNameEn: "Arcane Pulse",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6025 talents.arcane_pulse = find_talent_spell( talent_tree::SPECIALIZATION, "Arcane Pulse" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "arcane_surge",
+      displayNameEn: "Arcane Surge",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6026 talents.arcane_surge = find_talent_spell( talent_tree::SPECIALIZATION, "Arcane Surge" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "charged_orb",
+      displayNameEn: "Charged Orb",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6034 talents.charged_orb = find_talent_spell( talent_tree::SPECIALIZATION, "Charged Orb" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "evocation",
+      displayNameEn: "Evocation",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6050 talents.evocation = find_talent_spell( talent_tree::SPECIALIZATION, "Evocation" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "high_voltage",
+      displayNameEn: "High Voltage",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6063 talents.high_voltage = find_talent_spell( talent_tree::SPECIALIZATION, "High Voltage" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "orb_barrage",
+      displayNameEn: "Orb Barrage",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6067 talents.orb_barrage = find_talent_spell( talent_tree::SPECIALIZATION, "Orb Barrage" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "orb_mastery",
+      displayNameEn: "Orb Mastery",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6066 talents.orb_mastery = find_talent_spell( talent_tree::SPECIALIZATION, "Orb Mastery" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "presence_of_mind",
+      displayNameEn: "Presence of Mind",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6030 talents.presence_of_mind = find_talent_spell( talent_tree::SPECIALIZATION, "Presence of Mind" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "spellfire_spheres",
+      displayNameEn: "Spellfire Spheres",
+      tree: "HERO",
+      binding:
+        'sc_mage.cpp:6232 talents.spellfire_spheres = find_talent_spell( talent_tree::HERO, "Spellfire Spheres" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "splintering_sorcery",
+      displayNameEn: "Splintering Sorcery",
+      tree: "HERO",
+      binding:
+        'sc_mage.cpp:6208 talents.splintering_sorcery = find_talent_spell( talent_tree::HERO, "Splintering Sorcery" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "touch_of_the_magi",
+      displayNameEn: "Touch of the Magi",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6037 talents.touch_of_the_magi = find_talent_spell( talent_tree::SPECIALIZATION, "Touch of the Magi" );; the pinned list reads it or an action of the list is built on it',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data` (trait_data.inc:4406-4408).
+    { simcName: "sunfury", subTreeId: 39 },
+    { simcName: "spellslinger", subTreeId: 40 },
+  ],
+};
+
+/**
+ * The Frost Mage profile (ONB-D3): the talents the pinned list reads as `talent.<name>`, and the talents an action of
+ * that list is built on (an action on `not_found()` is background, action.cpp:541-549).
+ */
+const MAGE_FROST_TARGET = {
+  datasetId: "SIMC_TRAIT_MAGE_FROST_TALENTS",
+  classId: 8,
+  specId: 64,
+  defaultOut: "src/data/game/mage-frost-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node, as every earlier target recorded." +
+    ' No retained Frost Mage subject carries combatant info, so nothing corroborates these keys for Frost on real evidence (agent/architecture.md "ONB-D3").',
+  requiredTalents: [
+    {
+      simcName: "cone_of_frost",
+      displayNameEn: "Cone of Frost",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6153 talents.cone_of_frost = find_talent_spell( talent_tree::SPECIALIZATION, "Cone of Frost" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "crystalline_refraction",
+      displayNameEn: "Crystalline Refraction",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6170 talents.crystalline_refraction = find_talent_spell( talent_tree::SPECIALIZATION, "Crystalline Refraction" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "flurry",
+      displayNameEn: "Flurry",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6135 talents.flurry = find_talent_spell( talent_tree::SPECIALIZATION, "Flurry" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "freezing_rain",
+      displayNameEn: "Freezing Rain",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6152 talents.freezing_rain = find_talent_spell( talent_tree::SPECIALIZATION, "Freezing Rain" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "freezing_winds",
+      displayNameEn: "Freezing Winds",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6167 talents.freezing_winds = find_talent_spell( talent_tree::SPECIALIZATION, "Freezing Winds" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "frostfire_bolt",
+      displayNameEn: "Frostfire Bolt",
+      tree: "HERO",
+      binding:
+        "sc_mage.cpp:6184 talents.frostfire_bolt = find_talent_spell( talent_tree::HERO, 431044 );; the pinned list reads it or an action of the list is built on it",
+    },
+    {
+      simcName: "frozen_orb",
+      displayNameEn: "Frozen Orb",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6138 talents.frozen_orb = find_talent_spell( talent_tree::SPECIALIZATION, "Frozen Orb" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "ice_lance",
+      displayNameEn: "Ice Lance",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6126 talents.ice_lance = find_talent_spell( talent_tree::SPECIALIZATION, "Ice Lance" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "ice_nova",
+      displayNameEn: "Ice Nova",
+      tree: "CLASS",
+      binding:
+        'sc_mage.cpp:5999 talents.ice_nova = find_talent_spell( talent_tree::CLASS, "Ice Nova" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "ray_of_frost",
+      displayNameEn: "Ray of Frost",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6142 talents.ray_of_frost = find_talent_spell( talent_tree::SPECIALIZATION, "Ray of Frost" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "wintertide",
+      displayNameEn: "Wintertide",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_mage.cpp:6159 talents.wintertide = find_talent_spell( talent_tree::SPECIALIZATION, "Wintertide" );; the pinned list reads it or an action of the list is built on it',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data` (trait_data.inc:4406-4408).
+    { simcName: "spellslinger", subTreeId: 40 },
+    { simcName: "frostfire", subTreeId: 41 },
+  ],
+};
+
+/**
  * The Destruction Warlock profile (ONB-D1): the talents the pinned Destruction list reads as
  * `talent.<name>`, the talents an action of that list is built on (an action on `not_found()` is
  * background, action.cpp:541-549). The hero sub-trees are Hellcaller (58) and Diabolist (59).
@@ -2813,6 +3025,8 @@ export const TARGETS = {
   "shaman-elemental": SHAMAN_ELEMENTAL_TARGET,
   "druid-balance": DRUID_BALANCE_TARGET,
   "priest-shadow": PRIEST_SHADOW_TARGET,
+  "mage-arcane": MAGE_ARCANE_TARGET,
+  "mage-frost": MAGE_FROST_TARGET,
   "warlock-destruction": WARLOCK_DESTRUCTION_TARGET,
   "rogue-subtlety": ROGUE_SUBTLETY_TARGET,
   "monk-brewmaster": MONK_BREWMASTER_TARGET,

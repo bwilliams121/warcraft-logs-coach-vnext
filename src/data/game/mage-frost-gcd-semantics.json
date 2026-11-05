@@ -1,0 +1,279 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_MAGE_FROST_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/sc_mage.cpp",
+        "sha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "byteLength": 262461
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 116,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Frostbolt"
+    },
+    {
+      "abilityGameId": 120,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Cone of Cold"
+    },
+    {
+      "abilityGameId": 30455,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Ice Lance"
+    },
+    {
+      "abilityGameId": 44614,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Flurry"
+    },
+    {
+      "abilityGameId": 84714,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Frozen Orb"
+    },
+    {
+      "abilityGameId": 153595,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Comet Storm"
+    },
+    {
+      "abilityGameId": 157997,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Ice Nova"
+    },
+    {
+      "abilityGameId": 190356,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Blizzard"
+    },
+    {
+      "abilityGameId": 199786,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Glacial Spike"
+    },
+    {
+      "abilityGameId": 205021,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Ray of Frost"
+    },
+    {
+      "abilityGameId": 431044,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Frostfire Bolt"
+    },
+    {
+      "abilityGameId": 1248829,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Blizzard"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "blizzard",
+      "candidateAbilityGameIds": [190356, 1248829],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / blizzard_t",
+        "startLine": 5697,
+        "endLine": 5697,
+        "sourceNote": "create_action dispatches \"blizzard\" to blizzard_t: built on talents.blizzard_1 or talents.blizzard_2 (:3402); find_talent_spell( SPECIALIZATION, 190356 ) and ( SPECIALIZATION, 1248829 ) at :6128-6129.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "comet_storm",
+      "candidateAbilityGameIds": [153595],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / comet_storm_t",
+        "startLine": 5699,
+        "endLine": 5699,
+        "sourceNote": "create_action dispatches \"comet_storm\" to comet_storm_t: built on p->find_spell( 153595 ) (:3561). Its ready() is a usability claim this slice does not make.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "cone_of_cold",
+      "candidateAbilityGameIds": [120],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / cone_of_cold_t",
+        "startLine": 5710,
+        "endLine": 5710,
+        "sourceNote": "create_action dispatches \"cone_of_cold\" to cone_of_cold_t: built on p->find_class_spell( \"Cone of Cold\" ) (:3618), class_spells.inc row 120.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "flurry",
+      "candidateAbilityGameIds": [44614],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / flurry_t",
+        "startLine": 5700,
+        "endLine": 5700,
+        "sourceNote": "create_action dispatches \"flurry\" to flurry_t: built on p->talents.flurry (:3917); talents.flurry = find_talent_spell at :6135.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "frostbolt",
+      "candidateAbilityGameIds": [116, 431044],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / frostbolt_t",
+        "startLine": 5715,
+        "endLine": 5715,
+        "sourceNote": "create_action dispatches \"frostbolt\" to frostbolt_t: built on p->talents.frostfire_bolt when talented, else p->find_class_spell( \"Frostbolt\" ) (:3985); create_action redirects the token at :5673.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "frozen_orb",
+      "candidateAbilityGameIds": [84714],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / frozen_orb_t",
+        "startLine": 5701,
+        "endLine": 5701,
+        "sourceNote": "create_action dispatches \"frozen_orb\" to frozen_orb_t: built on p->talents.frozen_orb (:4145); talents.frozen_orb = find_talent_spell at :6138.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "glacial_spike",
+      "candidateAbilityGameIds": [199786],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / glacial_spike_t",
+        "startLine": 5702,
+        "endLine": 5702,
+        "sourceNote": "create_action dispatches \"glacial_spike\" to glacial_spike_t: built on p->find_spell( 199786 ) (:4227).",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "ice_lance",
+      "candidateAbilityGameIds": [30455],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / ice_lance_t",
+        "startLine": 5703,
+        "endLine": 5703,
+        "sourceNote": "create_action dispatches \"ice_lance\" to ice_lance_t: built on p->talents.ice_lance (:4408); talents.ice_lance = find_talent_spell at :6126.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "ice_nova",
+      "candidateAbilityGameIds": [157997],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / ice_nova_t",
+        "startLine": 5716,
+        "endLine": 5716,
+        "sourceNote": "create_action dispatches \"ice_nova\" to ice_nova_t: built on p->talents.ice_nova (:4492); talents.ice_nova = find_talent_spell at :5999.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "ray_of_frost",
+      "candidateAbilityGameIds": [205021],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_mage.cpp",
+        "sourceSha256": "8bd38fb5393485b86e4e146cdbbe68ad38d5f9e0d48ef76fb9d8c16e4ee110bb",
+        "symbol": "create_action / ray_of_frost_t",
+        "startLine": 5704,
+        "endLine": 5704,
+        "sourceNote": "create_action dispatches \"ray_of_frost\" to ray_of_frost_t: built on p->talents.ray_of_frost (:4939); talents.ray_of_frost = find_talent_spell at :6142.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}
