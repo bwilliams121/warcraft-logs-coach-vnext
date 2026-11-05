@@ -29,6 +29,23 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After ONB-X4: what the Demonology Warlock slice does not establish
+
+**Raised:** ONB-X4 (2026-11-05). Each item is UNKNOWN today, never guessed. No decision of the seven retained subjects resolves.
+
+- **The first stops.** `buff.dominion_of_argus.up` at `diabolist[1]`, which needs a reviewed aura identity, then Summon Doomguard's talent at `diabolist[4]`, a lone node absent from every retained tree. The three-way rule says UNKNOWN; a promotion needs a reviewed reading of what a complete tree proves, or the build's choice.
+- **Possibly-instant casts.** 1,245 of 1,391 decisions have no established anchor. Hand of Gul'dan and Ruination read Blazing Meteor, Demonbolt reads Demonic Core and Shadowy Inspiration, Shadow Bolt and Infernal Bolt read rows of other talents. Narrowing any needs an observed proc or a proven dead row. No retained source holds a set-bonus table.
+- **A begin in the completion's own millisecond.** Demonbolt and Call Dreadstalkers log that shape on six of the seven subjects, and the shared timeline reads it as ambiguous, since the begin may be the next press's. Whether it can be settled, for a spell with no other press near, is a shared ONB-S4 question.
+- **gtKb fight 22 actor 10 logs no begin** for 49 of its 51 Demonbolts and all 14 Call Dreadstalkers, where the other six log one. Why one player differs is not read. It stays `BEGINCAST_NOT_OBSERVED`.
+- **Call Dreadstalkers' cast time.** Pinned data says about a second, and no retained press shows a gap. No source read explains it.
+- **Pets with no stated owner.** Every retained fight holds them, so `OWNERSHIP_NOT_STATED` refuses every pet answer. Attributing one needs an owner-approved rule, as "After ONB-S6" says. A summon source is not one.
+- **A floor for the Tyrant and for imps.** Without one nothing is ever PRESENT, and `buff.wild_imps.stack` is never proven at least anything. An imp's casts might support a past-only rule, which is the one "After ONB-S6" asks for.
+- **A ceiling for the Tyrant.** The pinned 15,000 ms does not match the wire's last events, and delayed damage means those do not settle it either.
+- **A re-summoned instance key.** The shared state leaves it POSSIBLE for the rest of the fight, even far outside its maximum life, so a reused Tyrant key could never be PRESENT under a future floor. One Tyrant key recurs on b1Pm actor 11. That is a shared ONB-S6 limit.
+- **Soul Harvester** has no retained subject, so its list is read on synthetic builds only.
+- **`tyrant-setup`** stays a recorded question: pet presence alone cannot answer it, and it reads `buff.demonic_core.stack`, which nothing binds. **`ritual-clipping`** stays `UNRESOLVED_DIABOLIST_HERO_TREE`.
+- **The stale manifest paths** recorded in "After ONB-X3" are unchanged.
+
 ## After ONB-X3: what the Vengeance Demon Hunter slice does not establish
 
 **Raised:** ONB-X3 (2026-11-05). Coverage, not soundness: every decision is UNKNOWN.

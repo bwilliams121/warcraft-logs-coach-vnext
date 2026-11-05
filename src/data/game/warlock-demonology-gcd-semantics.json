@@ -1,0 +1,312 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_WARLOCK_DEMONOLOGY_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "byteLength": 210927
+      },
+      {
+        "path": "engine/class_modules/warlock/sc_warlock_init.cpp",
+        "sha256": "8e1eae332a7be9607a4bde41640411183ecef8e00fddd1ab611c9d5fe8241d4c",
+        "byteLength": 95724
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-05",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 686,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Shadow Bolt"
+    },
+    {
+      "abilityGameId": 104316,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Call Dreadstalkers"
+    },
+    {
+      "abilityGameId": 105174,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Hand of Gul'dan"
+    },
+    {
+      "abilityGameId": 196277,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Implosion"
+    },
+    {
+      "abilityGameId": 264130,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Power Siphon"
+    },
+    {
+      "abilityGameId": 264178,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Demonbolt"
+    },
+    {
+      "abilityGameId": 265187,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Summon Demonic Tyrant"
+    },
+    {
+      "abilityGameId": 434506,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Infernal Bolt"
+    },
+    {
+      "abilityGameId": 434635,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Ruination"
+    },
+    {
+      "abilityGameId": 1276452,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Grimoire: Imp Lord"
+    },
+    {
+      "abilityGameId": 1276467,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Grimoire: Fel Ravager"
+    },
+    {
+      "abilityGameId": 1276672,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Summon Doomguard"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "call_dreadstalkers",
+      "candidateAbilityGameIds": [104316],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / call_dreadstalkers_t",
+        "startLine": 5904,
+        "endLine": 5904,
+        "sourceNote": "create_action dispatches \"call_dreadstalkers\" to call_dreadstalkers_t: built on p->talents.call_dreadstalkers (:3405); find_talent_spell( SPECIALIZATION, \"Call Dreadstalkers\" ) at sc_warlock_init.cpp:255.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "demonbolt",
+      "candidateAbilityGameIds": [264178],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / demonbolt_t",
+        "startLine": 5896,
+        "endLine": 5896,
+        "sourceNote": "create_action dispatches \"demonbolt\" to demonbolt_t: built on p->talents.demoniac.ok() ? p->talents.demonbolt_spell : not_found (:2912); conditional_spell_lookup( talents.demoniac.ok(), 264178 ) at sc_warlock_init.cpp:250.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "grimoire_fel_ravager",
+      "candidateAbilityGameIds": [1276467],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / grimoire_fel_ravager_t",
+        "startLine": 5910,
+        "endLine": 5910,
+        "sourceNote": "create_action dispatches \"grimoire_fel_ravager\" to grimoire_fel_ravager_t: built on p->talents.grimoire_fel_ravager (:3699); find_talent_spell( SPECIALIZATION, \"Grimoire: Fel Ravager\" ) at sc_warlock_init.cpp:330.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "grimoire_imp_lord",
+      "candidateAbilityGameIds": [1276452],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / grimoire_imp_lord_t",
+        "startLine": 5908,
+        "endLine": 5908,
+        "sourceNote": "create_action dispatches \"grimoire_imp_lord\" to grimoire_imp_lord_t: built on p->talents.grimoire_imp_lord (:3678); find_talent_spell( SPECIALIZATION, \"Grimoire: Imp Lord\" ) at sc_warlock_init.cpp:328.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "hand_of_guldan",
+      "candidateAbilityGameIds": [105174],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / hand_of_guldan_t",
+        "startLine": 5898,
+        "endLine": 5898,
+        "sourceNote": "create_action dispatches \"hand_of_guldan\" to hand_of_guldan_t: built on p->talents.hand_of_guldan_cast (:2778); conditional_spell_lookup( talents.hand_of_guldan.ok(), 105174 ) at sc_warlock_init.cpp:246. The talent row is 1250273.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "implosion",
+      "candidateAbilityGameIds": [196277],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / implosion_t",
+        "startLine": 5900,
+        "endLine": 5900,
+        "sourceNote": "create_action dispatches \"implosion\" to implosion_t: built on p->talents.implosion (:3028); find_talent_spell( SPECIALIZATION, \"Implosion\" ) at sc_warlock_init.cpp:269.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "infernal_bolt",
+      "candidateAbilityGameIds": [434506],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / infernal_bolt_t",
+        "startLine": 5948,
+        "endLine": 5948,
+        "sourceNote": "create_action dispatches \"infernal_bolt\" to infernal_bolt_t: built on p->hero.infernal_bolt (:5202); conditional_spell_lookup( hero.secrets_of_the_coven.ok(), 434506 ) at sc_warlock_init.cpp:561.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "power_siphon",
+      "candidateAbilityGameIds": [264130],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / power_siphon_t",
+        "startLine": 5902,
+        "endLine": 5902,
+        "sourceNote": "create_action dispatches \"power_siphon\" to power_siphon_t: built on p->talents.power_siphon (:3460); find_talent_spell( SPECIALIZATION, \"Power Siphon\" ) at sc_warlock_init.cpp:272.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "ruination",
+      "candidateAbilityGameIds": [434635],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / ruination_t",
+        "startLine": 5951,
+        "endLine": 5951,
+        "sourceNote": "create_action dispatches \"ruination\" to ruination_t: built on p->hero.ruination_cast (:5309); conditional_spell_lookup( hero.ruination.ok(), 434635 ) at sc_warlock_init.cpp:578.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "shadow_bolt",
+      "candidateAbilityGameIds": [686],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / shadow_bolt_t",
+        "startLine": 5860,
+        "endLine": 5860,
+        "sourceNote": "create_action dispatches \"shadow_bolt\" to shadow_bolt_t: built on p->talents.drain_soul.ok() ? not_found : p->warlock_base.shadow_bolt (:829); find_class_spell( \"Shadow Bolt\" ) at sc_warlock_init.cpp:23, class_spells.inc row 686. Drain Soul is an Affliction talent, not in this specialization's tree.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "summon_demonic_tyrant",
+      "candidateAbilityGameIds": [265187],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / summon_demonic_tyrant_t",
+        "startLine": 5906,
+        "endLine": 5906,
+        "sourceNote": "create_action dispatches \"summon_demonic_tyrant\" to summon_demonic_tyrant_t: built on p->talents.summon_demonic_tyrant (:3567); find_talent_spell( SPECIALIZATION, \"Summon Demonic Tyrant\" ) at sc_warlock_init.cpp:291.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "summon_doomguard",
+      "candidateAbilityGameIds": [1276672],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/warlock/sc_warlock_actions.cpp",
+        "sourceSha256": "fa37a97c7d6183b6e976d0e6bcffee3eb9d1cbce066f907359b56107c38590ed",
+        "symbol": "warlock_t::create_action_* / summon_doomguard_t",
+        "startLine": 5912,
+        "endLine": 5912,
+        "sourceNote": "create_action dispatches \"summon_doomguard\" to summon_doomguard_t: built on p->talents.summon_doomguard (:3720); find_talent_spell( SPECIALIZATION, \"Summon Doomguard\" ) at sc_warlock_init.cpp:339.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

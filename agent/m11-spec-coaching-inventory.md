@@ -83,7 +83,7 @@ row).
 | `mage/frost` | D — INTERNAL_ONLY since ONB-D3 | none usable (filtered M13-A actor 6, no combatant info; on ONB-EV) | audited | UNASSESSED | — |
 | `warlock/destruction` | D — INTERNAL_ONLY since ONB-D1 | local raw (A7R6 fight 7 actors 12 and 15, first 165 s, both Hellcaller) | audited | SPECIFIC_QUESTIONS_IDENTIFIED | `ritual-clipping` (ownership unresolved), `immolate-wither-refresh` |
 | `warlock/affliction` | D — INTERNAL_ONLY since ONB-D4 | none usable (filtered M13-A actor 20, no combatant info; on ONB-EV) | audited | UNASSESSED | — |
-| `warlock/demonology` | D | local raw | blocked | SPECIFIC_QUESTIONS_IDENTIFIED | `ritual-clipping` (ownership unresolved), `tyrant-setup` |
+| `warlock/demonology` | D — INTERNAL_ONLY since ONB-X4 | local raw (seven subjects, all Diabolist) | audited | SPECIFIC_QUESTIONS_IDENTIFIED | `ritual-clipping` (ownership unresolved), `tyrant-setup` |
 | `shaman/elemental` | D — INTERNAL_ONLY since ONB-D2 | local raw (seven subjects, all Farseer) | audited | PARTIAL | `flame-shock-maintenance` |
 | `priest/shadow` | D — INTERNAL_ONLY since ONB-D2 | local raw (two subjects, both Archon) | audited | PARTIAL | `dot-maintenance` |
 | `druid/balance` | D — INTERNAL_ONLY since ONB-D2 | local raw (three subjects, all Elune's Chosen) | audited | PARTIAL | `astral-power-capping` |

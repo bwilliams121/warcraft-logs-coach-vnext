@@ -5220,6 +5220,184 @@ const WARLOCK_AFFLICTION_FACTS = {
 };
 
 /**
+ * The Demonology Warlock facts (ONB-X4).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the pinned Demonology list
+ * (warlock.cpp `demonology`) executes. Facts a reader should not have to rediscover:
+ *
+ *   - HAND OF GUL'DAN BINDS THE PRESS, 105174 (talents.hand_of_guldan_cast), not the talent row 1250273.
+ *   - RUINATION BINDS 434635 AND INFERNAL BOLT 434506, as Destruction's do. Each has like-named buff rows with `_gcd` 0, which no press logs.
+ *   - WILD IMP 104317 AND 279910, AND DREADSTALKERS 193331 AND 193332, ARE SUMMONS, not presses, and no token binds them.
+ *   - THE RACIAL, POTION, ITEM AND EXTERNAL-BUFF TOKENS ARE NOT BOUND. `summon_pet` appears only in precombat.
+ */
+const WARLOCK_DEMONOLOGY_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 104316, displayNameEn: "Call Dreadstalkers", baseGcdMs: 1500 },
+    { abilityGameId: 264178, displayNameEn: "Demonbolt", baseGcdMs: 1500 },
+    { abilityGameId: 1276467, displayNameEn: "Grimoire: Fel Ravager", baseGcdMs: 1500 },
+    { abilityGameId: 1276452, displayNameEn: "Grimoire: Imp Lord", baseGcdMs: 1500 },
+    { abilityGameId: 105174, displayNameEn: "Hand of Gul'dan", baseGcdMs: 1500 },
+    { abilityGameId: 196277, displayNameEn: "Implosion", baseGcdMs: 1500 },
+    { abilityGameId: 434506, displayNameEn: "Infernal Bolt", baseGcdMs: 1500 },
+    { abilityGameId: 264130, displayNameEn: "Power Siphon", baseGcdMs: 1500 },
+    { abilityGameId: 434635, displayNameEn: "Ruination", baseGcdMs: 1500 },
+    { abilityGameId: 686, displayNameEn: "Shadow Bolt", baseGcdMs: 1500 },
+    { abilityGameId: 265187, displayNameEn: "Summon Demonic Tyrant", baseGcdMs: 1500 },
+    { abilityGameId: 1276672, displayNameEn: "Summon Doomguard", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "call_dreadstalkers",
+      candidateAbilityGameIds: [104316],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / call_dreadstalkers_t",
+      startLine: 5904,
+      endLine: 5904,
+      sourceNote:
+        'create_action dispatches "call_dreadstalkers" to call_dreadstalkers_t: built on p->talents.call_dreadstalkers (:3405); find_talent_spell( SPECIALIZATION, "Call Dreadstalkers" ) at sc_warlock_init.cpp:255.',
+    },
+    {
+      simcToken: "demonbolt",
+      candidateAbilityGameIds: [264178],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / demonbolt_t",
+      startLine: 5896,
+      endLine: 5896,
+      sourceNote:
+        'create_action dispatches "demonbolt" to demonbolt_t: built on p->talents.demoniac.ok() ? p->talents.demonbolt_spell : not_found (:2912); conditional_spell_lookup( talents.demoniac.ok(), 264178 ) at sc_warlock_init.cpp:250.',
+    },
+    {
+      simcToken: "grimoire_fel_ravager",
+      candidateAbilityGameIds: [1276467],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / grimoire_fel_ravager_t",
+      startLine: 5910,
+      endLine: 5910,
+      sourceNote:
+        'create_action dispatches "grimoire_fel_ravager" to grimoire_fel_ravager_t: built on p->talents.grimoire_fel_ravager (:3699); find_talent_spell( SPECIALIZATION, "Grimoire: Fel Ravager" ) at sc_warlock_init.cpp:330.',
+    },
+    {
+      simcToken: "grimoire_imp_lord",
+      candidateAbilityGameIds: [1276452],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / grimoire_imp_lord_t",
+      startLine: 5908,
+      endLine: 5908,
+      sourceNote:
+        'create_action dispatches "grimoire_imp_lord" to grimoire_imp_lord_t: built on p->talents.grimoire_imp_lord (:3678); find_talent_spell( SPECIALIZATION, "Grimoire: Imp Lord" ) at sc_warlock_init.cpp:328.',
+    },
+    {
+      simcToken: "hand_of_guldan",
+      candidateAbilityGameIds: [105174],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / hand_of_guldan_t",
+      startLine: 5898,
+      endLine: 5898,
+      sourceNote:
+        'create_action dispatches "hand_of_guldan" to hand_of_guldan_t: built on p->talents.hand_of_guldan_cast (:2778); conditional_spell_lookup( talents.hand_of_guldan.ok(), 105174 ) at sc_warlock_init.cpp:246. The talent row is 1250273.',
+    },
+    {
+      simcToken: "implosion",
+      candidateAbilityGameIds: [196277],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / implosion_t",
+      startLine: 5900,
+      endLine: 5900,
+      sourceNote:
+        'create_action dispatches "implosion" to implosion_t: built on p->talents.implosion (:3028); find_talent_spell( SPECIALIZATION, "Implosion" ) at sc_warlock_init.cpp:269.',
+    },
+    {
+      simcToken: "infernal_bolt",
+      candidateAbilityGameIds: [434506],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / infernal_bolt_t",
+      startLine: 5948,
+      endLine: 5948,
+      sourceNote:
+        'create_action dispatches "infernal_bolt" to infernal_bolt_t: built on p->hero.infernal_bolt (:5202); conditional_spell_lookup( hero.secrets_of_the_coven.ok(), 434506 ) at sc_warlock_init.cpp:561.',
+    },
+    {
+      simcToken: "power_siphon",
+      candidateAbilityGameIds: [264130],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / power_siphon_t",
+      startLine: 5902,
+      endLine: 5902,
+      sourceNote:
+        'create_action dispatches "power_siphon" to power_siphon_t: built on p->talents.power_siphon (:3460); find_talent_spell( SPECIALIZATION, "Power Siphon" ) at sc_warlock_init.cpp:272.',
+    },
+    {
+      simcToken: "ruination",
+      candidateAbilityGameIds: [434635],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / ruination_t",
+      startLine: 5951,
+      endLine: 5951,
+      sourceNote:
+        'create_action dispatches "ruination" to ruination_t: built on p->hero.ruination_cast (:5309); conditional_spell_lookup( hero.ruination.ok(), 434635 ) at sc_warlock_init.cpp:578.',
+    },
+    {
+      simcToken: "shadow_bolt",
+      candidateAbilityGameIds: [686],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / shadow_bolt_t",
+      startLine: 5860,
+      endLine: 5860,
+      sourceNote:
+        'create_action dispatches "shadow_bolt" to shadow_bolt_t: built on p->talents.drain_soul.ok() ? not_found : p->warlock_base.shadow_bolt (:829); find_class_spell( "Shadow Bolt" ) at sc_warlock_init.cpp:23, class_spells.inc row 686. Drain Soul is an Affliction talent, not in this specialization\'s tree.',
+    },
+    {
+      simcToken: "summon_demonic_tyrant",
+      candidateAbilityGameIds: [265187],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / summon_demonic_tyrant_t",
+      startLine: 5906,
+      endLine: 5906,
+      sourceNote:
+        'create_action dispatches "summon_demonic_tyrant" to summon_demonic_tyrant_t: built on p->talents.summon_demonic_tyrant (:3567); find_talent_spell( SPECIALIZATION, "Summon Demonic Tyrant" ) at sc_warlock_init.cpp:291.',
+    },
+    {
+      simcToken: "summon_doomguard",
+      candidateAbilityGameIds: [1276672],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / summon_doomguard_t",
+      startLine: 5912,
+      endLine: 5912,
+      sourceNote:
+        'create_action dispatches "summon_doomguard" to summon_doomguard_t: built on p->talents.summon_doomguard (:3720); find_talent_spell( SPECIALIZATION, "Summon Doomguard" ) at sc_warlock_init.cpp:339.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
+/**
  * The Marksmanship Hunter facts (ONB-D4).
  *
  * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the pinned Marksmanship list
@@ -7058,6 +7236,22 @@ export const TARGETS = {
     ],
     requiredFacts: WARLOCK_AFFLICTION_FACTS,
     defaultOut: "src/data/game/warlock-affliction-gcd-semantics.json",
+  },
+  "warlock-demonology": {
+    datasetId: "SIMC_DBC_WARLOCK_DEMONOLOGY_GCD_SEMANTICS",
+    classId: 9,
+    className: "Warlock",
+    sources: WARLOCK_DESTRUCTION_SOURCES,
+    classModulePath: WARLOCK_DESTRUCTION_SOURCES.classModule,
+    handReviewedPaths: [
+      WARLOCK_DESTRUCTION_SOURCES.classModule,
+      WARLOCK_DESTRUCTION_SOURCES.initModule,
+      WARLOCK_DESTRUCTION_SOURCES.racialSpells,
+      WARLOCK_DESTRUCTION_SOURCES.playerModule,
+      WARLOCK_DESTRUCTION_SOURCES.consumableModule,
+    ],
+    requiredFacts: WARLOCK_DEMONOLOGY_FACTS,
+    defaultOut: "src/data/game/warlock-demonology-gcd-semantics.json",
   },
   "hunter-marksmanship": {
     datasetId: "SIMC_DBC_HUNTER_MARKSMANSHIP_GCD_SEMANTICS",

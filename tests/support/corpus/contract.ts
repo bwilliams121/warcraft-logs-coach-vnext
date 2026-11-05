@@ -71,6 +71,7 @@ import pinnedMarksmanshipHunterApl from "../../../src/simc/data/hunter-marksmans
 import pinnedFireMageApl from "../../../src/simc/data/mage-fire.apl.json";
 import pinnedDevastationEvokerApl from "../../../src/simc/data/evoker-devastation.apl.json";
 import pinnedVengeanceDemonHunterApl from "../../../src/simc/data/demonhunter-vengeance.apl.json";
+import pinnedDemonologyWarlockApl from "../../../src/simc/data/warlock-demonology.apl.json";
 import pinnedOutlawRogueApl from "../../../src/simc/data/rogue-outlaw.apl.json";
 import pinnedEnhancementShamanApl from "../../../src/simc/data/shaman-enhancement.apl.json";
 import { AUTHORITY_DOMAINS, AUTHORITY_RESOLUTION_OUTCOMES } from "../../../src/findings/authority-domain.js";
@@ -432,6 +433,7 @@ export const OWNING_LAYERS = {
   SPEC_FIRE_MAGE: ["src/specs/mage/fire/"],
   SPEC_DEVASTATION_EVOKER: ["src/specs/evoker/devastation/"],
   SPEC_VENGEANCE_DEMON_HUNTER: ["src/specs/demonhunter/vengeance/"],
+  SPEC_DEMONOLOGY_WARLOCK: ["src/specs/warlock/demonology/"],
   SPEC_OUTLAW_ROGUE: ["src/specs/rogue/outlaw/"],
   SPEC_ENHANCEMENT_SHAMAN: ["src/specs/shaman/enhancement/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
@@ -490,6 +492,7 @@ export const SPEC_LAYER_OF = {
   "mage/fire": "SPEC_FIRE_MAGE",
   "evoker/devastation": "SPEC_DEVASTATION_EVOKER",
   "demonhunter/vengeance": "SPEC_VENGEANCE_DEMON_HUNTER",
+  "warlock/demonology": "SPEC_DEMONOLOGY_WARLOCK",
   "rogue/outlaw": "SPEC_OUTLAW_ROGUE",
   "shaman/enhancement": "SPEC_ENHANCEMENT_SHAMAN",
 } as const satisfies Record<SpecId, OwningLayer>;
@@ -3558,6 +3561,19 @@ export const ASSERTION_KINDS = {
       "The Vengeance Demon Hunter facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
   },
 
+  // ---- SPEC_DEMONOLOGY_WARLOCK (ONB-X4, INTERNAL_ONLY) ---
+  "SPEC_DEMONOLOGY_WARLOCK.SPEC_GATE": {
+    owningLayer: "SPEC_DEMONOLOGY_WARLOCK",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Demonology Warlock facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
+  },
+
   // ---- SPEC_OUTLAW_ROGUE (ONB-C2, INTERNAL_ONLY) ---
   "SPEC_OUTLAW_ROGUE.SPEC_GATE": {
     owningLayer: "SPEC_OUTLAW_ROGUE",
@@ -4405,6 +4421,7 @@ export const PINNED_AUTHORITY_REVISIONS: Readonly<Record<string, string>> = {
   [pinnedFireMageApl.authorityId]: pinnedFireMageApl.artifactRevision,
   [pinnedDevastationEvokerApl.authorityId]: pinnedDevastationEvokerApl.artifactRevision,
   [pinnedVengeanceDemonHunterApl.authorityId]: pinnedVengeanceDemonHunterApl.artifactRevision,
+  [pinnedDemonologyWarlockApl.authorityId]: pinnedDemonologyWarlockApl.artifactRevision,
   [pinnedOutlawRogueApl.authorityId]: pinnedOutlawRogueApl.artifactRevision,
   [pinnedEnhancementShamanApl.authorityId]: pinnedEnhancementShamanApl.artifactRevision,
 };

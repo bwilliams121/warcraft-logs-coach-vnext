@@ -2157,6 +2157,140 @@ const WARLOCK_AFFLICTION_TARGET = {
 };
 
 /**
+ * The Demonology Warlock profile (ONB-X4): the talents the pinned list reads as `talent.<name>`, and the talents an action of
+ * that list is built on (an action on `not_found()` is background, action.cpp:541-549).
+ */
+const WARLOCK_DEMONOLOGY_TARGET = {
+  datasetId: "SIMC_TRAIT_WARLOCK_DEMONOLOGY_TALENTS",
+  classId: 9,
+  specId: 266,
+  defaultOut: "src/data/game/warlock-demonology-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node, as every earlier target recorded." +
+    ' The retained Demonology subjects corroborate these keys (agent/architecture.md "ONB-X4").',
+  requiredTalents: [
+    {
+      simcName: "call_dreadstalkers",
+      displayNameEn: "Call Dreadstalkers",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:255 talents.call_dreadstalkers = find_talent_spell( talent_tree::SPECIALIZATION, "Call Dreadstalkers" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "demoniac",
+      displayNameEn: "Demoniac",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:249 talents.demoniac = find_talent_spell( talent_tree::SPECIALIZATION, "Demoniac" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "doom",
+      displayNameEn: "Doom",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:321 talents.doom = find_talent_spell( talent_tree::SPECIALIZATION, "Doom" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "grimoire_fel_ravager",
+      displayNameEn: "Grimoire: Fel Ravager",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:330 talents.grimoire_fel_ravager = find_talent_spell( talent_tree::SPECIALIZATION, "Grimoire: Fel Ravager" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "grimoire_imp_lord",
+      displayNameEn: "Grimoire: Imp Lord",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:328 talents.grimoire_imp_lord = find_talent_spell( talent_tree::SPECIALIZATION, "Grimoire: Imp Lord" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "hand_of_guldan",
+      displayNameEn: "Hand of Gul'dan",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:245 talents.hand_of_guldan = find_talent_spell( talent_tree::SPECIALIZATION, "Hand of Gul\'dan" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "implosion",
+      displayNameEn: "Implosion",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:269 talents.implosion = find_talent_spell( talent_tree::SPECIALIZATION, "Implosion" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "power_siphon",
+      displayNameEn: "Power Siphon",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:272 talents.power_siphon = find_talent_spell( talent_tree::SPECIALIZATION, "Power Siphon" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "reign_of_tyranny",
+      displayNameEn: "Reign of Tyranny",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:315 talents.reign_of_tyranny = find_talent_spell( talent_tree::SPECIALIZATION, "Reign of Tyranny" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "summon_demonic_tyrant",
+      displayNameEn: "Summon Demonic Tyrant",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:291 talents.summon_demonic_tyrant = find_talent_spell( talent_tree::SPECIALIZATION, "Summon Demonic Tyrant" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "summon_doomguard",
+      displayNameEn: "Summon Doomguard",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:339 talents.summon_doomguard = find_talent_spell( talent_tree::SPECIALIZATION, "Summon Doomguard" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "to_hell_and_back",
+      displayNameEn: "To Hell and Back",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:342 talents.to_hell_and_back = find_talent_spell( talent_tree::SPECIALIZATION, "To Hell and Back" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "demonic_soul",
+      displayNameEn: "Demonic Soul",
+      tree: "HERO",
+      binding:
+        'sc_warlock_init.cpp:641 hero.demonic_soul = find_talent_spell( talent_tree::HERO, "Demonic Soul" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "diabolic_ritual",
+      displayNameEn: "Diabolic Ritual",
+      tree: "HERO",
+      binding:
+        'sc_warlock_init.cpp:538 hero.diabolic_ritual = find_talent_spell( talent_tree::HERO, "Diabolic Ritual" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "ruination",
+      displayNameEn: "Ruination",
+      tree: "HERO",
+      binding:
+        'sc_warlock_init.cpp:576 hero.ruination = find_talent_spell( talent_tree::HERO, "Ruination" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "secrets_of_the_coven",
+      displayNameEn: "Secrets of the Coven",
+      tree: "HERO",
+      binding:
+        'sc_warlock_init.cpp:560 hero.secrets_of_the_coven = find_talent_spell( talent_tree::HERO, "Secrets of the Coven" );; the pinned list reads it or an action of the list is built on it',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data` (trait_data.inc:4421-4423). Hellcaller is not a Demonology tree.
+    { simcName: "soul_harvester", subTreeId: 57 },
+    { simcName: "diabolist", subTreeId: 59 },
+  ],
+};
+
+/**
  * The Marksmanship Hunter profile (ONB-D4): the talents the pinned list reads as `talent.<name>`, and the talents an action of
  * that list is built on (an action on `not_found()` is background, action.cpp:541-549).
  */
@@ -3681,6 +3815,7 @@ export const TARGETS = {
   "demonhunter-vengeance": DEMONHUNTER_VENGEANCE_TARGET,
   "evoker-devastation": EVOKER_DEVASTATION_TARGET,
   "mage-fire": MAGE_FIRE_TARGET,
+  "warlock-demonology": WARLOCK_DEMONOLOGY_TARGET,
   "warlock-destruction": WARLOCK_DESTRUCTION_TARGET,
   "rogue-subtlety": ROGUE_SUBTLETY_TARGET,
   "monk-brewmaster": MONK_BREWMASTER_TARGET,

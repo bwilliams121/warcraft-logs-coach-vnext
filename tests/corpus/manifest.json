@@ -5297,6 +5297,37 @@
       ]
     },
     {
+      "caseId": "application-service.demonology-warlock-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Demonology Warlock registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "warlock/demonology",
+            "expected": {
+              "internalAnalyzerId": "warlock-demonology-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Demonology Warlock is registered INTERNAL_ONLY in ONB-X4, its own representative. No decision of it resolves, and its seven retained subjects are uncommitted (agent/follow-ups.md \"After ONB-X4\")."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
+      ]
+    },
+    {
       "caseId": "application-service.derives-player-context-scope-and-selects-the-assassination-analyzer",
       "artifactId": "wcl-assassination-d2-decision-corpus",
       "owningLayer": "APPLICATION_SERVICE",
@@ -20816,6 +20847,29 @@
         "tests/contracts/m11c2-brewmaster-evaluator.test.ts",
         "tests/unit/m11c2-brewmaster-bindings.test.ts"
       ]
+    },
+    {
+      "caseId": "spec-demonology-warlock.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_DEMONOLOGY_WARLOCK",
+      "contractUnderTest": "src/specs/warlock/demonology/observed-analysis.ts analyzeObservedDemonologyWarlockDecisions (the spec gate)",
+      "purpose": "The Demonology Warlock facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_DEMONOLOGY_WARLOCK.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Demonology Warlock list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-x4-demonology-warlock.test.ts"]
     },
     {
       "caseId": "spec-destruction-warlock.the-facade-refuses-every-other-specialization",

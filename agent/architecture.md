@@ -14275,6 +14275,62 @@ Limits: the census does not read JSON files of 500 bytes or less, or log and tex
 
 **What a later promotion must do.** ONB-EV supplies a capture, which first checks what the synthetic builds assume: the talent id space, the wire's cast shape, the moment a logged Fel Devastation reports, and Fury on Fracture and Soul Cleave. Vengeance then answers what stands in scan order (agent/follow-ups.md "After ONB-X3"), and measures or refuses each hero list. ONB-S3 alone moves nothing. The tank's domains keep `NO_PINNED_AUTHORITY_FOR_DOMAIN` until their own authority is decided, and an offensive promotion must not read as tank coaching. A new public entry then promotes it through the unchanged gates by the five-site promotion, and must first commit identity proof, because a PUBLIC module cannot use the retained-only exception. No such entry is queued.
 
+## ONB-X4 — Demonology Warlock (internal, own representative)
+
+Autopilot queue entry ONB-X4. Public contract: NONE. No Warcraft Logs request. `src/specs/warlock/demonology/README.md` is the slice in detail.
+
+**What it is.** One specialization registered INTERNAL_ONLY on the observed-decision pattern, with its own pinned list, GCD and talent data, cast semantics, anchor profile, resolver, facade and registration, and the first reviewed pet rows of the project. No shared analyzer was introduced, and no shared code changed. It is cloned from Affliction's finished shape, then given Demonology's vocabulary, applicability, cast review and pet readings.
+
+**Seven real subjects, and every decision stays UNKNOWN.** Replayed offline through production ingestion and the facade, at this tranche's base:
+
+| Subject | Hero tree | Span | Eligible | Excluded | MATCH | REJECTED | UNKNOWN |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| b1Pm fight 48 actor 11 | Diabolist | whole, 345 s | 269 | 10 | 0 | 0 | 269 |
+| b1Pm fight 48 actor 14 | Diabolist | whole, 345 s | 247 | 28 | 0 | 0 | 247 |
+| gtKb fight 22 actor 3 | Diabolist | whole, 285 s | 209 | 18 | 0 | 0 | 209 |
+| gtKb fight 22 actor 7 | Diabolist | whole, 285 s | 200 | 10 | 0 | 0 | 200 |
+| gtKb fight 22 actor 10 | Diabolist | whole, 285 s | 216 | 19 | 0 | 0 | 216 |
+| rXAf fight 13 actor 6 | Diabolist | first 165 s | 128 | 9 | 0 | 0 | 128 |
+| rXAf fight 13 actor 22 | Diabolist | first 165 s | 122 | 5 | 0 | 0 | 122 |
+| **Total** | | | **1,391** | **99** | **0** | **0** | **1,391** |
+
+All seven take the same choices: Implosion over Power Siphon, Grimoire: Imp Lord over Fel Ravager, To Hell and Back, and Reign of Tyranny, with Doom and Summon Doomguard absent from the tree, so those two stay UNKNOWN. No retained subject is Soul Harvester.
+
+**Where they stop.**
+
+| Anchors | Count | | Root scan stops at | Count |
+| --- | ---: | --- | --- | ---: |
+| `BEGINCAST_PAIRING_AMBIGUOUS` | 1,178 | | `diabolist[4] summon_doomguard` | 1,372 |
+| `BEGINCAST_NOT_OBSERVED` | 62 | | `default[4] call_action_list` (a Grimoire: Imp Lord press) | 19 |
+| `CAST_TIME_UNKNOWN` | 5 | | | |
+| `INSTANT_COMPLETION` | 114 | | | |
+| `OBSERVED_BEGINCAST` | 32 | | | |
+
+The 146 with an established anchor all refuse in the engine at `diabolist[1] hand_of_guldan`, on `buff.dominion_of_argus.up`. ONB-S3 alone moves nothing, since every one of those stops comes before any enemy count.
+
+**The first consumer of ONB-S6, and what it does.** `src/data/game/warlock-demonology-pet-semantics.ts` holds the rows, with what each rests on, and `pet-profile.ts` feeds `pet.demonic_tyrant.active` and `buff.wild_imps.stack`.
+
+- **The Demonic Tyrant has no floor and no ceiling.** Its spawn is the 15,000 ms duration plus `gauss<380, 220>` (`sc_warlock_actions.cpp:3583-3584`), a distribution with no floor, and nothing proves an encounter cannot kill one. Of its 32 retained instances, 31 source events 18,941 to 20,622 ms after their summon and one 11,252 ms. Dead actors can source delayed damage (M11-ED), so those numbers bound nothing either. It is therefore never PRESENT and never NOT_PRESENT.
+- **The Wild Imps have a ceiling of 40,000 ms and no floor.** Both summon spells feed one spawner, which takes the spell's duration (104317 is 40,000, 279910 is 20,000), and the module never reschedules an imp. An imp ends early by Implosion, Power Siphon or energy. The longest retained gap from a summon to a cast of the same key is 15,009 ms, so the bound is not contradicted.
+- **Pre-pull imps are real and already handled.** Every subject has imp casts in the first 9 s with no summon before them, because their summons precede the pull. The shared `PRE_PULL_INSTANCE_POSSIBLE` covers the first 40 s.
+- **Instance ids recur, never inside 40 s.** On each subject, 0 to 26 imp keys are summoned more than once, and never twice within the bound, so `INSTANCE_IDENTITY_AMBIGUOUS` does not arise. The shared rule does keep a re-summoned key from ever being PRESENT; with no floor pinned, that costs nothing here.
+- **Ownership is what stops it on real evidence.** Every retained fight's catalog holds an actor of each mapped gameID with no stated owner (b1Pm 78, 34 and 66; gtKb 196, 115 and 119; rXAf 270, 184 and 187). The shared state then refuses every absence and ceiling (`OWNERSHIP_NOT_STATED`), on all 146 readings. So the pet answers move no real decision. On a synthetic fight with owners stated, a ceiling below six proves `buff.wild_imps.stack>=6` false, and a test pins that it reaches the scan.
+
+**Decisions.**
+
+1. **A pet is read at the anchor or not at all.** A cast-time action is decided at its begin, so a reading at its completion would answer the wrong moment. With no established anchor nothing is read.
+2. **The count is a stack binding.** `buff.wild_imps.stack` is a shared built-in, so it travels on `knownBuffStacks`, whose `NumericBinding` form already accepts the shared pet answer. It is explicit even when unknown, and the shared evaluator needed no change.
+3. **SUMMONS is declared on the offensive capability**, because absence claims gate on its coverage. Otherwise a request deriving its ingestion from the row could under-fetch them.
+4. **The pinned data and the wire disagree on Call Dreadstalkers, and neither is overruled.** `_cast_time` is 2000, and only Demonic Calling's -50% row matches it, so the data says about a second. Of its 89 retained presses, 75 log a begin within 1 ms of the completion, and the 14 of gtKb actor 10 log none. Its row is `WIRE_CONTRADICTS_POSITIVE_BASE`, which claims no cast time.
+5. **Shadow Bolt has no talent guard here.** Its constructor asks for Drain Soul's absence, but that is an Affliction talent in no Demonology tree.
+6. **Hand of Gul'dan binds the press 105174**, not the talent row 1250273, as the wire does. Demonbolt is built on Demoniac and Infernal Bolt on Secrets of the Coven.
+7. **`talent.to_hell_and_back.enabled`** is the same answer as the talent's, bound as a truth when the rule resolves it, as Brewmaster's is.
+8. **Tyrant setup stays a recorded question, and Ritual Clipping stays `UNRESOLVED_DIABOLIST_HERO_TREE`.** Neither is answered, and neither blocks registration, as the queue entry says.
+
+**Evidence.** Nothing new is committed, because the replay needs whole raw fights and the archive line has about 5 KB left. Every pinned source read was already on disk and matches the recorded hashes.
+
+**No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse the row. A public request is SPEC_NOT_SUPPORTED, exactly as before.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

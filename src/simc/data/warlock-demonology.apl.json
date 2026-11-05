@@ -1,0 +1,433 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_WARLOCK_DEMONOLOGY",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "warlock",
+    "specName": "demonology"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "UNKNOWN",
+    "sourcePath": "engine/class_modules/apl/warlock.cpp",
+    "sourceSha256": "09f2bb54304a3886a87aae18931bf2214f56882a88c074c7e77f730ed3e51bda",
+    "sourceByteLength": 33759,
+    "regionStartMarker": "//demonology_apl_start",
+    "regionEndMarker": "//demonology_apl_end",
+    "extractedOn": "2026-11-05",
+    "extractorVersion": 1,
+    "regionSha256": "b00451e7c62531fac402345065e43b74af0be76f398139aa7a4e509558ac2c73",
+    "livePtrPolicy": "NO_PTR_REGION",
+    "dispatchSource": {
+      "sourcePath": "engine/class_modules/warlock/sc_warlock_init.cpp",
+      "sourceSha256": "8e1eae332a7be9607a4bde41640411183ecef8e00fddd1ab611c9d5fe8241d4c"
+    }
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "potion,if=pet.demonic_tyrant.active|fight_remains<=30",
+          "comment": null,
+          "sourceLine": 224
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "invoke_external_buff,name=power_infusion,if=pet.demonic_tyrant.active",
+          "comment": null,
+          "sourceLine": 225
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "call_action_list,name=racials,if=pet.demonic_tyrant.active|fight_remains<22,use_off_gcd=1",
+          "comment": null,
+          "sourceLine": 226
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "call_action_list,name=items,use_off_gcd=1",
+          "comment": null,
+          "sourceLine": 227
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "call_action_list,name=diabolist,if=talent.diabolic_ritual",
+          "comment": null,
+          "sourceLine": 228
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "call_action_list,name=soulharvest,if=talent.demonic_soul",
+          "comment": null,
+          "sourceLine": 229
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "summon_pet",
+          "comment": null,
+          "sourceLine": 209
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": null,
+          "sourceLine": 210
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=in_opener,op=set,value=1",
+          "comment": null,
+          "sourceLine": 211
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=trinket_1_buffs,value=trinket.1.has_use_buff",
+          "comment": null,
+          "sourceLine": 212
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=trinket_2_buffs,value=trinket.2.has_use_buff",
+          "comment": null,
+          "sourceLine": 213
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "variable,name=trinket_1_buff_duration,value=trinket.1.proc.any_dps.duration",
+          "comment": null,
+          "sourceLine": 214
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "variable,name=trinket_2_buff_duration,value=trinket.2.proc.any_dps.duration",
+          "comment": null,
+          "sourceLine": 215
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "variable,name=trinket_1_sync,op=setif,value=1,value_else=0.5,condition=variable.trinket_1_buffs&(trinket.1.cooldown.duration%%cooldown.summon_demonic_tyrant.duration=0|cooldown.summon_demonic_tyrant.duration%%trinket.1.cooldown.duration=0)",
+          "comment": null,
+          "sourceLine": 216
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "variable,name=trinket_2_sync,op=setif,value=1,value_else=0.5,condition=variable.trinket_2_buffs&(trinket.2.cooldown.duration%%cooldown.summon_demonic_tyrant.duration=0|cooldown.summon_demonic_tyrant.duration%%trinket.2.cooldown.duration=0)",
+          "comment": null,
+          "sourceLine": 217
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "variable,name=damage_trinket_priority,op=setif,value=2,value_else=1,condition=!variable.trinket_1_buffs&!variable.trinket_2_buffs&trinket.2.ilvl>trinket.1.ilvl",
+          "comment": null,
+          "sourceLine": 218
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "variable,name=trinket_priority,op=setif,value=2,value_else=1,condition=!variable.trinket_1_buffs&variable.trinket_2_buffs|variable.trinket_2_buffs&((trinket.2.cooldown.duration%variable.trinket_2_buff_duration)*(1.5+trinket.2.has_buff.intellect)*(variable.trinket_2_sync))>(((trinket.1.cooldown.duration%variable.trinket_1_buff_duration)*(1.5+trinket.1.has_buff.intellect)*(variable.trinket_1_sync))*(1+((trinket.1.ilvl-trinket.2.ilvl)%100)))",
+          "comment": null,
+          "sourceLine": 219
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "power_siphon",
+          "comment": null,
+          "sourceLine": 220
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "demonbolt,if=!buff.power_siphon.up&(talent.ruination&!talent.grimoire_imp_lord|talent.ruination&!talent.summon_doomguard)",
+          "comment": null,
+          "sourceLine": 221
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "shadow_bolt",
+          "comment": null,
+          "sourceLine": 222
+        }
+      ]
+    },
+    {
+      "listName": "items",
+      "receiverIdentifier": "items",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "use_item,use_off_gcd=1,slot=trinket1,if=variable.trinket_1_buffs&(!pet.demonic_tyrant.active&trinket.1.cast_time>0|!trinket.1.cast_time>0)&(pet.demonic_tyrant.active|trinket.1.cast_time>0&cooldown.summon_demonic_tyrant.remains<=4|!talent.summon_demonic_tyrant|variable.trinket_priority=2&cooldown.summon_demonic_tyrant.remains>20&!pet.demonic_tyrant.active&trinket.2.cooldown.remains<cooldown.summon_demonic_tyrant.remains+5)&(!trinket.2.has_cooldown|trinket.2.cooldown.remains|variable.trinket_priority=1)|variable.trinket_1_buff_duration>=fight_remains",
+          "comment": null,
+          "sourceLine": 263
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "use_item,use_off_gcd=1,slot=trinket2,if=variable.trinket_2_buffs&(!pet.demonic_tyrant.active&trinket.2.cast_time>0|!trinket.2.cast_time>0)&(pet.demonic_tyrant.active|trinket.2.cast_time>0&cooldown.summon_demonic_tyrant.remains<=4|!talent.summon_demonic_tyrant|variable.trinket_priority=1&cooldown.summon_demonic_tyrant.remains>20&!pet.demonic_tyrant.active&trinket.1.cooldown.remains<cooldown.summon_demonic_tyrant.remains+5)&(!trinket.1.has_cooldown|trinket.1.cooldown.remains|variable.trinket_priority=2)|variable.trinket_2_buff_duration>=fight_remains",
+          "comment": null,
+          "sourceLine": 264
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_item,use_off_gcd=1,slot=trinket1,if=!variable.trinket_1_buffs&((variable.damage_trinket_priority=1|trinket.2.cooldown.remains)&(trinket.1.cast_time>0&!pet.demonic_tyrant.active|!trinket.1.cast_time>0)|(time<20&variable.trinket_2_buffs)|cooldown.summon_demonic_tyrant.remains_expected>20)",
+          "comment": null,
+          "sourceLine": 265
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "use_item,use_off_gcd=1,slot=trinket2,if=!variable.trinket_2_buffs&((variable.damage_trinket_priority=2|trinket.1.cooldown.remains)&(trinket.2.cast_time>0&!pet.demonic_tyrant.active|!trinket.2.cast_time>0)|(time<20&variable.trinket_1_buffs)|cooldown.summon_demonic_tyrant.remains_expected>20)",
+          "comment": null,
+          "sourceLine": 266
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "use_item,slot=trinket1,if=!variable.trinket_1_buffs&(variable.damage_trinket_priority=1|trinket.2.cooldown.remains)",
+          "comment": null,
+          "sourceLine": 267
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "use_item,slot=trinket2,if=!variable.trinket_2_buffs&(variable.damage_trinket_priority=2|trinket.1.cooldown.remains)",
+          "comment": null,
+          "sourceLine": 268
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "use_item,use_off_gcd=1,slot=main_hand",
+          "comment": null,
+          "sourceLine": 269
+        }
+      ]
+    },
+    {
+      "listName": "racials",
+      "receiverIdentifier": "racials",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "berserking,use_off_gcd=1",
+          "comment": null,
+          "sourceLine": 271
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "blood_fury",
+          "comment": null,
+          "sourceLine": 272
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "fireblood",
+          "comment": null,
+          "sourceLine": 273
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "ancestral_call",
+          "comment": null,
+          "sourceLine": 274
+        }
+      ]
+    },
+    {
+      "listName": "soulharvest",
+      "receiverIdentifier": "soulharvest",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "power_siphon,if=buff.demonic_core.stack<=1|fight_remains<10",
+          "comment": null,
+          "sourceLine": 248
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "hand_of_guldan,if=buff.dominion_of_argus.up",
+          "comment": null,
+          "sourceLine": 249
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "grimoire_imp_lord",
+          "comment": null,
+          "sourceLine": 250
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "grimoire_fel_ravager",
+          "comment": null,
+          "sourceLine": 251
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "summon_doomguard",
+          "comment": null,
+          "sourceLine": 252
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "call_dreadstalkers",
+          "comment": null,
+          "sourceLine": 253
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "summon_demonic_tyrant",
+          "comment": null,
+          "sourceLine": 254
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "implosion,if=buff.wild_imps.stack>=6&(active_enemies>2|talent.to_hell_and_back.enabled)",
+          "comment": null,
+          "sourceLine": 255
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "hand_of_guldan",
+          "comment": null,
+          "sourceLine": 256
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "infernal_bolt,if=soul_shard<3",
+          "comment": null,
+          "sourceLine": 257
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "demonbolt,target_if=(!debuff.doom.up),if=soul_shard<4&buff.demonic_core.stack>=1&talent.doom",
+          "comment": null,
+          "sourceLine": 258
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "demonbolt,if=soul_shard<4&buff.demonic_core.stack>=2&!talent.doom",
+          "comment": null,
+          "sourceLine": 259
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "demonbolt,if=soul_shard<4&buff.demonic_core.react",
+          "comment": null,
+          "sourceLine": 260
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "shadow_bolt",
+          "comment": null,
+          "sourceLine": 261
+        }
+      ]
+    },
+    {
+      "listName": "diabolist",
+      "receiverIdentifier": "diabolist",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "power_siphon,if=buff.demonic_core.stack<=1|fight_remains<10",
+          "comment": null,
+          "sourceLine": 231
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "hand_of_guldan,if=buff.dominion_of_argus.up",
+          "comment": null,
+          "sourceLine": 232
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "grimoire_imp_lord",
+          "comment": null,
+          "sourceLine": 233
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "grimoire_fel_ravager",
+          "comment": null,
+          "sourceLine": 234
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "summon_doomguard",
+          "comment": null,
+          "sourceLine": 235
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "call_dreadstalkers,if=talent.reign_of_tyranny&(cooldown.summon_demonic_tyrant.remains>=20+gcd.max|cooldown.summon_demonic_tyrant.remains<=12-gcd.max)",
+          "comment": null,
+          "sourceLine": 236
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "call_dreadstalkers,if=!talent.reign_of_tyranny",
+          "comment": null,
+          "sourceLine": 237
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "summon_demonic_tyrant,if=soul_shard=5",
+          "comment": null,
+          "sourceLine": 238
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "implosion,if=buff.wild_imps.stack>=6&(active_enemies>2|talent.to_hell_and_back.enabled)",
+          "comment": null,
+          "sourceLine": 239
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "ruination",
+          "comment": null,
+          "sourceLine": 240
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "hand_of_guldan,if=soul_shard>=3&cooldown.summon_demonic_tyrant.remains>5|soul_shard=5",
+          "comment": null,
+          "sourceLine": 241
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "infernal_bolt,if=soul_shard<3",
+          "comment": null,
+          "sourceLine": 242
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "demonbolt,target_if=(!debuff.doom.up),if=soul_shard<4&buff.demonic_core.react&talent.doom",
+          "comment": null,
+          "sourceLine": 243
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "demonbolt,if=soul_shard<4&buff.demonic_core.react",
+          "comment": null,
+          "sourceLine": 244
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "shadow_bolt",
+          "comment": null,
+          "sourceLine": 245
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "infernal_bolt",
+          "comment": null,
+          "sourceLine": 246
+        }
+      ]
+    }
+  ]
+}

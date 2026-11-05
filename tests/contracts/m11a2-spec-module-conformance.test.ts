@@ -181,6 +181,13 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
   "mage/fire": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 17 },
   // ONB-X2: actor 11 of the same fight, its Devastation Evoker and the unsupported subject until this tranche.
   "evoker/devastation": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 11 },
+  // ONB-X4: actor 11 of the committed fight 48 context, one of its two Demonology Warlocks.
+  "warlock/demonology": {
+    artifactId: "wcl-fight-context-b1pm-fight-48",
+    fightId: 48,
+    sourceId: 11,
+    archive: true,
+  },
   // ONB-D3: actor 6 of the M13-A fight context, the Frost Mage the committed evidence archive
   // context reports. That capture's casts are filtered and carry no combatant info.
   "mage/frost": {
@@ -557,6 +564,7 @@ describe("what the tree exports today", () => {
       // HEAL-A: the first healer, INTERNAL_ONLY, binding no pinned decision authority; PUBLIC since HEAL-AP.
       ["RESTORATION_SHAMAN_MODULE", "shaman/restoration", "PUBLIC", 0],
       ["AFFLICTION_WARLOCK_MODULE", "warlock/affliction", "INTERNAL_ONLY", 0],
+      ["DEMONOLOGY_WARLOCK_MODULE", "warlock/demonology", "INTERNAL_ONLY", 0],
       // ONB-D1: Cohort D's representative, INTERNAL_ONLY.
       ["DESTRUCTION_WARLOCK_MODULE", "warlock/destruction", "INTERNAL_ONLY", 0],
       // ONB-B1: Cohort B's representative, INTERNAL_ONLY.
