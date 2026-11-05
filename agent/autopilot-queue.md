@@ -1222,7 +1222,7 @@ status: OWNER_DECISION_REQUIRED
 dependsOn: none
 wcl: NONE
 publicContract: NONE
-ownerDecision: Authorize one bounded, neutral, deterministic Warcraft Logs evidence campaign for the specializations that have no retained, already-authorized real evidence. Known today: Fury Warrior, Protection Warrior, Outlaw Rogue, Survival Hunter and Vengeance Demon Hunter appear in no committed fight context, and onboarding tranches append any further spec whose review finds its evidence inadequate. Appended by ONB-B2: Enhancement Shaman (the only retained events are the filtered M13-A casts of actor 7, with no combatant info, so its talents never resolve). Appended by HEAL-B1P, and corrected by HEAL-B4P: Restoration Druid needs no campaign (its whole-fight events in gtKb2xHn87pNcFfW fight 22, actor 2, are in the retained M9-C2, M11-C4 and M11-C4b captures, which HEAL-B1P's census did not read; agent/follow-ups.md "After HEAL-B4P"). Appended by HEAL-B3: Discipline Priest (committed evidence is a filtered M13-A cast capture, actor 9, and Atonement applications by the G2 cohort246 fight 33 actor 88 onto another player; no committed or retained capture holds its whole-fight casts or any Atonement heal event, and fight 48 has no Discipline Priest, so HEAL-B3P cannot meet the healer promotion gate). (Preservation Evoker, appended by HEAL-B4, was removed by HEAL-B4P: it passed the gate on retained evidence.) Appended by ONB-A2: Subtlety Rogue (committed evidence is 150 filtered M13-A casts of actor 17, with no combatant info, auras or resources, so its talents never resolve); its census also found Fury and Protection Warrior only in retained fight contexts, with no event. The proposal is the smallest campaign: per spec, the first public raid fight in a fixed order containing it, with its actor slice (casts, auras, resources, combatant info), and no ranking or comparison data. Confirmed by ONB-C2: Outlaw Rogue, whose only context is the uncommitted g34mvXTKLMJ2Nfwr fights 1, 6 and 7, actor 17, with no event retained. Appended by ONB-D3: Frost Mage (the only real casts are 103 filtered M13-A casts of actor 6, with no combatant info, and one cast in a two-second page, so nothing has met real evidence).
+ownerDecision: Authorize one bounded, neutral, deterministic Warcraft Logs evidence campaign for the specializations that have no retained, already-authorized real evidence. Known today: Fury Warrior, Protection Warrior, Outlaw Rogue, Survival Hunter and Vengeance Demon Hunter appear in no committed fight context, and onboarding tranches append any further spec whose review finds its evidence inadequate. Appended by ONB-B2: Enhancement Shaman (the only retained events are the filtered M13-A casts of actor 7, with no combatant info, so its talents never resolve). Appended by HEAL-B1P, and corrected by HEAL-B4P: Restoration Druid needs no campaign (its whole-fight events in gtKb2xHn87pNcFfW fight 22, actor 2, are in the retained M9-C2, M11-C4 and M11-C4b captures, which HEAL-B1P's census did not read; agent/follow-ups.md "After HEAL-B4P"). Appended by HEAL-B3: Discipline Priest (committed evidence is a filtered M13-A cast capture, actor 9, and Atonement applications by the G2 cohort246 fight 33 actor 88 onto another player; no committed or retained capture holds its whole-fight casts or any Atonement heal event, and fight 48 has no Discipline Priest, so HEAL-B3P cannot meet the healer promotion gate). (Preservation Evoker, appended by HEAL-B4, was removed by HEAL-B4P: it passed the gate on retained evidence.) Appended by ONB-A2: Subtlety Rogue (committed evidence is 150 filtered M13-A casts of actor 17, with no combatant info, auras or resources, so its talents never resolve); its census also found Fury and Protection Warrior only in retained fight contexts, with no event. The proposal is the smallest campaign: per spec, the first public raid fight in a fixed order containing it, with its actor slice (casts, auras, resources, combatant info), and no ranking or comparison data. Confirmed by ONB-C2: Outlaw Rogue, whose only context is the uncommitted g34mvXTKLMJ2Nfwr fights 1, 6 and 7, actor 17, with no event retained. Appended by ONB-D3: Frost Mage (the only real casts are 103 filtered M13-A casts of actor 6, with no combatant info, and one cast in a two-second page, so nothing has met real evidence). Appended by ONB-D4: Affliction Warlock and Marksmanship Hunter (the only real casts are the filtered M13-A casts of actors 20, 14 and 18, with no combatant info, so each refuses PROFILE_NOT_RESOLVED).
 ```
 
 **Direction.** The owner's onboarding evidence policy: neutral,
@@ -1892,11 +1892,13 @@ Frost Mage's must be verified, or it is recorded for ONB-EV.
 ### ONB-D3P: Arcane Mage and Frost Mage (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-D3
 branch: autopilot/onb-d3p
 wcl: NONE
 publicContract: EXPECTED
+pr: 74
+mergeSha: 9b771666d37d25a1ee0ce9930fda1cb93bdec896
 ```
 
 **Outcome.** Neither passes the rotational promotion gates, so each stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Arcane's six retained subjects, replayed offline, give 1,039 decisions, with 0 MATCH, 0 REJECTED and every decision UNKNOWN. Frost's only replayable source, the filtered M13-A actor 6, refuses `PROFILE_NOT_RESOLVED`, so Frost stays on ONB-EV. A census of 5,699 retained files finds no new subject. ONB-S3 alone moves neither. A promotion after each one's own inputs is a new public entry through the unchanged gates (agent/architecture.md "ONB-D3P"; agent/follow-ups.md "After ONB-D3").
@@ -1904,8 +1906,9 @@ publicContract: EXPECTED
 ### ONB-D4: Affliction Warlock and Marksmanship Hunter (internal, Cohort D)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-D1
+branch: autopilot/onb-d4
 wcl: NONE
 publicContract: NONE
 ```
@@ -1913,6 +1916,8 @@ publicContract: NONE
 **Scope.** Cohort D casters with multi-DoT (Affliction) or cast-time
 shots (Marksmanship). Neither has known retained events, so record them
 for ONB-EV if needed.
+
+**Outcome.** Both are registered INTERNAL_ONLY, and no decision of either resolves. Neither has a retained subject with combatant info, so both are on ONB-EV: the filtered M13-A actors 20, 14 and 18 refuse `PROFILE_NOT_RESOLVED` when replayed. On synthetic builds Affliction stops in `end_of_fight` on `fight_remains` and Drain Soul's talent, and Marksmanship at its `retarget` line, before any rotation line. Multi-DoT state stays UNKNOWN, and a simulation's fight style is never read from a real fight. No shared code changed, and ONB-S3 alone moves neither (agent/architecture.md "ONB-D4"; agent/follow-ups.md "After ONB-D4").
 
 ### ONB-D4P: Affliction Warlock and Marksmanship Hunter (public)
 

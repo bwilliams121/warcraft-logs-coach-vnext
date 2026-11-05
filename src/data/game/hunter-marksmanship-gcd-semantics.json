@@ -1,0 +1,319 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_HUNTER_MARKSMANSHIP_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/sc_hunter.cpp",
+        "sha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "byteLength": 309166
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 19434,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Aimed Shot"
+    },
+    {
+      "abilityGameId": 53351,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Kill Shot"
+    },
+    {
+      "abilityGameId": 56641,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Steady Shot"
+    },
+    {
+      "abilityGameId": 185358,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Arcane Shot"
+    },
+    {
+      "abilityGameId": 212431,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Explosive Shot"
+    },
+    {
+      "abilityGameId": 257044,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Rapid Fire"
+    },
+    {
+      "abilityGameId": 257620,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Multi-Shot"
+    },
+    {
+      "abilityGameId": 260243,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Volley"
+    },
+    {
+      "abilityGameId": 288613,
+      "baseGcdMs": 0,
+      "displayNameEn": "Trueshot"
+    },
+    {
+      "abilityGameId": 392060,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Wailing Arrow"
+    },
+    {
+      "abilityGameId": 466930,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Black Arrow"
+    },
+    {
+      "abilityGameId": 1264949,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Moonlight Chakram"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "aimed_shot",
+      "candidateAbilityGameIds": [19434],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / aimed_shot_t",
+        "startLine": 7535,
+        "endLine": 7535,
+        "sourceNote": "create_action dispatches \"aimed_shot\" to aimed_shot_t: built on p->talents.aimed_shot (:5451); find_talent_spell( SPECIALIZATION, \"Aimed Shot\", HUNTER_MARKSMANSHIP ) at :7747.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "arcane_shot",
+      "candidateAbilityGameIds": [185358],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / arcane_shot_t",
+        "startLine": 7569,
+        "endLine": 7569,
+        "sourceNote": "create_action dispatches \"arcane_shot\" to arcane_shot_t: create_action builds arcane_shot_t unless Cobra Shot is taken, a Beast Mastery talent; specs.arcane_shot = find_class_spell( \"Arcane Shot\" ) at :8029, class_spells.inc row 185358.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "black_arrow",
+      "candidateAbilityGameIds": [466930],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / black_arrow_t",
+        "startLine": 7541,
+        "endLine": 7541,
+        "sourceNote": "create_action dispatches \"black_arrow\" to black_arrow_t: built on p->talents.black_arrow_spell (:4670); talents.black_arrow_spell = talents.black_arrow.ok() ? find_spell( 466930 ) : not_found at :4670.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "explosive_shot",
+      "candidateAbilityGameIds": [212431],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / explosive_shot_t",
+        "startLine": 7544,
+        "endLine": 7544,
+        "sourceNote": "create_action dispatches \"explosive_shot\" to explosive_shot_t: built on p->talents.explosive_shot (:6047); find_talent_spell( SPECIALIZATION, \"Explosive Shot\", HUNTER_MARKSMANSHIP ) at :7773.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "kill_shot",
+      "candidateAbilityGameIds": [53351],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / kill_shot_t",
+        "startLine": 7577,
+        "endLine": 7577,
+        "sourceNote": "create_action dispatches \"kill_shot\" to kill_shot_t: create_action builds kill_shot_t on Marksmanship; built on p->talents.kill_shot (:4355), background with Black Arrow taken; find_talent_spell( SPECIALIZATION, \"Kill Shot\", HUNTER_MARKSMANSHIP ) at :7777.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "moonlight_chakram",
+      "candidateAbilityGameIds": [1264949],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / moonlight_chakram_t",
+        "startLine": 7550,
+        "endLine": 7550,
+        "sourceNote": "create_action dispatches \"moonlight_chakram\" to moonlight_chakram_t: built on p->talents.moonlight_chakram_spell (:4438); talents.moonlight_chakram.ok() ? find_spell( 1264949 ) : not_found at :4438. Its ready() asks for its buff, a usability claim this slice does not make.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "multishot",
+      "candidateAbilityGameIds": [257620],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / multishot_t",
+        "startLine": 7551,
+        "endLine": 7551,
+        "sourceNote": "create_action dispatches \"multishot\" to multishot_t: built on p->specs.multishot (:5193); find_specialization_spell( \"Multi-Shot\" ) at :7743, class_spells.inc row 257620.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "rapid_fire",
+      "candidateAbilityGameIds": [257044],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / rapid_fire_t",
+        "startLine": 7553,
+        "endLine": 7553,
+        "sourceNote": "create_action dispatches \"rapid_fire\" to rapid_fire_t: built on p->talents.rapid_fire (:5833), channeled; find_talent_spell( SPECIALIZATION, \"Rapid Fire\", HUNTER_MARKSMANSHIP ) at :7749.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "steady_shot",
+      "candidateAbilityGameIds": [56641],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / steady_shot_t",
+        "startLine": 7556,
+        "endLine": 7556,
+        "sourceNote": "create_action dispatches \"steady_shot\" to steady_shot_t: built on p->specs.steady_shot (:4077); find_class_spell( \"Steady Shot\" ) unless Pack Tactics is taken, at :8030, class_spells.inc row 56641.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "trueshot",
+      "candidateAbilityGameIds": [288613],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / trueshot_t",
+        "startLine": 7561,
+        "endLine": 7561,
+        "sourceNote": "create_action dispatches \"trueshot\" to trueshot_t: built on p->talents.trueshot (:7013); find_talent_spell( SPECIALIZATION, \"Trueshot\", HUNTER_MARKSMANSHIP ) at :7778.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "volley",
+      "candidateAbilityGameIds": [260243],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / volley_t",
+        "startLine": 7562,
+        "endLine": 7562,
+        "sourceNote": "create_action dispatches \"volley\" to volley_t: built on p->talents.volley (:7094); find_talent_spell( SPECIALIZATION, \"Volley\", HUNTER_MARKSMANSHIP ) at :7804.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "wailing_arrow",
+      "candidateAbilityGameIds": [392060],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / wailing_arrow_t",
+        "startLine": 7563,
+        "endLine": 7563,
+        "sourceNote": "create_action dispatches \"wailing_arrow\" to wailing_arrow_t: built on p->talents.wailing_arrow (:4761); talents.wailing_dead.ok() ? find_spell( 392060 ) : not_found at :7925. Its ready() asks for its buff, a usability claim this slice does not make.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "auto_shot",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "auto_attack_t::auto_attack_t",
+        "line": 7351,
+        "sourceNote": "create_action builds actions::auto_attack_t for \"auto_shot\" (:7538), an action_t of type ACTION_OTHER with no spell, whose constructor assigns trigger_gcd = 0_ms."
+      }
+    },
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

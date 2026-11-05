@@ -2037,6 +2037,260 @@ const MAGE_FROST_TARGET = {
 };
 
 /**
+ * The Affliction Warlock profile (ONB-D4): the talents the pinned list reads as `talent.<name>`, and the talents an action of
+ * that list is built on (an action on `not_found()` is background, action.cpp:541-549).
+ */
+const WARLOCK_AFFLICTION_TARGET = {
+  datasetId: "SIMC_TRAIT_WARLOCK_AFFLICTION_TALENTS",
+  classId: 9,
+  specId: 265,
+  defaultOut: "src/data/game/warlock-affliction-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node, as every earlier target recorded." +
+    ' No retained Affliction Warlock subject carries combatant info, so nothing corroborates these keys for it on real evidence (agent/architecture.md "ONB-D4").',
+  requiredTalents: [
+    {
+      simcName: "agony",
+      displayNameEn: "Agony",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:129 talents.agony = find_talent_spell( talent_tree::SPECIALIZATION, "Agony" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "cascading_calamity",
+      displayNameEn: "Cascading Calamity",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:212 talents.cascading_calamity = find_talent_spell( talent_tree::SPECIALIZATION, "Cascading Calamity" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "dark_harvest",
+      displayNameEn: "Dark Harvest",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:164 talents.dark_harvest = find_talent_spell( talent_tree::SPECIALIZATION, "Dark Harvest" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "drain_soul",
+      displayNameEn: "Drain Soul",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:148 talents.drain_soul = find_talent_spell( talent_tree::SPECIALIZATION, "Drain Soul" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "grimoire_of_sacrifice",
+      displayNameEn: "Grimoire of Sacrifice",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:67 talents.grimoire_of_sacrifice = find_talent_spell( talent_tree::SPECIALIZATION, "Grimoire of Sacrifice" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "haunt",
+      displayNameEn: "Haunt",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:142 talents.haunt = find_talent_spell( talent_tree::SPECIALIZATION, "Haunt" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "malefic_grasp",
+      displayNameEn: "Malefic Grasp",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:181 talents.malefic_grasp = find_talent_spell( talent_tree::SPECIALIZATION, "Malefic Grasp" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "seed_of_corruption",
+      displayNameEn: "Seed of Corruption",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:135 talents.seed_of_corruption = find_talent_spell( talent_tree::SPECIALIZATION, "Seed of Corruption" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "siphon_life",
+      displayNameEn: "Siphon Life",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:155 talents.siphon_life = find_talent_spell( talent_tree::SPECIALIZATION, "Siphon Life" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "sow_the_seeds",
+      displayNameEn: "Sow the Seeds",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:219 talents.sow_the_seeds = find_talent_spell( talent_tree::SPECIALIZATION, "Sow the Seeds" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "summon_darkglare",
+      displayNameEn: "Summon Darkglare",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:169 talents.summon_darkglare = find_talent_spell( talent_tree::SPECIALIZATION, "Summon Darkglare" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "unstable_affliction",
+      displayNameEn: "Unstable Affliction",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_warlock_init.cpp:132 talents.unstable_affliction = find_talent_spell( talent_tree::SPECIALIZATION, "Unstable Affliction" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "malevolence",
+      displayNameEn: "Malevolence",
+      tree: "HERO",
+      binding:
+        'sc_warlock_init.cpp:634 hero.malevolence = find_talent_spell( talent_tree::HERO, "Malevolence" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "wither",
+      displayNameEn: "Wither",
+      tree: "HERO",
+      binding:
+        'sc_warlock_init.cpp:604 hero.wither = find_talent_spell( talent_tree::HERO, "Wither" );; the pinned list reads it or an action of the list is built on it',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data` (trait_data.inc:4421-4422).
+    { simcName: "soul_harvester", subTreeId: 57 },
+    { simcName: "hellcaller", subTreeId: 58 },
+  ],
+};
+
+/**
+ * The Marksmanship Hunter profile (ONB-D4): the talents the pinned list reads as `talent.<name>`, and the talents an action of
+ * that list is built on (an action on `not_found()` is background, action.cpp:541-549).
+ */
+const HUNTER_MARKSMANSHIP_TARGET = {
+  datasetId: "SIMC_TRAIT_HUNTER_MARKSMANSHIP_TALENTS",
+  classId: 3,
+  specId: 254,
+  defaultOut: "src/data/game/hunter-marksmanship-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node, as every earlier target recorded." +
+    ' No retained Marksmanship Hunter subject carries combatant info, so nothing corroborates these keys for it on real evidence (agent/architecture.md "ONB-D4").',
+  requiredTalents: [
+    {
+      simcName: "aimed_shot",
+      displayNameEn: "Aimed Shot",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7747 talents.aimed_shot = find_talent_spell( talent_tree::SPECIALIZATION, "Aimed Shot", HUNTER_MARKSMANSHIP );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "aspect_of_the_hydra",
+      displayNameEn: "Aspect of the Hydra",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7768 talents.aspect_of_the_hydra = find_talent_spell( talent_tree::SPECIALIZATION, "Aspect of the Hydra", HUNTER_MARKSMANSHIP );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "bullseye",
+      displayNameEn: "Bullseye",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7788 talents.bullseye = find_talent_spell( talent_tree::SPECIALIZATION, "Bullseye", HUNTER_MARKSMANSHIP );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "calling_the_shots",
+      displayNameEn: "Calling the Shots",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7796 talents.calling_the_shots = find_talent_spell( talent_tree::SPECIALIZATION, "Calling the Shots", HUNTER_MARKSMANSHIP );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "explosive_shot",
+      displayNameEn: "Explosive Shot",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7773 talents.explosive_shot = find_talent_spell( talent_tree::SPECIALIZATION, "Explosive Shot", HUNTER_MARKSMANSHIP );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "kill_shot",
+      displayNameEn: "Kill Shot",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7777 talents.kill_shot = find_talent_spell( talent_tree::SPECIALIZATION, "Kill Shot", HUNTER_MARKSMANSHIP );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "rapid_fire",
+      displayNameEn: "Rapid Fire",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7749 talents.rapid_fire = find_talent_spell( talent_tree::SPECIALIZATION, "Rapid Fire", HUNTER_MARKSMANSHIP );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "tactical_reload",
+      displayNameEn: "Tactical Reload",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7779 talents.tactical_reload = find_talent_spell( talent_tree::SPECIALIZATION, "Tactical Reload", HUNTER_MARKSMANSHIP );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "trick_shots",
+      displayNameEn: "Trick Shots",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7765 talents.trick_shots = find_talent_spell( talent_tree::SPECIALIZATION, "Trick Shots", HUNTER_MARKSMANSHIP );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "trueshot",
+      displayNameEn: "Trueshot",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7778 talents.trueshot = find_talent_spell( talent_tree::SPECIALIZATION, "Trueshot", HUNTER_MARKSMANSHIP );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "unbreakable_bond",
+      displayNameEn: "Unbreakable Bond",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7757 talents.unbreakable_bond = find_talent_spell( talent_tree::SPECIALIZATION, "Unbreakable Bond", HUNTER_MARKSMANSHIP );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "unload",
+      displayNameEn: "Unload",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7813 talents.unload = find_talent_spell( talent_tree::SPECIALIZATION, "Unload", HUNTER_MARKSMANSHIP );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "volley",
+      displayNameEn: "Volley",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7804 talents.volley = find_talent_spell( talent_tree::SPECIALIZATION, "Volley", HUNTER_MARKSMANSHIP );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "black_arrow",
+      displayNameEn: "Black Arrow",
+      tree: "HERO",
+      binding:
+        'sc_hunter.cpp:7909 talents.black_arrow = find_talent_spell( talent_tree::HERO, "Black Arrow" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "moonlight_chakram",
+      displayNameEn: "Moonlight Chakram",
+      tree: "HERO",
+      binding:
+        'sc_hunter.cpp:7992 talents.moonlight_chakram = find_talent_spell( talent_tree::HERO, "Moonlight Chakram" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "wailing_dead",
+      displayNameEn: "Wailing Dead",
+      tree: "HERO",
+      binding:
+        'sc_hunter.cpp:7924 talents.wailing_dead = find_talent_spell( talent_tree::HERO, "Wailing Dead" );; the pinned list reads it or an action of the list is built on it',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data` (trait_data.inc:4409-4411).
+    { simcName: "sentinel", subTreeId: 42 },
+    { simcName: "dark_ranger", subTreeId: 44 },
+  ],
+};
+
+/**
  * The Destruction Warlock profile (ONB-D1): the talents the pinned Destruction list reads as
  * `talent.<name>`, the talents an action of that list is built on (an action on `not_found()` is
  * background, action.cpp:541-549). The hero sub-trees are Hellcaller (58) and Diabolist (59).
@@ -3027,6 +3281,8 @@ export const TARGETS = {
   "priest-shadow": PRIEST_SHADOW_TARGET,
   "mage-arcane": MAGE_ARCANE_TARGET,
   "mage-frost": MAGE_FROST_TARGET,
+  "warlock-affliction": WARLOCK_AFFLICTION_TARGET,
+  "hunter-marksmanship": HUNTER_MARKSMANSHIP_TARGET,
   "warlock-destruction": WARLOCK_DESTRUCTION_TARGET,
   "rogue-subtlety": ROGUE_SUBTLETY_TARGET,
   "monk-brewmaster": MONK_BREWMASTER_TARGET,

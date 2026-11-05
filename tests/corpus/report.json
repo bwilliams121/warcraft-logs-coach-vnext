@@ -761,6 +761,24 @@
       "assertions": 1,
       "cases": 1,
       "failed": 0,
+      "kindsExercised": ["SPEC_AFFLICTION_WARLOCK.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_AFFLICTION_WARLOCK",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_MARKSMANSHIP_HUNTER.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_MARKSMANSHIP_HUNTER",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
       "kindsExercised": ["SPEC_OUTLAW_ROGUE.SPEC_GATE"],
       "notExecuted": 0,
       "owningLayer": "SPEC_OUTLAW_ROGUE",
@@ -776,13 +794,13 @@
       "passed": 1
     },
     {
-      "assertions": 39,
-      "cases": 35,
+      "assertions": 41,
+      "cases": 37,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 39
+      "passed": 41
     },
     {
       "assertions": 14,
@@ -795,6 +813,20 @@
     }
   ],
   "cases": [
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.affliction-warlock-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
     {
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
@@ -1096,6 +1128,20 @@
       ],
       "authority": null,
       "caseId": "application-service.holy-priest-registration-is-public-since-heal-b2p",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.marksmanship-hunter-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -3546,6 +3592,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_AFFLICTION_WARLOCK.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-affliction-warlock.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_AFFLICTION_WARLOCK",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_ARCANE_MAGE.SPEC_GATE",
           "ordinal": 0,
           "status": "PASSED"
@@ -5841,6 +5901,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_MARKSMANSHIP_HUNTER.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-marksmanship-hunter.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_MARKSMANSHIP_HUNTER",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_MISTWEAVER_MONK.REGISTRATION_RESULT",
           "ordinal": 0,
           "status": "PASSED"
@@ -7793,6 +7867,7 @@
     "SIMC_APL_DEMONHUNTER_HAVOC": "simc-33622e9d-1",
     "SIMC_APL_DRUID_BALANCE": "simc-33622e9d-1",
     "SIMC_APL_DRUID_FERAL": "simc-33622e9d-1",
+    "SIMC_APL_HUNTER_MARKSMANSHIP": "simc-33622e9d-1",
     "SIMC_APL_MAGE_ARCANE": "simc-33622e9d-1",
     "SIMC_APL_MAGE_FROST": "simc-33622e9d-1",
     "SIMC_APL_MONK_BREWMASTER": "simc-33622e9d-1",
@@ -7804,6 +7879,7 @@
     "SIMC_APL_ROGUE_SUBTLETY": "simc-33622e9d-1",
     "SIMC_APL_SHAMAN_ELEMENTAL": "simc-33622e9d-1",
     "SIMC_APL_SHAMAN_ENHANCEMENT": "simc-33622e9d-1",
+    "SIMC_APL_WARLOCK_AFFLICTION": "simc-33622e9d-1",
     "SIMC_APL_WARLOCK_DESTRUCTION": "simc-33622e9d-1",
     "SIMC_APL_WARRIOR_ARMS": "simc-33622e9d-1",
     "SIMC_APL_WARRIOR_FURY": "simc-33622e9d-1",
@@ -7816,13 +7892,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 826,
-    "cases": 231,
+    "assertions": 830,
+    "cases": 235,
     "declared": 0,
-    "executable": 826,
+    "executable": 830,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 826
+    "passed": 830
   }
 }

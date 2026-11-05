@@ -185,6 +185,19 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
     sourceId: 6,
     archive: true,
   },
+  // ONB-D4: actors 20 and 14 of the same context. The capture's casts are filtered and carry no combatant info.
+  "warlock/affliction": {
+    artifactId: "wcl-m13a-fight-context-aug1-fight-1",
+    fightId: 1,
+    sourceId: 20,
+    archive: true,
+  },
+  "hunter/marksmanship": {
+    artifactId: "wcl-m13a-fight-context-aug1-fight-1",
+    fightId: 1,
+    sourceId: 14,
+    archive: true,
+  },
   "druid/balance": { artifactId: "wcl-fight-context-gtkb-fight-22", fightId: 22, sourceId: 27 },
   "priest/shadow": { artifactId: "wcl-fight-context-gtkb-fight-22", fightId: 22, sourceId: 29 },
   // ONB-B3: actor 32 of the corpus gtKb fight 22 context, the Devourer Demon Hunter the committed
@@ -507,6 +520,7 @@ describe("what the tree exports today", () => {
       ["AUGMENTATION_EVOKER_MODULE", "evoker/augmentation", "PUBLIC", 0],
       // HEAL-B4: a healer on the same architecture, its roster role UNKNOWN as pinned, INTERNAL_ONLY.
       ["PRESERVATION_EVOKER_MODULE", "evoker/preservation", "PUBLIC", 0],
+      ["MARKSMANSHIP_HUNTER_MODULE", "hunter/marksmanship", "INTERNAL_ONLY", 0],
       ["ARCANE_MAGE_MODULE", "mage/arcane", "INTERNAL_ONLY", 0],
       ["FROST_MAGE_MODULE", "mage/frost", "INTERNAL_ONLY", 0],
       ["BREWMASTER_MONK_MODULE", "monk/brewmaster", "PUBLIC", 0],
@@ -529,6 +543,7 @@ describe("what the tree exports today", () => {
       ["ENHANCEMENT_SHAMAN_MODULE", "shaman/enhancement", "INTERNAL_ONLY", 0],
       // HEAL-A: the first healer, INTERNAL_ONLY, binding no pinned decision authority; PUBLIC since HEAL-AP.
       ["RESTORATION_SHAMAN_MODULE", "shaman/restoration", "PUBLIC", 0],
+      ["AFFLICTION_WARLOCK_MODULE", "warlock/affliction", "INTERNAL_ONLY", 0],
       // ONB-D1: Cohort D's representative, INTERNAL_ONLY.
       ["DESTRUCTION_WARLOCK_MODULE", "warlock/destruction", "INTERNAL_ONLY", 0],
       // ONB-B1: Cohort B's representative, INTERNAL_ONLY.

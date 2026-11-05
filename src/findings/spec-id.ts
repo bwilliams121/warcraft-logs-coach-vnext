@@ -93,7 +93,9 @@ export type SpecId =
   | "druid/balance"
   | "priest/shadow"
   | "mage/arcane"
-  | "mage/frost";
+  | "mage/frost"
+  | "warlock/affliction"
+  | "hunter/marksmanship";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -125,6 +127,8 @@ export const SPEC_IDS = Object.freeze([
   "priest/shadow",
   "mage/arcane",
   "mage/frost",
+  "warlock/affliction",
+  "hunter/marksmanship",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -280,6 +284,9 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  *
  * Arcane Mage and Frost Mage arrived here in ONB-D3, two more Cohort D followers on the shared cast anchor. No decision of
  * either resolves, and Frost has no retained subject with combatant info.
+ *
+ * Affliction Warlock and Marksmanship Hunter arrived here in ONB-D4, the last two Cohort D followers on the shared cast anchor. No
+ * decision of either resolves, and neither has a retained subject with combatant info.
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
@@ -299,6 +306,8 @@ export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "priest/shadow",
   "mage/arcane",
   "mage/frost",
+  "warlock/affliction",
+  "hunter/marksmanship",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

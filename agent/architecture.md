@@ -13941,6 +13941,60 @@ Arcane 1,039, all UNKNOWN. Frost none: its one replayable source refuses, as ONB
 
 **What a later promotion must do.** Each specialization answers its own first question: for Arcane, whether an interrupt with no castable target can be stepped past, then `fight_remains`, `prev_gcd`, `cancel_action` and Evocation's talent; for Frost, a real subject (ONB-EV), then how `interrupt_if` and its sibling options are read, since each only ends a channel. Each binds its own stacks with their reaction bound, measures its unmeasured hero trees and spells or refuses them, and answers the anchor's limits (agent/follow-ups.md "After ONB-D3"). A new public entry then promotes it through the unchanged gates by the five-site promotion. No such entry is queued.
 
+## ONB-D4 — Affliction Warlock and Marksmanship Hunter (internal, Cohort D)
+
+Autopilot queue entry ONB-D4. Public contract: NONE. No Warcraft Logs request. `src/specs/warlock/affliction/README.md` and `src/specs/hunter/marksmanship/README.md` are the slices in detail.
+
+**What it is.** The last two of Cohort D's followers, registered INTERNAL_ONLY on the same observed-decision pattern, each with its own pinned list, GCD and talent data, cast semantics, anchor profile, resolver, facade and registration. No shared analyzer was introduced, no shared code changed, and no decision of either resolves. Soul Shards and Focus are named and stay unbound. No DoT, aura, cooldown, charge, pet or travel state is derived.
+
+**Neither has a subject, so both are on ONB-EV.** A census of every retained JSON file over 500 bytes (5,703 parsed of 5,704), reading events of any type, with Mortal Strike as its positive control (559 casts), finds real casts of these two specializations in one place only: the filtered M13-A capture, Gw2kXrTfLWcDdhFY fight 1. Its casts carry no combatant info, so its talents never resolve. Replayed offline through production ingestion, each one refuses:
+
+| Subject | Spec | Casts, begins | Result |
+| --- | --- | ---: | --- |
+| M13-A fight 1 actor 20 | Affliction | 116, 91 | `PROFILE_NOT_RESOLVED` |
+| M13-A fight 1 actor 14 | Marksmanship | 83, 25 | `PROFILE_NOT_RESOLVED` |
+| M13-A fight 1 actor 18 | Marksmanship | 93, 28 | `PROFILE_NOT_RESOLVED` |
+
+The census's Malevolence and Wither hits in the A7R6kxPJ1hC8YQ4w pages are ONB-D1's Destruction subjects, actors 12 and 15. The other contexts naming these specializations, among them FPp6xjkNC9R4LrVh fight 10 actor 15 and 8dTmPvCzHfpkrF23 fight 3 actor 10, hold no cast of these abilities in any retained file. So every statement below about where a list stops is a synthetic reading, the talent keys of both are uncorroborated on real evidence, and each one's data says so.
+
+**What the filtered casts do corroborate.** Not a decision, but the bindings and the cast review, by logged id:
+
+- Malefic Grasp logs 1261153 and Moonlight Chakram 1264949, not their talent rows.
+- Unstable Affliction (35 begins, 34 casts), Shadow Bolt (49, 48), Haunt (7, 8), Aimed Shot (19, 20 and 23, 22) and Steady Shot (6, 6 and 5, 5) log begins.
+- Rapid Fire, Dark Harvest and Malefic Grasp log `cast` with no begin, as channels should.
+
+Drain Soul, Seed of Corruption, Corruption, Black Arrow, Wailing Arrow and Multi-Shot have no cast there, so their rows rest on pinned data alone.
+
+**Where each stops, on synthetic builds:**
+
+| Spec | Engine refusal | Root scan stops at | On |
+| --- | --- | --- | --- |
+| Affliction, either tree | `end_of_fight[0] unstable_affliction` | `end_of_fight[2] drain_soul` | Drain Soul's talent is not resolved. `end_of_fight[0]` and `[1]` stay open as candidates, on `soul_shard`, `fight_remains` (PREDICTIVE) and the enemy count |
+| Affliction, Drain Soul proven not taken | as above | `HC_cleave[1]` or `SH_cleave[1] seed_of_corruption`, by tree | past the tree's dispatch, every line open, then a condition with too many unresolved atoms to enumerate |
+| Marksmanship, either tree | `default[2] retarget` | `default[2] retarget` | the line's `target_if`, before any rotation line. Its gate is `fight_style.dungeonroute`, a simulation setting |
+| Marksmanship, the fight style stated by a test | `default[3] auto_shot` | `sentaoe[0]` or `draoe[0] explosive_shot`, by tree | `auto_shot` is off the GCD with no contract, the area dispatch is open on the enemy count, and the line's `target_if` is refused |
+
+**ONB-S3 alone moves neither of them.** Both reach the enemy count only behind other stops.
+
+**Requirement C is not met, and why this is not an owner stop.** As for Arms, Destruction and Frost Mage. The queue asks for an internal registration of each and says a missing subject is recorded for ONB-EV, and ONB-EV is already the owner's. What would change the result is listed in agent/follow-ups.md "After ONB-D4".
+
+**Decisions.**
+
+1. **Nothing shared moved.** Both lists fit the shared timeline and selection as they stand.
+2. **Multi-DoT state stays UNKNOWN.** `remains`, `refreshable`, `ticking`, `dot.*` and `active_dot.*` have no window behind them, and `target_if` and `cycle_targets` choose among targets nobody identified. A test pins each as UNRESOLVED or refused, never a DoT read as absent. A cast of Agony is not read as Agony up, because no aura or DoT is read at all.
+3. **Two Affliction actions are built on a talent's absence.** Corruption is on `!hero.wither.ok()` (sc_warlock_actions.cpp:785) and Shadow Bolt on `!talents.drain_soul.ok()` (:829). Each is background with that talent taken, applicable with it proven not taken, and UNKNOWN otherwise, so the reading never falls to "no guard".
+4. **Kill Shot reads two talents.** It is built on its own, and it is background with Black Arrow taken (sc_hunter.cpp:4357). It is applicable only with its own taken and Black Arrow proven not taken. Wailing Arrow is built on Wailing Dead (:7925), not on a talent of its own name.
+5. **A channel's and a press's row is the one its action reads.** Drain Soul binds 198590 and Malefic Grasp 1261153, each the row its channel reads (the talent rows are `_gcd` 0). Black Arrow binds 466930, not the Marksmanship talent row 466932. Moonlight Chakram binds 1264949. Those other rows have no binding, so a cast of one is excluded, never a press.
+6. **Only Haunt, Steady Shot and Wailing Arrow are proven to have a cast time.** Shadow Bolt, Seed of Corruption and Unstable Affliction have -100% rows on aura subtype 108 (Nightfall, Shadowy Inspiration, Shard Instability), and Aimed Shot has Lock and Load's. None is narrowed by a talent reading. Improved Haunt, Seeds of Destruction and Xavius' Gambit are flat subtype 107 rows that reach no spell's base, so they do not make Haunt possibly instant. Marksmanship's Trueshot row has a value of 0 and Streamline's is -20%.
+7. **`auto_shot` has a lane and no contract; `retarget` has neither.** `auto_shot` builds a spell-less `auto_attack_t` with `trigger_gcd` 0, so it is a meta-action lane, off the GCD, and it refuses. No contract is written for it, because it sits behind `retarget`, where the scan already stops. `retarget` is the shared pseudo-action, with no binding. Each is a refusal, never a free step past the line.
+8. **A simulation's fight style is never a fact of a real fight.** `fight_style.dungeonroute` is declared and unbound. A test states it false to show what is behind it, and says that only a test may. `raid_event.pull.*` and `max_prio_damage` are the same kind of atom.
+9. **The hero trees are read from the observed tree.** `hero_tree.*` is bound only when the tree resolves, as Devourer's is. An unresolved tree has no row, so both dispatches stay open.
+10. **`marksmanship` is `PTR_BODY_DIFFERS`.** Its live and PTR regions differ, and `hunter_t::init_action_list` chooses by `is_ptr()`. The pinned list is the live branch. `affliction` is `NO_PTR_REGION`.
+
+**Evidence.** Nothing new is committed. Every pinned source read was already on disk and matches the recorded hashes.
+
+**No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse both rows. A public request for either is SPEC_NOT_SUPPORTED, exactly as before.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

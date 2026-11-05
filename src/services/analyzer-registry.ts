@@ -92,6 +92,8 @@ import { ELEMENTAL_SHAMAN_REGISTRATION } from "../specs/shaman/elemental/registr
 import { SHADOW_PRIEST_REGISTRATION } from "../specs/priest/shadow/registration.js";
 import { ARCANE_MAGE_REGISTRATION } from "../specs/mage/arcane/registration.js";
 import { FROST_MAGE_REGISTRATION } from "../specs/mage/frost/registration.js";
+import { AFFLICTION_WARLOCK_REGISTRATION } from "../specs/warlock/affliction/registration.js";
+import { MARKSMANSHIP_HUNTER_REGISTRATION } from "../specs/hunter/marksmanship/registration.js";
 import { DESTRUCTION_WARLOCK_REGISTRATION } from "../specs/warlock/destruction/registration.js";
 import { OUTLAW_ROGUE_REGISTRATION } from "../specs/rogue/outlaw/registration.js";
 import { SUBTLETY_ROGUE_REGISTRATION } from "../specs/rogue/subtlety/registration.js";
@@ -525,6 +527,9 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   // INTERNAL_ONLY since ONB-D3: two more of Cohort D's followers. No decision of either resolves.
   ARCANE_MAGE_REGISTRATION,
   FROST_MAGE_REGISTRATION,
+  // INTERNAL_ONLY since ONB-D4: the last two of Cohort D's followers. No decision of either resolves.
+  AFFLICTION_WARLOCK_REGISTRATION,
+  MARKSMANSHIP_HUNTER_REGISTRATION,
 ]);
 
 /**

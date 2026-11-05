@@ -5026,6 +5026,388 @@ const MAGE_FROST_FACTS = {
   ],
 };
 
+const HUNTER_SOURCES = {
+  spellData: "engine/dbc/generated/sc_spell_data.inc",
+  classSpells: "engine/dbc/generated/class_spells.inc",
+  clientDataVersion: "engine/dbc/generated/client_data_version.inc",
+  spellDataLayout: "engine/dbc/spell_data.hpp",
+  // HASHED, NEVER PARSED: the class module every token binding is a hand-reviewed reading of.
+  classModule: "engine/class_modules/sc_hunter.cpp",
+  // HASHED, NEVER PARSED. Present because every target hashes the same shared sources.
+  racialSpells: "engine/dbc/generated/racial_spells.inc",
+  playerModule: "engine/player/player.cpp",
+  consumableModule: "engine/player/consumable.cpp",
+};
+
+const HUNTER_MODULE_PATH = "engine/class_modules/sc_hunter.cpp";
+
+/**
+ * The Affliction Warlock facts (ONB-D4).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the pinned Affliction list
+ * (warlock.cpp `affliction`) executes. Facts a reader should not have to rediscover:
+ *
+ *   - DRAIN SOUL AND MALEFIC GRASP BIND THE ROW THEIR CHANNEL READS, not the talent's: 198590 (talents.drain_soul_dot, sc_warlock_init.cpp:149) and 1261153 (talents.malefic_grasp_2, :182). Each talent row is `_gcd` 0. The filtered M13-A capture logs 1261153.
+ *   - MALEVOLENCE BINDS 442726, as Destruction's does: its action reads trigger_gcd and cooldown from hero.malevolence_buff.
+ *   - CORRUPTION IS BUILT ONLY WITHOUT WITHER, and Shadow Bolt only without Drain Soul. The action profile reads that, not this table.
+ *   - THE RACIAL, POTION, ITEM AND EXTERNAL-BUFF TOKENS ARE NOT BOUND. `summon_pet` and `grimoire_of_sacrifice` appear only in precombat.
+ */
+const WARLOCK_AFFLICTION_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 980, displayNameEn: "Agony", baseGcdMs: 1500 },
+    { abilityGameId: 172, displayNameEn: "Corruption", baseGcdMs: 1500 },
+    { abilityGameId: 1257052, displayNameEn: "Dark Harvest", baseGcdMs: 1500 },
+    { abilityGameId: 198590, displayNameEn: "Drain Soul", baseGcdMs: 1500 },
+    { abilityGameId: 48181, displayNameEn: "Haunt", baseGcdMs: 1500 },
+    { abilityGameId: 1261153, displayNameEn: "Malefic Grasp", baseGcdMs: 1500 },
+    { abilityGameId: 442726, displayNameEn: "Malevolence", baseGcdMs: 1500 },
+    { abilityGameId: 27243, displayNameEn: "Seed of Corruption", baseGcdMs: 1500 },
+    { abilityGameId: 686, displayNameEn: "Shadow Bolt", baseGcdMs: 1500 },
+    { abilityGameId: 205180, displayNameEn: "Summon Darkglare", baseGcdMs: 1500 },
+    { abilityGameId: 1259790, displayNameEn: "Unstable Affliction", baseGcdMs: 1500 },
+    { abilityGameId: 445468, displayNameEn: "Wither", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "agony",
+      candidateAbilityGameIds: [980],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / agony_t",
+      startLine: 5874,
+      endLine: 5874,
+      sourceNote:
+        'create_action dispatches "agony" to agony_t: built on p->talents.agony (:1411); find_talent_spell( SPECIALIZATION, "Agony" ) at sc_warlock_init.cpp:129.',
+    },
+    {
+      simcToken: "corruption",
+      candidateAbilityGameIds: [172],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / corruption_t",
+      startLine: 5858,
+      endLine: 5858,
+      sourceNote:
+        'create_action dispatches "corruption" to corruption_t: built on !p->hero.wither.ok() ? p->warlock_base.corruption : not_found (:785); find_class_spell( "Corruption" ) at sc_warlock_init.cpp:22, class_spells.inc row 172.',
+    },
+    {
+      simcToken: "dark_harvest",
+      candidateAbilityGameIds: [1257052],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / dark_harvest_t",
+      startLine: 5886,
+      endLine: 5886,
+      sourceNote:
+        'create_action dispatches "dark_harvest" to dark_harvest_t: built on p->talents.dark_harvest (:2461), channeled; find_talent_spell( SPECIALIZATION, "Dark Harvest" ) at sc_warlock_init.cpp:164.',
+    },
+    {
+      simcToken: "drain_soul",
+      candidateAbilityGameIds: [198590],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / drain_soul_t",
+      startLine: 5880,
+      endLine: 5880,
+      sourceNote:
+        'create_action dispatches "drain_soul" to drain_soul_t: built on p->talents.drain_soul.ok() ? p->talents.drain_soul_dot : not_found (:2281), channeled; talents.drain_soul_dot = conditional_spell_lookup( talents.drain_soul.ok(), 198590 ) at sc_warlock_init.cpp:149.',
+    },
+    {
+      simcToken: "haunt",
+      candidateAbilityGameIds: [48181],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / haunt_t",
+      startLine: 5884,
+      endLine: 5884,
+      sourceNote:
+        'create_action dispatches "haunt" to haunt_t: built on p->talents.haunt (:2390); find_talent_spell( SPECIALIZATION, "Haunt" ) at sc_warlock_init.cpp:142.',
+    },
+    {
+      simcToken: "malefic_grasp",
+      candidateAbilityGameIds: [1261153],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / malefic_grasp_t",
+      startLine: 5882,
+      endLine: 5882,
+      sourceNote:
+        'create_action dispatches "malefic_grasp" to malefic_grasp_t: built on p->talents.malefic_grasp.ok() ? p->talents.malefic_grasp_2 : not_found (:2100), channeled; talents.malefic_grasp_2 = conditional_spell_lookup( talents.malefic_grasp.ok(), 1261153 ) at sc_warlock_init.cpp:182.',
+    },
+    {
+      simcToken: "malevolence",
+      candidateAbilityGameIds: [442726],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / malevolence_t",
+      startLine: 5962,
+      endLine: 5962,
+      sourceNote:
+        'create_action dispatches "malevolence" to malevolence_t: built on p->hero.malevolence (:1298), whose trigger_gcd and cooldown it reads from hero.malevolence_buff, conditional_spell_lookup( hero.malevolence.ok(), 442726 ) at sc_warlock_init.cpp:635.',
+    },
+    {
+      simcToken: "seed_of_corruption",
+      candidateAbilityGameIds: [27243],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / seed_of_corruption_t",
+      startLine: 5888,
+      endLine: 5888,
+      sourceNote:
+        'create_action dispatches "seed_of_corruption" to seed_of_corruption_t: built on p->talents.seed_of_corruption (:1782); find_talent_spell( SPECIALIZATION, "Seed of Corruption" ) at sc_warlock_init.cpp:135.',
+    },
+    {
+      simcToken: "shadow_bolt",
+      candidateAbilityGameIds: [686],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / shadow_bolt_t",
+      startLine: 5860,
+      endLine: 5860,
+      sourceNote:
+        'create_action dispatches "shadow_bolt" to shadow_bolt_t: built on p->talents.drain_soul.ok() ? not_found : p->warlock_base.shadow_bolt (:829); find_class_spell( "Shadow Bolt" ) at sc_warlock_init.cpp:23, class_spells.inc row 686.',
+    },
+    {
+      simcToken: "summon_darkglare",
+      candidateAbilityGameIds: [205180],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / summon_darkglare_t",
+      startLine: 5878,
+      endLine: 5878,
+      sourceNote:
+        'create_action dispatches "summon_darkglare" to summon_darkglare_t: built on p->talents.summon_darkglare (:2423); find_talent_spell( SPECIALIZATION, "Summon Darkglare" ) at sc_warlock_init.cpp:169.',
+    },
+    {
+      simcToken: "unstable_affliction",
+      candidateAbilityGameIds: [1259790],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / unstable_affliction_t",
+      startLine: 5876,
+      endLine: 5876,
+      sourceNote:
+        'create_action dispatches "unstable_affliction" to unstable_affliction_t: built on p->talents.unstable_affliction (:1500); find_talent_spell( SPECIALIZATION, "Unstable Affliction" ) at sc_warlock_init.cpp:132.',
+    },
+    {
+      simcToken: "wither",
+      candidateAbilityGameIds: [445468],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: WARLOCK_DESTRUCTION_MODULE_PATH,
+      symbol: "warlock_t::create_action_* / wither_t",
+      startLine: 5959,
+      endLine: 5959,
+      sourceNote:
+        'create_action dispatches "wither" to wither_t: built on p->hero.wither.ok() ? p->hero.wither_direct : not_found (:1189); hero.wither_direct = conditional_spell_lookup( hero.wither.ok(), 445468 ) at sc_warlock_init.cpp:605.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
+/**
+ * The Marksmanship Hunter facts (ONB-D4).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the pinned Marksmanship list
+ * (apl_hunter.cpp `marksmanship`) executes. Facts a reader should not have to rediscover:
+ *
+ *   - BLACK ARROW BINDS 466930, the action's own spell (talents.black_arrow_spell, sc_hunter.cpp:4670). The Marksmanship talent row, 466932, is a `_gcd` 0 passive.
+ *   - MOONLIGHT CHAKRAM BINDS 1264949 (talents.moonlight_chakram_spell, :4438). The talent row 1264902, the buff 1264946 and the damage 1266081 are not the press. The filtered M13-A capture logs 1264949.
+ *   - KILL SHOT IS BACKGROUND WITH BLACK ARROW TAKEN (:4357). The action profile reads that, not this table.
+ *   - TRUESHOT IS `_gcd` 0, SO IT IS NON_GCD.
+ *   - RETARGET IS NOT BOUND. It is the shared pseudo-action. AUTO_SHOT is a meta-action lane below.
+ *   - THE RACIAL, POTION, ITEM AND EXTERNAL-BUFF TOKENS ARE NOT BOUND. `summon_pet` appears only in precombat.
+ */
+const HUNTER_MARKSMANSHIP_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 19434, displayNameEn: "Aimed Shot", baseGcdMs: 1500 },
+    { abilityGameId: 185358, displayNameEn: "Arcane Shot", baseGcdMs: 1500 },
+    { abilityGameId: 466930, displayNameEn: "Black Arrow", baseGcdMs: 1500 },
+    { abilityGameId: 212431, displayNameEn: "Explosive Shot", baseGcdMs: 1500 },
+    { abilityGameId: 53351, displayNameEn: "Kill Shot", baseGcdMs: 1500 },
+    { abilityGameId: 1264949, displayNameEn: "Moonlight Chakram", baseGcdMs: 1500 },
+    { abilityGameId: 257620, displayNameEn: "Multi-Shot", baseGcdMs: 1500 },
+    { abilityGameId: 257044, displayNameEn: "Rapid Fire", baseGcdMs: 1500 },
+    { abilityGameId: 56641, displayNameEn: "Steady Shot", baseGcdMs: 1500 },
+    { abilityGameId: 288613, displayNameEn: "Trueshot", baseGcdMs: 0 },
+    { abilityGameId: 260243, displayNameEn: "Volley", baseGcdMs: 1500 },
+    { abilityGameId: 392060, displayNameEn: "Wailing Arrow", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "aimed_shot",
+      candidateAbilityGameIds: [19434],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / aimed_shot_t",
+      startLine: 7535,
+      endLine: 7535,
+      sourceNote:
+        'create_action dispatches "aimed_shot" to aimed_shot_t: built on p->talents.aimed_shot (:5451); find_talent_spell( SPECIALIZATION, "Aimed Shot", HUNTER_MARKSMANSHIP ) at :7747.',
+    },
+    {
+      simcToken: "arcane_shot",
+      candidateAbilityGameIds: [185358],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / arcane_shot_t",
+      startLine: 7569,
+      endLine: 7569,
+      sourceNote:
+        'create_action dispatches "arcane_shot" to arcane_shot_t: create_action builds arcane_shot_t unless Cobra Shot is taken, a Beast Mastery talent; specs.arcane_shot = find_class_spell( "Arcane Shot" ) at :8029, class_spells.inc row 185358.',
+    },
+    {
+      simcToken: "black_arrow",
+      candidateAbilityGameIds: [466930],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / black_arrow_t",
+      startLine: 7541,
+      endLine: 7541,
+      sourceNote:
+        'create_action dispatches "black_arrow" to black_arrow_t: built on p->talents.black_arrow_spell (:4670); talents.black_arrow_spell = talents.black_arrow.ok() ? find_spell( 466930 ) : not_found at :4670.',
+    },
+    {
+      simcToken: "explosive_shot",
+      candidateAbilityGameIds: [212431],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / explosive_shot_t",
+      startLine: 7544,
+      endLine: 7544,
+      sourceNote:
+        'create_action dispatches "explosive_shot" to explosive_shot_t: built on p->talents.explosive_shot (:6047); find_talent_spell( SPECIALIZATION, "Explosive Shot", HUNTER_MARKSMANSHIP ) at :7773.',
+    },
+    {
+      simcToken: "kill_shot",
+      candidateAbilityGameIds: [53351],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / kill_shot_t",
+      startLine: 7577,
+      endLine: 7577,
+      sourceNote:
+        'create_action dispatches "kill_shot" to kill_shot_t: create_action builds kill_shot_t on Marksmanship; built on p->talents.kill_shot (:4355), background with Black Arrow taken; find_talent_spell( SPECIALIZATION, "Kill Shot", HUNTER_MARKSMANSHIP ) at :7777.',
+    },
+    {
+      simcToken: "moonlight_chakram",
+      candidateAbilityGameIds: [1264949],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / moonlight_chakram_t",
+      startLine: 7550,
+      endLine: 7550,
+      sourceNote:
+        'create_action dispatches "moonlight_chakram" to moonlight_chakram_t: built on p->talents.moonlight_chakram_spell (:4438); talents.moonlight_chakram.ok() ? find_spell( 1264949 ) : not_found at :4438. Its ready() asks for its buff, a usability claim this slice does not make.',
+    },
+    {
+      simcToken: "multishot",
+      candidateAbilityGameIds: [257620],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / multishot_t",
+      startLine: 7551,
+      endLine: 7551,
+      sourceNote:
+        'create_action dispatches "multishot" to multishot_t: built on p->specs.multishot (:5193); find_specialization_spell( "Multi-Shot" ) at :7743, class_spells.inc row 257620.',
+    },
+    {
+      simcToken: "rapid_fire",
+      candidateAbilityGameIds: [257044],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / rapid_fire_t",
+      startLine: 7553,
+      endLine: 7553,
+      sourceNote:
+        'create_action dispatches "rapid_fire" to rapid_fire_t: built on p->talents.rapid_fire (:5833), channeled; find_talent_spell( SPECIALIZATION, "Rapid Fire", HUNTER_MARKSMANSHIP ) at :7749.',
+    },
+    {
+      simcToken: "steady_shot",
+      candidateAbilityGameIds: [56641],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / steady_shot_t",
+      startLine: 7556,
+      endLine: 7556,
+      sourceNote:
+        'create_action dispatches "steady_shot" to steady_shot_t: built on p->specs.steady_shot (:4077); find_class_spell( "Steady Shot" ) unless Pack Tactics is taken, at :8030, class_spells.inc row 56641.',
+    },
+    {
+      simcToken: "trueshot",
+      candidateAbilityGameIds: [288613],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / trueshot_t",
+      startLine: 7561,
+      endLine: 7561,
+      sourceNote:
+        'create_action dispatches "trueshot" to trueshot_t: built on p->talents.trueshot (:7013); find_talent_spell( SPECIALIZATION, "Trueshot", HUNTER_MARKSMANSHIP ) at :7778.',
+    },
+    {
+      simcToken: "volley",
+      candidateAbilityGameIds: [260243],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / volley_t",
+      startLine: 7562,
+      endLine: 7562,
+      sourceNote:
+        'create_action dispatches "volley" to volley_t: built on p->talents.volley (:7094); find_talent_spell( SPECIALIZATION, "Volley", HUNTER_MARKSMANSHIP ) at :7804.',
+    },
+    {
+      simcToken: "wailing_arrow",
+      candidateAbilityGameIds: [392060],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / wailing_arrow_t",
+      startLine: 7563,
+      endLine: 7563,
+      sourceNote:
+        'create_action dispatches "wailing_arrow" to wailing_arrow_t: built on p->talents.wailing_arrow (:4761); talents.wailing_dead.ok() ? find_spell( 392060 ) : not_found at :7925. Its ready() asks for its buff, a usability claim this slice does not make.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "auto_shot",
+      triggerGcdMs: 0,
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "auto_attack_t::auto_attack_t",
+      line: 7351,
+      sourceNote:
+        'create_action builds actions::auto_attack_t for "auto_shot" (:7538), an action_t of type ACTION_OTHER with no spell, whose constructor assigns trigger_gcd = 0_ms.',
+    },
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
 /**
  * The Destruction Warlock facts (ONB-D1).
  *
@@ -6055,6 +6437,37 @@ export const TARGETS = {
     ],
     requiredFacts: MAGE_FROST_FACTS,
     defaultOut: "src/data/game/mage-frost-gcd-semantics.json",
+  },
+  "warlock-affliction": {
+    datasetId: "SIMC_DBC_WARLOCK_AFFLICTION_GCD_SEMANTICS",
+    classId: 9,
+    className: "Warlock",
+    sources: WARLOCK_DESTRUCTION_SOURCES,
+    classModulePath: WARLOCK_DESTRUCTION_SOURCES.classModule,
+    handReviewedPaths: [
+      WARLOCK_DESTRUCTION_SOURCES.classModule,
+      WARLOCK_DESTRUCTION_SOURCES.initModule,
+      WARLOCK_DESTRUCTION_SOURCES.racialSpells,
+      WARLOCK_DESTRUCTION_SOURCES.playerModule,
+      WARLOCK_DESTRUCTION_SOURCES.consumableModule,
+    ],
+    requiredFacts: WARLOCK_AFFLICTION_FACTS,
+    defaultOut: "src/data/game/warlock-affliction-gcd-semantics.json",
+  },
+  "hunter-marksmanship": {
+    datasetId: "SIMC_DBC_HUNTER_MARKSMANSHIP_GCD_SEMANTICS",
+    classId: 3,
+    className: "Hunter",
+    sources: HUNTER_SOURCES,
+    classModulePath: HUNTER_SOURCES.classModule,
+    handReviewedPaths: [
+      HUNTER_SOURCES.classModule,
+      HUNTER_SOURCES.racialSpells,
+      HUNTER_SOURCES.playerModule,
+      HUNTER_SOURCES.consumableModule,
+    ],
+    requiredFacts: HUNTER_MARKSMANSHIP_FACTS,
+    defaultOut: "src/data/game/hunter-marksmanship-gcd-semantics.json",
   },
   "warlock-destruction": {
     datasetId: "SIMC_DBC_WARLOCK_DESTRUCTION_GCD_SEMANTICS",

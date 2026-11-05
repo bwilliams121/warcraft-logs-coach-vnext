@@ -208,6 +208,8 @@ describe("a Blood Death Knight alone", () => {
       "priest-shadow-observed-decisions": 0,
       "mage-arcane-observed-decisions": 0,
       "mage-frost-observed-decisions": 0,
+      "warlock-affliction-observed-decisions": 0,
+      "hunter-marksmanship-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
     expectBloodCell(cellOf(run.aggregate.cells, BLOOD_DK));
@@ -265,6 +267,8 @@ describe("a mixed roster — all four supported specializations plus Fire — ov
       "priest-shadow-observed-decisions": 0,
       "mage-arcane-observed-decisions": 0,
       "mage-frost-observed-decisions": 0,
+      "warlock-affliction-observed-decisions": 0,
+      "hunter-marksmanship-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
   });

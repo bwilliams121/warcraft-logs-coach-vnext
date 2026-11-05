@@ -5009,6 +5009,37 @@
   ],
   "cases": [
     {
+      "caseId": "application-service.affliction-warlock-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Affliction Warlock registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "warlock/affliction",
+            "expected": {
+              "internalAnalyzerId": "warlock-affliction-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Affliction Warlock is registered INTERNAL_ONLY in ONB-D4, a Cohort D follower on the shared cast anchor. No decision of it resolves. No retained subject of it has combatant info, so it is on ONB-EV (agent/follow-ups.md \"After ONB-D4\")."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
+      ]
+    },
+    {
       "caseId": "application-service.arcane-mage-registration-is-internal-only",
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "APPLICATION_SERVICE",
@@ -5693,6 +5724,37 @@
       "rationale": {
         "basis": ["OWNED_CONTRACT"],
         "text": "Promotion changed reachability, not analysis: the registration still binds no pinned authority and is never ANALYZED; what a public request now receives is its healer findings (healerFindings), never an HPS ranking, an inferred assignment or a cooldown-quality verdict."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
+      ]
+    },
+    {
+      "caseId": "application-service.marksmanship-hunter-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Marksmanship Hunter registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "hunter/marksmanship",
+            "expected": {
+              "internalAnalyzerId": "hunter-marksmanship-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Marksmanship Hunter is registered INTERNAL_ONLY in ONB-D4, a Cohort D follower on the shared cast anchor. No decision of it resolves. No retained subject of it has combatant info, so it is on ONB-EV (agent/follow-ups.md \"After ONB-D4\")."
       },
       "authority": null,
       "limitations": [],
@@ -11442,6 +11504,29 @@
         "tests/contracts/m5c3c3b-engine-scope.test.ts",
         "tests/contracts/m10c-cross-spec-isolation.test.ts"
       ]
+    },
+    {
+      "caseId": "spec-affliction-warlock.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_AFFLICTION_WARLOCK",
+      "contractUnderTest": "src/specs/warlock/affliction/observed-analysis.ts analyzeObservedAfflictionWarlockDecisions (the spec gate)",
+      "purpose": "The Affliction Warlock facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_AFFLICTION_WARLOCK.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Affliction Warlock list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-d4-affliction-warlock.test.ts"]
     },
     {
       "caseId": "spec-arcane-mage.the-facade-refuses-every-other-specialization",
@@ -20989,6 +21074,29 @@
         "tests/unit/specs/heal-b2-holy-priest.test.ts",
         "tests/contracts/m11a2-cross-spec-isolation.test.ts"
       ]
+    },
+    {
+      "caseId": "spec-marksmanship-hunter.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_MARKSMANSHIP_HUNTER",
+      "contractUnderTest": "src/specs/hunter/marksmanship/observed-analysis.ts analyzeObservedMarksmanshipHunterDecisions (the spec gate)",
+      "purpose": "The Marksmanship Hunter facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_MARKSMANSHIP_HUNTER.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Marksmanship Hunter list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-d4-marksmanship-hunter.test.ts"]
     },
     {
       "caseId": "spec-mistweaver-monk.unstated-subject-yields-no-healer-finding",

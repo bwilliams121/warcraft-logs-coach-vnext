@@ -1,0 +1,559 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_HUNTER_MARKSMANSHIP",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "hunter",
+    "specName": "marksmanship"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "UNKNOWN",
+    "sourcePath": "engine/class_modules/apl/apl_hunter.cpp",
+    "sourceSha256": "8d7b7273ac056d1b28154cd9342db48cd95c643c215e5731c6b770c2e49facbb",
+    "sourceByteLength": 51094,
+    "regionStartMarker": "//marksmanship_apl_start",
+    "regionEndMarker": "//marksmanship_apl_end",
+    "extractedOn": "2026-11-04",
+    "extractorVersion": 1,
+    "regionSha256": "5f66ad059a846939fbf1cf32984852a41711e38f2b69848b539fafaf93c3e456",
+    "livePtrPolicy": "PTR_BODY_DIFFERS",
+    "dispatchSource": {
+      "sourcePath": "engine/class_modules/sc_hunter.cpp",
+      "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9"
+    }
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "variable,name=trueshot_ready,value=!talent.bullseye|(fight_remains>cooldown.trueshot.duration+10|buff.bullseye.stack=buff.bullseye.max_stack)&(cooldown.explosive_shot.remains>=15|cooldown.explosive_shot.ready)|fight_remains<25|time<10",
+          "comment": null,
+          "sourceLine": 241
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "variable,name=trueshot_ready,op=setif,condition=fight_style.dungeonroute,value_else=variable.trueshot_ready,value=raid_event.pull.remains>30|raid_event.pull.in>60|talent.calling_the_shots",
+          "comment": "For DungeonRoute, hold Trueshot at the end of pulls.",
+          "sourceLine": 242
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "retarget,target_if=max:target.health,line_cd=5,if=fight_style.dungeonroute",
+          "comment": null,
+          "sourceLine": 243
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "auto_shot",
+          "comment": null,
+          "sourceLine": 244
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "call_action_list,name=cds",
+          "comment": null,
+          "sourceLine": 245
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "call_action_list,name=trinkets",
+          "comment": null,
+          "sourceLine": 246
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "call_action_list,name=draoe,if=active_enemies>2&talent.trick_shots&hero_tree.dark_ranger",
+          "comment": null,
+          "sourceLine": 247
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "call_action_list,name=sentaoe,if=active_enemies>2&talent.trick_shots&hero_tree.sentinel",
+          "comment": null,
+          "sourceLine": 248
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "call_action_list,name=drst,if=hero_tree.dark_ranger",
+          "comment": null,
+          "sourceLine": 249
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "call_action_list,name=sentst,if=hero_tree.sentinel",
+          "comment": null,
+          "sourceLine": 250
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": null,
+          "sourceLine": 236
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "summon_pet,if=talent.unbreakable_bond",
+          "comment": null,
+          "sourceLine": 237
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_item,name=algethar_puzzle_box",
+          "comment": null,
+          "sourceLine": 238
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "aimed_shot",
+          "comment": null,
+          "sourceLine": 239
+        }
+      ]
+    },
+    {
+      "listName": "cds",
+      "receiverIdentifier": "cds",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "invoke_external_buff,name=power_infusion,if=buff.trueshot.remains>12|fight_remains<13",
+          "comment": null,
+          "sourceLine": 252
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "berserking,if=buff.trueshot.up|fight_remains<13",
+          "comment": null,
+          "sourceLine": 253
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "blood_fury,if=buff.trueshot.up|cooldown.trueshot.remains>30|fight_remains<16",
+          "comment": null,
+          "sourceLine": 254
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "ancestral_call,if=buff.trueshot.up|cooldown.trueshot.remains>30|fight_remains<16",
+          "comment": null,
+          "sourceLine": 255
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "fireblood,if=buff.trueshot.up|cooldown.trueshot.remains>30|fight_remains<9",
+          "comment": null,
+          "sourceLine": 256
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "lights_judgment,if=buff.trueshot.down",
+          "comment": null,
+          "sourceLine": 257
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "potion,if=buff.trueshot.up&(buff.bloodlust.up|fight_remains<120-30*talent.calling_the_shots)|fight_remains<31",
+          "comment": null,
+          "sourceLine": 258
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "potion,name=liquid_luster_2,if=potion.potion_of_recklessness&buff.bullseye.up&cooldown.trueshot.remains<10&(fight_style.dungeonroute|cooldown.explosive_shot.remains>=25|cooldown.explosive_shot.remains<10)|fight_remains<31",
+          "comment": "Bullseye's crit devalues Potion of Recklessness in execute. Additionally, a mid-fight pot means that prepotting Luster before Trueshot becomes higher value than pre-potting before combat begins. Therefore, Pot of Recklessness on pull, but during execute, Luster pot around 10s before Trueshot to maximize its benefit.",
+          "sourceLine": 259
+        }
+      ]
+    },
+    {
+      "listName": "drst",
+      "receiverIdentifier": "drst",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "black_arrow,target_if=max:debuff.spotters_mark.down|action.aimed_shot.in_flight_to_target|max_prio_damage,if=buff.precise_shots.up",
+          "comment": null,
+          "sourceLine": 261
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "explosive_shot,target_if=min:dot.explosive_shot.remains,if=set_bonus.mid2_4pc&active_enemies>1&(!max_prio_damage|!fight_style.dungeonroute)&(!talent.tactical_reload|!buff.lock_and_load.up)",
+          "comment": null,
+          "sourceLine": 262
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "explosive_shot,if=(!talent.tactical_reload|!buff.lock_and_load.up)&(!cooldown.rapid_fire.ready|buff.unstable_trigger.up|!fight_style.dungeonroute)",
+          "comment": "In DRoute, prioritize Rapid Fire over Explosive Shot to maximize the RF CDR from Explo, but never let the 2nd free Explo from Unstable Trigger lapse.",
+          "sourceLine": 263
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "volley",
+          "comment": null,
+          "sourceLine": 264
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "aimed_shot,if=buff.trueshot.up&buff.precise_shots.down&cooldown.black_arrow.ready|full_recharge_time<gcd+cast_time",
+          "comment": null,
+          "sourceLine": 265
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "trueshot,if=variable.trueshot_ready",
+          "comment": null,
+          "sourceLine": 266
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "rapid_fire",
+          "comment": null,
+          "sourceLine": 267
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "wailing_arrow",
+          "comment": null,
+          "sourceLine": 268
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "multishot,target_if=max:debuff.spotters_mark.down,if=buff.precise_shots.up&active_enemies>1&talent.aspect_of_the_hydra&(!fight_style.dungeonroute|active_enemies>2)",
+          "comment": "Multi-Shot as a PS spender on 2T with Hydra talented. In DRoute, do it on 3 or more targets.",
+          "sourceLine": 269
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "arcane_shot,target_if=max:debuff.spotters_mark.down|action.aimed_shot.in_flight_to_target|max_prio_damage,if=buff.precise_shots.up",
+          "comment": null,
+          "sourceLine": 270
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "aimed_shot,target_if=max:debuff.spotters_mark.up|max_prio_damage",
+          "comment": null,
+          "sourceLine": 271
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "black_arrow",
+          "comment": null,
+          "sourceLine": 272
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "steady_shot",
+          "comment": null,
+          "sourceLine": 273
+        }
+      ]
+    },
+    {
+      "listName": "draoe",
+      "receiverIdentifier": "draoe",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "explosive_shot,target_if=min:dot.explosive_shot.remains,if=set_bonus.mid2_4pc&(!max_prio_damage|!fight_style.dungeonroute)&(!talent.tactical_reload|!buff.lock_and_load.up)",
+          "comment": null,
+          "sourceLine": 275
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "explosive_shot,if=(!talent.tactical_reload|!buff.lock_and_load.up)&(!cooldown.rapid_fire.ready|buff.unstable_trigger.up|!fight_style.dungeonroute)",
+          "comment": "In DRoute, prioritize Rapid Fire over Explosive Shot to maximize the RF CDR from Explo, but never let the 2nd free Explo from Unstable Trigger lapse.",
+          "sourceLine": 276
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "volley",
+          "comment": null,
+          "sourceLine": 277
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "aimed_shot,target_if=max:debuff.spotters_mark.up|max_prio_damage,if=buff.trick_shots.remains>cast_time&full_recharge_time<gcd+cast_time",
+          "comment": null,
+          "sourceLine": 278
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "black_arrow,target_if=max:debuff.spotters_mark.down|action.aimed_shot.in_flight_to_target|max_prio_damage,if=buff.precise_shots.up",
+          "comment": null,
+          "sourceLine": 279
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "multishot,target_if=max:debuff.spotters_mark.down|action.aimed_shot.in_flight_to_target|max_prio_damage,if=buff.trick_shots.down",
+          "comment": null,
+          "sourceLine": 280
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "trueshot,if=variable.trueshot_ready",
+          "comment": null,
+          "sourceLine": 281
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "rapid_fire,if=buff.trick_shots.remains>execute_time",
+          "comment": null,
+          "sourceLine": 282
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "wailing_arrow,if=!cooldown.black_arrow.ready",
+          "comment": null,
+          "sourceLine": 283
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "multishot,target_if=max:debuff.spotters_mark.down|action.aimed_shot.in_flight_to_target|max_prio_damage,if=buff.precise_shots.up",
+          "comment": null,
+          "sourceLine": 284
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "aimed_shot,target_if=max:debuff.spotters_mark.up|max_prio_damage,if=buff.trick_shots.remains>cast_time",
+          "comment": null,
+          "sourceLine": 285
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "black_arrow",
+          "comment": null,
+          "sourceLine": 286
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "multishot,if=focus>cost+action.aimed_shot.cost&!max_prio_damage",
+          "comment": null,
+          "sourceLine": 287
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "steady_shot",
+          "comment": null,
+          "sourceLine": 288
+        }
+      ]
+    },
+    {
+      "listName": "sentaoe",
+      "receiverIdentifier": "sentaoe",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "explosive_shot,target_if=min:dot.explosive_shot.remains,if=set_bonus.mid2_4pc&(!max_prio_damage|!fight_style.dungeonroute)&(!talent.tactical_reload|!buff.lock_and_load.up)",
+          "comment": null,
+          "sourceLine": 290
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "explosive_shot,if=(!talent.tactical_reload|!buff.lock_and_load.up)&(!cooldown.rapid_fire.ready|buff.unstable_trigger.up|!fight_style.dungeonroute)",
+          "comment": "In DRoute, prioritize Rapid Fire over Explosive Shot to maximize the RF CDR from Explo, but never let the 2nd free Explo from Unstable Trigger lapse.",
+          "sourceLine": 291
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "volley",
+          "comment": null,
+          "sourceLine": 292
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "trueshot,if=variable.trueshot_ready",
+          "comment": null,
+          "sourceLine": 293
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "moonlight_chakram,if=buff.moonlight_chakram.remains<gcd.max",
+          "comment": null,
+          "sourceLine": 294
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "multishot,target_if=max:debuff.sentinels_mark.down,if=buff.precise_shots.up&!talent.aspect_of_the_hydra|buff.trick_shots.down",
+          "comment": null,
+          "sourceLine": 295
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "aimed_shot,target_if=max:debuff.sentinels_mark.up,if=debuff.sentinels_mark.react&buff.bulletstorm.up",
+          "comment": null,
+          "sourceLine": 296
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "rapid_fire,target_if=max:debuff.sentinels_mark.down,if=talent.unload,interrupt_if=talent.unload&ticks_remain<2&buff.precise_shots.up&!gcd.remains,interrupt_immediate=1,interrupt_global=1",
+          "comment": null,
+          "sourceLine": 297
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "rapid_fire,interrupt_if=talent.unload&ticks_remain<2&buff.precise_shots.up&!gcd.remains,interrupt_immediate=1,interrupt_global=1",
+          "comment": null,
+          "sourceLine": 298
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "aimed_shot,target_if=max:debuff.sentinels_mark.up,if=buff.trick_shots.remains>cast_time",
+          "comment": null,
+          "sourceLine": 299
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "moonlight_chakram",
+          "comment": null,
+          "sourceLine": 300
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "multishot,if=focus>cost+action.aimed_shot.cost&!max_prio_damage",
+          "comment": null,
+          "sourceLine": 301
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "steady_shot",
+          "comment": null,
+          "sourceLine": 302
+        }
+      ]
+    },
+    {
+      "listName": "sentst",
+      "receiverIdentifier": "sentst",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "explosive_shot,target_if=min:dot.explosive_shot.remains,if=set_bonus.mid2_4pc&active_enemies>1&(!max_prio_damage|!fight_style.dungeonroute)&(!talent.tactical_reload|!buff.lock_and_load.up)",
+          "comment": null,
+          "sourceLine": 304
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "explosive_shot,if=(!talent.tactical_reload|!buff.lock_and_load.up)&(!cooldown.rapid_fire.ready|buff.unstable_trigger.up|!fight_style.dungeonroute)",
+          "comment": "In DRoute, prioritize Rapid Fire over Explosive Shot to maximize the RF CDR from Explo, but never let the 2nd free Explo from Unstable Trigger lapse.",
+          "sourceLine": 305
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "volley",
+          "comment": null,
+          "sourceLine": 306
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "trueshot,if=variable.trueshot_ready",
+          "comment": null,
+          "sourceLine": 307
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "moonlight_chakram,if=buff.moonlight_chakram.remains<5",
+          "comment": null,
+          "sourceLine": 308
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "aimed_shot,if=debuff.sentinels_mark.react&buff.bulletstorm.up&active_enemies>1&fight_style.dungeonroute",
+          "comment": null,
+          "sourceLine": 309
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "rapid_fire,target_if=max:debuff.sentinels_mark.down,if=!fight_style.dungeonroute",
+          "comment": null,
+          "sourceLine": 310
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "rapid_fire",
+          "comment": null,
+          "sourceLine": 311
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "kill_shot,target_if=max:debuff.sentinels_mark.down|max_prio_damage,if=buff.precise_shots.up",
+          "comment": null,
+          "sourceLine": 312
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "multishot,target_if=max:debuff.sentinels_mark.down,if=buff.precise_shots.up&active_enemies>1&talent.aspect_of_the_hydra&(!fight_style.dungeonroute|!max_prio_damage|active_enemies>2)",
+          "comment": "Multi-Shot as a PS spender on 2T with Hydra talented. In DRoute, do it on 3 or more targets.",
+          "sourceLine": 313
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "arcane_shot,target_if=max:debuff.sentinels_mark.down|max_prio_damage,if=buff.precise_shots.up",
+          "comment": null,
+          "sourceLine": 314
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "aimed_shot,target_if=max:debuff.sentinels_mark.up",
+          "comment": null,
+          "sourceLine": 315
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "moonlight_chakram",
+          "comment": null,
+          "sourceLine": 316
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "steady_shot",
+          "comment": null,
+          "sourceLine": 317
+        }
+      ]
+    },
+    {
+      "listName": "trinkets",
+      "receiverIdentifier": "trinkets",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "use_items,check_existing=0,slots=trinket1:trinket2,if=this_trinket.has_use_buff&this_trinket.cooldown.duration%%cooldown.trueshot.duration=0&(buff.trueshot.remains>14|this_trinket.is.algethar_puzzle_box&variable.trueshot_ready&cooldown.trueshot.remains<5)",
+          "comment": "A buff trinket that lines up cleanly with Trueshot; use with Trueshot.",
+          "sourceLine": 319
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "use_items,check_existing=0,slots=trinket1:trinket2,if=this_trinket.has_use_buff&other_trinket.has_use_buff&other_trinket.cooldown.duration%%cooldown.trueshot.duration=0&(buff.trueshot.remains>14&other_trinket.cooldown.remains|cooldown.trueshot.remains>20&other_trinket.cooldown.remains<=cooldown.trueshot.remains)",
+          "comment": "A buff trinket paired with a trinket that matches the above line; use with Trueshot if the other trinket is not ready or use without Trueshot if the other trinket will come up for the next Trueshot.",
+          "sourceLine": 320
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_items,check_existing=0,slots=trinket1:trinket2,if=this_trinket.has_use_buff&(buff.trueshot.remains>14|buff.trueshot.up&fight_remains<cooldown.trueshot.remains+15|fight_remains<21)",
+          "comment": "A buff trinket, use with Trueshot or in the last ~20 seconds of the fight.",
+          "sourceLine": 321
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "use_items,check_existing=0,slots=trinket1:trinket2,if=this_trinket.has_use_damage&cooldown.trueshot.remains>20",
+          "comment": "A damage trinket; use when Trueshot has at least 20 seconds remaining on its cooldown.",
+          "sourceLine": 322
+        }
+      ]
+    }
+  ]
+}
