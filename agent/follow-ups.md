@@ -33,6 +33,8 @@ current total (5,748,495 bytes), with what each row buys.
 
 **Raised:** ONB-X4 (2026-11-05). Each item is UNKNOWN today, never guessed. No decision of the seven retained subjects resolves.
 
+**ONB-X4P (2026-11-05): not promoted.** The gate search finds nothing (`m11-promotion-evidence-gate`). The seven retained subjects, replayed at that base, give the same 1,391 UNKNOWN. A census of retained JSON files finds one more source of casts, the filtered M13-A actor 19, which has no combatant info and refuses `PROFILE_NOT_RESOLVED`. No new public entry is queued; one must follow this list (agent/architecture.md "ONB-X4P").
+
 - **The first stops.** `buff.dominion_of_argus.up` at `diabolist[1]`, which needs a reviewed aura identity, then Summon Doomguard's talent at `diabolist[4]`, a lone node absent from every retained tree. The three-way rule says UNKNOWN; a promotion needs a reviewed reading of what a complete tree proves, or the build's choice.
 - **Possibly-instant casts.** 1,245 of 1,391 decisions have no established anchor. Hand of Gul'dan and Ruination read Blazing Meteor, Demonbolt reads Demonic Core and Shadowy Inspiration, Shadow Bolt and Infernal Bolt read rows of other talents. Narrowing any needs an observed proc or a proven dead row. No retained source holds a set-bonus table.
 - **A begin in the completion's own millisecond.** Demonbolt and Call Dreadstalkers log that shape on six of the seven subjects, and the shared timeline reads it as ambiguous, since the begin may be the next press's. Whether it can be settled, for a spell with no other press near, is a shared ONB-S4 question.

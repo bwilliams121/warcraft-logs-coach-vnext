@@ -781,8 +781,9 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
   });
 
   it("ONB-X4: the gate search finds nothing for Demonology Warlock", async () => {
-    // No decision of it resolves on its seven retained subjects, and nothing of it is committed as a decision set (agent/architecture.md "ONB-X4").
-    // A later capture that changed this would fail this pin and prompt a new public entry; it would not promote anything by itself.
+    // All 1,391 decisions of its seven retained subjects stay UNKNOWN, so it was not promoted (agent/architecture.md
+    // "ONB-X4P"). A later capture that changed this would fail this pin and prompt a new public entry; it would not
+    // promote anything by itself.
     const tiers = await tiersPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "warlock/demonology");
     if (module === undefined) throw new Error("no module for warlock/demonology");

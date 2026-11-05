@@ -224,6 +224,8 @@ describe("an unsupported specialization", () => {
       // Registered INTERNAL_ONLY in ONB-X1, not promoted by ONB-X1P. "Mage" is the token its registration names; another
       // spelling would pass here for the wrong reason.
       ["Mage", "Fire"],
+      // Registered INTERNAL_ONLY in ONB-X4, not promoted by ONB-X4P. The same class token as Warlock/Destruction above.
+      ["Warlock", "Demonology"],
     ]) {
       const { analyze, ingest, deps } = spies(className, specName);
       const result = await analyzeFight(REQUEST, deps);
