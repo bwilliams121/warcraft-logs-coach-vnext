@@ -261,6 +261,7 @@ describe("what the tree registers today", () => {
     expect(DISCOVERED.map((found) => [found.path, found.exportName, found.registration.exposure])).toEqual([
       ["src/specs/deathknight/blood/registration.ts", "BLOOD_DEATH_KNIGHT_REGISTRATION", "PUBLIC"],
       ["src/specs/deathknight/frost/registration.ts", "FROST_DEATH_KNIGHT_REGISTRATION", "INTERNAL_ONLY"],
+      ["src/specs/deathknight/unholy/registration.ts", "UNHOLY_DEATH_KNIGHT_REGISTRATION", "INTERNAL_ONLY"],
       [
         "src/specs/demonhunter/devourer/registration.ts",
         "DEVOURER_DEMON_HUNTER_REGISTRATION",

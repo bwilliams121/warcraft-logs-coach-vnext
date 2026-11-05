@@ -2983,6 +2983,98 @@ const WARLOCK_DESTRUCTION_TARGET = {
 };
 
 /**
+ * The Unholy Death Knight profile (ONB-X5): the talents the pinned list reads as `talent.<name>`, and the talents an action of
+ * that list is built on (an action on `not_found()` is background, action.cpp:541-549). The list reads no hero talent and no `hero_tree.*`:
+ * the hero trees are here only so a build's tree is reported from entry membership.
+ */
+const DEATHKNIGHT_UNHOLY_TARGET = {
+  datasetId: "SIMC_TRAIT_DEATHKNIGHT_UNHOLY_TALENTS",
+  classId: 6,
+  specId: 252,
+  defaultOut: "src/data/game/deathknight-unholy-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. That `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node is corroborated for Unholy Death Knight on one real subject: rXAfw9t1q8YpmkKD fight 13 actor 18.",
+  requiredTalents: [
+    {
+      simcName: "army_of_the_dead",
+      displayNameEn: "Army of the Dead",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:15034 talent.unholy.army_of_the_dead = find_talent_spell( talent_tree::SPECIALIZATION, "Army of the Dead" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "blightburst",
+      displayNameEn: "Blightburst",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:15046 talent.unholy.blightburst = find_talent_spell( talent_tree::SPECIALIZATION, "Blightburst" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "cycle_of_death",
+      displayNameEn: "Cycle of Death",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:15032 talent.unholy.cycle_of_death = find_talent_spell( talent_tree::SPECIALIZATION, "Cycle of Death" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "dark_transformation",
+      displayNameEn: "Dark Transformation",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:15018 talent.unholy.dark_transformation = find_talent_spell( talent_tree::SPECIALIZATION, "Dark Transformation" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "festering_scythe",
+      displayNameEn: "Festering Scythe",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:15026 talent.unholy.festering_scythe = find_talent_spell( talent_tree::SPECIALIZATION, "Festering Scythe" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "outbreak",
+      displayNameEn: "Outbreak",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:15011 talent.unholy.outbreak = find_talent_spell( talent_tree::SPECIALIZATION, "Outbreak" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "putrefy",
+      displayNameEn: "Putrefy",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:15017 talent.unholy.putrefy = find_talent_spell( talent_tree::SPECIALIZATION, "Putrefy" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "reaping",
+      displayNameEn: "Reaping",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:15035 talent.unholy.reaping = find_talent_spell( talent_tree::SPECIALIZATION, "Reaping" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "scourge_strike",
+      displayNameEn: "Scourge Strike",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:15013 talent.unholy.scourge_strike = find_talent_spell( talent_tree::SPECIALIZATION, "Scourge Strike" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "soul_reaper",
+      displayNameEn: "Soul Reaper",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:15028 talent.unholy.soul_reaper = find_talent_spell( talent_tree::SPECIALIZATION, "Soul Reaper" );; the pinned list reads it or an action of the list is built on it',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data` (trait_data.inc:4398-4399). Deathbringer is not an Unholy tree.
+    { simcName: "sanlayn", subTreeId: 31 },
+    { simcName: "rider_of_the_apocalypse", subTreeId: 32 },
+  ],
+};
+
+/**
  * The Frost Death Knight profile (ONB-B2): (a) the talents the pinned Frost list reads as
  * `talent.<name>`, and (b) the talents an action of that list is built on (an action on
  * `not_found()` is background, action.cpp:541-549). `chosen_of_frostbrood` is NOT here: it is a
@@ -3799,6 +3891,7 @@ export const TARGETS = {
   "demonhunter-havoc": DEMONHUNTER_HAVOC_TARGET,
   "druid-feral": DRUID_FERAL_TARGET,
   "demonhunter-devourer": DEMONHUNTER_DEVOURER_TARGET,
+  "deathknight-unholy": DEATHKNIGHT_UNHOLY_TARGET,
   "deathknight-frost": DEATHKNIGHT_FROST_TARGET,
   "shaman-enhancement": SHAMAN_ENHANCEMENT_TARGET,
   "warrior-arms": WARRIOR_ARMS_TARGET,

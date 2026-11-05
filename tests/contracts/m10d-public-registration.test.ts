@@ -93,6 +93,7 @@ describe("the five sites agree", () => {
       "evoker/devastation",
       "demonhunter/vengeance",
       "warlock/demonology",
+      "deathknight/unholy",
     ]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
@@ -188,6 +189,7 @@ describe("the five sites agree", () => {
       ["evoker/devastation", "INTERNAL_ONLY"],
       ["demonhunter/vengeance", "INTERNAL_ONLY"],
       ["warlock/demonology", "INTERNAL_ONLY"],
+      ["deathknight/unholy", "INTERNAL_ONLY"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -311,6 +313,7 @@ describe("the complete-catalog helper", () => {
       "evoker-devastation-observed-decisions": 0,
       "demonhunter-vengeance-observed-decisions": 0,
       "warlock-demonology-observed-decisions": 0,
+      "deathknight-unholy-observed-decisions": 0,
     });
   });
 });

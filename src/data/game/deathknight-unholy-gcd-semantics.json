@@ -1,0 +1,306 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_DEATHKNIGHT_UNHOLY_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/sc_death_knight.cpp",
+        "sha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "byteLength": 636861
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-05",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 42650,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Army of the Dead"
+    },
+    {
+      "abilityGameId": 43265,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Death and Decay"
+    },
+    {
+      "abilityGameId": 47541,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Death Coil"
+    },
+    {
+      "abilityGameId": 55090,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Scourge Strike"
+    },
+    {
+      "abilityGameId": 77575,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Outbreak"
+    },
+    {
+      "abilityGameId": 85948,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Festering Strike"
+    },
+    {
+      "abilityGameId": 207317,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Epidemic"
+    },
+    {
+      "abilityGameId": 343294,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Soul Reaper"
+    },
+    {
+      "abilityGameId": 383269,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Graveyard"
+    },
+    {
+      "abilityGameId": 433895,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Vampiric Strike"
+    },
+    {
+      "abilityGameId": 458128,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Festering Scythe"
+    },
+    {
+      "abilityGameId": 1233448,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Dark Transformation"
+    },
+    {
+      "abilityGameId": 1242174,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Necrotic Coil"
+    },
+    {
+      "abilityGameId": 1247378,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Putrefy"
+    },
+    {
+      "abilityGameId": 1271967,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Blightfall"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "army_of_the_dead",
+      "candidateAbilityGameIds": [42650],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / army_of_the_dead_t",
+        "startLine": 14401,
+        "endLine": 14402,
+        "sourceNote": "create_action dispatches \"army_of_the_dead\" to army_of_the_dead_t: built on p->talent.unholy.army_of_the_dead (:8819); find_talent_spell( SPECIALIZATION, \"Army of the Dead\" ) at :15034, trait row spell 42650.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "dark_transformation",
+      "candidateAbilityGameIds": [1233448, 1271967],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / dark_transformation_t",
+        "startLine": 14403,
+        "endLine": 14404,
+        "sourceNote": "create_action dispatches \"dark_transformation\" to dark_transformation_t: built on p->talent.unholy.dark_transformation (:8700); find_talent_spell( SPECIALIZATION, \"Dark Transformation\" ) at :15018, trait row spell 1233448. The specialization table's 325554 \"Rank 2\" and the buff rows 63560, 344955 and 1235391 are not presses. The constructor sets trigger_gcd = 0_ms (:8724), over the record's 1500 ms, a lane src/data/game/deathknight-unholy-gcd-semantics.ts reviews. Under the Blightfall buff its replacement (:8722) runs blightfall_t on spell.blightfall (1271967, :15329), which has no such override, so the token's lane depends on the buff. The list holds no blightfall token.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "death_and_decay",
+      "candidateAbilityGameIds": [43265],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / death_and_decay_t",
+        "startLine": 14405,
+        "endLine": 14406,
+        "sourceNote": "create_action dispatches \"death_and_decay\" to death_and_decay_t: built on p->spec.death_and_decay (:9725); find_spell( 43265 ) at :14810.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "death_coil",
+      "candidateAbilityGameIds": [47541, 1242174],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / death_coil_t",
+        "startLine": 14407,
+        "endLine": 14408,
+        "sourceNote": "create_action dispatches \"death_coil\" to death_coil_t: built on p->spec.death_coil (:9899); find_class_spell( \"Death Coil\" ) at :14807, row 47541. Under the Forbidden Knowledge buff the constructor's replacement (:9907, the rule at :6033-6055) runs necrotic_coil_t on spell.necrotic_coil_action (1242174, :15336), so an observed Necrotic Coil is this token executing. The list holds no necrotic_coil token.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "epidemic",
+      "candidateAbilityGameIds": [207317, 383269],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / epidemic_t",
+        "startLine": 14409,
+        "endLine": 14410,
+        "sourceNote": "create_action dispatches \"epidemic\" to epidemic_t: built on p->spec.epidemic (:10370); find_specialization_spell( \"Epidemic\" ) at :14838, row 207317. Under the Forbidden Knowledge buff the constructor's replacement (:10375) runs graveyard_t on spell.graveyard_action (383269, :15339). The list holds no graveyard token.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "festering_strike",
+      "candidateAbilityGameIds": [85948, 458128],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / festering_strike_t",
+        "startLine": 14411,
+        "endLine": 14412,
+        "sourceNote": "create_action dispatches \"festering_strike\" to festering_strike_t: built on p->spec.festering_strike (:10452); find_specialization_spell( \"Festering Strike\" ) at :14835, row 85948. Under the Festering Scythe buff the constructor's replacement (:10457) runs festering_scythe_t on spell.festering_scythe (458128, :15308). The list holds no festering_scythe token.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "outbreak",
+      "candidateAbilityGameIds": [77575],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / outbreak_t",
+        "startLine": 14413,
+        "endLine": 14414,
+        "sourceNote": "create_action dispatches \"outbreak\" to outbreak_t: built on p->talent.unholy.outbreak (:11985); find_talent_spell( SPECIALIZATION, \"Outbreak\" ) at :15011, trait row spell 77575.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "putrefy",
+      "candidateAbilityGameIds": [1247378],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / putrefy_t",
+        "startLine": 14417,
+        "endLine": 14418,
+        "sourceNote": "create_action dispatches \"putrefy\" to putrefy_t: built on p->talent.unholy.putrefy (:12169); find_talent_spell( SPECIALIZATION, \"Putrefy\" ) at :15017, trait row spell 1247378. Rows 390220, 1270443 and 1277016 are its damage children, not presses.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "scourge_strike",
+      "candidateAbilityGameIds": [55090, 433895],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / scourge_strike_t",
+        "startLine": 14415,
+        "endLine": 14416,
+        "sourceNote": "create_action dispatches \"scourge_strike\" to scourge_strike_t: built on p->talent.unholy.scourge_strike (:12631); find_talent_spell( SPECIALIZATION, \"Scourge Strike\" ) at :15013, trait row spell 55090. Under the San'layn Vampiric Strike talent the constructor's replacement (:12636) runs vampiric_strike_unholy_t on spell.vampiric_strike (433895, :15372). 445508 is Nazgrim's, a pet's, and no token binds it.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "soul_reaper",
+      "candidateAbilityGameIds": [343294],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "death_knight_t::create_action / soul_reaper_t",
+        "startLine": 14419,
+        "endLine": 14420,
+        "sourceNote": "create_action dispatches \"soul_reaper\" to soul_reaper_t: built on p->talent.unholy.soul_reaper (:12659); find_talent_spell( SPECIALIZATION, \"Soul Reaper\" ) at :15028, trait row spell 343294.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "auto_attack",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "symbol": "auto_attack_t::auto_attack_t",
+        "line": 7753,
+        "sourceNote": "auto_attack_t is built on death_knight_melee_attack_t( \"auto_attack\", p ) with no spell data (sc_death_knight.cpp:7732-7733) and its constructor assigns trigger_gcd = 0_ms."
+      }
+    },
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

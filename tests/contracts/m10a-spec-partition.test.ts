@@ -115,6 +115,7 @@ describe("the known specialization ids are exactly partitioned", () => {
       "evoker/devastation",
       "demonhunter/vengeance",
       "warlock/demonology",
+      "deathknight/unholy",
     ]);
     for (const id of INTERNAL_ONLY_SPEC_IDS) {
       expect(isSpecId(id), id).toBe(true);
@@ -142,7 +143,6 @@ describe("the known specialization ids are exactly partitioned", () => {
       "Paladin/Protection",
       "Paladin/Retribution",
       "Paladin/Holy",
-      "deathknight/unholy",
       "Monk/Mistweaver",
       "monk/windwalker",
       "Monk/Brewmaster",

@@ -188,6 +188,13 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
     sourceId: 11,
     archive: true,
   },
+  // ONB-X5: actor 18 of the committed rXAf fight 13 context, the Unholy Death Knight the census found.
+  "deathknight/unholy": {
+    artifactId: "wcl-fight-context-rxaf-fight-13",
+    fightId: 13,
+    sourceId: 18,
+    archive: true,
+  },
   // ONB-D3: actor 6 of the M13-A fight context, the Frost Mage the committed evidence archive
   // context reports. That capture's casts are filtered and carry no combatant info.
   "mage/frost": {
@@ -524,6 +531,7 @@ describe("what the tree exports today", () => {
       ["BLOOD_DEATH_KNIGHT_MODULE", "deathknight/blood", "PUBLIC", 0],
       // ONB-B2: a Cohort B follower, INTERNAL_ONLY.
       ["FROST_DEATH_KNIGHT_MODULE", "deathknight/frost", "INTERNAL_ONLY", 0],
+      ["UNHOLY_DEATH_KNIGHT_MODULE", "deathknight/unholy", "INTERNAL_ONLY", 0],
       // ONB-B3: its own representative, INTERNAL_ONLY.
       ["DEVOURER_DEMON_HUNTER_MODULE", "demonhunter/devourer", "INTERNAL_ONLY", 0],
       // ONB-A1: Cohort A's representative, INTERNAL_ONLY.

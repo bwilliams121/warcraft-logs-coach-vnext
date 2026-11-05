@@ -2055,11 +2055,13 @@ unresolved and is not a blocker. Real evidence is retained (fight 48).
 ### ONB-X4P: Demonology Warlock (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-X4
 branch: autopilot/onb-x4p
 wcl: NONE
 publicContract: EXPECTED
+pr: 84
+mergeSha: 6e08a90d1db7545c53ccc8ce406c6ca831a82c30
 ```
 
 **Outcome.** It does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Its seven retained subjects, all Diabolist, replayed offline, give 1,391 decisions, 0 MATCH, 0 REJECTED, all UNKNOWN, output byte-identical to ONB-X4's. A census of 5,714 retained files finds one more source of casts, the filtered M13-A actor 19, which has no combatant info and refuses `PROFILE_NOT_RESOLVED`. Evidence is not its gap, so it is not on ONB-EV, and ONB-S3 alone moves nothing. A promotion after its own inputs, first `buff.dominion_of_argus.up` and Summon Doomguard's lone node, is a new public entry through the unchanged gates (agent/architecture.md "ONB-X4P"; agent/follow-ups.md "After ONB-X4").
@@ -2067,8 +2069,9 @@ publicContract: EXPECTED
 ### ONB-X5: Unholy Death Knight (internal, own representative)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-S2, ONB-S6
+branch: autopilot/onb-x5
 wcl: NONE
 publicContract: NONE
 ```
@@ -2077,6 +2080,8 @@ publicContract: NONE
 variable-heavy on top of `run_action_list` dispatch. It uses ONB-S6 and
 ONB-S2, and no retained events are known, so record it for ONB-EV if
 needed.
+
+**Outcome.** Registered INTERNAL_ONLY, and no decision resolves. Two of the scope's premises were wrong: a census finds one retained subject, and the pinned list uses `call_action_list` only. rXAf fight 13 actor 18, first 165 s, Rider of the Apocalypse, gives 147 decisions, 0 MATCH, 0 REJECTED, all UNKNOWN, refused at `default[0] auto_attack` with Outbreak, Army of the Dead and Dark Transformation open behind it. It reads the shared pet state at each decision's own cast. No row proves a floor or a ceiling, since the wire contradicts the Lord of the Dead's pinned 15,000 ms, and army ghouls share a gameID with every other Lesser Ghoul, so the pets move no decision. Evidence is not its first gap, so it is not on ONB-EV. No shared code changed, and ONB-S3 alone moves nothing (agent/architecture.md "ONB-X5"; agent/follow-ups.md "After ONB-X5").
 
 ### ONB-X5P: Unholy Death Knight (public)
 

@@ -246,6 +246,9 @@ describe("M5 invents no combat state", () => {
     // ONB-X4: reads no aura at all. Its `presenceAt` is the shared pet state's (ONB-S6), the method of the same name, and this
     // text guard cannot tell them apart. Its companion test is tests/unit/specs/onb-x4-demonology-warlock.test.ts.
     "src/specs/warlock/demonology/pet-profile.ts",
+    // ONB-X5: reads no aura at all. Its `presenceAt` is the shared pet state's (ONB-S6), the method of the same name, and this
+    // text guard cannot tell them apart. Its companion test is tests/unit/specs/onb-x5-unholy-death-knight.test.ts.
+    "src/specs/deathknight/unholy/pet-profile.ts",
   ] as const;
 
   const AURA_READING_MODULE = AURA_READING_MODULES[0];
@@ -487,6 +490,7 @@ describe("M5 forms no unearned verdict", () => {
       "src/specs/evoker/devastation/observed-analysis.ts",
       "src/specs/demonhunter/vengeance/observed-analysis.ts",
       "src/specs/warlock/demonology/observed-analysis.ts",
+      "src/specs/deathknight/unholy/observed-analysis.ts",
       "src/specs/rogue/outlaw/observed-analysis.ts",
       "src/specs/shaman/enhancement/observed-analysis.ts",
       "src/specs/warrior/protection/domains.ts",
@@ -506,6 +510,7 @@ describe("M5 forms no unearned verdict", () => {
       "src/specs/evoker/devastation/domains.ts",
       "src/specs/demonhunter/vengeance/domains.ts",
       "src/specs/warlock/demonology/domains.ts",
+      "src/specs/deathknight/unholy/domains.ts",
       "src/specs/rogue/outlaw/domains.ts",
       "src/specs/shaman/enhancement/domains.ts",
     ];

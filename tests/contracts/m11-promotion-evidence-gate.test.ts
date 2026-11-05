@@ -761,6 +761,7 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
       "evoker/devastation",
       "demonhunter/vengeance",
       "warlock/demonology",
+      "deathknight/unholy",
     ]);
     const internal = PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY");
     expect(internal.map((row) => row.specId)).toEqual([...INTERNAL_ONLY_SPEC_IDS]);
@@ -778,6 +779,17 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
       expect(readiness.qualifyingAssertions, specId).toEqual([]);
       expect(readiness.evidenceReady, specId).toBe(false);
     }
+  });
+
+  it("ONB-X5: the gate search finds nothing for Unholy Death Knight", async () => {
+    // No decision of it resolves on its one retained subject, and nothing of it is committed as a decision set (agent/architecture.md "ONB-X5").
+    // A later capture that changed this would fail this pin and prompt a new public entry; it would not promote anything by itself.
+    const tiers = await tiersPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "deathknight/unholy");
+    if (module === undefined) throw new Error("no module for deathknight/unholy");
+    const readiness = evaluate(tiers, "deathknight/unholy", "INTERNAL_ONLY", internalPairing(module));
+    expect(readiness.qualifyingAssertions).toEqual([]);
+    expect(readiness.evidenceReady).toBe(false);
   });
 
   it("ONB-X4: the gate search finds nothing for Demonology Warlock", async () => {

@@ -29,6 +29,23 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After ONB-X5: what the Unholy Death Knight slice does not establish
+
+**Raised:** ONB-X5 (2026-11-05). Each item is UNKNOWN today, never guessed. No decision of the one retained subject resolves.
+
+- **The first stops.** The swing's entry at `default[0]`, whose readiness is unobserved, then `cooldowns[2] outbreak`, which reads `dot.dread_plague.active_dots`, `dot.virulent_plague.active_dots`, `gcd.max`, `time`, `cooldown.putrefy.remains`, `fight_remains` and `raid_event.adds.*`. Army of the Dead and Dark Transformation sit open behind it, on `variable.st_planning` and `variable.adds_remain`, and those read the enemy count. ONB-S3 alone moves nothing.
+- **Dark Transformation's token has no proven lane.** Its press is off the GCD and its Blightfall replacement is on it, and which one a press would be reads a buff nothing binds. Binding `buff.blightfall.up` needs a reviewed aura identity, and a contract for the off-GCD branch needs a review of what the press writes: pet energy, buffs, a Rider and a Soul Reaper reset.
+- **One subject, one hero tree.** rXAf fight 13 actor 18, first 165 s, Rider of the Apocalypse. No retained subject is San'layn, so Vampiric Strike's binding is read from the pinned module alone, and its list reads no hero talent to check it against. A second subject and a whole fight need a capture, which is ONB-EV's owner decision.
+- **Pets with no stated owner.** The retained fight's catalog holds actor 273 of the Lord of the Dead's gameID, so `OWNERSHIP_NOT_STATED` refuses it, as "After ONB-S6" says.
+- **A bound for the Lord of the Dead.** The pinned 15,000 ms is contradicted by the wire's casts, and 1292072's 20,000 ms is not what the spawner reads. Why the wire runs past the pin is not read. Without a floor nothing is ever PRESENT, and without a ceiling nothing is ever gone.
+- **`pet.army_ghoul.active`.** The log gives army ghouls and ordinary ghouls one gameID. Telling them apart would need a mapping by summon ability, and the shared state maps by gameID only. Two ids of the retained summons, 1282535 and 1294029, have no row in the pinned data, so such a mapping has more to read first.
+- **`pet.gargoyle.active`.** Its gameID is uncorroborated: no retained catalog holds actor 27829. A build proving Summon Gargoyle not taken could prove it false, because the module spawns one only under that talent. That is not bound, since it moves nothing behind today's stops.
+- **`%` still does not parse**, so `aoe[0] death_and_decay` refuses as a whole, as "After ONB-X3" records for another list. `duration%2` is the only in-domain one here.
+- **`target_if` on Soul Reaper**, `festering_strike` and `death_coil` in the area list. `target_if=min:health.pct` needs the enemy set.
+- **Actors of other lists are not read.** The list reads no Abomination, magus or Rider, so those are unclassified owned actors, disclosed and never assigned. Pet damage and uptime are not reconstructed.
+- **Arcane Pulse stays out of the shared table**, as "After ONB-A2" records, and this specialization classifies it locally. Frost's list has it too, at a line its real scans do not reach, so Frost is unchanged.
+- **The stale manifest paths** recorded in "After ONB-X3" are unchanged.
+
 ## After ONB-X4: what the Demonology Warlock slice does not establish
 
 **Raised:** ONB-X4 (2026-11-05). Each item is UNKNOWN today, never guessed. No decision of the seven retained subjects resolves.
