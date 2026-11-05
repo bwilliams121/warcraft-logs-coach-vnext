@@ -96,6 +96,7 @@ import { AFFLICTION_WARLOCK_REGISTRATION } from "../specs/warlock/affliction/reg
 import { MARKSMANSHIP_HUNTER_REGISTRATION } from "../specs/hunter/marksmanship/registration.js";
 import { FIRE_MAGE_REGISTRATION } from "../specs/mage/fire/registration.js";
 import { DEVASTATION_EVOKER_REGISTRATION } from "../specs/evoker/devastation/registration.js";
+import { VENGEANCE_DEMON_HUNTER_REGISTRATION } from "../specs/demonhunter/vengeance/registration.js";
 import { DESTRUCTION_WARLOCK_REGISTRATION } from "../specs/warlock/destruction/registration.js";
 import { OUTLAW_ROGUE_REGISTRATION } from "../specs/rogue/outlaw/registration.js";
 import { SUBTLETY_ROGUE_REGISTRATION } from "../specs/rogue/subtlety/registration.js";
@@ -536,6 +537,8 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   FIRE_MAGE_REGISTRATION,
   // INTERNAL_ONLY since ONB-X2: its own representative. No decision of it resolves.
   DEVASTATION_EVOKER_REGISTRATION,
+  // INTERNAL_ONLY since ONB-X3: its own representative, with no retained evidence. No decision of it resolves.
+  VENGEANCE_DEMON_HUNTER_REGISTRATION,
 ]);
 
 /**

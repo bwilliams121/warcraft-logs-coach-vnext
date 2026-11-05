@@ -200,6 +200,7 @@ describe("a Retribution Paladin alone", () => {
       "hunter-marksmanship-observed-decisions": 0,
       "mage-fire-observed-decisions": 0,
       "evoker-devastation-observed-decisions": 0,
+      "demonhunter-vengeance-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
     expectRetributionCell(cellOf(run.aggregate.cells, RETRIBUTION));
@@ -261,6 +262,7 @@ describe("a mixed roster — Assassination, Protection, Retribution, Beast Maste
       "hunter-marksmanship-observed-decisions": 0,
       "mage-fire-observed-decisions": 0,
       "evoker-devastation-observed-decisions": 0,
+      "demonhunter-vengeance-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
   });

@@ -522,9 +522,9 @@
     {
       "specId": "demonhunter/vengeance",
       "cohort": "C_RUN_ACTION_LIST_DISPATCH",
-      "currentAnalyzerStatus": "UNREGISTERED",
+      "currentAnalyzerStatus": "INTERNAL_ONLY",
       "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
-      "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
+      "authorityAuditStatus": "AUTHORITY_AUDITED",
       "deepDiveInventoryStatus": "UNASSESSED",
       "questions": []
     },

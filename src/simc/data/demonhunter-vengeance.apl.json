@@ -1,0 +1,1345 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_DEMONHUNTER_VENGEANCE",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "demonhunter",
+    "specName": "vengeance"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "UNKNOWN",
+    "sourcePath": "engine/class_modules/apl/apl_demon_hunter.cpp",
+    "sourceSha256": "c95ab0af6cfce46c64304903a7e8c65417beb01ff69f661beb727b9e23b4b389",
+    "sourceByteLength": 56505,
+    "regionStartMarker": "//vengeance_apl_start",
+    "regionEndMarker": "//vengeance_apl_end",
+    "extractedOn": "2026-11-05",
+    "extractorVersion": 1,
+    "regionSha256": "ea44428b9dc9c4c27284a81083f42418229f882b49ead6053c06093cb18c6b85",
+    "livePtrPolicy": "PTR_MARKERS_EMPTY",
+    "dispatchSource": {
+      "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+      "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0"
+    }
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "variable,name=single_target,value=spell_targets.spirit_bomb=1",
+          "comment": null,
+          "sourceLine": 354
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "variable,name=aoe,value=spell_targets.spirit_bomb>=3",
+          "comment": null,
+          "sourceLine": 355
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=execute,value=fight_remains<20",
+          "comment": null,
+          "sourceLine": 356
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=is_dungeon,value=fight_style.dungeonroute|fight_style.dungeonslice",
+          "comment": "Dungeon Route",
+          "sourceLine": 357
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "cycling_variable,name=dung_pull_ttd,op=reset",
+          "comment": null,
+          "sourceLine": 358
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "cycling_variable,name=dung_pull_ttd,op=max,value=target.time_to_die",
+          "comment": null,
+          "sourceLine": 359
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "variable,name=dung_next_pull,value=variable.is_dungeon&raid_event.adds.exists&raid_event.pull.remains<12&(raid_event.adds.has_boss|raid_event.adds.count>=3)",
+          "comment": null,
+          "sourceLine": 360
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "variable,name=dung_cd_ok,value=variable.execute|!variable.is_dungeon|(variable.dung_pull_ttd>12&!variable.dung_next_pull)",
+          "comment": "Safe to use 40-60s CDs (SC, SoS, FD, buff trinkets)",
+          "sourceLine": 361
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "variable,name=dung_meta_ok,value=variable.execute|!variable.is_dungeon|(variable.dung_pull_ttd>(15-5*hero_tree.annihilator)&!variable.dung_next_pull)",
+          "comment": "Stricter guard for Meta (2min CD) - Anni gets lower bar for UR proc windows",
+          "sourceLine": 362
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "variable,name=trinket_1_buffs,value=trinket.1.has_use_buff|(trinket.1.has_buff.agility|trinket.1.has_buff.mastery|trinket.1.has_buff.versatility|trinket.1.has_buff.haste|trinket.1.has_buff.crit|trinket.1.has_buff.attack_power)",
+          "comment": null,
+          "sourceLine": 363
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "variable,name=trinket_2_buffs,value=trinket.2.has_use_buff|(trinket.2.has_buff.agility|trinket.2.has_buff.mastery|trinket.2.has_buff.versatility|trinket.2.has_buff.haste|trinket.2.has_buff.crit|trinket.2.has_buff.attack_power)",
+          "comment": null,
+          "sourceLine": 364
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "variable,name=trinket_priority,op=setif,value=2,value_else=1,condition=!variable.trinket_1_buffs&variable.trinket_2_buffs|variable.trinket_2_buffs&((trinket.2.proc.any_dps.duration)*trinket.2.proc.any_dps.default_value)>((trinket.1.proc.any_dps.duration)*trinket.1.proc.any_dps.default_value)",
+          "comment": "Rank buff trinkets by total stat value (duration * proc value)",
+          "sourceLine": 365
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "variable,name=damage_trinket_priority,op=setif,value=2,value_else=1,condition=!variable.trinket_1_buffs&!variable.trinket_2_buffs&trinket.2.ilvl>=trinket.1.ilvl",
+          "comment": "Non-buff damage trinkets: which slot has higher ilvl",
+          "sourceLine": 366
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "variable,name=fiery_demise_active,value=talent.fiery_demise&dot.fiery_brand.ticking",
+          "comment": null,
+          "sourceLine": 367
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "variable,name=fire_cd_soon,value=cooldown.soul_carver.remains>?cooldown.fel_devastation.remains>?cooldown.sigil_of_spite.remains<(8+talent.charred_flesh.rank)",
+          "comment": null,
+          "sourceLine": 368
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "variable,name=fragment_target,op=setif,value=5+apex.2,value_else=variable.fiery_demise_active*3+!variable.fiery_demise_active*(5-buff.metamorphosis.up),condition=hero_tree.aldrachi_reaver",
+          "comment": "Fragment target: AR uses AotG scaling; Anni uses 3 during Brand, 4 in Meta, 5 baseline",
+          "sourceLine": 369
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "auto_attack",
+          "comment": null,
+          "sourceLine": 370
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "retarget_auto_attack,target_if=min:debuff.reavers_mark.remains,if=hero_tree.aldrachi_reaver",
+          "comment": null,
+          "sourceLine": 371
+        },
+        {
+          "priorityOrdinal": 18,
+          "actionStringVerbatim": "disrupt,if=target.debuff.casting.react",
+          "comment": null,
+          "sourceLine": 372
+        },
+        {
+          "priorityOrdinal": 19,
+          "actionStringVerbatim": "infernal_strike,use_off_gcd=1",
+          "comment": null,
+          "sourceLine": 373
+        },
+        {
+          "priorityOrdinal": 20,
+          "actionStringVerbatim": "demon_spikes,use_off_gcd=1,if=!buff.demon_spikes.up&in_combat",
+          "comment": null,
+          "sourceLine": 374
+        },
+        {
+          "priorityOrdinal": 21,
+          "actionStringVerbatim": "run_action_list,name=ar,if=hero_tree.aldrachi_reaver",
+          "comment": null,
+          "sourceLine": 375
+        },
+        {
+          "priorityOrdinal": 22,
+          "actionStringVerbatim": "run_action_list,name=anni,if=hero_tree.annihilator",
+          "comment": null,
+          "sourceLine": 376
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": null,
+          "sourceLine": 349
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "sigil_of_flame",
+          "comment": null,
+          "sourceLine": 350
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "sigil_of_spite,if=hero_tree.aldrachi_reaver|talent.soul_carver",
+          "comment": "AR always. Anni only with Soul Carver (non-SC builds lose DPS from pre-pull frag misalignment)",
+          "sourceLine": 351
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "immolation_aura",
+          "comment": null,
+          "sourceLine": 352
+        }
+      ]
+    },
+    {
+      "listName": "ar",
+      "receiverIdentifier": "ar",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "variable,name=frac_souls,value=2+buff.metamorphosis.up",
+          "comment": "TTNG MODEL: GCDs until next glaive, accounting for SC, SoS, and passive frags",
+          "sourceLine": 378
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "variable,name=base_deficit,value=(20-buff.art_of_the_glaive.stack-soul_fragments.total)<?0",
+          "comment": null,
+          "sourceLine": 379
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=eff_recharge,value=cooldown.fracture.remains+(cooldown.fracture.charges>=2)*cooldown.fracture.duration",
+          "comment": null,
+          "sourceLine": 380
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=passive_per_sec,value=0.30+(talent.fallout&buff.immolation_aura.up)*0.30*spell_targets.spirit_bomb",
+          "comment": null,
+          "sourceLine": 381
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=fracs_base,value=variable.base_deficit%variable.frac_souls",
+          "comment": null,
+          "sourceLine": 382
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "variable,name=fracs_base,op=ceil",
+          "comment": null,
+          "sourceLine": 383
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "variable,name=base_gen_time,value=(variable.fracs_base>0)*((variable.fracs_base<=cooldown.fracture.charges)*variable.fracs_base*(1+apex.3)*gcd.max+(variable.fracs_base>cooldown.fracture.charges)*((cooldown.fracture.charges*(1+apex.3)*gcd.max<?variable.eff_recharge)+((variable.fracs_base-cooldown.fracture.charges-1)<?0)*cooldown.fracture.duration+gcd.max))",
+          "comment": null,
+          "sourceLine": 384
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "variable,name=sc1,value=talent.soul_carver&cooldown.soul_carver.remains<variable.base_gen_time",
+          "comment": "Pass 1: subtract SC (6 frags) and SoS (3 frags) if they arrive within the gen window",
+          "sourceLine": 385
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "variable,name=net1,value=(variable.base_deficit-variable.sc1*6)<?0",
+          "comment": null,
+          "sourceLine": 386
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "variable,name=fracs1,value=variable.net1%variable.frac_souls",
+          "comment": null,
+          "sourceLine": 387
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "variable,name=fracs1,op=ceil",
+          "comment": null,
+          "sourceLine": 388
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "variable,name=gt1,value=(variable.fracs1>0)*((variable.fracs1<=cooldown.fracture.charges)*variable.fracs1*(1+apex.3)*gcd.max+(variable.fracs1>cooldown.fracture.charges)*((cooldown.fracture.charges*(1+apex.3)*gcd.max<?variable.eff_recharge)+((variable.fracs1-cooldown.fracture.charges-1)<?0)*cooldown.fracture.duration+gcd.max))",
+          "comment": null,
+          "sourceLine": 389
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "variable,name=sos1,value=talent.sigil_of_spite&cooldown.sigil_of_spite.remains<variable.gt1",
+          "comment": null,
+          "sourceLine": 390
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "variable,name=N1,value=(variable.net1-variable.sos1*3)<?0",
+          "comment": null,
+          "sourceLine": 391
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "variable,name=fracs_np,value=variable.N1%variable.frac_souls",
+          "comment": null,
+          "sourceLine": 392
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "variable,name=fracs_np,op=ceil",
+          "comment": null,
+          "sourceLine": 393
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "variable,name=gt_np,value=(variable.fracs_np>0)*((variable.fracs_np<=cooldown.fracture.charges)*variable.fracs_np*(1+apex.3)*gcd.max+(variable.fracs_np>cooldown.fracture.charges)*((cooldown.fracture.charges*(1+apex.3)*gcd.max<?variable.eff_recharge)+((variable.fracs_np-cooldown.fracture.charges-1)<?0)*cooldown.fracture.duration+gcd.max))",
+          "comment": null,
+          "sourceLine": 394
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "variable,name=T1,value=gcd.max+variable.gt_np+variable.sc1*gcd.max+variable.sos1*gcd.max",
+          "comment": "T1: no-passive reference time (overhead GCD + fracture gen + SC/SoS cast GCDs)",
+          "sourceLine": 395
+        },
+        {
+          "priorityOrdinal": 18,
+          "actionStringVerbatim": "variable,name=sc_prop,value=(talent.soul_carver&cooldown.soul_carver.remains<variable.T1)*((1-cooldown.soul_carver.remains%variable.T1)<?0)",
+          "comment": "Pass 2: proportional SC credit (scales by how early SC arrives relative to T1)",
+          "sourceLine": 396
+        },
+        {
+          "priorityOrdinal": 19,
+          "actionStringVerbatim": "variable,name=net_p,value=(variable.base_deficit-6*variable.sc_prop)<?0",
+          "comment": null,
+          "sourceLine": 397
+        },
+        {
+          "priorityOrdinal": 20,
+          "actionStringVerbatim": "variable,name=fracs_p,value=variable.net_p%variable.frac_souls",
+          "comment": null,
+          "sourceLine": 398
+        },
+        {
+          "priorityOrdinal": 21,
+          "actionStringVerbatim": "variable,name=fracs_p,op=ceil",
+          "comment": null,
+          "sourceLine": 399
+        },
+        {
+          "priorityOrdinal": 22,
+          "actionStringVerbatim": "variable,name=gt_p,value=(variable.fracs_p>0)*((variable.fracs_p<=cooldown.fracture.charges)*variable.fracs_p*(1+apex.3)*gcd.max+(variable.fracs_p>cooldown.fracture.charges)*((cooldown.fracture.charges*(1+apex.3)*gcd.max<?variable.eff_recharge)+((variable.fracs_p-cooldown.fracture.charges-1)<?0)*cooldown.fracture.duration+gcd.max))",
+          "comment": null,
+          "sourceLine": 400
+        },
+        {
+          "priorityOrdinal": 23,
+          "actionStringVerbatim": "variable,name=sos_p,value=talent.sigil_of_spite&cooldown.sigil_of_spite.remains<variable.gt_p",
+          "comment": null,
+          "sourceLine": 401
+        },
+        {
+          "priorityOrdinal": 24,
+          "actionStringVerbatim": "variable,name=N_p,value=(variable.net_p-variable.sos_p*3)<?0",
+          "comment": null,
+          "sourceLine": 402
+        },
+        {
+          "priorityOrdinal": 25,
+          "actionStringVerbatim": "variable,name=adj2,value=(variable.N_p-variable.passive_per_sec*variable.T1)<?0",
+          "comment": null,
+          "sourceLine": 403
+        },
+        {
+          "priorityOrdinal": 26,
+          "actionStringVerbatim": "variable,name=fracs_p2,value=variable.adj2%variable.frac_souls",
+          "comment": null,
+          "sourceLine": 404
+        },
+        {
+          "priorityOrdinal": 27,
+          "actionStringVerbatim": "variable,name=fracs_p2,op=ceil",
+          "comment": null,
+          "sourceLine": 405
+        },
+        {
+          "priorityOrdinal": 28,
+          "actionStringVerbatim": "variable,name=gt_p2,value=(variable.fracs_p2>0)*((variable.fracs_p2<=cooldown.fracture.charges)*variable.fracs_p2*(1+apex.3)*gcd.max+(variable.fracs_p2>cooldown.fracture.charges)*((cooldown.fracture.charges*(1+apex.3)*gcd.max<?variable.eff_recharge)+((variable.fracs_p2-cooldown.fracture.charges-1)<?0)*cooldown.fracture.duration+gcd.max))",
+          "comment": null,
+          "sourceLine": 406
+        },
+        {
+          "priorityOrdinal": 29,
+          "actionStringVerbatim": "variable,name=T2,value=gcd.max+variable.gt_p2+(variable.sc_prop>0)*gcd.max+variable.sos_p*gcd.max",
+          "comment": "T2: passive-adjusted estimate, averaged with T1 to tame oscillation",
+          "sourceLine": 407
+        },
+        {
+          "priorityOrdinal": 30,
+          "actionStringVerbatim": "variable,name=T_avg,value=(variable.T1+variable.T2)%2",
+          "comment": null,
+          "sourceLine": 408
+        },
+        {
+          "priorityOrdinal": 31,
+          "actionStringVerbatim": "variable,name=adj_f,value=(variable.N_p-variable.passive_per_sec*variable.T_avg)<?0",
+          "comment": "Final pass: use T_avg as the passive window for the definitive fracture count",
+          "sourceLine": 409
+        },
+        {
+          "priorityOrdinal": 32,
+          "actionStringVerbatim": "variable,name=fracs_f,value=variable.adj_f%variable.frac_souls",
+          "comment": null,
+          "sourceLine": 410
+        },
+        {
+          "priorityOrdinal": 33,
+          "actionStringVerbatim": "variable,name=fracs_f,op=ceil",
+          "comment": null,
+          "sourceLine": 411
+        },
+        {
+          "priorityOrdinal": 34,
+          "actionStringVerbatim": "variable,name=gt_f,value=(variable.fracs_f>0)*((variable.fracs_f<=cooldown.fracture.charges)*variable.fracs_f*(1+apex.3)*gcd.max+(variable.fracs_f>cooldown.fracture.charges)*((cooldown.fracture.charges*(1+apex.3)*gcd.max<?variable.eff_recharge)+((variable.fracs_f-cooldown.fracture.charges-1)<?0)*cooldown.fracture.duration+gcd.max))",
+          "comment": null,
+          "sourceLine": 412
+        },
+        {
+          "priorityOrdinal": 35,
+          "actionStringVerbatim": "variable,name=time_to_next_glaive,value=gcd.max+variable.gt_f+(variable.sc_prop>0)*gcd.max+variable.sos_p*gcd.max",
+          "comment": null,
+          "sourceLine": 413
+        },
+        {
+          "priorityOrdinal": 36,
+          "actionStringVerbatim": "variable,name=passive_floor,value=variable.N_p%(variable.passive_per_sec*gcd.max)",
+          "comment": "When passives alone cover the deficit, round up to GCD boundaries",
+          "sourceLine": 414
+        },
+        {
+          "priorityOrdinal": 37,
+          "actionStringVerbatim": "variable,name=passive_floor,op=ceil",
+          "comment": null,
+          "sourceLine": 415
+        },
+        {
+          "priorityOrdinal": 38,
+          "actionStringVerbatim": "variable,name=passive_floor,value=variable.passive_floor*gcd.max",
+          "comment": null,
+          "sourceLine": 416
+        },
+        {
+          "priorityOrdinal": 39,
+          "actionStringVerbatim": "variable,name=time_to_next_glaive,value=variable.time_to_next_glaive<?(variable.fracs_f=0&variable.N_p>0)*variable.passive_floor",
+          "comment": null,
+          "sourceLine": 417
+        },
+        {
+          "priorityOrdinal": 40,
+          "actionStringVerbatim": "variable,name=time_to_next_rm_application,value=variable.time_to_next_glaive+2*gcd.max",
+          "comment": "RM application happens 2 GCDs into the cycle (RG -> SC -> Frac applies mark)",
+          "sourceLine": 418
+        },
+        {
+          "priorityOrdinal": 41,
+          "actionStringVerbatim": "variable,name=rm_remains,value=(variable.last_rm_applied>0)*(20-(time-variable.last_rm_applied))<?0",
+          "comment": "Manual RM tracking (debuff.remains unreliable with async stacks)",
+          "sourceLine": 419
+        },
+        {
+          "priorityOrdinal": 42,
+          "actionStringVerbatim": "variable,name=prio_slashes,value=variable.aoe|variable.execute|(variable.rm_remains>0&variable.last_refresh_at>variable.last_slash_at)",
+          "comment": "Alternate slash and refresh cycles",
+          "sourceLine": 420
+        },
+        {
+          "priorityOrdinal": 43,
+          "actionStringVerbatim": "variable,name=last_slash_at,op=setif,value=time,value_else=variable.last_slash_at,condition=buff.reavers_glaive.up&!variable.cycle_recorded&variable.prio_slashes",
+          "comment": "Record cycle type once when RG first stored (resets when RG buff drops)",
+          "sourceLine": 421
+        },
+        {
+          "priorityOrdinal": 44,
+          "actionStringVerbatim": "variable,name=last_refresh_at,op=setif,value=time,value_else=variable.last_refresh_at,condition=buff.reavers_glaive.up&!variable.cycle_recorded&!variable.prio_slashes",
+          "comment": null,
+          "sourceLine": 422
+        },
+        {
+          "priorityOrdinal": 45,
+          "actionStringVerbatim": "variable,name=cycle_recorded,value=buff.reavers_glaive.up",
+          "comment": null,
+          "sourceLine": 423
+        },
+        {
+          "priorityOrdinal": 46,
+          "actionStringVerbatim": "variable,name=rg_imminent,value=(buff.reavers_glaive.up&(variable.execute|variable.rm_remains<=variable.time_to_next_rm_application|buff.art_of_the_glaive.stack+soul_fragments>=(20-variable.frac_souls)))|(buff.art_of_the_glaive.stack+soul_fragments>=20)|(soul_fragments>=6&buff.art_of_the_glaive.stack>=(20-variable.frac_souls)&cooldown.fracture.charges>=1)",
+          "comment": "RG imminent: stored and ready to fire, at AotG cap, or one consume from overflow",
+          "sourceLine": 424
+        },
+        {
+          "priorityOrdinal": 47,
+          "actionStringVerbatim": "felblade,if=prev_gcd.1.vengeful_retreat|prev_off_gcd.vengeful_retreat",
+          "comment": null,
+          "sourceLine": 425
+        },
+        {
+          "priorityOrdinal": 48,
+          "actionStringVerbatim": "metamorphosis,use_off_gcd=1,if=buff.untethered_rage.up|(!buff.metamorphosis.up&variable.dung_meta_ok)",
+          "comment": "UR proc meta fires unconditionally; hardcast gates on dungeon TTD",
+          "sourceLine": 426
+        },
+        {
+          "priorityOrdinal": 49,
+          "actionStringVerbatim": "call_action_list,name=trinkets",
+          "comment": "Stat buff trinkets before RG so the buff covers the glaive cycle",
+          "sourceLine": 427
+        },
+        {
+          "priorityOrdinal": 50,
+          "actionStringVerbatim": "reavers_glaive,if=buff.reavers_glaive.up&!buff.rending_strike.up&!buff.glaive_flurry.up&(variable.execute|variable.prio_slashes|variable.rm_remains<=0|variable.rm_remains<10|buff.art_of_the_glaive.stack+soul_fragments>=(20-variable.frac_souls))",
+          "comment": "Fire stored RG: execute, mark expired or aging, or about to overflow AotG",
+          "sourceLine": 428
+        },
+        {
+          "priorityOrdinal": 51,
+          "actionStringVerbatim": "call_action_list,name=ar_glaive_cycle,if=buff.rending_strike.up|buff.glaive_flurry.up|prev_gcd.1.reavers_glaive",
+          "comment": null,
+          "sourceLine": 429
+        },
+        {
+          "priorityOrdinal": 52,
+          "actionStringVerbatim": "fiery_brand,if=charges>=2|!variable.fiery_demise_active|variable.execute",
+          "comment": "Fiery brand: overcapped charges, or setup for fiery demise window",
+          "sourceLine": 430
+        },
+        {
+          "priorityOrdinal": 53,
+          "actionStringVerbatim": "sigil_of_spite,if=variable.dung_cd_ok&!buff.reavers_glaive.up&!buff.rending_strike.up&!buff.glaive_flurry.up",
+          "comment": "SoS for frags, skip during glaive cycle",
+          "sourceLine": 431
+        },
+        {
+          "priorityOrdinal": 54,
+          "actionStringVerbatim": "call_action_list,name=ar_quick_consume,if=!buff.reavers_glaive.up&!buff.rending_strike.up&!buff.glaive_flurry.up&(buff.art_of_the_glaive.stack+soul_fragments>=20|(variable.aoe&soul_fragments>=6))",
+          "comment": "Emergency consume: AotG overflow or frag cap in aoe",
+          "sourceLine": 432
+        },
+        {
+          "priorityOrdinal": 55,
+          "actionStringVerbatim": "immolation_aura,if=in_combat",
+          "comment": null,
+          "sourceLine": 433
+        },
+        {
+          "priorityOrdinal": 56,
+          "actionStringVerbatim": "fel_devastation,if=variable.dung_cd_ok&fury>85&(soul_fragments.inactive>1|variable.aoe)&(!variable.rg_imminent|variable.aoe)",
+          "comment": "FD: high fury, in-flight frags, not near RG. aoe skips the RG check",
+          "sourceLine": 434
+        },
+        {
+          "priorityOrdinal": 57,
+          "actionStringVerbatim": "sigil_of_flame",
+          "comment": null,
+          "sourceLine": 435
+        },
+        {
+          "priorityOrdinal": 58,
+          "actionStringVerbatim": "soul_carver,if=variable.dung_cd_ok&(variable.fiery_demise_active|(variable.rm_remains<7&buff.art_of_the_glaive.stack+soul_fragments<20)|variable.execute)",
+          "comment": "SC: 6 frags, prefer fiery demise. OK when mark is aging or in execute",
+          "sourceLine": 436
+        },
+        {
+          "priorityOrdinal": 59,
+          "actionStringVerbatim": "call_action_list,name=ar_fillers",
+          "comment": null,
+          "sourceLine": 437
+        }
+      ]
+    },
+    {
+      "listName": "ar_quick_consume",
+      "receiverIdentifier": "ar_quick_consume",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "soul_cleave,if=soul_fragments<(3-variable.aoe)",
+          "comment": "Quick consume: rush to AotG 20. aoe uses lower SpB threshold",
+          "sourceLine": 439
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "spirit_bomb,if=soul_fragments>=(3-variable.aoe)",
+          "comment": null,
+          "sourceLine": 440
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "soul_cleave,if=!variable.aoe",
+          "comment": null,
+          "sourceLine": 441
+        }
+      ]
+    },
+    {
+      "listName": "ar_fillers",
+      "receiverIdentifier": "ar_fillers",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "spirit_bomb,if=soul_fragments>=(variable.fragment_target-variable.aoe)",
+          "comment": "Fillers outside glaive cycles. aoe lowers SpB threshold by 1",
+          "sourceLine": 443
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "immolation_aura,if=variable.time_to_next_glaive>3*gcd.max",
+          "comment": null,
+          "sourceLine": 444
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "felblade,if=cooldown.spirit_bomb.remains<gcd.max&soul_fragments.total>=variable.fragment_target&fury<40",
+          "comment": null,
+          "sourceLine": 445
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "vengeful_retreat,use_off_gcd=1,if=!cooldown.felblade.up&talent.unhindered_assault&cooldown.spirit_bomb.remains<gcd.max&soul_fragments.total>=variable.fragment_target&fury<40",
+          "comment": null,
+          "sourceLine": 446
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "soul_cleave,if=((soul_fragments>=5&!variable.aoe)|soul_fragments<=1|fury.deficit<30)&(fury>=2*action.soul_cleave.cost|cooldown.fracture.charges>=1|cooldown.fracture.remains<=gcd.max)&(!buff.rending_strike.up|!buff.glaive_flurry.up|!variable.prio_slashes)",
+          "comment": "SC: aoe skips frag>=5 trigger to save frags for SpB",
+          "sourceLine": 447
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "sigil_of_flame,if=variable.aoe",
+          "comment": null,
+          "sourceLine": 448
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "fracture,if=buff.metamorphosis.up|full_recharge_time<gcd.max|buff.warblades_hunger.stack>=4",
+          "comment": null,
+          "sourceLine": 449
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "immolation_aura,if=!variable.is_dungeon|in_combat",
+          "comment": null,
+          "sourceLine": 450
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "sigil_of_flame",
+          "comment": null,
+          "sourceLine": 451
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "soul_cleave,if=(fury>=2*action.soul_cleave.cost|cooldown.fracture.charges>=1|cooldown.fracture.remains<=gcd.max)&(!buff.rending_strike.up|!buff.glaive_flurry.up|!variable.prio_slashes)",
+          "comment": "Unconditional SC fallback with same guards",
+          "sourceLine": 452
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "fracture",
+          "comment": null,
+          "sourceLine": 453
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "felblade",
+          "comment": null,
+          "sourceLine": 454
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "vengeful_retreat,use_off_gcd=1,if=talent.unhindered_assault&!cooldown.felblade.up",
+          "comment": null,
+          "sourceLine": 455
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "soul_carver",
+          "comment": null,
+          "sourceLine": 456
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "fel_devastation",
+          "comment": null,
+          "sourceLine": 457
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "throw_glaive",
+          "comment": null,
+          "sourceLine": 458
+        }
+      ]
+    },
+    {
+      "listName": "ar_glaive_cycle",
+      "receiverIdentifier": "ar_glaive_cycle",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "use_item,use_off_gcd=1,slot=trinket1,if=!variable.trinket_1_buffs&(variable.damage_trinket_priority=1|trinket.2.cooldown.remains|trinket.2.cooldown.duration=0)&gcd.remains>0.1",
+          "comment": "GLAIVE CYCLE: alternate RS+GF buffs after RG. Slash = frac first, refresh = SC first",
+          "sourceLine": 460
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "use_item,use_off_gcd=1,slot=trinket2,if=!variable.trinket_2_buffs&(variable.damage_trinket_priority=2|trinket.1.cooldown.remains|trinket.1.cooldown.duration=0)&gcd.remains>0.1",
+          "comment": null,
+          "sourceLine": 461
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "call_action_list,name=ar_glaive_cycle_filler,if=(variable.prio_slashes&((cooldown.fracture.charges<1&buff.rending_strike.up&buff.glaive_flurry.up)|fury<10))|(!variable.prio_slashes&((buff.rending_strike.up&buff.glaive_flurry.up&fury<35)|(buff.rending_strike.up&!buff.glaive_flurry.up&cooldown.fracture.charges<1)))",
+          "comment": "Fill GCD when waiting for fracture charge (slash) or fury (refresh)",
+          "sourceLine": 462
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "potion,use_off_gcd=1",
+          "comment": null,
+          "sourceLine": 463
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "invoke_external_buff,name=power_infusion",
+          "comment": null,
+          "sourceLine": 464
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "variable,name=last_rm_applied,value=time,if=buff.rending_strike.up",
+          "comment": "Record RM application time when fracture is about to consume RS",
+          "sourceLine": 465
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "fracture,if=buff.rending_strike.up&buff.glaive_flurry.up&variable.prio_slashes",
+          "comment": "Slash: fracture first when both buffs up (applies 1-stack RM + triggers slash damage)",
+          "sourceLine": 466
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "soul_cleave,if=buff.rending_strike.up&buff.glaive_flurry.up&!variable.prio_slashes",
+          "comment": "Refresh: SC first when both buffs up (subsequent fracture gets 3-stack RM)",
+          "sourceLine": 467
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "fracture,if=buff.rending_strike.up&!buff.glaive_flurry.up",
+          "comment": "Single-buff continuation",
+          "sourceLine": 468
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "soul_cleave,if=buff.glaive_flurry.up&!buff.rending_strike.up",
+          "comment": null,
+          "sourceLine": 469
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "call_action_list,name=ar_glaive_cycle_filler",
+          "comment": null,
+          "sourceLine": 470
+        }
+      ]
+    },
+    {
+      "listName": "ar_glaive_cycle_filler",
+      "receiverIdentifier": "ar_glaive_cycle_filler",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "spirit_bomb,if=fury>75&soul_fragments>=variable.fragment_target",
+          "comment": "Glaive cycle filler: non-consuming actions while waiting for resources",
+          "sourceLine": 472
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "immolation_aura",
+          "comment": null,
+          "sourceLine": 473
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "fel_devastation,if=fury>=85",
+          "comment": null,
+          "sourceLine": 474
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "sigil_of_flame",
+          "comment": null,
+          "sourceLine": 475
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "felblade",
+          "comment": null,
+          "sourceLine": 476
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "soul_carver",
+          "comment": null,
+          "sourceLine": 477
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "vengeful_retreat,use_off_gcd=1,if=talent.unhindered_assault&!cooldown.felblade.up",
+          "comment": null,
+          "sourceLine": 478
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "soul_cleave,if=!buff.glaive_flurry.up",
+          "comment": "SC only when GF already consumed (safe during slash cycles)",
+          "sourceLine": 479
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "throw_glaive",
+          "comment": null,
+          "sourceLine": 480
+        }
+      ]
+    },
+    {
+      "listName": "anni",
+      "receiverIdentifier": "anni",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "variable,name=anni_meta_entry_time,value=3*gcd.max",
+          "comment": "Pre-meta setup window, typically ~3 GCDs",
+          "sourceLine": 482
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "potion,use_off_gcd=1,if=variable.execute&(!variable.is_dungeon|in_boss_encounter)",
+          "comment": null,
+          "sourceLine": 483
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "invoke_external_buff,name=power_infusion,if=buff.voidfall_spending.stack=3|variable.execute",
+          "comment": null,
+          "sourceLine": 484
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "call_action_list,name=anni_voidfall_spending,if=buff.voidfall_spending.up",
+          "comment": null,
+          "sourceLine": 485
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "call_action_list,name=anni_voidfall_fishing,if=buff.voidfall_building.stack>=2&!buff.voidfall_spending.up",
+          "comment": null,
+          "sourceLine": 486
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "call_action_list,name=anni_meta_entry,if=buff.untethered_rage.up|(variable.dung_meta_ok&cooldown.metamorphosis.remains<variable.anni_meta_entry_time)",
+          "comment": "Prepare to enter hardcast meta (UR procs enter unconditionally)",
+          "sourceLine": 487
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "call_action_list,name=anni_cooldowns,if=variable.dung_cd_ok&(!talent.fiery_demise|variable.fiery_demise_active|cooldown.fiery_brand.remains>20|variable.execute)",
+          "comment": "Use cooldowns, reserving at least one for the next meta",
+          "sourceLine": 488
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "fiery_brand,if=charges>=2|(!variable.fiery_demise_active&(!talent.fiery_demise|variable.fire_cd_soon|variable.execute))",
+          "comment": null,
+          "sourceLine": 489
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "fracture,if=full_recharge_time<gcd.max",
+          "comment": null,
+          "sourceLine": 490
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "immolation_aura,if=(talent.fallout&variable.aoe)|(talent.charred_flesh&variable.fiery_demise_active)",
+          "comment": "Priority IA: Fallout generates frags in aoe, Charred Flesh extends brand",
+          "sourceLine": 491
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "spirit_bomb,if=soul_fragments>=variable.fragment_target",
+          "comment": null,
+          "sourceLine": 492
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "immolation_aura",
+          "comment": null,
+          "sourceLine": 493
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "sigil_of_flame",
+          "comment": null,
+          "sourceLine": 494
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "fracture,if=soul_fragments.total<=4|fury<40",
+          "comment": null,
+          "sourceLine": 495
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "soul_cleave,if=soul_fragments<=1|fury.deficit<=15",
+          "comment": null,
+          "sourceLine": 496
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "soul_cleave,if=!(apex.3&!buff.untethered_rage.up&buff.seething_anger.stack>=10)&!cooldown.metamorphosis.up",
+          "comment": null,
+          "sourceLine": 497
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "fracture",
+          "comment": null,
+          "sourceLine": 498
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "felblade",
+          "comment": null,
+          "sourceLine": 499
+        },
+        {
+          "priorityOrdinal": 18,
+          "actionStringVerbatim": "throw_glaive",
+          "comment": null,
+          "sourceLine": 500
+        }
+      ]
+    },
+    {
+      "listName": "anni_cooldowns",
+      "receiverIdentifier": "anni_cooldowns",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "spirit_bomb,if=soul_fragments>=variable.fragment_target",
+          "comment": null,
+          "sourceLine": 502
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "soul_carver,if=soul_fragments<=3",
+          "comment": null,
+          "sourceLine": 503
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "sigil_of_spite,if=soul_fragments<=2+talent.soul_sigils",
+          "comment": null,
+          "sourceLine": 504
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "fel_devastation",
+          "comment": null,
+          "sourceLine": 505
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "call_action_list,name=anni_generate_fury,if=cooldown.fel_devastation.up&fury<50",
+          "comment": null,
+          "sourceLine": 506
+        }
+      ]
+    },
+    {
+      "listName": "anni_voidfall_spending",
+      "receiverIdentifier": "anni_voidfall_spending",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "fiery_brand,if=charges>=2|!variable.fiery_demise_active",
+          "comment": null,
+          "sourceLine": 508
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "felblade,if=buff.voidfall_spending.stack=buff.voidfall_spending.max_stack&cooldown.spirit_bomb.ready&soul_fragments.total>=variable.fragment_target&fury>=30&fury<45&cooldown.fracture.charges>=1",
+          "comment": "Felblade to bridge fury into fracture bridge range (30+15=45)",
+          "sourceLine": 509
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "fracture,if=buff.voidfall_spending.stack=buff.voidfall_spending.max_stack&cooldown.spirit_bomb.ready&soul_fragments.total>=variable.fragment_target&fury>=45&fury<75",
+          "comment": "Fracture to bridge fury for SB+SC combo when 1 fracture away (45+30=75)",
+          "sourceLine": 510
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "soul_cleave,if=cooldown.spirit_bomb.remains>gcd.max*4",
+          "comment": null,
+          "sourceLine": 511
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "spirit_bomb,if=soul_fragments>=variable.fragment_target",
+          "comment": null,
+          "sourceLine": 512
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "felblade,if=(fury<40&cooldown.spirit_bomb.remains<=gcd.max)|(fury<25&cooldown.spirit_bomb.remains>gcd.max)",
+          "comment": null,
+          "sourceLine": 513
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "immolation_aura,if=(fury<40&cooldown.spirit_bomb.remains<=gcd.max)|(fury<25&cooldown.spirit_bomb.remains>gcd.max)",
+          "comment": null,
+          "sourceLine": 514
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "soul_carver,if=(cooldown.spirit_bomb.remains<=gcd.max)&soul_fragments.total<variable.fragment_target&(!talent.sigil_of_spite|!action.sigil_of_spite.placed)",
+          "comment": null,
+          "sourceLine": 515
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "fel_devastation,if=(cooldown.spirit_bomb.remains<=gcd.max)&soul_fragments.total<variable.fragment_target&(!talent.sigil_of_spite|!action.sigil_of_spite.placed)",
+          "comment": null,
+          "sourceLine": 516
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "immolation_aura,if=variable.aoe&(cooldown.spirit_bomb.remains<=gcd.max)&soul_fragments.total<variable.fragment_target&(!talent.sigil_of_spite|!action.sigil_of_spite.placed)",
+          "comment": null,
+          "sourceLine": 517
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "sigil_of_spite,if=(cooldown.spirit_bomb.remains<=gcd.max)&soul_fragments.total<variable.fragment_target",
+          "comment": null,
+          "sourceLine": 518
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "call_action_list,name=anni_filler_no_spend",
+          "comment": null,
+          "sourceLine": 519
+        }
+      ]
+    },
+    {
+      "listName": "anni_meta_entry",
+      "receiverIdentifier": "anni_meta_entry",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "potion,use_off_gcd=1,if=(variable.fiery_demise_active|variable.execute)&(!variable.is_dungeon|in_boss_encounter)",
+          "comment": null,
+          "sourceLine": 521
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "call_action_list,name=trinkets",
+          "comment": null,
+          "sourceLine": 522
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "invoke_external_buff,name=power_infusion",
+          "comment": null,
+          "sourceLine": 523
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "metamorphosis,use_off_gcd=1,if=gcd.remains=0&buff.untethered_rage.up&!buff.voidfall_spending.up",
+          "comment": null,
+          "sourceLine": 524
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "call_action_list,name=anni_pre_meta_spb,if=cooldown.spirit_bomb.remains<variable.anni_meta_entry_time&soul_fragments.total<variable.fragment_target",
+          "comment": null,
+          "sourceLine": 525
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "fiery_brand,if=charges>=2|!variable.fiery_demise_active",
+          "comment": null,
+          "sourceLine": 526
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "sigil_of_spite,if=soul_fragments>=variable.fragment_target&cooldown.spirit_bomb.up&cooldown.metamorphosis.up",
+          "comment": null,
+          "sourceLine": 527
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "spirit_bomb,if=soul_fragments>=variable.fragment_target&fury>=60",
+          "comment": null,
+          "sourceLine": 528
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "sigil_of_spite,if=soul_fragments.total<variable.fragment_target",
+          "comment": null,
+          "sourceLine": 529
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "call_action_list,name=anni_generate_fury,if=fury<75&cooldown.metamorphosis.up&cooldown.spirit_bomb.remains>gcd.max*3",
+          "comment": "Pool to 75 fury for SB+SC voidfall combo after meta entry",
+          "sourceLine": 530
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "metamorphosis,use_off_gcd=1,if=variable.dung_meta_ok&gcd.remains=0&cooldown.spirit_bomb.remains>gcd.max*3&(soul_fragments.total>=variable.fragment_target|(talent.sigil_of_spite&action.sigil_of_spite.placed))",
+          "comment": null,
+          "sourceLine": 531
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "call_action_list,name=anni_filler_no_spend",
+          "comment": null,
+          "sourceLine": 532
+        }
+      ]
+    },
+    {
+      "listName": "anni_pre_meta_spb",
+      "receiverIdentifier": "anni_pre_meta_spb",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "fracture",
+          "comment": null,
+          "sourceLine": 534
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "immolation_aura,if=variable.aoe",
+          "comment": null,
+          "sourceLine": 535
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "fiery_brand,if=charges>=2|!variable.fiery_demise_active",
+          "comment": null,
+          "sourceLine": 536
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "soul_carver,if=(cooldown.soul_carver.up+cooldown.sigil_of_spite.up+cooldown.fel_devastation.up)>=2",
+          "comment": null,
+          "sourceLine": 537
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "fel_devastation,if=(cooldown.soul_carver.up+cooldown.sigil_of_spite.up+cooldown.fel_devastation.up)>=2",
+          "comment": null,
+          "sourceLine": 538
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "felblade",
+          "comment": null,
+          "sourceLine": 539
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "call_action_list,name=anni_filler_no_spend",
+          "comment": null,
+          "sourceLine": 540
+        }
+      ]
+    },
+    {
+      "listName": "anni_voidfall_fishing",
+      "receiverIdentifier": "anni_voidfall_fishing",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "fracture",
+          "comment": null,
+          "sourceLine": 542
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "call_action_list,name=anni_generate_fury,if=cooldown.fracture.charges_fractional>=0.75",
+          "comment": null,
+          "sourceLine": 543
+        }
+      ]
+    },
+    {
+      "listName": "anni_generate_fury",
+      "receiverIdentifier": "anni_generate_fury",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "immolation_aura",
+          "comment": null,
+          "sourceLine": 545
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "sigil_of_flame",
+          "comment": null,
+          "sourceLine": 546
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "felblade",
+          "comment": null,
+          "sourceLine": 547
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "fracture",
+          "comment": null,
+          "sourceLine": 548
+        }
+      ]
+    },
+    {
+      "listName": "anni_filler_no_spend",
+      "receiverIdentifier": "anni_filler_no_spend",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "soul_cleave,if=soul_fragments=0&!action.sigil_of_flame.placed&(!talent.sigil_of_spite|(talent.sigil_of_spite&!action.sigil_of_spite.placed))&!prev_gcd.2.soul_carver",
+          "comment": null,
+          "sourceLine": 550
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "immolation_aura",
+          "comment": null,
+          "sourceLine": 551
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "sigil_of_flame",
+          "comment": null,
+          "sourceLine": 552
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "felblade",
+          "comment": null,
+          "sourceLine": 553
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "fracture,if=!buff.voidfall_spending.up",
+          "comment": null,
+          "sourceLine": 554
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "soul_carver,if=(!talent.sigil_of_spite|(talent.sigil_of_spite&!action.sigil_of_spite.placed))",
+          "comment": null,
+          "sourceLine": 555
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "fel_devastation,if=(!talent.sigil_of_spite|(talent.sigil_of_spite&!action.sigil_of_spite.placed))",
+          "comment": null,
+          "sourceLine": 556
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "sigil_of_spite",
+          "comment": null,
+          "sourceLine": 557
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "fracture",
+          "comment": null,
+          "sourceLine": 558
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "throw_glaive",
+          "comment": null,
+          "sourceLine": 559
+        }
+      ]
+    },
+    {
+      "listName": "trinkets",
+      "receiverIdentifier": "trinkets",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "use_item,slot=trinket1,if=variable.trinket_1_buffs&variable.dung_cd_ok&(!trinket.2.has_cooldown|trinket.2.cooldown.remains|variable.trinket_priority=1)",
+          "comment": null,
+          "sourceLine": 561
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "use_item,slot=trinket2,if=variable.trinket_2_buffs&variable.dung_cd_ok&(!trinket.1.has_cooldown|trinket.1.cooldown.remains|variable.trinket_priority=2)",
+          "comment": null,
+          "sourceLine": 562
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_item,use_off_gcd=1,slot=trinket1,if=!variable.trinket_1_buffs&(variable.damage_trinket_priority=1|trinket.2.cooldown.remains|trinket.2.cooldown.duration=0)&gcd.remains>0.1",
+          "comment": "Non-buff on-use trinkets (direct damage): fire on cooldown, off-GCD",
+          "sourceLine": 563
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "use_item,use_off_gcd=1,slot=trinket2,if=!variable.trinket_2_buffs&(variable.damage_trinket_priority=2|trinket.1.cooldown.remains|trinket.1.cooldown.duration=0)&gcd.remains>0.1",
+          "comment": null,
+          "sourceLine": 564
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "use_item,slot=trinket1,if=variable.execute",
+          "comment": "End of fight: dump everything",
+          "sourceLine": 565
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "use_item,slot=trinket2,if=variable.execute",
+          "comment": null,
+          "sourceLine": 566
+        }
+      ]
+    }
+  ]
+}

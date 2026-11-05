@@ -29,6 +29,36 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After ONB-X3: what the Vengeance Demon Hunter slice does not establish
+
+**Raised:** ONB-X3 (2026-11-05). Coverage, not soundness: every decision is UNKNOWN.
+
+**It is on ONB-EV.** No retained capture holds a cast or combatant info of this specialization, and the contexts naming it are uncommitted (agent/architecture.md "ONB-X3"). A capture alone would not resolve a decision either: everything below stands first. The first thing a capture must check is what the synthetic builds assume: the talent id space, the wire's cast shape, whether a logged Fel Devastation `cast` is the channel's start, and whether Fury appears on Fracture and Soul Cleave.
+
+**What it needs, in order, before any rotation line is read:**
+
+- **`default[16] auto_attack`.** Its contract lets the query branch, and its readiness is the swing state, unobserved. The same stop as Feral's (agent/follow-ups.md "After ONB-C1").
+- **`default[17] retarget_auto_attack`** on an Aldrachi Reaver build, whose `target_if` reads `debuff.reavers_mark.remains`.
+- **`default[18] disrupt`.** It needs `target.debuff.casting.react`, or a contract stepping past an off-GCD interrupt. Quell and Counterspell have the same shape.
+- **`default[19] infernal_strike` and `default[20] demon_spikes`.** Each writes state the list reads, and each needs a charge reading and a contract. Demon Spikes reads its own buff and `in_combat`.
+- **`ar[47] felblade`, `ar[48] metamorphosis`.** The previous action, which no log gives when a selection cast nothing, and `buff.untethered_rage`.
+
+**The variable programme.** `%` does not parse, on nine `ar` values, so `time_to_next_glaive`, `time_to_next_rm_application` and `rg_imminent` have no value. A reader of it also needs soul fragments, Fracture's charges, `gcd.max` and `apex.*`, so parsing `%` alone moves nothing. Its `ceil` lines are on variables with no `add`..`max` line, and stay UNKNOWN on `CONSTANT_FOLDING` until an `is_constant` rule proves them unfoldable (agent/follow-ups.md "After M11-D3-C2"). `rm_remains` is simulation bookkeeping over `time`, and it needs a contract saying when a real Reaver's Mark was applied.
+
+**Soul fragments have no reading.** `soul_fragments`, `.total` and `.inactive` drive most conditions of both lists. Devourer found that 1223412 is logged and unidentified, and no capture shows what Vengeance logs. Nothing here proves a count.
+
+**Simulation-only state.** `variable.is_dungeon` reads `fight_style.*`, and `dung_next_pull` reads `raid_event.*`. Both have no meaning in a real raid fight, and `dung_pull_ttd` is a `cycling_variable` (ONB-S3). So `dung_cd_ok` and `dung_meta_ok`, which gate several cooldowns, need a decision about simulation-only state, as Devastation's `sc[1]` does. `variable.execute` reads `fight_remains`, which is predictive and stays UNKNOWN.
+
+**ONB-S3 alone moves nothing,** pinned by a test giving `spell_targets.spirit_bomb` the value 1.
+
+**The tank's domains have no authority.** Demon Spikes, Metamorphosis, Fiery Brand, and Soul Cleave and Fel Devastation as healing, all resolve `NO_PINNED_AUTHORITY_FOR_DOMAIN`. Any reading of them needs its own decision about what authority could govern them, and that decision must not borrow the list's survival-blind ordering.
+
+**Unmeasured.** Both hero lists, since nothing is retained. A promotion must measure each or refuse it, as Havoc refuses Fel-Scarred.
+
+**Stale manifest paths, found here and not fixed.** A script over `tests/corpus/manifest.json` finds 12 `tests/...` paths that do not exist, all before this tranche, among them `onb-d3-devastation-evoker`, `onb-d3-fire-mage`, `onb-b1-devourer-demon-hunter`, `onb-b1-enhancement-shaman` and `onb-b1-frost-death-knight`, each a test under another tranche's name. The ONB-X3 row had the same defect from its cloned pins and is corrected. Nothing checks these paths, so a manifest test could.
+
+---
+
 ## After ONB-X2: what the Devastation Evoker slice does not establish
 
 **Raised:** ONB-X2 (2026-11-05). Coverage, not soundness: every decision is UNKNOWN.

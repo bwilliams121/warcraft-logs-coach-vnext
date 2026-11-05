@@ -1990,11 +1990,13 @@ A7R6 actor 11 since ONB-X1, so migrate it first (`tests/support/unsupported-subj
 ### ONB-X2P: Devastation Evoker (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-X2
 branch: autopilot/onb-x2p
 wcl: NONE
 publicContract: EXPECTED
+pr: 80
+mergeSha: 278c1ef74b750463123ffec587d0f94f98bc2298
 ```
 
 **Outcome.** It does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Its three retained subjects, all Scalecommander, replayed offline, give 440 decisions, 0 MATCH, 0 REJECTED, all UNKNOWN, output byte-identical to ONB-X2's. A census of 5,714 retained files finds no new subject, by combatant-info specID as well as by named and pinned ability ids. Evidence is not its gap, so it is not on ONB-EV, and ONB-S3 alone moves nothing. A promotion after its own inputs, first the Quell and `cancel_if` stops, is a new public entry through the unchanged gates (agent/architecture.md "ONB-X2P"; agent/follow-ups.md "After ONB-X2").
@@ -2002,8 +2004,9 @@ publicContract: EXPECTED
 ### ONB-X3: Vengeance Demon Hunter (internal, own representative)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-S1, ONB-S2
+branch: autopilot/onb-x3
 wcl: NONE
 publicContract: NONE
 ```
@@ -2012,6 +2015,8 @@ publicContract: NONE
 `ceil` and charges (`agent/follow-ups.md` "After M11-D3-C2"), so it needs
 ONB-S2. Its tank meaning stays separate from offense. No retained evidence
 is known, so record it for ONB-EV if needed.
+
+**Outcome.** Registered INTERNAL_ONLY, and no decision resolves. No retained capture holds a cast or combatant info of it, so its gap stays on ONB-EV, and everything is measured on synthetic builds: every query refuses first at `auto_attack`, with Disrupt, Infernal Strike and Demon Spikes open behind it, and each hero list's root scan stops at its unconditional fillers. The tank's mitigation stays out of the offensive authority: active mitigation, defensive cooldowns and self healing each resolve `NO_PINNED_AUTHORITY_FOR_DOMAIN`, and a Demon Spikes press is no decision. ONB-S2 did not carry the variable programme: `%` still does not parse, on nine values, so `time_to_next_glaive` stays UNKNOWN, and a test pins that no refusal reads as zero. No shared code changed, and ONB-S3 alone moves nothing (agent/architecture.md "ONB-X3"; agent/follow-ups.md "After ONB-X3").
 
 ### ONB-X3P: Vengeance Demon Hunter (public)
 

@@ -253,6 +253,7 @@ const IDENTITY_RETAINED_ONLY: Readonly<Record<string, string>> = {
   "warrior/fury": "m11c4f context-2, FPp6xjkNC9R4LrVh fight 10, actor 3: Warrior / Fury",
   "warrior/protection": "m11c4f context-1, 2xptYq89Tb631Hmg fight 17, actor 5: Warrior / Protection",
   "rogue/outlaw": "m13a discovery, g34mvXTKLMJ2Nfwr fights 1, 6 and 7, actor 17: Outlaw",
+  "demonhunter/vengeance": "m13a discovery, g34mvXTKLMJ2Nfwr fights 1, 6 and 7, actor 13: Vengeance",
 };
 
 /** A committed Warrior of another specialization: actor 4 of A7R6 fight 7, an Arms Warrior. */
@@ -379,7 +380,12 @@ for (const { path, exportName, module } of MODULES) {
       if (IDENTITY_RETAINED_ONLY[identity.specId] !== undefined) {
         expect(module.exposure).toBe("INTERNAL_ONLY");
         expect(IDENTITY_EVIDENCE[identity.specId]).toBeUndefined();
-        const sameClass = identity.specId === "rogue/outlaw" ? COMMITTED_ROGUE : COMMITTED_WARRIOR;
+        const sameClass =
+          identity.specId === "rogue/outlaw"
+            ? COMMITTED_ROGUE
+            : identity.specId === "demonhunter/vengeance"
+              ? (IDENTITY_EVIDENCE["demonhunter/havoc"] as IdentityEvidence)
+              : COMMITTED_WARRIOR;
         expect(identity.wclClassName).toBe(wclIdentityOf(sameClass).className);
         return;
       }
@@ -515,6 +521,7 @@ describe("what the tree exports today", () => {
       ["DEVOURER_DEMON_HUNTER_MODULE", "demonhunter/devourer", "INTERNAL_ONLY", 0],
       // ONB-A1: Cohort A's representative, INTERNAL_ONLY.
       ["HAVOC_DEMON_HUNTER_MODULE", "demonhunter/havoc", "PUBLIC", 0],
+      ["VENGEANCE_DEMON_HUNTER_MODULE", "demonhunter/vengeance", "INTERNAL_ONLY", 0],
       ["BALANCE_DRUID_MODULE", "druid/balance", "INTERNAL_ONLY", 0],
       // ONB-C1: Cohort C's representative, INTERNAL_ONLY.
       ["FERAL_DRUID_MODULE", "druid/feral", "INTERNAL_ONLY", 0],

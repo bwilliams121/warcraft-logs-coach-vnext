@@ -70,6 +70,7 @@ import pinnedAfflictionWarlockApl from "../../../src/simc/data/warlock-afflictio
 import pinnedMarksmanshipHunterApl from "../../../src/simc/data/hunter-marksmanship.apl.json";
 import pinnedFireMageApl from "../../../src/simc/data/mage-fire.apl.json";
 import pinnedDevastationEvokerApl from "../../../src/simc/data/evoker-devastation.apl.json";
+import pinnedVengeanceDemonHunterApl from "../../../src/simc/data/demonhunter-vengeance.apl.json";
 import pinnedOutlawRogueApl from "../../../src/simc/data/rogue-outlaw.apl.json";
 import pinnedEnhancementShamanApl from "../../../src/simc/data/shaman-enhancement.apl.json";
 import { AUTHORITY_DOMAINS, AUTHORITY_RESOLUTION_OUTCOMES } from "../../../src/findings/authority-domain.js";
@@ -430,6 +431,7 @@ export const OWNING_LAYERS = {
   SPEC_MARKSMANSHIP_HUNTER: ["src/specs/hunter/marksmanship/"],
   SPEC_FIRE_MAGE: ["src/specs/mage/fire/"],
   SPEC_DEVASTATION_EVOKER: ["src/specs/evoker/devastation/"],
+  SPEC_VENGEANCE_DEMON_HUNTER: ["src/specs/demonhunter/vengeance/"],
   SPEC_OUTLAW_ROGUE: ["src/specs/rogue/outlaw/"],
   SPEC_ENHANCEMENT_SHAMAN: ["src/specs/shaman/enhancement/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
@@ -487,6 +489,7 @@ export const SPEC_LAYER_OF = {
   "hunter/marksmanship": "SPEC_MARKSMANSHIP_HUNTER",
   "mage/fire": "SPEC_FIRE_MAGE",
   "evoker/devastation": "SPEC_DEVASTATION_EVOKER",
+  "demonhunter/vengeance": "SPEC_VENGEANCE_DEMON_HUNTER",
   "rogue/outlaw": "SPEC_OUTLAW_ROGUE",
   "shaman/enhancement": "SPEC_ENHANCEMENT_SHAMAN",
 } as const satisfies Record<SpecId, OwningLayer>;
@@ -3542,6 +3545,19 @@ export const ASSERTION_KINDS = {
       "The Devastation Evoker facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
   },
 
+  // ---- SPEC_VENGEANCE_DEMON_HUNTER (ONB-X3, INTERNAL_ONLY) ---
+  "SPEC_VENGEANCE_DEMON_HUNTER.SPEC_GATE": {
+    owningLayer: "SPEC_VENGEANCE_DEMON_HUNTER",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Vengeance Demon Hunter facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
+  },
+
   // ---- SPEC_OUTLAW_ROGUE (ONB-C2, INTERNAL_ONLY) ---
   "SPEC_OUTLAW_ROGUE.SPEC_GATE": {
     owningLayer: "SPEC_OUTLAW_ROGUE",
@@ -4388,6 +4404,7 @@ export const PINNED_AUTHORITY_REVISIONS: Readonly<Record<string, string>> = {
   [pinnedMarksmanshipHunterApl.authorityId]: pinnedMarksmanshipHunterApl.artifactRevision,
   [pinnedFireMageApl.authorityId]: pinnedFireMageApl.artifactRevision,
   [pinnedDevastationEvokerApl.authorityId]: pinnedDevastationEvokerApl.artifactRevision,
+  [pinnedVengeanceDemonHunterApl.authorityId]: pinnedVengeanceDemonHunterApl.artifactRevision,
   [pinnedOutlawRogueApl.authorityId]: pinnedOutlawRogueApl.artifactRevision,
   [pinnedEnhancementShamanApl.authorityId]: pinnedEnhancementShamanApl.artifactRevision,
 };

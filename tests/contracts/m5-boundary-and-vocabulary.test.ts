@@ -482,6 +482,7 @@ describe("M5 forms no unearned verdict", () => {
       "src/specs/hunter/marksmanship/observed-analysis.ts",
       "src/specs/mage/fire/observed-analysis.ts",
       "src/specs/evoker/devastation/observed-analysis.ts",
+      "src/specs/demonhunter/vengeance/observed-analysis.ts",
       "src/specs/rogue/outlaw/observed-analysis.ts",
       "src/specs/shaman/enhancement/observed-analysis.ts",
       "src/specs/warrior/protection/domains.ts",
@@ -499,6 +500,7 @@ describe("M5 forms no unearned verdict", () => {
       "src/specs/hunter/marksmanship/domains.ts",
       "src/specs/mage/fire/domains.ts",
       "src/specs/evoker/devastation/domains.ts",
+      "src/specs/demonhunter/vengeance/domains.ts",
       "src/specs/rogue/outlaw/domains.ts",
       "src/specs/shaman/enhancement/domains.ts",
     ];
