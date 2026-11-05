@@ -775,8 +775,9 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
   });
 
   it("ONB-D3: the gate search finds nothing for Arcane Mage", async () => {
-    // No decision of it resolves on real evidence, and nothing of it is committed as a decision set (agent/architecture.md "ONB-D3").
-    // A later capture that changed this would fail this pin and prompt a new public entry; it would not promote anything by itself.
+    // All 1,039 decisions of its retained subjects stay UNKNOWN, so it was not promoted (agent/architecture.md
+    // "ONB-D3P"). A later change that resolved one would fail this pin and prompt a new public entry; it would not
+    // promote anything by itself.
     const tiers = await tiersPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "mage/arcane");
     if (module === undefined) throw new Error("no module for mage/arcane");
@@ -786,8 +787,9 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
   });
 
   it("ONB-D3: the gate search finds nothing for Frost Mage", async () => {
-    // No decision of it resolves on real evidence, and nothing of it is committed as a decision set (agent/architecture.md "ONB-D3").
-    // A later capture that changed this would fail this pin and prompt a new public entry; it would not promote anything by itself.
+    // Its only replayable source refuses for want of combatant info, so it was not promoted (agent/architecture.md
+    // "ONB-D3P"). A later capture that changed this would fail this pin and prompt a new public entry; it would not
+    // promote anything by itself.
     const tiers = await tiersPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "mage/frost");
     if (module === undefined) throw new Error("no module for mage/frost");

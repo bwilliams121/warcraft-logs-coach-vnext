@@ -5696,3 +5696,9 @@ Each list's own: Arcane's stop at `cooldowns[4] evocation` with its earlier cand
 Four corpus cases, two per spec, as for ONB-D1, and `tests/contracts/m11-promotion-evidence-gate.test.ts` pins that the gate search finds nothing for each. `m11d2c-pinned-extraction-preflight` holds the two new targets.
 
 Offline only, not committed: the census with its sources resolved to actors (`.probe/onbd3/census.cjs`, `actors.cjs`, Mortal Strike as its positive control), the replay through production ingestion (`.probe/onbd3/m/`), and the class-mask reading of cast-time effects (`.probe/onbd3/masks.cjs`). The real extractor preflight runs only against a local pinned source root, as for every pinned target.
+
+# ONB-D3P: Arcane Mage and Frost Mage, not promoted
+
+No production code changed. `tests/unit/analysis-composition-refusals.test.ts` holds Mage/Arcane and Mage/Frost: SPEC_NOT_SUPPORTED, one retrieval for preparation alone, no dispatch. The class token is the one both registrations' `wclClassName` names, so each row reaches the identity table's real lookup rather than failing on a misspelling; Mage/Frost is a distinct row from DeathKnight/Frost. `tests/contracts/m11-promotion-evidence-gate.test.ts` keeps its ONB-D3 gate searches (no qualifying assertion, `evidenceReady` false), their comments now naming the outcome. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, the two `onb-d3-*` suites).
+
+Offline only, not committed: the census (`.probe/onbd3p/census.cjs`, Mortal Strike as its positive control), the resolution of its sources against each report's actors (`.probe/onbd3p/actors.cjs`), the replay of the six Arcane subjects (`.probe/onbd3p/m/measure.baseline.ts`), and the replay of M13-A's two Mage actors (`.probe/onbd3p/m/subjects.baseline.ts`). They give the numbers in agent/architecture.md "ONB-D3P". The replay is a measurement, so a prefix subject reports only its retained span.

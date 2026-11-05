@@ -3,6 +3,8 @@
 **Exposure: `INTERNAL_ONLY`.** The registration (`mage-frost-observed-decisions`, `mage/frost`) is in the production
 catalog for the internal lookup only. The public lookup and the identity table refuse it.
 
+**Not promoted by ONB-D3P.** It cannot pass the rotational gates, and it waits on a real subject (ONB-EV), then how the `interrupt_if` option is read and the inputs behind it (agent/architecture.md "ONB-D3P").
+
 **A Cohort D follower on the shared cast anchor (ONB-S4), with no real subject. It resolves nothing today.** No retained Frost Mage subject has combatant info, so nothing here has met real evidence. On the synthetic builds in its tests every decision stays UNKNOWN. That is a property of the pinned list and the missing inputs below, not a claim about any player.
 
 ## The authority
