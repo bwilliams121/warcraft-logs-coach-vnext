@@ -5,9 +5,11 @@ catalog for the internal lookup only. The public lookup and the identity table r
 
 **Not promoted by ONB-B1P.** It cannot pass the rotational gates, and it waits on ONB-S3 rather than on evidence: see "Other subjects" below.
 
+**ONB-S3R (2026-11-06): replayed over all 1,207 decisions of its five retained subjects, and none resolves. 1,155 stay at the dispatch, because fewer than 3 enemies are proven, and all 1,207 stop at Charge.** (agent/architecture.md "ONB-S3R").
+
 **Cohort B's representative, and it resolves nothing today.** No decision of this specialization reaches MATCH or REJECTED:
-every GCD action of the pinned list sits behind a `run_action_list` gated on the enemy count, which is the ONB-S3 owner
-decision. That is a measured property of the pinned list and the missing inputs below, not a claim about any player. What it
+every decision meets Charge's open line first, and every GCD action of the pinned list sits behind a `run_action_list` gated on
+the enemy count, which events only bound from below (ONB-S3). That is a measured property of the pinned list and the missing inputs below, not a claim about any player. What it
 can say over a real fight is one observation, the Colossus Smash windows.
 
 ## The authority
@@ -35,7 +37,8 @@ Every COMPLETE cast by the actor, classified by pinned data:
 | `rage` | the decision cast's own PRE_COST | EXACT on a costed cast; unknown on a free one. Never replayed |
 | `talent.massacre.enabled` | the three-way rule | absent from the tree is UNKNOWN |
 | `talent.<x>` | the three-way rule; another hero tree's talents are FALSE on a resolved tree | absent from the tree is UNKNOWN |
-| `buff.*`, `debuff.*`, `dot.*`, `cooldown.*`, the enemy count, the target's health and casts, simulation options | none | unbound or UNKNOWN_NUMBER, stated as such |
+| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `buff.*`, `debuff.*`, `dot.*`, `cooldown.*`, the target's health and casts, simulation options | none | unbound or UNKNOWN_NUMBER, stated as such |
 
 ## Why no decision resolves
 
@@ -43,12 +46,12 @@ Every COMPLETE cast by the actor, classified by pinned data:
 | --- | --- |
 | `default[0] charge` | the query's refusal: `movement.distance` has no evidence, and Charge is off the GCD with no reviewed transition contract |
 | `default[3] pummel` | `target.debuff.casting.react` is not read, and Pummel has no contract either |
-| `default[17] run_action_list` (`slayer_aoe`) | where the root scan stops on a Slayer build: `talent.slayers_dominance` holds and `active_enemies` is at most a proven lower bound (ONB-S3). `default[14]` is the same stop on a Colossus build |
+| `default[17] run_action_list` (`slayer_aoe`) | where the root scan stops on a Slayer build while fewer than 3 enemies are proven: `talent.slayers_dominance` holds, and `active_enemies>2` needs a proven 3 or an upper bound (ONB-S3). `default[14]` is the same stop on a Colossus build |
 | `default[18] run_action_list` (`slayer_execute`) | below that gate, and its own `target_if=min:target.health.pct` picks among enemies nothing enumerates |
 
 The lists behind the dispatch open differently, so the worlds do not converge: `slayer_aoe` starts at Cleave, Sweeping Strikes
-and Avatar, and `slayer_st` at Sweeping Strikes on two targets, Cleave and Rend. Lifting the enemy count needs ONB-S3, which is
-an owner decision.
+and Avatar, and `slayer_st` at Sweeping Strikes on two targets, Cleave and Rend. ONB-S3 gives the count a proven lower bound and no upper bound, so the dispatch
+opens only where 3 or more enemies are proven.
 
 **Why nothing else was bound.** Binding auras and cooldowns would not move a decision while that stands, and the wire says a
 pinned cooldown is not a usable bound here (see below). Each binding would be machinery with no decision behind it. See

@@ -3,6 +3,8 @@
 **Exposure: `INTERNAL_ONLY`.** The registration (`warrior-fury-observed-decisions`, `warrior/fury`) is in the production
 catalog for the internal lookup only. The public lookup and the identity table refuse it.
 
+**ONB-S3R (2026-11-06): not replayable. No event of it is retained, so its gap stays on ONB-EV, and its list reads `active_enemies`.** (agent/architecture.md "ONB-S3R").
+
 **A Cohort A follower of Havoc's pattern, and it resolves nothing today.** No decision of this
 specialization reaches MATCH or REJECTED on the shared engine as it stands. Every decision is observed,
 classified and explained, and stays UNKNOWN. That is a measured property of the pinned list and the
@@ -31,7 +33,8 @@ Every COMPLETE cast by the actor, classified by pinned data:
 | --- | --- | --- |
 | `rage` | the decision cast's own PRE_COST | EXACT on a costed cast; unknown on a free one. Never replayed |
 | `talent.<x>`, `talent.<x>.enabled` | the three-way rule; another hero tree's talents are FALSE on a resolved tree | absent from the tree is UNKNOWN |
-| `buff.*`, `debuff.*`, `cooldown.*`, the enemy count, simulation options | none | unbound or UNKNOWN_NUMBER, stated as such |
+| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `buff.*`, `debuff.*`, `cooldown.*`, simulation options | none | unbound or UNKNOWN_NUMBER, stated as such |
 
 ## Why no decision resolves
 
@@ -43,7 +46,7 @@ Every COMPLETE cast by the actor, classified by pinned data:
 | `default[14..17] run_action_list` | every hero list is gated on `active_enemies`, so the single-target and multi-target lists are both possible at every decision (ONB-S3) |
 | `slayer`, `thane` and their `_aoe` lists | their first entries are off-GCD cooldowns with no contract, and the lists diverge on their first GCD action |
 
-Lifting the enemy count needs ONB-S3, which is an owner decision. Every GCD action of the list sits behind those dispatches, so nothing can resolve while it stands.
+ONB-S3 gives the count a proven lower bound and no upper bound. Every GCD action of the list sits behind those dispatches, so nothing resolves until one of them settles.
 
 ## The evidence
 
@@ -61,4 +64,4 @@ before binding anything that could resolve a decision.
 ## Not evaluated, deliberately
 
 Auras (no wire identity is corroborated), cooldowns (no pin is checked against real gaps), resources between
-casts, the enemy count, the target's health and casts, movement. See `agent/follow-ups.md` "After ONB-A2".
+casts, the target's health and casts, movement. See `agent/follow-ups.md` "After ONB-A2".

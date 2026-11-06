@@ -5,6 +5,8 @@ catalog for the internal lookup only. The public lookup and the identity table r
 
 **Not promoted by ONB-B2P.** It cannot pass the rotational gates: its only subject refuses for want of combatant info (ONB-EV), and its list also waits on ONB-S3 (agent/architecture.md "ONB-B2P").
 
+**ONB-S3R (2026-11-06): still refuses. Its one retained subject has no combatant info, so its gap stays on ONB-EV.** (agent/architecture.md "ONB-S3R").
+
 **A Cohort B follower of Arms' pattern, and it resolves nothing today.** No decision of this
 specialization reaches MATCH or REJECTED on the shared engine as it stands. Every decision is observed,
 classified and explained, and stays UNKNOWN. That is a measured property of the pinned list and the
@@ -34,7 +36,8 @@ Every COMPLETE cast by the actor, classified by pinned data:
 | --- | --- | --- |
 
 | `talent.<x>`, `talent.<x>.enabled` | the three-way rule; another hero tree's talents are FALSE on a resolved tree | absent from the tree is UNKNOWN |
-| `buff.*`, `debuff.*`, `cooldown.*`, the enemy count, simulation options | none | unbound or UNKNOWN_NUMBER, stated as such |
+| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `buff.*`, `debuff.*`, `cooldown.*`, simulation options | none | unbound or UNKNOWN_NUMBER, stated as such |
 | `line_cd=600` on `bloodlust` | the shared cast attribution | a logged 2825 attributes to its sole entry; a timer read from a log is UNKNOWN |
 
 ## Why no decision resolves
@@ -44,7 +47,7 @@ Every COMPLETE cast by the actor, classified by pinned data:
 | `default[4] bloodlust,line_cd=600` | the engine's first refusal: off-GCD, no reviewed contract, and the line's timer is UNKNOWN from any log |
 | `default[6]` (Stormbringer) or `default[7]` (Totemic) `call_action_list` | where each root scan stops: the enemy count (ONB-S3). `talent.surging_totem` picks the list; the count stays open |
 
-Lifting the enemy count needs ONB-S3, which is an owner decision. Every action outside `default` sits behind those gates.
+ONB-S3 gives the count a proven lower bound and no upper bound. Every action outside `default` sits behind those gates.
 
 ## The evidence
 
@@ -61,4 +64,4 @@ Lifting the enemy count needs ONB-S3, which is an owner decision. Every action o
 ## Not evaluated, deliberately
 
 Auras (no wire identity is corroborated), cooldowns (no pin is checked against real gaps), resources between
-casts, the enemy count, the target's health and casts, movement. See `agent/follow-ups.md` "After ONB-B2".
+casts, the target's health and casts, movement. See `agent/follow-ups.md` "After ONB-B2".

@@ -48,7 +48,8 @@ The list names none of the replacements, so an unbound one would be excluded as 
 | `runic_power`, `runic_power.deficit` | the decision cast's own PRE_COST | EXACT on a costed cast; unknown on a free one. Never replayed |
 | `talent.<x>` | the three-way rule | absent from the tree is UNKNOWN |
 | `pet.army_ghoul.active`, `pet.gargoyle.active`, `pet.lord_of_the_dead.active` | shared pet presence, at the decision's cast | an undecided presence binds nothing, so the truth is enumerated |
-| `pet.lord_of_the_dead.remains`, `buff.*`, `debuff.*`, `dot.*`, `cooldown.*`, `active_enemies`, `raid_event.*`, `time`, `gcd`, `fight_remains`, the target's health | none | unbound or UNKNOWN_NUMBER, stated as such |
+| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `pet.lord_of_the_dead.remains`, `buff.*`, `debuff.*`, `dot.*`, `cooldown.*`, `raid_event.*`, `time`, `gcd`, `fight_remains`, the target's health | none | unbound or UNKNOWN_NUMBER, stated as such |
 
 **No hero tree is read.** The list reads no `hero_tree.*` and no hero talent, and no action of it is built on one. The facade reports the tree from entry membership and nothing decides on it.
 
@@ -87,4 +88,4 @@ ONB-S3 alone moves nothing: the swing's entry and the three cooldown lines come 
 
 ## Not evaluated, deliberately
 
-Auras, plagues, cooldowns and charges, the enemy count, the target's health, haste, resources between casts, pet presence past what the shared state proves, and movement. See `agent/follow-ups.md` "After ONB-X5".
+Auras, plagues, cooldowns and charges, the target's health, haste, resources between casts, pet presence past what the shared state proves, and movement. See `agent/follow-ups.md` "After ONB-X5".

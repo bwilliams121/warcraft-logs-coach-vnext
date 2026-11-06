@@ -5,9 +5,10 @@ catalog for the internal lookup only. The public lookup and the identity table r
 
 **Not promoted by ONB-D1P.** It cannot pass the rotational gates, and it waits on the enemy count (ONB-S3) and the inputs behind it, rather than on evidence (agent/architecture.md "ONB-D1P").
 
-**Cohort D's representative, and the first reader of the shared cast anchor (ONB-S4). It resolves nothing today.** No decision of this
-specialization reaches MATCH or REJECTED on the shared engine as it stands. Every decision is observed, anchored where the evidence allows,
-classified and explained, and stays UNKNOWN. That is a measured property of the pinned list and the missing inputs below, not a claim about any player.
+**ONB-S3R (2026-11-06): 4 of its 220 retained decisions now MATCH, and it still cannot pass the rotational gates.** All four are Summon Infernal, one observed token against the gate's minimum of two, with no REJECTED and no control, and nothing committed (agent/architecture.md "ONB-S3R").
+
+**Cohort D's representative, and the first reader of the shared cast anchor (ONB-S4).** The other 216 decisions are observed, anchored where the evidence allows,
+classified and explained, and stay UNKNOWN. That is a measured property of the pinned list and the missing inputs below, not a claim about any player.
 
 ## The authority
 
@@ -54,22 +55,23 @@ The rows are hand-reviewed readings of the pinned `_cast_time` and of every warl
 | Atom | Source | Rule |
 | --- | --- | --- |
 | `talent.<x>`, `talent.cataclysm.enabled` | the three-way rule; another hero tree's talents are FALSE on a resolved tree | absent from the tree is UNKNOWN |
-| `soul_shard`, `active_enemies`, `active_dot.*`, `dot.*`, `dot_refreshable_count.*`, `buff.*`, `cooldown.*`, `action.*`, `demonic_art`, `pet.infernal.active`, `target.health.pct`, `target.time_to_die`, `fight_remains`, `raid_event.*`, `time` | none | unbound or UNKNOWN_NUMBER, stated as such |
+| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `soul_shard`, `active_dot.*`, `dot.*`, `dot_refreshable_count.*`, `buff.*`, `cooldown.*`, `action.*`, `demonic_art`, `pet.infernal.active`, `target.health.pct`, `target.time_to_die`, `fight_remains`, `raid_event.*`, `time` | none | unbound or UNKNOWN_NUMBER, stated as such |
 
-## Why no decision resolves
+## Why 216 decisions stay UNKNOWN
 
 | Stops at | Why |
 | --- | --- |
-| `default[3] call_action_list,name=aoe_hc` (Hellcaller), `default[4] .. aoe_dia` (Diabolist) | both read `active_enemies`. The other tree's list closes on its talent, and these stay open. Lifting the count needs ONB-S3, which is an owner decision |
-| inside the open area list, `aoe_hc[2] rain_of_fire` | where the scan physically stops on real evidence. Its talent is a choice of two rows, so its applicability is UNKNOWN, and its condition reads the count anyway |
-| `default[5] soul_fire`, `default[6] conflagrate` (a count only a test can have) | Soul Shards and charges are unknown, so the single-target lines stay open and nothing falls through to Incinerate |
+| `aoe_hc[0] summon_infernal`, `aoe_hc[1] malevolence` | a proven lower bound of 2 opens `default[3]` on 215 of the 220 decisions (Hellcaller; `default[4] .. aoe_dia` is its Diabolist twin). Then no cooldown is read, so unless Summon Infernal is the press itself, its line stays open. This is what the 103 decisions that are not anchor refusals stop on |
+| `aoe_hc[2] rain_of_fire` | where the scan physically stops on real evidence. Its talent is a choice of two rows, so its applicability is UNKNOWN, and its condition reads the count anyway |
+| `default[5] soul_fire`, `default[6] conflagrate` (a count of 1, which only a test can have, because no event proves an upper bound) | Soul Shards and charges are unknown, so the single-target lines stay open and nothing falls through to Incinerate |
 
 The dispatch before the count works: `variables`, `ogcd` and `items` all return no action on both subjects.
 
 ## The evidence
 
-Two retained subjects, replayed offline through production ingestion: A7R6kxPJ1hC8YQ4w fight 7, actors 12 and 15, the first 165 s of 424.5 s (pages m10b + m10c5), both Hellcaller. Nothing is committed but their context rows, and the anchor counts are in agent/architecture.md "ONB-D1". Every Chaos Bolt has a begin before it, which corroborates and does not prove, so all 64 stay UNKNOWN. Only 4 Soul Fires are anchored at a begin, and no real instant contradicts its review.
+Two retained subjects, replayed offline through production ingestion: A7R6kxPJ1hC8YQ4w fight 7, actors 12 and 15, the first 165 s of 424.5 s (pages m10b + m10c5), both Hellcaller. Each has two MATCH on Summon Infernal, with its own Wither on both bosses. Nothing is committed but their context rows, and the anchor counts are in agent/architecture.md "ONB-D1". Every Chaos Bolt has a begin before it, which corroborates and does not prove, so all 64 stay UNKNOWN. Only 4 Soul Fires are anchored at a begin, and no real instant contradicts its review.
 
 ## Not evaluated, deliberately
 
-Ritual Clipping stays `UNRESOLVED_DIABOLIST_HERO_TREE`, a deep-dive question this slice neither answers nor needs (no retained Destruction subject is a Diabolist). Auras, cooldowns, charges, Soul Shards, pets, the enemy count, the target's health, haste and movement are not modelled. See `agent/follow-ups.md` "After ONB-D1".
+Ritual Clipping stays `UNRESOLVED_DIABOLIST_HERO_TREE`, a deep-dive question this slice neither answers nor needs (no retained Destruction subject is a Diabolist). Auras, cooldowns, charges, Soul Shards, pets, the target's health, haste and movement are not modelled. See `agent/follow-ups.md` "After ONB-D1".

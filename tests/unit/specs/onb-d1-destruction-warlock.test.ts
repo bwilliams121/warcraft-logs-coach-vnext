@@ -1,14 +1,14 @@
 /**
  * ONB-D1: Destruction Warlock, Cohort D's representative, the first reader of the shared ONB-S4 cast anchor.
  *
- * No decision resolves on real evidence, because both hero trees' area lists read the enemy count first, so the
+ * Almost nothing resolves on real evidence, because both hero trees' area lists read the enemy count first, so the
  * mandatory negatives are the centre of it: a decision whose moment is not established is never judged, a cast-time
  * completion with no begin is never read as instant, a begin alone is never a decision, an open enemy count never
  * reads as single target, a missing talent never reads as false, and a wire Soul Shard value at a completion is
  * never read as the decision's.
  *
- * Synthetic on purpose. The authority views here answer with a single line, past the enemy count, because only a
- * test can get there: they show what the anchor does when a scan finally resolves.
+ * Synthetic on purpose. The authority views here answer with a single line, past the enemy count: they show what the
+ * anchor does when a scan finally resolves. What a real lower bound opens is in onb-s3r-destruction-lower-bound.test.ts.
  */
 
 import { describe, expect, it } from "vitest";
@@ -601,7 +601,7 @@ describe("what the profile proves about a cast", () => {
   });
 });
 
-describe("no decision resolves", () => {
+describe("with no enemy evidence, no decision resolves", () => {
   it.each([
     ["Hellcaller", HELLCALLER_BUILD],
     ["Diabolist", DIABOLIST_BUILD],
@@ -707,7 +707,7 @@ describe("the list as pinned", () => {
 });
 
 describe("the enemy count", () => {
-  it("is declared and unbound, so a line reading it stays open and never reads as single target", () => {
+  it("unbound by the spec's own resolver, a line reading it stays open and never reads as single target", () => {
     const facts = factsOf(HELLCALLER_BUILD);
     const bindings = bindingsOf(facts);
     const row = bindings.specAtoms?.bound.find((binding) => binding.key === ACTIVE_ENEMIES);

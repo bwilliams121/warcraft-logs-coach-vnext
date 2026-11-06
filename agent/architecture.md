@@ -12197,6 +12197,59 @@ rest and recording each next blocker is ONB-S3R.
 reads a count and stayed open, by its verbatim text, so a line open on another atom beside a settled
 count is still counted there (agent/follow-ups.md "After ONB-S3").
 
+## ONB-S3R — the enemy-count specializations, replayed
+
+Autopilot queue entry ONB-S3R, the owner's "Promotion semantics" above. Offline replay only: no Warcraft Logs request, no
+public contract change, no specialization promoted, no decision-making code changed.
+
+**What ran.** Every retained subject of every enemy-count reader, through production ingestion and each facade, at the ONB-S3
+merge (`.probe/onbs3r/m/`, not committed). Beside the named specializations, that includes the rest of the seventeen ONB-S3 wired,
+because "ONB-S3 alone moves nothing" was a prediction worth checking. Forty-two subjects have a saved output from their own public
+tranche to compare with. Their decision counts are all equal, and only Destruction's two subjects change a verdict. Arms' and Frost's outputs saved no
+stop table, so those rest on the tables recorded in their sections.
+
+| Specialization | Subjects | Decisions | MATCH | REJECTED | The scan's stop | What the engine refuses on first |
+| --- | ---: | ---: | ---: | ---: | --- | --- |
+| Arms | 5 | 1,207 | 0 | 0 | `default[17]` on the count, 1,155; past it, 52 | `default[0] charge`, all 1,207 |
+| Frost Death Knight | 2 | 567 | 0 | 0 | `cooldowns[4] reapers_mark` on `target_if`, all | `default[0] auto_attack`, all |
+| Devourer | 3 | 251 | 0 | 0 | `voidscarred_melee[0]` on `active_enemies=1`, all | the same line, all |
+| Feral | 2 | 372 | 0 | 0 | `default[6] chomp` 256, `cooldown[13] convoke_the_spirits` 112, none 4 | `prowl` 164, `auto_attack` 199, `cat_form` 5, `tigers_fury` 4 |
+| Destruction | 2 | 220 | **4** | 0 | `aoe_hc[2] rain_of_fire` 210, `default[3]` 6, resolved 4 | 113 anchor refusals, then `aoe_hc[0] summon_infernal` 103 |
+
+**Not replayable.** Subtlety and Enhancement: their only subjects (filtered M13-A actors 17 and 7) still refuse
+`PROFILE_NOT_RESOLVED`, as do the M13-A actors of Balance, Shadow, Arcane, Frost Mage, Affliction, Marksmanship and Demonology.
+Fury, Protection Warrior, Outlaw and Vengeance have no retained event. All stay on ONB-EV.
+
+**The rest moved nothing.** Elemental, Balance, Shadow, Arcane, Fire, Devastation, Demonology and Unholy, 30 subjects, have stop tables
+identical to their public tranches', with 0 MATCH and 0 REJECTED.
+
+**Destruction's four MATCH are real, and they are what the model promised.** `default[3]` is `active_enemies>=2&talent.wither`,
+and `aoe_hc[0] summon_infernal` has no condition. On A7R6kxPJ1hC8YQ4w fight 7, actor 12 presses Summon Infernal at 1,357 and 93,094 ms,
+and actor 15 at 967 and 93,336 ms. At each, the subject's own Wither is active on both bosses, Breath of Ula'tek (21) and Blood of Ula'tek (22),
+applied in the raw events with that subject as source, so the bound is 2, or 3 with a Venom Coagulation. The press is positive usability, as for
+any other MATCH. They are the first real decisions the enemy-set model has resolved, and `tests/unit/specs/onb-s3r-destruction-lower-bound.test.ts`
+pins the rule on synthetic events: one debuffed boss, a debuff removed first, or no aura evidence each leave the same press UNKNOWN.
+
+**No promotion entry.** Requirement C needs the rotational gate's observation and discrimination on committed evidence. Destruction has one
+observed token against `MIN_DISTINCT_OBSERVED_ACTION_TOKENS` of 2, no REJECTED, no control and no committed assertion, and every other
+specialization has no resolved decision. So no `ONB-*P2` entry is added, and `m11-promotion-evidence-gate` still finds nothing for any of them.
+
+**No blocker was fixed, because none is covered by existing semantics.** Each was checked rather than assumed:
+
+- **An upper bound.** 1,155 Arms and all 251 Devourer decisions wait on it, on the fights where fewer enemies are proven than the gate reads.
+  Only the deferred curated roster (Policy B) could supply one, and that is the owner's to schedule.
+- **Charge.** A contract alone leaves `time<=0.5|movement.distance>5` open, because nothing establishes movement (CLAUDE.md "Movement
+  Claims"). On the 51 decisions with no root stopping point, Charge is one of many open candidates, so it would decide none of them.
+- **Frost's target domain.** ONB-S3's seam could accept one, as its `debuff.reapers_mark.down` shape allows. On both subjects the scan
+  already holds `auto_attack`, `remorseless_winter` and `breath_of_sindragosa` open before that line on every decision, so supplying it would move none.
+  It would be machinery with no decision behind it.
+- **Summon Infernal's readiness.** This is the nearest gain: all six Malevolence decisions stop only on it, between 985 and 62,860 ms after a logged press, so one proof
+  gives the second observed token. It is not covered today. No runtime row pins that cooldown, and the wire's gaps of 91,737 and 92,369 ms have no pin to respect, so a reading needs
+  new reviewed data and a reset review first (agent/follow-ups.md "After ONB-S3R").
+
+**What this tranche corrected.** Prose only, plus one new test. Sixteen specialization READMEs still called the count unbound, and ten called ONB-S3 a pending owner decision.
+Destruction's limitation strings said no decision resolves, which the replay disproves. Those strings are INTERNAL_ONLY and unpublished, and the public reports stay byte-identical.
+
 ## ONB-S4 — Shared cast and channel decision anchor
 
 Autopilot queue entry ONB-S4. Internal shared engine only: no public contract

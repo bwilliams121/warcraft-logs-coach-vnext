@@ -52,7 +52,8 @@ The rows are hand-reviewed readings of the pinned `_cast_time` and of every cast
 | --- | --- | --- |
 | `talent.<x>` | the three-way rule; another hero tree's talents are FALSE on a resolved tree | absent from the tree is UNKNOWN |
 | `hero_tree.soul_harvester`, `hero_tree.hellcaller` | the resolved hero tree | a constant; on an unresolved tree, no row, so both dispatches stay open |
-| `soul_shard`, `active_enemies`, `remains`, `refreshable`, `ticking`, `dot.*`, `active_dot.*`, `buff.*`, `pet.darkglare.*`, `cooldown.*`, `prev.*`, `prev_gcd.*`, `set_bonus.*`, `action.*`, `execute_time`, `duration`, `gcd`, `fight_remains` | none | unbound or UNKNOWN_NUMBER, stated as such |
+| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `soul_shard`, `remains`, `refreshable`, `ticking`, `dot.*`, `active_dot.*`, `buff.*`, `pet.darkglare.*`, `cooldown.*`, `prev.*`, `prev_gcd.*`, `set_bonus.*`, `action.*`, `execute_time`, `duration`, `gcd`, `fight_remains` | none | unbound or UNKNOWN_NUMBER, stated as such |
 
 ## Why no decision resolves
 

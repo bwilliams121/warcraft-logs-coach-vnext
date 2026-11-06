@@ -34,11 +34,11 @@
  *
  * MATCH MEANS AUTHORITY_COMPATIBLE_ONLY, after the non-domain exclusion.
  *
- * NO UNSELECTABILITY PROOF, AND NO DECISION RESOLVES. Every comparison passes `null` for the
- * unselectability proof: the conditions it would need FALSE read state this slice does not
- * bind. Both hero trees' area lists read the enemy count before any single-target line, so the
- * query stays UNKNOWN (`src/specs/warlock/destruction/README.md`).
- * A decision here is observed and explained, not judged.
+ * NO UNSELECTABILITY PROOF. Every comparison passes `null` for the unselectability proof: the
+ * conditions it would need FALSE read state this slice does not bind. Both hero trees' area lists read
+ * the enemy count before any single-target line, so the query stays UNKNOWN unless a proven lower bound
+ * opens a list and the press is that list's first line (`src/specs/warlock/destruction/README.md`). So a
+ * decision here can MATCH and cannot be REJECTED.
  */
 
 import type { CombatState } from "../../../engine/state/combat-state.js";

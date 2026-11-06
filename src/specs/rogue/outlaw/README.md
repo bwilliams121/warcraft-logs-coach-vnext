@@ -5,6 +5,8 @@ catalog for the internal lookup only. The public lookup and the identity table r
 
 **Not promoted by ONB-C2P.** It cannot pass the rotational gates: no decision resolves and no retained capture holds one of its events, so its gap is on ONB-EV (agent/architecture.md "ONB-C2P").
 
+**ONB-S3R (2026-11-06): not replayable. No event of it is retained, so its gap stays on ONB-EV, and its list reads `spell_targets`, which no action registers.** (agent/architecture.md "ONB-S3R").
+
 **A Cohort C follower of Feral's pooling, and it resolves nothing today.** No decision of this
 specialization reaches MATCH or REJECTED on the shared engine as it stands. Every decision is observed,
 classified and explained, and stays UNKNOWN. That is a measured property of the pinned list and the
@@ -46,7 +48,7 @@ Every COMPLETE cast by the actor, classified by pinned data:
 | `default[7] run_action_list` (root scan, a whole tree) | `variable.finish_condition` reads `cp_max_spend` and two cooldowns, none bound. The `cds` lines above it stay MAY_SELECT, since they read auras, cooldowns, `rtb_buffs`, `raid_event.adds.*`, `fight_remains` and the enemy count |
 | `build`, `finish` (no whole-tree scan arrives) | their entries read `buff.*` and `cooldown.*`, and no aura identity is pinned |
 
-Lifting the enemy count needs ONB-S3, which is an owner decision, and it would not be enough: Stealth stands before everything.
+ONB-S3 does not settle this list's count: it reads `spell_targets`, and no action registers one, and that would not be enough: Stealth stands before everything.
 
 ## Pooling
 

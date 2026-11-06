@@ -3,6 +3,8 @@
 **Exposure: `INTERNAL_ONLY`.** The registration (`rogue-subtlety-observed-decisions`, `rogue/subtlety`) is in the production
 catalog for the internal lookup only. The public lookup and the identity table refuse it.
 
+**ONB-S3R (2026-11-06): still refuses. Its one retained subject has no combatant info, so its gap stays on ONB-EV, and its list reads `spell_targets`, which no action registers.** (agent/architecture.md "ONB-S3R").
+
 **A Cohort A follower of Havoc's pattern, and it resolves nothing today.** No decision of this
 specialization reaches MATCH or REJECTED on the shared engine as it stands. Every decision is observed,
 classified and explained, and stays UNKNOWN. That is a measured property of the pinned list and the
@@ -46,7 +48,7 @@ Every COMPLETE cast by the actor, classified by pinned data:
 | `finish`, `build` | their gates and entries read `variable.targets`, `buff.*` (no aura identity is pinned) and `cp_max_spend` |
 | `fill[1]` | `arcane_pulse` is a racial the shared non-domain table does not list, so an entry reaching it refuses |
 
-Lifting the enemy count needs ONB-S3, which is an owner decision. It is the widest blocker below the first stop, not the only one: `finish[0]` and `build[0]` could decide without it once their auras are bound.
+ONB-S3 does not settle this list's count: it reads `spell_targets`, and no action registers one. It is the widest blocker below the first stop, not the only one: `finish[0]` and `build[0]` could decide without it once their auras are bound.
 
 ## The evidence
 
