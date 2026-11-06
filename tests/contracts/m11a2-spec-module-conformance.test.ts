@@ -195,6 +195,13 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
     sourceId: 18,
     archive: true,
   },
+  // ONB-T1: actor 13 of the committed b1Pm fight 48 context, the Windwalker Monk the census found.
+  "monk/windwalker": {
+    artifactId: "wcl-fight-context-b1pm-fight-48",
+    fightId: 48,
+    sourceId: 13,
+    archive: true,
+  },
   // ONB-D3: actor 6 of the M13-A fight context, the Frost Mage the committed evidence archive
   // context reports. That capture's casts are filtered and carry no combatant info.
   "mage/frost": {
@@ -553,6 +560,7 @@ describe("what the tree exports today", () => {
       ["FROST_MAGE_MODULE", "mage/frost", "INTERNAL_ONLY", 0],
       ["BREWMASTER_MONK_MODULE", "monk/brewmaster", "PUBLIC", 0],
       ["MISTWEAVER_MONK_MODULE", "monk/mistweaver", "PUBLIC", 0],
+      ["WINDWALKER_MONK_MODULE", "monk/windwalker", "INTERNAL_ONLY", 0],
       ["HOLY_PALADIN_MODULE", "paladin/holy", "PUBLIC", 0],
       ["PROTECTION_PALADIN_MODULE", "paladin/protection", "PUBLIC", 0],
       ["RETRIBUTION_PALADIN_MODULE", "paladin/retribution", "PUBLIC", 0],

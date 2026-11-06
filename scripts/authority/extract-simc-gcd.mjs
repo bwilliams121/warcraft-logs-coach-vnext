@@ -2239,6 +2239,234 @@ const WARRIOR_SOURCES = {
 const WARRIOR_MODULE_PATH = "engine/class_modules/sc_warrior.cpp";
 
 /**
+ * The Windwalker Monk facts (ONB-T1).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the pinned Windwalker list
+ * (apl_monk.cpp `namespace windwalker`, `live_apl`) executes. Facts a reader should not have to rediscover:
+ *
+ *   - THE RECORDS ARE THE DATA'S, NOT THE LIVE GLOBAL. The module says a spec aura lowers monk GCDs by 500 ms at init_finished
+ *     (sc_monk.cpp:505-507), so a 1500 record runs at 1000 ms. A lane needs only zero or not zero, and no record here crosses it.
+ *   - SLICING WINDS' CONSTRUCTOR SETS trigger_gcd = 1400 ms (:2918) over its record's 1000. Both are on the GCD, so the lane holds, and the extracted number stays the record's.
+ *   - THE LOG REPORTS IDS NO TOKEN OF THE LIST BINDS. Chi Explosion 393056, Roll 109132, Flying Serpent Kick 101545, Fortifying Brew 115203, a trinket and a potion are logged
+ *     and the list names none of them, so they have no lane record and are excluded.
+ *   - THE LIST'S RACIAL, POTION, ITEM AND EXTERNAL-BUFF TOKENS ARE NOT BOUND. They are outside the rotational domain, and the domain
+ *     boundary refuses them before any lane is read.
+ */
+const MONK_WINDWALKER_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 100784, displayNameEn: "Blackout Kick", baseGcdMs: 1500 },
+    { abilityGameId: 443028, displayNameEn: "Celestial Conduit", baseGcdMs: 750 },
+    { abilityGameId: 113656, displayNameEn: "Fists of Fury", baseGcdMs: 1000 },
+    { abilityGameId: 123904, displayNameEn: "Invoke Xuen, the White Tiger", baseGcdMs: 1000 },
+    { abilityGameId: 107428, displayNameEn: "Rising Sun Kick", baseGcdMs: 1500 },
+    { abilityGameId: 467307, displayNameEn: "Rushing Wind Kick", baseGcdMs: 1500 },
+    { abilityGameId: 1217413, displayNameEn: "Slicing Winds", baseGcdMs: 1000 },
+    { abilityGameId: 101546, displayNameEn: "Spinning Crane Kick", baseGcdMs: 1500 },
+    { abilityGameId: 392983, displayNameEn: "Strike of the Windlord", baseGcdMs: 1000 },
+    { abilityGameId: 100780, displayNameEn: "Tiger Palm", baseGcdMs: 1500 },
+    { abilityGameId: 322109, displayNameEn: "Touch of Death", baseGcdMs: 1500 },
+    { abilityGameId: 122470, displayNameEn: "Touch of Karma", baseGcdMs: 0 },
+    { abilityGameId: 152175, displayNameEn: "Whirling Dragon Punch", baseGcdMs: 1000 },
+    { abilityGameId: 1249625, displayNameEn: "Zenith", baseGcdMs: 0 },
+    { abilityGameId: 1272696, displayNameEn: "Zenith Stomp", baseGcdMs: 1000 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "blackout_kick",
+      candidateAbilityGameIds: [100784],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / blackout_kick_t",
+      startLine: 5331,
+      endLine: 5332,
+      sourceNote:
+        'create_action dispatches "blackout_kick" to blackout_kick_t: built on baseline.monk.blackout_kick off a Brewmaster (:1368-1371); find_class_spell( "Blackout Kick" ) at :5564.',
+    },
+    {
+      simcToken: "celestial_conduit",
+      candidateAbilityGameIds: [443028],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / celestial_conduit_t",
+      startLine: 5399,
+      endLine: 5400,
+      sourceNote:
+        'create_action dispatches "celestial_conduit" to celestial_conduit_t: built on talent.conduit_of_the_celestials.celestial_conduit_action (:3836-3837); find_spell( 443028 ) at :5895.',
+    },
+    {
+      simcToken: "fists_of_fury",
+      candidateAbilityGameIds: [113656],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / fists_of_fury_t",
+      startLine: 5373,
+      endLine: 5374,
+      sourceNote:
+        'create_action dispatches "fists_of_fury" to fists_of_fury_t: built on talent.windwalker.fists_of_fury (:1782); _ST( "Fists of Fury" ) at :5784.',
+    },
+    {
+      simcToken: "invoke_xuen_the_white_tiger",
+      candidateAbilityGameIds: [123904],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / xuen_summon_t",
+      startLine: 5387,
+      endLine: 5388,
+      sourceNote:
+        'create_action dispatches "invoke_xuen_the_white_tiger" to xuen_summon_t: built on talent.conduit_of_the_celestials.invoke_xuen_the_white_tiger (:3603); _HT( "Invoke Xuen, the White Tiger" ) at :5870.',
+    },
+    {
+      simcToken: "rising_sun_kick",
+      candidateAbilityGameIds: [107428],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / rising_sun_kick_t",
+      startLine: 5335,
+      endLine: 5336,
+      sourceNote:
+        'create_action dispatches "rising_sun_kick" to rising_sun_kick_t: built on talent.monk.rising_sun_kick (:1110); _CT( "Rising Sun Kick" ) at :5621.',
+    },
+    {
+      simcToken: "rushing_wind_kick",
+      candidateAbilityGameIds: [467307],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / rushing_wind_kick_t",
+      startLine: 5337,
+      endLine: 5338,
+      sourceNote:
+        'create_action dispatches "rushing_wind_kick" to rushing_wind_kick_t: built on talent.windwalker.rushing_wind_kick_action (:1180); find_spell( 467307 ) at :5839.',
+    },
+    {
+      simcToken: "slicing_winds",
+      candidateAbilityGameIds: [1217413],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / slicing_winds_t",
+      startLine: 5379,
+      endLine: 5380,
+      sourceNote:
+        'create_action dispatches "slicing_winds" to slicing_winds_t: built on talent.windwalker.slicing_winds (:2910); _ST( "Slicing Winds" ) at :5844.',
+    },
+    {
+      simcToken: "spinning_crane_kick",
+      candidateAbilityGameIds: [101546],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / spinning_crane_kick_t",
+      startLine: 5339,
+      endLine: 5340,
+      sourceNote:
+        'create_action dispatches "spinning_crane_kick" to spinning_crane_kick_t: built on baseline.monk.spinning_crane_kick off a Brewmaster (:1572-1575); find_spell( 101546 ) at :5570.',
+    },
+    {
+      simcToken: "strike_of_the_windlord",
+      candidateAbilityGameIds: [392983],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / strike_of_the_windlord_t",
+      startLine: 5383,
+      endLine: 5384,
+      sourceNote:
+        'create_action dispatches "strike_of_the_windlord" to strike_of_the_windlord_t: built on talent.windwalker.strike_of_the_windlord (:1993); _ST( "Strike of the Windlord" ) at :5823.',
+    },
+    {
+      simcToken: "tiger_palm",
+      candidateAbilityGameIds: [100780],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / tiger_palm_t",
+      startLine: 5329,
+      endLine: 5330,
+      sourceNote:
+        'create_action dispatches "tiger_palm" to tiger_palm_t: built on baseline.monk.tiger_palm (:837); find_spell( 100780 ) at :5571.',
+    },
+    {
+      simcToken: "touch_of_death",
+      candidateAbilityGameIds: [322109],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / touch_of_death_t",
+      startLine: 5343,
+      endLine: 5344,
+      sourceNote:
+        'create_action dispatches "touch_of_death" to touch_of_death_t: built on baseline.monk.touch_of_death (:2655); find_spell( 322109 ) at :5572.',
+    },
+    {
+      simcToken: "touch_of_karma",
+      candidateAbilityGameIds: [122470],
+      crossCheck: "NONE_SPECIALIZATION_SPELL",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / touch_of_karma_t",
+      startLine: 5381,
+      endLine: 5382,
+      sourceNote:
+        'create_action dispatches "touch_of_karma" to touch_of_karma_t: built on baseline.windwalker.touch_of_karma (:2773); find_specialization_spell( "Touch of Karma" ) at :5610; its constructor also assigns trigger_gcd = timespan_t::zero(), the record\'s own value.',
+    },
+    {
+      simcToken: "whirling_dragon_punch",
+      candidateAbilityGameIds: [152175],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / whirling_dragon_punch_t",
+      startLine: 5391,
+      endLine: 5392,
+      sourceNote:
+        'create_action dispatches "whirling_dragon_punch" to whirling_dragon_punch_t: built on talent.windwalker.whirling_dragon_punch (:1875); _ST( "Whirling Dragon Punch" ) at :5824.',
+    },
+    {
+      simcToken: "zenith",
+      candidateAbilityGameIds: [1249625],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / zenith_t",
+      startLine: 5393,
+      endLine: 5394,
+      sourceNote:
+        'create_action dispatches "zenith" to zenith_t: built on talent.windwalker.zenith (:3960); _ST( "Zenith" ) at :5805.',
+    },
+    {
+      simcToken: "zenith_stomp",
+      candidateAbilityGameIds: [1272696],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / zenith_stomp_t",
+      startLine: 5395,
+      endLine: 5396,
+      sourceNote:
+        'create_action dispatches "zenith_stomp" to zenith_stomp_t: built on talent.monk.zenith_stomp_damage (:3896); find_spell( 1272696 ) at :5675. The token builds the ZENITH_STOMP_CAST source (:5396), which keeps the record\'s _gcd; only the ZENITH_STOMP_TRIGGER child sets trigger_gcd = 0_ms.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "auto_attack",
+      triggerGcdMs: 0,
+      sourcePath: MONK,
+      symbol: "auto_attack_t::auto_attack_t",
+      line: 2299,
+      sourceNote:
+        "auto_attack_t (struct opens at sc_monk.cpp:2034) is built on the spell-less " +
+        'monk_melee_attack_t( player, "auto_attack" ) base and its constructor (:2293) assigns trigger_gcd = 0_ms at ' +
+        ":2299.",
+    },
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
+/**
  * The Unholy Death Knight facts (ONB-X5).
  *
  * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the pinned Unholy list
@@ -7228,6 +7456,22 @@ export const TARGETS = {
     ],
     requiredFacts: DRUID_FERAL_FACTS,
     defaultOut: "src/data/game/druid-feral-gcd-semantics.json",
+  },
+  "monk-windwalker": {
+    datasetId: "SIMC_DBC_MONK_WINDWALKER_GCD_SEMANTICS",
+    classId: 10,
+    className: "Monk",
+    sources: MONK_BREWMASTER_SOURCES,
+    classModulePath: MONK_BREWMASTER_SOURCES.classModule,
+    handReviewedPaths: [
+      MONK_BREWMASTER_SOURCES.classModule,
+      MONK_BREWMASTER_SOURCES.talentModule,
+      MONK_BREWMASTER_SOURCES.racialSpells,
+      MONK_BREWMASTER_SOURCES.playerModule,
+      MONK_BREWMASTER_SOURCES.consumableModule,
+    ],
+    requiredFacts: MONK_WINDWALKER_FACTS,
+    defaultOut: "src/data/game/monk-windwalker-gcd-semantics.json",
   },
   "deathknight-unholy": {
     datasetId: "SIMC_DBC_DEATHKNIGHT_UNHOLY_GCD_SEMANTICS",

@@ -43,7 +43,11 @@ export interface TraitRow {
 
 export function resolveHeroTree(
   rows: readonly TraitRow[],
-  declared: { readonly simcName: string; readonly subTreeId: number },
+  declared: {
+    readonly simcName: string;
+    readonly subTreeId: number;
+    readonly placeholderEntryIds?: readonly number[];
+  },
   target: { readonly classId: number; readonly specId: number },
 ):
   | { readonly ok: false; readonly error: string }

@@ -824,6 +824,15 @@
       "assertions": 1,
       "cases": 1,
       "failed": 0,
+      "kindsExercised": ["SPEC_WINDWALKER_MONK.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_WINDWALKER_MONK",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
       "kindsExercised": ["SPEC_OUTLAW_ROGUE.SPEC_GATE"],
       "notExecuted": 0,
       "owningLayer": "SPEC_OUTLAW_ROGUE",
@@ -839,13 +848,13 @@
       "passed": 1
     },
     {
-      "assertions": 46,
-      "cases": 42,
+      "assertions": 47,
+      "cases": 43,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 46
+      "passed": 47
     },
     {
       "assertions": 14,
@@ -1463,6 +1472,20 @@
       ],
       "authority": null,
       "caseId": "application-service.vengeance-demon-hunter-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.windwalker-monk-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -7717,6 +7740,20 @@
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_WINDWALKER_MONK.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-windwalker-monk.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_WINDWALKER_MONK",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
       "artifactId": "synthetic.graphql-page-sequence-two-pages",
       "assertions": [
         {
@@ -8060,6 +8097,7 @@
     "SIMC_APL_MAGE_FIRE": "simc-33622e9d-1",
     "SIMC_APL_MAGE_FROST": "simc-33622e9d-1",
     "SIMC_APL_MONK_BREWMASTER": "simc-33622e9d-1",
+    "SIMC_APL_MONK_WINDWALKER": "simc-33622e9d-1",
     "SIMC_APL_PALADIN_PROTECTION": "simc-33622e9d-1",
     "SIMC_APL_PALADIN_RETRIBUTION": "simc-33622e9d-1",
     "SIMC_APL_PRIEST_SHADOW": "simc-33622e9d-1",
@@ -8082,13 +8120,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 840,
-    "cases": 245,
+    "assertions": 842,
+    "cases": 247,
     "declared": 0,
-    "executable": 840,
+    "executable": 842,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 840
+    "passed": 842
   }
 }

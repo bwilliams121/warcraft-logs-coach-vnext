@@ -1,0 +1,564 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_TRAIT_MONK_WINDWALKER_TALENTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
+    "extractedOn": "2026-11-06",
+    "extractorVersion": 1,
+    "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. That `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals trait_data_t::id_node is corroborated for Windwalker Monk on one real subject: b1PmaKrd6CDfzngc fight 48 actor 13.",
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "talents": [
+    {
+      "simcName": "airborne_rhythm",
+      "displayNameEn": "Airborne Rhythm",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101043,
+      "traitEntryId": 124815,
+      "talentSpellId": 1248833,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 124814,
+          "displayNameEn": "Hurricane's Vault",
+          "talentSpellId": 1248837
+        }
+      ],
+      "binding": "sc_monk.cpp:5856 talent.windwalker.airborne_rhythm = _ST( \"Airborne Rhythm\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "ascension",
+      "displayNameEn": "Ascension",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101037,
+      "traitEntryId": 124807,
+      "talentSpellId": 115396,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_monk.cpp:5794 talent.windwalker.ascension = _ST( \"Ascension\" ); // TODO: NYI: EFFECT 2 ENERGY REGEN; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "celestial_conduit",
+      "displayNameEn": "Celestial Conduit",
+      "tree": "HERO",
+      "traitNodeId": 110220,
+      "traitEntryId": 136745,
+      "talentSpellId": 1248989,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_monk.cpp:5894 talent.conduit_of_the_celestials.celestial_conduit = _HT( \"Celestial Conduit\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "drinking_horn_cover",
+      "displayNameEn": "Drinking Horn Cover",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101052,
+      "traitEntryId": 124825,
+      "talentSpellId": 391370,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 124824,
+          "displayNameEn": "Spiritual Focus",
+          "talentSpellId": 280197
+        }
+      ],
+      "binding": "sc_monk.cpp:5812 talent.windwalker.drinking_horn_cover = _ST( \"Drinking Horn Cover\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "echo_technique",
+      "displayNameEn": "Echo Technique",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101203,
+      "traitEntryId": 125009,
+      "talentSpellId": 1250042,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 125010,
+          "displayNameEn": "Revolving Whirl",
+          "talentSpellId": 451524
+        }
+      ],
+      "binding": "sc_monk.cpp:5834 talent.windwalker.echo_technique = _ST( \"Echo Technique\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "energy_burst",
+      "displayNameEn": "Energy Burst",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101056,
+      "traitEntryId": 124829,
+      "talentSpellId": 451498,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_monk.cpp:5828 talent.windwalker.energy_burst = _ST( \"Energy Burst\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "fists_of_fury",
+      "displayNameEn": "Fists of Fury",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101218,
+      "traitEntryId": 125026,
+      "talentSpellId": 113656,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_monk.cpp:5784 talent.windwalker.fists_of_fury = _ST( \"Fists of Fury\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "flurry_strikes",
+      "displayNameEn": "Flurry Strikes",
+      "tree": "HERO",
+      "traitNodeId": 101248,
+      "traitEntryId": 125069,
+      "talentSpellId": 450615,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_monk.cpp:5948 talent.shado_pan.flurry_strikes = _HT( \"Flurry Strikes\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "harmonic_combo",
+      "displayNameEn": "Harmonic Combo",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 104129,
+      "traitEntryId": 128712,
+      "talentSpellId": 1250041,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_monk.cpp:5852 talent.windwalker.harmonic_combo = _ST( \"Harmonic Combo\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "invoke_xuen_the_white_tiger",
+      "displayNameEn": "Invoke Xuen, the White Tiger",
+      "tree": "HERO",
+      "traitNodeId": 101243,
+      "traitEntryId": 125062,
+      "talentSpellId": 123904,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_monk.cpp:5870 talent.conduit_of_the_celestials.invoke_xuen_the_white_tiger = _HT( \"Invoke Xuen, the White Tiger\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "meridian_strikes",
+      "displayNameEn": "Meridian Strikes",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101061,
+      "traitEntryId": 124835,
+      "talentSpellId": 391330,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_monk.cpp:5803 talent.windwalker.meridian_strikes = _ST( \"Meridian Strikes\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "obsidian_spiral",
+      "displayNameEn": "Obsidian Spiral",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101051,
+      "traitEntryId": 124823,
+      "talentSpellId": 1249832,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_monk.cpp:5814 talent.windwalker.obsidian_spiral = _ST( \"Obsidian Spiral\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "restore_balance",
+      "displayNameEn": "Restore Balance",
+      "tree": "HERO",
+      "traitNodeId": 110221,
+      "traitEntryId": 136760,
+      "talentSpellId": 442719,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 136744,
+          "displayNameEn": "Xuen's Bond",
+          "talentSpellId": 392986
+        }
+      ],
+      "binding": "sc_monk.cpp:5879 talent.conduit_of_the_celestials.restore_balance = _HT( \"Restore Balance\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "revolving_whirl",
+      "displayNameEn": "Revolving Whirl",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101203,
+      "traitEntryId": 125010,
+      "talentSpellId": 451524,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 125009,
+          "displayNameEn": "Echo Technique",
+          "talentSpellId": 1250042
+        }
+      ],
+      "binding": "sc_monk.cpp:5833 talent.windwalker.revolving_whirl = _ST( \"Revolving Whirl\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "rising_sun_kick",
+      "displayNameEn": "Rising Sun Kick",
+      "tree": "CLASS",
+      "traitNodeId": 101186,
+      "traitEntryId": 124985,
+      "talentSpellId": 107428,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_monk.cpp:5621 talent.monk.rising_sun_kick = _CT( \"Rising Sun Kick\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "rushing_wind_kick",
+      "displayNameEn": "Rushing Wind Kick",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 108946,
+      "traitEntryId": 134543,
+      "talentSpellId": 1250566,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_monk.cpp:5837 talent.windwalker.rushing_wind_kick = _ST( \"Rushing Wind Kick\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "sequenced_strikes",
+      "displayNameEn": "Sequenced Strikes",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101059,
+      "traitEntryId": 124833,
+      "talentSpellId": 451515,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_monk.cpp:5830 talent.windwalker.sequenced_strikes = _ST( \"Sequenced Strikes\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "shadowboxing_treads",
+      "displayNameEn": "Shadowboxing Treads",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101062,
+      "traitEntryId": 124836,
+      "talentSpellId": 392982,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_monk.cpp:5822 talent.windwalker.shadowboxing_treads = _STID( 392982 );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "slicing_winds",
+      "displayNameEn": "Slicing Winds",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102250,
+      "traitEntryId": 126307,
+      "talentSpellId": 1217413,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_monk.cpp:5844 talent.windwalker.slicing_winds = _ST( \"Slicing Winds\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "spiritual_focus",
+      "displayNameEn": "Spiritual Focus",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101052,
+      "traitEntryId": 124824,
+      "talentSpellId": 280197,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 124825,
+          "displayNameEn": "Drinking Horn Cover",
+          "talentSpellId": 391370
+        }
+      ],
+      "binding": "sc_monk.cpp:5813 talent.windwalker.spiritual_focus = _ST( \"Spiritual Focus\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "strike_of_the_windlord",
+      "displayNameEn": "Strike of the Windlord",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101207,
+      "traitEntryId": 125014,
+      "talentSpellId": 392983,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 134452,
+          "displayNameEn": "Whirling Dragon Punch",
+          "talentSpellId": 152175
+        }
+      ],
+      "binding": "sc_monk.cpp:5823 talent.windwalker.strike_of_the_windlord = _ST( \"Strike of the Windlord\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "whirling_dragon_punch",
+      "displayNameEn": "Whirling Dragon Punch",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101207,
+      "traitEntryId": 134452,
+      "talentSpellId": 152175,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 125014,
+          "displayNameEn": "Strike of the Windlord",
+          "talentSpellId": 392983
+        }
+      ],
+      "binding": "sc_monk.cpp:5824 talent.windwalker.whirling_dragon_punch = _ST( \"Whirling Dragon Punch\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "zenith",
+      "displayNameEn": "Zenith",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 101053,
+      "traitEntryId": 124826,
+      "talentSpellId": 1249625,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_monk.cpp:5805 talent.windwalker.zenith = _ST( \"Zenith\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "zenith_stomp",
+      "displayNameEn": "Zenith Stomp",
+      "tree": "CLASS",
+      "traitNodeId": 101162,
+      "traitEntryId": 124956,
+      "talentSpellId": 1272694,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_monk.cpp:5674 talent.monk.zenith_stomp = _CT( \"Zenith Stomp\" );; the pinned list reads it or an action of the list is built on it"
+    }
+  ],
+  "heroTrees": [
+    {
+      "simcName": "conduit_of_the_celestials",
+      "subTreeId": 64,
+      "entries": [
+        {
+          "traitEntryId": 125050,
+          "traitNodeId": 101234,
+          "displayNameEn": "Path of the Falling Star",
+          "talentSpellId": 1273154
+        },
+        {
+          "traitEntryId": 125052,
+          "traitNodeId": 101235,
+          "displayNameEn": "Inner Compass",
+          "talentSpellId": 443571
+        },
+        {
+          "traitEntryId": 125053,
+          "traitNodeId": 101236,
+          "displayNameEn": "Xuen's Guidance",
+          "talentSpellId": 442687
+        },
+        {
+          "traitEntryId": 125054,
+          "traitNodeId": 101236,
+          "displayNameEn": "Temple Training",
+          "talentSpellId": 442743
+        },
+        {
+          "traitEntryId": 125055,
+          "traitNodeId": 101237,
+          "displayNameEn": "Chi-Ji's Swiftness",
+          "talentSpellId": 443566
+        },
+        {
+          "traitEntryId": 125056,
+          "traitNodeId": 101238,
+          "displayNameEn": "Jade Sanctuary",
+          "talentSpellId": 443059
+        },
+        {
+          "traitEntryId": 125057,
+          "traitNodeId": 101238,
+          "displayNameEn": "Niuzao's Protection",
+          "talentSpellId": 442747
+        },
+        {
+          "traitEntryId": 125058,
+          "traitNodeId": 101239,
+          "displayNameEn": "Unity Within",
+          "talentSpellId": 443589
+        },
+        {
+          "traitEntryId": 125061,
+          "traitNodeId": 101242,
+          "displayNameEn": "Courage of the White Tiger",
+          "talentSpellId": 443087
+        },
+        {
+          "traitEntryId": 125062,
+          "traitNodeId": 101243,
+          "displayNameEn": "Invoke Xuen, the White Tiger",
+          "talentSpellId": 123904
+        },
+        {
+          "traitEntryId": 135958,
+          "traitNodeId": 109700,
+          "displayNameEn": "Flowing Wisdom",
+          "talentSpellId": 1262672
+        },
+        {
+          "traitEntryId": 135959,
+          "traitNodeId": 109701,
+          "displayNameEn": "Heart of the Jade Serpent",
+          "talentSpellId": 443294
+        },
+        {
+          "traitEntryId": 136744,
+          "traitNodeId": 110221,
+          "displayNameEn": "Xuen's Bond",
+          "talentSpellId": 392986
+        },
+        {
+          "traitEntryId": 136745,
+          "traitNodeId": 110220,
+          "displayNameEn": "Celestial Conduit",
+          "talentSpellId": 1248989
+        },
+        {
+          "traitEntryId": 136747,
+          "traitNodeId": 110211,
+          "displayNameEn": "Strength of the Black Ox",
+          "talentSpellId": 443110
+        },
+        {
+          "traitEntryId": 136754,
+          "traitNodeId": 110218,
+          "displayNameEn": "Yu'lon's Avatar",
+          "talentSpellId": 1262667
+        },
+        {
+          "traitEntryId": 136760,
+          "traitNodeId": 110221,
+          "displayNameEn": "Restore Balance",
+          "talentSpellId": 442719
+        }
+      ]
+    },
+    {
+      "simcName": "shadopan",
+      "subTreeId": 65,
+      "entries": [
+        {
+          "traitEntryId": 125063,
+          "traitNodeId": 101244,
+          "displayNameEn": "Vigilant Watch",
+          "talentSpellId": 450993
+        },
+        {
+          "traitEntryId": 125064,
+          "traitNodeId": 101245,
+          "displayNameEn": "Predictive Training",
+          "talentSpellId": 450992
+        },
+        {
+          "traitEntryId": 125065,
+          "traitNodeId": 101245,
+          "displayNameEn": "Whirling Steel",
+          "talentSpellId": 450991
+        },
+        {
+          "traitEntryId": 125066,
+          "traitNodeId": 101246,
+          "displayNameEn": "Martial Precision",
+          "talentSpellId": 450990
+        },
+        {
+          "traitEntryId": 125067,
+          "traitNodeId": 101247,
+          "displayNameEn": "High Impact",
+          "talentSpellId": 450982
+        },
+        {
+          "traitEntryId": 125068,
+          "traitNodeId": 101247,
+          "displayNameEn": "Pride of Pandaria",
+          "talentSpellId": 450979
+        },
+        {
+          "traitEntryId": 125069,
+          "traitNodeId": 101248,
+          "displayNameEn": "Flurry Strikes",
+          "talentSpellId": 450615
+        },
+        {
+          "traitEntryId": 125070,
+          "traitNodeId": 101249,
+          "displayNameEn": "Veteran's Eye",
+          "talentSpellId": 450987
+        },
+        {
+          "traitEntryId": 125071,
+          "traitNodeId": 101250,
+          "displayNameEn": "One Versus Many",
+          "talentSpellId": 450988
+        },
+        {
+          "traitEntryId": 125072,
+          "traitNodeId": 101251,
+          "displayNameEn": "Efficient Training",
+          "talentSpellId": 450989
+        },
+        {
+          "traitEntryId": 125073,
+          "traitNodeId": 101252,
+          "displayNameEn": "Wisdom of the Wall",
+          "talentSpellId": 1272821
+        },
+        {
+          "traitEntryId": 125074,
+          "traitNodeId": 101253,
+          "displayNameEn": "Against All Odds",
+          "talentSpellId": 450986
+        },
+        {
+          "traitEntryId": 125075,
+          "traitNodeId": 101254,
+          "displayNameEn": "Initiator's Edge",
+          "talentSpellId": 1272849
+        },
+        {
+          "traitEntryId": 125076,
+          "traitNodeId": 101254,
+          "displayNameEn": "Combat Stance",
+          "talentSpellId": 1272844
+        },
+        {
+          "traitEntryId": 135955,
+          "traitNodeId": 109697,
+          "displayNameEn": "Shado Over the Battlefield",
+          "talentSpellId": 1262612
+        },
+        {
+          "traitEntryId": 135956,
+          "traitNodeId": 109698,
+          "displayNameEn": "Stand Ready",
+          "talentSpellId": 1262603
+        },
+        {
+          "traitEntryId": 135957,
+          "traitNodeId": 109699,
+          "displayNameEn": "Weapons of the Wall",
+          "talentSpellId": 1262610
+        }
+      ]
+    }
+  ]
+}

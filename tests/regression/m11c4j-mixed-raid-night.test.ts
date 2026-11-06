@@ -202,6 +202,7 @@ const NO_CALLS = {
   "demonhunter-vengeance-observed-decisions": 0,
   "warlock-demonology-observed-decisions": 0,
   "deathknight-unholy-observed-decisions": 0,
+  "monk-windwalker-observed-decisions": 0,
   "rogue-outlaw-observed-decisions": 0,
 };
 

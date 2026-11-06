@@ -778,7 +778,7 @@ const EARLIER = [
 ];
 
 describe("the registry", () => {
-  it("holds exactly the five earlier targets, the eight D2-C targets, ONB-B2's Enhancement, ONB-C1's Feral, ONB-C2's Outlaw, ONB-D1's Destruction, ONB-D2's three, ONB-D3's two, ONB-D4's two, ONB-X1's one, ONB-X2's one, ONB-X3's one, ONB-X4's one and ONB-X5's one", () => {
+  it("holds exactly the five earlier targets, the eight D2-C targets, ONB-B2's Enhancement, ONB-C1's Feral, ONB-C2's Outlaw, ONB-D1's Destruction, ONB-D2's three, ONB-D3's two, ONB-D4's two, ONB-X1's one, ONB-X2's one, ONB-X3's one, ONB-X4's one, ONB-X5's one and ONB-T1's one", () => {
     // ONB-B2 is the audit this entry waited for: its list is a class method (onb-b2-class-method-extraction).
     // ONB-C1's list is an included file with a separate PTR file (onb-c1-included-file-extraction).
     expect(Object.keys(TARGETS).sort()).toEqual(
@@ -801,6 +801,7 @@ describe("the registry", () => {
         "demonhunter-vengeance",
         "warlock-demonology",
         "deathknight-unholy",
+        "monk-windwalker",
       ].sort(),
     );
   });
@@ -824,6 +825,51 @@ describe("the registry", () => {
     expect(arms).not.toBe(fury);
     expect(arms?.reason).toContain("the arms region");
     expect(fury?.reason).toContain("the fury region");
+  });
+
+  it("ONB-T1: Windwalker's list is reached by delegation, and the policy refuses any other body on either function", () => {
+    const target = TARGETS["monk-windwalker"] as PinnedExtractionTarget;
+    expect(validatePinnedRecord("monk-windwalker", target)).toEqual([]);
+    expect(target.livePtrPolicy.kind).toBe("PTR_DELEGATES_TO_LIVE");
+    const module = [
+      "namespace windwalker",
+      "{",
+      "void live_apl( monk_t* player )",
+      "{",
+      "}",
+      "",
+      "void ptr_apl( monk_t* player )",
+      "{",
+      "  live_apl( player );",
+      "}",
+      "",
+      "void default_apl( monk_t* player )",
+      "{",
+      "  if ( !player->is_ptr() )",
+      "    live_apl( player );",
+      "  else",
+      "    ptr_apl( player );",
+      "}",
+      "};",
+    ];
+    expect(() => verifyLivePtrPolicy(module, "windwalker::default_apl( this );", target)).not.toThrow();
+    // A PTR function that could build another list.
+    const ownPtr = module.map((line) =>
+      line === "  live_apl( player );" ? '  def->add_action( "x" );' : line,
+    );
+    expect(() => verifyLivePtrPolicy(ownPtr, "", target)).toThrow(/POLICY_VIOLATED: PTR_DELEGATES_TO_LIVE/);
+    // An entry function that goes anywhere else.
+    const otherEntry = module.map((line) =>
+      line === "    ptr_apl( player );" ? "    other_apl( player );" : line,
+    );
+    expect(() => verifyLivePtrPolicy(otherEntry, "", target)).toThrow(/POLICY_VIOLATED: void default_apl/);
+    // The policy goes with a namespace selector, and only with one.
+    const { enclosingNamespace: _unused, ...noNamespace } = target as PinnedExtractionTarget & {
+      enclosingNamespace: string;
+    };
+    expect(validatePinnedRecord("monk-windwalker", noNamespace as PinnedExtractionTarget).join()).toContain(
+      "PTR_DELEGATES_TO_LIVE and enclosingNamespace go together",
+    );
   });
 
   it("ONB-X2: Devastation's PTR region is an empty stub never dispatched, and the policy refuses anything more", () => {

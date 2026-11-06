@@ -1,0 +1,381 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_MONK_WINDWALKER_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/monk/sc_monk.cpp",
+        "sha256": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
+        "byteLength": 279398
+      },
+      {
+        "path": "engine/player/talent.cpp",
+        "sha256": "fcc46ddda25070ead9592f34daf9f732347ba7d739d90d8004c96ba08afdd60d",
+        "byteLength": 1408
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-06",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 100780,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Tiger Palm"
+    },
+    {
+      "abilityGameId": 100784,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Blackout Kick"
+    },
+    {
+      "abilityGameId": 101546,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Spinning Crane Kick"
+    },
+    {
+      "abilityGameId": 107428,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Rising Sun Kick"
+    },
+    {
+      "abilityGameId": 113656,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Fists of Fury"
+    },
+    {
+      "abilityGameId": 122470,
+      "baseGcdMs": 0,
+      "displayNameEn": "Touch of Karma"
+    },
+    {
+      "abilityGameId": 123904,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Invoke Xuen, the White Tiger"
+    },
+    {
+      "abilityGameId": 152175,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Whirling Dragon Punch"
+    },
+    {
+      "abilityGameId": 322109,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Touch of Death"
+    },
+    {
+      "abilityGameId": 392983,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Strike of the Windlord"
+    },
+    {
+      "abilityGameId": 443028,
+      "baseGcdMs": 750,
+      "displayNameEn": "Celestial Conduit"
+    },
+    {
+      "abilityGameId": 467307,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Rushing Wind Kick"
+    },
+    {
+      "abilityGameId": 1217413,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Slicing Winds"
+    },
+    {
+      "abilityGameId": 1249625,
+      "baseGcdMs": 0,
+      "displayNameEn": "Zenith"
+    },
+    {
+      "abilityGameId": 1272696,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Zenith Stomp"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "blackout_kick",
+      "candidateAbilityGameIds": [100784],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/monk/sc_monk.cpp",
+        "sourceSha256": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
+        "symbol": "monk_t::create_action / blackout_kick_t",
+        "startLine": 5331,
+        "endLine": 5332,
+        "sourceNote": "create_action dispatches \"blackout_kick\" to blackout_kick_t: built on baseline.monk.blackout_kick off a Brewmaster (:1368-1371); find_class_spell( \"Blackout Kick\" ) at :5564.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "celestial_conduit",
+      "candidateAbilityGameIds": [443028],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/monk/sc_monk.cpp",
+        "sourceSha256": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
+        "symbol": "monk_t::create_action / celestial_conduit_t",
+        "startLine": 5399,
+        "endLine": 5400,
+        "sourceNote": "create_action dispatches \"celestial_conduit\" to celestial_conduit_t: built on talent.conduit_of_the_celestials.celestial_conduit_action (:3836-3837); find_spell( 443028 ) at :5895.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "fists_of_fury",
+      "candidateAbilityGameIds": [113656],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/monk/sc_monk.cpp",
+        "sourceSha256": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
+        "symbol": "monk_t::create_action / fists_of_fury_t",
+        "startLine": 5373,
+        "endLine": 5374,
+        "sourceNote": "create_action dispatches \"fists_of_fury\" to fists_of_fury_t: built on talent.windwalker.fists_of_fury (:1782); _ST( \"Fists of Fury\" ) at :5784.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "invoke_xuen_the_white_tiger",
+      "candidateAbilityGameIds": [123904],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/monk/sc_monk.cpp",
+        "sourceSha256": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
+        "symbol": "monk_t::create_action / xuen_summon_t",
+        "startLine": 5387,
+        "endLine": 5388,
+        "sourceNote": "create_action dispatches \"invoke_xuen_the_white_tiger\" to xuen_summon_t: built on talent.conduit_of_the_celestials.invoke_xuen_the_white_tiger (:3603); _HT( \"Invoke Xuen, the White Tiger\" ) at :5870.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "rising_sun_kick",
+      "candidateAbilityGameIds": [107428],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/monk/sc_monk.cpp",
+        "sourceSha256": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
+        "symbol": "monk_t::create_action / rising_sun_kick_t",
+        "startLine": 5335,
+        "endLine": 5336,
+        "sourceNote": "create_action dispatches \"rising_sun_kick\" to rising_sun_kick_t: built on talent.monk.rising_sun_kick (:1110); _CT( \"Rising Sun Kick\" ) at :5621.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "rushing_wind_kick",
+      "candidateAbilityGameIds": [467307],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/monk/sc_monk.cpp",
+        "sourceSha256": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
+        "symbol": "monk_t::create_action / rushing_wind_kick_t",
+        "startLine": 5337,
+        "endLine": 5338,
+        "sourceNote": "create_action dispatches \"rushing_wind_kick\" to rushing_wind_kick_t: built on talent.windwalker.rushing_wind_kick_action (:1180); find_spell( 467307 ) at :5839.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "slicing_winds",
+      "candidateAbilityGameIds": [1217413],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/monk/sc_monk.cpp",
+        "sourceSha256": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
+        "symbol": "monk_t::create_action / slicing_winds_t",
+        "startLine": 5379,
+        "endLine": 5380,
+        "sourceNote": "create_action dispatches \"slicing_winds\" to slicing_winds_t: built on talent.windwalker.slicing_winds (:2910); _ST( \"Slicing Winds\" ) at :5844.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "spinning_crane_kick",
+      "candidateAbilityGameIds": [101546],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/monk/sc_monk.cpp",
+        "sourceSha256": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
+        "symbol": "monk_t::create_action / spinning_crane_kick_t",
+        "startLine": 5339,
+        "endLine": 5340,
+        "sourceNote": "create_action dispatches \"spinning_crane_kick\" to spinning_crane_kick_t: built on baseline.monk.spinning_crane_kick off a Brewmaster (:1572-1575); find_spell( 101546 ) at :5570.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "strike_of_the_windlord",
+      "candidateAbilityGameIds": [392983],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/monk/sc_monk.cpp",
+        "sourceSha256": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
+        "symbol": "monk_t::create_action / strike_of_the_windlord_t",
+        "startLine": 5383,
+        "endLine": 5384,
+        "sourceNote": "create_action dispatches \"strike_of_the_windlord\" to strike_of_the_windlord_t: built on talent.windwalker.strike_of_the_windlord (:1993); _ST( \"Strike of the Windlord\" ) at :5823.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "tiger_palm",
+      "candidateAbilityGameIds": [100780],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/monk/sc_monk.cpp",
+        "sourceSha256": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
+        "symbol": "monk_t::create_action / tiger_palm_t",
+        "startLine": 5329,
+        "endLine": 5330,
+        "sourceNote": "create_action dispatches \"tiger_palm\" to tiger_palm_t: built on baseline.monk.tiger_palm (:837); find_spell( 100780 ) at :5571.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "touch_of_death",
+      "candidateAbilityGameIds": [322109],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/monk/sc_monk.cpp",
+        "sourceSha256": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
+        "symbol": "monk_t::create_action / touch_of_death_t",
+        "startLine": 5343,
+        "endLine": 5344,
+        "sourceNote": "create_action dispatches \"touch_of_death\" to touch_of_death_t: built on baseline.monk.touch_of_death (:2655); find_spell( 322109 ) at :5572.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "touch_of_karma",
+      "candidateAbilityGameIds": [122470],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/monk/sc_monk.cpp",
+        "sourceSha256": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
+        "symbol": "monk_t::create_action / touch_of_karma_t",
+        "startLine": 5381,
+        "endLine": 5382,
+        "sourceNote": "create_action dispatches \"touch_of_karma\" to touch_of_karma_t: built on baseline.windwalker.touch_of_karma (:2773); find_specialization_spell( \"Touch of Karma\" ) at :5610; its constructor also assigns trigger_gcd = timespan_t::zero(), the record's own value.",
+        "crossCheck": "NONE_SPECIALIZATION_SPELL"
+      }
+    },
+    {
+      "simcToken": "whirling_dragon_punch",
+      "candidateAbilityGameIds": [152175],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/monk/sc_monk.cpp",
+        "sourceSha256": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
+        "symbol": "monk_t::create_action / whirling_dragon_punch_t",
+        "startLine": 5391,
+        "endLine": 5392,
+        "sourceNote": "create_action dispatches \"whirling_dragon_punch\" to whirling_dragon_punch_t: built on talent.windwalker.whirling_dragon_punch (:1875); _ST( \"Whirling Dragon Punch\" ) at :5824.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "zenith",
+      "candidateAbilityGameIds": [1249625],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/monk/sc_monk.cpp",
+        "sourceSha256": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
+        "symbol": "monk_t::create_action / zenith_t",
+        "startLine": 5393,
+        "endLine": 5394,
+        "sourceNote": "create_action dispatches \"zenith\" to zenith_t: built on talent.windwalker.zenith (:3960); _ST( \"Zenith\" ) at :5805.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "zenith_stomp",
+      "candidateAbilityGameIds": [1272696],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/monk/sc_monk.cpp",
+        "sourceSha256": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
+        "symbol": "monk_t::create_action / zenith_stomp_t",
+        "startLine": 5395,
+        "endLine": 5396,
+        "sourceNote": "create_action dispatches \"zenith_stomp\" to zenith_stomp_t: built on talent.monk.zenith_stomp_damage (:3896); find_spell( 1272696 ) at :5675. The token builds the ZENITH_STOMP_CAST source (:5396), which keeps the record's _gcd; only the ZENITH_STOMP_TRIGGER child sets trigger_gcd = 0_ms.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "auto_attack",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/class_modules/monk/sc_monk.cpp",
+        "sourceSha256": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
+        "symbol": "auto_attack_t::auto_attack_t",
+        "line": 2299,
+        "sourceNote": "auto_attack_t (struct opens at sc_monk.cpp:2034) is built on the spell-less monk_melee_attack_t( player, \"auto_attack\" ) base and its constructor (:2293) assigns trigger_gcd = 0_ms at :2299."
+      }
+    },
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

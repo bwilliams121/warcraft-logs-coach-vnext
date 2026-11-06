@@ -18,6 +18,12 @@
  * The central invariant, as in D3-A: uncertainty is UNKNOWN, never REJECTED.
  */
 
+import assassinationApl from "../../src/simc/data/rogue-assassination.apl.json";
+import protectionApl from "../../src/simc/data/paladin-protection.apl.json";
+import retributionApl from "../../src/simc/data/paladin-retribution.apl.json";
+import bloodApl from "../../src/simc/data/deathknight-blood.apl.json";
+import brewmasterApl from "../../src/simc/data/monk-brewmaster.apl.json";
+import havocApl from "../../src/simc/data/demonhunter-havoc.apl.json";
 import { describe, expect, it } from "vitest";
 
 import type { ExecutionLane } from "../../src/data/game/ability-gcd-semantics.js";
@@ -200,6 +206,9 @@ function expectRefusedAtFirstLine(setup: Setup, reason: string | null, label: st
 // ---------------------------------------------------------------------------
 // The line representation
 // ---------------------------------------------------------------------------
+
+/** Every rotational authority a public analyzer reads. Augmentation and the healers hold no APL decision. */
+const PUBLIC_APLS = [assassinationApl, protectionApl, retributionApl, bloodApl, brewmasterApl, havocApl];
 
 describe("target_if is read structurally", () => {
   it("reads the mode and expression; no prefix is FIRST; the mode is case-insensitive", () => {
@@ -492,6 +501,63 @@ describe("MIN and MAX: target identity is ignorable only when it cannot matter",
     const classified = classifyDecision(query);
     expect(classified.rawBlocker).toBe("ONE_SCAN_BLOCKED/UNSUPPORTED_ACTION_OPTION");
     expect(classified.blockerClass).toBe("TARGETING_NOT_MODELLED");
+  });
+
+  it("ONB-T1: a refused line's score is no reason it is open: a time-to-die score classifies as target selection", () => {
+    for (const mode of ["min", "max"]) {
+      const classified = classifyDecision(
+        firstGcd(one([`x,target_if=${mode}:target.time_to_die,if=${T_DEP}`, "y"]), ["x", "y"]),
+      );
+      expect(classified.rawBlocker, mode).toBe("ONE_SCAN_BLOCKED/UNSUPPORTED_ACTION_OPTION");
+      expect(classified.blockerClass, mode).toBe("TARGETING_NOT_MODELLED");
+    }
+    // FIRST has no ordering score to read past, and the same rule holds.
+    const first = classifyDecision(
+      firstGcd(one(["x,target_if=first:target.time_to_die>10", "y"]), ["x", "y"]),
+    );
+    expect(first.blockerClass).toBe("TARGETING_NOT_MODELLED");
+  });
+
+  it("ONB-T1: a marked atom in a refused line's condition still classifies, because the line needs it whichever enemy wins", () => {
+    const predictive = classifyDecision(
+      firstGcd(one([`x,target_if=max:target.time_to_die,if=target.time_to_die>10&${T_DEP}`, "y"]), [
+        "x",
+        "y",
+      ]),
+    );
+    expect(predictive.rawBlocker).toBe("ONE_SCAN_BLOCKED/UNSUPPORTED_ACTION_OPTION");
+    expect(predictive.blockerClass).toBe("PREDICTIVE_STATE");
+    const count = classifyDecision(
+      firstGcd(one([`x,target_if=max:target.health.pct,if=active_enemies>1&${T_DEP}`, "y"]), ["x", "y"]),
+    );
+    expect(count.blockerClass).toBe("TARGET_COUNT");
+  });
+
+  it("ONB-T1: a line with no target_if keeps its whole-line reading", () => {
+    const cycling = classifyDecision(
+      firstGcd(one(["x,cycle_targets=1,if=target.time_to_die>10", "y"]), ["x", "y"]),
+    );
+    expect(cycling.blockerClass).toBe("PREDICTIVE_STATE");
+  });
+
+  it("ONB-T1: no line of a public specialization has a marked atom in its score, so the settled precedence changes nothing public", () => {
+    for (const raw of PUBLIC_APLS) {
+      for (const list of raw.lists) {
+        for (const action of list.actions) {
+          const score = /(?:^|,)target_if=([^,]*)/.exec(action.actionStringVerbatim)?.[1];
+          if (score === undefined) continue;
+          for (const marker of [
+            "spell_targets",
+            "variable.single_target",
+            "active_enemies",
+            "fight_remains",
+            "time_to_die",
+          ]) {
+            expect(score.includes(marker), action.actionStringVerbatim).toBe(false);
+          }
+        }
+      }
+    }
   });
 
   it("E: other target-scoped atoms are dependent too: refreshable, remains, dot ticking, time to die", () => {

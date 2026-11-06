@@ -127,6 +127,7 @@ describe("the sweep has something to sweep", () => {
       "src/specs/mage/frost",
       "src/specs/monk/brewmaster",
       "src/specs/monk/mistweaver",
+      "src/specs/monk/windwalker",
       "src/specs/paladin/holy",
       "src/specs/paladin/protection",
       "src/specs/paladin/retribution",
@@ -176,6 +177,7 @@ describe("the sweep has something to sweep", () => {
     expect(existsSync("src/specs/demonhunter/vengeance/registration.ts")).toBe(true);
     expect(existsSync("src/specs/warlock/demonology/registration.ts")).toBe(true);
     expect(existsSync("src/specs/deathknight/unholy/registration.ts")).toBe(true);
+    expect(existsSync("src/specs/monk/windwalker/registration.ts")).toBe(true);
     expect(existsSync("src/specs/rogue/outlaw/registration.ts")).toBe(true);
     expect(existsSync("src/specs/shaman/enhancement/registration.ts")).toBe(true);
     expect(existsSync("src/specs/paladin/retribution/registration.ts")).toBe(true);
@@ -261,6 +263,7 @@ describe("shared code reaches specializations only through the registration boun
       "src/specs/mage/frost/registration.js",
       "src/specs/monk/brewmaster/registration.js",
       "src/specs/monk/mistweaver/registration.js",
+      "src/specs/monk/windwalker/registration.js",
       "src/specs/paladin/holy/registration.js",
       "src/specs/paladin/protection/registration.js",
       "src/specs/paladin/retribution/registration.js",

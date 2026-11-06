@@ -138,6 +138,7 @@ describe("the Rogue adapter lives in the spec layer, and only there", () => {
   const VENGEANCE_DEMON_HUNTER_ADAPTER_PATH = "src/specs/demonhunter/vengeance/first-gcd-adapter.ts";
   const DEMONOLOGY_WARLOCK_ADAPTER_PATH = "src/specs/warlock/demonology/first-gcd-adapter.ts";
   const UNHOLY_DEATH_KNIGHT_ADAPTER_PATH = "src/specs/deathknight/unholy/first-gcd-adapter.ts";
+  const WINDWALKER_MONK_ADAPTER_PATH = "src/specs/monk/windwalker/first-gcd-adapter.ts";
   const OUTLAW_ROGUE_ADAPTER_PATH = "src/specs/rogue/outlaw/first-gcd-adapter.ts";
   const ENHANCEMENT_SHAMAN_ADAPTER_PATH = "src/specs/shaman/enhancement/first-gcd-adapter.ts";
 
@@ -172,6 +173,7 @@ describe("the Rogue adapter lives in the spec layer, and only there", () => {
         VENGEANCE_DEMON_HUNTER_ADAPTER_PATH,
         DEMONOLOGY_WARLOCK_ADAPTER_PATH,
         UNHOLY_DEATH_KNIGHT_ADAPTER_PATH,
+        WINDWALKER_MONK_ADAPTER_PATH,
         OUTLAW_ROGUE_ADAPTER_PATH,
         ENHANCEMENT_SHAMAN_ADAPTER_PATH,
         ADAPTER_PATH,

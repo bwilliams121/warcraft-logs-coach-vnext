@@ -73,6 +73,7 @@ import pinnedDevastationEvokerApl from "../../../src/simc/data/evoker-devastatio
 import pinnedVengeanceDemonHunterApl from "../../../src/simc/data/demonhunter-vengeance.apl.json";
 import pinnedDemonologyWarlockApl from "../../../src/simc/data/warlock-demonology.apl.json";
 import pinnedUnholyDeathKnightApl from "../../../src/simc/data/deathknight-unholy.apl.json";
+import pinnedWindwalkerMonkApl from "../../../src/simc/data/monk-windwalker.apl.json";
 import pinnedOutlawRogueApl from "../../../src/simc/data/rogue-outlaw.apl.json";
 import pinnedEnhancementShamanApl from "../../../src/simc/data/shaman-enhancement.apl.json";
 import { AUTHORITY_DOMAINS, AUTHORITY_RESOLUTION_OUTCOMES } from "../../../src/findings/authority-domain.js";
@@ -436,6 +437,7 @@ export const OWNING_LAYERS = {
   SPEC_VENGEANCE_DEMON_HUNTER: ["src/specs/demonhunter/vengeance/"],
   SPEC_DEMONOLOGY_WARLOCK: ["src/specs/warlock/demonology/"],
   SPEC_UNHOLY_DEATH_KNIGHT: ["src/specs/deathknight/unholy/"],
+  SPEC_WINDWALKER_MONK: ["src/specs/monk/windwalker/"],
   SPEC_OUTLAW_ROGUE: ["src/specs/rogue/outlaw/"],
   SPEC_ENHANCEMENT_SHAMAN: ["src/specs/shaman/enhancement/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
@@ -496,6 +498,7 @@ export const SPEC_LAYER_OF = {
   "demonhunter/vengeance": "SPEC_VENGEANCE_DEMON_HUNTER",
   "warlock/demonology": "SPEC_DEMONOLOGY_WARLOCK",
   "deathknight/unholy": "SPEC_UNHOLY_DEATH_KNIGHT",
+  "monk/windwalker": "SPEC_WINDWALKER_MONK",
   "rogue/outlaw": "SPEC_OUTLAW_ROGUE",
   "shaman/enhancement": "SPEC_ENHANCEMENT_SHAMAN",
 } as const satisfies Record<SpecId, OwningLayer>;
@@ -3590,6 +3593,19 @@ export const ASSERTION_KINDS = {
       "The Unholy Death Knight facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
   },
 
+  // ---- SPEC_WINDWALKER_MONK (ONB-T1, INTERNAL_ONLY) ---
+  "SPEC_WINDWALKER_MONK.SPEC_GATE": {
+    owningLayer: "SPEC_WINDWALKER_MONK",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Windwalker Monk facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
+  },
+
   // ---- SPEC_OUTLAW_ROGUE (ONB-C2, INTERNAL_ONLY) ---
   "SPEC_OUTLAW_ROGUE.SPEC_GATE": {
     owningLayer: "SPEC_OUTLAW_ROGUE",
@@ -4439,6 +4455,7 @@ export const PINNED_AUTHORITY_REVISIONS: Readonly<Record<string, string>> = {
   [pinnedVengeanceDemonHunterApl.authorityId]: pinnedVengeanceDemonHunterApl.artifactRevision,
   [pinnedDemonologyWarlockApl.authorityId]: pinnedDemonologyWarlockApl.artifactRevision,
   [pinnedUnholyDeathKnightApl.authorityId]: pinnedUnholyDeathKnightApl.artifactRevision,
+  [pinnedWindwalkerMonkApl.authorityId]: pinnedWindwalkerMonkApl.artifactRevision,
   [pinnedOutlawRogueApl.authorityId]: pinnedOutlawRogueApl.artifactRevision,
   [pinnedEnhancementShamanApl.authorityId]: pinnedEnhancementShamanApl.artifactRevision,
 };

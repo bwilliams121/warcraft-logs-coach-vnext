@@ -491,6 +491,7 @@ describe("M5 forms no unearned verdict", () => {
       "src/specs/demonhunter/vengeance/observed-analysis.ts",
       "src/specs/warlock/demonology/observed-analysis.ts",
       "src/specs/deathknight/unholy/observed-analysis.ts",
+      "src/specs/monk/windwalker/observed-analysis.ts",
       "src/specs/rogue/outlaw/observed-analysis.ts",
       "src/specs/shaman/enhancement/observed-analysis.ts",
       "src/specs/warrior/protection/domains.ts",
@@ -511,6 +512,7 @@ describe("M5 forms no unearned verdict", () => {
       "src/specs/demonhunter/vengeance/domains.ts",
       "src/specs/warlock/demonology/domains.ts",
       "src/specs/deathknight/unholy/domains.ts",
+      "src/specs/monk/windwalker/domains.ts",
       "src/specs/rogue/outlaw/domains.ts",
       "src/specs/shaman/enhancement/domains.ts",
     ];

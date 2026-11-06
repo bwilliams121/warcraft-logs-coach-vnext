@@ -99,6 +99,7 @@ import { DEVASTATION_EVOKER_REGISTRATION } from "../specs/evoker/devastation/reg
 import { VENGEANCE_DEMON_HUNTER_REGISTRATION } from "../specs/demonhunter/vengeance/registration.js";
 import { DEMONOLOGY_WARLOCK_REGISTRATION } from "../specs/warlock/demonology/registration.js";
 import { UNHOLY_DEATH_KNIGHT_REGISTRATION } from "../specs/deathknight/unholy/registration.js";
+import { WINDWALKER_MONK_REGISTRATION } from "../specs/monk/windwalker/registration.js";
 import { DESTRUCTION_WARLOCK_REGISTRATION } from "../specs/warlock/destruction/registration.js";
 import { OUTLAW_ROGUE_REGISTRATION } from "../specs/rogue/outlaw/registration.js";
 import { SUBTLETY_ROGUE_REGISTRATION } from "../specs/rogue/subtlety/registration.js";
@@ -545,6 +546,8 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   DEMONOLOGY_WARLOCK_REGISTRATION,
   // INTERNAL_ONLY since ONB-X5: its own representative, reading the shared pet mapping. No decision of it resolves.
   UNHOLY_DEATH_KNIGHT_REGISTRATION,
+  // INTERNAL_ONLY since ONB-T1: the Cohort T representative. No decision of it resolves.
+  WINDWALKER_MONK_REGISTRATION,
 ]);
 
 /**

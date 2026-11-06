@@ -5812,3 +5812,21 @@ Offline only, not committed: the census (`.probe/onbx5/census.cjs`, Mortal Strik
 No production code changed. One assertion row is new: `tests/unit/analysis-composition-refusals.test.ts` had no row for it, and now holds DeathKnight/Unholy (SPEC_NOT_SUPPORTED, one retrieval for preparation alone, no dispatch). `tests/contracts/m11-promotion-evidence-gate.test.ts` keeps its ONB-X5 gate search (no qualifying assertion, `evidenceReady` false), its comment now naming the outcome. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, the `onb-x5` suite).
 
 Offline only, not committed: the census (`.probe/onbx5p/census.cjs`, Mortal Strike as its positive control for events and the specID distribution as its control for combatant info), its reading by source (`.probe/onbx5p/census-read.cjs`, `actors.cjs`, `actors2.cjs`), and the replay of the subject (`.probe/onbx5p/m/measure.baseline.ts`). They give the results in agent/architecture.md "ONB-X5P".
+
+# ONB-T1: Windwalker Monk
+
+`tests/unit/specs/onb-t1-windwalker-monk.test.ts`, synthetic throughout, with the real replay offline. The row is internal only and refused publicly; it refuses another specialization first; a capture with no combatant info refuses; the datasets load; every domain but the offensive one reads without authority, and the one resource it reads is declared.
+
+The population: a swing, an off-GCD press and a spell with no record are excluded, never judged. A channel is a decision at the cast that started it, and a begin alone is no decision.
+
+The hero trees: no entry proves nothing absent; Shado-Pan proves Conduit's talents not taken, which skips `big_coc`, and an unresolved tree never does; Conduit proves Flurry Strikes not taken; both at once is a contradiction that proves nothing; the placeholder row proves no tree, and the extractor refuses an undeclared one and a declared row that is not spell-less.
+
+Target selection: Touch of Karma's choice alone cannot change its line; a condition reading the chosen enemy refuses, with no target domain supplied; a player conjunct proven false eliminates a line whichever enemy wins, and the same line under an unresolved tree stays refused.
+
+The negatives: over each hero tree and none, no decision resolves; the engine stops at `default[0]` and the scan at `zenith[3]`; the enemy count given as 1 moves nothing and is never read as single target or as many; Energy without its own observation is never zero, and Energy at its maximum is no waste; Chi is never read, even on a cast carrying it, and `chi>=0` stays open; `combo_strike` reads neither way; the fight clock, the fight's end, simulated fight styles, auras and cooldowns answer nothing; every racial the list names, the three the shared table omits included, cannot preempt a class action.
+
+`tests/unit/m11d3b1-target-if.test.ts` holds the settled classification: a refused line's score is no reason it is open, for MIN, MAX and FIRST; a marked atom in its condition still classifies; a line with no `target_if` keeps its whole-line reading; and no public list has a marked atom in a score, the test that makes the public invariance structural.
+
+`m11d2c-pinned-extraction-preflight` holds the new target and `PTR_DELEGATES_TO_LIVE`, which refuses a PTR function that does more than call the live one, an entry function that reaches anything else, and the policy without a namespace selector. Two corpus cases, as for its neighbours, and `tests/contracts/m11-promotion-evidence-gate.test.ts` pins that the gate search finds nothing. `m11a2-spec-module-conformance` proves its identity through the committed fight 48 context.
+
+Offline only, not committed: the census (`.probe/onbt1/census.cjs`, Mortal Strike as its control), the wire probes (`wire.cjs`, `wire2.cjs`) and the replays (`.probe/onbt1/m/`), including the all-subject comparison of the classification change.
