@@ -15,7 +15,7 @@ hygiene and clarity items.
 
 This changes what older entries here say. They stay as written, as the record of when they were true:
 
-- **Policy B is approved and scheduled** (POLB-A to POLB-C). Text below calling it deferred, not queued or "the owner's to schedule" is superseded.
+- **Policy B is approved and scheduled** (POLB-A, POLB-CENSUS, POLB-B, POLB-C), with a neutral Warcraft Logs census as its source (`agent/architecture.md` "Owner decision (2026-11-06): Policy B source"). An observed maximum is not an upper bound, so the upper-bound gap closes only where a completeness argument exists. Text below calling it deferred, not queued or "the owner's to schedule" is superseded.
 - **ONB-EV is approved,** with a hard cap of 60 Warcraft Logs requests (`agent/architecture.md` "Owner grant (2026-11-06): ONB-EV"). The grant authorizes no archive-limit increase and no promotion.
 - **Restoration Druid's promotion is queued** (HEAL-B1P2), which supersedes "is not queued" under "After HEAL-B4P". HEAL-B1P2 ran and did not promote it: "After HEAL-B1P2".
 
