@@ -293,9 +293,9 @@
     {
       "specId": "hunter/beast_mastery",
       "cohort": "B_INSTANT_TARGET_GATED",
-      "currentAnalyzerStatus": "UNREGISTERED",
+      "currentAnalyzerStatus": "INTERNAL_ONLY",
       "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
-      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "authorityAuditStatus": "AUTHORITY_AUDITED",
       "deepDiveInventoryStatus": "PARTIAL",
       "questions": [
         {
@@ -339,9 +339,9 @@
     {
       "specId": "hunter/survival",
       "cohort": "B_INSTANT_TARGET_GATED",
-      "currentAnalyzerStatus": "UNREGISTERED",
+      "currentAnalyzerStatus": "INTERNAL_ONLY",
       "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
-      "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
+      "authorityAuditStatus": "AUTHORITY_AUDITED",
       "deepDiveInventoryStatus": "UNASSESSED",
       "questions": []
     },
@@ -375,9 +375,9 @@
     {
       "specId": "druid/guardian",
       "cohort": "B_INSTANT_TARGET_GATED",
-      "currentAnalyzerStatus": "UNREGISTERED",
+      "currentAnalyzerStatus": "INTERNAL_ONLY",
       "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
-      "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
+      "authorityAuditStatus": "AUTHORITY_AUDITED",
       "deepDiveInventoryStatus": "UNASSESSED",
       "questions": []
     },

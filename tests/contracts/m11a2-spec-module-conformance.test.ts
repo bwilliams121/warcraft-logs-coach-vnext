@@ -202,6 +202,19 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
     sourceId: 13,
     archive: true,
   },
+  // ONB-T2: actor 91 of the G2 cohort 246 fight 33 context, the Guardian Druid the census found, whose events are a two-second diagnostic sample.
+  "druid/guardian": {
+    artifactId: "wcl-g2-fight-context-cohort246-fight-33",
+    fightId: 33,
+    sourceId: 91,
+    archive: true,
+  },
+  // ONB-T2: actor 20 of the committed A7R6 fight 7 context, the Beast Mastery Hunter the wire names BeastMastery.
+  "hunter/beast_mastery": {
+    artifactId: "wcl-fight-context-a7r6-fight-7",
+    fightId: 7,
+    sourceId: 20,
+  },
   // ONB-D3: actor 6 of the M13-A fight context, the Frost Mage the committed evidence archive
   // context reports. That capture's casts are filtered and carry no combatant info.
   "mage/frost": {
@@ -275,6 +288,7 @@ const IDENTITY_RETAINED_ONLY: Readonly<Record<string, string>> = {
   "warrior/protection": "m11c4f context-1, 2xptYq89Tb631Hmg fight 17, actor 5: Warrior / Protection",
   "rogue/outlaw": "m13a discovery, g34mvXTKLMJ2Nfwr fights 1, 6 and 7, actor 17: Outlaw",
   "demonhunter/vengeance": "m13a discovery, g34mvXTKLMJ2Nfwr fights 1, 6 and 7, actor 13: Vengeance",
+  "hunter/survival": "m13a discovery, zpryqKdtRjWNQXa6 fights 30 to 34, actor 742: Survival",
 };
 
 /** A committed Warrior of another specialization: actor 4 of A7R6 fight 7, an Arms Warrior. */
@@ -406,7 +420,9 @@ for (const { path, exportName, module } of MODULES) {
             ? COMMITTED_ROGUE
             : identity.specId === "demonhunter/vengeance"
               ? (IDENTITY_EVIDENCE["demonhunter/havoc"] as IdentityEvidence)
-              : COMMITTED_WARRIOR;
+              : identity.specId === "hunter/survival"
+                ? (IDENTITY_EVIDENCE["hunter/beast_mastery"] as IdentityEvidence)
+                : COMMITTED_WARRIOR;
         expect(identity.wclClassName).toBe(wclIdentityOf(sameClass).className);
         return;
       }
@@ -547,6 +563,7 @@ describe("what the tree exports today", () => {
       ["BALANCE_DRUID_MODULE", "druid/balance", "INTERNAL_ONLY", 0],
       // ONB-C1: Cohort C's representative, INTERNAL_ONLY.
       ["FERAL_DRUID_MODULE", "druid/feral", "INTERNAL_ONLY", 0],
+      ["GUARDIAN_DRUID_MODULE", "druid/guardian", "INTERNAL_ONLY", 0],
       // HEAL-B1: healers on Restoration Shaman's architecture, INTERNAL_ONLY; Holy Paladin and Mistweaver Monk PUBLIC since HEAL-B1P.
       ["RESTORATION_DRUID_MODULE", "druid/restoration", "INTERNAL_ONLY", 0],
       // M13-E: INTERNAL_ONLY, binding no decision authority; PUBLIC since M13-F.
@@ -554,7 +571,9 @@ describe("what the tree exports today", () => {
       ["DEVASTATION_EVOKER_MODULE", "evoker/devastation", "INTERNAL_ONLY", 0],
       // HEAL-B4: a healer on the same architecture, its roster role UNKNOWN as pinned, INTERNAL_ONLY.
       ["PRESERVATION_EVOKER_MODULE", "evoker/preservation", "PUBLIC", 0],
+      ["BEAST_MASTERY_HUNTER_MODULE", "hunter/beast_mastery", "INTERNAL_ONLY", 0],
       ["MARKSMANSHIP_HUNTER_MODULE", "hunter/marksmanship", "INTERNAL_ONLY", 0],
+      ["SURVIVAL_HUNTER_MODULE", "hunter/survival", "INTERNAL_ONLY", 0],
       ["ARCANE_MAGE_MODULE", "mage/arcane", "INTERNAL_ONLY", 0],
       ["FIRE_MAGE_MODULE", "mage/fire", "INTERNAL_ONLY", 0],
       ["FROST_MAGE_MODULE", "mage/frost", "INTERNAL_ONLY", 0],

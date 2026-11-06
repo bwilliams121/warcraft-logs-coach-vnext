@@ -1,0 +1,409 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_HUNTER_BEAST_MASTERY",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "hunter",
+    "specName": "beast_mastery"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "UNKNOWN",
+    "sourcePath": "engine/class_modules/apl/apl_hunter.cpp",
+    "sourceSha256": "8d7b7273ac056d1b28154cd9342db48cd95c643c215e5731c6b770c2e49facbb",
+    "sourceByteLength": 51094,
+    "regionStartMarker": "//beast_mastery_apl_start",
+    "regionEndMarker": "//beast_mastery_apl_end",
+    "extractedOn": "2026-11-06",
+    "extractorVersion": 1,
+    "regionSha256": "3780ea1945d5b4b37eed6b6f727384a26a8ddf56429ac50b1d76524ee73430be",
+    "livePtrPolicy": "PTR_BODY_IDENTICAL",
+    "dispatchSource": {
+      "sourcePath": "engine/class_modules/sc_hunter.cpp",
+      "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9"
+    }
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "retarget,target_if=max:target.health,line_cd=5,if=fight_style.dungeonroute",
+          "comment": null,
+          "sourceLine": 86
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "auto_shot",
+          "comment": null,
+          "sourceLine": 87
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "call_action_list,name=cds",
+          "comment": null,
+          "sourceLine": 88
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "call_action_list,name=trinkets",
+          "comment": null,
+          "sourceLine": 89
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "call_action_list,name=drst,if=talent.black_arrow&(active_enemies<2|!talent.beast_cleave&active_enemies<3)",
+          "comment": null,
+          "sourceLine": 90
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "call_action_list,name=drcleave,if=talent.black_arrow&(active_enemies>2|talent.beast_cleave&active_enemies>1)",
+          "comment": null,
+          "sourceLine": 91
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "call_action_list,name=st,if=!talent.black_arrow&(active_enemies<2|!talent.beast_cleave&active_enemies<3)",
+          "comment": null,
+          "sourceLine": 92
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "call_action_list,name=cleave,if=!talent.black_arrow&(active_enemies>2|talent.beast_cleave&active_enemies>1)",
+          "comment": null,
+          "sourceLine": 93
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "summon_pet",
+          "comment": null,
+          "sourceLine": 82
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": null,
+          "sourceLine": 83
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_item,name=algethar_puzzle_box",
+          "comment": null,
+          "sourceLine": 84
+        }
+      ]
+    },
+    {
+      "listName": "cds",
+      "receiverIdentifier": "cds",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "invoke_external_buff,name=power_infusion,if=buff.bestial_wrath.up|cooldown.bestial_wrath.remains<30|fight_remains<16",
+          "comment": null,
+          "sourceLine": 95
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "berserking,if=cooldown.bestial_wrath.ready|fight_remains<13",
+          "comment": null,
+          "sourceLine": 96
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "blood_fury,if=cooldown.bestial_wrath.ready|fight_remains<16",
+          "comment": null,
+          "sourceLine": 97
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "ancestral_call,if=cooldown.bestial_wrath.ready|fight_remains<16",
+          "comment": null,
+          "sourceLine": 98
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "fireblood,if=cooldown.bestial_wrath.ready|fight_remains<9",
+          "comment": null,
+          "sourceLine": 99
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "potion,if=cooldown.bestial_wrath.ready|fight_remains<31",
+          "comment": null,
+          "sourceLine": 100
+        }
+      ]
+    },
+    {
+      "listName": "cleave",
+      "receiverIdentifier": "cleave",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "wild_thrash,if=talent.beast_cleave&(prev_gcd.1.bestial_wrath|!buff.beast_cleave.up)",
+          "comment": "Bestial Wrath spawns an Apex Pet which casts Bestial Wrath 1.5s after, but it does not get the Beast Cleave that was active prior to Bestial Wrath. Therefore, to ensure this hit cleaves, Wild Thrash needs to follow up Bestial Wrath.",
+          "sourceLine": 102
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "barbed_shot,target_if=min:dot.barbed_shot.remains|max_prio_damage,if=full_recharge_time<gcd",
+          "comment": null,
+          "sourceLine": 103
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "bestial_wrath,if=buff.beast_cleave.remains|!talent.beast_cleave|!talent.wild_thrash",
+          "comment": null,
+          "sourceLine": 104
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "wild_thrash,if=talent.beast_cleave&cooldown.bestial_wrath.remains>buff.beast_cleave.remains|!talent.beast_cleave",
+          "comment": null,
+          "sourceLine": 105
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "kill_command,if=buff.natures_ally.react|talent.master_handler&(active_enemies>3|howl_summon.ready)|!apex.3",
+          "comment": null,
+          "sourceLine": 106
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "cobra_shot,if=buff.cobra_fang.up&buff.beast_cleave.remains",
+          "comment": null,
+          "sourceLine": 107
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "barbed_shot,target_if=min:dot.barbed_shot.remains|max_prio_damage",
+          "comment": null,
+          "sourceLine": 108
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "cobra_shot,if=talent.beast_cleave&cooldown.wild_thrash.remains>gcd|!talent.beast_cleave",
+          "comment": null,
+          "sourceLine": 109
+        }
+      ]
+    },
+    {
+      "listName": "drcleave",
+      "receiverIdentifier": "drcleave",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "black_arrow,if=buff.beast_cleave.remains<gcd&cooldown.bestial_wrath.remains<gcd&active_enemies>2",
+          "comment": null,
+          "sourceLine": 111
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "bestial_wrath,if=buff.beast_cleave.remains|!talent.beast_cleave",
+          "comment": null,
+          "sourceLine": 112
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "wild_thrash,if=talent.beast_cleave&(prev_gcd.1.bestial_wrath|!buff.beast_cleave.up|cooldown.bestial_wrath.remains>buff.beast_cleave.remains)|!talent.beast_cleave",
+          "comment": null,
+          "sourceLine": 113
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "kill_command,if=cooldown.bestial_wrath.remains>full_recharge_time+gcd&buff.natures_ally.react|!apex.3",
+          "comment": null,
+          "sourceLine": 114
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "barbed_shot,target_if=min:dot.barbed_shot.remains|max_prio_damage,if=full_recharge_time<1*gcd",
+          "comment": null,
+          "sourceLine": 115
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "black_arrow,if=buff.withering_fire.up",
+          "comment": null,
+          "sourceLine": 116
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "wailing_arrow,if=buff.withering_fire.remains<execute_time+gcd|time_to_die.remains<execute_time+gcd",
+          "comment": null,
+          "sourceLine": 117
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "barbed_shot,target_if=min:dot.barbed_shot.remains|max_prio_damage",
+          "comment": null,
+          "sourceLine": 118
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "black_arrow",
+          "comment": null,
+          "sourceLine": 119
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "wailing_arrow",
+          "comment": null,
+          "sourceLine": 120
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "cobra_shot",
+          "comment": null,
+          "sourceLine": 121
+        }
+      ]
+    },
+    {
+      "listName": "drst",
+      "receiverIdentifier": "drst",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "barbed_shot,target_if=min:dot.barbed_shot.remains|max_prio_damage,if=(talent.bloody_frenzy&talent.snakeskin_quiver&talent.jagged_wounds)&cooldown.bestial_wrath.remains<2*gcd",
+          "comment": null,
+          "sourceLine": 123
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "bestial_wrath",
+          "comment": null,
+          "sourceLine": 124
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "black_arrow,if=buff.withering_fire.up&cooldown.kill_command.full_recharge_time>gcd",
+          "comment": null,
+          "sourceLine": 125
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "kill_command,if=cooldown.bestial_wrath.remains>full_recharge_time+gcd&buff.natures_ally.react|!apex.3",
+          "comment": null,
+          "sourceLine": 126
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "wailing_arrow,if=buff.withering_fire.remains<execute_time+2*gcd|time_to_die.remains<execute_time+gcd",
+          "comment": null,
+          "sourceLine": 127
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "cobra_shot,if=buff.cobra_fang.at_max_stacks",
+          "comment": null,
+          "sourceLine": 128
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "cobra_shot,if=talent.killer_cobra&buff.bestial_wrath.up&cooldown.barbed_shot.charges_fractional<1.4",
+          "comment": null,
+          "sourceLine": 129
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "black_arrow",
+          "comment": null,
+          "sourceLine": 130
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "barbed_shot,target_if=min:dot.barbed_shot.remains|max_prio_damage",
+          "comment": null,
+          "sourceLine": 131
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "cobra_shot,if=cooldown.bestial_wrath.remains>gcd",
+          "comment": null,
+          "sourceLine": 132
+        }
+      ]
+    },
+    {
+      "listName": "st",
+      "receiverIdentifier": "st",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "barbed_shot,target_if=min:dot.barbed_shot.remains|max_prio_damage,if=cooldown.bestial_wrath.remains<gcd|full_recharge_time<gcd",
+          "comment": null,
+          "sourceLine": 134
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "bestial_wrath",
+          "comment": null,
+          "sourceLine": 135
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "wild_thrash,if=active_enemies>1",
+          "comment": null,
+          "sourceLine": 136
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "kill_command,if=howl_summon.ready|(cooldown.bestial_wrath.remains>full_recharge_time+gcd&buff.natures_ally.react|!apex.3)&(buff.howl_of_the_pack_leader_cooldown.remains>4|cooldown.kill_command.charges_fractional>1.8)",
+          "comment": null,
+          "sourceLine": 137
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "cobra_shot,if=buff.cobra_fang.at_max_stacks",
+          "comment": null,
+          "sourceLine": 138
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "barbed_shot,if=(focus<75|full_recharge_time<gcd)&!talent.serpentine_strikes|talent.serpentine_strikes",
+          "comment": null,
+          "sourceLine": 139
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "cobra_shot,if=cooldown.bestial_wrath.remains>gcd",
+          "comment": null,
+          "sourceLine": 140
+        }
+      ]
+    },
+    {
+      "listName": "trinkets",
+      "receiverIdentifier": "trinkets",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "use_items,check_existing=0,slots=trinket1:trinket2,if=this_trinket.has_use_buff&(cooldown.bestial_wrath.ready|cooldown.bestial_wrath.remains<this_trinket.proc.any_dps.duration-15)|fight_remains<21",
+          "comment": null,
+          "sourceLine": 142
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "use_items,check_existing=0,slots=trinket1:trinket2,if=this_trinket.has_use_damage&!potion.liquid_luster|!equipped.font_of_venomous_rage|((buff.liquid_luster.up&buff.liquid_luster.remains<6)|(fight_remains<cooldown.potion.remains&!buff.liquid_luster.up))|fight_remains<10",
+          "comment": null,
+          "sourceLine": 143
+        }
+      ]
+    }
+  ]
+}

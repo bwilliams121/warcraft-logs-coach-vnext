@@ -189,7 +189,7 @@ current total (5,748,495 bytes), with what each row buys.
 
 **Decision times are the anchor's**, as for Destruction, so a public promotion must check its readers of `fightTimeMs`.
 
-**The unsupported subject has no further migration inside this capture.** Beast Mastery Hunter is the last unregistered specialization in A7R6 fight 7. ONB-T2 owes a move to another committed fight context, which brings a new corpus artifact or an existing one's roster. Its `hunter/beastmastery` observed string and `hunter/beast_mastery` roster key are both pinned now. The row in `SUPPORTED_SPEC_IDENTITIES` that ONB-T2's promotion adds needs that same mapping.
+**The unsupported subject did not move.** This item expected ONB-T2 to migrate it to another committed fight context. ONB-T2 registers the last roster rows, so no real identity is outside every `SpecId`, and it stays actor 20, now publicly unsupported (agent/architecture.md "ONB-T2"). Its `hunter/beastmastery` observed string and `hunter/beast_mastery` roster key are both pinned. A row in `SUPPORTED_SPEC_IDENTITIES`, if a promotion adds one, needs that same mapping.
 
 ---
 
@@ -632,8 +632,9 @@ validated on real logs, and one subject is not many.
 
 - **No reviewed profile exists.** The lifetimes, summon-start and continuity
   facts are the consuming specialization's to pin, with SimulationCraft and
-  wire evidence, in ONB-X4 (Demonology), ONB-X5 (Unholy) and ONB-T2 (Beast
-  Mastery). The retained Blood measurement uses test values only.
+  wire evidence, in ONB-X4 (Demonology) and ONB-X5 (Unholy). ONB-T2 (Beast
+  Mastery) supplies none, because its list reads no pet atom (agent/architecture.md
+  "ONB-T2"). The retained Blood measurement uses test values only.
 - **PRESENT needs a proven minimum lifetime.** Under O2 (no future
   evidence), presence at t comes only from a summon before t plus a pinned
   minimum life. A pet that can die or be dismissed at any moment (most
@@ -2983,3 +2984,26 @@ Every remaining gap has a canonical owner (`KNOWN_EVIDENCE_GAPS`,
 **ONB-T2's clone.** Survival and Beast Mastery read a hero tree the same way, and a hero-tree target now fails extraction on an undeclared spell-less row. Guardian should check `trigger_gcd`, `gcd_type` and `set_replacement_action` over its class module first.
 
 **One retained subject, one hero tree.** No Conduit of the Celestials subject has a retained event, so the `big_coc` list, Invoke Xuen and Celestial Conduit are read only on synthetic decisions.
+
+## After ONB-T2
+
+**Raised:** ONB-T2 (2026-11-06). Guardian Druid, Beast Mastery Hunter and Survival Hunter are INTERNAL_ONLY and resolve nothing. None is a soundness defect.
+
+**Guardian and Survival are on ONB-EV.** Neither has a retained subject. Guardian's only real events are a two-second diagnostic sample (gBMC fight 33 actor 91), and Survival has no event on an id of its own. Contexts naming them hold no retained event.
+
+**What a Beast Mastery decision would need, in the order a scan meets it.**
+
+- **`default[0] retarget`.** Whether a line gated on `fight_style.dungeonroute` can be stepped past on a raid fight is the first question for Beast Mastery, Survival and Marksmanship alike, and M11-F recorded that `fight_style` waits on a difficulty authority. Its `target_if` reads `target.health`, whose score is not proven finite.
+- **`default[1] auto_shot`.** A reviewed contract, as Arms has for its swing.
+- **`cds` and the dispatches.** The dispatches read `active_enemies`, and `active_enemies<2` needs an upper bound no real evidence gives (agent/follow-ups.md "After ONB-S3R").
+- **`st`.** Its first line reads `target_if` and charges. Behind it are `howl_summon.ready`, which the module reads from three Pack Leader buffs, `apex.3`, the tiered talent's rank, and Focus.
+
+**`barbed-shot-charge-capping` stays open.** The coaching inventory's question needs Barbed Shot's charges, which nothing derives, and `full_recharge_time` stays unbound. Cast counts alone could not answer it: the talents and procs that reset the charge were not reviewed.
+
+**Focus and Rage have contracts and no reader here.** A later slice binding either must declare it on the offensive capability first, and must read Beast Mastery's Wailing Arrow at its begin, not its completion.
+
+**What a Guardian decision would need.** A subject first. Then `default[0] auto_attack`, a contract, and the off-GCD Barkskin and Ironfur lines, each of which writes state later lines read. Heart of the Wild's talent must resolve, and `cooldown.*`, `buff.bear_form`, `target.cooldown.pause_action.remains`, a simulation's raid event, and Rage follow. `active_enemies` comes only after those.
+
+**Unmeasured.** No Dark Ranger subject is retained, so `drst`, `drcleave`, Black Arrow and Wailing Arrow are read only on synthetic builds. Every Survival and Guardian row is unmeasured. Moonkin Form's two spell rows and `wild_guardian`'s logged id need a real Guardian cast. Guardian's reading that a press of its form or Maul is on the GCD rests on pinned records alone.
+
+**The unsupported subject's next move.** It is publicly unsupported since this tranche, not unregistered. The day Beast Mastery becomes PUBLIC the guard demands another INTERNAL_ONLY identity from a committed context. When every roster row is PUBLIC or otherwise terminal, no real subject can exist, and ONB-Z has to say what the unsupported-path proofs stand on then.

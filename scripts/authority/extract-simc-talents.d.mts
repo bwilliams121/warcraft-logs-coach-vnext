@@ -19,6 +19,7 @@ export interface TalentExtractionTarget {
     readonly binding: string;
     /** Names the hero sub-tree when a name is held by two of them (ONB-B3). */
     readonly subTreeId?: number;
+    readonly traitEntryId?: number;
   }[];
   readonly heroTrees: readonly { readonly simcName: string; readonly subTreeId: number }[];
   readonly apexTraits: boolean;
@@ -67,6 +68,7 @@ export function resolveTalent(
     readonly displayNameEn: string;
     readonly tree: string;
     readonly subTreeId?: number;
+    readonly traitEntryId?: number;
   },
   target: { readonly classId: number; readonly specId: number },
 ):

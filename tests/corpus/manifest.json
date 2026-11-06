@@ -5164,6 +5164,37 @@
       ]
     },
     {
+      "caseId": "application-service.beast-mastery-hunter-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Beast Mastery Hunter registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "hunter/beast_mastery",
+            "expected": {
+              "internalAnalyzerId": "hunter-beast_mastery-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Beast Mastery Hunter is registered INTERNAL_ONLY in ONB-T2, a Cohort T follower. No decision of it resolves, and its retained subjects are uncommitted (agent/follow-ups.md \"After ONB-T2\")."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
+      ]
+    },
+    {
       "caseId": "application-service.beast-mastery-hunter-subject-is-unsupported-on-the-same-evidence",
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "APPLICATION_SERVICE",
@@ -5692,6 +5723,37 @@
       "rationale": {
         "basis": ["OWNED_CONTRACT"],
         "text": "Fury Warrior is registered INTERNAL_ONLY in ONB-A2. No retained capture can validate it, so a public request must keep receiving SPEC_NOT_SUPPORTED until ONB-A2P can promote it on real evidence."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
+      ]
+    },
+    {
+      "caseId": "application-service.guardian-druid-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Guardian Druid registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "druid/guardian",
+            "expected": {
+              "internalAnalyzerId": "druid-guardian-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Guardian Druid is registered INTERNAL_ONLY in ONB-T2, a Cohort T follower, a tank whose mitigation stays out of the offensive authority. No decision of it resolves, and no retained subject of it exists, so it is on ONB-EV (agent/follow-ups.md \"After ONB-T2\")."
       },
       "authority": null,
       "limitations": [],
@@ -6285,6 +6347,37 @@
       "rationale": {
         "basis": ["OWNED_CONTRACT"],
         "text": "Subtlety Rogue is registered INTERNAL_ONLY in ONB-A2. No retained capture can validate it, so a public request must keep receiving SPEC_NOT_SUPPORTED until ONB-A2P can promote it on real evidence."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts"
+      ]
+    },
+    {
+      "caseId": "application-service.survival-hunter-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Survival Hunter registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "hunter/survival",
+            "expected": {
+              "internalAnalyzerId": "hunter-survival-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Survival Hunter is registered INTERNAL_ONLY in ONB-T2, a Cohort T follower. No decision of it resolves, and no retained capture holds one of its events, so it is on ONB-EV (agent/follow-ups.md \"After ONB-T2\")."
       },
       "authority": null,
       "limitations": [],
@@ -12376,6 +12469,29 @@
       "authority": null,
       "limitations": [],
       "relatedTests": ["tests/unit/specs/onb-d2-balance-druid.test.ts"]
+    },
+    {
+      "caseId": "spec-beast-mastery-hunter.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_BEAST_MASTERY_HUNTER",
+      "contractUnderTest": "src/specs/hunter/beast_mastery/observed-analysis.ts analyzeObservedBeastMasteryHunterDecisions (the spec gate)",
+      "purpose": "The Beast Mastery Hunter facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_BEAST_MASTERY_HUNTER.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Beast Mastery Hunter list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-t2-beast-mastery-hunter.test.ts"]
     },
     {
       "caseId": "spec-blood-death-knight.a-segment-alone-has-no-profile",
@@ -21212,6 +21328,29 @@
       "relatedTests": ["tests/unit/specs/onb-a2-cohort-a-followers.test.ts"]
     },
     {
+      "caseId": "spec-guardian-druid.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_GUARDIAN_DRUID",
+      "contractUnderTest": "src/specs/druid/guardian/observed-analysis.ts analyzeObservedGuardianDruidDecisions (the spec gate)",
+      "purpose": "The Guardian Druid facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_GUARDIAN_DRUID.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Guardian Druid list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-t2-guardian-druid.test.ts"]
+    },
+    {
       "caseId": "spec-havoc-demon-hunter.the-facade-refuses-every-other-specialization",
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "SPEC_HAVOC_DEMON_HUNTER",
@@ -26175,6 +26314,29 @@
       "authority": null,
       "limitations": [],
       "relatedTests": ["tests/unit/specs/onb-a2-cohort-a-followers.test.ts"]
+    },
+    {
+      "caseId": "spec-survival-hunter.the-facade-refuses-every-other-specialization",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_SURVIVAL_HUNTER",
+      "contractUnderTest": "src/specs/hunter/survival/observed-analysis.ts analyzeObservedSurvivalHunterDecisions (the spec gate)",
+      "purpose": "The Survival Hunter facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+      "assertions": [
+        {
+          "kind": "SPEC_SURVIVAL_HUNTER.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Survival Hunter list."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-t2-survival-hunter.test.ts"]
     },
     {
       "caseId": "spec-unholy-death-knight.the-facade-refuses-every-other-specialization",

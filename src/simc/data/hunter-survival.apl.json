@@ -1,0 +1,433 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_HUNTER_SURVIVAL",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "hunter",
+    "specName": "survival"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "UNKNOWN",
+    "sourcePath": "engine/class_modules/apl/apl_hunter.cpp",
+    "sourceSha256": "8d7b7273ac056d1b28154cd9342db48cd95c643c215e5731c6b770c2e49facbb",
+    "sourceByteLength": 51094,
+    "regionStartMarker": "//survival_apl_start",
+    "regionEndMarker": "//survival_apl_end",
+    "extractedOn": "2026-11-06",
+    "extractorVersion": 1,
+    "regionSha256": "b16ff21787dc24f665080261989540cafa1c1e2904d4a6e9c0cea01d3d37c1d8",
+    "livePtrPolicy": "PTR_BODY_IDENTICAL",
+    "dispatchSource": {
+      "sourcePath": "engine/class_modules/sc_hunter.cpp",
+      "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9"
+    }
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "retarget,target_if=max:target.health,line_cd=5,if=fight_style.dungeonroute",
+          "comment": null,
+          "sourceLine": 439
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "auto_attack",
+          "comment": null,
+          "sourceLine": 440
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "call_action_list,name=cds",
+          "comment": null,
+          "sourceLine": 441
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "call_action_list,name=plst,if=active_enemies<3&talent.howl_of_the_pack_leader",
+          "comment": null,
+          "sourceLine": 442
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "call_action_list,name=plcleave,if=active_enemies>2&talent.howl_of_the_pack_leader",
+          "comment": null,
+          "sourceLine": 443
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "call_action_list,name=sentst,if=active_enemies<3&!talent.howl_of_the_pack_leader",
+          "comment": null,
+          "sourceLine": 444
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "call_action_list,name=sentcleave,if=active_enemies>2&!talent.howl_of_the_pack_leader",
+          "comment": null,
+          "sourceLine": 445
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "summon_pet",
+          "comment": null,
+          "sourceLine": 434
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": "Snapshot raid buffed stats before combat begins.",
+          "sourceLine": 435
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_item,name=algethar_puzzle_box",
+          "comment": null,
+          "sourceLine": 436
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "wildfire_bomb,if=active_enemies=1",
+          "comment": null,
+          "sourceLine": 437
+        }
+      ]
+    },
+    {
+      "listName": "cds",
+      "receiverIdentifier": "cds",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "blood_fury,if=buff.takedown.up|cooldown.takedown.ready",
+          "comment": "CDS",
+          "sourceLine": 447
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "use_items,check_existing=0,slots=trinket1:trinket2,if=this_trinket.has_use_damage",
+          "comment": null,
+          "sourceLine": 448
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_items,check_existing=0,slots=trinket1:trinket2,if=this_trinket.has_use_buff&talent.takedown&!other_trinket.has_use_buff&this_trinket.cooldown.duration>=cooldown.takedown.duration*2&this_trinket.has_buff.haste&(buff.takedown.up|cooldown.takedown.remains>this_trinket.cooldown.duration*0.45)",
+          "comment": null,
+          "sourceLine": 449
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "use_items,check_existing=0,slots=trinket1:trinket2,if=this_trinket.has_use_buff&(!talent.takedown|other_trinket.has_use_buff|this_trinket.cooldown.duration<cooldown.takedown.duration*2|!this_trinket.has_buff.haste)&(buff.takedown.up|cooldown.takedown.ready|cooldown.takedown.remains>20|!talent.takedown)",
+          "comment": null,
+          "sourceLine": 450
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "use_item,name=algethar_puzzle_box,if=cooldown.takedown.remains<5|!talent.takedown",
+          "comment": null,
+          "sourceLine": 451
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "invoke_external_buff,name=power_infusion,if=buff.takedown.up&!buff.power_infusion.up",
+          "comment": null,
+          "sourceLine": 452
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "ancestral_call,if=buff.takedown.up|cooldown.takedown.ready",
+          "comment": null,
+          "sourceLine": 453
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "fireblood,if=buff.takedown.up|cooldown.takedown.ready",
+          "comment": null,
+          "sourceLine": 454
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "berserking,if=buff.takedown.up|cooldown.takedown.ready",
+          "comment": null,
+          "sourceLine": 455
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "muzzle",
+          "comment": null,
+          "sourceLine": 456
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "potion,if=target.time_to_die<25|cooldown.takedown.ready",
+          "comment": null,
+          "sourceLine": 457
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "aspect_of_the_eagle,if=target.distance>=6",
+          "comment": null,
+          "sourceLine": 458
+        }
+      ]
+    },
+    {
+      "listName": "plst",
+      "receiverIdentifier": "plst",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "kill_command,if=buff.tip_of_the_spear.stack<2&howl_summon.ready",
+          "comment": "ST - PL",
+          "sourceLine": 460
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "kill_command,if=cooldown.takedown.remains<gcd&buff.tip_of_the_spear.stack<2&!talent.twin_fangs",
+          "comment": null,
+          "sourceLine": 461
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "takedown,if=buff.tip_of_the_spear.stack>0&!talent.twin_fangs|buff.tip_of_the_spear.stack=0&talent.twin_fangs",
+          "comment": null,
+          "sourceLine": 462
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "wildfire_bomb,if=buff.tip_of_the_spear.up&(talent.lethal_calibration&full_recharge_time<4+gcd|!talent.lethal_calibration)",
+          "comment": null,
+          "sourceLine": 463
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "boomstick,if=buff.tip_of_the_spear.up",
+          "comment": null,
+          "sourceLine": 464
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "raptor_strike,if=(buff.tip_of_the_spear.up|!buff.raptor_swipe.up)",
+          "comment": null,
+          "sourceLine": 465
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "wildfire_bomb,if=buff.tip_of_the_spear.up",
+          "comment": null,
+          "sourceLine": 466
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "kill_command,if=cooldown.takedown.remains",
+          "comment": null,
+          "sourceLine": 467
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "takedown",
+          "comment": null,
+          "sourceLine": 468
+        }
+      ]
+    },
+    {
+      "listName": "sentst",
+      "receiverIdentifier": "sentst",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "kill_command,if=buff.tip_of_the_spear.stack=0&(cooldown.takedown.remains|!talent.twin_fangs)",
+          "comment": "ST - Sent",
+          "sourceLine": 470
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "boomstick",
+          "comment": null,
+          "sourceLine": 471
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "wildfire_bomb,if=(debuff.sentinels_mark.remains|full_recharge_time<4)",
+          "comment": null,
+          "sourceLine": 472
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "kill_command,if=cooldown.takedown.remains<gcd&buff.tip_of_the_spear.stack<2&!talent.twin_fangs",
+          "comment": null,
+          "sourceLine": 473
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "takedown,if=buff.tip_of_the_spear.stack>0&!talent.twin_fangs|buff.tip_of_the_spear.stack=0&talent.twin_fangs",
+          "comment": null,
+          "sourceLine": 474
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "moonlight_chakram",
+          "comment": null,
+          "sourceLine": 475
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "raptor_strike",
+          "comment": null,
+          "sourceLine": 476
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "kill_command,if=cooldown.takedown.remains",
+          "comment": null,
+          "sourceLine": 477
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "wildfire_bomb",
+          "comment": null,
+          "sourceLine": 478
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "takedown",
+          "comment": null,
+          "sourceLine": 479
+        }
+      ]
+    },
+    {
+      "listName": "plcleave",
+      "receiverIdentifier": "plcleave",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "kill_command,if=buff.tip_of_the_spear.stack<2&(buff.howl_of_the_pack_leader_wyvern.remains|buff.howl_of_the_pack_leader_boar.remains|buff.howl_of_the_pack_leader_bear.remains)",
+          "comment": "AOE - PL",
+          "sourceLine": 481
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "kill_command,if=cooldown.takedown.remains<gcd&buff.tip_of_the_spear.stack<2&!talent.twin_fangs",
+          "comment": null,
+          "sourceLine": 482
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "takedown,if=buff.tip_of_the_spear.stack>0&!talent.twin_fangs|buff.tip_of_the_spear.stack=0&talent.twin_fangs",
+          "comment": null,
+          "sourceLine": 483
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "wildfire_bomb,if=full_recharge_time<gcd",
+          "comment": null,
+          "sourceLine": 484
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "boomstick,if=buff.tip_of_the_spear.up",
+          "comment": null,
+          "sourceLine": 485
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "wildfire_bomb,if=buff.tip_of_the_spear.up",
+          "comment": null,
+          "sourceLine": 486
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "raptor_strike,if=buff.tip_of_the_spear.up|!buff.raptor_swipe.up",
+          "comment": null,
+          "sourceLine": 487
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "kill_command,if=cooldown.takedown.remains",
+          "comment": null,
+          "sourceLine": 488
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "wildfire_bomb",
+          "comment": null,
+          "sourceLine": 489
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "takedown",
+          "comment": null,
+          "sourceLine": 490
+        }
+      ]
+    },
+    {
+      "listName": "sentcleave",
+      "receiverIdentifier": "sentcleave",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "kill_command,if=buff.tip_of_the_spear.stack=0&(cooldown.takedown.remains|!talent.twin_fangs)",
+          "comment": "AOE - Sent",
+          "sourceLine": 492
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "boomstick,if=buff.tip_of_the_spear.up",
+          "comment": null,
+          "sourceLine": 493
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "wildfire_bomb,target_if=max:debuff.sentinels_mark.remains,if=buff.tip_of_the_spear.up",
+          "comment": null,
+          "sourceLine": 494
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "kill_command,if=cooldown.takedown.remains<gcd&buff.tip_of_the_spear.stack<2&!talent.twin_fangs",
+          "comment": null,
+          "sourceLine": 495
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "takedown,target_if=min:debuff.sentinels_mark.remains,if=buff.tip_of_the_spear.stack>0&!talent.twin_fangs|buff.tip_of_the_spear.stack=0&talent.twin_fangs",
+          "comment": null,
+          "sourceLine": 496
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "moonlight_chakram,target_if=min:debuff.sentinels_mark.remains,if=buff.tip_of_the_spear.up",
+          "comment": null,
+          "sourceLine": 497
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "raptor_strike,target_if=min:debuff.sentinels_mark.remains,if=buff.tip_of_the_spear.up&buff.raptor_swipe.up|!buff.raptor_swipe.up",
+          "comment": null,
+          "sourceLine": 498
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "kill_command",
+          "comment": null,
+          "sourceLine": 499
+        }
+      ]
+    }
+  ]
+}

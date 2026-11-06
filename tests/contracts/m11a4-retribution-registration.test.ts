@@ -366,6 +366,9 @@ describe("the public path analyzes (M11-A5), and the internal path analyzes the 
       "warlock-demonology-observed-decisions": 0,
       "deathknight-unholy-observed-decisions": 0,
       "monk-windwalker-observed-decisions": 0,
+      "druid-guardian-observed-decisions": 0,
+      "hunter-beast_mastery-observed-decisions": 0,
+      "hunter-survival-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
     const document = projectAnalysisResult(result.analysis);

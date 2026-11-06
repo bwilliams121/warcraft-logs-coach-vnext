@@ -12626,8 +12626,9 @@ observed up to t, and the specialization queries `state.auras` on them.
 - Warband Bank Convergence (224) is owned and unclassified.
 
 **No consumer yet.** No registered specialization builds a pet state, so no
-public decision changes. ONB-X4 (Demonology), ONB-X5 (Unholy) and ONB-T2
-(Beast Mastery) supply reviewed profiles and own what their pet atoms mean.
+public decision changes. ONB-X4 (Demonology) and ONB-X5 (Unholy) supply reviewed
+profiles and own what their pet atoms mean. ONB-T2 (Beast Mastery) supplies none,
+because its list reads no pet atom.
 
 ## HEAL-A — Restoration Shaman registration and the healer finding shape (internal)
 
@@ -14833,3 +14834,45 @@ Limits: the census does not read JSON files of 500 bytes or less, or log and tex
 **What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists it; the gate search finds no qualifying assertion and `evidenceReady` false (`m11-promotion-evidence-gate`, from ONB-T1, its comment now naming the outcome). One test row is new: a public Monk/Windwalker request is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which held no row for it). A public request still runs preparation and reports partial coverage. Nothing reads as clean play. The replay and census are offline and not committed.
 
 **What a later promotion must do.** It first answers its stops, in order (agent/follow-ups.md "After ONB-T1"): positive readiness for the swing at `default[0]` and for Touch of Karma, the fight clock for `opener`'s gate, a contract for Zenith's own writes and a Zenith line's cooldowns and auras, and then a chosen enemy at `zenith[3]`. Most lines also read Chi, which has no wire contract. It measures or refuses Conduit of the Celestials, as Havoc refuses Fel-Scarred. A second subject needs a capture, which is ONB-EV's owner decision. A new public entry then promotes it through the unchanged gates by the five-site promotion, and must first commit its evidence with identity proof, because a PUBLIC module cannot use the retained-only exception. No such entry is queued.
+
+## ONB-T2 — Guardian Druid, Beast Mastery Hunter and Survival Hunter (internal, Cohort T)
+
+Autopilot queue entry ONB-T2. Public contract: NONE. No Warcraft Logs request. `src/specs/druid/guardian/README.md`, `src/specs/hunter/beast_mastery/README.md` and `src/specs/hunter/survival/README.md` are the slices in detail.
+
+**What it is.** The last of Cohort T, and the last three unregistered rows of the roster, registered INTERNAL_ONLY on Marksmanship's shape: each with its own pinned list, GCD and talent data, cast semantics, anchor profile, resolver, facade and registration. No decision of any of them resolves, and no shared analyzer was introduced. Every roster row now has a registration, which confers no support: 12 are PUBLIC and 28 INTERNAL_ONLY.
+
+**Where each stands.**
+
+| Spec | Retained subjects | Eligible | MATCH | REJECTED | UNKNOWN | Excluded | Engine refusal | Root scan stops at |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| Beast Mastery | four real, all Pack Leader | 707 | 0 | 0 | 707 | 127 | `default[0] retarget` | `default[0] retarget`, its `target_if` |
+| Survival | none | synthetic | 0 | 0 | all | | `default[0] retarget` | `default[0] retarget`, its `target_if` |
+| Guardian | none | synthetic | 0 | 0 | all | | `default[0] auto_attack` | `cooldowns[9] heart_of_the_wild`, its unresolved talent |
+
+Beast Mastery's subjects are A7R6 fight 7 actor 20 (first 165 s), gtKb fight 22 actor 13 (whole fight), rXAf fight 13 actor 15 (first 165 s) and b1Pm fight 48 actor 164 (whole fight). ONB-S3 alone moves none of the three: Beast Mastery and Survival meet the count only behind `retarget` and the swing, and Guardian's scan stops before any line reading it.
+
+**The census.** 6,006 retained JSON files over 500 bytes, 6,005 parsed (`.probe/m11d2c/bad.json` is not JSON), with Mortal Strike as its control (601 casts). By combatant-info specID and by named ability id:
+
+- **Beast Mastery:** the four subjects above, and gBMC fight 33 actor 141 in a diagnostic sample of 8 events, which is not a subject.
+- **Guardian:** gBMC fight 33 actor 91 in the same sample, 7 events: one cast off the list (77764), one Mangle resource change and one Red Moon damage row, so not a subject. Every other hit on a pinned id has a Feral, Balance or Restoration Druid as its source, and the Pulverize hits are Primal Earth Elementals, pets of Shamans. It is on ONB-EV.
+- **Survival:** no event of any type on an id of its own. The one pinned id with hits, Moonlight Chakram 1264949, is filtered M13-A actors 14 and 18, Marksmanship Hunters. It is on ONB-EV.
+
+A second pass read events of any type by every id in Guardian's and Survival's GCD data, over 5,744 files with worktree copies skipped (`.probe/onbt2/census2.cjs`).
+
+**Decisions.**
+
+1. **The unsupported subject stayed, and its guard now watches the public half.** Every proof of the public unsupported path uses one real identity, and until now the guard demanded it be outside every `SpecId` so a tranche migrated first. ONB-T2 registers the last three roster rows, so that set is empty: the committed contexts hold no other class and spec pair, and agent/follow-ups.md "After ONB-X2" had assumed a move that does not exist. A subject can now only be publicly unsupported, which is all those proofs read, because the public lookup and the identity table refuse an INTERNAL_ONLY row exactly as they refused an unregistered one. So A7R6 fight 7 actor 20 stays. The guard (`tests/contracts/m11a2-unsupported-subject.test.ts`) fails the day `hunter/beast_mastery` becomes PUBLIC, proves the wire string `hunter/beastmastery` is no `SpecId`, and pins that no roster row is unregistered. The other unregistered-id tests use a string that names no specialization. Every corpus case, public document and bench capture stays byte-identical, which the invariance pass shows.
+2. **Beast Mastery builds no pet state, though the queue expected it to consume ONB-S6.** Its list reads no `pet.*` atom, and a test pins that. The one dependency is `kill_command_t::ready()` asking the main pet's own action (sc_hunter.cpp:6773-6778), and a press proves it. A main pet is tamed before the pull, so it has no summon event and no pinned gameID, and the retained catalogs give each one its own. A profile here would feed no atom and say nothing, so none is written. Agent/follow-ups.md "After ONB-S6" records this.
+3. **`hunter-beast_mastery` is the file and target name.** The specialization-ownership rule reads `<class>-<spec>` against the roster key, so the underscore stays. The wire's `BeastMastery` lives only on the module's identity.
+4. **Moonkin Form names its trait row.** Two rows of the name are open to Guardian, a class-wide one and one scoped to Feral and Guardian. `find_talent_spell` takes the one with no spec requirement (trait_data.cpp:107-113), so the target names entry 103286 through a new optional `traitEntryId`, as `subTreeId` already names a sub-tree. Both spell rows, 24858 and 197625, are bound, because a player can take the other row and no retained Guardian cast says which one logs. Balance Druids log 24858, which says nothing about Guardian's row. A taken entry 112970 reads as the lone-node talent absent, so UNKNOWN.
+5. **Two Guardian tokens read two talents.** `berserk` builds Incarnation or Berserk (sc_druid.cpp:10162-10172) and `maul` builds Raze or Maul (:10202-10204). Each binds both ids and is applicable with either talent, background with both proven not taken, UNKNOWN otherwise. `wild_guardian` has no binding, because its action is an override no retained cast names, so its lane is a refusal.
+6. **`talent.<name>.enabled` is bound on Guardian**, the dotted form of the same question as `talent.<name>`, on the same three-way reading, as Protection Paladin and Brewmaster do. An unresolved one has no row, so it is enumerated, never false. `talent.flashing_claws.rank` stays a magnitude nothing states.
+7. **No resource is read.** Contracts exist for Rage and Focus, and no scan reaches a line where either could decide anything, so each is declared unbound and no resource is on the capability. Survival's list reads no Focus at all.
+8. **A simulation's fight style is never a fact of a real fight.** As for Marksmanship, `fight_style.dungeonroute` is declared and unbound. A test states it false to show what is behind it, and says that only a test may.
+9. **Constructors were checked.** `trigger_gcd`, `gcd_type` and `set_replacement_action` over `sc_hunter.cpp` and `sc_druid.cpp` show no action of these lists overriding its record's GCD, as agent/follow-ups.md "After ONB-T1" asked. The token builds the player's action, never the pet's struct of the same name: `bestial_wrath`, `kill_command`, `wild_thrash` and `takedown` each have both.
+
+**Requirement C is not met, and why this is not an owner stop.** As for Arms and Windwalker. The queue asks for an internal registration of each, and ONB-EV is already the owner's. What would change the result is in agent/follow-ups.md "After ONB-T2".
+
+**Evidence.** Nothing new is committed. Every pinned source read was already on disk and matches the recorded hashes.
+
+**No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse all three rows. A public request for any of them is SPEC_NOT_SUPPORTED, exactly as before.

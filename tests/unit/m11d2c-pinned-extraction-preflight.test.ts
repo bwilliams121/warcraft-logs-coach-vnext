@@ -778,7 +778,7 @@ const EARLIER = [
 ];
 
 describe("the registry", () => {
-  it("holds exactly the five earlier targets, the eight D2-C targets, ONB-B2's Enhancement, ONB-C1's Feral, ONB-C2's Outlaw, ONB-D1's Destruction, ONB-D2's three, ONB-D3's two, ONB-D4's two, ONB-X1's one, ONB-X2's one, ONB-X3's one, ONB-X4's one, ONB-X5's one and ONB-T1's one", () => {
+  it("holds exactly the five earlier targets, the eight D2-C targets, ONB-B2's Enhancement, ONB-C1's Feral, ONB-C2's Outlaw, ONB-D1's Destruction, ONB-D2's three, ONB-D3's two, ONB-D4's two, ONB-X1's one, ONB-X2's one, ONB-X3's one, ONB-X4's one, ONB-X5's one, ONB-T1's one and ONB-T2's two (Survival's was already a target)", () => {
     // ONB-B2 is the audit this entry waited for: its list is a class method (onb-b2-class-method-extraction).
     // ONB-C1's list is an included file with a separate PTR file (onb-c1-included-file-extraction).
     expect(Object.keys(TARGETS).sort()).toEqual(
@@ -802,6 +802,8 @@ describe("the registry", () => {
         "warlock-demonology",
         "deathknight-unholy",
         "monk-windwalker",
+        "druid-guardian",
+        "hunter-beast_mastery",
       ].sort(),
     );
   });
@@ -940,6 +942,7 @@ describe("the registry", () => {
       "deathknight-frost",
       "demonhunter-devourer",
       "demonhunter-havoc",
+      "hunter-survival",
       "rogue-subtlety",
       "warrior-arms",
       "warrior-fury",

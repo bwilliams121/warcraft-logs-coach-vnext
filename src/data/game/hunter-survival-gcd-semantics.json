@@ -1,0 +1,243 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_HUNTER_SURVIVAL_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/sc_hunter.cpp",
+        "sha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "byteLength": 309166
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-06",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 186270,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Raptor Strike"
+    },
+    {
+      "abilityGameId": 186289,
+      "baseGcdMs": 0,
+      "displayNameEn": "Aspect of the Eagle"
+    },
+    {
+      "abilityGameId": 187707,
+      "baseGcdMs": 0,
+      "displayNameEn": "Muzzle"
+    },
+    {
+      "abilityGameId": 259489,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Kill Command"
+    },
+    {
+      "abilityGameId": 259495,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Wildfire Bomb"
+    },
+    {
+      "abilityGameId": 1250646,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Takedown"
+    },
+    {
+      "abilityGameId": 1261193,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Boomstick"
+    },
+    {
+      "abilityGameId": 1264949,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Moonlight Chakram"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "aspect_of_the_eagle",
+      "candidateAbilityGameIds": [186289],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / aspect_of_the_eagle_t",
+        "startLine": 7536,
+        "endLine": 7536,
+        "sourceNote": "create_action dispatches \"aspect_of_the_eagle\" to aspect_of_the_eagle_t: built on p->specs.aspect_of_the_eagle (:7322); find_spell( 186289 ) at :7824.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "boomstick",
+      "candidateAbilityGameIds": [1261193],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / boomstick_t",
+        "startLine": 7546,
+        "endLine": 7546,
+        "sourceNote": "create_action dispatches \"boomstick\" to boomstick_t: built on p->talents.boomstick (:6420), channeled (:6425); find_talent_spell( SPECIALIZATION, \"Boomstick\", HUNTER_SURVIVAL ) at :7851.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "kill_command",
+      "candidateAbilityGameIds": [259489],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / kill_command_t",
+        "startLine": 7585,
+        "endLine": 7585,
+        "sourceNote": "create_action dispatches \"kill_command\" to kill_command_t: create_action builds kill_command_t on Survival with talents.kill_command_sv_player (:7590); find_talent_spell( SPECIALIZATION, \"Kill Command\", HUNTER_SURVIVAL ) at :7590. Its ready() also asks the main pet's own action (:6776), which this slice does not read.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "moonlight_chakram",
+      "candidateAbilityGameIds": [1264949],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / moonlight_chakram_t",
+        "startLine": 7550,
+        "endLine": 7550,
+        "sourceNote": "create_action dispatches \"moonlight_chakram\" to moonlight_chakram_t: built on p->talents.moonlight_chakram_spell (:4438); talents.moonlight_chakram.ok() ? find_spell( 1264949 ) : not_found at :4438. Its ready() asks for its buff, a usability claim this slice does not make.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "muzzle",
+      "candidateAbilityGameIds": [187707],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / muzzle_t",
+        "startLine": 7552,
+        "endLine": 7552,
+        "sourceNote": "create_action dispatches \"muzzle\" to muzzle_t: built on p->talents.muzzle (:6183); find_talent_spell( CLASS, \"Muzzle\" ) at :7647.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "raptor_strike",
+      "candidateAbilityGameIds": [186270],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / raptor_strike_t",
+        "startLine": 7554,
+        "endLine": 7554,
+        "sourceNote": "create_action dispatches \"raptor_strike\" to raptor_strike_t: built on p->talents.raptor_strike (:6337); find_talent_spell( SPECIALIZATION, \"Raptor Strike\", HUNTER_SURVIVAL ) at :7835. 265189 is raptor_strike_eagle, a token the list does not name.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "takedown",
+      "candidateAbilityGameIds": [1250646],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / takedown_t",
+        "startLine": 7559,
+        "endLine": 7559,
+        "sourceNote": "create_action dispatches \"takedown\" to takedown_t: built on p->talents.takedown (:6499); find_talent_spell( SPECIALIZATION, \"Takedown\", HUNTER_SURVIVAL ) at :7885.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "wildfire_bomb",
+      "candidateAbilityGameIds": [259495],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / wildfire_bomb_t",
+        "startLine": 7565,
+        "endLine": 7565,
+        "sourceNote": "create_action dispatches \"wildfire_bomb\" to wildfire_bomb_t: built on p->talents.wildfire_bomb (:7268); find_talent_spell( SPECIALIZATION, \"Wildfire Bomb\", HUNTER_SURVIVAL ) at :7831.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "auto_attack",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "auto_attack_t::auto_attack_t",
+        "line": 7351,
+        "sourceNote": "create_action builds actions::auto_attack_t for \"auto_attack\" (:7537), an action_t of type ACTION_OTHER with no spell, whose constructor assigns trigger_gcd = 0_ms."
+      }
+    },
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

@@ -3,7 +3,7 @@
  *
  * WHAT THIS IS
  *
- * The one real Warcraft Logs identity every unsupported-path proof uses —
+ * The one real Warcraft Logs identity every public unsupported-path proof uses —
  * service refusal, public projection, REST, MCP, transport parity, raid-night
  * cells, corpus cases and the manual smoke checklist. Since ONB-X2 that has
  * been the Beast Mastery Hunter of the committed A7R6 fight-7 capture, actor 20,
@@ -17,20 +17,24 @@
  *
  * Before M11-A2 the same coordinates were spelled in a dozen tests. That is
  * harmless while the subject never changes and dangerous the moment it must:
- * Beast Mastery Hunter is an ordinary DPS specialization and an onboarding
- * candidate (ONB-T2), so the day `hunter/beast_mastery` becomes a `SpecId` —
- * INTERNAL_ONLY or PUBLIC — this subject stops being unsupported and every proof
- * that leans on it would be proving the wrong thing. The guard in
+ * Beast Mastery Hunter can be promoted, so the day `hunter/beast_mastery` becomes a
+ * PUBLIC `SpecId` this subject stops being unsupported and every proof that leans on
+ * it would be proving the wrong thing. The guard in
  * `tests/contracts/m11a2-unsupported-subject.test.ts` fails on that day, by
  * construction, naming this file as the thing to change. Migration is then
  * ONE edit here (a new identity from an already-committed context artifact
- * whose specialization is outside every current `SpecId`), plus the corpus
- * cases that pin the subject by coordinates, plus the smoke checklist.
+ * whose specialization is not PUBLIC), plus the corpus cases that pin the subject
+ * by coordinates, plus the smoke checklist.
  *
- * This subject is not permanent either: ONB-T2 onboards Beast Mastery Hunter, and
- * the same guard will demand the same migration then. This is the last
- * unregistered specialization this capture holds, so that migration has to leave
- * it, for another committed fight context.
+ * WHAT CHANGED AT ONB-T2, AND WHY THIS SUBJECT DID NOT MOVE. Until then each subject
+ * was outside every `SpecId`. ONB-T2 registers the last three roster rows, so no real
+ * identity is outside every `SpecId` any more, and no committed context holds one. A
+ * subject can only be publicly unsupported now, which is what every proof here reads:
+ * the public lookup and the identity table refuse an INTERNAL_ONLY row exactly as they
+ * refused an unregistered one. Moving to another INTERNAL_ONLY row would change the
+ * coordinates of every proof and gain nothing, so the subject stays, and the guard now
+ * watches the public half. The path with no registration at all is reached only by a
+ * string that names no specialization, as in `tests/contracts/m10a-spec-partition.test.ts`.
  *
  * TWO SPELLINGS, BOTH REAL. The wire's `friendlySpecs` says `BeastMastery`, which the
  * service lower-cases into the identity it reports, `hunter/beastmastery`. The pinned
@@ -54,10 +58,11 @@ export interface UnsupportedSubject {
   /**
    * The `<class>/<spec>` string the service reports for the unsupported
    * identity (`specNotSupported(observedSpecId)`). Deliberately typed as a
-   * plain string: it is NOT a `SpecId`, and the guard proves it never is.
+   * plain string: it is the wire's pair lower-cased, not the roster key, and the
+   * guard proves it is no `SpecId`.
    */
   readonly observedSpecId: string;
-  /** The pinned roster's key for it: the id a `SpecId` would use, which the guard watches. */
+  /** The pinned roster's key for it: the id its `SpecId` uses, which the guard proves is not PUBLIC. */
   readonly rosterKey: string;
   /** The milestone this subject is valid for. */
   readonly scopedToMilestone: "ONB";
@@ -76,7 +81,7 @@ export const CURRENT_UNSUPPORTED_SUBJECT: UnsupportedSubject = Object.freeze({
   rosterKey: "hunter/beast_mastery",
   scopedToMilestone: "ONB",
   eligibilityNote:
-    "Beast Mastery Hunter is an ordinary onboarding candidate (ONB-T2). This subject must be migrated BEFORE 'hunter/beast_mastery' is added to SpecId in any exposure.",
+    "Beast Mastery Hunter is INTERNAL_ONLY since ONB-T2. This subject must be migrated BEFORE 'hunter/beast_mastery' becomes PUBLIC.",
 });
 
 /** The identity pair in the shape `fixtureAnalysisRunner` and `resolveSpecIdentity` take. */

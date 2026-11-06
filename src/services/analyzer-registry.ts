@@ -100,6 +100,9 @@ import { VENGEANCE_DEMON_HUNTER_REGISTRATION } from "../specs/demonhunter/vengea
 import { DEMONOLOGY_WARLOCK_REGISTRATION } from "../specs/warlock/demonology/registration.js";
 import { UNHOLY_DEATH_KNIGHT_REGISTRATION } from "../specs/deathknight/unholy/registration.js";
 import { WINDWALKER_MONK_REGISTRATION } from "../specs/monk/windwalker/registration.js";
+import { GUARDIAN_DRUID_REGISTRATION } from "../specs/druid/guardian/registration.js";
+import { BEAST_MASTERY_HUNTER_REGISTRATION } from "../specs/hunter/beast_mastery/registration.js";
+import { SURVIVAL_HUNTER_REGISTRATION } from "../specs/hunter/survival/registration.js";
 import { DESTRUCTION_WARLOCK_REGISTRATION } from "../specs/warlock/destruction/registration.js";
 import { OUTLAW_ROGUE_REGISTRATION } from "../specs/rogue/outlaw/registration.js";
 import { SUBTLETY_ROGUE_REGISTRATION } from "../specs/rogue/subtlety/registration.js";
@@ -548,6 +551,10 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   UNHOLY_DEATH_KNIGHT_REGISTRATION,
   // INTERNAL_ONLY since ONB-T1: the Cohort T representative. No decision of it resolves.
   WINDWALKER_MONK_REGISTRATION,
+  // INTERNAL_ONLY since ONB-T2: the last of Cohort T, and the last unregistered rows of the roster. No decision of any of them resolves.
+  GUARDIAN_DRUID_REGISTRATION,
+  BEAST_MASTERY_HUNTER_REGISTRATION,
+  SURVIVAL_HUNTER_REGISTRATION,
 ]);
 
 /**

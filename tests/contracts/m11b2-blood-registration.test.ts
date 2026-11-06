@@ -137,6 +137,9 @@ describe("identity and partition", () => {
       "warlock/demonology",
       "deathknight/unholy",
       "monk/windwalker",
+      "druid/guardian",
+      "hunter/beast_mastery",
+      "hunter/survival",
     ]);
     expect(PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");

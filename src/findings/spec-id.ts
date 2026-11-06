@@ -101,7 +101,10 @@ export type SpecId =
   | "demonhunter/vengeance"
   | "warlock/demonology"
   | "deathknight/unholy"
-  | "monk/windwalker";
+  | "monk/windwalker"
+  | "druid/guardian"
+  | "hunter/beast_mastery"
+  | "hunter/survival";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -141,6 +144,9 @@ export const SPEC_IDS = Object.freeze([
   "warlock/demonology",
   "deathknight/unholy",
   "monk/windwalker",
+  "druid/guardian",
+  "hunter/beast_mastery",
+  "hunter/survival",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -317,6 +323,9 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  *
  * Windwalker Monk arrived here in ONB-T1, the Cohort T representative. No decision of it resolves on its one retained
  * subject.
+ *
+ * Guardian Druid, Beast Mastery Hunter and Survival Hunter arrived here in ONB-T2, the last of Cohort T and the last unregistered rows of the
+ * roster. No decision of any of them resolves. Beast Mastery's wire name, `BeastMastery`, does not lower-case to its key.
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
@@ -344,6 +353,9 @@ export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "warlock/demonology",
   "deathknight/unholy",
   "monk/windwalker",
+  "druid/guardian",
+  "hunter/beast_mastery",
+  "hunter/survival",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

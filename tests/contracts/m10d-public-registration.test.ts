@@ -95,6 +95,9 @@ describe("the five sites agree", () => {
       "warlock/demonology",
       "deathknight/unholy",
       "monk/windwalker",
+      "druid/guardian",
+      "hunter/beast_mastery",
+      "hunter/survival",
     ]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
@@ -192,6 +195,9 @@ describe("the five sites agree", () => {
       ["warlock/demonology", "INTERNAL_ONLY"],
       ["deathknight/unholy", "INTERNAL_ONLY"],
       ["monk/windwalker", "INTERNAL_ONLY"],
+      ["druid/guardian", "INTERNAL_ONLY"],
+      ["hunter/beast_mastery", "INTERNAL_ONLY"],
+      ["hunter/survival", "INTERNAL_ONLY"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -317,6 +323,9 @@ describe("the complete-catalog helper", () => {
       "warlock-demonology-observed-decisions": 0,
       "deathknight-unholy-observed-decisions": 0,
       "monk-windwalker-observed-decisions": 0,
+      "druid-guardian-observed-decisions": 0,
+      "hunter-beast_mastery-observed-decisions": 0,
+      "hunter-survival-observed-decisions": 0,
     });
   });
 });

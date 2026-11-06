@@ -62,13 +62,13 @@ row).
 | --- | --- | --- | --- | --- | --- |
 | `paladin/retribution` | SELECTED — INTERNAL_ONLY at M11-A4, PUBLIC since M11-A5 | committed sanitized (A7R6 actor 6, 165 s; gtKb actor 23, 20 s) | audited | SPECIFIC_QUESTIONS_IDENTIFIED | `spender-choice` (A4_REQUIRED — IMPLEMENTED_PUBLIC since M11-A5), `holy-power-waste` (A4_OPTIONAL), `empyrean-legacy-consumption`, `divine-arbiter-alternation`, `wake-of-ashes-cooldown-drift`, `execution-sentence-wake-alignment`, `avenging-wrath-usage` (LATER_M11), `wings-hammer-of-wrath-window` (BLOCKED) |
 | `demonhunter/havoc` | A — PUBLIC since ONB-A1P (Aldrachi Reaver only) | committed (first 90 s of fight 48, actor 18); whole fight local raw | audited | SPECIFIC_QUESTIONS_IDENTIFIED | `essence-break-window-fill`, `fury-cap` |
-| `hunter/beast_mastery` | B | local raw | blocked | PARTIAL | `barbed-shot-charge-capping` |
+| `hunter/beast_mastery` | T — INTERNAL_ONLY since ONB-T2 | local raw (four subjects, all Pack Leader) | audited | PARTIAL | `barbed-shot-charge-capping` |
 | `druid/feral` | C — INTERNAL_ONLY since ONB-C1 | local raw (b1Pm fight 48 actor 170, whole fight; A7R6 fight 7 actor 1, first 165 s) | audited | PARTIAL | `rip-rake-snapshot-refresh` |
-| `hunter/survival` | B | none | not yet | UNASSESSED | — |
+| `hunter/survival` | T — INTERNAL_ONLY since ONB-T2 | none (on ONB-EV) | audited | UNASSESSED | — |
 | `monk/windwalker` | T — INTERNAL_ONLY since ONB-T1 | local raw (one subject, Shado-Pan, whole fight) | audited | UNASSESSED | — |
 | `rogue/subtlety` | B — INTERNAL_ONLY since ONB-A2 | committed filtered casts only (M13-A actor 17), cannot validate | audited | UNASSESSED | — |
 | `shaman/enhancement` | B — INTERNAL_ONLY since ONB-B2 | committed filtered casts only (M13-A actor 7), cannot validate | audited | UNASSESSED | — |
-| `druid/guardian` | B | none | not yet | UNASSESSED | — |
+| `druid/guardian` | T — INTERNAL_ONLY since ONB-T2 | none (a two-second diagnostic sample of one actor; on ONB-EV) | audited | UNASSESSED | — |
 | `warrior/arms` | C — INTERNAL_ONLY since ONB-B1 | committed (first 6 s of fight 48, actor 5); whole fight local raw | audited | PARTIAL | `colossus-smash-window-fill` |
 | `warrior/fury` | C — INTERNAL_ONLY since ONB-A2 | uncommitted contexts only | audited | UNASSESSED | — |
 | `warrior/protection` | C — INTERNAL_ONLY since ONB-A2 | uncommitted context only | audited | UNASSESSED | — |

@@ -833,6 +833,33 @@
       "assertions": 1,
       "cases": 1,
       "failed": 0,
+      "kindsExercised": ["SPEC_GUARDIAN_DRUID.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_GUARDIAN_DRUID",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_BEAST_MASTERY_HUNTER.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_BEAST_MASTERY_HUNTER",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_SURVIVAL_HUNTER.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_SURVIVAL_HUNTER",
+      "passed": 1
+    },
+    {
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
       "kindsExercised": ["SPEC_OUTLAW_ROGUE.SPEC_GATE"],
       "notExecuted": 0,
       "owningLayer": "SPEC_OUTLAW_ROGUE",
@@ -848,13 +875,13 @@
       "passed": 1
     },
     {
-      "assertions": 47,
-      "cases": 43,
+      "assertions": 50,
+      "cases": 46,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 47
+      "passed": 50
     },
     {
       "assertions": 14,
@@ -934,6 +961,20 @@
       ],
       "authority": null,
       "caseId": "application-service.balance-druid-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.beast-mastery-hunter-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -1168,6 +1209,20 @@
       ],
       "authority": null,
       "caseId": "application-service.fury-warrior-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.guardian-druid-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -1416,6 +1471,20 @@
       ],
       "authority": null,
       "caseId": "application-service.subtlety-rogue-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.survival-hunter-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -4069,6 +4138,20 @@
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_BEAST_MASTERY_HUNTER.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-beast-mastery-hunter.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_BEAST_MASTERY_HUNTER",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
       "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
       "assertions": [
         {
@@ -6039,6 +6122,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_GUARDIAN_DRUID.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-guardian-druid.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_GUARDIAN_DRUID",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_HAVOC_DEMON_HUNTER.SPEC_GATE",
           "ordinal": 0,
           "status": "PASSED"
@@ -7715,6 +7812,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_SURVIVAL_HUNTER.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-survival-hunter.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_SURVIVAL_HUNTER",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_UNHOLY_DEATH_KNIGHT.SPEC_GATE",
           "ordinal": 0,
           "status": "PASSED"
@@ -8091,8 +8202,11 @@
     "SIMC_APL_DEMONHUNTER_VENGEANCE": "simc-33622e9d-1",
     "SIMC_APL_DRUID_BALANCE": "simc-33622e9d-1",
     "SIMC_APL_DRUID_FERAL": "simc-33622e9d-1",
+    "SIMC_APL_DRUID_GUARDIAN": "simc-33622e9d-1",
     "SIMC_APL_EVOKER_DEVASTATION": "simc-33622e9d-1",
+    "SIMC_APL_HUNTER_BEAST_MASTERY": "simc-33622e9d-1",
     "SIMC_APL_HUNTER_MARKSMANSHIP": "simc-33622e9d-1",
+    "SIMC_APL_HUNTER_SURVIVAL": "simc-33622e9d-1",
     "SIMC_APL_MAGE_ARCANE": "simc-33622e9d-1",
     "SIMC_APL_MAGE_FIRE": "simc-33622e9d-1",
     "SIMC_APL_MAGE_FROST": "simc-33622e9d-1",
@@ -8120,13 +8234,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 842,
-    "cases": 247,
+    "assertions": 848,
+    "cases": 253,
     "declared": 0,
-    "executable": 842,
+    "executable": 848,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 842
+    "passed": 848
   }
 }
