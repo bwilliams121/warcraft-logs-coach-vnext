@@ -71,7 +71,41 @@
  *
  * Everything else — FIRST (even with a finite score: it still needs SOME enemy
  * to score non-zero), a target-dependent or unparseable `if=`, a score not
- * proven finite, a malformed `target_if` — stays refused.
+ * proven finite, a malformed `target_if` — stays refused, unless the next
+ * section decides it.
+ *
+ * WHAT A TARGET DOMAIN ADDS (ONB-S3)
+ *
+ * The owner of an action may state the enemies it selects over
+ * (`AtomBindings.targetDomainFor`). The rule is that of every other unknown
+ * here: a line resolves only when EVERY evidence-consistent target world gives
+ * the same answer. So no candidate order is ever read: not parser order, actor
+ * id or event order. The pinned order among candidates only decides WHICH enemy
+ * wins, and the rule below never depends on that, so reversing a domain cannot
+ * change a verdict.
+ *
+ *   FIRST, score    FALSE in every world on every candidate of a CLOSED domain:
+ *                   no enemy scores non-zero, so nothing is chosen. Not ready.
+ *   FIRST, score    TRUE on a candidate proven ready, and truth-valued: some
+ *                   enemy IS chosen, on an OPEN domain too, since an unobserved
+ *                   enemy can only win instead of it. Truth-valued, because one
+ *                   candidate needs `> 0` and several need `!= 0`, which only
+ *                   agree on 0 and 1.
+ *   FIRST, score    a top-level PLAYER_SCOPED conjunct FALSE: zero on every enemy
+ *                   however many there are. Not ready, with no domain at all.
+ *   any mode, if=   FALSE on every candidate of a CLOSED domain: not ready
+ *                   whichever is chosen. TRUE on every one, once a target is
+ *                   certainly chosen: ready whichever is chosen.
+ *
+ * Once a domain is stated, a target is certainly chosen only with a candidate
+ * proven ready. For MIN/MAX that is a finite score AND such a candidate, since a
+ * finite score alone proves nothing about targeting or range on the enemies the
+ * domain names, and a world with none ready stays possible.
+ *
+ * On an OPEN domain a target-dependent `if=` stays refused, because the enemy
+ * nobody observed could be the one chosen. No real evidence closes a domain
+ * today (no upper bound is established), so every FIRST line on a real fight
+ * still refuses unless a player-scoped fact or a proven candidate settles it.
  *
  * `call_action_list` IS NOT HERE. `call_action_list_t::action_ready`
  * (action.cpp:4672-4685) overrides the base and never calls `select_target()`,
@@ -81,7 +115,14 @@
  */
 
 import { atomKey, isPlayerScoped, type ExpressionNode } from "./expression/ast.js";
-import type { AtomBindings } from "./expression/evaluate.js";
+import {
+  actingAction,
+  evaluateSimcExpression,
+  type AtomBindings,
+  type ExpressionEvaluation,
+  type TargetCandidate,
+  type TargetDomain,
+} from "./expression/evaluate.js";
 import { parseSimcExpression } from "./expression/parse.js";
 import type { SpecAtomVocabulary } from "./expression/spec-vocabulary.js";
 import type { AplAction, TargetIfStructure } from "./apl-authority.js";
@@ -233,6 +274,8 @@ function finitenessOf(node: ExpressionNode): ScoreFiniteness {
 
 /** Why a `target_if` line could be neither eliminated nor read as an ordinary line. */
 export type TargetIfRefusalReason =
+  /** A target domain was stated, and its worlds do not agree (ONB-S3). */
+  | "TARGET_DOMAIN_NOT_CONVERGED"
   /** The option is malformed; see `TargetIfStructure`. */
   | "TARGET_IF_MALFORMED"
   /** FIRST gates on whether SOME enemy satisfies its expression — an enemy-set question. */
@@ -245,6 +288,7 @@ export type TargetIfRefusalReason =
   | "SCORE_NOT_PROVEN_FINITE";
 
 export const TARGET_IF_REFUSAL_REASONS = [
+  "TARGET_DOMAIN_NOT_CONVERGED",
   "TARGET_IF_MALFORMED",
   "FIRST_MODE_NEEDS_ENEMY_SET",
   "CONDITION_TARGET_DEPENDENT",
@@ -258,8 +302,10 @@ export const TARGET_IF_REFUSAL_REASONS = [
  *
  *   ELIMINATED_FOR_EVERY_TARGET  a PLAYER_SCOPED `if=` conjunct is FALSE; the
  *                                line is not ready whatever target is chosen
- *   TARGET_SELECTION_IGNORABLE   MIN/MAX, finite score, `if=` absent or wholly
- *                                PLAYER_SCOPED: evaluate as an ordinary line
+ *   TARGET_SELECTION_IGNORABLE   a target is certainly chosen, and whichever it
+ *                                is the line reads the same: MIN/MAX with a
+ *                                finite score, or (ONB-S3) a target domain.
+ *                                Evaluate as an ordinary line
  *   REFUSED                      neither; the line stays unresolved
  */
 export type TargetIfVerdict =
@@ -271,10 +317,24 @@ export type TargetIfVerdict =
   | {
       readonly kind: "TARGET_SELECTION_IGNORABLE";
       readonly structure: Extract<TargetIfStructure, { kind: "WELL_FORMED" }>;
-      /** The proof that MIN/MAX always chooses a target. */
-      readonly scoreFiniteness: Extract<ScoreFiniteness, { kind: "PROVEN_FINITE" }>;
-      /** Whether there was an `if=` at all. When present it is wholly PLAYER_SCOPED. */
-      readonly condition: "ABSENT" | "PLAYER_SCOPED";
+      /**
+       * The proof that MIN/MAX always chooses a target. `null` for FIRST (ONB-S3), whose proof
+       * is `overTargets`: a proven-ready candidate with a truth-valued score of TRUE.
+       */
+      readonly scoreFiniteness: Extract<ScoreFiniteness, { kind: "PROVEN_FINITE" }> | null;
+      /**
+       * Whether there was an `if=` at all. When present it is wholly PLAYER_SCOPED, or (ONB-S3)
+       * proven TRUE on every candidate of a closed domain.
+       */
+      readonly condition: "ABSENT" | "PLAYER_SCOPED" | "TRUE_ON_EVERY_CANDIDATE";
+      /** Absent unless a target domain decided this (ONB-S3). */
+      readonly overTargets?: {
+        readonly closure: TargetDomain["closure"];
+        readonly provenance: string;
+        readonly candidateKeys: readonly string[];
+        /** What to read the `if=` with: any candidate, since all agree. Null when not needed. */
+        readonly conditionOverlay: Partial<AtomBindings> | null;
+      };
     }
   | {
       readonly kind: "REFUSED";
@@ -299,6 +359,30 @@ export function targetIfVerdict(action: AplAction, bindings: AtomBindings): Targ
     return { kind: "ELIMINATED_FOR_EVERY_TARGET", structure, elimination };
   }
 
+  // A FALSE player-only conjunct of the FIRST score: zero on every enemy, whatever the set is.
+  if (structure.mode === "FIRST") {
+    const scoreProof = proveTargetIndependentFalsehood(
+      { ...action, conditionRaw: structure.expressionRaw },
+      bindings,
+    );
+    if (scoreProof.kind === "ELIMINATED_FOR_EVERY_TARGET") {
+      return {
+        kind: "ELIMINATED_FOR_EVERY_TARGET",
+        structure,
+        elimination: {
+          ...scoreProof,
+          overTargets: { basis: "SCORE_PLAYER_CONJUNCT_FALSE", candidateKeys: [] },
+        },
+      };
+    }
+  }
+
+  const domain = bindings.targetDomainFor?.(action.actionToken) ?? null;
+  if (domain !== null) {
+    const verdict = verdictOverDomain(action, structure, domain, bindings);
+    if (verdict !== null) return verdict;
+  }
+
   if (structure.mode === "FIRST") return { kind: "REFUSED", structure, reason: "FIRST_MODE_NEEDS_ENEMY_SET" };
 
   if (action.conditionRaw !== null) {
@@ -319,6 +403,141 @@ export function targetIfVerdict(action: AplAction, bindings: AtomBindings): Targ
     scoreFiniteness,
     condition: action.conditionRaw === null ? "ABSENT" : "PLAYER_SCOPED",
   };
+}
+
+/** One expression on one candidate: the base bindings, with what differs on that enemy. */
+function evaluateOn(
+  raw: string,
+  action: AplAction,
+  candidate: TargetCandidate,
+  bindings: AtomBindings,
+): ExpressionEvaluation | null {
+  const candidateBindings: AtomBindings = { ...bindings, ...candidate.overlay };
+  const parsed = parseSimcExpression(raw, candidateBindings.specAtoms?.vocabulary);
+  if (!parsed.ok) return null;
+  return evaluateSimcExpression(parsed.ast, raw, candidateBindings, actingAction(action.actionToken));
+}
+
+/** The one truth an expression takes on a candidate: TRUE, FALSE, or undecided. */
+function truthOn(evaluation: ExpressionEvaluation | null | undefined): "TRUE" | "FALSE" | "UNDECIDED" {
+  if (evaluation?.outcome !== "RESOLVED") return "UNDECIDED";
+  return evaluation.value ? "TRUE" : "FALSE";
+}
+
+/**
+ * Whether `node` can only evaluate to 0 or 1, on the pinned semantics `finitenessOf` cites, plus a
+ * declared truth named `buff.<name>.up`, `.down` or the same on `debuff.`, which the pinned
+ * expression returns as a bool (buff.cpp:409-429). Every other atom is refused: a spec-declared
+ * truth may be a count in SimulationCraft.
+ */
+function isTruthValued(node: ExpressionNode): boolean {
+  switch (node.kind) {
+    case "COMPARISON":
+    case "AND":
+    case "OR":
+    case "NOT":
+    case "TALENT":
+    case "BUFF_UP":
+    case "DEBUFF_UP":
+      return true;
+    case "SPEC_ATOM":
+      return node.shape === "BOOLEAN" && /^(buff|debuff).[a-z0-9_]+.(up|down)$/.test(node.identifier);
+    default:
+      return false;
+  }
+}
+
+/**
+ * A line's verdict over a stated target domain. See the module header. Candidate order is never
+ * read, and an empty domain settles nothing.
+ */
+function verdictOverDomain(
+  action: AplAction,
+  structure: Extract<TargetIfStructure, { kind: "WELL_FORMED" }>,
+  domain: TargetDomain,
+  bindings: AtomBindings,
+): TargetIfVerdict {
+  const refused: TargetIfVerdict = { kind: "REFUSED", structure, reason: "TARGET_DOMAIN_NOT_CONVERGED" };
+  if (domain.candidates.length === 0) return refused;
+  if (domain.closure === "CLOSED" && domain.provenance.length === 0) return refused;
+  const candidateKeys = domain.candidates.map((candidate) => candidate.key);
+  const eliminated = (
+    basis: "SCORE_ZERO_ON_EVERY_CANDIDATE" | "CONDITION_FALSE_ON_EVERY_CANDIDATE",
+    evaluation: ExpressionEvaluation | null | undefined,
+  ): TargetIfVerdict => {
+    if (evaluation?.outcome !== "RESOLVED") return refused;
+    return {
+      kind: "ELIMINATED_FOR_EVERY_TARGET",
+      structure,
+      elimination: {
+        kind: "ELIMINATED_FOR_EVERY_TARGET",
+        conjunctIndex: 0,
+        conjunctAtomKeys: evaluation.trace.atoms.map((atom) => atom.key),
+        trace: evaluation.trace,
+        overTargets: { basis, candidateKeys },
+      },
+    };
+  };
+
+  // ---- is a target certainly chosen, or certainly not? ----
+  const vocabulary = bindings.specAtoms?.vocabulary;
+  const finiteness = scoreFinitenessOf(structure.expressionRaw, vocabulary);
+  let targetCertainlyChosen = false;
+  if (structure.mode === "FIRST") {
+    const parsedScore = parseSimcExpression(structure.expressionRaw, vocabulary);
+    if (!parsedScore.ok) return refused;
+    const scores = domain.candidates.map((candidate) =>
+      evaluateOn(structure.expressionRaw, action, candidate, bindings),
+    );
+    if (domain.closure === "CLOSED" && scores.every((score) => truthOn(score) === "FALSE")) {
+      return eliminated("SCORE_ZERO_ON_EVERY_CANDIDATE", scores[0]);
+    }
+    targetCertainlyChosen =
+      isTruthValued(parsedScore.ast) &&
+      domain.candidates.some(
+        (candidate, index) => candidate.targetReady === "PROVEN_READY" && truthOn(scores[index]) === "TRUE",
+      );
+  } else {
+    targetCertainlyChosen =
+      finiteness.kind === "PROVEN_FINITE" &&
+      domain.candidates.some((candidate) => candidate.targetReady === "PROVEN_READY");
+  }
+
+  // ---- the if=, on the enemy chosen ----
+  const ready = (
+    condition: "ABSENT" | "PLAYER_SCOPED" | "TRUE_ON_EVERY_CANDIDATE",
+    conditionOverlay: Partial<AtomBindings> | null,
+  ): TargetIfVerdict => ({
+    kind: "TARGET_SELECTION_IGNORABLE",
+    structure,
+    scoreFiniteness: finiteness.kind === "PROVEN_FINITE" && structure.mode !== "FIRST" ? finiteness : null,
+    condition,
+    overTargets: { closure: domain.closure, provenance: domain.provenance, candidateKeys, conditionOverlay },
+  });
+
+  if (action.conditionRaw === null) return targetCertainlyChosen ? ready("ABSENT", null) : refused;
+  const parsedCondition = parseSimcExpression(action.conditionRaw, vocabulary);
+  if (!parsedCondition.ok) return { kind: "REFUSED", structure, reason: "CONDITION_UNSUPPORTED" };
+  if (isPlayerScoped(parsedCondition.ast)) {
+    return targetCertainlyChosen ? ready("PLAYER_SCOPED", null) : refused;
+  }
+  if (domain.closure !== "CLOSED") return refused;
+  const conditionRaw = action.conditionRaw;
+  const conditions = domain.candidates.map((candidate) =>
+    evaluateOn(conditionRaw, action, candidate, bindings),
+  );
+  if (conditions.every((condition) => truthOn(condition) === "FALSE")) {
+    return eliminated("CONDITION_FALSE_ON_EVERY_CANDIDATE", conditions[0]);
+  }
+  const [anyCandidate] = domain.candidates;
+  if (
+    targetCertainlyChosen &&
+    anyCandidate !== undefined &&
+    conditions.every((condition) => truthOn(condition) === "TRUE")
+  ) {
+    return ready("TRUE_ON_EVERY_CANDIDATE", anyCandidate.overlay);
+  }
+  return refused;
 }
 
 /**

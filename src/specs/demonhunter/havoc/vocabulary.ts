@@ -33,7 +33,7 @@
  *   gcd.max, gcd.remains
  *       Hasted, and the pinned client's haste at a decision is not reconstructed.
  *   active_enemies, spell_targets, active_dot.burning_wound
- *       The enemy set has no authority (TARGET_COUNT, ONB-S3).
+ *       A PUBLIC analyzer stays invariant at ONB-S3, so this list reads no enemy count.
  *   debuff.reavers_mark.stack
  *       M4 reconstructs no stack count.
  *   charges, full_recharge_time (self-addressing)

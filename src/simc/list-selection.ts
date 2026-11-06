@@ -388,7 +388,15 @@ export function selectWithinList(
       };
     }
 
-    const condition = evaluateCondition(action, bindings);
+    // An `if=` proven TRUE on every candidate of a target domain is read on one of them (ONB-S3).
+    const conditionOverlay =
+      targeting?.kind === "ORDINARY_LINE" ? targeting.targetIf.overTargets?.conditionOverlay : null;
+    const condition = evaluateCondition(
+      action,
+      conditionOverlay === null || conditionOverlay === undefined
+        ? bindings
+        : { ...bindings, ...conditionOverlay },
+    );
 
     if (condition.kind === "UNSUPPORTED") {
       // Recorded, then the scan ends. Never skipped, never read as false, and

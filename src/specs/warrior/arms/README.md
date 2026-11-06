@@ -43,7 +43,7 @@ Every COMPLETE cast by the actor, classified by pinned data:
 | --- | --- |
 | `default[0] charge` | the query's refusal: `movement.distance` has no evidence, and Charge is off the GCD with no reviewed transition contract |
 | `default[3] pummel` | `target.debuff.casting.react` is not read, and Pummel has no contract either |
-| `default[17] run_action_list` (`slayer_aoe`) | where the root scan stops on a Slayer build: `talent.slayers_dominance` holds and `active_enemies` has no authority (ONB-S3). `default[14]` is the same stop on a Colossus build |
+| `default[17] run_action_list` (`slayer_aoe`) | where the root scan stops on a Slayer build: `talent.slayers_dominance` holds and `active_enemies` is at most a proven lower bound (ONB-S3). `default[14]` is the same stop on a Colossus build |
 | `default[18] run_action_list` (`slayer_execute`) | below that gate, and its own `target_if=min:target.health.pct` picks among enemies nothing enumerates |
 
 The lists behind the dispatch open differently, so the worlds do not converge: `slayer_aoe` starts at Cleave, Sweeping Strikes

@@ -9,7 +9,7 @@
  * NEVER GIVEN A VALUE BY THIS SLICE, and why:
  *
  *   spell_targets, spell_targets.starfire, enemies, active_dots.moonfire
- *       the enemy set has no authority (ONB-S3)
+ *       action-owned, and no action registers its target applicability (ONB-S3)
  *   astral_power, astral_power.deficit, energize_amount, action.*.cost
  *       the wire carries Astral Power (type 8) on casts, at a completion, and a cast-time spell generates it. A completion's reading is not its
  *       decision's, so nothing here reads it

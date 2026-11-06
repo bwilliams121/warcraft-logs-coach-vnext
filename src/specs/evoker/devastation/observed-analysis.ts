@@ -41,6 +41,7 @@
  */
 
 import type { CombatState } from "../../../engine/state/combat-state.js";
+import { decisionPositionOfAnchor, withEnemyCountAt } from "../../../findings/enemy-count-bindings.js";
 import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
 import type {
   AnalysisAuthorityMetadata,
@@ -480,7 +481,7 @@ export function analyzeObservedDevastationEvokerDecisions(
 
     const outcome = devastationFirstGcdSelectionAt({
       authority,
-      bindings,
+      bindings: withEnemyCountAt(bindings, state, actorId, decisionPositionOfAnchor(anchor, position)),
       buildFacts,
       observedAbilityGameId: abilityGameId,
     });

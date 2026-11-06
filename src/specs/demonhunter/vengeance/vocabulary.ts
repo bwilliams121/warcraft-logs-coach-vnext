@@ -9,7 +9,7 @@
  * NEVER GIVEN A VALUE BY THIS SLICE, and why:
  *
  *   spell_targets.spirit_bomb
- *       the enemy set has no authority (ONB-S3)
+ *       action-owned, and no action registers its target applicability (ONB-S3)
  *   soul_fragments, soul_fragments.total, soul_fragments.inactive
  *       soul fragments are not reconstructed, and no capture shows what the log reports of them
  *   apex.2, apex.3

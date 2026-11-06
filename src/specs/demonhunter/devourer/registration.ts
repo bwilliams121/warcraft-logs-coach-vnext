@@ -131,7 +131,7 @@ export function devourerDemonHunterObservedDecisionView(
 export const DEVOURER_DEMON_HUNTER_LIMITS = Object.freeze({
   analysis: [
     "Devourer Demon Hunter analysis compares observed global-cooldown decisions with pinned class/spec rotational authority,",
-    "when the necessary state can be established. A Void-Scarred build with The Hunt reaches `voidscarred_melee` and stops on the enemy count, which has no authority. An Annihilator build has its first line open on the count and on auras nothing binds. Behind the count, each pick-up line's `line_cd` is UNKNOWN from any log and has no reviewed contract, so no decision currently resolves.",
+    "when the necessary state can be established. A Void-Scarred build with The Hunt reaches `voidscarred_melee` and stops on the enemy count, which events can only bound from below. An Annihilator build has its first line open on the count and on auras nothing binds. Behind the count, each pick-up line's `line_cd` is UNKNOWN from any log and has no reviewed contract, so no decision currently resolves.",
     "It does NOT evaluate defensive cooldowns, interrupts or survival, it does not score performance, and it does",
     "not read race, faction, gear use effects or consumables. It reconstructs no Fury between observations, no cooldown, no",
     "aura and no enemy count. UNKNOWN is expected here and is not a fault.",

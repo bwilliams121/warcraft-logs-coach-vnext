@@ -122,7 +122,7 @@ export function outlawObservedDecisionView(
 export const OUTLAW_LIMITS = Object.freeze({
   analysis: [
     "Outlaw Rogue analysis compares observed global-cooldown decisions with pinned class/spec rotational authority,",
-    "when the necessary state can be established. Every decision first meets Stealth, an off-GCD action whose effect has no reviewed contract, and the cooldown list reads the enemy count, which has no authority, so no decision currently resolves.",
+    "when the necessary state can be established. Every decision first meets Stealth, an off-GCD action whose effect has no reviewed contract, and the cooldown list reads the enemy count, which no action registers yet, so no decision currently resolves.",
     "It does NOT evaluate defensive cooldowns, interrupts or survival, it does not score performance, and it does",
     "not read race, faction, gear use effects or consumables. It reconstructs no Energy and Combo Points between observations, no cooldown, no",
     "aura and no enemy count. UNKNOWN is expected here and is not a fault.",

@@ -9,7 +9,7 @@
  * NEVER GIVEN A VALUE BY THIS SLICE, and why:
  *
  *   spell_targets.chain_lightning, active_enemies, active_dot.flame_shock, lightning_rod
- *       the enemy set has no authority (ONB-S3)
+ *       active_enemies: the resolver leaves it to the analysis, which binds the shared enemy count per decision (ONB-S3); spell_targets: action-owned, unregistered
  *   maelstrom, maelstrom.deficit
  *       the wire carries Maelstrom (type 11) only on a costed cast, at its completion, and a cast-time spell generates it. A completion's
  *       reading is not its decision's, and no shared wire contract has a row for it, so nothing here reads it

@@ -2,7 +2,7 @@
  * ONB-B1: Arms Warrior, Cohort B's representative.
  *
  * The mandatory negative is the centre of it. Every GCD action of the pinned list sits behind a
- * dispatch on the enemy count, which has no authority (ONB-S3): an open dispatch never falls through
+ * dispatch on the enemy count, which events can only bound from below (ONB-S3): an open dispatch never falls through
  * to a lower list, and no decision becomes a MATCH or a REJECTED. The one thing this slice says over a
  * real fight is an observation, `colossus-smash-window-fill`, and what the evidence does not show is
  * `null`, never zero and never an extended window.

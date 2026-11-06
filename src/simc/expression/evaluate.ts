@@ -511,6 +511,41 @@ export interface AtomBindings {
    * generic variable reads UNKNOWN.
    */
   readonly scanVariables?: ScanVariables;
+  /**
+   * The target domain one action selects over, when its owner established one (ONB-S3).
+   * Absent or `null`, no target is enumerated and `target_if` keeps its refusals. See
+   * `src/simc/target-if.ts`.
+   */
+  readonly targetDomainFor?: (actionToken: string) => TargetDomain | null;
+}
+
+/**
+ * One enemy an action's `target_if` may choose (ONB-S3).
+ *
+ * `overlay` is what differs on this enemy: the atoms read with it as the target. The evaluator
+ * reads the base bindings plus the overlay.
+ */
+export interface TargetCandidate {
+  /** A stable identity for evidence. Never read as an order. */
+  readonly key: string;
+  /**
+   * Whether the action is proven ready on this enemy (`target_ready`), which is action-owned:
+   * targeting, range and geometry. Being in the enemy set does not prove this.
+   */
+  readonly targetReady: "PROVEN_READY" | "NOT_PROVEN";
+  readonly overlay: Partial<AtomBindings>;
+}
+
+/**
+ * The enemies one action selects over, as its owner established them.
+ *
+ *   CLOSED  every enemy that could be chosen is listed. A positive claim needing `provenance`.
+ *   OPEN    these are proven candidates, and an enemy nobody observed may also exist.
+ */
+export interface TargetDomain {
+  readonly closure: "CLOSED" | "OPEN";
+  readonly candidates: readonly TargetCandidate[];
+  readonly provenance: string;
 }
 
 /**

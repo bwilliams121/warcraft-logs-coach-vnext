@@ -64,7 +64,7 @@ Measured on synthetic builds. There is nothing real to replay.
 
 **The in-combat variable programme stays UNKNOWN, and it does not decide this.** Nine value lines of `ar`, `fracs_base`, `fracs1`, `fracs_np`, `sc_prop`, `fracs_p`, `fracs_p2`, `T_avg`, `fracs_f` and `passive_floor`, divide with `%`, which the shared parser refuses, so `time_to_next_glaive` and everything reading it never gets a value (agent/follow-ups.md "After M11-D3-C2"). Its `ceil` lines depend on those. Four `default` lines read `trinket.*` and refuse too. No refusal reads as zero.
 
-**The enemy count alone moves nothing.** `spell_targets.spirit_bomb` has no authority (ONB-S3), and a test giving it the value 1 leaves every first refusal in place.
+**The enemy count alone moves nothing.** `spell_targets.spirit_bomb` has no action registration (ONB-S3), and a test giving it the value 1 leaves every first refusal in place.
 
 ## The evidence
 

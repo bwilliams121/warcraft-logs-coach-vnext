@@ -123,7 +123,7 @@ export function feralDruidObservedDecisionView(
 export const FERAL_DRUID_LIMITS = Object.freeze({
   analysis: [
     "Feral Druid analysis compares observed global-cooldown decisions with pinned class/spec rotational authority,",
-    "when the necessary state can be established. On every retained subject the first GCD query stays UNKNOWN: Prowl is open on an Incarnation build once it has been pressed, Tiger's Fury has no contract, and every finisher and builder sits behind the enemy count, which has no authority (ONB-S3). The pool line is modelled and can only be reached past that count, so no decision currently resolves.",
+    "when the necessary state can be established. On every retained subject the first GCD query stays UNKNOWN: Prowl is open on an Incarnation build once it has been pressed, Tiger's Fury has no contract, and every finisher and builder sits behind the enemy count, which no action registers yet (ONB-S3). The pool line is modelled and can only be reached past that count, so no decision currently resolves.",
     "It does NOT evaluate defensive cooldowns, interrupts or survival, it does not score performance, and it does",
     "not read race, faction, gear use effects or consumables. It reconstructs no Energy and Combo Points between observations, no cooldown, no",
     "DoT on the target and no enemy count. UNKNOWN is expected here and is not a fault.",

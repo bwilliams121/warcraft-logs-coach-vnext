@@ -1130,7 +1130,7 @@ value. Prove the result against pinned source citations.
 ### ONB-S3: Enemy-set and target-count authority model
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: none
 wcl: NONE
 publicContract: NONE
@@ -2206,11 +2206,13 @@ needed.
 ### ONB-X5P: Unholy Death Knight (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-X5
 branch: autopilot/onb-x5p
 wcl: NONE
 publicContract: EXPECTED
+pr: 86
+mergeSha: b68a0f14f9d38830bd98e0128413737b4af587c1
 ```
 
 **Outcome.** It does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Its one retained subject, Rider of the Apocalypse, replayed offline, gives 147 decisions, 0 MATCH, 0 REJECTED, all UNKNOWN, output byte-identical to ONB-X5's. A census of 5,717 retained files finds no other subject: gBMC fight 33 actors 195 and 199 hold one Outbreak each in a diagnostic sample, and every other hit is a Blood Death Knight's or a pet's. Evidence is not its first gap, so it is not on ONB-EV, and ONB-S3 alone moves nothing. A promotion after its own inputs, first the swing's entry and the three cooldown lines behind it, is a new public entry through the unchanged gates (agent/architecture.md "ONB-X5P"; agent/follow-ups.md "After ONB-X5").

@@ -9,7 +9,7 @@
  * NEVER GIVEN A VALUE BY THIS SLICE, and why:
  *
  *   active_enemies
- *       the enemy set has no authority (ONB-S3)
+ *       the resolver leaves it to the analysis, which binds the shared enemy count per decision (ONB-S3)
  *   cooldown.*, cooldown_react, charges, buff.*.down, debuff.*.react, debuff.*.stack, buff.*.last_trigger, prev_gcd.*, time, set_bonus.*
  *       no cooldown, charge, aura, proc trigger, previous press, clock or tier set is derived
  *   movement.distance

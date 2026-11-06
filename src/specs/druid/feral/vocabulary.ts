@@ -9,13 +9,13 @@
  * NEVER GIVEN A VALUE BY THIS SLICE, and why:
  *
  *   spell_targets
- *       the enemy set has no authority (ONB-S3)
+ *       action-owned, and no action registers its target applicability (ONB-S3)
  *   spell_targets.primal_wrath
- *       the enemy set has no authority (ONB-S3)
+ *       action-owned, and no action registers its target applicability (ONB-S3)
  *   spell_targets.swipe_cat
- *       the enemy set has no authority (ONB-S3)
+ *       action-owned, and no action registers its target applicability (ONB-S3)
  *   active_dot.rake
- *       the enemy set has no authority (ONB-S3)
+ *       no action or enemy-set binding establishes it (ONB-S3)
  *   persistent_multiplier
  *       the snapshot multiplier is unbindable by design: nothing here infers it from damage numbers
  *   action.rake.pmultiplier
