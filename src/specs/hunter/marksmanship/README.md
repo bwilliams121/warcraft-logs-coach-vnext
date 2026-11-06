@@ -52,7 +52,8 @@ The rows are hand-reviewed readings of the pinned `_cast_time` and of every cast
 | --- | --- | --- |
 | `talent.<x>` | the three-way rule; another hero tree's talents are FALSE on a resolved tree | absent from the tree is UNKNOWN |
 | `hero_tree.sentinel`, `hero_tree.dark_ranger` | the resolved hero tree | a constant; on an unresolved tree, no row, so both dispatches stay open |
-| `fight_style.dungeonroute`, `raid_event.pull.*`, `max_prio_damage`, `focus`, `cost`, `active_enemies`, `buff.*`, `debuff.*`, `cooldown.*`, `dot.*`, `full_recharge_time`, `cast_time`, `execute_time`, `gcd`, `time`, `set_bonus.*`, `action.*`, `fight_remains` | none | unbound or UNKNOWN_NUMBER, stated as such |
+| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `fight_style.dungeonroute`, `raid_event.pull.*`, `max_prio_damage`, `focus`, `cost`, `buff.*`, `debuff.*`, `cooldown.*`, `dot.*`, `full_recharge_time`, `cast_time`, `execute_time`, `gcd`, `time`, `set_bonus.*`, `action.*`, `fight_remains` | none | unbound or UNKNOWN_NUMBER, stated as such |
 
 ## Why no decision resolves
 

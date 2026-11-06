@@ -5,6 +5,8 @@ catalog for the internal lookup only. The public lookup and the identity table r
 
 **Not promoted by ONB-B3P.** It cannot pass the rotational gates, and it waits on ONB-S3 rather than on evidence (agent/architecture.md "ONB-B3P").
 
+**ONB-S3R (2026-11-06): replayed over all 251 decisions, and none resolves. No subject's bound passes 1, and `active_enemies=1` needs an upper bound no event proves.** (agent/architecture.md "ONB-S3R").
+
 **Its own representative, on the observed-decision pattern, and it resolves nothing today.** No decision of this
 specialization reaches MATCH or REJECTED on the shared engine as it stands. Every decision is observed,
 classified and explained, and stays UNKNOWN. That is a measured property of the pinned list and the
@@ -35,7 +37,8 @@ Every COMPLETE cast by the actor, classified by pinned data:
 | `fury` | the decision cast's own PRE_COST | EXACT on a costed cast; unknown on a free one. Never replayed |
 | `hero_tree.annihilator`, `hero_tree.voidscarred` | entry membership in the observed tree | both or neither |
 | `talent.<x>` | the three-way rule; another hero tree's talents are FALSE on a resolved tree | absent from the tree is UNKNOWN |
-| `buff.*`, `debuff.*`, `cooldown.*`, the enemy count, simulation options | none | unbound or UNKNOWN_NUMBER, stated as such |
+| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `buff.*`, `debuff.*`, `cooldown.*`, simulation options | none | unbound or UNKNOWN_NUMBER, stated as such |
 | `line_cd=` on `pick_up_fragment` | the shared cast attribution | never observed, so nothing attributes, and each of the four timers is UNKNOWN |
 
 ## Why no decision resolves
@@ -47,7 +50,7 @@ Every COMPLETE cast by the actor, classified by pinned data:
 | `default[4] run_action_list` (The Hunt absent from the observed tree: synthetic only) | `talent.the_hunt` on a lone node is UNKNOWN, never false, so neither Void-Scarred list is chosen |
 | `vsm_st[0]`, `vsm_meta[1]`, `vsm_out[0]`, `annihilator_ranged[0]` `pick_up_fragment` (behind the count) | each `line_cd` is `LINE_CD:SELECTION_COVERAGE_NOT_PROVEN`: nothing in a log attributes a selection, and no contract exists |
 
-Lifting the enemy count needs ONB-S3, which is an owner decision, and it would not be enough. Behind it, `vsm_st[0]`, `vsm_meta[1]` and `vsm_out[0]` are pick-up lines whose timers no log can read and whose executions consume a soul and may grant Fury, and `vsm_meta` and `vsm_out` also read `void_ray_count`, an `op=add` over a value only the simulation holds.
+ONB-S3 gives the count a proven lower bound and no upper bound, so `active_enemies=1` stays open on every retained subject, and settling it would not be enough. Behind it, `vsm_st[0]`, `vsm_meta[1]` and `vsm_out[0]` are pick-up lines whose timers no log can read and whose executions consume a soul and may grant Fury, and `vsm_meta` and `vsm_out` also read `void_ray_count`, an `op=add` over a value only the simulation holds.
 
 ## The evidence
 
@@ -64,4 +67,4 @@ Lifting the enemy count needs ONB-S3, which is an owner decision, and it would n
 ## Not evaluated, deliberately
 
 Auras (no wire identity is corroborated), cooldowns (no pin is checked against real gaps), resources between
-casts, the enemy count, the target's health and casts, movement. See `agent/follow-ups.md` "After ONB-B3".
+casts, the target's health and casts, movement. See `agent/follow-ups.md` "After ONB-B3".

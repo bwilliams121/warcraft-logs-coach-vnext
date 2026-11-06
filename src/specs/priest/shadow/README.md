@@ -55,7 +55,8 @@ The rows are hand-reviewed readings of the pinned `_cast_time` and of every cast
 | Atom | Source | Rule |
 | --- | --- | --- |
 | `talent.<x>` | the three-way rule; another hero tree's talents are FALSE on a resolved tree | absent from the tree is UNKNOWN |
-| `insanity.deficit`, `active_enemies`, `spell_targets.*`, `active_dot.*`, `dot.*`, `buff.*`, `cooldown.*`, `target.health.pct`, `health.pct`, `pet.*`, `action.*`, `raid_event.*`, `priest.*`, `gcd.max`, `time_to_bloodlust`, `fight_remains`, `target.time_to_die` | none | unbound or UNKNOWN_NUMBER, stated as such |
+| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `insanity.deficit`, `spell_targets.*`, `active_dot.*`, `dot.*`, `buff.*`, `cooldown.*`, `target.health.pct`, `health.pct`, `pet.*`, `action.*`, `raid_event.*`, `priest.*`, `gcd.max`, `time_to_bloodlust`, `fight_remains`, `target.time_to_die` | none | unbound or UNKNOWN_NUMBER, stated as such |
 
 ## Why no decision resolves
 
@@ -71,4 +72,4 @@ Two retained subjects, replayed offline through production ingestion, both Archo
 
 ## Not evaluated, deliberately
 
-Voidweaver has no retained subject, and none casts Vampiric Touch, Void Torrent or Void Blast, so those lines are unmeasured. Insanity, auras, DoTs, cooldowns, the enemy count, targets' health, pets and haste are not modelled. See `agent/follow-ups.md` "After ONB-D2".
+Voidweaver has no retained subject, and none casts Vampiric Touch, Void Torrent or Void Blast, so those lines are unmeasured. Insanity, auras, DoTs, cooldowns, targets' health, pets and haste are not modelled. See `agent/follow-ups.md` "After ONB-D2".

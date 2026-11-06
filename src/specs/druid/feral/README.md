@@ -5,6 +5,8 @@ catalog for the internal lookup only. The public lookup and the identity table r
 
 **Not promoted by ONB-C1P.** It cannot pass the rotational gates, and it waits on the inputs before the enemy count and on ONB-S3, rather than on evidence (agent/architecture.md "ONB-C1P").
 
+**ONB-S3R (2026-11-06): replayed over all 372 decisions, and none resolves. Its list reads `spell_targets`, which no action registers, and no scan reaches that dispatch.** (agent/architecture.md "ONB-S3R").
+
 **Cohort C's representative, on the observed-decision pattern, and it resolves nothing today.** No decision of this
 specialization reaches MATCH or REJECTED on the shared engine as it stands. Every decision is observed,
 classified and explained, and stays UNKNOWN. That is a measured property of the pinned list and the
@@ -55,7 +57,7 @@ Every COMPLETE cast by the actor, classified by pinned data:
 | `cooldown[13] convoke_the_spirits` (actor 1's root scans: 112) | `TOO_MANY_UNRESOLVED_ATOMS` on a condition that also reads `fight_remains` |
 | `default[9..12]` (no real scan arrives) | `spell_targets` (ONB-S3), read by all four finisher and builder dispatches |
 
-Lifting the enemy count needs ONB-S3, which is an owner decision, and it would not be enough. The lines above it need Prowl's Incarnation state, Tiger's Fury's cooldown and contract (the wire's smallest gaps, 30,008 and 30,578 ms, do respect the 30 s pin), a read of the fight style, and Berserk's, Incarnation's and Feral Frenzy's cooldowns, which do not respect their pins (121.7 s and 90.3 s against 180 s, 30.5 s against 45 s). Below it, `rake` and `moonfire_cat` read `persistent_multiplier` and `pmultiplier`, which stay unbindable by design, and `rip` and `shred` need their DoT state.
+ONB-S3 does not settle this list's count: it reads `spell_targets`, and no action registers one, and that would not be enough. The lines above it need Prowl's Incarnation state, Tiger's Fury's cooldown and contract (the wire's smallest gaps, 30,008 and 30,578 ms, do respect the 30 s pin), a read of the fight style, and Berserk's, Incarnation's and Feral Frenzy's cooldowns, which do not respect their pins (121.7 s and 90.3 s against 180 s, 30.5 s against 45 s). Below it, `rake` and `moonfire_cat` read `persistent_multiplier` and `pmultiplier`, which stay unbindable by design, and `rip` and `shred` need their DoT state.
 
 ## Form state
 

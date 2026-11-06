@@ -7,8 +7,8 @@
  * that runs it, and the projection of its result shared code may read.
  * `src/services/analyzer-registry.ts` lists this row and reads nothing else from this directory.
  *
- * INTERNAL_ONLY. The public lookup and the identity table refuse it. No decision of it resolves on its
- * retained evidence, because both hero trees' area lists read the enemy count first (ONB-S3).
+ * INTERNAL_ONLY. The public lookup and the identity table refuse it. On its retained evidence 4 of 220
+ * decisions MATCH, all one token, so it cannot pass the rotational gates (agent/architecture.md "ONB-S3R").
  *
  * THE AUTHORITY, BOUND TO ONE DOMAIN. `SIMC_APL_WARLOCK_DESTRUCTION` governs OFFENSIVE_ROTATION and nothing
  * else (`authority-bindings.ts`, `domains.ts`).
@@ -128,15 +128,15 @@ export const DESTRUCTION_LIMITS = Object.freeze({
   analysis: [
     "Destruction Warlock analysis compares observed global-cooldown decisions with pinned class/spec rotational authority,",
     "when the necessary state can be established, at the moment each cast began where that is established. Every decision",
-    "meets a list that reads the enemy count before any single-target line, and no decision currently resolves.",
+    "meets a list that reads the enemy count before any single-target line, and only a press of the first area line resolves.",
     "It does NOT evaluate defensive cooldowns, interrupts or survival, it does not score performance, and it does",
     "not read race, faction, gear use effects or consumables. It reconstructs no Soul Shards, no cooldown, no aura,",
-    "no pet and no enemy count. UNKNOWN is expected here and is not a fault.",
+    "and no pet, and the enemy count is a proven lower bound at most. UNKNOWN is expected here and is not a fault.",
   ].join("\n"),
   raidNight: [
     "Destruction Warlock cells count only observed global-cooldown decisions compared against pinned class/spec authority,",
-    "and no decision currently resolves. They do NOT evaluate defensive cooldowns, interrupts or survival, and they do",
-    "not score performance. All decisions remain UNKNOWN, which is expected.",
+    "and only a press of the first area line resolves. They do NOT evaluate defensive cooldowns, interrupts or survival, and they do",
+    "not score performance. Nearly every decision remains UNKNOWN, which is expected.",
   ].join("\n"),
 });
 

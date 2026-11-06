@@ -5,6 +5,8 @@ catalog for the internal lookup only. The public lookup and the identity table r
 
 **Not promoted by ONB-B2P.** It cannot pass the rotational gates, and it waits on ONB-S3 rather than on evidence (agent/architecture.md "ONB-B2P").
 
+**ONB-S3R (2026-11-06): replayed over all 567 decisions, and none resolves. Bounds reach 11, and every scan still stops at Reaper's Mark's `target_if`, with the swing's entry and open lines before it.** (agent/architecture.md "ONB-S3R").
+
 **A Cohort B follower of Arms' pattern, and it resolves nothing today.** No decision of this
 specialization reaches MATCH or REJECTED on the shared engine as it stands. Every decision is observed,
 classified and explained, and stays UNKNOWN. That is a measured property of the pinned list and the
@@ -36,7 +38,8 @@ Every COMPLETE cast by the actor, classified by pinned data:
 | `runic_power.deficit` | the decision cast's own PRE_COST | EXACT on a costed cast; unknown on a free one. Never replayed |
 | `hero_tree.deathbringer`, `hero_tree.rider_of_the_apocalypse` | entry membership in the observed tree | both or neither |
 | `talent.<x>` | the three-way rule; another hero tree's talents are FALSE on a resolved tree | absent from the tree is UNKNOWN |
-| `buff.*`, `debuff.*`, `cooldown.*`, the enemy count, simulation options | none | unbound or UNKNOWN_NUMBER, stated as such |
+| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `buff.*`, `debuff.*`, `cooldown.*`, simulation options | none | unbound or UNKNOWN_NUMBER, stated as such |
 
 ## Why no decision resolves
 
@@ -46,7 +49,7 @@ Every COMPLETE cast by the actor, classified by pinned data:
 | `cooldowns[5] frostwyrms_fury` (Rider: synthetic only) | its condition has too many unresolved atoms to enumerate |
 | `default[6] run_action_list` | the enemy count (ONB-S3), behind all of the above: no build reaches it today |
 
-Lifting the enemy count needs ONB-S3, which is an owner decision, and it would not be enough: every GCD action of `single_target` and `aoe` sits behind that dispatch, and everything in `cooldowns` is read before it.
+ONB-S3 gives the count a proven lower bound and no upper bound, and settling it would not be enough: every GCD action of `single_target` and `aoe` sits behind that dispatch, and everything in `cooldowns` is read before it.
 
 ## The evidence
 
@@ -61,4 +64,4 @@ Lifting the enemy count needs ONB-S3, which is an owner decision, and it would n
 ## Not evaluated, deliberately
 
 Auras (no wire identity is corroborated), cooldowns (no pin is checked against real gaps), resources between
-casts, the enemy count, the target's health and casts, movement. See `agent/follow-ups.md` "After ONB-B2".
+casts, the target's health and casts, movement. See `agent/follow-ups.md` "After ONB-B2".

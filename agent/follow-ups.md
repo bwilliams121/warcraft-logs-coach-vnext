@@ -9,13 +9,37 @@ hygiene and clarity items.
 
 ---
 
+## After ONB-S3R: each specialization's next real blocker
+
+**Raised:** ONB-S3R (2026-11-06). Measured by replaying every retained subject offline (agent/architecture.md "ONB-S3R"). Coverage, not soundness: no REJECTED anywhere, and 4 MATCH.
+
+| Specialization | Next real blocker, in the order a decision meets it | What is behind it |
+| --- | --- | --- |
+| Arms | `default[0] charge`: no contract, and `movement.distance` has no evidence. Then `default[17]`, `active_enemies>2`, on the 1,155 decisions with fewer than 3 proven: an upper bound | Pummel, then `slayer_aoe[0]` on `dot.rend_dot.remains`, and the list "After ONB-B1" |
+| Frost Death Knight | `default[0] auto_attack`, then `remorseless_winter`, `breath_of_sindragosa` and the other open cooldown lines, then Reaper's Mark's `target_if`. Bounds reach 11 and move nothing | "After ONB-B2" |
+| Devourer | `voidscarred_melee[0]`, `active_enemies=1`: an upper bound. No subject's bound passes 1 (235 at 1, 16 with no member), so this is the whole population | The pick-up lines and the rest of "After ONB-B3" |
+| Feral | Prowl, `auto_attack`, Cat Form, Tiger's Fury, then Chomp's choice node and Convoke. Its count is `spell_targets`, and no scan reaches it | "After ONB-C1" |
+| Destruction | 113 of 220: the cast anchor (-100% cast-time rows). 103 of 220: Summon Infernal's readiness, and Rain of Fire's choice node behind it | Soul Shards and the rest of "After ONB-D1" |
+| Enhancement, Subtlety | no combatant info on the only subject: ONB-EV | "After ONB-B2", "After ONB-A2" |
+| Fury, Protection Warrior, Outlaw | no retained event: ONB-EV | "After ONB-A2", "After ONB-C2" |
+
+**Nearest gain: Destruction's second token.** All six Malevolence decisions (three per subject) stop only on `USABILITY:summon_infernal`. They fall 985, 32,341 and 62,860 ms after the last logged press on actor 12, and 1,215, 32,493 and 62,699 ms on actor 15. A proof that the press has not recharged would make each a MATCH, and Malevolence would be the second observed token the observation gate needs. It would not be enough to promote: discrimination still needs a real REJECTED or a qualifying control, and all of it must be committed, against the archive's notice line (5,212 bytes left). It also needs what this tranche could not assume: a pinned Summon Infernal cooldown, which no runtime row holds, and a review of what shortens it. The wire's gaps are 91,737 and 92,369 ms, and `destructive_rapidity` is SELECTED on these builds, which is unread here. A floor is not safe until that review says so.
+
+**The upper bound is the widest single gap.** It stands on 1,155 Arms and 251 Devourer decisions, and any single-target decision of any list dispatching on a count. "After ONB-S3" records that only Policy B can supply it, and that it is not queued. That remains the owner's to schedule.
+
+**Two bosses are not a multi-target fight.** Destruction's MATCHes rest on Ula'tek's two bosses, both carrying the subject's Wither. The count is the number of enemies present, which is what `active_enemies` reads, and it makes no claim about the encounter's strategy. A later binding of `spell_targets` on this fight must still prove its own range and geometry.
+
+**Devastation's and Fire's bounds are real and unused.** Bounds reach 10 on Devastation and 3 on Fire, and both stop elsewhere first, as their own lists record.
+
+**The replay is uncommitted.** Its harness is local, as every public tranche's was. Only the rule is pinned, on synthetic events.
+
 ## After ONB-S3: what the enemy-set model does not establish
 
 **An upper bound.** No event proves one, so `active_enemies=1`, `active_enemies<3` and any threshold
 above the proven lower bound stay UNKNOWN, on every single-target fight. The approved, deferred curated
 roster (Policy B, O3) is the only source on record. So a specialization whose first gate is a
-single-target dispatch stays UNKNOWN on single-target evidence, whatever else lands. ONB-S3R should
-expect this to be the common result, and a promotion that needs real MATCH on single-target decisions
+single-target dispatch stays UNKNOWN on single-target evidence, whatever else lands. ONB-S3R measured
+this as the common result ("After ONB-S3R"), and a promotion that needs real MATCH on single-target decisions
 needs Policy B first. That is the owner's to schedule, and it is not queued.
 
 **Any target domain.** `targetDomainFor` has no production supplier. A specialization supplying one owns

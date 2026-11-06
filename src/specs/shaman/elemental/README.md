@@ -54,7 +54,8 @@ The rows are hand-reviewed readings of the pinned `_cast_time` and of every cast
 | Atom | Source | Rule |
 | --- | --- | --- |
 | `talent.<x>` | the three-way rule; another hero tree's talents are FALSE on a resolved tree | absent from the tree is UNKNOWN |
-| `maelstrom`, `maelstrom.deficit`, `spell_targets.*`, `active_enemies`, `active_dot.*`, `lightning_rod`, `dot.*`, `buff.*`, `cooldown.*`, `movement.distance`, `gcd`, `fight_remains` | none | unbound or UNKNOWN_NUMBER, stated as such |
+| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `maelstrom`, `maelstrom.deficit`, `spell_targets.*`, `active_dot.*`, `lightning_rod`, `dot.*`, `buff.*`, `cooldown.*`, `movement.distance`, `gcd`, `fight_remains` | none | unbound or UNKNOWN_NUMBER, stated as such |
 
 ## Why no decision resolves
 
@@ -71,4 +72,4 @@ Seven retained subjects, replayed offline through production ingestion, all Fars
 
 ## Not evaluated, deliberately
 
-Stormbringer has no retained subject, so Tempest's lines are unmeasured. Auras, cooldowns, charges, Maelstrom, the enemy count, Lightning Rod, haste and movement are not modelled. See `agent/follow-ups.md` "After ONB-D2".
+Stormbringer has no retained subject, so Tempest's lines are unmeasured. Auras, cooldowns, charges, Maelstrom, Lightning Rod, haste and movement are not modelled. See `agent/follow-ups.md` "After ONB-D2".

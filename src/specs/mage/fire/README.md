@@ -54,7 +54,8 @@ The rows are hand-reviewed readings of the pinned `_cast_time` and of every cast
 | Atom | Source | Rule |
 | --- | --- | --- |
 | `talent.<x>` | the three-way rule; another hero tree's talents are FALSE on a resolved tree | absent from the tree is UNKNOWN |
-| `active_enemies`, `buff.*`, `cooldown.*`, `action.*`, `hot_streak_spells_in_flight`, `scorch_execute.active`, `firestarter.active`, `prev_gcd.*`, `set_bonus.*`, `gcd.*`, `time`, `cast_time`, `fight_remains` | none | unbound or UNKNOWN_NUMBER, stated as such |
+| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `buff.*`, `cooldown.*`, `action.*`, `hot_streak_spells_in_flight`, `scorch_execute.active`, `firestarter.active`, `prev_gcd.*`, `set_bonus.*`, `gcd.*`, `time`, `cast_time`, `fight_remains` | none | unbound or UNKNOWN_NUMBER, stated as such |
 
 ## Applicability
 

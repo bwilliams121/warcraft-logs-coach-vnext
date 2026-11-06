@@ -70,7 +70,8 @@ So the `cast` is the start, and the shared CHANNEL kind already says that of a c
 | Atom | Source | Rule |
 | --- | --- | --- |
 | `talent.<x>` | the three-way rule; another hero tree's talents are FALSE on a resolved tree | absent from the tree is UNKNOWN |
-| `active_enemies`, `active_dot.*`, `buff.*`, `dot.*`, `cooldown.*`, `action.*`, `raid_event.*`, `set_bonus.*`, `gcd.*`, `target.*`, `execute_time`, `talent.volatility.rank`, `fight_remains` | none | unbound or UNKNOWN_NUMBER, stated as such |
+| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `active_dot.*`, `buff.*`, `dot.*`, `cooldown.*`, `action.*`, `raid_event.*`, `set_bonus.*`, `gcd.*`, `target.*`, `execute_time`, `talent.volatility.rank`, `fight_remains` | none | unbound or UNKNOWN_NUMBER, stated as such |
 
 ## Applicability
 
@@ -95,4 +96,4 @@ Three retained subjects, replayed offline through production ingestion, all Scal
 
 ## Not evaluated, deliberately
 
-No Flameshaper subject is retained, so `fs`, `fb` and `legacy_of_the_lifebinder` are unmeasured. Ranks, off-GCD Hover, Quell and Tip the Scales decisions, Essence, Mana, auras, cooldowns, charges, target health, the enemy count, simulation raid events and haste are not modelled. See `agent/follow-ups.md` "After ONB-X2".
+No Flameshaper subject is retained, so `fs`, `fb` and `legacy_of_the_lifebinder` are unmeasured. Ranks, off-GCD Hover, Quell and Tip the Scales decisions, Essence, Mana, auras, cooldowns, charges, target health, simulation raid events and haste are not modelled. See `agent/follow-ups.md` "After ONB-X2".

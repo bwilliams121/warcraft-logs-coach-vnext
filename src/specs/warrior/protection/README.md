@@ -3,6 +3,8 @@
 **Exposure: `INTERNAL_ONLY`.** The registration (`warrior-protection-observed-decisions`, `warrior/protection`) is in the production
 catalog for the internal lookup only. The public lookup and the identity table refuse it.
 
+**ONB-S3R (2026-11-06): not replayable. No event of it is retained, so its gap stays on ONB-EV, and its list reads `spell_targets`, which no action registers.** (agent/architecture.md "ONB-S3R").
+
 **A Cohort A follower of Havoc's pattern, and it resolves nothing today.** No decision of this
 specialization reaches MATCH or REJECTED on the shared engine as it stands. Every decision is observed,
 classified and explained, and stays UNKNOWN. That is a measured property of the pinned list and the
@@ -51,7 +53,7 @@ Every COMPLETE cast by the actor, classified by pinned data:
 | `default[16] ravager`, `default[20] champions_spear` | unconditional GCD actions whose cooldowns are not derived |
 | `default[25..26] run_action_list` | the AoE lists are gated on `spell_targets.thunder_clap`, so they are possible at every decision (ONB-S3) |
 
-Lifting the enemy count needs ONB-S3, which is an owner decision. Every single-target GCD action sits behind the AoE dispatches that read it. The GCD lines above those dispatches (`ravager`, `champions_spear`, `shield_charge`) would need cooldowns instead.
+ONB-S3 does not settle this list's count: it reads `spell_targets`, and no action registers one. Every single-target GCD action sits behind the AoE dispatches that read it. The GCD lines above those dispatches (`ravager`, `champions_spear`, `shield_charge`) would need cooldowns instead.
 
 ## The evidence
 

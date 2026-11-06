@@ -48,7 +48,8 @@ No haste is established, so `exactMs` is always null and no anchor is ever deriv
 | `talent.to_hell_and_back.enabled` | the same answer | an unresolved talent binds nothing |
 | `pet.demonic_tyrant.active` | shared pet presence, at the anchor | an undecided presence binds nothing, so the truth is enumerated |
 | `buff.wild_imps.stack` | shared pet count, at the anchor | a stack binding, explicit even when unknown, and never zero by default |
-| `soul_shard`, `active_enemies`, `gcd.max`, every other `buff.*` and `debuff.*`, `cooldown.*`, `fight_remains` | none | unbound or UNKNOWN_NUMBER, stated as such |
+| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `soul_shard`, `gcd.max`, every other `buff.*` and `debuff.*`, `cooldown.*`, `fight_remains` | none | unbound or UNKNOWN_NUMBER, stated as such |
 
 ## The pets (ONB-S6)
 
@@ -81,4 +82,4 @@ Seven retained Diabolist subjects, each replayed offline through production inge
 
 ## Not evaluated, deliberately
 
-Soul Shards, auras, cooldowns, the enemy count, haste, Tyrant setup and Ritual Clipping (`UNRESOLVED_DIABOLIST_HERO_TREE`, as recorded). See `agent/follow-ups.md` "After ONB-X4".
+Soul Shards, auras, cooldowns, haste, Tyrant setup and Ritual Clipping (`UNRESOLVED_DIABOLIST_HERO_TREE`, as recorded). See `agent/follow-ups.md` "After ONB-X4".

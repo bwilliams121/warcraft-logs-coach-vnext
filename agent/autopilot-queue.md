@@ -1130,10 +1130,12 @@ value. Prove the result against pinned source citations.
 ### ONB-S3: Enemy-set and target-count authority model
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: none
 wcl: NONE
 publicContract: NONE
+pr: 88
+mergeSha: 33cbb6170c49821b1bc81893210511d71ed86706
 ```
 
 **Owner resolution (2026-11-05): approve a bounded, evidence-first
@@ -1229,7 +1231,7 @@ first, on either hero tree's area list
 ### ONB-S3R: Re-replay the TARGET_COUNT-gated INTERNAL_ONLY specializations
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-S3
 wcl: NONE
 publicContract: NONE
@@ -1263,6 +1265,8 @@ semantics": lifting `TARGET_COUNT` makes no specialization PUBLIC.
    C) now passes, add a separate public re-promotion entry for it (`ONB-*P2`,
    `publicContract: EXPECTED`) through the existing, unchanged MATCH and
    REJECTED promotion gates. This tranche promotes nothing itself.
+
+**Outcome.** Every retained subject replayed offline. Destruction gains 4 real MATCH, all Summon Infernal, and no other specialization resolves a decision. Requirement C passes for none, so no `ONB-*P2` entry is added. No blocker is covered by existing semantics, and the widest is an upper bound on the count, which only the unscheduled Policy B could supply (agent/architecture.md "ONB-S3R"; agent/follow-ups.md "After ONB-S3R").
 
 ### ONB-S4: Shared cast and channel decision anchor
 
