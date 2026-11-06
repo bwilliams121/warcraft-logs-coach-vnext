@@ -33,5 +33,6 @@ Option C: a neutral, deterministic, separately retained Warcraft Logs census sup
 
 ## Validation
 
-- The supervisor's own `ConvertFrom-QueueText` was run on the result; see the commit's PR for the counts.
+- The supervisor's own `ConvertFrom-QueueText` reads 88 entries, with unique IDs and known dependencies.
+- Simulated selection after main: POLB-A, then it stops at POLB-CENSUS's owner decision. POLB-B, POLB-C, ONB-EV-PLAN, ONB-EV, REM-CENSUS, REM-GATE and ONB-Z wait behind it. M15-E and M11-G4-5-R stay BLOCKED.
 - `prettier --check` and `git diff --check` pass. No test suite was run: nothing executable changed.
