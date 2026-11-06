@@ -5,6 +5,8 @@ catalog for the internal lookup only. The public lookup and the identity table r
 
 **The Cohort T representative. It resolves nothing today.** All 239 eligible decisions of its one retained subject stay UNKNOWN. That is a property of the pinned list and the missing inputs, and neither is a fault in this slice or in the player.
 
+**Not promoted by ONB-T1P.** It cannot pass the rotational gates: all 239 decisions stay UNKNOWN. It waits on positive readiness for the swing at `default[0]` and for Touch of Karma, the fight clock for `opener`, a contract for Zenith, and a chosen enemy at `zenith[3]` (agent/architecture.md "ONB-T1P").
+
 ## The authority
 
 `SIMC_APL_MONK_WINDWALKER` (`simc-33622e9d-1`), the `live_apl` function of `namespace windwalker` in `apl_monk.cpp`, governs

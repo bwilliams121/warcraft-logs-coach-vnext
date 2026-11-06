@@ -5830,3 +5830,9 @@ The negatives: over each hero tree and none, no decision resolves; the engine st
 `m11d2c-pinned-extraction-preflight` holds the new target and `PTR_DELEGATES_TO_LIVE`, which refuses a PTR function that does more than call the live one, an entry function that reaches anything else, and the policy without a namespace selector. Two corpus cases, as for its neighbours, and `tests/contracts/m11-promotion-evidence-gate.test.ts` pins that the gate search finds nothing. `m11a2-spec-module-conformance` proves its identity through the committed fight 48 context.
 
 Offline only, not committed: the census (`.probe/onbt1/census.cjs`, Mortal Strike as its control), the wire probes (`wire.cjs`, `wire2.cjs`) and the replays (`.probe/onbt1/m/`), including the all-subject comparison of the classification change.
+
+# ONB-T1P: Windwalker Monk, not promoted
+
+No production code changed. One assertion row is new: `tests/unit/analysis-composition-refusals.test.ts` had no row for it, and now holds Monk/Windwalker (SPEC_NOT_SUPPORTED, one retrieval for preparation alone, no dispatch). `tests/contracts/m11-promotion-evidence-gate.test.ts` keeps its ONB-T1 gate search (no qualifying assertion, `evidenceReady` false), its comment now naming the outcome. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, the `onb-t1` suite).
+
+Offline only, not committed: the census (`.probe/onbt1p/census.cjs`, Mortal Strike as its positive control for events and the specID distribution as its control for combatant info), its reading by source (`.probe/onbt1p/actors.cjs`, `qj1p.cjs`), and the replay of the subject (`.probe/onbt1p/m/replay.baseline.ts`). They give the results in agent/architecture.md "ONB-T1P".
