@@ -9,7 +9,7 @@
  * NEVER GIVEN A VALUE BY THIS SLICE, and why:
  *
  *   active_enemies
- *       the enemy set has no authority (ONB-S3)
+ *       the resolver leaves it to the analysis, which binds the shared enemy count per decision (ONB-S3)
  *   time
  *       the reaction to a pull is not modelled
  *   gcd
@@ -17,7 +17,7 @@
  *   charges_fractional
  *       no cooldown is derived
  *   active_dot.flame_shock
- *       the enemy set has no authority (ONB-S3)
+ *       no action or enemy-set binding establishes it (ONB-S3)
  *   action.lightning_bolt.damage
  *       a simulated damage estimate
  *   action.chain_lightning.damage

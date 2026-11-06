@@ -9,7 +9,7 @@
  * NEVER GIVEN A VALUE BY THIS SLICE, and why:
  *
  *   active_enemies
- *       the enemy set has no authority (ONB-S3)
+ *       the resolver leaves it to the analysis, which binds the shared enemy count per decision (ONB-S3)
  *   cooldown.*, cooldown_react, gcd.*, time
  *       no cooldown, charge, GCD or clock is derived, so the Combustion dispatch stays open
  *   hot_streak_spells_in_flight, action.*.in_flight, action.*.in_flight_remains

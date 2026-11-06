@@ -9,9 +9,9 @@
  * NEVER GIVEN A VALUE BY THIS SLICE, and why:
  *
  *   active_enemies
- *       the enemy set has no authority (ONB-S3)
+ *       the resolver leaves it to the analysis, which binds the shared enemy count per decision (ONB-S3)
  *   active_dot.soul_immolation
- *       the enemy set has no authority (ONB-S3)
+ *       no action or enemy-set binding establishes it (ONB-S3)
  *   time
  *       the reaction to a pull is not modelled
  *   gcd.max

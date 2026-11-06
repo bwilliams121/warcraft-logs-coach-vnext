@@ -124,7 +124,7 @@ export function armsWarriorObservedDecisionView(
 export const ARMS_WARRIOR_LIMITS = Object.freeze({
   analysis: [
     "Arms Warrior analysis compares observed global-cooldown decisions with pinned class/spec rotational authority,",
-    "when the necessary state can be established. Every decision first meets Charge, an off-GCD action whose effect has no reviewed contract, and then a hero-talent list dispatch gated on the enemy count, which has no authority, so no decision currently resolves.",
+    "when the necessary state can be established. Every decision first meets Charge, an off-GCD action whose effect has no reviewed contract, and then a hero-talent list dispatch gated on the enemy count, which events can only bound from below, so no decision currently resolves.",
     "It does NOT evaluate defensive cooldowns, interrupts or survival, it does not score performance, and it does",
     "not read race, faction, gear use effects or consumables. It reconstructs no Rage between observations, no cooldown, no",
     "aura and no enemy count. UNKNOWN is expected here and is not a fault.",

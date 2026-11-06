@@ -130,7 +130,7 @@ export function unholyDeathKnightObservedDecisionView(
 export const UNHOLY_DEATH_KNIGHT_LIMITS = Object.freeze({
   analysis: [
     "Unholy Death Knight analysis compares observed global-cooldown decisions with pinned class/spec rotational authority,",
-    "when the necessary state can be established. Every decision first meets the swing's entry, whose readiness is unobserved, then cooldown lines that read plagues, simulated raid events and the enemy count, and behind them a list dispatch on the enemy count, which has no authority, so no decision currently resolves.",
+    "when the necessary state can be established. Every decision first meets the swing's entry, whose readiness is unobserved, then cooldown lines that read plagues, simulated raid events and the enemy count, and behind them a list dispatch on the enemy count, which events can only bound from below, so no decision currently resolves.",
     "It does NOT evaluate defensive cooldowns, interrupts or survival, it does not score performance, and it does",
     "not read race, faction, gear use effects or consumables. It reconstructs no Runes or Runic Power between observations, no cooldown, no",
     "aura and no enemy count. Pet presence comes only from summons it can attribute, and no pet is proven up or gone today. UNKNOWN is expected here and is not a fault.",

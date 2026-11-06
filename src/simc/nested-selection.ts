@@ -1183,11 +1183,26 @@ function undecidedTransferWorld(child: Extract<ScanOutcome, { kind: "COMPLETED" 
  *     certain call's are, and the parent's earlier possibilities stay ahead of
  *     them in priority order.
  */
+function gateOnChosenTarget(
+  action: AplAction,
+  targeting: TargetingOutcome | null,
+  gate: LineCondition,
+  bindings: AtomBindings,
+): LineCondition {
+  // ONB-S3. When a target domain proved the `if=` TRUE on every candidate, the base bindings hold
+  // no target, so the gate is read on one of them. All agree, so which one is not a choice.
+  const overlay =
+    targeting?.kind === "ORDINARY_LINE" ? targeting.targetIf.overTargets?.conditionOverlay : null;
+  return overlay === null || overlay === undefined
+    ? gate
+    : evaluateCondition(action, { ...bindings, ...overlay });
+}
+
 function scanRunDispatch(
   context: ScanContext,
   action: AplAction,
   target: string,
-  gate: LineCondition,
+  givenGate: LineCondition,
   path: readonly TraversalPathEntry[],
   nestedStack: readonly string[],
   candidates: readonly Candidate[],
@@ -1213,6 +1228,8 @@ function scanRunDispatch(
     action.targetIf !== null && action.unsupportedOptions.every((option) => option.optionKey === "target_if");
   const targeting = soleTargetIf ? targetingOutcomeFor(action, bindingsOf(context)) : null;
   const optionKeys = action.unsupportedOptions.map((option) => option.optionKey);
+  // An `if=` proven TRUE on every candidate of a domain is read on one of them (ONB-S3).
+  const gate = gateOnChosenTarget(action, targeting, givenGate, bindingsOf(context));
 
   if (targeting?.kind === "ELIMINATED_FOR_EVERY_TARGET") {
     // Not ready whatever target selection does: the parent continues.
@@ -1465,7 +1482,7 @@ function walkList(
       if (settled === "POOL_SELECTED") break;
     }
 
-    const gate = evaluateCondition(action, bindingsOf(context));
+    let gate = evaluateCondition(action, bindingsOf(context));
 
     // ---- variable: the one execute-and-continue construct ----
     if (action.entryKind === "VARIABLE_ASSIGNMENT") {
@@ -1950,6 +1967,7 @@ function walkList(
 
       if (targeting.kind === "ORDINARY_LINE") {
         targetSelection = { kind: "TARGET_SELECTION_IGNORABLE", optionKeys, targetIf: targeting.targetIf };
+        gate = gateOnChosenTarget(action, targeting, gate, bindingsOf(context));
       } else {
         const step = stepOf(
           action,

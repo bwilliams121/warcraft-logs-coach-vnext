@@ -9,7 +9,7 @@
  * NEVER GIVEN A VALUE BY THIS SLICE, and why:
  *
  *   active_enemies
- *       the enemy set has no authority (ONB-S3)
+ *       the resolver leaves it to the analysis, which binds the shared enemy count per decision (ONB-S3)
  *   soul_shard
  *       the wire carries Soul Shards on a costed cast, at its completion, and a cast-time spell spends them. A completion's reading is not its decision's, and no
  *       shared wire contract row exists for it

@@ -9,7 +9,7 @@
  * NEVER GIVEN A VALUE BY THIS SLICE, and why:
  *
  *   active_enemies, active_dot.wither, active_dot.immolate, dot_refreshable_count.*
- *       the enemy set has no authority (ONB-S3)
+ *       no action or enemy-set binding establishes it (ONB-S3)
  *   soul_shard
  *       the wire carries it only on a costed cast, and at a cast-time action's COMPLETION, which is not
  *       its decision: Immolate, Wither and Incinerate generate fractions while a Chaos Bolt is cast.

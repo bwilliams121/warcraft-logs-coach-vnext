@@ -13,13 +13,13 @@
  *   target.health.pct
  *       the target's health is not modelled
  *   spell_targets.thunder_blast
- *       the enemy set has no authority (ONB-S3)
+ *       action-owned, and no action registers its target applicability (ONB-S3)
  *   spell_targets.revenge
- *       the enemy set has no authority (ONB-S3)
+ *       action-owned, and no action registers its target applicability (ONB-S3)
  *   spell_targets.execute
- *       the enemy set has no authority (ONB-S3)
+ *       action-owned, and no action registers its target applicability (ONB-S3)
  *   spell_targets.thunder_clap
- *       the enemy set has no authority (ONB-S3)
+ *       action-owned, and no action registers its target applicability (ONB-S3)
  *   buff.thunder_blast.down
  *       no aura identity is pinned
  *   cooldown.shield_slam.ready

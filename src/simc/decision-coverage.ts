@@ -19,11 +19,12 @@
  * WHY THE BLOCKER IS CLASSIFIED RATHER THAN JUST COUNTED
  *
  * The raw blocker names say WHERE the engine stopped. They do not say whether a
- * reader should expect the gap ever to close. `PREDICTIVE_STATE` and
- * `TARGET_COUNT` are permanent by construction — no amount of implementation
- * removes them, because the information is not in a combat log. Reporting those
- * in the same bucket as `OBSERVED_STATE_MISSING`, which is an ordinary evidence
- * gap, would tell a reader to wait for a fix that is never coming.
+ * reader should expect the gap ever to close. `PREDICTIVE_STATE` is permanent by
+ * construction: no implementation removes it, because the information is not in
+ * a combat log. `TARGET_COUNT` stopped being permanent at ONB-S3: a count resolves
+ * as far as positive evidence proves it, and what evidence cannot prove stays
+ * here. Reporting either in the same bucket as `OBSERVED_STATE_MISSING`, an
+ * ordinary evidence gap, would misstate what a wider capture could close.
  *
  * NOTHING HERE EVALUATES PLAY. A decision's coverage says what the analyzer
  * could determine. It says nothing about whether the player was right.
@@ -70,9 +71,11 @@ export type DecisionBlockerClass =
    */
   | "DIVERGENT_WORLDS"
   /**
-   * The condition needs a target COUNT. Permanently unsupported: it counts the
-   * simulation's enemy roster, which is a sim configuration and not a fact
-   * Warcraft Logs records.
+   * The line reads a target COUNT, and the evidence did not settle it (ONB-S3).
+   * Not permanent: `active_enemies` binds as far as positive evidence proves it
+   * (`src/engine/game-state/enemies/enemy-set.ts`), and every count consistent
+   * with the evidence must agree before a condition resolves. Events alone prove
+   * no upper bound, so a question only an upper bound answers stays here.
    */
   | "TARGET_COUNT"
   /**
@@ -195,23 +198,22 @@ function classificationTextOf(step: TraversalStep | null): string | null {
 }
 
 /**
- * Atoms that can never be bound, keyed to the reason a reader needs.
+ * Atoms that name why a blocked line stayed open, keyed to the reason a reader needs.
  *
  * Matched against the blocking entry's VERBATIM authority line. That is
  * deliberate: the line is the authority's own text, so a pinned APL that stops
  * using one of these atoms stops producing the classification, rather than the
  * classification persisting as a stale opinion about a line that changed.
  */
-const PERMANENT_ATOM_MARKERS: readonly { readonly marker: string; readonly reason: DecisionBlockerClass }[] =
-  [
-    { marker: "spell_targets", reason: "TARGET_COUNT" },
-    { marker: "variable.single_target", reason: "TARGET_COUNT" },
-    { marker: "active_enemies", reason: "TARGET_COUNT" },
-    { marker: "fight_remains", reason: "PREDICTIVE_STATE" },
-    { marker: "time_to_die", reason: "PREDICTIVE_STATE" },
-    { marker: "cycle_targets", reason: "TARGETING_NOT_MODELLED" },
-    { marker: "target_if", reason: "TARGETING_NOT_MODELLED" },
-  ];
+const BLOCKING_ATOM_MARKERS: readonly { readonly marker: string; readonly reason: DecisionBlockerClass }[] = [
+  { marker: "spell_targets", reason: "TARGET_COUNT" },
+  { marker: "variable.single_target", reason: "TARGET_COUNT" },
+  { marker: "active_enemies", reason: "TARGET_COUNT" },
+  { marker: "fight_remains", reason: "PREDICTIVE_STATE" },
+  { marker: "time_to_die", reason: "PREDICTIVE_STATE" },
+  { marker: "cycle_targets", reason: "TARGETING_NOT_MODELLED" },
+  { marker: "target_if", reason: "TARGETING_NOT_MODELLED" },
+];
 
 function classifyBlocker(
   blocker: string,
@@ -229,7 +231,7 @@ function classifyBlocker(
     // The run entry's gate parsed and could not be decided (M11-B1); since
     // M11-D3-A its worlds were also explored and did not converge. Either way
     // the stop is the GATE, so it is read like an undecided player-action
-    // condition: a permanent atom on the line names the reason, otherwise it
+    // condition: a marked atom on the line names the reason, otherwise it
     // is state the evidence did not establish. Never DIVERGENT_WORLDS.
     return lineClass(blockingLine) ?? "OBSERVED_STATE_MISSING";
   }
@@ -244,7 +246,7 @@ function classifyBlocker(
 
 function lineClass(line: string | null): DecisionBlockerClass | null {
   if (line === null) return null;
-  for (const entry of PERMANENT_ATOM_MARKERS) {
+  for (const entry of BLOCKING_ATOM_MARKERS) {
     if (line.includes(entry.marker)) return entry.reason;
   }
   return null;

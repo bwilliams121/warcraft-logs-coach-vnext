@@ -30,6 +30,7 @@
  */
 
 import type { CombatState } from "../../../engine/state/combat-state.js";
+import { withEnemyCountAt } from "../../../findings/enemy-count-bindings.js";
 import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
 import type {
   AnalysisAuthorityMetadata,
@@ -473,7 +474,7 @@ export function analyzeObservedFrostDeathKnightDecisions(
 
     const outcome = frostDeathKnightFirstGcdSelectionAt({
       authority,
-      bindings,
+      bindings: withEnemyCountAt(bindings, state, actorId, position),
       buildFacts,
       observedAbilityGameId: abilityGameId,
     });

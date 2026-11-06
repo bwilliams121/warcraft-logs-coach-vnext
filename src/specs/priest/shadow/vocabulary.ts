@@ -9,7 +9,7 @@
  * NEVER GIVEN A VALUE BY THIS SLICE, and why:
  *
  *   active_enemies, spell_targets.vampiric_touch, active_dot.*
- *       the enemy set has no authority (ONB-S3)
+ *       active_enemies: the resolver leaves it to the analysis, which binds the shared enemy count per decision (ONB-S3); spell_targets: action-owned, unregistered
  *   insanity.deficit
  *       the wire carries Insanity (type 13) at a completion, and a cast-time spell generates it. A completion's reading is not its decision's,
  *       so nothing here reads it

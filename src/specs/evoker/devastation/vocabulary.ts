@@ -9,7 +9,7 @@
  * NEVER GIVEN A VALUE BY THIS SLICE, and why:
  *
  *   active_enemies, active_dot.*
- *       the enemy set has no authority (ONB-S3)
+ *       no action or enemy-set binding establishes it (ONB-S3)
  *   raid_event.*
  *       a simulation's scripted raid events; a real fight has no such schedule
  *   cooldown.*, gcd.*, action.*.usable_in, action.*.ready

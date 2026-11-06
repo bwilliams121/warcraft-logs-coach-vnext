@@ -9,7 +9,7 @@
  * NEVER GIVEN A VALUE BY THIS SLICE, and why:
  *
  *   spell_targets.shuriken_storm
- *       the enemy set has no authority (ONB-S3)
+ *       action-owned, and no action registers its target applicability (ONB-S3)
  *   cp_max_spend
  *       not reconstructed: it depends on talents and buffs this slice does not bind
  *   priority_rotation

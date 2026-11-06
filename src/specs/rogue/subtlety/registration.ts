@@ -123,7 +123,7 @@ export function subtletyObservedDecisionView(
 export const SUBTLETY_LIMITS = Object.freeze({
   analysis: [
     "Subtlety Rogue analysis compares observed global-cooldown decisions with pinned class/spec rotational authority,",
-    "when the necessary state can be established. Every decision first meets Stealth, an off-GCD action whose effect has no reviewed contract, and most of the list reads the enemy count, through variable.targets, which has no authority, so no decision currently resolves.",
+    "when the necessary state can be established. Every decision first meets Stealth, an off-GCD action whose effect has no reviewed contract, and most of the list reads the enemy count, through variable.targets, which no action registers yet, so no decision currently resolves.",
     "It does NOT evaluate defensive cooldowns, interrupts or survival, it does not score performance, and it does",
     "not read race, faction, gear use effects or consumables. It reconstructs no Energy and Combo Points between observations, no cooldown, no",
     "aura and no enemy count. UNKNOWN is expected here and is not a fault.",

@@ -9,6 +9,49 @@ hygiene and clarity items.
 
 ---
 
+## After ONB-S3: what the enemy-set model does not establish
+
+**An upper bound.** No event proves one, so `active_enemies=1`, `active_enemies<3` and any threshold
+above the proven lower bound stay UNKNOWN, on every single-target fight. The approved, deferred curated
+roster (Policy B, O3) is the only source on record. So a specialization whose first gate is a
+single-target dispatch stays UNKNOWN on single-target evidence, whatever else lands. ONB-S3R should
+expect this to be the common result, and a promotion that needs real MATCH on single-target decisions
+needs Policy B first. That is the owner's to schedule, and it is not queued.
+
+**Any target domain.** `targetDomainFor` has no production supplier. A specialization supplying one owns
+the per-target atoms and `target_ready`, and on real evidence can only state an OPEN domain:
+
+- A FIRST score over a declared `debuff.<name>.down` can prove a target chosen, which is Frost's
+  `reapers_mark` shape, once that needs positive per-target aura evidence. An `if=` beside it must be
+  player-scoped.
+- `debuff.<name>.up` has no binding seam in the evaluator and always enumerates, so a line using it
+  needs a declared atom or a new seam.
+
+**`spell_targets.<ability>`.** No action registers applicability, so Subtlety, Protection Warrior,
+Feral, Outlaw, Vengeance and the `spell_targets` lines of other lists stay UNKNOWN. A bare
+`spell_targets` (Feral, Outlaw, Balance) has no acting-action binding at all. Registering one needs range
+and geometry evidence, and none is on record.
+
+**PUBLIC analyzers.** Havoc and Retribution declare `active_enemies` and do not read the count, by the
+invariance rule. Wiring one is a measured change with its own entry. Assassination's `spell_targets`
+lines and `variable.single_target` are unchanged.
+
+**The subject's debuffs are the only carried presence.** Another player's debuff would admit more
+enemies, and it needs that player's aura coverage, which a PLAYER_CONTEXT capture does not hold. A
+specialization with no debuff of its own (Arms has one, a pure-physical rotation may not) has a lower
+bound only in the rare millisecond a health snapshot falls on its decision.
+
+**Identity is one actor catalog read.** An NPC a player damaged is treated as hostile. A friendly NPC a
+player can damage would be counted, and none is on record. Two actor ids for one unit would count twice,
+and none is on record: no NPC actor of the three replayed Arms subjects holds both a `null` and a numbered instance.
+
+**Blocker class reads the line's text.** `classifyBlocker` calls a line open on another atom
+`TARGET_COUNT` when the line also names a settled count. Only the internal coverage census reads it, for
+wired specializations. Reading the trace's bindings would attribute it exactly, and no decision depends
+on it yet.
+
+**`cycling_variable`** stays UNKNOWN (ONB-S2, Vengeance's `dung_pull_ttd`, Affliction's `min_agony`).
+
 ## Regression-corpus ledger: healer fixtures that did not fit (M12)
 
 **Raised:** M12-B (2026-10-31). Owner decision, the same day: the corpus

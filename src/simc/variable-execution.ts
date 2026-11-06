@@ -51,7 +51,7 @@
  * target list whenever the sim has more than one non-sleeping target
  * (variable.cpp:369-391, action.cpp:1729-1770), with `target` bound to each in
  * turn — so both the number of executions and every per-target value depend on
- * the enemy set, which no authority here establishes (TARGET_COUNT, ONB-S3).
+ * the enemy set, which no real evidence closes (ONB-S3).
  *
  * `line_cd=` IS supported, and as nothing (M11-D3-C3): a variable line's
  * timer is never started. `variable_t::execute` runs inline in

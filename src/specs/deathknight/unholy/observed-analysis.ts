@@ -33,6 +33,7 @@
  */
 
 import type { CombatState } from "../../../engine/state/combat-state.js";
+import { withEnemyCountAt } from "../../../findings/enemy-count-bindings.js";
 import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
 import type {
   AnalysisAuthorityMetadata,
@@ -481,7 +482,7 @@ export function analyzeObservedUnholyDeathKnightDecisions(
 
     const outcome = unholyDeathKnightFirstGcdSelectionAt({
       authority,
-      bindings,
+      bindings: withEnemyCountAt(bindings, state, actorId, position),
       buildFacts,
       observedAbilityGameId: abilityGameId,
     });

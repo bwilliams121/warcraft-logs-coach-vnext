@@ -207,7 +207,7 @@ export function stoppingAtomsOf(step: TraversalStep, blocker: string): readonly 
         (atom) =>
           atom.binding === "UNRESOLVED_BOOLEAN" ||
           atom.binding === "UNKNOWN_NUMBER" ||
-          (atom.binding === "ONE_OF" && gate.truth === "UNKNOWN_STATE"),
+          ((atom.binding === "ONE_OF" || atom.binding === "BOUNDED") && gate.truth === "UNKNOWN_STATE"),
       )
       .map((atom) => atom.key);
     if (unresolved.length > 0) return unresolved;

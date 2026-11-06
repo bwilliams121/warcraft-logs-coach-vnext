@@ -107,6 +107,18 @@ export type TargetIndependentElimination =
       readonly conjunctAtomKeys: readonly string[];
       /** The conjunct's own evaluation, so a reader can check the world table. */
       readonly trace: ExpressionTrace;
+      /**
+       * Set when the proof read a target domain or the `target_if` score rather than an `if=`
+       * conjunct (ONB-S3). `conjunctIndex` and `trace` then describe the expression it names.
+       */
+      readonly overTargets?: {
+        readonly basis:
+          | "SCORE_PLAYER_CONJUNCT_FALSE"
+          | "SCORE_ZERO_ON_EVERY_CANDIDATE"
+          | "CONDITION_FALSE_ON_EVERY_CANDIDATE";
+        /** The candidates read, or empty when the proof needed none. */
+        readonly candidateKeys: readonly string[];
+      };
     }
   | { readonly kind: "NOT_PROVEN"; readonly failure: TargetIndependenceFailure };
 

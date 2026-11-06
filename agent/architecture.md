@@ -7552,8 +7552,8 @@ Semantic targets and rules:
   authority profile that have arisen and not demised at decision D."
   Invulnerability does not remove a unit. Harmful-target readiness for
   `target_if` is a separate domain. `active_enemies` is never described as
-  attackable, targetable, observed NPCs, WCL enemyNPCs or targets hit. Not
-  implemented.
+  attackable, targetable, observed NPCs, WCL enemyNPCs or targets hit.
+  Implemented as a positive-evidence lower bound at ONB-S3.
 - **WCL enemy classification (N2).** `WCL_ENEMY_NPC_CLASSIFIED` /
   `WCL_ENEMY_PET_CLASSIFIED` are whole-fight participation metadata. They are
   post-hoc only: M11-G labels, Policy B drift checks, roster research. They are
@@ -12112,6 +12112,90 @@ ONB-S3 succeeds when:
 - the affected INTERNAL_ONLY specs can be replayed to find their next real
   blocker;
 - no specialization is promoted solely because the capability exists.
+
+## ONB-S3 — enemy-set and target-count model, as built
+
+Autopilot queue entry ONB-S3, implementing the owner decision above. Internal shared engine and
+INTERNAL_ONLY wiring only: no public contract change, no specialization promoted, no Warcraft Logs
+request.
+
+**Where.**
+
+- `src/engine/game-state/enemies/enemy-set.ts`: `enemySetAt`, gameplay-neutral.
+- `src/simc/expression/enemy-count.ts`: counts as `NumericBinding`s. It imports nothing from the
+  engine, so the count shape is mirrored structurally.
+- `src/simc/target-if.ts`: the target-domain rule, through the optional
+  `AtomBindings.targetDomainFor`.
+- `src/findings/enemy-count-bindings.ts`: the one call a specialization adds.
+
+**Membership.** An instance is a member at D only with both of these, read at or before D:
+
+- **Hostile identity.** It is an NPC in the actor catalog, and a friendly player or that player's
+  pet was observed damaging that exact instance. This says what it is, not that it is still there.
+  `WCL_ENEMY_NPC_CLASSIFIED` is not read (N2).
+- **Presence at D.** Either the subject's own debuff is ACTIVE on it by `presenceAt`, or a damage
+  event in D's own millisecond carries that instance's target-side health above zero.
+
+Any death event in the resolved prefix for the key, or for a key that may be the same unit (a `null`
+instance beside a numbered one of the actor), leaves it out of the proof. It is read from the
+prefix rather than through `deathStateAt`, which reads by report time and would admit an event after
+the boundary in the same millisecond. A `null` instance counts only when its actor has no numbered
+member, because the two may be one unit.
+
+**Why a carried debuff is trusted.** Measured offline on the retained whole-fight capture
+b1PmaKrd6CDfzngc fight 48, which has 133 NPC deaths and the eleven instances that vanished with no
+death event (see `death-state.ts`): 1,880 of 1,882 player debuff tracks on NPC instances end in an
+observed removal, and the other two are on the boss at the end of the capture, so no instance that
+vanished keeps a debuff. Replaying three Arms
+subjects, 1,985 member readings had 0 cases where the instance then went silent for more than 30 s.
+That check is post-hoc, and no future event is ever authority.
+
+**No upper bound comes from events.** An enemy nobody touched leaves no event, and absence proves
+nothing. So on real evidence today a count is BOUNDED below or UNKNOWN. `enemySetAt` accepts an upper
+bound only with explicit provenance, which the deferred curated roster (Policy B, O3) would supply.
+No production caller passes one. Consequences that must not be read as a defect:
+
+- `active_enemies=1`, `active_enemies<3` and `active_enemies>=3` with a smaller lower bound stay
+  UNKNOWN, on every single-target fight. Only a proven lower bound decides anything.
+- No target domain is CLOSED on real evidence, so a target-dependent `if=` and a FIRST line that
+  needs every enemy scored stay UNKNOWN.
+
+**The evaluator did not change.** A count is a whole number, so a two-sided range binds as the
+existing `ONE_OF_NUMBERS` and a lower bound as `BOUNDED_NUMBER`. Both decide a comparison only when
+every consistent value agrees.
+
+**`spell_targets.<ability>`** binds only through an `ActionTargetApplicability` the action's owner
+registers with provenance. None is registered in production, so every one stays UNKNOWN, and binding
+`active_enemies` never binds it.
+
+**`target_if`.** No candidate order is read, so reversing a domain cannot change a verdict. A line
+resolves only when every target world agrees. FIRST needs a truth-valued score to prove a target is
+chosen, because one candidate needs `> 0` and several need `!= 0`. MIN/MAX needs a finite score and
+a candidate proven ready, because a finite score proves nothing about targeting or range. A FIRST score with a FALSE
+player-only conjunct is eliminated with no domain at all. No production specialization supplies a
+domain yet, so this rule's real effect today is that elimination alone. No PUBLIC list has a FIRST
+line.
+
+**`cycling_variable`** stays UNKNOWN. It needs a value per enemy over every enemy, which no real
+evidence closes. `cycle_targets` keeps its M5-D1 conjunct rule.
+
+**Invariance.** Seventeen INTERNAL_ONLY specializations that declare `active_enemies` now read the
+count at the decision, through `withEnemyCountAt`. A cast-time decision reads it at the begin, and one
+with no established position reads none. No PUBLIC analyzer calls it, including Havoc and Retribution,
+which declare the atom, so public output is unchanged by construction (pinned by
+`tests/unit/onb-s3-enemy-set.test.ts`). The specializations whose lists read only `spell_targets`
+(Subtlety, Protection Warrior, Feral, Outlaw, Vengeance) gain nothing until an action registers.
+
+**What the replay showed.** Three retained Arms subjects: all 892 eligible decisions stay UNKNOWN, 0
+MATCH and 0 REJECTED, and no finding appears. On b1PmaKrd6CDfzngc fight 48 the lower bound reaches 10
+(53 of 549 casts at 3 or more; 146 at 2). There, 37 of 324 decisions now pass the `default[17]`
+dispatch and stop instead at `default[0] charge`, which has no transition contract. The whole-fight
+single-target subjects of gtKb fight 22 hold a bound of 1 and stay at `default[17]`. Replaying the
+rest and recording each next blocker is ONB-S3R.
+
+**Blocker class.** `TARGET_COUNT` is no longer described as permanent. It still names a line that
+reads a count and stayed open, by its verbatim text, so a line open on another atom beside a settled
+count is still counted there (agent/follow-ups.md "After ONB-S3").
 
 ## ONB-S4 — Shared cast and channel decision anchor
 
