@@ -105,6 +105,9 @@ const EVERY_ANALYZER = [
   "warlock-demonology-observed-decisions",
   "deathknight-unholy-observed-decisions",
   "monk-windwalker-observed-decisions",
+  "druid-guardian-observed-decisions",
+  "hunter-beast_mastery-observed-decisions",
+  "hunter-survival-observed-decisions",
   "rogue-outlaw-observed-decisions",
   // HEAL-B3: Discipline Priest INTERNAL_ONLY.
   "priest-discipline-healer-findings",

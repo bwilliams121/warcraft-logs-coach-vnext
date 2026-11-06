@@ -117,6 +117,9 @@ describe("the known specialization ids are exactly partitioned", () => {
       "warlock/demonology",
       "deathknight/unholy",
       "monk/windwalker",
+      "druid/guardian",
+      "hunter/beast_mastery",
+      "hunter/survival",
     ]);
     for (const id of INTERNAL_ONLY_SPEC_IDS) {
       expect(isSpecId(id), id).toBe(true);
@@ -130,7 +133,7 @@ describe("the known specialization ids are exactly partitioned", () => {
     expect(isSpecId("evoker/augmentation")).toBe(true);
     expect(requirePublicSpecId("evoker/augmentation")).toBe("evoker/augmentation");
     // The narrowing boundary still refuses a name that is no specialization at all.
-    expect(() => requirePublicSpecId("hunter/beast_mastery" as never)).toThrow(InternalSpecExposureError);
+    expect(() => requirePublicSpecId("hunter/beast_mastery")).toThrow(InternalSpecExposureError);
     for (const id of PUBLIC_SPEC_IDS) expect(isPublicSpecId(id), id).toBe(true);
     expect(requirePublicSpecId("monk/brewmaster")).toBe("monk/brewmaster");
   });
@@ -139,14 +142,14 @@ describe("the known specialization ids are exactly partitioned", () => {
     for (const value of [
       "",
       "paladin",
-      "hunter/survival",
+      "hunter/not_a_spec",
       "Rogue/Assassination",
       "Paladin/Protection",
       "Paladin/Retribution",
       "Paladin/Holy",
       "Monk/Mistweaver",
       "Monk/Brewmaster",
-      "hunter/beast_mastery",
+      "hunter/beastmastery",
       "constructor",
     ]) {
       expect(isSpecId(value), value).toBe(false);

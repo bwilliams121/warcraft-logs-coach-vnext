@@ -117,11 +117,14 @@ describe("the sweep has something to sweep", () => {
       "src/specs/demonhunter/vengeance",
       "src/specs/druid/balance",
       "src/specs/druid/feral",
+      "src/specs/druid/guardian",
       "src/specs/druid/restoration",
       "src/specs/evoker/augmentation",
       "src/specs/evoker/devastation",
       "src/specs/evoker/preservation",
+      "src/specs/hunter/beast_mastery",
       "src/specs/hunter/marksmanship",
+      "src/specs/hunter/survival",
       "src/specs/mage/arcane",
       "src/specs/mage/fire",
       "src/specs/mage/frost",
@@ -178,6 +181,9 @@ describe("the sweep has something to sweep", () => {
     expect(existsSync("src/specs/warlock/demonology/registration.ts")).toBe(true);
     expect(existsSync("src/specs/deathknight/unholy/registration.ts")).toBe(true);
     expect(existsSync("src/specs/monk/windwalker/registration.ts")).toBe(true);
+    expect(existsSync("src/specs/druid/guardian/registration.ts")).toBe(true);
+    expect(existsSync("src/specs/hunter/beast_mastery/registration.ts")).toBe(true);
+    expect(existsSync("src/specs/hunter/survival/registration.ts")).toBe(true);
     expect(existsSync("src/specs/rogue/outlaw/registration.ts")).toBe(true);
     expect(existsSync("src/specs/shaman/enhancement/registration.ts")).toBe(true);
     expect(existsSync("src/specs/paladin/retribution/registration.ts")).toBe(true);
@@ -253,11 +259,14 @@ describe("shared code reaches specializations only through the registration boun
       "src/specs/demonhunter/vengeance/registration.js",
       "src/specs/druid/balance/registration.js",
       "src/specs/druid/feral/registration.js",
+      "src/specs/druid/guardian/registration.js",
       "src/specs/druid/restoration/registration.js",
       "src/specs/evoker/augmentation/registration.js",
       "src/specs/evoker/devastation/registration.js",
       "src/specs/evoker/preservation/registration.js",
+      "src/specs/hunter/beast_mastery/registration.js",
       "src/specs/hunter/marksmanship/registration.js",
+      "src/specs/hunter/survival/registration.js",
       "src/specs/mage/arcane/registration.js",
       "src/specs/mage/fire/registration.js",
       "src/specs/mage/frost/registration.js",

@@ -11,11 +11,12 @@
  *      fight's `friendlySpecs` index, never from the fixture itself.
  *   2. UNSUPPORTED TODAY. `resolveSpecIdentity` refuses it as
  *      UNSUPPORTED_SPECIALIZATION; the identity table, the public partition
- *      and the pinned roster agree it is a real specialization that this
- *      build has no name for.
- *   3. MIGRATION GUARD. The fixture's `observedSpecId` is not a `SpecId` —
- *      not public, not internal-only. The day a milestone adds it in either
- *      exposure, this test fails and names the fixture as what to migrate.
+ *      and the pinned roster agree it is a real specialization that no public
+ *      request can reach.
+ *   3. MIGRATION GUARD. Its roster key is not PUBLIC, and its observed string is
+ *      no `SpecId` at all. The day a milestone promotes it, this test fails and
+ *      names the fixture as what to migrate. Since ONB-T2 every roster row is
+ *      registered, so the row is INTERNAL_ONLY rather than absent.
  *   4. CORPUS AGREEMENT. The manifest cases that pin the subject by
  *      coordinates (they are declarative JSON and cannot import a module)
  *      carry the same actor, class and spec as the fixture.
@@ -23,8 +24,19 @@
 
 import { describe, expect, it } from "vitest";
 
-import { INTERNAL_ONLY_SPEC_IDS, isSpecId, PUBLIC_SPEC_IDS, SPEC_IDS } from "../../src/findings/spec-id.js";
-import { rosterSpecialization } from "../../src/data/game/spec-roster.js";
+import {
+  INTERNAL_ONLY_SPEC_IDS,
+  isSpecId,
+  PUBLIC_SPEC_IDS,
+  SPEC_IDS,
+  type SpecId,
+} from "../../src/findings/spec-id.js";
+import { pinnedSpecRoster, rosterSpecialization } from "../../src/data/game/spec-roster.js";
+import {
+  analyzerForSpec,
+  internalAnalyzerForSpec,
+  PRODUCTION_CATALOG,
+} from "../../src/services/analyzer-registry.js";
 import { resolveSpecIdentity, SUPPORTED_SPEC_IDENTITIES } from "../../src/services/spec-identity.js";
 import { committedArtifactText, committedManifest } from "../support/corpus/artifacts.js";
 import {
@@ -104,17 +116,29 @@ describe("the current unsupported subject is unsupported everywhere production d
     expect(Object.keys(SUPPORTED_SPEC_IDENTITIES)).not.toContain(CURRENT_UNSUPPORTED_SUBJECT.observedSpecId);
   });
 
-  it("MIGRATION GUARD: its spec is not a SpecId in any exposure — migrate the fixture before adding it", () => {
-    for (const observed of [
-      CURRENT_UNSUPPORTED_SUBJECT.observedSpecId,
-      CURRENT_UNSUPPORTED_SUBJECT.rosterKey,
-    ]) {
-      const where = `${observed} is now a SpecId; tests/support/unsupported-subject.ts must be migrated to a specialization outside SPEC_IDS before this id can exist`;
-      expect(isSpecId(observed), where).toBe(false);
-      expect([...SPEC_IDS] as readonly string[], where).not.toContain(observed);
-      expect([...PUBLIC_SPEC_IDS] as readonly string[], where).not.toContain(observed);
-      expect([...INTERNAL_ONLY_SPEC_IDS] as readonly string[], where).not.toContain(observed);
-    }
+  it("MIGRATION GUARD: its spec is not PUBLIC — migrate the fixture before promoting it", () => {
+    const observed = CURRENT_UNSUPPORTED_SUBJECT.observedSpecId;
+    const key = CURRENT_UNSUPPORTED_SUBJECT.rosterKey;
+    const where = `${key} is now PUBLIC; tests/support/unsupported-subject.ts must be migrated to a specialization outside PUBLIC_SPEC_IDS first`;
+    expect([...PUBLIC_SPEC_IDS] as readonly string[], where).not.toContain(key);
+    expect([...PUBLIC_SPEC_IDS] as readonly string[], where).not.toContain(observed);
+    expect([...INTERNAL_ONLY_SPEC_IDS] as readonly string[]).toContain(key);
+    // The string the service reports is the wire's pair, which names no SpecId in any exposure.
+    expect(isSpecId(observed)).toBe(false);
+    expect([...SPEC_IDS] as readonly string[]).not.toContain(observed);
+  });
+
+  it("no public lookup reaches it, though the internal lookup does", () => {
+    const key = CURRENT_UNSUPPORTED_SUBJECT.rosterKey as SpecId;
+    expect(analyzerForSpec(key, PRODUCTION_CATALOG)).toBeNull();
+    expect(internalAnalyzerForSpec(key, PRODUCTION_CATALOG)?.exposure).toBe("INTERNAL_ONLY");
+  });
+
+  it("ONB-T2: every roster row is registered, so a real subject can only be publicly unsupported", () => {
+    const loaded = pinnedSpecRoster();
+    if (!loaded.ok) throw new Error(loaded.reason);
+    const known: readonly string[] = SPEC_IDS;
+    expect(loaded.specializations.filter((row) => !known.includes(row.rosterKey))).toEqual([]);
   });
 
   it("is scoped to the onboarding programme and says so", () => {

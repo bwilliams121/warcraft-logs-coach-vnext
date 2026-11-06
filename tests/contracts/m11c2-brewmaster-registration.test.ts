@@ -161,6 +161,9 @@ describe("identity and partition", () => {
       "warlock/demonology",
       "deathknight/unholy",
       "monk/windwalker",
+      "druid/guardian",
+      "hunter/beast_mastery",
+      "hunter/survival",
     ]);
     expect([...PUBLIC_SPEC_IDS]).toEqual(NINE_PUBLIC);
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("monk/brewmaster");
@@ -186,8 +189,9 @@ describe("identity and partition", () => {
     expect(BREWMASTER_MONK_MODULE.supplementalAnalyses).toEqual([]);
   });
 
-  it("Hunter/BeastMastery is still unsupported: it is not a SpecId and the identity table does not resolve it", () => {
-    expect(isSpecId("hunter/beast_mastery")).toBe(false);
+  it("Hunter/BeastMastery is still publicly unsupported: it is INTERNAL_ONLY, and the identity table does not resolve it", () => {
+    expect(isSpecId("hunter/beast_mastery")).toBe(true);
+    expect(isPublicSpecId("hunter/beast_mastery")).toBe(false);
     expect(resolveSpecIdentity({ className: "Hunter", specName: "BeastMastery" })).toMatchObject({
       ok: false,
       reason: "UNSUPPORTED_SPECIALIZATION",

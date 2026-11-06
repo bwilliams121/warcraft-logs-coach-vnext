@@ -237,6 +237,9 @@ describe("cross-spec authority access is refused structurally", () => {
       ["warlock/demonology", ["SIMC_APL_WARLOCK_DEMONOLOGY"]],
       ["deathknight/unholy", ["SIMC_APL_DEATHKNIGHT_UNHOLY"]],
       ["monk/windwalker", ["SIMC_APL_MONK_WINDWALKER"]],
+      ["druid/guardian", ["SIMC_APL_DRUID_GUARDIAN"]],
+      ["hunter/beast_mastery", ["SIMC_APL_HUNTER_BEAST_MASTERY"]],
+      ["hunter/survival", ["SIMC_APL_HUNTER_SURVIVAL"]],
     ]);
   });
 });

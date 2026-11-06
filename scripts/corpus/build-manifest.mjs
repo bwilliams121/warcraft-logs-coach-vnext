@@ -7657,6 +7657,120 @@ const BREWMASTER_CASES = [
     "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Windwalker Monk list.",
     { related: ["tests/unit/specs/onb-t1-windwalker-monk.test.ts"] },
   ),
+  // ---- SPEC_GUARDIAN_DRUID (ONB-T2, INTERNAL_ONLY) ---
+  kase(
+    "application-service.guardian-druid-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Guardian Druid registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "druid/guardian",
+        expected: {
+          internalAnalyzerId: "druid-guardian-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    'Guardian Druid is registered INTERNAL_ONLY in ONB-T2, a Cohort T follower, a tank whose mitigation stays out of the offensive authority. No decision of it resolves, and no retained subject of it exists, so it is on ONB-EV (agent/follow-ups.md "After ONB-T2").',
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-guardian-druid.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_GUARDIAN_DRUID",
+    "src/specs/druid/guardian/observed-analysis.ts analyzeObservedGuardianDruidDecisions (the spec gate)",
+    "The Guardian Druid facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_GUARDIAN_DRUID.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Guardian Druid list.",
+    { related: ["tests/unit/specs/onb-t2-guardian-druid.test.ts"] },
+  ),
+  // ---- SPEC_BEAST_MASTERY_HUNTER (ONB-T2, INTERNAL_ONLY) ---
+  kase(
+    "application-service.beast-mastery-hunter-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Beast Mastery Hunter registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "hunter/beast_mastery",
+        expected: {
+          internalAnalyzerId: "hunter-beast_mastery-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    'Beast Mastery Hunter is registered INTERNAL_ONLY in ONB-T2, a Cohort T follower. No decision of it resolves, and its retained subjects are uncommitted (agent/follow-ups.md "After ONB-T2").',
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-beast-mastery-hunter.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_BEAST_MASTERY_HUNTER",
+    "src/specs/hunter/beast_mastery/observed-analysis.ts analyzeObservedBeastMasteryHunterDecisions (the spec gate)",
+    "The Beast Mastery Hunter facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_BEAST_MASTERY_HUNTER.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Beast Mastery Hunter list.",
+    { related: ["tests/unit/specs/onb-t2-beast-mastery-hunter.test.ts"] },
+  ),
+  // ---- SPEC_SURVIVAL_HUNTER (ONB-T2, INTERNAL_ONLY) ---
+  kase(
+    "application-service.survival-hunter-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Survival Hunter registration for the INTERNAL lookup only, INTERNAL_ONLY; the public lookup and the identity table refuse it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "hunter/survival",
+        expected: {
+          internalAnalyzerId: "hunter-survival-observed-decisions",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    'Survival Hunter is registered INTERNAL_ONLY in ONB-T2, a Cohort T follower. No decision of it resolves, and no retained capture holds one of its events, so it is on ONB-EV (agent/follow-ups.md "After ONB-T2").',
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-survival-hunter.the-facade-refuses-every-other-specialization",
+    PP,
+    "SPEC_SURVIVAL_HUNTER",
+    "src/specs/hunter/survival/observed-analysis.ts analyzeObservedSurvivalHunterDecisions (the spec gate)",
+    "The Survival Hunter facade refuses an id that is not its own with SPEC_NOT_SUPPORTED, before any of its rules or its authority is read.",
+    [a("SPEC_SURVIVAL_HUNTER.SPEC_GATE", { actorId: 7, specId: "paladin/protection" })],
+    ["OWNED_CONTRACT"],
+    "A spec gate is the first thing a shared caller could get wrong, and it must fail closed rather than judge a Paladin against the Survival Hunter list.",
+    { related: ["tests/unit/specs/onb-t2-survival-hunter.test.ts"] },
+  ),
   // ---- SPEC_OUTLAW_ROGUE (ONB-C2, INTERNAL_ONLY) ---
   kase(
     "application-service.outlaw-rogue-registration-is-internal-only",

@@ -1902,11 +1902,13 @@ Settle the follow-up "Whole-line blocker classification for refused
 ### ONB-T1P: Windwalker Monk (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-T1
 branch: autopilot/onb-t1p
 wcl: NONE
 publicContract: EXPECTED
+pr: 91
+mergeSha: 49dfccf27371a099da903ef2bfc611baad2e3880
 ```
 
 **Outcome.** It does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Its one retained subject, Shado-Pan, replayed offline, gives 239 decisions, 0 MATCH, 0 REJECTED, all UNKNOWN, output identical to ONB-T1's apart from a wall-clock field. A census of 5,989 retained files finds no other subject: gBMC fight 33 actor 1 holds combatant info and one Roll in a diagnostic sample, and every other hit with a mapped source is a Mistweaver's or a Brewmaster's. Evidence is not its first gap, so it is not on ONB-EV, and ONB-S3 alone moves nothing. A promotion after its own inputs, first the swing's entry and the lines behind it, is a new public entry through the unchanged gates (agent/architecture.md "ONB-T1P"; agent/follow-ups.md "After ONB-T1").
@@ -1914,8 +1916,9 @@ publicContract: EXPECTED
 ### ONB-T2: Guardian Druid, Beast Mastery Hunter and Survival Hunter (internal, Cohort T)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-T1, ONB-S6
+branch: autopilot/onb-t2
 wcl: NONE
 publicContract: NONE
 ```
@@ -1928,6 +1931,8 @@ publicContract: NONE
 - Survival's `retarget` and `fight_style.dungeonroute` gate stay UNKNOWN
   where unsupported. It has no retained evidence, so it is recorded for
   ONB-EV if needed.
+
+**Outcome.** All three are registered INTERNAL_ONLY, the last unregistered rows of the roster, and no decision of any of them resolves. Beast Mastery's four retained subjects, all Pack Leader, give 707 eligible decisions, all UNKNOWN, every scan stopping at `default[0] retarget`. Guardian and Survival have no retained subject, so both are on ONB-EV: on synthetic builds Guardian stops at Heart of the Wild's unresolved talent and Survival at `retarget`. Beast Mastery builds no pet state, because its list reads no pet atom, and `barbed-shot-charge-capping` stays a recorded question. The unsupported subject stays actor 20, publicly unsupported, because no real identity is outside every `SpecId` any more (agent/architecture.md "ONB-T2"; agent/follow-ups.md "After ONB-T2").
 
 ### ONB-T2P: Guardian Druid, Beast Mastery Hunter and Survival Hunter (public)
 

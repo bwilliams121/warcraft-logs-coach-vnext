@@ -2983,6 +2983,412 @@ const WARLOCK_DESTRUCTION_TARGET = {
 };
 
 /**
+ * The Guardian Druid profile (ONB-T2): the talents the pinned list reads as `talent.<name>`, and the talents an action of
+ * that list is built on (an action on `not_found()` is background, action.cpp:541-549). The list reads no `hero_tree.*`, so a
+ * resolved tree only proves the other tree's talents not taken.
+ */
+const DRUID_GUARDIAN_TARGET = {
+  datasetId: "SIMC_TRAIT_DRUID_GUARDIAN_TALENTS",
+  classId: 11,
+  specId: 104,
+  defaultOut: "src/data/game/druid-guardian-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node, as every earlier target recorded." +
+    ' No retained Guardian Druid subject has an event beyond a two-second diagnostic sample of gBMCKxyY7dQDRZav fight 33 actor 91, so these keys rest on that one combatant-info row and the pinned table (agent/architecture.md "ONB-T2").',
+  requiredTalents: [
+    {
+      simcName: "berserk_bear",
+      displayNameEn: "Berserk",
+      tree: "SPECIALIZATION",
+      binding:
+        "sc_druid.cpp:5253 p->talent.incarnation_bear.ok() ? spell_data_t::not_found() : p->talent.berserk_bear ); the pinned list reads it or an action of the list is built on it",
+    },
+    {
+      simcName: "bristling_fur",
+      displayNameEn: "Bristling Fur",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:5284 DRUID_ABILITY( bristling_fur_t, bear_attack_t, "bristling_fur", p->talent.bristling_fur ); the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "convoke_the_spirits",
+      displayNameEn: "Convoke the Spirits",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:9256 DRUID_ABILITY( convoke_the_spirits_t, base_t, "convoke_the_spirits", p->talent.convoke_the_spirits ),; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "flashing_claws",
+      displayNameEn: "Flashing Claws",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10494 talent.flashing_claws = ST( "Flashing Claws" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "fluid_form",
+      displayNameEn: "Fluid Form",
+      tree: "CLASS",
+      binding:
+        'sc_druid.cpp:10326 talent.fluid_form = CT( "Fluid Form" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "fount_of_strength",
+      displayNameEn: "Fount of Strength",
+      tree: "HERO",
+      binding:
+        'sc_druid.cpp:10598 talent.fount_of_strength = HT( "Fount of Strength" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "heart_of_the_wild",
+      displayNameEn: "Heart of the Wild",
+      tree: "CLASS",
+      binding:
+        'sc_druid.cpp:9134 DRUID_ABILITY( heart_of_the_wild_t, druid_spell_t, "heart_of_the_wild", p->talent.heart_of_the_wild ); the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "incarnation_bear",
+      displayNameEn: "Incarnation: Guardian of Ursoc",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:5264 DRUID_ABILITY( incarnation_bear_t, berserk_bear_base_t, "incarnation_guardian_of_ursoc", p->talent.incarnation_bear ); the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "ironfur",
+      displayNameEn: "Ironfur",
+      tree: "CLASS",
+      binding:
+        'sc_druid.cpp:5332 DRUID_ABILITY( ironfur_t, base_t, "ironfur", p->talent.ironfur ),; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "killing_blow",
+      displayNameEn: "Killing Blow",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10506 talent.killing_blow = ST( "Killing Blow" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "lunar_beam",
+      displayNameEn: "Lunar Beam",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:5393 DRUID_ABILITY( lunar_beam_t, druid_spell_t, "lunar_beam", p->talent.lunar_beam ); the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "lunar_calling",
+      displayNameEn: "Lunar Calling",
+      tree: "HERO",
+      binding:
+        'sc_druid.cpp:10658 talent.lunar_calling = HT( "Lunar Calling" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "lunation",
+      displayNameEn: "Lunation",
+      tree: "HERO",
+      binding:
+        'sc_druid.cpp:10660 talent.lunation = HT( "Lunation" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "maul",
+      displayNameEn: "Maul",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:5804 DRUID_ABILITY( maul_t, base_t, "maul", p->talent.maul ); the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "moonkin_form",
+      displayNameEn: "Moonkin Form",
+      tree: "CLASS",
+      traitEntryId: 103286,
+      binding:
+        'sc_druid.cpp:10352 talent.moonkin_form = CT( "Moonkin Form" ); the class-wide row, which find_talent_spell takes over the row scoped to Feral and Guardian (trait_data.cpp:107-113); the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "rake",
+      displayNameEn: "Rake",
+      tree: "CLASS",
+      binding:
+        'sc_druid.cpp:4551 DRUID_ABILITY( rake_t, base_t, "rake", p->talent.rake ); the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "ravage",
+      displayNameEn: "Ravage",
+      tree: "HERO",
+      binding:
+        'sc_druid.cpp:10602 talent.ravage = HT( "Ravage" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "raze",
+      displayNameEn: "Raze",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:5863 DRUID_ABILITY( raze_t, base_t, "raze", p->talent.raze ); the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "red_moon",
+      displayNameEn: "Red Moon",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:8002 DRUID_ABILITY( red_moon_t, druid_spell_t, "red_moon", p->talent.red_moon ); the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "rip",
+      displayNameEn: "Rip",
+      tree: "CLASS",
+      binding:
+        'sc_druid.cpp:4656 DRUID_ABILITY( rip_t, base_t, "rip", p->talent.rip ),; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "soul_of_the_forest",
+      displayNameEn: "Soul of the Forest",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:10519 talent.soul_of_the_forest_bear = ST( "Soul of the Forest", DRUID_GUARDIAN );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "sundering_roar",
+      displayNameEn: "Sundering Roar",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_druid.cpp:5879 DRUID_ABILITY( sundering_roar_t, bear_attack_t, "sundering_roar", p->talent.sundering_roar ); the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "swipe",
+      displayNameEn: "Swipe",
+      tree: "CLASS",
+      binding:
+        'sc_druid.cpp:8033 : druid_spell_t( "swipe", p, p->talent.swipe ),; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "wildpower_surge",
+      displayNameEn: "Wildpower Surge",
+      tree: "HERO",
+      binding:
+        'sc_druid.cpp:10607 talent.wildpower_surge = HT( "Wildpower Surge" );; the pinned list reads it or an action of the list is built on it',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data`, class 11.
+    { simcName: "druid_of_the_claw", subTreeId: 21 },
+    { simcName: "elunes_chosen", subTreeId: 24 },
+  ],
+};
+
+/**
+ * The Beast Mastery Hunter profile (ONB-T2): the talents the pinned list reads as `talent.<name>`, and the talents an action of
+ * that list is built on (an action on `not_found()` is background, action.cpp:541-549). The list reads no `hero_tree.*`, so a
+ * resolved tree only proves the other tree's talents not taken.
+ */
+const HUNTER_BEAST_MASTERY_TARGET = {
+  datasetId: "SIMC_TRAIT_HUNTER_BEAST_MASTERY_TALENTS",
+  classId: 3,
+  specId: 253,
+  defaultOut: "src/data/game/hunter-beast_mastery-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node, as every earlier target recorded." +
+    ' Corroborated for Beast Mastery Hunter on four retained subjects, whose observed trees resolve a hero tree and the pinned list\'s talents by these keys (agent/architecture.md "ONB-T2").',
+  requiredTalents: [
+    {
+      simcName: "barbed_shot",
+      displayNameEn: "Barbed Shot",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:5119 : barbed_shot_base_t( p, "barbed_shot", p->talents.barbed_shot ); the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "beast_cleave",
+      displayNameEn: "Beast Cleave",
+      tree: "SPECIALIZATION",
+      binding:
+        "sc_hunter.cpp:1724 -> set_default_value( o()->talents.beast_cleave.ok() ? o() -> talents.beast_cleave -> effectN( 1 ).percent() : 1.0 );; the pinned list reads it or an action of the list is built on it",
+    },
+    {
+      simcName: "bestial_wrath",
+      displayNameEn: "Bestial Wrath",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7684 talents.bestial_wrath = find_talent_spell( talent_tree::SPECIALIZATION, "Bestial Wrath", HUNTER_BEAST_MASTERY );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "black_arrow",
+      displayNameEn: "Black Arrow",
+      tree: "HERO",
+      binding:
+        'sc_hunter.cpp:7909 talents.black_arrow = find_talent_spell( talent_tree::HERO, "Black Arrow" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "bloody_frenzy",
+      displayNameEn: "Bloody Frenzy",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7729 talents.bloody_frenzy = find_talent_spell( talent_tree::SPECIALIZATION, "Bloody Frenzy", HUNTER_BEAST_MASTERY );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "cobra_shot",
+      displayNameEn: "Cobra Shot",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7685 talents.cobra_shot = find_talent_spell( talent_tree::SPECIALIZATION, "Cobra Shot", HUNTER_BEAST_MASTERY );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "jagged_wounds",
+      displayNameEn: "Jagged Wounds",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7707 talents.jagged_wounds = find_talent_spell( talent_tree::SPECIALIZATION, "Jagged Wounds", HUNTER_BEAST_MASTERY );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "kill_command",
+      displayNameEn: "Kill Command",
+      tree: "SPECIALIZATION",
+      binding:
+        "sc_hunter.cpp:7588 return new kill_command_t( this, options_str, talents.kill_command_bm_player );; the pinned list reads it or an action of the list is built on it",
+    },
+    {
+      simcName: "killer_cobra",
+      displayNameEn: "Killer Cobra",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7723 talents.killer_cobra = find_talent_spell( talent_tree::SPECIALIZATION, "Killer Cobra", HUNTER_BEAST_MASTERY );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "master_handler",
+      displayNameEn: "Master Handler",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7724 talents.master_handler = find_talent_spell( talent_tree::SPECIALIZATION, "Master Handler", HUNTER_BEAST_MASTERY );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "serpentine_strikes",
+      displayNameEn: "Serpentine Strikes",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7708 talents.serpentine_strikes = find_talent_spell( talent_tree::SPECIALIZATION, "Serpentine Strikes", HUNTER_BEAST_MASTERY );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "snakeskin_quiver",
+      displayNameEn: "Snakeskin Quiver",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7710 talents.snakeskin_quiver = find_talent_spell( talent_tree::SPECIALIZATION, "Snakeskin Quiver", HUNTER_BEAST_MASTERY );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "wailing_dead",
+      displayNameEn: "Wailing Dead",
+      tree: "HERO",
+      binding:
+        'sc_hunter.cpp:7924 talents.wailing_dead = find_talent_spell( talent_tree::HERO, "Wailing Dead" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "wild_thrash",
+      displayNameEn: "Wild Thrash",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:6926 wild_thrash_t( hunter_t* p, util::string_view options_str ) : hunter_spell_t( "wild_thrash", p, p->talents.wild_thrash_player ); the pinned list reads it or an action of the list is built on it',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data`, class 3.
+    { simcName: "pack_leader", subTreeId: 43 },
+    { simcName: "dark_ranger", subTreeId: 44 },
+  ],
+};
+
+/**
+ * The Survival Hunter profile (ONB-T2): the talents the pinned list reads as `talent.<name>`, and the talents an action of
+ * that list is built on (an action on `not_found()` is background, action.cpp:541-549). The list reads no `hero_tree.*`, so a
+ * resolved tree only proves the other tree's talents not taken.
+ */
+const HUNTER_SURVIVAL_TARGET = {
+  datasetId: "SIMC_TRAIT_HUNTER_SURVIVAL_TALENTS",
+  classId: 3,
+  specId: 255,
+  defaultOut: "src/data/game/hunter-survival-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node, as every earlier target recorded." +
+    ' No retained Survival Hunter subject carries combatant info, so nothing corroborates these keys for it on real evidence (agent/architecture.md "ONB-T2").',
+  requiredTalents: [
+    {
+      simcName: "boomstick",
+      displayNameEn: "Boomstick",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7851 talents.boomstick = find_talent_spell( talent_tree::SPECIALIZATION, "Boomstick", HUNTER_SURVIVAL );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "howl_of_the_pack_leader",
+      displayNameEn: "Howl of the Pack Leader",
+      tree: "HERO",
+      binding:
+        'sc_hunter.cpp:7943 talents.howl_of_the_pack_leader = find_talent_spell( talent_tree::HERO, "Howl of the Pack Leader" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "kill_command",
+      displayNameEn: "Kill Command",
+      tree: "SPECIALIZATION",
+      binding:
+        "sc_hunter.cpp:7590 return new kill_command_t( this, options_str, talents.kill_command_sv_player );; the pinned list reads it or an action of the list is built on it",
+    },
+    {
+      simcName: "lethal_calibration",
+      displayNameEn: "Lethal Calibration",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7902 talents.lethal_calibration = find_talent_spell( talent_tree::SPECIALIZATION, "Lethal Calibration", HUNTER_SURVIVAL );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "moonlight_chakram",
+      displayNameEn: "Moonlight Chakram",
+      tree: "HERO",
+      binding:
+        'sc_hunter.cpp:7992 talents.moonlight_chakram = find_talent_spell( talent_tree::HERO, "Moonlight Chakram" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "muzzle",
+      displayNameEn: "Muzzle",
+      tree: "CLASS",
+      binding:
+        'sc_hunter.cpp:7647 talents.muzzle = find_talent_spell( talent_tree::CLASS, "Muzzle" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "raptor_strike",
+      displayNameEn: "Raptor Strike",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7835 talents.raptor_strike = find_talent_spell( talent_tree::SPECIALIZATION, "Raptor Strike", HUNTER_SURVIVAL );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "takedown",
+      displayNameEn: "Takedown",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7885 talents.takedown = find_talent_spell( talent_tree::SPECIALIZATION, "Takedown", HUNTER_SURVIVAL );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "twin_fangs",
+      displayNameEn: "Twin Fangs",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7892 talents.twin_fangs = find_talent_spell( talent_tree::SPECIALIZATION, "Twin Fangs", HUNTER_SURVIVAL );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "wildfire_bomb",
+      displayNameEn: "Wildfire Bomb",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_hunter.cpp:7831 talents.wildfire_bomb = find_talent_spell( talent_tree::SPECIALIZATION, "Wildfire Bomb", HUNTER_SURVIVAL );; the pinned list reads it or an action of the list is built on it',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data`, class 3.
+    { simcName: "sentinel", subTreeId: 42 },
+    { simcName: "pack_leader", subTreeId: 43 },
+  ],
+};
+
+/**
  * The Windwalker Monk profile (ONB-T1): the talents the pinned list reads as `talent.<name>`, and the talents an action of
  * that list is built on (an action on `not_found()` is background, action.cpp:541-549). The list reads no `hero_tree.*`, but its `talent.`
  * reads reach both hero trees, so a resolved tree proves the other tree's talents not taken.
@@ -4082,6 +4488,9 @@ export const TARGETS = {
   "demonhunter-havoc": DEMONHUNTER_HAVOC_TARGET,
   "druid-feral": DRUID_FERAL_TARGET,
   "demonhunter-devourer": DEMONHUNTER_DEVOURER_TARGET,
+  "druid-guardian": DRUID_GUARDIAN_TARGET,
+  "hunter-beast_mastery": HUNTER_BEAST_MASTERY_TARGET,
+  "hunter-survival": HUNTER_SURVIVAL_TARGET,
   "monk-windwalker": MONK_WINDWALKER_TARGET,
   "deathknight-unholy": DEATHKNIGHT_UNHOLY_TARGET,
   "deathknight-frost": DEATHKNIGHT_FROST_TARGET,
@@ -4258,7 +4667,10 @@ export function resolveTalent(rows, required, target = ROGUE_ASSASSINATION_TARGE
       (row.specIds.length === 0 || row.specIds.includes(target.specId)) &&
       // Devourer: two hero sub-trees can each hold a row of one name, both open to the spec (Demonic Intensity
       // in Fel-Scarred and Void-Scarred). The module names the tree (`HT_FS`, sc_demon_hunter.cpp:11160-11162), so the target does too.
-      (required.subTreeId === undefined || row.idSubTree === required.subTreeId),
+      (required.subTreeId === undefined || row.idSubTree === required.subTreeId) &&
+      // Guardian: Moonkin Form has a class-wide row and a row scoped to Feral and Guardian, both open to the spec. `find_talent_spell` takes the one row
+      // with no spec requirement (trait_data.cpp:107-113), so the target names that row rather than this function guessing.
+      (required.traitEntryId === undefined || row.traitEntryId === required.traitEntryId),
   );
   if (matches.length === 0) {
     return { ok: false, error: `talent '${required.displayNameEn}' not found in the ${required.tree} tree` };

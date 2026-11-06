@@ -1,0 +1,505 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_DRUID_GUARDIAN_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/sc_druid.cpp",
+        "sha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "byteLength": 479886
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-06",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 768,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Cat Form"
+    },
+    {
+      "abilityGameId": 1079,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Rip"
+    },
+    {
+      "abilityGameId": 1822,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Rake"
+    },
+    {
+      "abilityGameId": 5221,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Shred"
+    },
+    {
+      "abilityGameId": 5487,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Bear Form"
+    },
+    {
+      "abilityGameId": 6807,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Maul"
+    },
+    {
+      "abilityGameId": 8921,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Moonfire"
+    },
+    {
+      "abilityGameId": 22568,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Ferocious Bite"
+    },
+    {
+      "abilityGameId": 22812,
+      "baseGcdMs": 0,
+      "displayNameEn": "Barkskin"
+    },
+    {
+      "abilityGameId": 24858,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Moonkin Form"
+    },
+    {
+      "abilityGameId": 33917,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Mangle"
+    },
+    {
+      "abilityGameId": 50334,
+      "baseGcdMs": 0,
+      "displayNameEn": "Berserk"
+    },
+    {
+      "abilityGameId": 77758,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Thrash"
+    },
+    {
+      "abilityGameId": 102558,
+      "baseGcdMs": 0,
+      "displayNameEn": "Incarnation: Guardian of Ursoc"
+    },
+    {
+      "abilityGameId": 155835,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Bristling Fur"
+    },
+    {
+      "abilityGameId": 192081,
+      "baseGcdMs": 0,
+      "displayNameEn": "Ironfur"
+    },
+    {
+      "abilityGameId": 197625,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Moonkin Form"
+    },
+    {
+      "abilityGameId": 204066,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Lunar Beam"
+    },
+    {
+      "abilityGameId": 213771,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Swipe"
+    },
+    {
+      "abilityGameId": 391528,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Convoke the Spirits"
+    },
+    {
+      "abilityGameId": 400254,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Raze"
+    },
+    {
+      "abilityGameId": 1252871,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Red Moon"
+    },
+    {
+      "abilityGameId": 1253799,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Sundering Roar"
+    },
+    {
+      "abilityGameId": 1261867,
+      "baseGcdMs": 0,
+      "displayNameEn": "Heart of the Wild"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "barkskin",
+      "candidateAbilityGameIds": [22812],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / barkskin_t",
+        "startLine": 10223,
+        "endLine": 10223,
+        "sourceNote": "create_action dispatches \"barkskin\" to barkskin_t: built on find_class_spell( \"Barkskin\" ) (:7063), class_spells.inc row 22812.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "bear_form",
+      "candidateAbilityGameIds": [5487],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / bear_form_t",
+        "startLine": 10148,
+        "endLine": 10148,
+        "sourceNote": "create_action dispatches \"bear_form\" to bear_form_t: built on p->spec.bear_form (:3041); find_class_spell( \"Bear Form\" ) at :10670, class_spells.inc row 5487.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "berserk",
+      "candidateAbilityGameIds": [50334, 102558],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / incarnation_bear_t or berserk_bear_t",
+        "startLine": 10162,
+        "endLine": 10162,
+        "sourceNote": "create_action dispatches \"berserk\" to incarnation_bear_t or berserk_bear_t: builds incarnation_bear_t with talent.incarnation_bear taken, spell 102558, and berserk_bear_t otherwise, spell 50334 (:10164-10171); ST( \"Incarnation: Guardian of Ursoc\" ) at :5264 and ST( \"Berserk\", DRUID_GUARDIAN ) at :5253.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "bristling_fur",
+      "candidateAbilityGameIds": [155835],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / bristling_fur_t",
+        "startLine": 10200,
+        "endLine": 10200,
+        "sourceNote": "create_action dispatches \"bristling_fur\" to bristling_fur_t: built on p->talent.bristling_fur (:5284); ST( \"Bristling Fur\" ) at :5284.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "cat_form",
+      "candidateAbilityGameIds": [768],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / cat_form_t",
+        "startLine": 10149,
+        "endLine": 10149,
+        "sourceNote": "create_action dispatches \"cat_form\" to cat_form_t: built on p->spec.cat_form (:3099); find_class_spell( \"Cat Form\" ) at :10674, class_spells.inc row 768.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "convoke_the_spirits",
+      "candidateAbilityGameIds": [391528],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / convoke_the_spirits_t",
+        "startLine": 10219,
+        "endLine": 10219,
+        "sourceNote": "create_action dispatches \"convoke_the_spirits\" to convoke_the_spirits_t: built on p->talent.convoke_the_spirits (:9256), channeled (:9264); ST( \"Convoke the Spirits\" ) at :9256.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "ferocious_bite",
+      "candidateAbilityGameIds": [22568],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / ferocious_bite_t",
+        "startLine": 10251,
+        "endLine": 10251,
+        "sourceNote": "create_action dispatches \"ferocious_bite\" to ferocious_bite_t: built on find_class_spell( \"Ferocious Bite\" ) (:4427), class_spells.inc row 22568.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "heart_of_the_wild",
+      "candidateAbilityGameIds": [1261867],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / heart_of_the_wild_t",
+        "startLine": 10226,
+        "endLine": 10226,
+        "sourceNote": "create_action dispatches \"heart_of_the_wild\" to heart_of_the_wild_t: built on p->talent.heart_of_the_wild (:9134); CT( \"Heart of the Wild\" ) at :9134.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "ironfur",
+      "candidateAbilityGameIds": [192081],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / ironfur_t",
+        "startLine": 10229,
+        "endLine": 10229,
+        "sourceNote": "create_action dispatches \"ironfur\" to ironfur_t: built on p->talent.ironfur (:5332); CT( \"Ironfur\" ) at :5332.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "lunar_beam",
+      "candidateAbilityGameIds": [204066],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / lunar_beam_t",
+        "startLine": 10201,
+        "endLine": 10201,
+        "sourceNote": "create_action dispatches \"lunar_beam\" to lunar_beam_t: built on p->talent.lunar_beam (:5393); ST( \"Lunar Beam\" ) at :5393.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "mangle",
+      "candidateAbilityGameIds": [33917],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / mangle_t",
+        "startLine": 10253,
+        "endLine": 10253,
+        "sourceNote": "create_action dispatches \"mangle\" to mangle_t: built on find_class_spell( \"Mangle\" ) (:5443), class_spells.inc row 33917.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "maul",
+      "candidateAbilityGameIds": [6807, 400254],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / raze_t or maul_t",
+        "startLine": 10202,
+        "endLine": 10202,
+        "sourceNote": "create_action dispatches \"maul\" to raze_t or maul_t: builds raze_t with talent.raze taken, spell 400254, and maul_t otherwise, spell 6807 (:10202-10204); ST( \"Raze\" ) at :5863 and ST( \"Maul\" ) at :5804.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "moonfire",
+      "candidateAbilityGameIds": [8921],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / moonfire_t",
+        "startLine": 10205,
+        "endLine": 10205,
+        "sourceNote": "create_action dispatches \"moonfire\" to moonfire_t: built on p->spec.moonfire (:7869); find_class_spell( \"Moonfire\" ) at :10681, class_spells.inc row 8921. create_action builds red_moon_t instead with talent.red_moon taken (:10205), which this line's own gate excludes.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "moonkin_form",
+      "candidateAbilityGameIds": [24858, 197625],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / moonkin_form_t",
+        "startLine": 10231,
+        "endLine": 10231,
+        "sourceNote": "create_action dispatches \"moonkin_form\" to moonkin_form_t: built on p->talent.moonkin_form (:3125); CT( \"Moonkin Form\" ) at :3125, the class-wide trait row (spell 24858). The row for Feral and Guardian, spell 197625, is bound too: a player can take it, and no retained Guardian cast says which one logs.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "rake",
+      "candidateAbilityGameIds": [1822],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / rake_t",
+        "startLine": 10232,
+        "endLine": 10232,
+        "sourceNote": "create_action dispatches \"rake\" to rake_t: built on p->talent.rake (:4551); CT( \"Rake\" ) at :4551.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "red_moon",
+      "candidateAbilityGameIds": [1252871],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / red_moon_t",
+        "startLine": 10206,
+        "endLine": 10206,
+        "sourceNote": "create_action dispatches \"red_moon\" to red_moon_t: built on p->talent.red_moon (:8002); ST( \"Red Moon\" ) at :8002.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "rip",
+      "candidateAbilityGameIds": [1079],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / rip_t",
+        "startLine": 10235,
+        "endLine": 10235,
+        "sourceNote": "create_action dispatches \"rip\" to rip_t: built on p->talent.rip (:4656); CT( \"Rip\" ) at :4656.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "shred",
+      "candidateAbilityGameIds": [5221],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / shred_t",
+        "startLine": 10257,
+        "endLine": 10257,
+        "sourceNote": "create_action dispatches \"shred\" to shred_t: built on find_class_spell( \"Shred\" ) (:4792), class_spells.inc row 5221.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "sundering_roar",
+      "candidateAbilityGameIds": [1253799],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / sundering_roar_t",
+        "startLine": 10208,
+        "endLine": 10208,
+        "sourceNote": "create_action dispatches \"sundering_roar\" to sundering_roar_t: built on p->talent.sundering_roar (:5879); ST( \"Sundering Roar\" ) at :5879.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "swipe_bear",
+      "candidateAbilityGameIds": [213771],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / swipe_bear_t",
+        "startLine": 10243,
+        "endLine": 10243,
+        "sourceNote": "create_action dispatches \"swipe_bear\" to swipe_bear_t: built on p->apply_override( p->talent.swipe, p->spec.bear_form_override ) (:5900); CT( \"Swipe\" ) at :8033 and find_spell( 106829 ) at :5900.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "thrash",
+      "candidateAbilityGameIds": [77758],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "druid_t::create_action / thrash_t",
+        "startLine": 10245,
+        "endLine": 10245,
+        "sourceNote": "create_action dispatches \"thrash\" to thrash_t: built on p->spec.thrash (:5954); find_class_spell( \"Thrash\" ) at :10684, class_spells.inc row 77758.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "auto_attack",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/class_modules/sc_druid.cpp",
+        "sourceSha256": "59227a2f687a9fe5229964f797fa2623040e3915dd6daec18b434ca4730a8fb0",
+        "symbol": "auto_attack_t::auto_attack_t",
+        "line": 9887,
+        "sourceNote": "create_action builds auto_attack_t, built on spell_data_t::nil(), whose constructor (:9885) assigns trigger_gcd = 0_ms and use_off_gcd."
+      }
+    },
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

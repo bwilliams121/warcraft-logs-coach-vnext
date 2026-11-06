@@ -74,6 +74,9 @@ import pinnedVengeanceDemonHunterApl from "../../../src/simc/data/demonhunter-ve
 import pinnedDemonologyWarlockApl from "../../../src/simc/data/warlock-demonology.apl.json";
 import pinnedUnholyDeathKnightApl from "../../../src/simc/data/deathknight-unholy.apl.json";
 import pinnedWindwalkerMonkApl from "../../../src/simc/data/monk-windwalker.apl.json";
+import pinnedGuardianDruidApl from "../../../src/simc/data/druid-guardian.apl.json";
+import pinnedBeastMasteryHunterApl from "../../../src/simc/data/hunter-beast_mastery.apl.json";
+import pinnedSurvivalHunterApl from "../../../src/simc/data/hunter-survival.apl.json";
 import pinnedOutlawRogueApl from "../../../src/simc/data/rogue-outlaw.apl.json";
 import pinnedEnhancementShamanApl from "../../../src/simc/data/shaman-enhancement.apl.json";
 import { AUTHORITY_DOMAINS, AUTHORITY_RESOLUTION_OUTCOMES } from "../../../src/findings/authority-domain.js";
@@ -438,6 +441,9 @@ export const OWNING_LAYERS = {
   SPEC_DEMONOLOGY_WARLOCK: ["src/specs/warlock/demonology/"],
   SPEC_UNHOLY_DEATH_KNIGHT: ["src/specs/deathknight/unholy/"],
   SPEC_WINDWALKER_MONK: ["src/specs/monk/windwalker/"],
+  SPEC_GUARDIAN_DRUID: ["src/specs/druid/guardian/"],
+  SPEC_BEAST_MASTERY_HUNTER: ["src/specs/hunter/beast_mastery/"],
+  SPEC_SURVIVAL_HUNTER: ["src/specs/hunter/survival/"],
   SPEC_OUTLAW_ROGUE: ["src/specs/rogue/outlaw/"],
   SPEC_ENHANCEMENT_SHAMAN: ["src/specs/shaman/enhancement/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
@@ -499,6 +505,9 @@ export const SPEC_LAYER_OF = {
   "warlock/demonology": "SPEC_DEMONOLOGY_WARLOCK",
   "deathknight/unholy": "SPEC_UNHOLY_DEATH_KNIGHT",
   "monk/windwalker": "SPEC_WINDWALKER_MONK",
+  "druid/guardian": "SPEC_GUARDIAN_DRUID",
+  "hunter/beast_mastery": "SPEC_BEAST_MASTERY_HUNTER",
+  "hunter/survival": "SPEC_SURVIVAL_HUNTER",
   "rogue/outlaw": "SPEC_OUTLAW_ROGUE",
   "shaman/enhancement": "SPEC_ENHANCEMENT_SHAMAN",
 } as const satisfies Record<SpecId, OwningLayer>;
@@ -3606,6 +3615,45 @@ export const ASSERTION_KINDS = {
       "The Windwalker Monk facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
   },
 
+  // ---- SPEC_GUARDIAN_DRUID (ONB-T2, INTERNAL_ONLY) ---
+  "SPEC_GUARDIAN_DRUID.SPEC_GATE": {
+    owningLayer: "SPEC_GUARDIAN_DRUID",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Guardian Druid facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
+  },
+
+  // ---- SPEC_BEAST_MASTERY_HUNTER (ONB-T2, INTERNAL_ONLY) ---
+  "SPEC_BEAST_MASTERY_HUNTER.SPEC_GATE": {
+    owningLayer: "SPEC_BEAST_MASTERY_HUNTER",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Beast Mastery Hunter facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
+  },
+
+  // ---- SPEC_SURVIVAL_HUNTER (ONB-T2, INTERNAL_ONLY) ---
+  "SPEC_SURVIVAL_HUNTER.SPEC_GATE": {
+    owningLayer: "SPEC_SURVIVAL_HUNTER",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Survival Hunter facade refuses this specialization with SPEC_NOT_SUPPORTED before any of its rules runs.",
+  },
+
   // ---- SPEC_OUTLAW_ROGUE (ONB-C2, INTERNAL_ONLY) ---
   "SPEC_OUTLAW_ROGUE.SPEC_GATE": {
     owningLayer: "SPEC_OUTLAW_ROGUE",
@@ -4456,6 +4504,9 @@ export const PINNED_AUTHORITY_REVISIONS: Readonly<Record<string, string>> = {
   [pinnedDemonologyWarlockApl.authorityId]: pinnedDemonologyWarlockApl.artifactRevision,
   [pinnedUnholyDeathKnightApl.authorityId]: pinnedUnholyDeathKnightApl.artifactRevision,
   [pinnedWindwalkerMonkApl.authorityId]: pinnedWindwalkerMonkApl.artifactRevision,
+  [pinnedGuardianDruidApl.authorityId]: pinnedGuardianDruidApl.artifactRevision,
+  [pinnedBeastMasteryHunterApl.authorityId]: pinnedBeastMasteryHunterApl.artifactRevision,
+  [pinnedSurvivalHunterApl.authorityId]: pinnedSurvivalHunterApl.artifactRevision,
   [pinnedOutlawRogueApl.authorityId]: pinnedOutlawRogueApl.artifactRevision,
   [pinnedEnhancementShamanApl.authorityId]: pinnedEnhancementShamanApl.artifactRevision,
 };

@@ -7337,6 +7337,579 @@ const DRUID_FERAL_FACTS = {
   ],
 };
 
+/**
+ * The Guardian Druid facts (ONB-T2).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the pinned Guardian list
+ * (guardian_apl.inc, included by `apl_guardian`) executes. Facts a reader should not have to rediscover:
+ *
+ *   - THE CONSTRUCTORS WERE CHECKED. No action of this list overrides its record's GCD: every `trigger_gcd` in the module is on a pet swing, a background swing, a form-shift cancel, Prowl or auto_attack itself. `gcd_type` is set only on Ravage's Maul, and the module has no `set_replacement_action`.
+ *   - MOONKIN FORM HAS TWO ROWS, AND BOTH ARE BOUND. `find_talent_spell` takes the class-wide trait row, spell 24858 (trait_data.cpp:107-113), so the action reads that, but the talent also has a row for Feral and Guardian, spell 197625, a player can take. Balance Druids log 24858, and no Guardian logs either in any retained fight, so `moonkin_form` binds both.
+ *   - THREE TOKENS BUILD ANOTHER ACTION. `berserk` builds Incarnation with its talent taken (:10164-10165), `maul` builds Raze with its talent taken (:10202), and `moonfire` builds Red Moon with its talent taken (:10205). Each of the first two binds both ids. `moonfire` binds its own, since the list's one `moonfire` line is gated on `!talent.red_moon.enabled` and the list names `red_moon` itself.
+ *   - HEART OF THE WILD BINDS 1261867, the talent's row, `_gcd` 0, as its constructor reads it (:9134). The older per-specialization rows 108291 to 108294 are not the action.
+ *   - `swipe_bear` BINDS 213771, THE BEAR FORM'S ROW, because its constructor overrides the talent row 213764 with `spec.bear_form_override` (:5900). The cat row 106785 is not on this list.
+ *   - IRONFUR, BARKSKIN, BERSERK AND HEART OF THE WILD ARE `_gcd` 0, SO THEY ARE NON_GCD. A logged one is excluded and never judged.
+ *   - `wild_guardian` IS NOT BOUND. Its action is `apply_override( talent, wild_guardian_buff )` (:10717), and no retained cast names the id it logs. So its lane is a refusal.
+ *   - THE RACIAL, POTION AND ITEM TOKENS ARE NOT BOUND. The domain boundary refuses them before any lane is read.
+ */
+const DRUID_GUARDIAN_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 22812, displayNameEn: "Barkskin", baseGcdMs: 0 },
+    { abilityGameId: 5487, displayNameEn: "Bear Form", baseGcdMs: 1500 },
+    { abilityGameId: 50334, displayNameEn: "Berserk", baseGcdMs: 0 },
+    { abilityGameId: 102558, displayNameEn: "Incarnation: Guardian of Ursoc", baseGcdMs: 0 },
+    { abilityGameId: 155835, displayNameEn: "Bristling Fur", baseGcdMs: 1500 },
+    { abilityGameId: 768, displayNameEn: "Cat Form", baseGcdMs: 1500 },
+    { abilityGameId: 391528, displayNameEn: "Convoke the Spirits", baseGcdMs: 1500 },
+    { abilityGameId: 22568, displayNameEn: "Ferocious Bite", baseGcdMs: 1000 },
+    { abilityGameId: 1261867, displayNameEn: "Heart of the Wild", baseGcdMs: 0 },
+    { abilityGameId: 192081, displayNameEn: "Ironfur", baseGcdMs: 0 },
+    { abilityGameId: 204066, displayNameEn: "Lunar Beam", baseGcdMs: 1500 },
+    { abilityGameId: 33917, displayNameEn: "Mangle", baseGcdMs: 1500 },
+    { abilityGameId: 6807, displayNameEn: "Maul", baseGcdMs: 1500 },
+    { abilityGameId: 400254, displayNameEn: "Raze", baseGcdMs: 1500 },
+    { abilityGameId: 8921, displayNameEn: "Moonfire", baseGcdMs: 1500 },
+    { abilityGameId: 24858, displayNameEn: "Moonkin Form", baseGcdMs: 1500 },
+    { abilityGameId: 197625, displayNameEn: "Moonkin Form", baseGcdMs: 1500 },
+    { abilityGameId: 1822, displayNameEn: "Rake", baseGcdMs: 1000 },
+    { abilityGameId: 1252871, displayNameEn: "Red Moon", baseGcdMs: 1500 },
+    { abilityGameId: 1079, displayNameEn: "Rip", baseGcdMs: 1000 },
+    { abilityGameId: 5221, displayNameEn: "Shred", baseGcdMs: 1000 },
+    { abilityGameId: 1253799, displayNameEn: "Sundering Roar", baseGcdMs: 1500 },
+    { abilityGameId: 213771, displayNameEn: "Swipe", baseGcdMs: 1500 },
+    { abilityGameId: 77758, displayNameEn: "Thrash", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "barkskin",
+      candidateAbilityGameIds: [22812],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / barkskin_t",
+      startLine: 10223,
+      endLine: 10223,
+      sourceNote:
+        'create_action dispatches "barkskin" to barkskin_t: built on find_class_spell( "Barkskin" ) (:7063), class_spells.inc row 22812.',
+    },
+    {
+      simcToken: "bear_form",
+      candidateAbilityGameIds: [5487],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / bear_form_t",
+      startLine: 10148,
+      endLine: 10148,
+      sourceNote:
+        'create_action dispatches "bear_form" to bear_form_t: built on p->spec.bear_form (:3041); find_class_spell( "Bear Form" ) at :10670, class_spells.inc row 5487.',
+    },
+    {
+      simcToken: "berserk",
+      candidateAbilityGameIds: [50334, 102558],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / incarnation_bear_t or berserk_bear_t",
+      startLine: 10162,
+      endLine: 10162,
+      sourceNote:
+        'create_action dispatches "berserk" to incarnation_bear_t or berserk_bear_t: builds incarnation_bear_t with talent.incarnation_bear taken, spell 102558, and berserk_bear_t otherwise, spell 50334 (:10164-10171); ST( "Incarnation: Guardian of Ursoc" ) at :5264 and ST( "Berserk", DRUID_GUARDIAN ) at :5253.',
+    },
+    {
+      simcToken: "bristling_fur",
+      candidateAbilityGameIds: [155835],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / bristling_fur_t",
+      startLine: 10200,
+      endLine: 10200,
+      sourceNote:
+        'create_action dispatches "bristling_fur" to bristling_fur_t: built on p->talent.bristling_fur (:5284); ST( "Bristling Fur" ) at :5284.',
+    },
+    {
+      simcToken: "cat_form",
+      candidateAbilityGameIds: [768],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / cat_form_t",
+      startLine: 10149,
+      endLine: 10149,
+      sourceNote:
+        'create_action dispatches "cat_form" to cat_form_t: built on p->spec.cat_form (:3099); find_class_spell( "Cat Form" ) at :10674, class_spells.inc row 768.',
+    },
+    {
+      simcToken: "convoke_the_spirits",
+      candidateAbilityGameIds: [391528],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / convoke_the_spirits_t",
+      startLine: 10219,
+      endLine: 10219,
+      sourceNote:
+        'create_action dispatches "convoke_the_spirits" to convoke_the_spirits_t: built on p->talent.convoke_the_spirits (:9256), channeled (:9264); ST( "Convoke the Spirits" ) at :9256.',
+    },
+    {
+      simcToken: "ferocious_bite",
+      candidateAbilityGameIds: [22568],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / ferocious_bite_t",
+      startLine: 10251,
+      endLine: 10251,
+      sourceNote:
+        'create_action dispatches "ferocious_bite" to ferocious_bite_t: built on find_class_spell( "Ferocious Bite" ) (:4427), class_spells.inc row 22568.',
+    },
+    {
+      simcToken: "heart_of_the_wild",
+      candidateAbilityGameIds: [1261867],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / heart_of_the_wild_t",
+      startLine: 10226,
+      endLine: 10226,
+      sourceNote:
+        'create_action dispatches "heart_of_the_wild" to heart_of_the_wild_t: built on p->talent.heart_of_the_wild (:9134); CT( "Heart of the Wild" ) at :9134.',
+    },
+    {
+      simcToken: "ironfur",
+      candidateAbilityGameIds: [192081],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / ironfur_t",
+      startLine: 10229,
+      endLine: 10229,
+      sourceNote:
+        'create_action dispatches "ironfur" to ironfur_t: built on p->talent.ironfur (:5332); CT( "Ironfur" ) at :5332.',
+    },
+    {
+      simcToken: "lunar_beam",
+      candidateAbilityGameIds: [204066],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / lunar_beam_t",
+      startLine: 10201,
+      endLine: 10201,
+      sourceNote:
+        'create_action dispatches "lunar_beam" to lunar_beam_t: built on p->talent.lunar_beam (:5393); ST( "Lunar Beam" ) at :5393.',
+    },
+    {
+      simcToken: "mangle",
+      candidateAbilityGameIds: [33917],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / mangle_t",
+      startLine: 10253,
+      endLine: 10253,
+      sourceNote:
+        'create_action dispatches "mangle" to mangle_t: built on find_class_spell( "Mangle" ) (:5443), class_spells.inc row 33917.',
+    },
+    {
+      simcToken: "maul",
+      candidateAbilityGameIds: [6807, 400254],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / raze_t or maul_t",
+      startLine: 10202,
+      endLine: 10202,
+      sourceNote:
+        'create_action dispatches "maul" to raze_t or maul_t: builds raze_t with talent.raze taken, spell 400254, and maul_t otherwise, spell 6807 (:10202-10204); ST( "Raze" ) at :5863 and ST( "Maul" ) at :5804.',
+    },
+    {
+      simcToken: "moonfire",
+      candidateAbilityGameIds: [8921],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / moonfire_t",
+      startLine: 10205,
+      endLine: 10205,
+      sourceNote:
+        'create_action dispatches "moonfire" to moonfire_t: built on p->spec.moonfire (:7869); find_class_spell( "Moonfire" ) at :10681, class_spells.inc row 8921. create_action builds red_moon_t instead with talent.red_moon taken (:10205), which this line\'s own gate excludes.',
+    },
+    {
+      simcToken: "moonkin_form",
+      candidateAbilityGameIds: [24858, 197625],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / moonkin_form_t",
+      startLine: 10231,
+      endLine: 10231,
+      sourceNote:
+        'create_action dispatches "moonkin_form" to moonkin_form_t: built on p->talent.moonkin_form (:3125); CT( "Moonkin Form" ) at :3125, the class-wide trait row (spell 24858). The row for Feral and Guardian, spell 197625, is bound too: a player can take it, and no retained Guardian cast says which one logs.',
+    },
+    {
+      simcToken: "rake",
+      candidateAbilityGameIds: [1822],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / rake_t",
+      startLine: 10232,
+      endLine: 10232,
+      sourceNote:
+        'create_action dispatches "rake" to rake_t: built on p->talent.rake (:4551); CT( "Rake" ) at :4551.',
+    },
+    {
+      simcToken: "red_moon",
+      candidateAbilityGameIds: [1252871],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / red_moon_t",
+      startLine: 10206,
+      endLine: 10206,
+      sourceNote:
+        'create_action dispatches "red_moon" to red_moon_t: built on p->talent.red_moon (:8002); ST( "Red Moon" ) at :8002.',
+    },
+    {
+      simcToken: "rip",
+      candidateAbilityGameIds: [1079],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / rip_t",
+      startLine: 10235,
+      endLine: 10235,
+      sourceNote:
+        'create_action dispatches "rip" to rip_t: built on p->talent.rip (:4656); CT( "Rip" ) at :4656.',
+    },
+    {
+      simcToken: "shred",
+      candidateAbilityGameIds: [5221],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / shred_t",
+      startLine: 10257,
+      endLine: 10257,
+      sourceNote:
+        'create_action dispatches "shred" to shred_t: built on find_class_spell( "Shred" ) (:4792), class_spells.inc row 5221.',
+    },
+    {
+      simcToken: "sundering_roar",
+      candidateAbilityGameIds: [1253799],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / sundering_roar_t",
+      startLine: 10208,
+      endLine: 10208,
+      sourceNote:
+        'create_action dispatches "sundering_roar" to sundering_roar_t: built on p->talent.sundering_roar (:5879); ST( "Sundering Roar" ) at :5879.',
+    },
+    {
+      simcToken: "swipe_bear",
+      candidateAbilityGameIds: [213771],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / swipe_bear_t",
+      startLine: 10243,
+      endLine: 10243,
+      sourceNote:
+        'create_action dispatches "swipe_bear" to swipe_bear_t: built on p->apply_override( p->talent.swipe, p->spec.bear_form_override ) (:5900); CT( "Swipe" ) at :8033 and find_spell( 106829 ) at :5900.',
+    },
+    {
+      simcToken: "thrash",
+      candidateAbilityGameIds: [77758],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: DRUID,
+      symbol: "druid_t::create_action / thrash_t",
+      startLine: 10245,
+      endLine: 10245,
+      sourceNote:
+        'create_action dispatches "thrash" to thrash_t: built on p->spec.thrash (:5954); find_class_spell( "Thrash" ) at :10684, class_spells.inc row 77758.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "auto_attack",
+      triggerGcdMs: 0,
+      sourcePath: DRUID,
+      symbol: "auto_attack_t::auto_attack_t",
+      line: 9887,
+      sourceNote:
+        "create_action builds auto_attack_t, built on spell_data_t::nil(), whose constructor (:9885) assigns trigger_gcd = 0_ms and use_off_gcd.",
+    },
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
+/**
+ * The Beast Mastery Hunter facts (ONB-T2).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the pinned Beast Mastery list
+ * (apl_hunter.cpp `beast_mastery`) executes. Facts a reader should not have to rediscover:
+ *
+ *   - THE CONSTRUCTORS WERE CHECKED. No action of this list overrides its record's GCD: the only `trigger_gcd` in the module are the background swing (:3938) and auto_attack (:7351). The module has no `gcd_type` and no `set_replacement_action`.
+ *   - THE PLAYER'S ACTION, NOT THE PET'S. `bestial_wrath`, `kill_command` and `wild_thrash` each name two structs. The token builds the player's (:6807, :6682, :6924), and the pet's rows 344572, 83381 and 1264355 are no press.
+ *   - BLACK ARROW BINDS 466930, Beast Mastery's own talent row and the action's spell (:4670). 466932 is Marksmanship's.
+ *   - WILD THRASH BINDS 1264359, the player's talent row (:6926). The retained fight b1Pm 48 logs 25 of it.
+ *   - DIRE BEAST IS OFF THE LIST. The retained subjects log 1308188, no token names it, so it has no lane and every one is excluded.
+ *   - RETARGET IS NOT BOUND. It is the shared pseudo-action. AUTO_SHOT is a meta-action lane below.
+ *   - THE RACIAL, POTION, ITEM AND EXTERNAL-BUFF TOKENS ARE NOT BOUND. `summon_pet` appears only in precombat.
+ */
+const HUNTER_BEAST_MASTERY_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 217200, displayNameEn: "Barbed Shot", baseGcdMs: 1500 },
+    { abilityGameId: 19574, displayNameEn: "Bestial Wrath", baseGcdMs: 1500 },
+    { abilityGameId: 466930, displayNameEn: "Black Arrow", baseGcdMs: 1500 },
+    { abilityGameId: 193455, displayNameEn: "Cobra Shot", baseGcdMs: 1500 },
+    { abilityGameId: 34026, displayNameEn: "Kill Command", baseGcdMs: 1500 },
+    { abilityGameId: 392060, displayNameEn: "Wailing Arrow", baseGcdMs: 1500 },
+    { abilityGameId: 1264359, displayNameEn: "Wild Thrash", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "barbed_shot",
+      candidateAbilityGameIds: [217200],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / barbed_shot_t",
+      startLine: 7539,
+      endLine: 7539,
+      sourceNote:
+        'create_action dispatches "barbed_shot" to barbed_shot_t: built on p->talents.barbed_shot (:5119); find_talent_spell( SPECIALIZATION, "Barbed Shot", HUNTER_BEAST_MASTERY ) at :5119.',
+    },
+    {
+      simcToken: "bestial_wrath",
+      candidateAbilityGameIds: [19574],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / bestial_wrath_t",
+      startLine: 7540,
+      endLine: 7540,
+      sourceNote:
+        'create_action dispatches "bestial_wrath" to bestial_wrath_t: built on p->talents.bestial_wrath (:6811); find_talent_spell( SPECIALIZATION, "Bestial Wrath", HUNTER_BEAST_MASTERY ) at :7684.',
+    },
+    {
+      simcToken: "black_arrow",
+      candidateAbilityGameIds: [466930],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / black_arrow_t",
+      startLine: 7541,
+      endLine: 7541,
+      sourceNote:
+        'create_action dispatches "black_arrow" to black_arrow_t: built on p->talents.black_arrow_spell (:4670); talents.black_arrow_spell = talents.black_arrow.ok() ? find_spell( 466930 ) : not_found at :4670.',
+    },
+    {
+      simcToken: "cobra_shot",
+      candidateAbilityGameIds: [193455],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / cobra_shot_t",
+      startLine: 7542,
+      endLine: 7542,
+      sourceNote:
+        'create_action dispatches "cobra_shot" to cobra_shot_t: built on p->talents.cobra_shot (:5031); find_talent_spell( SPECIALIZATION, "Cobra Shot", HUNTER_BEAST_MASTERY ) at :7685.',
+    },
+    {
+      simcToken: "kill_command",
+      candidateAbilityGameIds: [34026],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / kill_command_t",
+      startLine: 7585,
+      endLine: 7585,
+      sourceNote:
+        'create_action dispatches "kill_command" to kill_command_t: create_action builds kill_command_t on Beast Mastery with talents.kill_command_bm_player (:7588); find_talent_spell( SPECIALIZATION, "Kill Command", HUNTER_BEAST_MASTERY ) at :7588. Its ready() also asks the main pet\'s own action (:6776), which this slice does not read.',
+    },
+    {
+      simcToken: "wailing_arrow",
+      candidateAbilityGameIds: [392060],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / wailing_arrow_t",
+      startLine: 7563,
+      endLine: 7563,
+      sourceNote:
+        'create_action dispatches "wailing_arrow" to wailing_arrow_t: built on p->talents.wailing_arrow (:4761); talents.wailing_dead.ok() ? find_spell( 392060 ) : not_found at :7925. Its ready() asks for its buff, a usability claim this slice does not make.',
+    },
+    {
+      simcToken: "wild_thrash",
+      candidateAbilityGameIds: [1264359],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / wild_thrash_t",
+      startLine: 7564,
+      endLine: 7564,
+      sourceNote:
+        'create_action dispatches "wild_thrash" to wild_thrash_t: built on p->talents.wild_thrash_player (:6926); find_talent_spell( SPECIALIZATION, "Wild Thrash", HUNTER_BEAST_MASTERY ) at :6926.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "auto_shot",
+      triggerGcdMs: 0,
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "auto_attack_t::auto_attack_t",
+      line: 7351,
+      sourceNote:
+        'create_action builds actions::auto_attack_t for "auto_shot" (:7538), an action_t of type ACTION_OTHER with no spell, whose constructor assigns trigger_gcd = 0_ms.',
+    },
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
+/**
+ * The Survival Hunter facts (ONB-T2).
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every class/spec spell a token of the pinned Survival list
+ * (apl_hunter.cpp `survival`) executes. Facts a reader should not have to rediscover:
+ *
+ *   - THE CONSTRUCTORS WERE CHECKED. No action of this list overrides its record's GCD: the only `trigger_gcd` in the module are the background swing (:3938) and auto_attack (:7351). The module has no `gcd_type` and no `set_replacement_action`.
+ *   - THE PLAYER'S ACTION, NOT THE PET'S. `takedown` and `kill_command` each name two structs. The token builds the player's (:6487, :6682).
+ *   - MOONLIGHT CHAKRAM BINDS 1264949 (talents.moonlight_chakram_spell, :4438), as Marksmanship's does. The talent row 1264902 is not the press.
+ *   - MUZZLE AND ASPECT OF THE EAGLE ARE `_gcd` 0, SO THEY ARE NON_GCD.
+ *   - RETARGET IS NOT BOUND. It is the shared pseudo-action. AUTO_ATTACK is a meta-action lane below.
+ *   - THE RACIAL, POTION, ITEM AND EXTERNAL-BUFF TOKENS ARE NOT BOUND. `summon_pet` appears only in precombat.
+ */
+const HUNTER_SURVIVAL_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    { abilityGameId: 186289, displayNameEn: "Aspect of the Eagle", baseGcdMs: 0 },
+    { abilityGameId: 1261193, displayNameEn: "Boomstick", baseGcdMs: 1500 },
+    { abilityGameId: 259489, displayNameEn: "Kill Command", baseGcdMs: 1500 },
+    { abilityGameId: 1264949, displayNameEn: "Moonlight Chakram", baseGcdMs: 1500 },
+    { abilityGameId: 187707, displayNameEn: "Muzzle", baseGcdMs: 0 },
+    { abilityGameId: 186270, displayNameEn: "Raptor Strike", baseGcdMs: 1500 },
+    { abilityGameId: 1250646, displayNameEn: "Takedown", baseGcdMs: 1500 },
+    { abilityGameId: 259495, displayNameEn: "Wildfire Bomb", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "aspect_of_the_eagle",
+      candidateAbilityGameIds: [186289],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / aspect_of_the_eagle_t",
+      startLine: 7536,
+      endLine: 7536,
+      sourceNote:
+        'create_action dispatches "aspect_of_the_eagle" to aspect_of_the_eagle_t: built on p->specs.aspect_of_the_eagle (:7322); find_spell( 186289 ) at :7824.',
+    },
+    {
+      simcToken: "boomstick",
+      candidateAbilityGameIds: [1261193],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / boomstick_t",
+      startLine: 7546,
+      endLine: 7546,
+      sourceNote:
+        'create_action dispatches "boomstick" to boomstick_t: built on p->talents.boomstick (:6420), channeled (:6425); find_talent_spell( SPECIALIZATION, "Boomstick", HUNTER_SURVIVAL ) at :7851.',
+    },
+    {
+      simcToken: "kill_command",
+      candidateAbilityGameIds: [259489],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / kill_command_t",
+      startLine: 7585,
+      endLine: 7585,
+      sourceNote:
+        'create_action dispatches "kill_command" to kill_command_t: create_action builds kill_command_t on Survival with talents.kill_command_sv_player (:7590); find_talent_spell( SPECIALIZATION, "Kill Command", HUNTER_SURVIVAL ) at :7590. Its ready() also asks the main pet\'s own action (:6776), which this slice does not read.',
+    },
+    {
+      simcToken: "moonlight_chakram",
+      candidateAbilityGameIds: [1264949],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / moonlight_chakram_t",
+      startLine: 7550,
+      endLine: 7550,
+      sourceNote:
+        'create_action dispatches "moonlight_chakram" to moonlight_chakram_t: built on p->talents.moonlight_chakram_spell (:4438); talents.moonlight_chakram.ok() ? find_spell( 1264949 ) : not_found at :4438. Its ready() asks for its buff, a usability claim this slice does not make.',
+    },
+    {
+      simcToken: "muzzle",
+      candidateAbilityGameIds: [187707],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / muzzle_t",
+      startLine: 7552,
+      endLine: 7552,
+      sourceNote:
+        'create_action dispatches "muzzle" to muzzle_t: built on p->talents.muzzle (:6183); find_talent_spell( CLASS, "Muzzle" ) at :7647.',
+    },
+    {
+      simcToken: "raptor_strike",
+      candidateAbilityGameIds: [186270],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / raptor_strike_t",
+      startLine: 7554,
+      endLine: 7554,
+      sourceNote:
+        'create_action dispatches "raptor_strike" to raptor_strike_t: built on p->talents.raptor_strike (:6337); find_talent_spell( SPECIALIZATION, "Raptor Strike", HUNTER_SURVIVAL ) at :7835. 265189 is raptor_strike_eagle, a token the list does not name.',
+    },
+    {
+      simcToken: "takedown",
+      candidateAbilityGameIds: [1250646],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / takedown_t",
+      startLine: 7559,
+      endLine: 7559,
+      sourceNote:
+        'create_action dispatches "takedown" to takedown_t: built on p->talents.takedown (:6499); find_talent_spell( SPECIALIZATION, "Takedown", HUNTER_SURVIVAL ) at :7885.',
+    },
+    {
+      simcToken: "wildfire_bomb",
+      candidateAbilityGameIds: [259495],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "hunter_t::create_action / wildfire_bomb_t",
+      startLine: 7565,
+      endLine: 7565,
+      sourceNote:
+        'create_action dispatches "wildfire_bomb" to wildfire_bomb_t: built on p->talents.wildfire_bomb (:7268); find_talent_spell( SPECIALIZATION, "Wildfire Bomb", HUNTER_SURVIVAL ) at :7831.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "auto_attack",
+      triggerGcdMs: 0,
+      sourcePath: HUNTER_MODULE_PATH,
+      symbol: "auto_attack_t::auto_attack_t",
+      line: 7351,
+      sourceNote:
+        'create_action builds actions::auto_attack_t for "auto_attack" (:7537), an action_t of type ACTION_OTHER with no spell, whose constructor assigns trigger_gcd = 0_ms.',
+    },
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
 export const TARGETS = {
   "rogue-assassination": {
     datasetId: DATASET_ID,
@@ -7456,6 +8029,51 @@ export const TARGETS = {
     ],
     requiredFacts: DRUID_FERAL_FACTS,
     defaultOut: "src/data/game/druid-feral-gcd-semantics.json",
+  },
+  "druid-guardian": {
+    datasetId: "SIMC_DBC_DRUID_GUARDIAN_GCD_SEMANTICS",
+    classId: 11,
+    className: "Druid",
+    sources: DRUID_FERAL_SOURCES,
+    classModulePath: DRUID_FERAL_SOURCES.classModule,
+    handReviewedPaths: [
+      DRUID_FERAL_SOURCES.classModule,
+      DRUID_FERAL_SOURCES.racialSpells,
+      DRUID_FERAL_SOURCES.playerModule,
+      DRUID_FERAL_SOURCES.consumableModule,
+    ],
+    requiredFacts: DRUID_GUARDIAN_FACTS,
+    defaultOut: "src/data/game/druid-guardian-gcd-semantics.json",
+  },
+  "hunter-beast_mastery": {
+    datasetId: "SIMC_DBC_HUNTER_BEAST_MASTERY_GCD_SEMANTICS",
+    classId: 3,
+    className: "Hunter",
+    sources: HUNTER_SOURCES,
+    classModulePath: HUNTER_SOURCES.classModule,
+    handReviewedPaths: [
+      HUNTER_SOURCES.classModule,
+      HUNTER_SOURCES.racialSpells,
+      HUNTER_SOURCES.playerModule,
+      HUNTER_SOURCES.consumableModule,
+    ],
+    requiredFacts: HUNTER_BEAST_MASTERY_FACTS,
+    defaultOut: "src/data/game/hunter-beast_mastery-gcd-semantics.json",
+  },
+  "hunter-survival": {
+    datasetId: "SIMC_DBC_HUNTER_SURVIVAL_GCD_SEMANTICS",
+    classId: 3,
+    className: "Hunter",
+    sources: HUNTER_SOURCES,
+    classModulePath: HUNTER_SOURCES.classModule,
+    handReviewedPaths: [
+      HUNTER_SOURCES.classModule,
+      HUNTER_SOURCES.racialSpells,
+      HUNTER_SOURCES.playerModule,
+      HUNTER_SOURCES.consumableModule,
+    ],
+    requiredFacts: HUNTER_SURVIVAL_FACTS,
+    defaultOut: "src/data/game/hunter-survival-gcd-semantics.json",
   },
   "monk-windwalker": {
     datasetId: "SIMC_DBC_MONK_WINDWALKER_GCD_SEMANTICS",

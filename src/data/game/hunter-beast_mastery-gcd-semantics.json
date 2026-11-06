@@ -1,0 +1,224 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_HUNTER_BEAST_MASTERY_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/sc_hunter.cpp",
+        "sha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "byteLength": 309166
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-06",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 19574,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Bestial Wrath"
+    },
+    {
+      "abilityGameId": 34026,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Kill Command"
+    },
+    {
+      "abilityGameId": 193455,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Cobra Shot"
+    },
+    {
+      "abilityGameId": 217200,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Barbed Shot"
+    },
+    {
+      "abilityGameId": 392060,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Wailing Arrow"
+    },
+    {
+      "abilityGameId": 466930,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Black Arrow"
+    },
+    {
+      "abilityGameId": 1264359,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Wild Thrash"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "barbed_shot",
+      "candidateAbilityGameIds": [217200],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / barbed_shot_t",
+        "startLine": 7539,
+        "endLine": 7539,
+        "sourceNote": "create_action dispatches \"barbed_shot\" to barbed_shot_t: built on p->talents.barbed_shot (:5119); find_talent_spell( SPECIALIZATION, \"Barbed Shot\", HUNTER_BEAST_MASTERY ) at :5119.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "bestial_wrath",
+      "candidateAbilityGameIds": [19574],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / bestial_wrath_t",
+        "startLine": 7540,
+        "endLine": 7540,
+        "sourceNote": "create_action dispatches \"bestial_wrath\" to bestial_wrath_t: built on p->talents.bestial_wrath (:6811); find_talent_spell( SPECIALIZATION, \"Bestial Wrath\", HUNTER_BEAST_MASTERY ) at :7684.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "black_arrow",
+      "candidateAbilityGameIds": [466930],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / black_arrow_t",
+        "startLine": 7541,
+        "endLine": 7541,
+        "sourceNote": "create_action dispatches \"black_arrow\" to black_arrow_t: built on p->talents.black_arrow_spell (:4670); talents.black_arrow_spell = talents.black_arrow.ok() ? find_spell( 466930 ) : not_found at :4670.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "cobra_shot",
+      "candidateAbilityGameIds": [193455],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / cobra_shot_t",
+        "startLine": 7542,
+        "endLine": 7542,
+        "sourceNote": "create_action dispatches \"cobra_shot\" to cobra_shot_t: built on p->talents.cobra_shot (:5031); find_talent_spell( SPECIALIZATION, \"Cobra Shot\", HUNTER_BEAST_MASTERY ) at :7685.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "kill_command",
+      "candidateAbilityGameIds": [34026],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / kill_command_t",
+        "startLine": 7585,
+        "endLine": 7585,
+        "sourceNote": "create_action dispatches \"kill_command\" to kill_command_t: create_action builds kill_command_t on Beast Mastery with talents.kill_command_bm_player (:7588); find_talent_spell( SPECIALIZATION, \"Kill Command\", HUNTER_BEAST_MASTERY ) at :7588. Its ready() also asks the main pet's own action (:6776), which this slice does not read.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "wailing_arrow",
+      "candidateAbilityGameIds": [392060],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / wailing_arrow_t",
+        "startLine": 7563,
+        "endLine": 7563,
+        "sourceNote": "create_action dispatches \"wailing_arrow\" to wailing_arrow_t: built on p->talents.wailing_arrow (:4761); talents.wailing_dead.ok() ? find_spell( 392060 ) : not_found at :7925. Its ready() asks for its buff, a usability claim this slice does not make.",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "wild_thrash",
+      "candidateAbilityGameIds": [1264359],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "hunter_t::create_action / wild_thrash_t",
+        "startLine": 7564,
+        "endLine": 7564,
+        "sourceNote": "create_action dispatches \"wild_thrash\" to wild_thrash_t: built on p->talents.wild_thrash_player (:6926); find_talent_spell( SPECIALIZATION, \"Wild Thrash\", HUNTER_BEAST_MASTERY ) at :6926.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "auto_shot",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/class_modules/sc_hunter.cpp",
+        "sourceSha256": "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+        "symbol": "auto_attack_t::auto_attack_t",
+        "line": 7351,
+        "sourceNote": "create_action builds actions::auto_attack_t for \"auto_shot\" (:7538), an action_t of type ACTION_OTHER with no spell, whose constructor assigns trigger_gcd = 0_ms."
+      }
+    },
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}

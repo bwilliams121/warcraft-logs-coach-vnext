@@ -5836,3 +5836,19 @@ Offline only, not committed: the census (`.probe/onbt1/census.cjs`, Mortal Strik
 No production code changed. One assertion row is new: `tests/unit/analysis-composition-refusals.test.ts` had no row for it, and now holds Monk/Windwalker (SPEC_NOT_SUPPORTED, one retrieval for preparation alone, no dispatch). `tests/contracts/m11-promotion-evidence-gate.test.ts` keeps its ONB-T1 gate search (no qualifying assertion, `evidenceReady` false), its comment now naming the outcome. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, the `onb-t1` suite).
 
 Offline only, not committed: the census (`.probe/onbt1p/census.cjs`, Mortal Strike as its positive control for events and the specID distribution as its control for combatant info), its reading by source (`.probe/onbt1p/actors.cjs`, `qj1p.cjs`), and the replay of the subject (`.probe/onbt1p/m/replay.baseline.ts`). They give the results in agent/architecture.md "ONB-T1P".
+
+# ONB-T2: Guardian Druid, Beast Mastery Hunter and Survival Hunter
+
+`tests/unit/specs/onb-t2-guardian-druid.test.ts`, `onb-t2-beast-mastery-hunter.test.ts` and `onb-t2-survival-hunter.test.ts`, synthetic throughout, with Beast Mastery's real replay offline. Each row is internal only and refused publicly; each refuses another specialization first; a capture with no combatant info refuses; the datasets load; every domain but the offensive one reads without authority; and no resource is on the capability.
+
+The population: a spell with no record is excluded, never judged. An instant is decided when it lands, and a begin of one contradicts the review, so it is UNKNOWN. Beast Mastery's Wailing Arrow is decided at its begin, never inferred instant without one, and a missing page is never an instant cast. Boomstick and Convoke the Spirits are channels decided at their casts, with no bound claimed.
+
+The negatives: over each hero tree and none, no decision resolves; each list's stopping point is pinned; the enemy count given as 1 moves nothing; Focus and Rage on the wire are never read; a lone-node talent absent is UNKNOWN; an unresolved talent never backgrounds an action; a resolved tree disproves only the other tree's talents; a simulation's fight style stays open and is no row.
+
+Guardian's own: a logged Ironfur or Barkskin is excluded as off-GCD and never judged; Frenzied Regeneration, Survival Instincts and Rage of the Sleeper are excluded as off the list; `berserk` and `maul` read two talents each way; Moonkin Form's talent is the class-wide row; `talent.<name>.enabled` is true, false or no row; a rank stays open.
+
+Beast Mastery's own: the list reads no `pet.*` atom, the test that holds the decision not to build a pet state; the pet's rows of the same name are no press; a Dire Beast is excluded; the module states the wire's `BeastMastery` under the roster's id.
+
+`tests/contracts/m11a2-unsupported-subject.test.ts` holds the re-scoped guard: the subject's key is INTERNAL_ONLY and not PUBLIC, its wire string is no `SpecId`, no public lookup reaches it, the internal one does, and no roster row is unregistered. `m11a2-spec-roster` pins zero unregistered rows. `m11d2c-pinned-extraction-preflight` holds the new targets, and Survival's artifact is now committed. Six corpus cases, two each, and `tests/contracts/m11-promotion-evidence-gate.test.ts` pins that the gate search finds nothing for each. `m11a2-spec-module-conformance` proves Guardian's identity through the G2 cohort 246 context and Beast Mastery's through A7R6 fight 7, and records Survival as retained only.
+
+Offline only, not committed: the census (`.probe/onbt2/census.cjs`, Mortal Strike as its control), the wire probes (`wire.cjs`, `a91.cjs`, `specnames.cjs`), the source reading (`ctor.cjs`, `traits.cjs`) and the replays (`.probe/onbt2/m/`).

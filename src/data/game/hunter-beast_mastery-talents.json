@@ -1,0 +1,412 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_TRAIT_HUNTER_BEAST_MASTERY_TALENTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
+    "extractedOn": "2026-11-06",
+    "extractorVersion": 1,
+    "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals trait_data_t::id_node, as every earlier target recorded. Corroborated for Beast Mastery Hunter on four retained subjects, whose observed trees resolve a hero tree and the pinned list's talents by these keys (agent/architecture.md \"ONB-T2\").",
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "talents": [
+    {
+      "simcName": "barbed_shot",
+      "displayNameEn": "Barbed Shot",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102377,
+      "traitEntryId": 126440,
+      "talentSpellId": 217200,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_hunter.cpp:5119 : barbed_shot_base_t( p, \"barbed_shot\", p->talents.barbed_shot ); the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "beast_cleave",
+      "displayNameEn": "Beast Cleave",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102341,
+      "traitEntryId": 126403,
+      "talentSpellId": 115939,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_hunter.cpp:1724 -> set_default_value( o()->talents.beast_cleave.ok() ? o() -> talents.beast_cleave -> effectN( 1 ).percent() : 1.0 );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "bestial_wrath",
+      "displayNameEn": "Bestial Wrath",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102340,
+      "traitEntryId": 126402,
+      "talentSpellId": 19574,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_hunter.cpp:7684 talents.bestial_wrath = find_talent_spell( talent_tree::SPECIALIZATION, \"Bestial Wrath\", HUNTER_BEAST_MASTERY );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "black_arrow",
+      "displayNameEn": "Black Arrow",
+      "tree": "HERO",
+      "traitNodeId": 109961,
+      "traitEntryId": 136446,
+      "talentSpellId": 466930,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_hunter.cpp:7909 talents.black_arrow = find_talent_spell( talent_tree::HERO, \"Black Arrow\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "bloody_frenzy",
+      "displayNameEn": "Bloody Frenzy",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 110692,
+      "traitEntryId": 126400,
+      "talentSpellId": 407412,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_hunter.cpp:7729 talents.bloody_frenzy = find_talent_spell( talent_tree::SPECIALIZATION, \"Bloody Frenzy\", HUNTER_BEAST_MASTERY );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "cobra_shot",
+      "displayNameEn": "Cobra Shot",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102354,
+      "traitEntryId": 126416,
+      "talentSpellId": 193455,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_hunter.cpp:7685 talents.cobra_shot = find_talent_spell( talent_tree::SPECIALIZATION, \"Cobra Shot\", HUNTER_BEAST_MASTERY );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "jagged_wounds",
+      "displayNameEn": "Jagged Wounds",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102358,
+      "traitEntryId": 126420,
+      "talentSpellId": 1265044,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_hunter.cpp:7707 talents.jagged_wounds = find_talent_spell( talent_tree::SPECIALIZATION, \"Jagged Wounds\", HUNTER_BEAST_MASTERY );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "kill_command",
+      "displayNameEn": "Kill Command",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102346,
+      "traitEntryId": 126408,
+      "talentSpellId": 34026,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_hunter.cpp:7588 return new kill_command_t( this, options_str, talents.kill_command_bm_player );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "killer_cobra",
+      "displayNameEn": "Killer Cobra",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102375,
+      "traitEntryId": 126438,
+      "talentSpellId": 199532,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_hunter.cpp:7723 talents.killer_cobra = find_talent_spell( talent_tree::SPECIALIZATION, \"Killer Cobra\", HUNTER_BEAST_MASTERY );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "master_handler",
+      "displayNameEn": "Master Handler",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102359,
+      "traitEntryId": 126421,
+      "talentSpellId": 424558,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_hunter.cpp:7724 talents.master_handler = find_talent_spell( talent_tree::SPECIALIZATION, \"Master Handler\", HUNTER_BEAST_MASTERY );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "serpentine_strikes",
+      "displayNameEn": "Serpentine Strikes",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102372,
+      "traitEntryId": 126435,
+      "talentSpellId": 468701,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_hunter.cpp:7708 talents.serpentine_strikes = find_talent_spell( talent_tree::SPECIALIZATION, \"Serpentine Strikes\", HUNTER_BEAST_MASTERY );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "snakeskin_quiver",
+      "displayNameEn": "Snakeskin Quiver",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102344,
+      "traitEntryId": 126406,
+      "talentSpellId": 468695,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 128265,
+          "displayNameEn": "Cobra Senses",
+          "talentSpellId": 378244
+        }
+      ],
+      "binding": "sc_hunter.cpp:7710 talents.snakeskin_quiver = find_talent_spell( talent_tree::SPECIALIZATION, \"Snakeskin Quiver\", HUNTER_BEAST_MASTERY );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "wailing_dead",
+      "displayNameEn": "Wailing Dead",
+      "tree": "HERO",
+      "traitNodeId": 109800,
+      "traitEntryId": 136058,
+      "talentSpellId": 1264290,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_hunter.cpp:7924 talents.wailing_dead = find_talent_spell( talent_tree::HERO, \"Wailing Dead\" );; the pinned list reads it or an action of the list is built on it"
+    },
+    {
+      "simcName": "wild_thrash",
+      "displayNameEn": "Wild Thrash",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 102363,
+      "traitEntryId": 126425,
+      "talentSpellId": 1264359,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_hunter.cpp:6926 wild_thrash_t( hunter_t* p, util::string_view options_str ) : hunter_spell_t( \"wild_thrash\", p, p->talents.wild_thrash_player ); the pinned list reads it or an action of the list is built on it"
+    }
+  ],
+  "heroTrees": [
+    {
+      "simcName": "pack_leader",
+      "subTreeId": 43,
+      "entries": [
+        {
+          "traitEntryId": 117559,
+          "traitNodeId": 94962,
+          "displayNameEn": "Better Together",
+          "talentSpellId": 472357
+        },
+        {
+          "traitEntryId": 117563,
+          "traitNodeId": 94966,
+          "displayNameEn": "Stampede!",
+          "talentSpellId": 472741
+        },
+        {
+          "traitEntryId": 117564,
+          "traitNodeId": 94967,
+          "displayNameEn": "Shell Cover",
+          "talentSpellId": 472707
+        },
+        {
+          "traitEntryId": 117566,
+          "traitNodeId": 94969,
+          "displayNameEn": "No Mercy",
+          "talentSpellId": 472660
+        },
+        {
+          "traitEntryId": 117569,
+          "traitNodeId": 94972,
+          "displayNameEn": "Ursine Fury",
+          "talentSpellId": 472476
+        },
+        {
+          "traitEntryId": 117576,
+          "traitNodeId": 94979,
+          "displayNameEn": "Slicked Shoes",
+          "talentSpellId": 472719
+        },
+        {
+          "traitEntryId": 117581,
+          "traitNodeId": 94984,
+          "displayNameEn": "Fury of the Wyvern",
+          "talentSpellId": 472550
+        },
+        {
+          "traitEntryId": 117582,
+          "traitNodeId": 94985,
+          "displayNameEn": "Pack Mentality",
+          "talentSpellId": 472358
+        },
+        {
+          "traitEntryId": 117585,
+          "traitNodeId": 94988,
+          "displayNameEn": "Hogstrider",
+          "talentSpellId": 472639
+        },
+        {
+          "traitEntryId": 117588,
+          "traitNodeId": 94991,
+          "displayNameEn": "Howl of the Pack Leader",
+          "talentSpellId": 471876
+        },
+        {
+          "traitEntryId": 117589,
+          "traitNodeId": 94992,
+          "displayNameEn": "Dire Summons",
+          "talentSpellId": 472352
+        },
+        {
+          "traitEntryId": 123781,
+          "traitNodeId": 94979,
+          "displayNameEn": "Masterful Call",
+          "talentSpellId": 1268705
+        },
+        {
+          "traitEntryId": 128358,
+          "traitNodeId": 94972,
+          "displayNameEn": "Sharpened Claws",
+          "talentSpellId": 472524
+        },
+        {
+          "traitEntryId": 136060,
+          "traitNodeId": 109802,
+          "displayNameEn": "Sharpened Fangs",
+          "talentSpellId": 1264775
+        },
+        {
+          "traitEntryId": 136061,
+          "traitNodeId": 109803,
+          "displayNameEn": "Lethal Barbs",
+          "talentSpellId": 1264781
+        },
+        {
+          "traitEntryId": 136062,
+          "traitNodeId": 109804,
+          "displayNameEn": "Hoof and Blade",
+          "talentSpellId": 1264797
+        },
+        {
+          "traitEntryId": 136236,
+          "traitNodeId": 109804,
+          "displayNameEn": "Wyvern's Gaze",
+          "talentSpellId": 1264792
+        }
+      ]
+    },
+    {
+      "simcName": "dark_ranger",
+      "subTreeId": 44,
+      "entries": [
+        {
+          "traitEntryId": 117554,
+          "traitNodeId": 94957,
+          "displayNameEn": "Banshee's Mark",
+          "talentSpellId": 467902
+        },
+        {
+          "traitEntryId": 117557,
+          "traitNodeId": 94960,
+          "displayNameEn": "Dark Chains",
+          "talentSpellId": 430712
+        },
+        {
+          "traitEntryId": 117558,
+          "traitNodeId": 94961,
+          "displayNameEn": "Bleak Arrows",
+          "talentSpellId": 467749
+        },
+        {
+          "traitEntryId": 117565,
+          "traitNodeId": 94968,
+          "displayNameEn": "Soul Drinker",
+          "talentSpellId": 469638
+        },
+        {
+          "traitEntryId": 117571,
+          "traitNodeId": 94974,
+          "displayNameEn": "Bleak Powder",
+          "talentSpellId": 467911
+        },
+        {
+          "traitEntryId": 117583,
+          "traitNodeId": 94986,
+          "displayNameEn": "Ebon Bowstring",
+          "talentSpellId": 467897
+        },
+        {
+          "traitEntryId": 117590,
+          "traitNodeId": 94993,
+          "displayNameEn": "Withering Fire",
+          "talentSpellId": 466990
+        },
+        {
+          "traitEntryId": 123779,
+          "traitNodeId": 94959,
+          "displayNameEn": "Smoke Screen",
+          "talentSpellId": 430709
+        },
+        {
+          "traitEntryId": 128219,
+          "traitNodeId": 94960,
+          "displayNameEn": "Shadow Dagger",
+          "talentSpellId": 467741
+        },
+        {
+          "traitEntryId": 128238,
+          "traitNodeId": 94983,
+          "displayNameEn": "Blighted Quiver",
+          "talentSpellId": 1264291
+        },
+        {
+          "traitEntryId": 132888,
+          "traitNodeId": 94982,
+          "displayNameEn": "Umbral Reach",
+          "talentSpellId": 1235397
+        },
+        {
+          "traitEntryId": 136057,
+          "traitNodeId": 109799,
+          "displayNameEn": "Pact of the Hollow",
+          "talentSpellId": 1264690
+        },
+        {
+          "traitEntryId": 136058,
+          "traitNodeId": 109800,
+          "displayNameEn": "Wailing Dead",
+          "talentSpellId": 1264290
+        },
+        {
+          "traitEntryId": 136059,
+          "traitNodeId": 109801,
+          "displayNameEn": "Corpsecaller",
+          "talentSpellId": 1264289
+        },
+        {
+          "traitEntryId": 136231,
+          "traitNodeId": 94957,
+          "displayNameEn": "The Bell Tolls",
+          "talentSpellId": 467644
+        },
+        {
+          "traitEntryId": 136446,
+          "traitNodeId": 109961,
+          "displayNameEn": "Black Arrow",
+          "talentSpellId": 466930
+        },
+        {
+          "traitEntryId": 136742,
+          "traitNodeId": 94986,
+          "displayNameEn": "Through the Eyes",
+          "talentSpellId": 1277565
+        }
+      ]
+    }
+  ]
+}

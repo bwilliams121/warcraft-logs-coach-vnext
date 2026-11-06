@@ -107,8 +107,8 @@ describe("the committed corpus loads", () => {
     // ONB-B1: two cases for the INTERNAL_ONLY Arms Warrior registration.
     // ONB-B2: two cases each for the INTERNAL_ONLY Frost Death Knight and Enhancement Shaman registrations.
     // ONB-B3: two cases for the INTERNAL_ONLY Devourer Demon Hunter registration.
-    // ONB-D2, ONB-D3, ONB-D4: two cases for each INTERNAL_ONLY Cohort D follower. ONB-X1: two for Fire Mage. ONB-X2: two for Devastation Evoker. ONB-X3: two for Vengeance Demon Hunter. ONB-X4: two for Demonology Warlock. ONB-X5: two for Unholy Death Knight. ONB-T1: two for Windwalker Monk.
-    expect(loaded.cases).toHaveLength(247);
+    // ONB-D2, ONB-D3, ONB-D4: two cases for each INTERNAL_ONLY Cohort D follower. ONB-X1: two for Fire Mage. ONB-X2: two for Devastation Evoker. ONB-X3: two for Vengeance Demon Hunter. ONB-X4: two for Demonology Warlock. ONB-X5: two for Unholy Death Knight. ONB-T1: two for Windwalker Monk. ONB-T2: two each for Guardian Druid, Beast Mastery Hunter and Survival Hunter.
+    expect(loaded.cases).toHaveLength(253);
     expect(loaded.coverage.declared).toBe(0);
   });
 

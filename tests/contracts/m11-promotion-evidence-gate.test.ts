@@ -763,6 +763,9 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
       "warlock/demonology",
       "deathknight/unholy",
       "monk/windwalker",
+      "druid/guardian",
+      "hunter/beast_mastery",
+      "hunter/survival",
     ]);
     const internal = PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY");
     expect(internal.map((row) => row.specId)).toEqual([...INTERNAL_ONLY_SPEC_IDS]);
@@ -780,6 +783,39 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
       expect(readiness.qualifyingAssertions, specId).toEqual([]);
       expect(readiness.evidenceReady, specId).toBe(false);
     }
+  });
+
+  it("ONB-T2: the gate search finds nothing for Guardian Druid", async () => {
+    // No decision of it resolves, and nothing of it is committed as a decision set (agent/architecture.md "ONB-T2").
+    // A later capture that changed this would fail this pin and prompt a new public entry; it would not promote anything by itself.
+    const tiers = await tiersPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "druid/guardian");
+    if (module === undefined) throw new Error("no module for druid/guardian");
+    const readiness = evaluate(tiers, "druid/guardian", "INTERNAL_ONLY", internalPairing(module));
+    expect(readiness.qualifyingAssertions).toEqual([]);
+    expect(readiness.evidenceReady).toBe(false);
+  });
+
+  it("ONB-T2: the gate search finds nothing for Beast Mastery Hunter", async () => {
+    // No decision of it resolves, and nothing of it is committed as a decision set (agent/architecture.md "ONB-T2").
+    // A later capture that changed this would fail this pin and prompt a new public entry; it would not promote anything by itself.
+    const tiers = await tiersPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "hunter/beast_mastery");
+    if (module === undefined) throw new Error("no module for hunter/beast_mastery");
+    const readiness = evaluate(tiers, "hunter/beast_mastery", "INTERNAL_ONLY", internalPairing(module));
+    expect(readiness.qualifyingAssertions).toEqual([]);
+    expect(readiness.evidenceReady).toBe(false);
+  });
+
+  it("ONB-T2: the gate search finds nothing for Survival Hunter", async () => {
+    // No decision of it resolves, and nothing of it is committed as a decision set (agent/architecture.md "ONB-T2").
+    // A later capture that changed this would fail this pin and prompt a new public entry; it would not promote anything by itself.
+    const tiers = await tiersPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "hunter/survival");
+    if (module === undefined) throw new Error("no module for hunter/survival");
+    const readiness = evaluate(tiers, "hunter/survival", "INTERNAL_ONLY", internalPairing(module));
+    expect(readiness.qualifyingAssertions).toEqual([]);
+    expect(readiness.evidenceReady).toBe(false);
   });
 
   it("ONB-T1: the gate search finds nothing for Windwalker Monk", async () => {
