@@ -5853,6 +5853,20 @@ Beast Mastery's own: the list reads no `pet.*` atom, the test that holds the dec
 
 Offline only, not committed: the census (`.probe/onbt2/census.cjs`, Mortal Strike as its control), the wire probes (`wire.cjs`, `a91.cjs`, `specnames.cjs`), the source reading (`ctor.cjs`, `traits.cjs`) and the replays (`.probe/onbt2/m/`).
 
+# HEAL-B1P2: Restoration Druid, not promoted (capacity)
+
+No production behavior changed. `tests/unit/specs/heal-b1-healer-evaluators.test.ts` gains the one new block, how its choice node reads:
+
+```text
+  Tree of Life aura, no cast      -> not a use; listing COMPLETE; uses are Convoke and Tranquility
+  entry for the uncast sibling    -> ASSIGNMENT_UNKNOWN READINESS_NOT_ESTABLISHED, never met, missed or not selected
+  either entry's cast             -> a use; no talent is read to exclude it
+```
+
+The healer promotion gate gains no subject and is unchanged, and the archive pins in `tests/unit/m11c4e-evidence-archive.test.ts` are unchanged: they are what keeps the fixture out. Those pins are the proof the line did not move.
+
+Offline only, not committed: the census, size and deduplication measurements in `.probe/healb1p2/`, and a dry run in a removed worktree (the five promotion sites, the healer view, the manifest and a gate subject). There the gate gave 37 of 37 with its six Restoration Druid checks, and the archive test failed on `expected 4321003 to be less than 4194304`, its count pin failing with it. That run is a measurement, not a passing test in this repository (agent/follow-ups.md "After HEAL-B1P2").
+
 # ONB-T2P: Guardian Druid, Beast Mastery Hunter and Survival Hunter, not promoted
 
 No production code changed. Two assertion rows are new: `tests/unit/analysis-composition-refusals.test.ts` had none for Guardian or Survival, and now holds Druid/Guardian and Hunter/Survival (SPEC_NOT_SUPPORTED, one retrieval for preparation alone, no dispatch). Hunter/BeastMastery's row already existed. `tests/contracts/m11-promotion-evidence-gate.test.ts` keeps its three ONB-T2 gate searches (no qualifying assertion, `evidenceReady` false), their comments now naming the outcome. The existing pins carry the rest (`m10d-public-registration`, `m10a-spec-partition`, `m11a2-unsupported-subject`, the `onb-t2` suites).

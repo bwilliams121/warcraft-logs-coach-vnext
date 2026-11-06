@@ -15000,3 +15000,29 @@ The campaign may stop early once every currently eligible evidence-deficient spe
 **Capacity.** This grant authorizes no archive-size increase. If new evidence cannot be committed under the existing corpus and archive policy, stop with OWNER_DECISION_REQUIRED and give the measured proposal: the current archive size and limit, the bytes the proposed retained evidence requires, the deduplication and compression opportunities considered, and the smallest justified new limit. Required evidence is never discarded to fit, and the allowance is never raised silently.
 
 **Promotion.** Evidence acquisition authorizes no PUBLIC promotion. After capture, the normal evaluator is replayed, MATCH, REJECTED and UNKNOWN semantics are preserved, the existing promotion gates apply unchanged, and the next real blocker is exposed where a specialization still cannot pass. No outcome shopping and no weakening of promotion requirements is authorized.
+
+## HEAL-B1P2 — Restoration Druid public promotion: not promoted, for capacity
+
+Autopilot queue entry HEAL-B1P2. Public contract: declared EXPECTED; actual change NONE, because nothing is promoted. No Warcraft Logs request.
+
+**The outcome.** Restoration Druid stays INTERNAL_ONLY, with archive capacity as its one measured blocker (queue rule 8: the existing caps and notice lines stay in force, a fixture that cannot fit records its measured size, and no line is raised silently). It goes to REM-CENSUS. It is neither DEFERRED nor BLOCKED: nothing says the work cannot be done, and only an owner may postpone it.
+
+**What was measured.** gtKb2xHn87pNcFfW fight 22, actor 2, is retained whole in the M9-C2, M11-C4 and M11-C4b captures: `friendlySpecs` Restoration and combatantinfo specID 105.
+
+- Over the whole fight it has 384 cast and begincast events, 374 of them sourced by it: two Tranquility (2,439,674 and 2,625,679) and five Convoke the Spirits (2,428,292, 2,493,470, 2,559,083, 2,621,134 and 2,684,664). There are no Flourish or Incarnation: Tree of Life casts, no empower envelopes, and no completed cast without an ability id.
+- The minimal cut is the shape HEAL-B4P used without its envelope families: three compact `--actor-slice` segments of 11,410, 69,433 and 51,068 bytes, 131,911 in all.
+
+**The dry run.** To tell a capacity stop from a gate failure, the full promotion was applied in a throwaway worktree (the five promotion sites, the healer view, the manifest, the gate subject) and removed afterward:
+
+- the unchanged gate (`tests/contracts/heal-ap-healer-promotion-gate.test.ts`) gave 37 of 37, including all six checks on the new subject;
+- through the public service, the document is AUTHORITY_NOT_AVAILABLE, COOLDOWN is OBSERVED with a COMPLETE listing, and there are seven uses;
+- the plan entries gave Convoke MET, Tranquility MET at 2,439,000 ± 2 s, Tranquility UNKNOWN READINESS_NOT_ESTABLISHED at 2,600,000 ± 3 s, Flourish ASSIGNMENT_NOT_ACTIONABLE after the encounter's end, and Rejuvenation not registered;
+- the archive test failed exactly where it should: `expected 4321003 to be less than 4194304`.
+
+So capacity is what stops it, as far as that run can show. It is a measurement, not committed proof; only a committed fixture can make it a passing test.
+
+**The choice node.** Node 82064 (Incarnation: Tree of Life 33891, Convoke the Spirits 391528) reads by observed casts alone, the rule every other healer's node already follows. Both entries stay identified, and a completed cast of either is a use. An entry for the uncast sibling is ASSIGNMENT_UNKNOWN READINESS_NOT_ESTABLISHED, never a miss and never "not selected". The evaluator reads no talent, and no new vocabulary was added. This fight is the case that tests it: combatantinfo holds entry 103119 (Convoke), and six Tree of Life aura applications have no cast of 33891. A Tree of Life entry over one of those auras (2,449,000 ± 2 s) stayed UNKNOWN in the dry run. The rule is pinned on synthetic events in `tests/unit/specs/heal-b1-healer-evaluators.test.ts`.
+
+**Corrected.** "No retained evidence" for Restoration Druid in the `src/findings/spec-id.ts` comment and five test comments, wrong since HEAL-B4P's census, now states the capacity reason. The historical prose elsewhere stays as written.
+
+**Why a tranche stop, not an owner stop.** The entry says a gate that cannot pass leaves the specialization INTERNAL_ONLY and goes to REM-CENSUS, and rule 8 raises a proposal to the owner when several fixtures cannot fit. This is one row. ONB-EV's capacity stop is the first place several could meet, so the proposal is recorded now (`agent/follow-ups.md` "After HEAL-B1P2") with what the grant's capacity paragraph asks for, and the queue's order still holds: a stop here would hold POLB-A and everything behind it on a decision that does not block them.

@@ -30,7 +30,9 @@
  *   so the derived requirement is FULL_RAID by construction.
  *
  * INTERNAL_ONLY. No public description and no healer view: a public request
- * cannot reach this row. Its public shape and promotion are HEAL-B1P's.
+ * cannot reach this row. HEAL-B1P2 did not promote it, because its fixture does
+ * not fit under the evidence archive's notice line (agent/follow-ups.md "After
+ * HEAL-B1P2").
  */
 
 import type { SpecAnalysisInput, UnanalyzedEnvelope } from "../../../findings/analysis-envelope.js";
@@ -251,7 +253,7 @@ export const RESTORATION_DRUID_MODULE: SpecModule = defineSpecModule({
   exposure: "INTERNAL_ONLY",
   capabilities: RESTORATION_DRUID_CAPABILITIES,
   authorityBindings: RESTORATION_DRUID_AUTHORITY_BINDINGS,
-  // No public description: INTERNAL_ONLY. The public prose is HEAL-B1P's.
+  // No public description: INTERNAL_ONLY.
   limitsProse: Object.freeze({ analysis: "", raidNight: "" }),
   supplementalAnalyses: [],
   analyze: (input, authority): RestorationDruidAnalysis => analyzeRestorationDruid(input, authority),

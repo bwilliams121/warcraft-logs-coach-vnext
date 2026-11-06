@@ -19,6 +19,8 @@
  * - a cast-coverage gap makes the use listing UNKNOWN, never "none used";
  * - overlap with damage episodes needs the declared FULL_RAID roster.
  *
+ * HEAL-B1P2 adds how Restoration Druid's choice node reads (the last block).
+ *
  * The shared plan rules and use facts are pinned in depth by the Restoration
  * Shaman evaluator's own tests, which run unchanged over the same shared
  * modules (HEAL-B1 moved them there without changing behavior).
@@ -492,5 +494,59 @@ describe.each(CASES)("$label", (testCase) => {
         },
       ]);
     });
+  });
+});
+
+/**
+ * HEAL-B1P2: node 82064 reads by observed casts alone. The aura-without-a-cast
+ * shape is the real one: gtKb2xHn87pNcFfW fight 22's Restoration Druid (actor 2)
+ * holds Convoke the Spirits and casts it five times, and has six Tree of Life
+ * aura applications with no cast of 33891 (retained capture, not committed).
+ */
+describe("Restoration Druid: its choice node reads by observed casts alone", () => {
+  const TRANQUILITY = 740;
+  const TREE_OF_LIFE = 33891;
+  const CONVOKE = 391528;
+  const testCase = CASES.find((row) => row.label === "Restoration Druid");
+  if (testCase === undefined) throw new Error("no Restoration Druid case");
+  const run = (raw: readonly Raw[], plan: RaidCooldownPlan | null = null) => {
+    const fight = fightOf(testCase, raw);
+    return evaluated(testCase.evaluate({ fight, identity: identityFor(testCase, fight), plan }));
+  };
+  const auraRaw = [
+    cast(10_000, SUBJECT, CONVOKE),
+    { ...cast(20_000, SUBJECT, TREE_OF_LIFE), type: "applybuff", targetID: SUBJECT },
+    { ...cast(30_000, SUBJECT, TREE_OF_LIFE), type: "removebuff", targetID: SUBJECT },
+    cast(40_000, SUBJECT, TRANQUILITY),
+  ];
+
+  it("a Tree of Life aura with no cast is not a use, and the listing stays COMPLETE", () => {
+    const result = run(auraRaw);
+    expect(result.cooldowns.listing).toEqual({ state: "COMPLETE" });
+    expect(result.cooldowns.uses.map((use) => use.cast.abilityGameId)).toEqual([CONVOKE, TRANQUILITY]);
+  });
+
+  it("an entry for the uncast sibling over its aura is UNKNOWN, never met, missed or not selected", () => {
+    const result = run(
+      auraRaw,
+      planOf([assign(10_000, CONVOKE, "cast"), assign(20_000, TREE_OF_LIFE, "aura")]),
+    );
+    if (result.assignment.status !== "EVALUATED") throw new Error("expected an evaluated plan");
+    expect(
+      result.assignment.results.map((entry) => [
+        entry.assignment.assignmentId,
+        entry.status,
+        entry.status === "ASSIGNMENT_UNKNOWN" ? entry.reason : null,
+      ]),
+    ).toEqual([
+      ["cast", "ASSIGNMENT_MET", null],
+      ["aura", "ASSIGNMENT_UNKNOWN", "READINESS_NOT_ESTABLISHED"],
+    ]);
+    expect(JSON.stringify(result)).not.toMatch(/MISSED|NOT_SELECTED|INCORRECT/);
+  });
+
+  it("the other entry's cast is a use too: no talent is read to exclude either", () => {
+    const result = run([cast(10_000, SUBJECT, TREE_OF_LIFE), cast(50_000, SUBJECT, CONVOKE)]);
+    expect(result.cooldowns.uses.map((use) => use.cast.abilityGameId)).toEqual([TREE_OF_LIFE, CONVOKE]);
   });
 });

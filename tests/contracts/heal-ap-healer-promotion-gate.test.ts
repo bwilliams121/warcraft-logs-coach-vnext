@@ -46,13 +46,15 @@
  * A healer that cannot pass stays INTERNAL_ONLY. Followers meet this gate;
  * none meets a weakened one. HEAL-B1P added Holy Paladin and Mistweaver Monk,
  * each on its own whole-fight casts in the same canonical fight, driven by the
- * same checks; Restoration Druid has no retained evidence and stays
- * INTERNAL_ONLY. HEAL-B2P added Holy Priest the same way (actor 2, cut from
+ * same checks; Restoration Druid stayed INTERNAL_ONLY. HEAL-B2P added Holy Priest the same way (actor 2, cut from
  * the same capture). HEAL-B3P added no subject: no committed or retained
  * capture holds a Discipline Priest's whole-fight casts, so it stays
  * INTERNAL_ONLY. HEAL-B4P added Preservation Evoker the same way on another
  * whole fight (gtKb fight 22 actor 15, cut from its three adjoining retained
- * captures).
+ * captures). HEAL-B1P2 added no subject: Restoration Druid passed every check
+ * here in an uncommitted dry run on the same captures (actor 2), and its
+ * 131,911-byte fixture does not fit under the evidence archive's notice line, so
+ * it stays INTERNAL_ONLY (agent/follow-ups.md "After HEAL-B1P2").
  */
 
 import { beforeAll, describe, expect, it } from "vitest";

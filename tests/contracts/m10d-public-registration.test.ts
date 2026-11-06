@@ -150,8 +150,8 @@ describe("the five sites agree", () => {
     // its healer view, after the healer promotion gate passed. HEAL-B1 put
     // three INTERNAL_ONLY healer rows in, and HEAL-B1P made Holy Paladin and
     // Mistweaver Monk PUBLIC by the same move, each after the healer gate
-    // passed on its own real subject; Restoration Druid has no retained
-    // evidence and stays INTERNAL_ONLY. HEAL-B2 put a fourth INTERNAL_ONLY
+    // passed on its own real subject; Restoration Druid stays INTERNAL_ONLY:
+    // its whole fight is retained, and its fixture does not fit under the archive's notice line (HEAL-B1P2). HEAL-B2 put a fourth INTERNAL_ONLY
     // healer row in, Holy Priest, which HEAL-B2P made PUBLIC. HEAL-B3 put an
     // INTERNAL_ONLY Discipline Priest row in, NOT among the enabled analyzers,
     // and HEAL-B4 an INTERNAL_ONLY Preservation Evoker row, NOT among them either.

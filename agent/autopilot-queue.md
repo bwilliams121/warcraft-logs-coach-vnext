@@ -2296,11 +2296,14 @@ Onboarding does not close at 12 of 40 PUBLIC. The objective is every playable sp
 ### HEAL-B1P2: Restoration Druid (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: HEAL-B1P, HEAL-B4P
+branch: autopilot/heal-b1p2
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** Not promoted, for capacity alone; it stays INTERNAL_ONLY and goes to REM-CENSUS with that blocker, and nothing is DEFERRED. The public contract is unchanged, and no request was made. In an uncommitted dry run the unchanged healer promotion gate passes on gtKb2xHn87pNcFfW fight 22 actor 2 (two Tranquility and five Convoke the Spirits casts, the listing COMPLETE). The minimal fixture is 131,911 bytes and the archive has 5,212 left under its notice line, so the total would be 4,321,003 against 4,194,304, 126,699 over. Under rule 8 the measured size is recorded and the line is not raised. The choice node reads by observed casts alone. A retry waits on an owner capacity decision, the prerequisite rule 2 needs (agent/architecture.md "HEAL-B1P2"; agent/follow-ups.md "After HEAL-B1P2").
 
 **Direction.** Owner decision (2026-11-06), item 1; `agent/follow-ups.md` "After HEAL-B4P".
 
@@ -2405,6 +2408,8 @@ Then add the tranches the census shows are missing, in this order, before REM-GA
 - `REM-P<n>`: PUBLIC promotion retries, each only for specializations whose prerequisites changed.
 
 Add every new entry to REM-GATE's `dependsOn`. New Warcraft Logs needs are recorded as an owner stop under rule 7. This tranche implements nothing and promotes nothing.
+
+Restoration Druid enters with one measured blocker, archive capacity (agent/follow-ups.md "After HEAL-B1P2"). Its `REM-P<n>` is eligible only after an owner capacity decision; bring its row into any measured capacity proposal.
 
 ### REM-GATE: Remediation pass verified
 

@@ -86,8 +86,7 @@ describe("the known specialization ids are exactly partitioned", () => {
     // first healer registration) in HEAL-A, was empty again from HEAL-AP,
     // which published its healer findings, held Holy Paladin, Restoration
     // Druid and Mistweaver Monk from HEAL-B1, and holds Restoration Druid alone
-    // since HEAL-B1P, which promoted the other two (no retained evidence holds
-    // a Restoration Druid event, so it cannot meet the healer gate). HEAL-B2
+    // since HEAL-B1P, which promoted the other two (its whole fight is retained, and its fixture does not fit under the archive's notice line (HEAL-B1P2)). HEAL-B2
     // added Holy Priest, which HEAL-B2P promoted. HEAL-B4 added Preservation
     // Evoker, whose public promotion is HEAL-B4P. HEAL-B3 added Discipline
     // Priest, whose public promotion is HEAL-B3P.

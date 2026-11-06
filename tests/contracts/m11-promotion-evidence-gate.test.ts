@@ -731,8 +731,8 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     // Augmentation Evoker held it in M13-E until M13-F promoted it; Restoration
     // Shaman held it in HEAL-A until HEAL-AP promoted it. HEAL-B1 put the
     // three healers on its architecture here, and HEAL-B1P promoted Holy
-    // Paladin and Mistweaver Monk through the healer gate; Restoration Druid
-    // has no retained evidence. HEAL-B2 added Holy Priest, and HEAL-B2P
+    // Paladin and Mistweaver Monk through the healer gate; for Restoration Druid,
+    // its whole fight is retained, and its fixture does not fit under the archive's notice line (HEAL-B1P2). HEAL-B2 added Holy Priest, and HEAL-B2P
     // promoted it through the healer gate. HEAL-B3 added Discipline Priest,
     // HEAL-B4 Preservation Evoker, and HEAL-B4P promoted that through the healer gate. ONB-A1 added Havoc Demon Hunter, and ONB-A1P promoted it through both gates.
     // The synthetic module below still exercises the branch.
