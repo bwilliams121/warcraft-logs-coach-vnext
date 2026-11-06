@@ -19,6 +19,26 @@ This changes what older entries here say. They stay as written, as the record of
 - **ONB-EV is approved,** with a hard cap of 60 Warcraft Logs requests (`agent/architecture.md` "Owner grant (2026-11-06): ONB-EV"). The grant authorizes no archive-limit increase and no promotion.
 - **Restoration Druid's promotion is queued** (HEAL-B1P2), which supersedes "is not queued" under "After HEAL-B4P". HEAL-B1P2 ran and did not promote it: "After HEAL-B1P2".
 
+## After POLB-A: the census cannot supply an upper bound
+
+**Raised:** POLB-A (2026-11-06). Offline. The argument and the counts are in `agent/architecture.md` "POLB-A".
+
+**No contract justifies an upper bound or a closed set.** So this supersedes "the upper bound is the widest single gap ... only Policy B can supply it" under "After ONB-S3R" as a plan: Policy B's approved source cannot supply it either. The 1,414 count decisions and 2,301 `target_if` decisions stay UNKNOWN whatever the census returns, and those specializations' promotions must not be planned around it.
+
+**The owner's decision is POLB-CENSUS's:** approve the frozen plan and a cap of 243 requests with a named archive exception of up to 1 MiB, or decline it with Option E standing. Nothing in POLB-B or POLB-C can start until then, and if it is declined, both need rewording, as do the ONB-Z gate's "Policy B implemented and validated" and REM-CENSUS's dependency, because POLB-C would never merge.
+
+**Waiting for POLB-B if the census runs:**
+
+- Wire the build resolver, which needs a reviewed change to `m11g4-simulation-context-layering`'s importer pin. Production `gameBuildOf` returns `null` until then, so every datum refuses.
+- The lower bound's use, including which windows can transfer it at all, because an add's life depends on the group's kill speed.
+- The drift diagnostic beside the contradiction UNKNOWN, tested on real evidence.
+
+**Only two retained analyzed pulls have a build the calendar can prove.** rXAfw9t1q8YpmkKD (2 September) and gtKb2xHn87pNcFfW (13 September) fall outside every proven US interval, M13AAUGAAAAAAAAA (2 November) is after the observations end, and most contexts hold no region. Any fight ONB-EV captures will have this problem too, until the deploy calendar is extended. Build-keyed data is strict by choice, because a stale lower bound could produce a wrong finding.
+
+**The census's `Enemies` streams are unproven.** The measurements filtered a retained All stream. No capture has requested `hostilityType: Enemies` with `dataType: All` or `Deaths`, so POLB-CENSUS must check the first pull's rows and stop if they differ.
+
+**Malignant Totem is a real case the enemy-set model does not count.** 96 instances in b1Pm fight 48 summon, begin casting and die, untouched by any friendly, so hostile identity never admits them. Whether they are `active_enemies` under N1 was not reviewed. It only ever undercounts, which is sound for a lower bound.
+
 ## After HEAL-B1P2: Restoration Druid waits on archive capacity alone
 
 **Raised:** HEAL-B1P2 (2026-11-06). No Warcraft Logs request, and the notice line is unchanged. Measured offline; the numbers are in `agent/architecture.md` "HEAL-B1P2".

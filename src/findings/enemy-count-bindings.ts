@@ -20,6 +20,10 @@ import { enemySetAt } from "../engine/game-state/enemies/enemy-set.js";
 import type { CombatState } from "../engine/state/combat-state.js";
 import { withActiveEnemies } from "../simc/expression/enemy-count.js";
 import type { AtomBindings } from "../simc/expression/evaluate.js";
+import {
+  PRODUCTION_ENCOUNTER_STATE_SUPPLIER,
+  type EncounterStateSupplier,
+} from "./encounter-state-supplier.js";
 
 /**
  * The position an anchored decision was made at, by the anchor's SOURCE. A shared timestamp is not a
@@ -47,14 +51,20 @@ export function decisionPositionOfAnchor(
   }
 }
 
-/** `bindings` with `active_enemies` read at `position`, for the decision of `subjectActorId`. */
+/**
+ * `bindings` with `active_enemies` read at `position`, for the decision of `subjectActorId`. An upper
+ * bound comes only from the encounter-state supplier, which holds no production row today (POLB-A).
+ */
 export function withEnemyCountAt(
   bindings: AtomBindings,
   state: CombatState,
   subjectActorId: number,
   position: number | null,
+  supplier: EncounterStateSupplier = PRODUCTION_ENCOUNTER_STATE_SUPPLIER,
 ): AtomBindings {
   if (bindings.specAtoms === undefined || position === null) return bindings;
-  const enemySet = enemySetAt(state, { subjectActorId, at: { anchor: "BEFORE_EVENT", position } });
+  const at = { anchor: "BEFORE_EVENT", position } as const;
+  const upperBound = supplier.upperBoundAt(state, at);
+  const enemySet = enemySetAt(state, { subjectActorId, at, ...(upperBound === null ? {} : { upperBound }) });
   return { ...bindings, specAtoms: withActiveEnemies(bindings.specAtoms, enemySet.count) };
 }
