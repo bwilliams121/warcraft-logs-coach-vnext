@@ -2,8 +2,8 @@
 
 A healer specialization evaluator on the healer architecture Restoration
 Shaman proved (M12-D, HEAL-A). Registered INTERNAL_ONLY: a public request
-cannot reach it. Its public shape and promotion are HEAL-B1P's. It is not an
-APL specialization: there is no SimulationCraft authority and no APL artifact.
+cannot reach it. HEAL-B1P2 did not promote it: see "Promotion" below. It is not
+an APL specialization: there is no SimulationCraft authority and no APL artifact.
 
 ## Registration
 
@@ -54,3 +54,30 @@ verbatim specialization-tree row of the pinned SimulationCraft
 None of them is observed in any committed evidence: each is identified from
 the pinned row only. The identity subject (gtKb2xHn87pNcFfW fight 22, actor
 2) appears in a committed fight context with no event capture.
+
+## The choice node (HEAL-B1P2)
+
+Node 82064 reads by observed casts alone, as on every other healer's node:
+
+- Both entries stay identified, and the evaluator reads no talent. A completed
+  cast of either is a use.
+- An entry for the sibling the player did not cast is `ASSIGNMENT_UNKNOWN`
+  `READINESS_NOT_ESTABLISHED`, never a miss and never "not selected".
+- An aura is not a use. The retained fight shows why that matters: actor 2 holds
+  Convoke the Spirits (combatantinfo entry 103119) and casts it five times, yet
+  has six Incarnation: Tree of Life (33891) aura applications with no cast of
+  33891. An entry for Tree of Life over one of those auras stays UNKNOWN. Why the
+  aura is present was not reviewed.
+
+The synthetic form is pinned in
+`tests/unit/specs/heal-b1-healer-evaluators.test.ts`.
+
+## Promotion (HEAL-B1P2): not promoted, for capacity
+
+The retained whole fight (gtKb2xHn87pNcFfW fight 22, actor 2, in the M9-C2,
+M11-C4 and M11-C4b captures) passed the unchanged healer promotion gate in an
+uncommitted dry run: two Tranquility and five Convoke the Spirits casts, the
+listing COMPLETE. Its fixture is 131,911 bytes, and the evidence archive has 5,212
+left under its notice line, so nothing was committed and the line was not
+raised. The measured proposal and the retry recipe are in
+`agent/follow-ups.md` "After HEAL-B1P2".

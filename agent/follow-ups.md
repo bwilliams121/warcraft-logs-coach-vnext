@@ -17,7 +17,44 @@ This changes what older entries here say. They stay as written, as the record of
 
 - **Policy B is approved and scheduled** (POLB-A to POLB-C). Text below calling it deferred, not queued or "the owner's to schedule" is superseded.
 - **ONB-EV is approved,** with a hard cap of 60 Warcraft Logs requests (`agent/architecture.md` "Owner grant (2026-11-06): ONB-EV"). The grant authorizes no archive-limit increase and no promotion.
-- **Restoration Druid's promotion is queued** (HEAL-B1P2), which supersedes "is not queued" under "After HEAL-B4P".
+- **Restoration Druid's promotion is queued** (HEAL-B1P2), which supersedes "is not queued" under "After HEAL-B4P". HEAL-B1P2 ran and did not promote it: "After HEAL-B1P2".
+
+## After HEAL-B1P2: Restoration Druid waits on archive capacity alone
+
+**Raised:** HEAL-B1P2 (2026-11-06). No Warcraft Logs request, and the notice line is unchanged. Measured offline; the numbers are in `agent/architecture.md` "HEAL-B1P2".
+
+**Measured proposal, for the owner to decide with any other row.** Queue rule 8 records a single fixture that cannot fit and raises a proposal when several cannot.
+
+| Tranche | Smallest fixture that passes the gate | Bytes | Committed |
+| --- | --- | ---: | --- |
+| HEAL-B1P2 | gtKb2xHn87pNcFfW fight 22 actor 2: every `cast` and `begincast` it sources or is targeted by over the whole fight, three compact segments (11,410, 69,433 and 51,068), granted CASTS for actor 2 | 131,911 | no; the raw captures stay retained |
+
+- **Current size and limit.** Artifacts plus selection frames total 19,773,410 bytes. Without the M11-E2 (3,422,168) and M11-G2 (12,162,150) exceptions, 4,189,092 count against the 4,194,304 line, so 5,212 are left.
+- **What it buys.** Restoration Druid PUBLIC, the thirteenth public specialization. The gate already passes on these bytes, and no other blocker is known.
+- **Smallest justified change.** A named exception pinned to the byte, as M11-E2's and M11-G2's are, for these three segments: 131,911 bytes, with the 4 MiB line itself unchanged. Raising the line instead would need 4,321,003, and would leave no reviewed marker on the next growth.
+- **Deduplication and compression considered:**
+  - Other committed gtKb artifacts already hold 32 of the 384 events byte for byte (12,962 bytes). The loader has no cross-artifact reference, and without them the cut is still 118,949.
+  - Gzip of the whole cut is 8,855 bytes, over the room left, and the loader reads no compressed artifact.
+  - Casts sourced by the subject alone are 118,345 (7,756 gzipped), and casts and begincasts sourced by it are 127,951. Neither fits.
+  - Keeping six fields per event is 36,927. It does not fit, and the archive's rule is that the parsed payload is what the capture returned.
+  - The seven identified casts alone are 2,771 and fit, but a CASTS grant on them would claim the fight's casts are complete when 377 events were dropped. Without the grant, the listing is UNKNOWN and the gate's OBSERVATIONS check fails. Either way it is not a truthful minimal fixture.
+  - The regression corpus has 18,673 bytes left, which the owner treats as exhausted ("M12-B"), and the fixture would not fit there either.
+  - Removing committed evidence would need its own decision. The Arms segment (20,265 bytes), on which no decision resolves, is pinned and too small anyway.
+- **Retry.** Rule 2's changed prerequisite is that capacity decision. The promotion is then HEAL-B4P's shape:
+  - cut with `node scripts/sanitize-probe.mjs <raw> ../../../evidence/artifacts/wcl-events/wcl-gtkb-fight-22-restoration-druid-2-casts.<seg>.json --actor-slice 2 <to> --from <from> --families cast,begincast --compact`, over `.probe/m9c2-opener-pages.json` (2,415,040 to 2,435,041, `seg-0-20`), `.probe/m11c4-pages.json` (2,435,041 to 2,580,041, `seg-20-165`) and `.probe/m11c4b-pages.json` (2,580,041 to 2,699,832, `seg-165-285`);
+  - the gate's plan entries that passed: Convoke 2,428,000 ± 2 s (MET, cast 2,428,292), Tranquility 2,600,000 ± 3 s (READINESS_NOT_ESTABLISHED), Flourish 2,710,000 ± 2 s (after the encounter's end), Rejuvenation 774 at 2,428,000 ± 2 s (not registered), Tree of Life 2,428,000 ± 2 s. The gate ran with those five. Printed separately, Tree of Life at 2,449,000 ± 2 s, over a real aura, is READINESS_NOT_ESTABLISHED;
+  - no empower envelope family: the evaluator has no contradiction check, and actor 2 has none in the captures;
+  - no new public vocabulary is needed.
+
+**The dry run is not evidence.** It ran in a throwaway worktree, removed afterward. Nothing in this repository reproduces it until a fixture is committed, so a change after HEAL-B1P2 could make the retry fail. The retry must run the gate again.
+
+**The choice node.** Node 82064 reads by observed casts alone, like every other healer's node, for three reasons:
+
+- The minimal CASTS cut holds no combatantinfo, and adding it for one reading would grow the fixture by a family nothing else reads.
+- Talent selection would change nothing a player sees: an entry with no cast in its window is already UNKNOWN, never a miss.
+- A talent read would add `NOT_SELECTED` semantics to one healer that no other healer has.
+
+**Tree of Life's aura without a cast is unexplained.** Six applications at 2,448,993, 2,503,987, 2,541,783, 2,581,242, 2,641,443 and 2,682,526, with Convoke the Spirits on the node. It is not a use, and why it is present was not reviewed. Any later reading of that aura needs its own reviewed source.
 
 ## After ONB-S3R: each specialization's next real blocker
 

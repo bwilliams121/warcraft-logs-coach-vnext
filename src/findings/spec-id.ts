@@ -240,9 +240,10 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * healing-cooldown identity data. HEAL-B1P moved Holy Paladin and Mistweaver
  * Monk to `PUBLIC_SPEC_IDS` by the same five-site edit, with the shared healer
  * view, after each passed the healer promotion gate on real evidence (their
- * whole-fight casts in the canonical fight). Restoration Druid stays here: no
- * retained, authorized capture holds one of its events, so it cannot meet the
- * gate (agent/spec-onboarding-inventory.md; its evidence gap is ONB-EV's).
+ * whole-fight casts in the canonical fight). Restoration Druid stays here. Its
+ * whole fight is retained, and HEAL-B1P2 measured that it passes the gate
+ * uncommitted, but its fixture does not fit under the evidence archive's notice
+ * line (agent/follow-ups.md "After HEAL-B1P2").
  *
  * Holy Priest arrived here in HEAL-B2, a fourth healer registration on the
  * same architecture with its own reviewed healing-cooldown identity data

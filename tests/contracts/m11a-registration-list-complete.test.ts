@@ -252,8 +252,8 @@ describe("what the tree registers today", () => {
     // PUBLIC at HEAL-AP with its healer view; Holy Paladin, Restoration Druid
     // and Mistweaver Monk arrived INTERNAL_ONLY at HEAL-B1 on its architecture,
     // and Holy Paladin and Mistweaver Monk became PUBLIC at HEAL-B1P with the
-    // shared healer view; Restoration Druid has no retained evidence for the
-    // healer gate and stays INTERNAL_ONLY; Holy Priest arrived INTERNAL_ONLY
+    // shared healer view; Restoration Druid stays INTERNAL_ONLY:
+    // its whole fight is retained, and its fixture does not fit under the archive's notice line (HEAL-B1P2); Holy Priest arrived INTERNAL_ONLY
     // at HEAL-B2 on the same architecture (PUBLIC since HEAL-B2P); Discipline
     // Priest arrived INTERNAL_ONLY at HEAL-B3, and Preservation Evoker at
     // HEAL-B4. Subtlety Rogue, Fury Warrior and Protection Warrior arrived INTERNAL_ONLY at

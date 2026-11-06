@@ -100,7 +100,7 @@ The percentages are `public / playableTotal` and
 | `evoker/augmentation` | UNKNOWN (support) | PUBLIC | COMMITTED (M13-A, M13-D certified) | M13-A–M13-F (terminal) |
 | `shaman/restoration` | HEALER | PUBLIC | COMMITTED (M12-D archive, fight 48, actor 122) | M12-D, HEAL-A, HEAL-AP (terminal) |
 | `paladin/holy` | HEALER | PUBLIC | COMMITTED (HEAL-B1P archive, fight 48, actor 1, whole-fight casts) | HEAL-B1, HEAL-B1P (terminal) |
-| `druid/restoration` | HEALER | INTERNAL_ONLY | RETAINED_RAW (gtKb fight 22 actor 2, whole fight, in the M9-C2, M11-C4 and M11-C4b captures; found by HEAL-B4P's census; not yet cut or gated) | HEAL-B1, HEAL-B1P (not promoted); HEAL-B1P2 (queued) |
+| `druid/restoration` | HEALER | INTERNAL_ONLY | RETAINED_RAW (gtKb fight 22 actor 2, whole fight, in the M9-C2, M11-C4 and M11-C4b captures; the healer gate passes on it in an uncommitted dry run; its 131,911-byte fixture does not fit under the archive's notice line) | HEAL-B1, HEAL-B1P (not promoted), HEAL-B1P2 (not promoted: capacity; retry waits on an owner capacity decision, agent/follow-ups.md "After HEAL-B1P2") |
 | `monk/mistweaver` | HEALER | PUBLIC | COMMITTED (HEAL-B1P archive, fight 48, actor 9, whole-fight casts) | HEAL-B1, HEAL-B1P (terminal) |
 | `priest/holy` | HEALER | PUBLIC | COMMITTED (HEAL-B2P archive, fight 48, actor 2, whole-fight casts; also the filtered M13-A capture, actor 2) | HEAL-B2, HEAL-B2P (terminal) |
 | `priest/discipline` | HEALER | INTERNAL_ONLY | COMMITTED (filtered M13-A capture, actor 9: Evangelism and Ultimate Penitence casts; G2 cohort246 fight 33 actor 88: Atonement applications onto the capture's subject; no whole-fight casts: cannot meet the healer promotion gate, gap recorded on ONB-EV) | HEAL-B3, HEAL-B3P (not promoted), ONB-EV |

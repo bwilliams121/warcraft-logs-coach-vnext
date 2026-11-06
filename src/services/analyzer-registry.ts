@@ -491,7 +491,7 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   // INTERNAL_ONLY from HEAL-A; PUBLIC since HEAL-AP. The first healer row: binds no pinned authority, publishes healer findings.
   RESTORATION_SHAMAN_REGISTRATION,
   // Healer rows on Restoration Shaman's architecture, from HEAL-B1. Holy Paladin and Mistweaver Monk PUBLIC since
-  // HEAL-B1P; Restoration Druid INTERNAL_ONLY (not yet gated; agent/follow-ups.md "After HEAL-B4P").
+  // HEAL-B1P; Restoration Druid INTERNAL_ONLY (its fixture does not fit; agent/follow-ups.md "After HEAL-B1P2").
   HOLY_PALADIN_REGISTRATION,
   RESTORATION_DRUID_REGISTRATION,
   MISTWEAVER_MONK_REGISTRATION,
