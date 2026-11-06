@@ -231,6 +231,10 @@ describe("an unsupported specialization", () => {
       // Registered INTERNAL_ONLY in ONB-T1, not promoted by ONB-T1P. "Monk" is the token its registration names; another
       // spelling would pass here for the wrong reason. Brewmaster and Mistweaver are public, Windwalker is not.
       ["Monk", "Windwalker"],
+      // Registered INTERNAL_ONLY in ONB-T2, not promoted by ONB-T2P. Hunter/BeastMastery, above, is the third of that
+      // tranche. "Druid" and "Hunter" are the tokens their registrations name; another spelling would pass for the wrong reason.
+      ["Druid", "Guardian"],
+      ["Hunter", "Survival"],
     ]) {
       const { analyze, ingest, deps } = spies(className, specName);
       const result = await analyzeFight(REQUEST, deps);

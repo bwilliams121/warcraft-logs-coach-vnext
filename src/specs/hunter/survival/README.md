@@ -4,6 +4,8 @@
 
 **A Cohort T follower with no retained event. It resolves nothing today.** A census of every retained file finds no event on an id of its own (Moonlight Chakram's hits are Marksmanship Hunters), so it is on ONB-EV, and every stop below comes from a synthetic build. That is a property of the evidence and the pinned list, not a claim about any player. The only sign of one is uncommitted: the M13-A discovery names zpryqKdtRjWNQXa6 fights 30 to 34 actor 742.
 
+**Not promoted by ONB-T2P.** It cannot pass the rotational gates: it has no real resolved decision and no retained subject. It waits on a capture, which is ONB-EV's owner decision, and then on the inputs in agent/follow-ups.md "After ONB-T2" (agent/architecture.md "ONB-T2P").
+
 ## The authority
 
 `SIMC_APL_HUNTER_SURVIVAL` (`simc-33622e9d-1`), the `//survival_apl_start .. _end` region of `apl/apl_hunter.cpp`, whose PTR twin is identical, governs OFFENSIVE_ROTATION only. Resource spending, defensive cooldowns and interrupts are declared and resolve `NO_PINNED_AUTHORITY_FOR_DOMAIN`. Active mitigation and self healing are not declared.

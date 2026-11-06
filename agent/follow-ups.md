@@ -2989,6 +2989,8 @@ Every remaining gap has a canonical owner (`KNOWN_EVIDENCE_GAPS`,
 
 **Raised:** ONB-T2 (2026-11-06). Guardian Druid, Beast Mastery Hunter and Survival Hunter are INTERNAL_ONLY and resolve nothing. None is a soundness defect.
 
+**ONB-T2P (2026-11-06): not promoted, all three.** The gate search finds nothing for any of them (`m11-promotion-evidence-gate`). Beast Mastery's four retained subjects, replayed at that base, give the same 707 UNKNOWN. A census of retained JSON files finds no other subject: gBMC fight 33 actors 141 (Beast Mastery) and 91 (Guardian) sit in a diagnostic sample, Survival has no combatant info and one id hit, Marksmanship's, and every other hit is another Druid's, a Primal Earth Elemental's or a subject's pet's. No new public entry is queued; one must follow this list (agent/architecture.md "ONB-T2P").
+
 **Guardian and Survival are on ONB-EV.** Neither has a retained subject. Guardian's only real events are a two-second diagnostic sample (gBMC fight 33 actor 91), and Survival has no event on an id of its own. Contexts naming them hold no retained event.
 
 **What a Beast Mastery decision would need, in the order a scan meets it.**
