@@ -14793,3 +14793,43 @@ Windwalker Monk is registered INTERNAL_ONLY, cloned from Frost Death Knight's sh
 **Evidence.** One retained subject, uncommitted beyond its context row and 81 friendly-event rows in the committed fight 48 segments, none of them a cast. A census of 5,990 retained files found no other Windwalker events: actor 9 of the same fight is a Mistweaver and the other hits are Brewmaster buff applications sharing one id. Other contexts name Windwalkers with no retained event.
 
 **Not promoted, and not promotable by this tranche.** ONB-T1P must send it through the unchanged gates. Agent/follow-ups.md "After ONB-T1" holds what would have to exist first.
+
+## ONB-T1P — Windwalker Monk public promotion: not promoted
+
+Autopilot queue entry ONB-T1P. Public contract: declared EXPECTED; actual change NONE, because nothing passes. No Warcraft Logs request and no new evidence.
+
+**The outcome.** Windwalker Monk does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4). The gates are not weakened and gain no subject. This is not an owner stop: rule 4 decides it, and no new decision is needed to record that. Evidence is not its first gap, so it is not on ONB-EV, and ONB-S3 alone moves nothing.
+
+**Why it cannot pass.** OBSERVATION needs a real MATCH and real resolved decisions over several distinct action tokens, and DISCRIMINATION needs a real REJECTED or a control that flips a real MATCH. Both start from a real resolved decision, and Windwalker has none. Replaying the one retained subject through production ingestion and the facade over a fake transport, at this tranche's base commit:
+
+| Subject | Hero tree | Span | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| b1PmaKrd6CDfzngc fight 48 actor 13 | Shado-Pan | whole fight, 345 s | 239 | 0 | 0 | 239 | 216 |
+
+The replay's output file matches the one saved during ONB-T1 on every line but its wall-clock `ms` field. The engine refuses all 239 at `default[0] auto_attack`, and the root scan of all 239 stops at `zenith[3]` on a refused `target_if`. No dispatch on the enemy count is reached.
+
+**The census found no other subject, by three routes.** It parsed every JSON file over 500 bytes under `.probe/` and `tests/`, skipping tool output and worktree copies (5,989 parsed of 5,990; the other is `.probe/m11d2c/bad.json`). Mortal Strike, the positive control, has 1,034 events, 601 of them casts.
+
+1. **Combatant info.** The `combatantinfo` events with specID 269 are 3, naming actor 13 (`m11e2` pages) and actor 1 (`m11g2` `diagnose` and `diagnose2`). The route can find others: 31 specIDs appear in the distribution, each one a control.
+2. **Named abilities.** The 17 ids retained contexts' master data give Fists of Fury, Rising Sun Kick, Strike of the Windlord, Whirling Dragon Punch, Touch of Karma, Invoke Xuen, Zenith and Spinning Crane Kick.
+3. **Pinned ids.** Every id in `monk-windwalker-gcd-semantics.json`, 15 of them, read from the file. The census throws if this route or the named route is empty. This route adds Tiger Palm, Blackout Kick, Touch of Death, Celestial Conduit, Rushing Wind Kick, Slicing Winds and Zenith Stomp, several of which other Monk specializations also cast.
+
+Every source holding a hit was resolved:
+
+| Source | What it is | Result |
+| --- | --- | --- |
+| b1Pm fight 48 actor 13 (`m11e2` pages and its committed segments, `m11g34-wcl` `a3`) | the subject | replayed, above; the committed rows hold no cast |
+| b1Pm fight 48 actor 9, A7R6kxPJ1hC8YQ4w fight 7 actor 9, gtKb2xHn87pNcFfW fight 22 actor 17, rXAfw9t1q8YpmkKD fight 13 actor 5 | Mistweaver, by context | Rushing Wind Kick, Blackout Kick, Tiger Palm, Celestial Conduit, Touch of Death, and buff 1296687 |
+| gtKb fight 22 actor 4, rXAf fight 13 actor 11, Gw2kXrTfLWcDdhFY fight 1 actor 13 | Brewmaster, by context | Tiger Palm, and one Touch of Death on Gw2k |
+| gBMCKxyY7dQDRZav fight 33 actor 1 (`m11g2` `diagnose`, `diagnose2`) | Windwalker, by combatant info and context | combatant info and one Roll in a diagnostic sample, no id of these routes, not a subject |
+| qJ1pgB49ZrRNVmCd fight 6 sources 11 and 9 (`wcl-pull-window-with-resources`, a sanitized 43-event sample) | no retained context maps them | 11 pays Mana for one Rushing Wind Kick, so it is no Windwalker; 9 has one Tiger Palm damage row at 0 of 100 Energy and no cast, which is no decision whichever Energy Monk it is |
+
+This corrects one sentence of the ONB-T1 record, which called the other hits Brewmaster buff applications sharing one id. Buff 1296687's sources in this census are the four Mistweavers in the table.
+
+The retained contexts hold 57 rows naming Windwalker, over 14 report codes, two of them sanitized stand-ins (`COHORT246AAAAAAA`, `COHORT261AAAAAAA`), and one a rankings shape with no actor ids (qJ1p). Apart from the sources above they hold no event of these ids in any retained file: they name a player and carry none of that player's casts. No source is Conduit of the Celestials.
+
+Limits: the census does not read JSON files of 500 bytes or less, or log and text output. Its ability routes match the ids above only; the combatant-info route does not depend on them. An actor with neither a context nor combatant info, holding none of those ids, would not appear.
+
+**What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists it; the gate search finds no qualifying assertion and `evidenceReady` false (`m11-promotion-evidence-gate`, from ONB-T1, its comment now naming the outcome). One test row is new: a public Monk/Windwalker request is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which held no row for it). A public request still runs preparation and reports partial coverage. Nothing reads as clean play. The replay and census are offline and not committed.
+
+**What a later promotion must do.** It first answers its stops, in order (agent/follow-ups.md "After ONB-T1"): positive readiness for the swing at `default[0]` and for Touch of Karma, the fight clock for `opener`'s gate, a contract for Zenith's own writes and a Zenith line's cooldowns and auras, and then a chosen enemy at `zenith[3]`. Most lines also read Chi, which has no wire contract. It measures or refuses Conduit of the Celestials, as Havoc refuses Fel-Scarred. A second subject needs a capture, which is ONB-EV's owner decision. A new public entry then promotes it through the unchanged gates by the five-site promotion, and must first commit its evidence with identity proof, because a PUBLIC module cannot use the retained-only exception. No such entry is queued.

@@ -228,6 +228,9 @@ describe("an unsupported specialization", () => {
       ["Warlock", "Demonology"],
       // Registered INTERNAL_ONLY in ONB-X5, not promoted by ONB-X5P. The same class token as DeathKnight/Frost above.
       ["DeathKnight", "Unholy"],
+      // Registered INTERNAL_ONLY in ONB-T1, not promoted by ONB-T1P. "Monk" is the token its registration names; another
+      // spelling would pass here for the wrong reason. Brewmaster and Mistweaver are public, Windwalker is not.
+      ["Monk", "Windwalker"],
     ]) {
       const { analyze, ingest, deps } = spies(className, specName);
       const result = await analyzeFight(REQUEST, deps);

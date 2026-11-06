@@ -2968,7 +2968,9 @@ Every remaining gap has a canonical owner (`KNOWN_EVIDENCE_GAPS`,
 
 **Raised:** ONB-T1 (2026-11-06). Windwalker Monk is INTERNAL_ONLY and resolves nothing. None is a soundness defect.
 
-**What a Windwalker decision would need, in the order a scan meets it.** Positive readiness for the swing and for Touch of Karma; the fight clock for `opener`'s gate; a contract for Zenith's own writes and a Zenith line's cooldowns and auras; then a chosen enemy at `zenith[3]`. Only then does the scan reach the dispatch on the enemy count, and `active_enemies=1` needs an upper bound no real evidence gives. ONB-S3 alone moves nothing here. ONB-T1P should expect "not promoted".
+**ONB-T1P (2026-11-06): not promoted.** The gate search finds nothing (`m11-promotion-evidence-gate`). The one retained subject, replayed at that base, gives the same 239 UNKNOWN. A census of retained JSON files finds no other subject: gBMC fight 33 actor 1 holds combatant info and one Roll in a diagnostic sample, and every other hit with a mapped source is a Mistweaver's or a Brewmaster's. No new public entry is queued; one must follow this list (agent/architecture.md "ONB-T1P").
+
+**What a Windwalker decision would need, in the order a scan meets it.** Positive readiness for the swing and for Touch of Karma; the fight clock for `opener`'s gate; a contract for Zenith's own writes and a Zenith line's cooldowns and auras; then a chosen enemy at `zenith[3]`. Only then does the scan reach the dispatch on the enemy count, and `active_enemies=1` needs an upper bound no real evidence gives. ONB-S3 alone moves nothing here.
 
 **A wire contract for Chi.** `classResources` type 12 has no contract, so no Chi is read, and the list reads it on most lines. On retained fight b1Pm 48 it occurs on actor 13 alone, 102 times, with a stable maximum of 6 and costs of 1 to 3, which is corroboration of the kind the other contracts record. It is uncommitted, so a contract needs a committed slice. Reading Chi would still need the Mistweaver and Brewmaster readers checked.
 

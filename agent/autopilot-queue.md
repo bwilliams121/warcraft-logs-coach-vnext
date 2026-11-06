@@ -1882,11 +1882,13 @@ mergeSha: b46cbed381b35ec975fca5678739dac46ae65dd8
 ### ONB-T1: Windwalker Monk (internal, Cohort T representative)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-S3, ONB-S1
 branch: autopilot/onb-t1
 wcl: NONE
 publicContract: NONE
+pr: 90
+mergeSha: f2a77d594da12bb9953f5588aceda16435c3a366
 ```
 
 **Scope.** Cohort T representative: target selection, under the ONB-S3
@@ -1900,11 +1902,14 @@ Settle the follow-up "Whole-line blocker classification for refused
 ### ONB-T1P: Windwalker Monk (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-T1
+branch: autopilot/onb-t1p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** It does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Its one retained subject, Shado-Pan, replayed offline, gives 239 decisions, 0 MATCH, 0 REJECTED, all UNKNOWN, output identical to ONB-T1's apart from a wall-clock field. A census of 5,989 retained files finds no other subject: gBMC fight 33 actor 1 holds combatant info and one Roll in a diagnostic sample, and every other hit with a mapped source is a Mistweaver's or a Brewmaster's. Evidence is not its first gap, so it is not on ONB-EV, and ONB-S3 alone moves nothing. A promotion after its own inputs, first the swing's entry and the lines behind it, is a new public entry through the unchanged gates (agent/architecture.md "ONB-T1P"; agent/follow-ups.md "After ONB-T1").
 
 ### ONB-T2: Guardian Druid, Beast Mastery Hunter and Survival Hunter (internal, Cohort T)
 
