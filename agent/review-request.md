@@ -91,6 +91,18 @@ All on this tree.
   byte-identical in the corpus gate. I did not rerun the full suite at the base commit in this tranche.
 - Replay of the three Arms subjects: unchanged by cycle 4, with no alias exclusion on real evidence.
 
+## CI correction
+
+GitHub `verify` failed twice on commit a656826, on one test only: `m8g-encounter-context-composition`
+"is byte-identical across success, empty, rejection and total failure", timing out at 5 s (6,202 ms and
+5,963 ms). That run took 530 s against 379 s on main's last run, so the runner was slow.
+
+It is not this tranche's cost. Alternating this file at base 7b7cc24 and at the candidate, four times
+each on a quiet machine, gave 4,977 to 5,177 ms at base and 4,919 to 4,989 ms at the candidate. The test
+runs six full analyses and sits on the default limit at any commit.
+
+It now has a named 20 s limit, as `m7f-raid-night-orchestration` does. No assertion changed.
+
 ## Review cycle 4 corrections
 
 - **A death that may alias left a member counted.** Membership already treats a `null` and a numbered

@@ -274,26 +274,35 @@ describe("external outcomes never change the local result", () => {
     partition: { mode: "PINNED", partition: 1 },
   };
 
-  it("is byte-identical across success, empty, rejection and total failure", async () => {
-    const baseline = JSON.stringify((await run(requestOf())).analysis.progression);
+  // Six full analyses in one test: about 5 s on a quiet machine at any commit, which is the default
+  // limit itself. The limit is about the machine, so it is stated here; the assertions are unchanged.
+  const SIX_ANALYSES_TIMEOUT_MS = 20_000;
 
-    const scenarios: readonly { readonly rankings?: unknown; readonly metadata?: "OK" | "INACCESSIBLE" }[] = [
-      {},
-      { rankings: rankingPayload([]) },
-      { rankings: { error: "You cannot specify a size for a flexibly-sized raid zone." } },
-      { rankings: { nonsense: true } },
-      { metadata: "INACCESSIBLE" },
-    ];
+  it(
+    "is byte-identical across success, empty, rejection and total failure",
+    async () => {
+      const baseline = JSON.stringify((await run(requestOf())).analysis.progression);
 
-    for (const scenario of scenarios) {
-      const counters: Counters = { rankingCalls: 0, metadataCalls: 0 };
-      const { analysis } = await run(requestOf({ externalReferences: ENABLED }), {
-        ports: externalPorts(counters, scenario),
-        counters,
-      });
-      expect(JSON.stringify(analysis.progression), JSON.stringify(scenario)).toBe(baseline);
-    }
-  });
+      const scenarios: readonly { readonly rankings?: unknown; readonly metadata?: "OK" | "INACCESSIBLE" }[] =
+        [
+          {},
+          { rankings: rankingPayload([]) },
+          { rankings: { error: "You cannot specify a size for a flexibly-sized raid zone." } },
+          { rankings: { nonsense: true } },
+          { metadata: "INACCESSIBLE" },
+        ];
+
+      for (const scenario of scenarios) {
+        const counters: Counters = { rankingCalls: 0, metadataCalls: 0 };
+        const { analysis } = await run(requestOf({ externalReferences: ENABLED }), {
+          ports: externalPorts(counters, scenario),
+          counters,
+        });
+        expect(JSON.stringify(analysis.progression), JSON.stringify(scenario)).toBe(baseline);
+      }
+    },
+    SIX_ANALYSES_TIMEOUT_MS,
+  );
 
   it("keeps the request successful when the ranking payload is rejected", async () => {
     const counters: Counters = { rankingCalls: 0, metadataCalls: 0 };
