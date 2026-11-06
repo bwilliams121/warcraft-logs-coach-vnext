@@ -15072,3 +15072,147 @@ The census supplies empirical encounter-state bounds only. It is not rotational 
 - **B, boss-mod source:** not Policy B authority; it risks turning strategy and timer authoring into encounter truth and conflicts with the prohibition on guide-derived state.
 - **D, owner-authored rows:** rejected as the primary model, because it creates manually asserted encounter truth instead of reproducible evidence.
 - **E, remain UNKNOWN:** stays the fallback wherever Option C cannot establish a justified bound.
+
+## POLB-A — Policy B schema, sampling policy and census plan
+
+Autopilot queue entry POLB-A, on "Owner decision (2026-11-06): Policy B source". Public contract: none. No Warcraft Logs request, and no curated row. The schema is `src/data/encounter-census/encounter-state-census-artifact.ts`, the frozen plan `src/data/encounter-census/census-plan.json`, the empty dataset `encounter-state-census.json` beside it, and the seam `src/findings/encounter-state-supplier.ts`.
+
+**The result, plainly: no acquisition and completeness contract can justify an upper bound, an exact `spell_targets` or a closed `target_if` set from this census.** So the census cannot close the upper-bound gap. It can supply lower bounds and OPEN candidate evidence, and only on pulls whose build is proven. "Completeness, per fact" below gives the argument and the counts by specialization. The proposal to the owner follows from it, and POLB-CENSUS stays unauthorized until the owner answers.
+
+### Schema and seam
+
+**A datum** is one empirical fact about one encounter, difficulty and build over one window. It carries every field the owner listed: source reports and fights, applicability (`encounterId`, `difficulty`, `gameVersion`, `logVersion`, `gameBuilds`), `acquisitionRuleId`, `evidencePredicate`, `window`, exact or bounded `status`, `completeness` and the dataset's `sourceCorpusRevision`. Each source pull also names its retained evidence artifacts and keeps its own observation.
+
+**What the parser refuses, each with a test:**
+
+- An upper bound, exact count or closed set without a contract in `REVIEWED_CLOSURE_CONTRACTS`, which is empty and pinned empty.
+- A conflict resolved by choosing. The lower bound must be the smallest observation, an upper bound at least the largest, and a set the union. Two rows over one window are refused too, because a conflict widens one bound and never keeps two.
+- One fact standing in for another. `active_enemies`, `spell_targets.<ability>`, `target_if` candidates, targetability, attackability and add availability each need their own approved predicate, and only `ACTIVE_ENEMIES` has one. `spell_targets` and `target_if` rows must name their action.
+- Fewer than five pulls from distinct reports, a source pull on a build the datum does not name, and COMPLETE over a pull that is not.
+
+**The seam.** `EnemySetUpperBoundEvidence.provenance` is now a full citation rather than a bare string, and a citation missing a field, or not COMPLETE, is `UPPER_BOUND_WITHOUT_PROVENANCE`. `withEnemyCountAt` asks a supplier for the bound, and `targetDomainClosureAt` tells a specialization's `targetDomainFor` whether it may say CLOSED. Neither decides a count. A bound below the observed members is still the enemy set's own contradiction, so UNKNOWN.
+
+**Production supplies nothing.** The dataset has no row, so every count and every decision is unchanged. `gameBuildOf` returns `null` in production on purpose: only `src/publication/pipeline.ts` may import the build resolver (`m11g4-simulation-context-layering`), so POLB-B wires it as a reviewed change to that boundary if it has rows to apply.
+
+### Mapping a window onto an analyzed pull
+
+A datum maps only when each of these holds. Otherwise the fact is UNKNOWN, with the named reason.
+
+| Established | Otherwise |
+| --- | --- |
+| The same encounter and a known difficulty | `NO_CURATED_DATUM`, `DIFFICULTY_UNKNOWN` |
+| The same game and log version | `VERSION_NOT_APPLICABLE` |
+| A resolved build the datum names | `BUILD_UNRESOLVED`, `BUILD_NOT_COVERED` |
+| A report the census did not read | `ANALYZED_REPORT_IS_CENSUS_SOURCE` |
+| The window's anchor at or before D | `WINDOW_ANCHOR_NOT_ESTABLISHED`, `OUTSIDE_WINDOW` |
+| One datum, with no unreadable window beside it | `AMBIGUOUS_DATA` |
+| Complete census evidence | `CENSUS_NOT_COMPLETE` |
+
+Anchors read only `state.encounter.elapsedFightTimeAt` and `phaseAt` at the decision, so the pull's end and later phases cannot select a row (O2). A PHASE window is never read on the pull's clock: with phases unobserved or no transition held it is UNKNOWN.
+
+### Separation
+
+**Logically.** A census pull evaluates nobody, and an evaluated pull is never a census source. The plan excludes every report holding an evaluated pull, whole, because its other pulls share its players. A report the census did read cannot be bounded by data derived from it. `censusReportsAlsoEvaluated` and the plan's exclusion list are both tested against the committed contexts. Three entries on that list are the sanitized `COHORT...` placeholders of the comparison reports, so POLB-CENSUS must also exclude their real codes, held in the retained `.probe/m11g1` and `.probe/m11g2` captures.
+
+**Physically.** POLB-CENSUS keeps raw pages under `.probe/polb-census/`, and committed evidence under its own root `tests/evidence/policy-b-census/`, with its own manifest and notice line. Neither the corpus loader nor the evidence archive loader reads that root, so no promotion gate or case can reach it. This tranche creates no such directory.
+
+**Selection.** No pull is selected for a target-count result or because it helps a specialization pass. The rule below reads no event of a candidate, and nothing after selection can replace a chosen pull.
+
+### Sampling policy, frozen
+
+- **Encounter identity and build.** A partition is one encounter, difficulty, region and proven build. The rule: every (encounter, difficulty) of a committed fight whose start lies in a proven deployment interval. That gives 3455 Mythic on 12.1.0.69933 (b1PmaKrd6CDfzngc fight 48) and 3445 Mythic on 12.1.0.69587 (A7R6kxPJ1hC8YQ4w fight 7). Both are US, because the deploy calendar proves only US. A7R6's region has not been read, so POLB-CENSUS spends one request on it first and drops that partition if it is not US, before any selection.
+- **Listing.** `reportData.reports(zoneID: 53, startTime, endTime, limit: 100, page)` over the proven interval, at most ten pages per partition, reading `code`, `startTime`, `region.slug`, `guild.id` and `fights(encounterID, difficulty, killType: Kills) { id }`. These fields are in the retained schema capture. The list is whatever those pages return, and it is retained as a selection frame. No ranking, parse, percentile, damage or comparison query.
+- **Qualifying.** A US report outside the exclusion list with a kill of the partition whose start lies in the interval. Its lowest such fight id is its one candidate pull. Kills only, because a wipe holds no later phase, and it reads the encounter's outcome rather than any count. It leans toward groups that kill adds sooner, which can only lower a lower bound.
+- **Order.** Ascending `sha256("polb-census-v1|<partitionId>|<reportCode>")`, so upload order and the listing's order choose nothing.
+- **How many.** The first five candidates in that order with distinct groups: `guild.id`, or the report code where there is no guild. Fewer than five leaves the partition INSUFFICIENT with no row, and the listing is not widened.
+- **Streams.** Per pull, one fight context (actors, phases), then three event streams over the whole fight with `includeResources: false`: `DamageDone` Friendlies, `All` Enemies and `Deaths` Enemies. Page size 10,000, at most 20 pages per pull.
+- **Completeness.** A pull is COMPLETE when every stream reaches a null cursor inside the page limit and the report revision is unchanged. Otherwise it is recorded PARTIAL and stays selected. It is never replaced, and five complete pulls then cannot be met, so that partition has no row. The `Enemies` hostility streams have not been captured before, so if the first pull's rows do not match what the rule reads, POLB-CENSUS stops for the owner rather than requesting something else.
+- **The predicate, `BRACKETED_HOSTILE_INSTANCE_V1`.** An instance counts at time t in a census pull when a friendly player or pet damaged that exact instance somewhere in the pull, it has events (as source or target) at a ≤ t ≤ b with b − a ≤ 30,000 ms, and no death event at or before t names its key or a key that may alias it. A `null` instance counts only when its actor has no numbered member at t, as in ONB-S3. This reads a census pull's later events, which O2 does not forbid: O2 governs the proof at an analyzed pull's decision, and the owner's source ruling allows other pulls' events. It says "arisen and not demised" (N1), never targetable, attackable or in range.
+- **Windows.** A 30,000 ms grid from an independently established anchor. PULL_START by default, and PHASE_START only where all five pulls state the same `phaseTransitions` id sequence. A pull's value for a cell is the exact minimum count over it, by `minimumBracketCount` in `src/data/encounter-census/bracket-predicate.ts`: report time is whole milliseconds, the count changes only next to a presence interval's edge or a death, and every such millisecond is evaluated, so a dip shorter than any sampling grid is still the minimum. A cell that any of the five pulls does not wholly cover, past its end or past its phase's end, has no row: it is refused, never clipped. A minimum of zero has no row either. The datum's lower bound is the smallest value across pulls.
+- **Conflicts.** Every pull's value is kept in the row. Conflicting valid observations widen, unless a proven phase, build or context distinction separates them.
+- **Revisions.** A new build or log version is `BUILD_NOT_COVERED` or `VERSION_NOT_APPLICABLE`, so UNKNOWN, and a row is never extended by assumption. An encounter hotfix inside a build cannot be detected by key, and only a contradiction with observed evidence shows it (UNKNOWN plus a drift diagnostic, in POLB-B). New partitions are a new plan revision and a new owner grant.
+
+**Measured on the one retained all-source pull,** b1PmaKrd6CDfzngc fight 48 (`.probe/m11e2/pages.json`, 271,011 events, 345 s). It has 45 hostile instances, with a longest silence inside any of them of 17,916 ms and no gap over 30 s. The exact minimum of each whole 30 s cell is 0, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, and the last 15 s are refused as a partly covered cell. It never reaches 3 in a cell's minimum, though the moment-to-moment count reaches 12.
+
+### Completeness, per fact
+
+**Contracts considered for an upper bound or a closed set, and why each fails:**
+
+1. **Every event stream COMPLETE on the census pull.** It closes only the units that acted or were touched. An idle, untouched unit leaves nothing.
+2. **`enemyNPCs`.** It is N2 post-hoc metadata, and on b1Pm fight 48 it is exactly the friendly-damaged set: 45 instances, 12 + 32 + 1 by creature. So it adds no independent evidence.
+3. **Agreement across N pulls.** An observed maximum is never an authoritative one, and the retained pulls show why. In b1Pm fight 48, Malignant Totem (creature 269430) has 96 instances (summon, begincast and death events), none damaged by a friendly, so it is absent from `enemyNPCs` and from the predicate. On the retained cohort 261 pull, `enemyNPCs` lists the same creature 48 times. A bound drawn from the first pull would exclude units another pull attacked.
+4. **Raid-wide damage as a sweep.** It would prove the unit unhit, not nonexistent, and it depends on positions and on who was hit.
+5. **The analyzed pull's own later events.** That is O2.
+6. **A narrower meaning of the count,** such as "enemies somebody interacted with". This changes what N1 says `active_enemies` is, to make the APL easier to evaluate. Rejected.
+
+So `REVIEWED_CLOSURE_CONTRACTS` stays empty. An owner-reviewed argument that an unobserved qualifying unit could not exist for the interval would be needed, and no retained source supplies one.
+
+| Fact | What the census can establish | Upper bound or closed set |
+| --- | --- | --- |
+| `active_enemies` | A lower bound per window, on the mapped pulls | **No contract** |
+| `spell_targets.<ability>` | Nothing with its own predicate. Distinct targets hit by one cast would be a per-pull lower bound, shaped by where players stood. No exact value | **No contract**, and range and geometry are unread |
+| `target_if` sets | An OPEN list of creatures positively observed | **No contract**, and `target_ready` stays action-owned |
+| Targetability | Nothing yet. The capability is UNVERIFIED, 0 such events in the committed artifacts, and adds have no such event type | **No contract** |
+| Attackability | Positive moments only: a friendly hit landed on that instance then. No window | **No contract** |
+| Add availability | Observed intervals, first to last event, where a spawn is seen no earlier than it happened | Lower side only; **no contract** for "no add outside it" |
+
+**By specialization.** Retained decisions whose saved scan stop names the fact, from the ONB-S3R, ONB-T1P and ONB-T2P replays. These are saved outputs, not re-run here. "Build-proven" counts the decisions on b1Pm fight 48 and A7R6 fight 7, the only retained analyzed pulls with a build the calendar can prove, the second only if its region is US.
+
+| Specialization | Decisions | Stop on `active_enemies` | Of those, build-proven | Stop on a `target_if` line | Of those, build-proven |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Arms | 1,207 | 1,155 | 421 | 0 | 0 |
+| Devourer | 251 | 251 | 0 | 0 | 0 |
+| Shadow | 356 | 8 | 0 | 348 | 0 |
+| Beast Mastery | 707 | 0 | 0 | 707 | 354 |
+| Frost Death Knight | 567 | 0 | 0 | 567 | 308 |
+| Devastation | 440 | 0 | 0 | 440 | 280 |
+| Windwalker | 239 | 0 | 0 | 239 | 239 |
+| **Total** | | **1,414** | **421** | **2,301** | **1,181** |
+
+No retained scan stops on `spell_targets`. Unholy, Balance, Feral, Arcane, Fire, Elemental, Demonology and Destruction have replayed decisions and none stops on either fact, though some read them further down their lists. Marksmanship, Frost Mage, Subtlety, Enhancement and Affliction refuse before any decision on their only subjects, and Fury, Protection Warrior, Outlaw, Vengeance, Guardian and Survival have no retained events, so all of those wait on ONB-EV. A stop table counts only the first thing a decision reaches.
+
+**What this means for each count.** With no upper bound, a lower bound decides only one branch: `active_enemies>2` TRUE at 3 or more, and `active_enemies=1` FALSE at 2 or more. Every other answer stays UNKNOWN. In numbers:
+
+- **Upper bound:** none of the 1,414 count decisions can be settled by an upper bound from this census, and none of the 2,301 `target_if` decisions can be settled by a closed set.
+- **Arms:** only the 421 build-proven decisions can read a row at all. On b1Pm no cell's minimum reaches 3, so its 287 would not move on that pull's own measure, and all 1,207 are refused first at `default[0] charge` regardless (agent/follow-ups.md "After ONB-S3R").
+- **Devourer and Shadow:** none of their count decisions is on a build-proven pull, so all stay UNKNOWN with BUILD_UNRESOLVED.
+- **`target_if`:** a mapped row could only say OPEN, which is what these lines already have. Whether a line resolves stays with `target_ready` and per-target atoms.
+
+**Lower bounds also have a limit POLB-B must face.** An add's life depends on how fast the group kills it, so a census lower bound can exceed the analyzed pull's real count without any contradicting event. POLB-B must show which windows a lower bound can transfer to, and use none where it cannot.
+
+### The acquisition proposal, for POLB-CENSUS's owner decision
+
+**Plan.** The frozen `census-plan.json`, as above: two partitions, five pulls each.
+
+**Requests, worst case, counted as the ONB-EV grant counts them.**
+
+| Item | Requests |
+| --- | ---: |
+| OAuth token and one refresh | 2 |
+| A7R6 region | 1 |
+| Listing, 10 pages × 2 partitions | 20 |
+| Fight context, 10 pulls | 10 |
+| Event pages, 20 × 10 pulls | 200 |
+| Report revision after pagination, 10 pulls | 10 |
+| **Total, and the proposed cap** | **243** |
+
+b1Pm fight 48 would take about 12 event pages at these streams (100,795 rows, plus the deaths), so a normal run should spend fewer.
+
+**Retained evidence.** Measured on b1Pm fight 48, whole events as captured:
+
+| Retained per pull | Bytes |
+| --- | ---: |
+| The three streams whole | 36,603,720 (20.2 MB without resource fields) |
+| The same, seven fields per event | 4,044,851 |
+| Witness events only | 47,750 |
+| The fight and actor slice | 2,523 |
+
+**Witness events** are the deaths, each instance's first friendly hit, and enough of its events that consecutive ones are at most 30 s apart wherever the stream's were. They reproduce the predicate exactly, for a reason and on the measurement. A witness gap over 30 s is only ever two adjacent events, so the two event sets give the same presence intervals. All 45 instances' intervals came out identical, and so did every cell's minimum. They suffice because the census only claims positive facts, and they are not derived conclusions: they are the captured events. Raw pages stay retained under `.probe/` with their digests in the manifest, as every other capture does.
+
+Ten pulls at the measured size plus an estimated 70,000 bytes of selection frame per partition is **about 642,730 bytes**, against **5,212 bytes left** under the 4 MiB notice line. That is one pull's measurement, and a pull with more instances costs more, so the proposed allowance is a named exception of up to **1 MiB**, pinned to the byte at capture and stopping if it would be exceeded. Keeping whole streams instead would need about 366 MB.
+
+**Recommendation.** The owner asked what the census could establish, and on this evidence it cannot deliver what Policy B was approved to unblock. It cannot close the upper-bound gap, and it reaches at most 421 count decisions, all Arms, all refused earlier at Charge. If the purpose is the 1,414 and 2,301 above, this plan does not serve it, and declining the grant is the honest course, with Option E (UNKNOWN) standing for those decisions. If lower-bound and candidate evidence is wanted anyway, the plan above is the neutral way to get it. POLB-B, POLB-C and everything behind them wait on that answer.
+
+### What this does not do
+
+It makes no request, enters no row, promotes nothing, wires no build resolver, adds no predicate for any other fact, and creates no census evidence root. Observed counts and decisions are unchanged.

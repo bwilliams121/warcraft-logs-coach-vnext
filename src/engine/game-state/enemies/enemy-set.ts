@@ -40,10 +40,11 @@
  *                `null` instance may be the same unit as a numbered instance of its actor, so it
  *                counts only when that actor has no numbered member.
  *   Upper bound  none is ever derived from events, because an enemy nobody touched leaves none.
- *                A caller may supply one with explicit provenance (the approved, deferred curated
- *                roster, Policy B). No production caller does, so a real count today is BOUNDED
- *                below or UNKNOWN. A lower bound above a supplied upper bound is a contradiction,
- *                which yields UNKNOWN, never either number.
+ *                A caller may supply one with a full citation (Policy B, through the encounter-state
+ *                supplier). None is supplied in production: the census holds no row, and no
+ *                completeness contract is reviewed (POLB-A), so a real count today is BOUNDED below
+ *                or UNKNOWN. A lower bound above a supplied upper bound is a contradiction, which
+ *                yields UNKNOWN, never either number.
  *
  * PRESENT, TARGETABLE AND IN-RANGE ARE DISTINCT. A member is PRESENT. Neither basis proves the
  * subject could target it (a DoT keeps ticking on an untargetable unit), and range is action-owned,
@@ -100,10 +101,42 @@ export type EnemySetUnknownReason =
   | "UPPER_BOUND_NOT_A_COUNT"
   | "UPPER_BOUND_WITHOUT_PROVENANCE";
 
+/**
+ * Where a curated encounter-state datum came from (POLB-A). Every field is required, because a bound
+ * nobody can trace back to retained evidence is not evidence. This layer reads no dataset.
+ */
+export interface EncounterStateCitation {
+  readonly datasetId: string;
+  readonly datasetRevision: string;
+  readonly datumId: string;
+  readonly acquisitionRuleId: string;
+  readonly evidencePredicate: string;
+  readonly sourceCorpusRevision: string;
+  readonly window: string;
+  readonly completeness: string;
+  readonly sourcePulls: readonly { readonly reportCode: string; readonly fightId: number }[];
+}
+
 /** An upper bound from a source other than events. It must say where it came from. */
 export interface EnemySetUpperBoundEvidence {
   readonly upperBound: number;
-  readonly provenance: string;
+  readonly provenance: EncounterStateCitation;
+}
+
+function isCompleteCitation(citation: EncounterStateCitation): boolean {
+  return (
+    [
+      citation.datasetId,
+      citation.datasetRevision,
+      citation.datumId,
+      citation.acquisitionRuleId,
+      citation.evidencePredicate,
+      citation.sourceCorpusRevision,
+      citation.window,
+    ].every((field) => field.length > 0) &&
+    citation.completeness === "COMPLETE" &&
+    citation.sourcePulls.length > 0
+  );
 }
 
 export interface EnemySetQuery {
@@ -233,7 +266,9 @@ function countOf(lowerBound: number, upper: EnemySetUpperBoundEvidence | undefin
       ? { kind: "UNKNOWN", reason: "NO_POSITIVE_MEMBER" }
       : { kind: "BOUNDED", lowerBound, upperBound: null };
   }
-  if (upper.provenance.length === 0) return { kind: "UNKNOWN", reason: "UPPER_BOUND_WITHOUT_PROVENANCE" };
+  if (!isCompleteCitation(upper.provenance)) {
+    return { kind: "UNKNOWN", reason: "UPPER_BOUND_WITHOUT_PROVENANCE" };
+  }
   if (!Number.isSafeInteger(upper.upperBound) || upper.upperBound < 0) {
     return { kind: "UNKNOWN", reason: "UPPER_BOUND_NOT_A_COUNT" };
   }

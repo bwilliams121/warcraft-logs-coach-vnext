@@ -4,7 +4,11 @@ import { describe, expect, it } from "vitest";
 
 import { inclusiveRange } from "../../src/engine/evidence/coverage.js";
 import type { CastDecisionAnchorState } from "../../src/engine/game-state/casting/cast-decision-anchor.js";
-import { enemySetAt, type EnemySetQuery } from "../../src/engine/game-state/enemies/enemy-set.js";
+import {
+  enemySetAt,
+  type EncounterStateCitation,
+  type EnemySetQuery,
+} from "../../src/engine/game-state/enemies/enemy-set.js";
 import type { CombatActor } from "../../src/engine/normalization/actors.js";
 import { createNormalizer } from "../../src/engine/normalization/event-normalizer.js";
 import { VERIFIED_DIRECTION_FIELDS } from "../../src/engine/normalization/raw-event-fields.js";
@@ -616,7 +620,17 @@ describe("an upper bound comes only from a source that says where it came from",
   });
 
   it("a supplied bound makes the count exact or a range, and a contradicted one yields UNKNOWN", () => {
-    const provenance = "synthetic curated roster";
+    const provenance: EncounterStateCitation = {
+      datasetId: "SYNTHETIC",
+      datasetRevision: "synthetic/1",
+      datumId: "synthetic-roster",
+      acquisitionRuleId: "SYNTHETIC_RULE",
+      evidencePredicate: "SYNTHETIC_PREDICATE",
+      sourceCorpusRevision: "synthetic-corpus",
+      window: "PULL_START[0,90000)",
+      completeness: "COMPLETE",
+      sourcePulls: [{ reportCode: "SYNTHETIC", fightId: 1 }],
+    };
     expect(setAtEnd(twoMembers(), { upperBound: { upperBound: 2, provenance } }).count).toEqual({
       kind: "EXACT",
       count: 2,
@@ -630,9 +644,18 @@ describe("an upper bound comes only from a source that says where it came from",
       kind: "UNKNOWN",
       reason: "UPPER_BOUND_CONTRADICTS_OBSERVED_MEMBERS",
     });
-    expect(setAtEnd(twoMembers(), { upperBound: { upperBound: 4, provenance: "" } }).count.kind).toBe(
-      "UNKNOWN",
-    );
+    for (const incomplete of [
+      { ...provenance, datumId: "" },
+      { ...provenance, sourcePulls: [] },
+      { ...provenance, completeness: "PARTIAL" },
+    ]) {
+      expect(setAtEnd(twoMembers(), { upperBound: { upperBound: 4, provenance: incomplete } }).count).toEqual(
+        {
+          kind: "UNKNOWN",
+          reason: "UPPER_BOUND_WITHOUT_PROVENANCE",
+        },
+      );
+    }
     expect(setAtEnd(twoMembers(), { upperBound: { upperBound: 1.5, provenance } }).count.kind).toBe(
       "UNKNOWN",
     );

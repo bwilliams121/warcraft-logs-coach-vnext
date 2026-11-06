@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "datasetId": "ENCOUNTER_STATE_CENSUS",
+  "datasetRevision": "polb-a/empty",
+  "acquisitionRuleId": "POLB_CENSUS_V1",
+  "sourceCorpusRevision": "none-acquired",
+  "data": []
+}

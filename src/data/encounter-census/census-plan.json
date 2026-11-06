@@ -1,0 +1,93 @@
+{
+  "planVersion": 1,
+  "planRevision": "polb-a/1",
+  "acquisitionRuleId": "POLB_CENSUS_V1",
+  "frozenOn": "2026-11-06",
+  "status": "PROPOSED_NOT_AUTHORIZED",
+  "selectionSalt": "polb-census-v1",
+  "requiredIndependentPulls": 5,
+  "partitions": [
+    {
+      "partitionId": "3455-5-69933",
+      "zoneId": 53,
+      "encounterId": 3455,
+      "difficulty": 5,
+      "region": "US",
+      "gameBuildVersion": "12.1.0.69933",
+      "provenIntervalFromUtc": "2026-09-30T03:00:00.000Z",
+      "provenIntervalToUtc": "2026-10-12T04:18:14.000Z"
+    },
+    {
+      "partitionId": "3445-5-69587",
+      "zoneId": 53,
+      "encounterId": 3445,
+      "difficulty": 5,
+      "region": "US",
+      "gameBuildVersion": "12.1.0.69587",
+      "provenIntervalFromUtc": "2026-09-09T04:00:00.000Z",
+      "provenIntervalToUtc": "2026-09-12T06:45:21.000Z"
+    }
+  ],
+  "discovery": {
+    "listing": "reportData.reports(zoneID, startTime, endTime, limit, page)",
+    "listingFields": [
+      "code",
+      "startTime",
+      "region.slug",
+      "guild.id",
+      "fights(encounterID, difficulty, killType: Kills) { id }"
+    ],
+    "pageSize": 100,
+    "maxListingPagesPerPartition": 10
+  },
+  "excludedEvaluatedReports": [
+    "A7R6kxPJ1hC8YQ4w",
+    "COHORT116AAAAAAA",
+    "COHORT246AAAAAAA",
+    "COHORT261AAAAAAA",
+    "M13AAUGAAAAAAAAA",
+    "b1PmaKrd6CDfzngc",
+    "gtKb2xHn87pNcFfW",
+    "rXAfw9t1q8YpmkKD"
+  ],
+  "streams": [
+    {
+      "id": "FRIENDLY_DAMAGE",
+      "dataType": "DamageDone",
+      "hostilityType": "Friendlies",
+      "includeResources": false
+    },
+    { "id": "ENEMY_ALL", "dataType": "All", "hostilityType": "Enemies", "includeResources": false },
+    { "id": "ENEMY_DEATHS", "dataType": "Deaths", "hostilityType": "Enemies", "includeResources": false }
+  ],
+  "predicate": {
+    "id": "BRACKETED_HOSTILE_INSTANCE_V1",
+    "bracketGapMs": 30000
+  },
+  "window": {
+    "gridMs": 30000
+  },
+  "limits": {
+    "eventPageSize": 10000,
+    "maxEventPagesPerPull": 20
+  },
+  "requestBudget": {
+    "tokenRequests": 2,
+    "regionLookups": 1,
+    "listingPages": 20,
+    "contextRequests": 10,
+    "eventPages": 200,
+    "revisionRequests": 10,
+    "worstCaseTotal": 243,
+    "proposedCap": 243
+  },
+  "retainedBytes": {
+    "measuredPullWitnessBytes": 47750,
+    "measuredPullContextSliceBytes": 2523,
+    "estimatedListingFrameBytesPerPartition": 70000,
+    "estimatedTotalBytes": 642730,
+    "proposedAllowanceBytes": 1048576,
+    "noticeLineBytes": 4194304,
+    "bytesLeftUnderNoticeLine": 5212
+  }
+}

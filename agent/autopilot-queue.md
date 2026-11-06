@@ -2319,11 +2319,14 @@ mergeSha: 6351a7c72d8c4c8428bc0d80cbd0efe1dcf04d0a
 ### POLB-A: Policy B schema, sampling policy and census plan
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-S3R, HEAL-B1P2
+branch: autopilot/polb-a
 wcl: NONE
 publicContract: NONE
 ```
+
+**Outcome.** Schema, seam, frozen plan and proposal committed, with no row and no request. No acquisition and completeness contract can justify an upper bound, an exact `spell_targets` or a closed `target_if` set, so 1,414 count decisions and 2,301 `target_if` decisions stay UNKNOWN whatever the census returns (`agent/architecture.md` "POLB-A"; `agent/follow-ups.md` "After POLB-A").
 
 **Direction.** Owner decision (2026-11-06), item 3, on `agent/architecture.md` "Policy B (O3)".
 
@@ -2355,7 +2358,7 @@ status: OWNER_DECISION_REQUIRED
 dependsOn: POLB-A
 wcl: OWNER_DECISION_REQUIRED
 publicContract: NONE
-ownerDecision: Approve POLB-A's deterministic census plan and set its Warcraft Logs request cap, so this tranche's grant can be written. The plan, worst-case request count, proposed cap and measured archive need are committed by POLB-A. If the archive line cannot hold the evidence, this decision also needs the measured size increase. ONB-EV's grant does not cover this tranche.
+ownerDecision: Approve POLB-A's frozen census plan (src/data/encounter-census/census-plan.json) with a cap of 243 Warcraft Logs requests and a named archive exception of up to 1 MiB, or decline it. POLB-A found the census cannot justify any upper bound or closed set, so approving it buys lower-bound and candidate evidence only, reaching at most 421 count decisions, all Arms, and POLB-A recommends declining if the upper-bound gap was the purpose (agent/architecture.md "POLB-A"). Declining leaves those decisions UNKNOWN under Option E and needs POLB-B, POLB-C, REM-CENSUS and ONB-Z reworded. ONB-EV's grant does not cover this tranche.
 ```
 
 **Direction.** Owner decision (2026-11-06) "Policy B source", items 8, 11 and 12.
