@@ -1362,6 +1362,7 @@ publicContract: NONE
 - Preserve provenance and the deterministic selection criteria, and record every request in the review packet.
 - The campaign may stop early once every eligible specialization has sufficient retained evidence for a truthful promotion evaluation.
 - Any detected activity stops for the owner's audit confirmation, as `agent/autopilot.md` requires.
+- This grant covers ONB-EV only. It does not cover the Policy B census (POLB-CENSUS).
 
 **If the cap would be exceeded:** stop with OWNER_DECISION_REQUIRED before exceeding 60. Report:
 
@@ -2296,11 +2297,13 @@ Onboarding does not close at 12 of 40 PUBLIC. The objective is every playable sp
 ### HEAL-B1P2: Restoration Druid (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: HEAL-B1P, HEAL-B4P
 branch: autopilot/heal-b1p2
 wcl: NONE
 publicContract: EXPECTED
+pr: 95
+mergeSha: 6351a7c72d8c4c8428bc0d80cbd0efe1dcf04d0a
 ```
 
 **Outcome.** Not promoted, for capacity alone; it stays INTERNAL_ONLY and goes to REM-CENSUS with that blocker, and nothing is DEFERRED. The public contract is unchanged, and no request was made. In an uncommitted dry run the unchanged healer promotion gate passes on gtKb2xHn87pNcFfW fight 22 actor 2 (two Tranquility and five Convoke the Spirits casts, the listing COMPLETE). The minimal fixture is 131,911 bytes and the archive has 5,212 left under its notice line, so the total would be 4,321,003 against 4,194,304, 126,699 over. Under rule 8 the measured size is recorded and the line is not raised. The choice node reads by observed casts alone. A retry waits on an owner capacity decision, the prerequisite rule 2 needs (agent/architecture.md "HEAL-B1P2"; agent/follow-ups.md "After HEAL-B1P2").
@@ -2313,7 +2316,7 @@ publicContract: EXPECTED
 - Cut only the minimal fixture, under the archive's notice line.
 - If the gate cannot pass, it stays INTERNAL_ONLY with the measured reason and goes to REM-CENSUS. It is not DEFERRED.
 
-### POLB-A: Policy B source, schema and provenance review
+### POLB-A: Policy B schema, sampling policy and census plan
 
 ```autopilot
 status: READY
@@ -2322,31 +2325,65 @@ wcl: NONE
 publicContract: NONE
 ```
 
-**Direction.** Owner decision (2026-11-06), item 3, on `agent/architecture.md` "Policy B (O3)": curated encounter metadata, pinned, versioned, provenance-bearing, keyed by encounter, difficulty and build or season, local at runtime. A contradiction with observed evidence yields UNKNOWN plus a drift diagnostic, never REJECTED.
+**Direction.** Owner decision (2026-11-06), item 3, on `agent/architecture.md` "Policy B (O3)".
 
-**Scope.** Before any curated data is entered:
+**Owner resolution (2026-11-06): the source is Option C,** a neutral, deterministic, separately retained Warcraft Logs census that supplies empirical encounter-state bounds only (`agent/architecture.md` "Owner decision (2026-11-06): Policy B source"). Client data, boss-mod source and owner-authored rows are rejected as Policy B authority, and UNKNOWN remains the fallback.
 
-- Review which sources can truthfully support each fact: `active_enemies`, `spell_targets.<ability>`, closed `target_if` candidate sets, attackability and targetability windows, add-availability intervals, and exact or justified upper bounds. Record what each source can and cannot establish.
-- Never a source: guides, remembered mechanics, expected SimulationCraft behavior or top-log behavior. WCL enemy classification stays post-hoc only (N2), and no future observation raises proof at a decision (O2).
-- Define the versioned schema, its provenance fields, the runtime loader, and the supplier seam behind `enemySetAt`'s upper bound and `targetDomainFor`. The shared layer stays gameplay-neutral.
-- Unsupported, incompatible or uncovered keys stay BOUNDED or UNKNOWN.
+**Offline only: no Warcraft Logs request.** The source review is in `.probe/polba/source-review.md`; commit what later tranches rely on.
 
-**Stop.** `agent/architecture.md` names no source for the curated data. If no source reviewed here can truthfully supply it from what the repository already holds, stop with OWNER_DECISION_REQUIRED, naming the candidates and what each would establish. Choosing a source is the owner's.
+**Scope.**
+
+1. **Schema and seam.** Define the versioned schema, the runtime loader, and the supplier seam behind `enemySetAt`'s upper bound and `targetDomainFor`. The shared layer stays gameplay-neutral. Every datum carries its source report and fight, encounter, build or version applicability where available, acquisition rule, evidence predicate, interval or window, exact or bounded status, completeness status, and source-corpus revision. Curated data must be reproducible from its retained evidence.
+2. **Separation.** Define how census evidence is logically and physically distinct from the pulls that evaluate or promote players. No pull may be selected for a target-count result or because it helps a specialization pass.
+3. **Sampling policy, fixed before acquisition.** Define:
+   - encounter identity and client or build applicability;
+   - the deterministic report and fight selection rule, and how many independent pulls or reports it requires;
+   - the exact event streams and predicates requested;
+   - interval and window construction, which must be independently established, and how a window maps onto an analyzed pull, with UNKNOWN where it cannot;
+   - completeness requirements;
+   - conflict handling: conflicting valid observations widen the bound unless an independently proven phase, build or context distinction explains them;
+   - how a build or encounter revision invalidates or versions the census.
+4. **Completeness analysis, per fact.** For each of `active_enemies`, `spell_targets.<ability>`, closed `target_if` sets, targetability, attackability and add availability, state what the census can establish, and whether any acquisition and completeness contract could justify an upper bound or a closed set. Absence of an actor from sampled events never establishes one, and an observed maximum is never an authoritative maximum. If no contract can, say so plainly, by specialization and decision count.
+5. **The acquisition proposal for the owner.** Commit the deterministic plan, the worst-case request count and a proposed request cap, and the measured archive bytes the retained evidence needs against the current notice line. This is what POLB-CENSUS's owner decision reviews.
+
+No curated row is entered here, and no request is made.
+
+### POLB-CENSUS: Policy B neutral census acquisition
+
+```autopilot
+status: OWNER_DECISION_REQUIRED
+dependsOn: POLB-A
+wcl: OWNER_DECISION_REQUIRED
+publicContract: NONE
+ownerDecision: Approve POLB-A's deterministic census plan and set its Warcraft Logs request cap, so this tranche's grant can be written. The plan, worst-case request count, proposed cap and measured archive need are committed by POLB-A. If the archive line cannot hold the evidence, this decision also needs the measured size increase. ONB-EV's grant does not cover this tranche.
+```
+
+**Direction.** Owner decision (2026-11-06) "Policy B source", items 8, 11 and 12.
+
+**Not authorized yet.** No network activity occurs until the owner approves the plan and a cap, and an `OWNER-GRANT:` replaces the `wcl` value above. ONB-EV's campaign authorization is not implicit permission for this tranche.
+
+**Scope once granted.** Run the frozen plan exactly, retaining the evidence separately from analyzed pulls.
+
+- No additional pulls after inspecting outcomes merely to tighten a desired bound.
+- No rankings, parse percentiles, damage performance, or player behavior as authority.
+- Retain enough evidence to reproduce every curated bound. If the existing limit cannot hold it, stop with OWNER_DECISION_REQUIRED and the measured increase required; never raise the limit silently, and never keep only derived conclusions.
 
 ### POLB-B: Policy B curated data and enemy-count bounds
 
 ```autopilot
 status: READY
-dependsOn: POLB-A
+dependsOn: POLB-CENSUS
 wcl: NONE
 publicContract: NONE
 ```
 
-**Scope.** Curated rows for the encounters of retained real evidence, from POLB-A's approved sources only, and their use in `active_enemies`: exact counts or justified upper bounds where the evidence contract supports them, BOUNDED or UNKNOWN otherwise.
+**Scope.** Curated rows derived reproducibly from the retained census only, and their use in `active_enemies` through the existing EXACT, BOUNDED and UNKNOWN model. SimulationCraft never dictates the count: the census supplies evidence and the pinned APL consumes it.
 
-- A contradiction with observed evidence is UNKNOWN plus a drift diagnostic, tested on real evidence.
+- Positive observations may justify a lower bound for a supported interval. An upper bound needs the explicit completeness argument POLB-A recorded for that predicate and interval; otherwise the upper bound stays open or UNKNOWN.
+- If the evidence permits several counts that would produce different APL decisions, the decision stays UNKNOWN.
+- A contradiction with an analyzed pull's observed evidence is UNKNOWN plus a drift diagnostic, tested on real evidence, and never REJECTED. Conflicts within the census widen the bound and are never discarded.
 - Public analyzers stay invariant unless a change is measured, explained and pinned in this tranche.
-- Replay the specializations `agent/follow-ups.md` "After ONB-S3R" names as waiting on an upper bound, and record each one's next blocker. Nothing is promoted here.
+- Replay the affected INTERNAL_ONLY specializations, including those `agent/follow-ups.md` "After ONB-S3R" names as waiting on an upper bound. Record newly resolved decisions and each one's next blocker. Nothing is promoted here.
 
 ### POLB-C: Policy B target domains and availability windows
 
@@ -2357,10 +2394,13 @@ wcl: NONE
 publicContract: NONE
 ```
 
-**Scope.** Where POLB-A's sources support them: closed `target_if` candidate sets, attackability and targetability windows, and add-availability intervals. `spell_targets.<ability>` stays action-owned and resolves only with registered applicability, including range and geometry; it is never aliased to `active_enemies` by default.
+**Scope.** Where the retained census supports them: candidate-set evidence, targetability and attackability windows, and add-availability intervals.
 
+- Present, targetable, attackable, in line of sight, in range and `spell_targets.<ability>` are never aliased. Each needs its own positively supported evidence contract; otherwise it stays UNKNOWN.
+- A closed `target_if` set needs evidence that an unobserved qualifying target could not exist for the interval. Without that proof, use a lower or bounded candidate set where useful, or UNKNOWN.
+- `spell_targets.<ability>` stays action-owned, with its geometry and eligibility action- or spec-owned where appropriate.
 - Validate against retained real evidence, with negative tests that uncertain evidence stays BOUNDED or UNKNOWN.
-- Record which facts the sources could not establish, by specialization, for REM-CENSUS.
+- Record which facts the census could not establish, by specialization, for REM-CENSUS.
 
 ### ONB-EV-PLAN: Freeze the neutral evidence campaign plan
 

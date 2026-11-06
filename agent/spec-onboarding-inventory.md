@@ -39,7 +39,7 @@ The 12-of-40 first pass is not closure. The target is 40 of 40 PUBLIC if the ava
 - **Lifecycle:** `INTERNAL_ONLY` → blocker census → missing-input implementation → evidence acquisition if required → real-evidence replay → unchanged promotion gate → `PUBLIC`.
 - **`BLOCKED`** needs remediation to demonstrate that a required fact or authority cannot currently be obtained or implemented truthfully. **`DEFERRED`** needs an explicit owner decision.
 - **Neither is assigned merely because** a first promotion failed, a specialization has only UNKNOWN decisions, an implementation tranche already merged, or remediation needs more work.
-- **Owning entries:** HEAL-B1P2, POLB-A to POLB-C, ONB-EV-PLAN, ONB-EV, REM-CENSUS and the `REM-*` tranches it adds, REM-GATE, ONB-Z. REM-CENSUS records each specialization's blockers here.
+- **Owning entries:** HEAL-B1P2, POLB-A, POLB-CENSUS, POLB-B, POLB-C, ONB-EV-PLAN, ONB-EV, REM-CENSUS and the `REM-*` tranches it adds, REM-GATE, ONB-Z. REM-CENSUS records each specialization's blockers here.
 
 ## State vocabulary
 

@@ -7562,7 +7562,7 @@ Semantic targets and rules:
 - **No future bracketing (O2).** For authority, an observation after D may never
   raise the proof state at D. Post-hoc analysis may report "the same instance
   was observed before and after t", never "available throughout".
-- **Policy B (O3), approved; scheduled by the owner on 2026-11-06** (POLB-A to POLB-C; see "Owner decision (2026-11-06): remediation before roster closure").
+- **Policy B (O3), approved; scheduled by the owner on 2026-11-06** (POLB-A, POLB-CENSUS, POLB-B and POLB-C; see "Owner decision (2026-11-06): remediation before roster closure" and "Owner decision (2026-11-06): Policy B source").
   - Curated encounter metadata will be pinned, versioned and provenance-bearing.
   - It will be keyed by encounter, difficulty and build or season, and be local
     at runtime.
@@ -15026,3 +15026,49 @@ So capacity is what stops it, as far as that run can show. It is a measurement, 
 **Corrected.** "No retained evidence" for Restoration Druid in the `src/findings/spec-id.ts` comment and five test comments, wrong since HEAL-B4P's census, now states the capacity reason. The historical prose elsewhere stays as written.
 
 **Why a tranche stop, not an owner stop.** The entry says a gate that cannot pass leaves the specialization INTERNAL_ONLY and goes to REM-CENSUS, and rule 8 raises a proposal to the owner when several fixtures cannot fit. This is one row. ONB-EV's capacity stop is the first place several could meet, so the proposal is recorded now (`agent/follow-ups.md` "After HEAL-B1P2") with what the grant's capacity paragraph asks for, and the queue's order still holds: a stop here would hold POLB-A and everything behind it on a decision that does not block them.
+
+## Owner decision (2026-11-06): Policy B source
+
+**Ruling.** Policy B's source is Option C: a neutral, deterministic, separately retained Warcraft Logs census, from which only the empirical encounter-state bounds justified by positive evidence and demonstrated completeness are derived. Where such justification cannot be established, the result stays BOUNDED or UNKNOWN.
+
+The census supplies empirical encounter-state bounds only. It is not rotational authority, evidence that a player decided correctly, a guide, a top-log comparison model, permission to infer what should happen, or permission to treat repeated observations as exact encounter truth.
+
+**Separation.** The census is logically and physically distinct from the pulls that evaluate or promote players or specializations. Selection follows a predetermined, neutral, deterministic sampling rule. No pull is selected because it produces a desired target count or helps a specialization pass. No outcome shopping.
+
+**What it may establish,** as per-window facts feeding the existing EXACT, BOUNDED and UNKNOWN model:
+
+- positively observed hostile-actor membership;
+- observed concurrent hostile-actor counts;
+- observed spawn, despawn and death intervals;
+- empirical lower bounds on enemy availability;
+- empirical upper bounds, only when the acquisition and completeness contract actually justifies one;
+- phase- or window-specific bounds where the window itself is independently established.
+
+**Lower and upper bounds.** Four distinct qualifying hostile actors positively observed as concurrently active under the approved predicate may establish `activeEnemies >= 4` for that supported interval. The absence of a fifth from sampled events does not establish `activeEnemies <= 4`. An upper bound needs an explicit completeness argument for the predicate and interval; without one, the upper bound stays open or UNKNOWN. A frequently observed maximum never becomes an authoritative maximum.
+
+**Targetability and range stay separate.** Observed presence does not establish targetability, attackability, line of sight, player range, ability range or `spell_targets.<ability>`. Each needs its own positively supported contract. `present == targetable == in range` is never assumed; if the distinction cannot be proven, UNKNOWN stands.
+
+**`active_enemies`.** The census supplies evidence and the pinned APL consumes it; SimulationCraft does not dictate the count. If the evidence permits several counts that would produce different APL decisions, the decision stays UNKNOWN.
+
+**`spell_targets` and `target_if`.** The census may contribute candidate-set evidence but does not by itself authorize an exact `spell_targets` or a closed `target_if` domain. A closed set needs evidence that an unobserved qualifying target could not exist for the interval. Without that proof, use a lower or bounded candidate set where useful, or UNKNOWN. Action-specific geometry and eligibility stay action- or spec-owned where appropriate.
+
+**No behavior as authority.** Casts chosen by high performers, most-common targets, parse percentile, rankings, damage performance, what successful guilds usually do, and the frequency of player behavior are never authority for a recommendation. The census describes encounter state only.
+
+**Sampling policy, defined before acquisition by POLB-A and POLB-B:** encounter identity; client or build applicability; the deterministic report and fight selection rule; the number of independent pulls or reports required; the exact event streams and predicates; interval and window construction; completeness requirements; conflict handling; and how build or encounter revisions invalidate or version the census. Additional pulls are never chosen after inspecting outcomes merely to tighten a desired bound.
+
+**Conflicts widen the bound.** One qualifying observation supporting 4 enemies and another supporting 5 are both preserved unless an independently proven phase, build or context distinction explains the difference. The value that makes the APL easier to evaluate is never selected. This governs conflicts within the census. A contradiction between curated data and an analyzed pull's observed evidence stays UNKNOWN plus a drift diagnostic, as O3 says.
+
+**Provenance.** Every curated datum carries its source report and fight, encounter, build or version applicability where available, acquisition rule, evidence predicate, interval or window, exact or bounded status, completeness status, and source-corpus revision. Policy B data must be reproducible from its retained evidence.
+
+**Warcraft Logs.** This selects Warcraft Logs as the source and grants no requests. POLB-CENSUS is a separate tranche carrying `wcl: OWNER_DECISION_REQUIRED`, and the deterministic plan and request cap are presented before any network activity. ONB-EV's authorization is not implicit permission for Policy B.
+
+**Archive.** Evidence is retained sufficiently to reproduce the curated bounds. If the existing corpus or archive limit cannot hold it, stop with OWNER_DECISION_REQUIRED and the measured increase required. The limit is never raised silently, and derived conclusions are never kept while the evidence that reproduces them is discarded.
+
+**Promotion.** Policy B data may unblock UNKNOWN decisions but promotes nothing. After it is available, affected INTERNAL_ONLY specializations are replayed, newly resolved decisions identified and next blockers exposed. The existing promotion gates run unchanged, and only specializations that independently satisfy them are promoted.
+
+**Rejected alternatives.**
+
+- **A, Blizzard client data:** useful for identity and mechanics where applicable, but insufficient for encounter-window enemy availability.
+- **B, boss-mod source:** not Policy B authority; it risks turning strategy and timer authoring into encounter truth and conflicts with the prohibition on guide-derived state.
+- **D, owner-authored rows:** rejected as the primary model, because it creates manually asserted encounter truth instead of reproducible evidence.
+- **E, remain UNKNOWN:** stays the fallback wherever Option C cannot establish a justified bound.
