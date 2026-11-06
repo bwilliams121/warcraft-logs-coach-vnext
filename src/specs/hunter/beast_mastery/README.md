@@ -4,6 +4,8 @@
 
 **A Cohort T follower. It resolves nothing today.** All 707 eligible decisions of its four retained subjects stay UNKNOWN, with 0 MATCH and 0 REJECTED. That is a property of the pinned list and the missing inputs below, not a claim about any player.
 
+**Not promoted by ONB-T2P.** It cannot pass the rotational gates: all 707 decisions stay UNKNOWN. It waits on `default[0] retarget` and the difficulty authority `fight_style` needs, the swing's entry, an upper bound for the dispatches, and `st` (agent/architecture.md "ONB-T2P").
+
 ## The authority
 
 `SIMC_APL_HUNTER_BEAST_MASTERY` (`simc-33622e9d-1`), the `//beast_mastery_apl_start .. _end` region of `apl/apl_hunter.cpp`, whose PTR twin is identical, governs OFFENSIVE_ROTATION only. Resource spending, defensive cooldowns and interrupts are declared and resolve `NO_PINNED_AUTHORITY_FOR_DOMAIN`. Active mitigation and self healing are not declared.

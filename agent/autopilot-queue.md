@@ -1916,11 +1916,13 @@ mergeSha: 49dfccf27371a099da903ef2bfc611baad2e3880
 ### ONB-T2: Guardian Druid, Beast Mastery Hunter and Survival Hunter (internal, Cohort T)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-T1, ONB-S6
 branch: autopilot/onb-t2
 wcl: NONE
 publicContract: NONE
+pr: 92
+mergeSha: 3cbc6d171014f44b8121e9ca11651dcd6cceeb05
 ```
 
 **Scope.** Cohort T followers.
@@ -1937,11 +1939,14 @@ publicContract: NONE
 ### ONB-T2P: Guardian Druid, Beast Mastery Hunter and Survival Hunter (public)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-T2
+branch: autopilot/onb-t2p
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Outcome.** None of the three passes the rotational promotion gates, so all stay INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Beast Mastery's four retained subjects, all Pack Leader, replayed offline, give 707 decisions, 0 MATCH, 0 REJECTED, all UNKNOWN, identical to ONB-T2's apart from a wall-clock field. A census of 5,743 retained files finds no other subject: gBMC fight 33 actors 141 (Beast Mastery) and 91 (Guardian) sit in a diagnostic sample, Survival has no combatant info and its one id hit is Marksmanship's, and every other hit is another Druid's, a Primal Earth Elemental's or a subject's pet's. Guardian and Survival stay on ONB-EV. Beast Mastery's first gap is decision inputs, so it is not on ONB-EV, and ONB-S3 alone moves nothing. A promotion after those inputs is a new public entry through the unchanged gates (agent/architecture.md "ONB-T2P"; agent/follow-ups.md "After ONB-T2").
 
 ### ONB-D1: Destruction Warlock (internal, Cohort D representative)
 

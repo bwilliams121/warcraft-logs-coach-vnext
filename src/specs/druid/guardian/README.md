@@ -4,6 +4,8 @@
 
 **A Cohort T follower with no retained subject. It resolves nothing today.** The only real Guardian events anywhere are two seconds of gBMCKxyY7dQDRZav fight 33 actor 91 in a diagnostic sample: its combatant info, one cast off the list, one Mangle resource change and one Red Moon damage row. So every stop below comes from a synthetic build, and it is on ONB-EV. That is a property of the evidence and the pinned list, not a claim about any player.
 
+**Not promoted by ONB-T2P.** It cannot pass the rotational gates: it has no real resolved decision and no retained subject. It waits on a capture, which is ONB-EV's owner decision, and then on the inputs in agent/follow-ups.md "After ONB-T2" (agent/architecture.md "ONB-T2P").
+
 ## The authority
 
 `SIMC_APL_DRUID_GUARDIAN` (`simc-33622e9d-1`), `apl/druid/guardian_apl.inc`, governs OFFENSIVE_ROTATION only. The PTR list is a separate include this repository does not hold, and the dispatch chooses by `is_ptr()`.

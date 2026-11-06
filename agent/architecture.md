@@ -14876,3 +14876,47 @@ A second pass read events of any type by every id in Guardian's and Survival's G
 **Evidence.** Nothing new is committed. Every pinned source read was already on disk and matches the recorded hashes.
 
 **No public change.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/` changed, and the public lookup and identity table refuse all three rows. A public request for any of them is SPEC_NOT_SUPPORTED, exactly as before.
+
+## ONB-T2P — Guardian Druid, Beast Mastery Hunter and Survival Hunter public promotion: not promoted
+
+Autopilot queue entry ONB-T2P. Public contract: declared EXPECTED; actual change NONE, because nothing passes. No Warcraft Logs request and no new evidence.
+
+**The outcome.** None of the three passes the rotational promotion gates, so each stays INTERNAL_ONLY (onboarding rule 4). The gates are not weakened and gain no subject. This is not an owner stop: rule 4 decides it, and no new decision is needed to record that. Guardian and Survival have no retained subject and stay on ONB-EV. Beast Mastery's first gap is decision inputs, not evidence, so it is not on ONB-EV. ONB-S3 alone moves none of them.
+
+**Why they cannot pass.** OBSERVATION needs a real MATCH and real resolved decisions over several distinct action tokens, and DISCRIMINATION needs a real REJECTED or a control that flips a real MATCH. Both start from a real resolved decision, and none of the three has one. Beast Mastery is the only one with a subject to replay. Replaying its four through production ingestion and the facade over a fake transport, at this tranche's base commit:
+
+| Subject | Hero tree | Span | Eligible | MATCH | REJECTED | UNKNOWN | Excluded |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| A7R6kxPJ1hC8YQ4w fight 7 actor 20 | Pack Leader | first 165 s | 119 | 0 | 0 | 119 | 27 |
+| gtKb2xHn87pNcFfW fight 22 actor 13 | Pack Leader | whole fight, 285 s | 214 | 0 | 0 | 214 | 45 |
+| rXAfw9t1q8YpmkKD fight 13 actor 15 | Pack Leader | first 165 s | 139 | 0 | 0 | 139 | 24 |
+| b1PmaKrd6CDfzngc fight 48 actor 164 | Pack Leader | whole fight, 345 s | 235 | 0 | 0 | 235 | 31 |
+
+The total is 707 UNKNOWN and 127 excluded. Each subject's output matches the one saved during ONB-T2 once its wall-clock `ms` field is removed. The engine refuses all 707 at `default[0] retarget`, and the root scan of all 707 stops at the same line, on `ACTION_OPTION:target_if`. No dispatch on the enemy count is reached. Guardian's and Survival's stops are still the synthetic ones ONB-T2 recorded; no real decision of either exists to replay.
+
+**The census found no other subject, by three routes.** It parsed every JSON file over 500 bytes under `.probe/` and `tests/`, skipping tool output and worktree copies (5,743 parsed of 5,744; the other is `.probe/m11d2c/bad.json`). Events of any type are read. Mortal Strike, the positive control, has 985 events, 559 of them casts.
+
+1. **Combatant info.** The `combatantinfo` events with specID 253 (Beast Mastery) are 7, naming actors 20, 15, 164, 13 and 141. Those with specID 104 (Guardian) are 2, both naming actor 91. SpecID 255 (Survival) has none. The route can find others: 31 specIDs appear in the distribution, each one a control.
+2. **Named abilities.** The 44 ids retained contexts' master data give the names listed for the three specializations. None of them is one of Survival's ten listed names (Raptor Strike, Wildfire Bomb, Harpoon, Mongoose Bite, Flanking Strike, Boomstick, Takedown, Hatchet Toss, Butchery, Coordinated Assault): no retained context's master data names any of those.
+3. **Pinned ids.** Every id in the three `*-gcd-semantics.json` files, read from each file: Guardian 24, Beast Mastery 7, Survival 8. The census throws if this route or the named route is empty. Many of Guardian's are class-wide Druid ids.
+
+Every source holding a hit was resolved:
+
+| Source | What it is | Result |
+| --- | --- | --- |
+| A7R6 fight 7 actor 20, gtKb fight 22 actor 13, rXAf fight 13 actor 15, b1Pm fight 48 actor 164, and their pets (for example A7R6 29, gtKb 237, rXAf 169, b1Pm 165) | Beast Mastery, by context and combatant info | the four subjects, replayed above. The committed fixtures hold stray rows of them only; the two Focus casts in `wcl-rage-fury-focus-pre-cost` are actor 20's by its manifest |
+| gBMCKxyY7dQDRZav fight 33 actor 141 (`m11g2` `diagnose`, `diagnose2`) | Beast Mastery, by combatant info | combatant info, one Barbed Shot and its damage and resource rows in a diagnostic sample, not a subject |
+| gBMC fight 33 actor 91 (the same two files) | Guardian, by combatant info | combatant info, one cast off the list (77764) with its buff rows, three resource changes (one Mangle, one Red Moon), one Red Moon damage row, not a subject |
+| A7R6 fight 7 actor 1, b1Pm fight 48 actor 170 | Feral, by context | Druid ids, Swipe, Frenzied Regeneration; the same actor 1 in the Assassination fixtures |
+| gtKb fight 22 actor 2 | Restoration, by context | Druid ids |
+| gtKb fight 22 actor 27, rXAf fight 13 actors 13 and 9, Gw2kXrTfLWcDdhFY fight 1 actor 3 | Balance, by context | Druid ids, including Moonkin Form and Frenzied Regeneration |
+| Gw2k fight 1 actors 14 and 18 | Marksmanship, by context | one Moonlight Chakram each; it is the only hit on any id of Survival's |
+| b1Pm fight 48 actors 79 and 216 | Primal Earth Elementals, owners 17 and 8 | Pulverize, the elemental's own spell |
+
+The retained contexts hold 138 rows naming Beast Mastery over 20 report codes, 11 naming Guardian over 8, and 5 naming Survival, all zpryqKdtRjWNQXa6 actor 742. Some are sanitized stand-ins (`COHORT116AAAAAAA`, `COHORT246AAAAAAA`, `COHORT261AAAAAAA`). Apart from the sources above they hold no event of these ids in any retained file. No Beast Mastery source is Dark Ranger.
+
+Limits: the census does not read JSON files of 500 bytes or less, or log and text output. Its ability routes match the ids above only; the combatant-info route does not depend on them. An actor with neither a context nor combatant info, holding none of those ids, would not appear.
+
+**What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists all three; the gate search finds no qualifying assertion and `evidenceReady` false for each (`m11-promotion-evidence-gate`, from ONB-T2, their comments now naming the outcome). Two test rows are new: a public Druid/Guardian or Hunter/Survival request is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which held no row for them). Hunter/BeastMastery's row already existed. A public request still runs preparation and reports partial coverage. Nothing reads as clean play. The replay and census are offline and not committed.
+
+**What a later promotion must do.** It first answers its stops, in order (agent/follow-ups.md "After ONB-T2"). Beast Mastery: `default[0] retarget`, whose first question is the difficulty authority `fight_style` waits on, then the swing, the dispatches' upper bound, and `st`. Guardian and Survival: a capture first, which is ONB-EV's owner decision. Beast Mastery measures or refuses Dark Ranger, as Havoc refuses Fel-Scarred. Promoting it also moves the proofs off `tests/support/unsupported-subject.ts`, because the guard in `m11a2-unsupported-subject` fails the day that row becomes PUBLIC. A new public entry then promotes through the unchanged gates by the five-site promotion, and must first commit its evidence with identity proof, because a PUBLIC module cannot use the retained-only exception. No such entry is queued.
