@@ -1342,18 +1342,48 @@ events), plus pet-count and pet-active state for APL reads (for example
 ### ONB-EV: Neutral evidence campaign for specializations without retained real evidence
 
 ```autopilot
-status: OWNER_DECISION_REQUIRED
-dependsOn: none
-wcl: NONE
+status: READY
+dependsOn: ONB-EV-PLAN
+wcl: OWNER-GRANT: agent/autopilot-queue.md ONB-EV owner grant (2026-11-06); ONB-EV only; one neutral campaign running ONB-EV-PLAN's frozen plan for its listed specializations; per specialization the first qualifying public raid fight under the recorded fixed discovery rule, with no replacement fight or alternate subject because of any result; only the minimum actor and fight evidence the existing evaluator and promotion gate need (casts, auras, resources, combatant information and the fight context and actor identification they require); no rankings, comparison or top-log data; at most 60 Warcraft Logs HTTP requests in total, counting OAuth token requests and refreshes, discovery, fight and context lookups, actor identification, event retrieval, pagination and completeness requests; stop with OWNER_DECISION_REQUIRED before exceeding 60; no archive-limit increase and no promotion
 publicContract: NONE
-ownerDecision: Authorize one bounded, neutral, deterministic Warcraft Logs evidence campaign for the specializations that have no retained, already-authorized real evidence. Known today: Fury Warrior, Protection Warrior, Outlaw Rogue, Survival Hunter and Vengeance Demon Hunter appear in no committed fight context, and onboarding tranches append any further spec whose review finds its evidence inadequate. Appended by ONB-B2: Enhancement Shaman (the only retained events are the filtered M13-A casts of actor 7, with no combatant info, so its talents never resolve). Appended by HEAL-B1P, and corrected by HEAL-B4P: Restoration Druid needs no campaign (its whole-fight events in gtKb2xHn87pNcFfW fight 22, actor 2, are in the retained M9-C2, M11-C4 and M11-C4b captures, which HEAL-B1P's census did not read; agent/follow-ups.md "After HEAL-B4P"). Appended by HEAL-B3: Discipline Priest (committed evidence is a filtered M13-A cast capture, actor 9, and Atonement applications by the G2 cohort246 fight 33 actor 88 onto another player; no committed or retained capture holds its whole-fight casts or any Atonement heal event, and fight 48 has no Discipline Priest, so HEAL-B3P cannot meet the healer promotion gate). (Preservation Evoker, appended by HEAL-B4, was removed by HEAL-B4P: it passed the gate on retained evidence.) Appended by ONB-A2: Subtlety Rogue (committed evidence is 150 filtered M13-A casts of actor 17, with no combatant info, auras or resources, so its talents never resolve); its census also found Fury and Protection Warrior only in retained fight contexts, with no event. The proposal is the smallest campaign: per spec, the first public raid fight in a fixed order containing it, with its actor slice (casts, auras, resources, combatant info), and no ranking or comparison data. Confirmed by ONB-C2: Outlaw Rogue, whose only context is the uncommitted g34mvXTKLMJ2Nfwr fights 1, 6 and 7, actor 17, with no event retained. Appended by ONB-D3: Frost Mage (the only real casts are 103 filtered M13-A casts of actor 6, with no combatant info, and one cast in a two-second page, so nothing has met real evidence). Appended by ONB-D4: Affliction Warlock and Marksmanship Hunter (the only real casts are the filtered M13-A casts of actors 20, 14 and 18, with no combatant info, so each refuses PROFILE_NOT_RESOLVED).
 ```
 
-**Direction.** The owner's onboarding evidence policy: neutral,
-outcome-independent acquisition, with no searching for a desired
-MATCH/REJECTED result. Until this is decided, the affected specializations
-stay INTERNAL_ONLY after their internal tranches, and nothing else waits on
-them.
+**Owner grant (2026-11-06): APPROVED with a hard campaign cap of 60 Warcraft Logs HTTP requests in total** (`agent/architecture.md` "Owner grant (2026-11-06): ONB-EV"). This entry acquires evidence and promotes nothing. It runs ONB-EV-PLAN's frozen plan.
+
+**Recorded specializations (12).** Discipline Priest, Subtlety Rogue, Fury Warrior, Protection Warrior, Enhancement Shaman, Outlaw Rogue, Guardian Druid, Survival Hunter, Frost Mage, Affliction Warlock, Marksmanship Hunter and Vengeance Demon Hunter. ONB-EV-PLAN removes any that no longer qualify. Restoration Druid and Preservation Evoker were removed earlier: their evidence is retained.
+
+**Acquisition rules.**
+
+- The 60-request cap includes all Warcraft Logs network activity of this campaign: OAuth token requests and refreshes, report and fight discovery, fight and context lookups, actor identification, casts, auras, resources, combatant information, and pagination or completeness requests.
+- Follow the recorded neutral discovery rule: per specialization, the first qualifying public raid fight in the fixed order ONB-EV-PLAN froze.
+- Acquire only the minimum actor and fight evidence the existing evaluator and promotion gate need.
+- Query no rankings and no comparison or top-log data.
+- Never search for a different fight because the first result gave UNKNOWN, MATCH, REJECTED or otherwise unfavorable evidence, and never retry against alternate subjects to obtain an outcome.
+- Preserve provenance and the deterministic selection criteria, and record every request in the review packet.
+- The campaign may stop early once every eligible specialization has sufficient retained evidence for a truthful promotion evaluation.
+- Any detected activity stops for the owner's audit confirmation, as `agent/autopilot.md` requires.
+
+**If the cap would be exceeded:** stop with OWNER_DECISION_REQUIRED before exceeding 60. Report:
+
+- requests consumed and requests remaining;
+- specializations completed and specializations still requiring evidence;
+- why each remaining request is necessary;
+- the measured additional request amount proposed.
+
+**Archive and corpus capacity.** This grant authorizes no size-limit increase. If new evidence cannot be committed under the existing policy, stop with OWNER_DECISION_REQUIRED and give the measured proposal:
+
+- the current archive size and limit;
+- the bytes the proposed retained evidence requires;
+- the deduplication and compression opportunities considered;
+- the smallest justified new limit.
+
+Never discard required evidence to fit, and never raise the allowance silently.
+
+**Afterward.** Acquisition authorizes no promotion. Replay the normal evaluator through REM-CENSUS, preserving MATCH, REJECTED and UNKNOWN semantics, apply the existing promotion gates unchanged, and expose the next real blocker where a specialization still cannot pass.
+
+**Direction.** The owner's onboarding evidence policy: neutral, outcome-independent acquisition. Until this has run, the affected specializations stay INTERNAL_ONLY.
+
+**Why each specialization is listed (history from the onboarding tranches).** Authorize one bounded, neutral, deterministic Warcraft Logs evidence campaign for the specializations that have no retained, already-authorized real evidence. Known today: Fury Warrior, Protection Warrior, Outlaw Rogue, Survival Hunter and Vengeance Demon Hunter appear in no committed fight context, and onboarding tranches append any further spec whose review finds its evidence inadequate. Appended by ONB-B2: Enhancement Shaman (the only retained events are the filtered M13-A casts of actor 7, with no combatant info, so its talents never resolve). Appended by HEAL-B1P, and corrected by HEAL-B4P: Restoration Druid needs no campaign (its whole-fight events in gtKb2xHn87pNcFfW fight 22, actor 2, are in the retained M9-C2, M11-C4 and M11-C4b captures, which HEAL-B1P's census did not read; agent/follow-ups.md "After HEAL-B4P"). Appended by HEAL-B3: Discipline Priest (committed evidence is a filtered M13-A cast capture, actor 9, and Atonement applications by the G2 cohort246 fight 33 actor 88 onto another player; no committed or retained capture holds its whole-fight casts or any Atonement heal event, and fight 48 has no Discipline Priest, so HEAL-B3P cannot meet the healer promotion gate). (Preservation Evoker, appended by HEAL-B4, was removed by HEAL-B4P: it passed the gate on retained evidence.) Appended by ONB-A2: Subtlety Rogue (committed evidence is 150 filtered M13-A casts of actor 17, with no combatant info, auras or resources, so its talents never resolve); its census also found Fury and Protection Warrior only in retained fight contexts, with no event. The proposal is the smallest campaign: per spec, the first public raid fight in a fixed order containing it, with its actor slice (casts, auras, resources, combatant info), and no ranking or comparison data. Confirmed by ONB-C2: Outlaw Rogue, whose only context is the uncommitted g34mvXTKLMJ2Nfwr fights 1, 6 and 7, actor 17, with no event retained. Appended by ONB-D3: Frost Mage (the only real casts are 103 filtered M13-A casts of actor 6, with no combatant info, and one cast in a two-second page, so nothing has met real evidence). Appended by ONB-D4: Affliction Warlock and Marksmanship Hunter (the only real casts are the filtered M13-A casts of actors 20, 14 and 18, with no combatant info, so each refuses PROFILE_NOT_RESOLVED).
 
 ### HEAL-A: Restoration Shaman registration and healer finding shape (internal)
 
@@ -1939,11 +1969,13 @@ mergeSha: 3cbc6d171014f44b8121e9ca11651dcd6cceeb05
 ### ONB-T2P: Guardian Druid, Beast Mastery Hunter and Survival Hunter (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-T2
 branch: autopilot/onb-t2p
 wcl: NONE
 publicContract: EXPECTED
+pr: 93
+mergeSha: ec05be3e29fca81e4df7367f12f1f737941e6e67
 ```
 
 **Outcome.** None of the three passes the rotational promotion gates, so all stay INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Beast Mastery's four retained subjects, all Pack Leader, replayed offline, give 707 decisions, 0 MATCH, 0 REJECTED, all UNKNOWN, identical to ONB-T2's apart from a wall-clock field. A census of 5,743 retained files finds no other subject: gBMC fight 33 actors 141 (Beast Mastery) and 91 (Guardian) sit in a diagnostic sample, Survival has no combatant info and its one id hit is Marksmanship's, and every other hit is another Druid's, a Primal Earth Elemental's or a subject's pet's. Guardian and Survival stay on ONB-EV. Beast Mastery's first gap is decision inputs, so it is not on ONB-EV, and ONB-S3 alone moves nothing. A promotion after those inputs is a new public entry through the unchanged gates (agent/architecture.md "ONB-T2P"; agent/follow-ups.md "After ONB-T2").
@@ -2241,24 +2273,183 @@ mergeSha: b68a0f14f9d38830bd98e0128413737b4af587c1
 
 **Outcome.** It does not pass the rotational promotion gates, so it stays INTERNAL_ONLY (onboarding rule 4); nothing is promoted and the public contract is unchanged. Its one retained subject, Rider of the Apocalypse, replayed offline, gives 147 decisions, 0 MATCH, 0 REJECTED, all UNKNOWN, output byte-identical to ONB-X5's. A census of 5,717 retained files finds no other subject: gBMC fight 33 actors 195 and 199 hold one Outbreak each in a diagnostic sample, and every other hit is a Blood Death Knight's or a pet's. Evidence is not its first gap, so it is not on ONB-EV, and ONB-S3 alone moves nothing. A promotion after its own inputs, first the swing's entry and the three cooldown lines behind it, is a new public entry through the unchanged gates (agent/architecture.md "ONB-X5P"; agent/follow-ups.md "After ONB-X5").
 
-### ONB-Z: Specialization-onboarding completion matrix
+## Specialization remediation (owner decision, 2026-11-06)
+
+Onboarding does not close at 12 of 40 PUBLIC. The objective is every playable specialization PUBLIC wherever truthful authority, implementation and evidence can be established without weakening a gate: 40 of 40 if they permit it (`agent/architecture.md` "Owner decision (2026-11-06): remediation before roster closure").
+
+`INTERNAL_ONLY` after a failed promotion attempt means first-pass onboarding completed and remediation still required. It is not a terminal disposition.
+
+**Lifecycle:** `INTERNAL_ONLY` → blocker census → missing-input implementation → evidence acquisition if required → real-evidence replay → unchanged promotion gate → `PUBLIC`.
+
+**Rules for every remediation entry (in addition to the onboarding rules):**
+
+1. **Gates never weaken.** Pinned authority and provenance, real sanitized evidence, qualifying observation and discrimination, truthful MATCH, REJECTED and UNKNOWN, cross-spec isolation, public schema compatibility, REST, MCP and raid-night parity, invariance of existing public analyzers, and CI and review all still apply. The goal is to remove legitimate blockers.
+2. **A retry needs a changed prerequisite.** A promotion-only tranche is queued only when a known prerequisite of that specialization has changed. A failed retry records the next blocker and the specialization stays in remediation.
+3. **BLOCKED** is assigned only when remediation demonstrates that a required fact or authority cannot currently be obtained or implemented truthfully, with that demonstration recorded in the inventory.
+4. **DEFERRED** is assigned only by an explicit owner decision to postpone otherwise feasible work.
+5. **Never a reason for either:** a failed first promotion, only UNKNOWN decisions, an already-merged implementation tranche, or remediation needing more work.
+6. **Ownership.** Prefer a shared tranche when several specializations share a genuinely generic capability. Specialization mechanics stay under `src/specs/<class>/<spec>/`, with no generic gameplay evaluator and no spec conditionals in shared infrastructure.
+7. **Network.** `wcl: NONE` unless the entry carries an `OWNER-GRANT:` from an owner decision. A tranche that finds it needs a new request stops with OWNER_DECISION_REQUIRED, naming the exact evidence and the smallest campaign.
+8. **Capacity.** Promotion needs committed evidence, and the existing caps and notice lines stay in force. A tranche whose minimal fixture cannot fit records its measured size. When several cannot fit, raise the measured proposal for the owner; never raise a line silently.
+9. **No production deployment** under this program.
+
+### HEAL-B1P2: Restoration Druid (public)
 
 ```autopilot
 status: READY
-dependsOn: M13-F, ONB-S3R, HEAL-AP, HEAL-B1P, HEAL-B2P, HEAL-B3P, HEAL-B4P, ONB-A1P, ONB-A2P, ONB-B1P, ONB-B2P, ONB-B3P, ONB-C1P, ONB-C2P, ONB-T1P, ONB-T2P, ONB-D1P, ONB-D2P, ONB-D3P, ONB-D4P, ONB-X1P, ONB-X2P, ONB-X3P, ONB-X4P, ONB-X5P
+dependsOn: HEAL-B1P, HEAL-B4P
+wcl: NONE
+publicContract: EXPECTED
+```
+
+**Direction.** Owner decision (2026-11-06), item 1; `agent/follow-ups.md` "After HEAL-B4P".
+
+**Scope.** Run Restoration Druid through the unchanged healer promotion gate on its retained whole-fight evidence: gtKb2xHn87pNcFfW fight 22, actor 2, in the retained M9-C2, M11-C4 and M11-C4b captures, in HEAL-B4P's shape. No new request.
+
+- Decide how its choice node reads, as `agent/follow-ups.md` records.
+- Cut only the minimal fixture, under the archive's notice line.
+- If the gate cannot pass, it stays INTERNAL_ONLY with the measured reason and goes to REM-CENSUS. It is not DEFERRED.
+
+### POLB-A: Policy B source, schema and provenance review
+
+```autopilot
+status: READY
+dependsOn: ONB-S3R, HEAL-B1P2
 wcl: NONE
 publicContract: NONE
 ```
 
-**Scope.** Regenerate the roster matrix and progress summary in
-`agent/spec-onboarding-inventory.md` from the production registry, and
-verify that every playable specialization has a terminal disposition.
+**Direction.** Owner decision (2026-11-06), item 3, on `agent/architecture.md` "Policy B (O3)": curated encounter metadata, pinned, versioned, provenance-bearing, keyed by encounter, difficulty and build or season, local at runtime. A contradiction with observed evidence yields UNKNOWN plus a drift diagnostic, never REJECTED.
 
-- A specialization that is neither PUBLIC nor carrying a recorded owner
-  deferral or documented blocker fails this tranche: it is an open item,
-  not completion.
-- Add a contract test that pins the matrix against the registry and the
-  roster.
+**Scope.** Before any curated data is entered:
+
+- Review which sources can truthfully support each fact: `active_enemies`, `spell_targets.<ability>`, closed `target_if` candidate sets, attackability and targetability windows, add-availability intervals, and exact or justified upper bounds. Record what each source can and cannot establish.
+- Never a source: guides, remembered mechanics, expected SimulationCraft behavior or top-log behavior. WCL enemy classification stays post-hoc only (N2), and no future observation raises proof at a decision (O2).
+- Define the versioned schema, its provenance fields, the runtime loader, and the supplier seam behind `enemySetAt`'s upper bound and `targetDomainFor`. The shared layer stays gameplay-neutral.
+- Unsupported, incompatible or uncovered keys stay BOUNDED or UNKNOWN.
+
+**Stop.** `agent/architecture.md` names no source for the curated data. If no source reviewed here can truthfully supply it from what the repository already holds, stop with OWNER_DECISION_REQUIRED, naming the candidates and what each would establish. Choosing a source is the owner's.
+
+### POLB-B: Policy B curated data and enemy-count bounds
+
+```autopilot
+status: READY
+dependsOn: POLB-A
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Curated rows for the encounters of retained real evidence, from POLB-A's approved sources only, and their use in `active_enemies`: exact counts or justified upper bounds where the evidence contract supports them, BOUNDED or UNKNOWN otherwise.
+
+- A contradiction with observed evidence is UNKNOWN plus a drift diagnostic, tested on real evidence.
+- Public analyzers stay invariant unless a change is measured, explained and pinned in this tranche.
+- Replay the specializations `agent/follow-ups.md` "After ONB-S3R" names as waiting on an upper bound, and record each one's next blocker. Nothing is promoted here.
+
+### POLB-C: Policy B target domains and availability windows
+
+```autopilot
+status: READY
+dependsOn: POLB-B
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Where POLB-A's sources support them: closed `target_if` candidate sets, attackability and targetability windows, and add-availability intervals. `spell_targets.<ability>` stays action-owned and resolves only with registered applicability, including range and geometry; it is never aliased to `active_enemies` by default.
+
+- Validate against retained real evidence, with negative tests that uncertain evidence stays BOUNDED or UNKNOWN.
+- Record which facts the sources could not establish, by specialization, for REM-CENSUS.
+
+### ONB-EV-PLAN: Freeze the neutral evidence campaign plan
+
+```autopilot
+status: READY
+dependsOn: POLB-C
+wcl: NONE
+publicContract: NONE
+```
+
+**Direction.** Owner decision (2026-11-06), item 2, and the ONB-EV owner grant. Offline only: no Warcraft Logs request.
+
+**Scope.** Before any request, freeze and commit the plan ONB-EV will execute:
+
+- the specializations in ONB-EV's recorded list whose remaining blocker is still insufficient retained real evidence, each checked against current retained files; a specialization that now has adequate evidence is removed with the reason, and none is added without a new owner decision;
+- the fixed discovery order and its digest, set before any event of a candidate is read, with no ranking or comparison query;
+- for each specialization, the minimum data families its evaluator or healer gate requires, and the worst-case request count, counted as the grant counts them;
+- the total against ONB-EV's hard cap of 60 requests. If the worst case exceeds the cap, say so in the plan: ONB-EV then runs in the frozen order and stops at the cap with its report. Dropping or reordering specializations to fit is the owner's call, not this plan's;
+- the raw and committed storage plan, including provenance and the measured capacity under rule 8.
+
+The plan must not read any candidate's outcome, and no later step may replace a chosen fight because of what it resolves to.
+
+### REM-CENSUS: Full INTERNAL_ONLY blocker census and remediation waves
+
+```autopilot
+status: READY
+dependsOn: HEAL-B1P2, POLB-C, ONB-EV
+wcl: NONE
+publicContract: NONE
+```
+
+**Direction.** Owner decision (2026-11-06), items 4 and 5.
+
+**Scope.** Replay every INTERNAL_ONLY specialization offline on all retained and newly acquired evidence. Record in `agent/spec-onboarding-inventory.md`, for each:
+
+1. its first unresolved blocker;
+2. every known blocker immediately behind it;
+3. each blocker's class: shared engine capability, Policy B or target-domain evidence, spec-owned authority binding, unsupported SimC expression, missing runtime state, transition or mechanics support, missing real evidence, healer-specific evidence or modeling, or genuinely unavailable external authority.
+
+Then add the tranches the census shows are missing, in this order, before REM-GATE:
+
+- `REM-S<n>`: shared remediation inputs;
+- `REM-O<n>`: spec-owned remediation inputs;
+- `REM-E<n>`: evidence-dependent retries;
+- `REM-P<n>`: PUBLIC promotion retries, each only for specializations whose prerequisites changed.
+
+Add every new entry to REM-GATE's `dependsOn`. New Warcraft Logs needs are recorded as an owner stop under rule 7. This tranche implements nothing and promotes nothing.
+
+### REM-GATE: Remediation pass verified
+
+```autopilot
+status: READY
+dependsOn: REM-CENSUS
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Verify from the queue, the registry and the inventory that:
+
+- every INTERNAL_ONLY specialization has received at least one remediation pass against its documented blockers;
+- every resulting eligible promotion retry has run.
+
+Re-measure the first blockers. Where a pass exposed a next blocker that remediation can truthfully address, add the next wave of `REM-*` entries and a new `REM-GATE<n>` that ONB-Z depends on. A specialization may become BLOCKED only under rule 3. If a remaining item needs a choice that is the owner's, stop with OWNER_DECISION_REQUIRED.
+
+### ONB-Z: Final roster-closure gate
+
+```autopilot
+status: READY
+dependsOn: M13-F, ONB-S3R, HEAL-AP, HEAL-B1P, HEAL-B2P, HEAL-B3P, HEAL-B4P, ONB-A1P, ONB-A2P, ONB-B1P, ONB-B2P, ONB-B3P, ONB-C1P, ONB-C2P, ONB-T1P, ONB-T2P, ONB-D1P, ONB-D2P, ONB-D3P, ONB-D4P, ONB-X1P, ONB-X2P, ONB-X3P, ONB-X4P, ONB-X5P, HEAL-B1P2, POLB-C, ONB-EV, REM-CENSUS, REM-GATE
+wcl: NONE
+publicContract: NONE
+```
+
+**Owner decision (2026-11-06).** ONB-Z is the final roster-closure gate, not the end of first-pass onboarding. It does not merge at 12 of 40 PUBLIC.
+
+**It runs only after:**
+
+- Restoration Druid's public-entry path has completed;
+- ONB-EV has been resolved and applicable evidence collected;
+- Policy B has been implemented and validated;
+- all known shared and spec-owned remediation inputs have been queued and executed;
+- every INTERNAL_ONLY specialization has received at least one remediation pass against its documented blockers;
+- all resulting eligible promotion retries have run.
+
+**Scope.** Regenerate the roster matrix and progress summary in `agent/spec-onboarding-inventory.md` from the production registry, and verify:
+
+- PUBLIC count against the playable roster;
+- terminally dispositioned count against the playable roster;
+- no unexplained INTERNAL_ONLY entry;
+- every non-PUBLIC specialization has a genuine documented terminal reason, under remediation rules 3 to 5.
+
+Any specialization failing this is an open item, not completion. It fails this tranche, and a mass reclassification never satisfies it. Add a contract test that pins the matrix against the registry and the roster.
 
 ### M11-G4-5-R: Register a 12.1.5 simulation model
 
