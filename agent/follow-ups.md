@@ -9,6 +9,16 @@ hygiene and clarity items.
 
 ---
 
+## Owner decision (2026-11-06): remediation before roster closure
+
+**Raised:** ONB-Z's owner stop, at 12 of 40 PUBLIC. Decided in `agent/architecture.md` "Owner decision (2026-11-06): remediation before roster closure", and queued in `agent/autopilot-queue.md` "Specialization remediation".
+
+This changes what older entries here say. They stay as written, as the record of when they were true:
+
+- **Policy B is approved and scheduled** (POLB-A to POLB-C). Text below calling it deferred, not queued or "the owner's to schedule" is superseded.
+- **ONB-EV is approved,** with a hard cap of 60 Warcraft Logs requests (`agent/architecture.md` "Owner grant (2026-11-06): ONB-EV"). The grant authorizes no archive-limit increase and no promotion.
+- **Restoration Druid's promotion is queued** (HEAL-B1P2), which supersedes "is not queued" under "After HEAL-B4P".
+
 ## After ONB-S3R: each specialization's next real blocker
 
 **Raised:** ONB-S3R (2026-11-06). Measured by replaying every retained subject offline (agent/architecture.md "ONB-S3R"). Coverage, not soundness: no REJECTED anywhere, and 4 MATCH.

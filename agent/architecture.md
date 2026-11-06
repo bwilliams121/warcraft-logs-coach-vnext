@@ -7562,7 +7562,7 @@ Semantic targets and rules:
 - **No future bracketing (O2).** For authority, an observation after D may never
   raise the proof state at D. Post-hoc analysis may report "the same instance
   was observed before and after t", never "available throughout".
-- **Policy B (O3), approved and deferred.**
+- **Policy B (O3), approved; scheduled by the owner on 2026-11-06** (POLB-A to POLB-C; see "Owner decision (2026-11-06): remediation before roster closure").
   - Curated encounter metadata will be pinned, versioned and provenance-bearing.
   - It will be keyed by encounter, difficulty and build or season, and be local
     at runtime.
@@ -14920,3 +14920,83 @@ Limits: the census does not read JSON files of 500 bytes or less, or log and tex
 **What is pinned.** No production code changed. `INTERNAL_ONLY_SPEC_IDS` still lists all three; the gate search finds no qualifying assertion and `evidenceReady` false for each (`m11-promotion-evidence-gate`, from ONB-T2, their comments now naming the outcome). Two test rows are new: a public Druid/Guardian or Hunter/Survival request is SPEC_NOT_SUPPORTED, with one retrieval for preparation alone and no dispatch (`analysis-composition-refusals`, which held no row for them). Hunter/BeastMastery's row already existed. A public request still runs preparation and reports partial coverage. Nothing reads as clean play. The replay and census are offline and not committed.
 
 **What a later promotion must do.** It first answers its stops, in order (agent/follow-ups.md "After ONB-T2"). Beast Mastery: `default[0] retarget`, whose first question is the difficulty authority `fight_style` waits on, then the swing, the dispatches' upper bound, and `st`. Guardian and Survival: a capture first, which is ONB-EV's owner decision. Beast Mastery measures or refuses Dark Ranger, as Havoc refuses Fel-Scarred. Promoting it also moves the proofs off `tests/support/unsupported-subject.ts`, because the guard in `m11a2-unsupported-subject` fails the day that row becomes PUBLIC. A new public entry then promotes through the unchanged gates by the five-site promotion, and must first commit its evidence with identity proof, because a PUBLIC module cannot use the retained-only exception. No such entry is queued.
+
+## Owner decision (2026-11-06): remediation before roster closure
+
+**Decision.** Onboarding does not close at 12 of 40 PUBLIC, and ONB-Z does not merge now. The 28 `INTERNAL_ONLY` specializations are not mass-reclassified as `DEFERRED` or `BLOCKED` to satisfy ONB-Z.
+
+The objective is every playable specialization PUBLIC wherever truthful authority, implementation and evidence can be established without weakening the existing promotion gates. The target is 40 of 40 if they permit it. A lower final count is acceptable only for individual specializations whose remaining blocker is demonstrated to be genuinely unsolvable under the approved authority and evidence model.
+
+### Meaning of the states
+
+- **`INTERNAL_ONLY` after a failed promotion** means first-pass onboarding completed and remediation still required. It is not terminal.
+- **`BLOCKED`** requires remediation to demonstrate that a required fact or authority cannot currently be obtained or implemented truthfully.
+- **`DEFERRED`** requires an explicit owner decision to postpone otherwise feasible work.
+- **Neither may be assigned merely because** a first promotion failed, a specialization has only UNKNOWN decisions, an implementation tranche already merged, or remediation needs more work.
+
+### Approved work
+
+1. **Restoration Druid.** Its missing public entry is queued, on its retained evidence through the existing healer gate.
+2. **ONB-EV is approved.** It is one bounded, neutral, deterministic, outcome-independent campaign for specializations whose actual remaining blocker is insufficient retained real evidence.
+   - It uses the fixed discovery rule and acquires only the minimum actor slice required for evaluation, including the required casts, auras, resources and combatant information.
+   - It uses no rankings or comparison data, never searches repeatedly for a desired MATCH or REJECTED result, retains provenance, and stops at its request bounds.
+   - Acquisition does not authorize promotion. The normal evaluator is replayed and the gates apply unchanged.
+3. **Policy B is approved and no longer deferred,** because full playable-roster public support is a concrete consumer. Where reviewed provenance supports them, its scope may include `active_enemies`, `spell_targets.<ability>`, closed `target_if` candidate sets, attackability and targetability windows, add-availability intervals, and exact or justified upper bounds.
+   - It never converts uncertain evidence into fabricated certainty. Where exact membership or an upper bound cannot be established from the approved source, BOUNDED or UNKNOWN stands.
+   - Encounter state is never inferred from guides, remembered mechanics, expected SimulationCraft behavior or top-log behavior.
+4. **Census before retry.** Every `INTERNAL_ONLY` specialization gets its first blocker, the blockers immediately behind it and each blocker's class recorded before any retry. Implementation tranches are then queued for the missing inputs, shared where genuinely generic and otherwise under `src/specs/<class>/<spec>/`.
+
+### Lifecycle
+
+`INTERNAL_ONLY` → blocker census → missing-input implementation → evidence acquisition if required → real-evidence replay → unchanged promotion gate → `PUBLIC`.
+
+A failed retry exposes the next blocker and stays in remediation unless there is a genuine terminal reason. Promotion-only tranches are not repeated when the known prerequisite has not changed.
+
+### Gates
+
+The public requirements stay authoritative and unchanged: pinned authority and provenance, real sanitized evidence, qualifying observation and discrimination evidence, truthful MATCH, REJECTED and UNKNOWN semantics, cross-spec isolation, public schema compatibility, REST, MCP and raid-night parity, invariance of existing public analyzers, and CI and review gates. Production is not deployed under this decision.
+
+### ONB-Z's new role
+
+ONB-Z is the final roster-closure gate, not the end of first-pass onboarding. It runs only after:
+
+- Restoration Druid's public-entry path has completed;
+- ONB-EV has been resolved and applicable evidence collected;
+- Policy B has been implemented and validated;
+- all known shared and spec-owned remediation inputs have been queued and executed;
+- every `INTERNAL_ONLY` specialization has received at least one remediation pass against its documented blockers;
+- all resulting eligible promotion retries have run.
+
+It then regenerates the canonical inventory and verifies the PUBLIC and terminally dispositioned counts against the playable roster, that no `INTERNAL_ONLY` entry is unexplained, and that every non-PUBLIC specialization has a genuine documented terminal reason.
+
+### Queue order
+
+Supervisor concurrency stays 1. The order is: HEAL-B1P2; POLB-A, POLB-B and POLB-C; ONB-EV-PLAN and ONB-EV; REM-CENSUS; the shared, spec-owned, evidence-dependent and promotion-retry tranches it adds; REM-GATE; ONB-Z.
+
+**Recording notes.**
+
+- This decision approves Policy B without naming the source of its curated data, so POLB-A reviews sources first and stops for the owner if none it can use truthfully supplies them.
+- It referred to ONB-EV's request bounds, but the queue had recorded no numeric bound. The owner set one in "Owner grant (2026-11-06): ONB-EV".
+
+## Owner grant (2026-11-06): ONB-EV
+
+**Grant.** ONB-EV is approved with a hard campaign cap of 60 Warcraft Logs HTTP requests in total. The cap includes all of the campaign's Warcraft Logs network activity: OAuth token requests and refreshes, report and fight discovery, fight and context lookups, actor identification, casts, auras, resources, combatant information, and pagination or completeness requests.
+
+**Acquisition.**
+
+1. Follow the predetermined neutral discovery rule recorded in ONB-EV.
+2. Use the first qualifying public raid fight found under that rule.
+3. Acquire only the minimum actor and fight evidence the existing evaluator and promotion gate need.
+4. Query no rankings.
+5. Query no comparison or top-log data.
+6. Never search for a different fight because the first result gave UNKNOWN, MATCH, REJECTED or otherwise unfavorable promotion evidence.
+7. Never retry against alternate subjects to obtain a desired outcome.
+8. Preserve provenance and the deterministic selection criteria.
+
+The campaign may stop early once every currently eligible evidence-deficient specialization has sufficient retained evidence for a truthful promotion evaluation.
+
+**Cap exhaustion.** If the cap would be exceeded before the campaign is complete, stop with OWNER_DECISION_REQUIRED and report the requests consumed and remaining, the specializations completed and still requiring evidence, why each remaining request is necessary, and the measured additional amount proposed. The campaign never exceeds 60 automatically.
+
+**Capacity.** This grant authorizes no archive-size increase. If new evidence cannot be committed under the existing corpus and archive policy, stop with OWNER_DECISION_REQUIRED and give the measured proposal: the current archive size and limit, the bytes the proposed retained evidence requires, the deduplication and compression opportunities considered, and the smallest justified new limit. Required evidence is never discarded to fit, and the allowance is never raised silently.
+
+**Promotion.** Evidence acquisition authorizes no PUBLIC promotion. After capture, the normal evaluator is replayed, MATCH, REJECTED and UNKNOWN semantics are preserved, the existing promotion gates apply unchanged, and the next real blocker is exposed where a specialization still cannot pass. No outcome shopping and no weakening of promotion requirements is authorized.
