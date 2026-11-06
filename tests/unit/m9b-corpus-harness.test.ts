@@ -82,6 +82,7 @@ describe("every Node-executable layer of the corpus executes clean", () => {
       "SPEC_VENGEANCE_DEMON_HUNTER",
       "SPEC_DEMONOLOGY_WARLOCK",
       "SPEC_UNHOLY_DEATH_KNIGHT",
+      "SPEC_WINDWALKER_MONK",
       "SPEC_OUTLAW_ROGUE",
       "SPEC_ENHANCEMENT_SHAMAN",
       "APPLICATION_SERVICE",

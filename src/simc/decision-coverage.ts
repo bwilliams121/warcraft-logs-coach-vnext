@@ -186,15 +186,25 @@ export function classifyDecision(result: RotationalGcdResult): DecisionCoverageR
 
 /**
  * The authority text a blocked step is classified by: its verbatim line, or —
- * when the step's `target_if` was proven ignorable (M11-D3-B1) — only its
- * condition. Target selection was then shown not to matter, so the line's
+ * when `target_if` was read at all (M11-D3-B1) — only its condition.
+ *
+ * Proven ignorable: target selection was shown not to matter, so the line's
  * `target_if` text names nothing that is actually missing, and classifying by
  * it would attribute an undecided talent or buff to target selection.
+ *
+ * Refused (ONB-T1): the SCORE only says which enemy wins, so an atom in it is
+ * no reason the line is open. `target_if=max:target.time_to_die` is no predictive
+ * question the player was asked: what is missing is target selection, which the
+ * callers fall back to when the condition names nothing. An atom in the CONDITION
+ * still classifies, because the line needs it whichever enemy is chosen.
  */
 function classificationTextOf(step: TraversalStep | null): string | null {
   if (step === null) return null;
-  if (step.targetingRefusal?.kind !== "TARGET_SELECTION_IGNORABLE") return step.actionStringVerbatim;
-  return deriveConditionRaw(step.actionStringVerbatim);
+  const refusal = step.targetingRefusal;
+  const targetIfWasRead =
+    refusal?.kind === "TARGET_SELECTION_IGNORABLE" ||
+    (refusal?.kind === "REFUSED" && refusal.targetIf !== undefined);
+  return targetIfWasRead ? deriveConditionRaw(step.actionStringVerbatim) : step.actionStringVerbatim;
 }
 
 /**

@@ -100,7 +100,8 @@ export type SpecId =
   | "evoker/devastation"
   | "demonhunter/vengeance"
   | "warlock/demonology"
-  | "deathknight/unholy";
+  | "deathknight/unholy"
+  | "monk/windwalker";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -139,6 +140,7 @@ export const SPEC_IDS = Object.freeze([
   "demonhunter/vengeance",
   "warlock/demonology",
   "deathknight/unholy",
+  "monk/windwalker",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -312,6 +314,9 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  *
  * Unholy Death Knight arrived here in ONB-X5, its own representative, reading the shared pet mapping (ONB-S6). No decision of it resolves on its one
  * retained subject.
+ *
+ * Windwalker Monk arrived here in ONB-T1, the Cohort T representative. No decision of it resolves on its one retained
+ * subject.
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
@@ -338,6 +343,7 @@ export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "demonhunter/vengeance",
   "warlock/demonology",
   "deathknight/unholy",
+  "monk/windwalker",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

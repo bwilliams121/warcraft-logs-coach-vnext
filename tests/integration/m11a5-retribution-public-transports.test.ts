@@ -195,6 +195,7 @@ describe("REST: a real Retribution Paladin identity resolves publicly", () => {
       "demonhunter-vengeance-observed-decisions": 0,
       "warlock-demonology-observed-decisions": 0,
       "deathknight-unholy-observed-decisions": 0,
+      "monk-windwalker-observed-decisions": 0,
       "rogue-outlaw-observed-decisions": 0,
     });
     const parsed = PublicAnalysisResultSchema.safeParse(rest.body);

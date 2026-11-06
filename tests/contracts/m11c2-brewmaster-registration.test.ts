@@ -160,6 +160,7 @@ describe("identity and partition", () => {
       "demonhunter/vengeance",
       "warlock/demonology",
       "deathknight/unholy",
+      "monk/windwalker",
     ]);
     expect([...PUBLIC_SPEC_IDS]).toEqual(NINE_PUBLIC);
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("monk/brewmaster");

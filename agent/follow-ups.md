@@ -2079,16 +2079,7 @@ rule before broader resource-history consumers rely on it.
 public decision; none is a soundness defect — each is attribution precision
 or coverage.
 
-**Whole-line blocker classification for refused `target_if` lines.**
-`decision-coverage.ts` classifies a blocked line by permanent-atom markers
-over its WHOLE verbatim text, and `time_to_die` precedes `target_if` in
-`PERMANENT_ATOM_MARKERS`. So a REFUSED `target_if` line whose score is
-`target.time_to_die` (every Windwalker MIN/MAX line) classifies as
-PREDICTIVE_STATE, although target selection is what is missing
-(TARGETING_NOT_MODELLED). This predates B1; B1 only excluded the `target_if`
-text when target choice was proven IGNORABLE. Settle the precedence — or
-classify a refused line by its refusal reason — before a Windwalker-shaped
-authority becomes public.
+**Whole-line blocker classification for refused `target_if` lines: SETTLED in ONB-T1** (agent/architecture.md "ONB-T1"). A line whose `target_if` was read now classifies by its condition, so a score names no blocker.
 
 **`retarget` and the B1 NON_GCD guard classify as OTHER.** Both fail closed
 with the first-GCD blocker `TRANSITION_UNSUPPORTED`, which `classifyBlocker`
@@ -2972,3 +2963,21 @@ Every remaining gap has a canonical owner (`KNOWN_EVIDENCE_GAPS`,
 - **Older layering guards.** The m11e1-style import regex in older
   layering guards misses bare `import "x"` and dynamic `import()`. M12-A
   widened only its own copy.
+
+## After ONB-T1
+
+**Raised:** ONB-T1 (2026-11-06). Windwalker Monk is INTERNAL_ONLY and resolves nothing. None is a soundness defect.
+
+**What a Windwalker decision would need, in the order a scan meets it.** Positive readiness for the swing and for Touch of Karma; the fight clock for `opener`'s gate; a contract for Zenith's own writes and a Zenith line's cooldowns and auras; then a chosen enemy at `zenith[3]`. Only then does the scan reach the dispatch on the enemy count, and `active_enemies=1` needs an upper bound no real evidence gives. ONB-S3 alone moves nothing here. ONB-T1P should expect "not promoted".
+
+**A wire contract for Chi.** `classResources` type 12 has no contract, so no Chi is read, and the list reads it on most lines. On retained fight b1Pm 48 it occurs on actor 13 alone, 102 times, with a stable maximum of 6 and costs of 1 to 3, which is corroboration of the kind the other contracts record. It is uncommitted, so a contract needs a committed slice. Reading Chi would still need the Mistweaver and Brewmaster readers checked.
+
+**`combo_strike` is reconstructable, and is not reconstructed.** The module's rule is one comparison against the last Combo Strikes action (`sc_monk.cpp:325-339`). Which casts count needs each action's `may_combo_strike`, a reviewed table this slice does not hold. A cast only upper-bounds a SimC internal event, so a reader must state what it proves.
+
+**Three racials are classified locally.** `arcane_pulse`, `haymaker` and `rocket_barrage` are `racial_spell_t`s the shared `RACIAL_ACTION_TOKENS` omits, because `player_t::get_racial_actions()` omits them. Unholy classifies one of them locally too. Widening the shared table touches every reader, public ones included, so it is a separate decision.
+
+**Ten class lines read `trinket.*`.** `big_coc[1]`, five `zenith` lines, two more `zenith` lines and two `multitarget` lines refuse at that fragment. No gear is read, so they stay refused. A trinket reading would need its own authority.
+
+**ONB-T2's clone.** Survival and Beast Mastery read a hero tree the same way, and a hero-tree target now fails extraction on an undeclared spell-less row. Guardian should check `trigger_gcd`, `gcd_type` and `set_replacement_action` over its class module first.
+
+**One retained subject, one hero tree.** No Conduit of the Celestials subject has a retained event, so the `big_coc` list, Invoke Xuen and Celestial Conduit are read only on synthetic decisions.

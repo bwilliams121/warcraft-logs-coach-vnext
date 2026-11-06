@@ -183,7 +183,7 @@ function keysOf(value: unknown, into = new Set<string>()): Set<string> {
 
 describe("the production catalog", () => {
   it("is exactly the twelve PUBLIC registrations (Blood since M11-B12, Brewmaster since M11-C4j, Augmentation since M13-F, Restoration Shaman since HEAL-AP, Holy Paladin and Mistweaver Monk since HEAL-B1P, Holy Priest since HEAL-B2P, Preservation Evoker since HEAL-B4P, Havoc Demon Hunter since ONB-A1P) plus Restoration Druid and Discipline Priest INTERNAL_ONLY, and both lookups answer alike for every public one", () => {
-    expect(ANALYZER_REGISTRATIONS).toHaveLength(36);
+    expect(ANALYZER_REGISTRATIONS).toHaveLength(37);
     expect(ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "PUBLIC")).toHaveLength(12);
     // HEAL-B1: one INTERNAL_ONLY healer row since HEAL-B1P (a second, Holy Priest, from HEAL-B2 until HEAL-B2P; Discipline Priest since HEAL-B3; Preservation Evoker from HEAL-B4 until HEAL-B4P), invisible to the public lookup.
     const internal = ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "INTERNAL_ONLY");
@@ -212,6 +212,7 @@ describe("the production catalog", () => {
       "demonhunter/vengeance",
       "warlock/demonology",
       "deathknight/unholy",
+      "monk/windwalker",
     ]);
     for (const row of internal)
       expect(analyzerForSpec(row.specId, PRODUCTION_CATALOG), row.specId).toBeNull();

@@ -65,7 +65,7 @@ row).
 | `hunter/beast_mastery` | B | local raw | blocked | PARTIAL | `barbed-shot-charge-capping` |
 | `druid/feral` | C — INTERNAL_ONLY since ONB-C1 | local raw (b1Pm fight 48 actor 170, whole fight; A7R6 fight 7 actor 1, first 165 s) | audited | PARTIAL | `rip-rake-snapshot-refresh` |
 | `hunter/survival` | B | none | not yet | UNASSESSED | — |
-| `monk/windwalker` | B | none | not yet | UNASSESSED | — |
+| `monk/windwalker` | T — INTERNAL_ONLY since ONB-T1 | local raw (one subject, Shado-Pan, whole fight) | audited | UNASSESSED | — |
 | `rogue/subtlety` | B — INTERNAL_ONLY since ONB-A2 | committed filtered casts only (M13-A actor 17), cannot validate | audited | UNASSESSED | — |
 | `shaman/enhancement` | B — INTERNAL_ONLY since ONB-B2 | committed filtered casts only (M13-A actor 7), cannot validate | audited | UNASSESSED | — |
 | `druid/guardian` | B | none | not yet | UNASSESSED | — |

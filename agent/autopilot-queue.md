@@ -1231,10 +1231,12 @@ first, on either hero tree's area list
 ### ONB-S3R: Re-replay the TARGET_COUNT-gated INTERNAL_ONLY specializations
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-S3
 wcl: NONE
 publicContract: NONE
+pr: 89
+mergeSha: 5011ee3695da3936467d2a993527ab258d765956
 ```
 
 **Direction.** Owner decision (2026-11-05) on ONB-S3, "Promotion
@@ -1880,8 +1882,9 @@ mergeSha: b46cbed381b35ec975fca5678739dac46ae65dd8
 ### ONB-T1: Windwalker Monk (internal, Cohort T representative)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-S3, ONB-S1
+branch: autopilot/onb-t1
 wcl: NONE
 publicContract: NONE
 ```
@@ -1891,6 +1894,8 @@ authority decision. Real evidence is retained (fight 48).
 
 Settle the follow-up "Whole-line blocker classification for refused
 `target_if` lines" before any Windwalker-shaped authority becomes public.
+
+**Outcome.** Windwalker Monk is registered INTERNAL_ONLY, and no decision of it resolves: all 239 eligible decisions of its one retained subject (b1Pm fight 48 actor 13, Shado-Pan) stay UNKNOWN, refused at `default[0] auto_attack`, with the root scan stopped at `zenith[3]` on a refused `target_if`. No dispatch on the enemy count is reached, so ONB-S3 moves nothing here. The follow-up above is settled: a line whose `target_if` was read classifies by its condition, and nothing public moves (agent/architecture.md "ONB-T1"; agent/follow-ups.md "After ONB-T1").
 
 ### ONB-T1P: Windwalker Monk (public)
 

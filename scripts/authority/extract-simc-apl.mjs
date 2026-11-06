@@ -194,6 +194,12 @@ const PINNED_SOURCES = Object.freeze({
     sha256: "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
     byteLength: 636861,
   },
+  APL_MONK: {
+    sourcePath: "engine/class_modules/apl/apl_monk.cpp",
+    commitSha: PINNED_SIMC_COMMIT,
+    sha256: "a8b7e2afe48425089cdc97a369fc4abe87784a818d0423ba0706fb60f1f53c20",
+    byteLength: 39549,
+  },
   APL_DRUID_FERAL: {
     sourcePath: "engine/class_modules/apl/druid/feral_apl.inc",
     commitSha: PINNED_SIMC_COMMIT,
@@ -861,6 +867,72 @@ export const TARGETS = {
       ],
       forbiddenTokens: ["swap_action_list"],
       noTargetingOptions: true,
+    },
+  },
+  // ONB-T1. The file has no markers, and Windwalker's list is `live_apl` inside `namespace windwalker`. The
+  // module dispatches to that namespace's `default_apl`, which reaches it on either branch: live directly, PTR
+  // through a `ptr_apl` whose whole body is the same call. PTR_DELEGATES_TO_LIVE checks all of it.
+  "monk-windwalker": {
+    sourcePath: PINNED_SOURCES.APL_MONK.sourcePath,
+    enclosingNamespace: "windwalker",
+    functionHeader: "void live_apl( monk_t* player )",
+    playerIdentifier: "player",
+    regionName: "windwalker",
+    authorityId: "SIMC_APL_MONK_WINDWALKER",
+    spec: { className: "monk", specName: "windwalker" },
+    defaultOut: "src/simc/data/monk-windwalker.apl.json",
+    pinnedSource: {
+      ...PINNED_SOURCES.APL_MONK,
+      regionSha256: "4213cdf331e339a217966f507895293de74c441db316c6ea3ec108f39ed65e72",
+    },
+    livePtrPolicy: {
+      kind: "PTR_DELEGATES_TO_LIVE",
+      entryFunctionHeader: "void default_apl( monk_t* player )",
+      ptrFunctionHeader: "void ptr_apl( monk_t* player )",
+    },
+    dispatch: {
+      ...PINNED_SOURCES.APL_MONK,
+      functionHeader: "void monk_t::init_action_list()",
+      sequence: ["case MONK_WINDWALKER:", "windwalker::default_apl( this );", "break;"],
+    },
+    requiredFacts: {
+      kind: "DISPATCH_GRAPH",
+      entryListName: "default",
+      requiredLists: [
+        "default",
+        "precombat",
+        "opener",
+        "trinket",
+        "racials",
+        "big_coc",
+        "zenith",
+        "default_st",
+        "multitarget",
+        "fallback",
+      ],
+      listSizes: {
+        default: 21,
+        precombat: 3,
+        opener: 2,
+        trinket: 10,
+        racials: 4,
+        big_coc: 8,
+        zenith: 18,
+        default_st: 33,
+        multitarget: 29,
+        fallback: 4,
+      },
+      edges: [
+        { from: "default", ordinal: 5, kind: "CALL", to: "opener", condition: "time<2" },
+        { from: "default", ordinal: 6, kind: "CALL", to: "trinket", condition: null },
+        { from: "default", ordinal: 7, kind: "CALL", to: "racials", condition: null },
+        { from: "default", ordinal: 9, kind: "CALL", to: "big_coc", condition: "talent.celestial_conduit" },
+        { from: "default", ordinal: 10, kind: "CALL", to: "zenith", condition: null },
+        { from: "default", ordinal: 11, kind: "CALL", to: "default_st", condition: "active_enemies=1" },
+        { from: "default", ordinal: 12, kind: "CALL", to: "multitarget", condition: "active_enemies>1" },
+        { from: "default", ordinal: 13, kind: "CALL", to: "fallback", condition: null },
+      ],
+      forbiddenTokens: ["swap_action_list", "run_action_list"],
     },
   },
   "deathknight-unholy": {
@@ -3510,6 +3582,7 @@ export const LIVE_PTR_POLICIES = Object.freeze([
   "PTR_BODY_IDENTICAL",
   "PTR_BODY_DIFFERS",
   "PTR_SEPARATE_INCLUDE",
+  "PTR_DELEGATES_TO_LIVE",
 ]);
 
 const MARKER_LINE = /^\/\/[a-z][a-z0-9_]*_apl_(?:start|end)$/;
@@ -3517,9 +3590,13 @@ const SHA256_HEX = /^[0-9a-f]{64}$/;
 const COMMIT_HEX = /^[0-9a-f]{40}$/;
 const LIVE_FUNCTION_HEADER = /^void ([A-Za-z_][A-Za-z0-9_]*)\( player_t\* p \)$/;
 const CLASS_METHOD_HEADER = /^void [A-Za-z_][A-Za-z0-9_]*::([A-Za-z_][A-Za-z0-9_]*)\(\)$/;
+const NAMESPACE_FUNCTION_HEADER =
+  /^void ([A-Za-z_][A-Za-z0-9_]*)\( [A-Za-z_][A-Za-z0-9_]*\* [A-Za-z_][A-Za-z0-9_]* \)$/;
 
 /** The function a pinned target's region defines: `[, name]`, or `null` when the header is neither form. */
 function liveFunctionOf(target) {
+  if (target.enclosingNamespace !== undefined)
+    return NAMESPACE_FUNCTION_HEADER.exec(target.functionHeader ?? "");
   return (target.enclosingClass === undefined ? LIVE_FUNCTION_HEADER : CLASS_METHOD_HEADER).exec(
     target.functionHeader ?? "",
   );
@@ -3609,7 +3686,9 @@ export function validatePinnedRecord(targetName, target) {
     }
   }
   const markerFields =
-    target.enclosingClass === undefined && target.includedBy === undefined
+    target.enclosingClass === undefined &&
+    target.includedBy === undefined &&
+    target.enclosingNamespace === undefined
       ? [
           ["regionStart", target.regionStart, "_start"],
           ["regionEnd", target.regionEnd, "_end"],
@@ -3642,6 +3721,18 @@ export function validatePinnedRecord(targetName, target) {
     problems.push(`MALFORMED_POLICY: '${targetName}' declares no known live/PTR policy`);
   } else if ((policy.kind === "PTR_SEPARATE_INCLUDE") !== (target.includedBy !== undefined)) {
     problems.push(`MALFORMED_POLICY: '${targetName}' PTR_SEPARATE_INCLUDE and includedBy go together`);
+  } else if ((policy.kind === "PTR_DELEGATES_TO_LIVE") !== (target.enclosingNamespace !== undefined)) {
+    // ONB-T1: a namespace target has no markers for the other policies to read.
+    problems.push(
+      `MALFORMED_POLICY: '${targetName}' PTR_DELEGATES_TO_LIVE and enclosingNamespace go together`,
+    );
+  } else if (policy.kind === "PTR_DELEGATES_TO_LIVE") {
+    if (
+      NAMESPACE_FUNCTION_HEADER.exec(policy.entryFunctionHeader ?? "") === null ||
+      NAMESPACE_FUNCTION_HEADER.exec(policy.ptrFunctionHeader ?? "") === null
+    ) {
+      problems.push(`MALFORMED_POLICY: '${targetName}' PTR_DELEGATES_TO_LIVE names no entry or PTR function`);
+    }
   } else if (live !== null && policy.kind === "PTR_SEPARATE_INCLUDE") {
     if (policy.ptrFunctionHeader !== `void ${live[1]}_ptr( player_t* p )`) {
       problems.push(`MALFORMED_POLICY: '${targetName}' PTR function header does not name ${live[1]}_ptr`);
@@ -3678,6 +3769,14 @@ export function validatePinnedRecord(targetName, target) {
     dispatch.sequence.some((line) => typeof line !== "string" || line.length === 0 || line.trim() !== line)
   ) {
     problems.push(`MALFORMED_DISPATCH: '${targetName}' dispatch record is incomplete`);
+  } else if (live !== null && target.enclosingNamespace !== undefined) {
+    const entry = NAMESPACE_FUNCTION_HEADER.exec(policy?.entryFunctionHeader ?? "");
+    const call = `${target.enclosingNamespace}::${entry?.[1] ?? "?"}( this );`;
+    if (dispatch.sequence.filter((line) => line === call).length !== 1) {
+      problems.push(
+        `MALFORMED_DISPATCH: '${targetName}' dispatch sequence does not call ${call} exactly once`,
+      );
+    }
   } else if (live !== null && target.includedBy !== undefined) {
     if (dispatch.sequence.filter((line) => line.includes(`::${live[1]}( this );`)).length !== 1) {
       problems.push(
@@ -3785,6 +3884,47 @@ function countLines(lines, text) {
 export function verifyLivePtrPolicy(lines, dispatchText, target, includerText = null) {
   const policy = target.livePtrPolicy;
   const name = liveFunctionOf(target)[1];
+  // PTR_DELEGATES_TO_LIVE (ONB-T1): the dispatch reaches a namespace's entry function, which calls the live function on
+  // a live build and a PTR function on a PTR build, and the PTR function's whole body is the same call. Either branch
+  // builds the same lists, and that shape is checked line by line, because any other body could build another list.
+  if (policy.kind === "PTR_DELEGATES_TO_LIVE") {
+    const player = target.playerIdentifier ?? "p";
+    const liveCall = `${name}( ${player} );`;
+    const ptrName = NAMESPACE_FUNCTION_HEADER.exec(policy.ptrFunctionHeader)[1];
+    const bodyOf = (functionHeader) => {
+      const span = locateRegion(lines, {
+        regionName: target.regionName,
+        enclosingNamespace: target.enclosingNamespace,
+        functionHeader,
+      });
+      return lines
+        .slice(span.startIndex + 1, span.endIndex)
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
+    };
+    const same = (found, wanted) =>
+      found.length === wanted.length && found.every((line, index) => line === wanted[index]);
+    const entry = [
+      policy.entryFunctionHeader,
+      "{",
+      `if ( !${player}->is_ptr() )`,
+      liveCall,
+      "else",
+      `${ptrName}( ${player} );`,
+      "}",
+    ];
+    if (!same(bodyOf(policy.entryFunctionHeader), entry)) {
+      fail(
+        `POLICY_VIOLATED: ${policy.entryFunctionHeader} does not choose only between ${name} and ${ptrName}`,
+      );
+    }
+    if (!same(bodyOf(policy.ptrFunctionHeader), [policy.ptrFunctionHeader, "{", liveCall, "}"])) {
+      fail(
+        `POLICY_VIOLATED: PTR_DELEGATES_TO_LIVE, but ${policy.ptrFunctionHeader} does more than call ${name}`,
+      );
+    }
+    return;
+  }
   if (policy.kind === "PTR_SEPARATE_INCLUDE") {
     // ONB-C1: the PTR list is another file, and the dispatch chooses between the two with
     // is_ptr(). A live build takes the live branch, so the PTR file is neither read nor needed.
@@ -3931,7 +4071,10 @@ export function verifyDispatch(dispatchText, target) {
       `DISPATCH_UNVERIFIED: the sequence [${sequence.join(" | ")}] occurs ${String(occurrences)} times in ${functionHeader}; exactly one is required`,
     );
   }
-  const name = liveFunctionOf(target)[1];
+  const name =
+    target.enclosingNamespace === undefined
+      ? liveFunctionOf(target)[1]
+      : NAMESPACE_FUNCTION_HEADER.exec(target.livePtrPolicy.entryFunctionHeader)[1];
   const call = sequence.find((line) =>
     target.includedBy !== undefined
       ? line.includes(`::${name}( this );`)

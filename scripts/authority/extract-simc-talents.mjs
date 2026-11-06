@@ -2983,6 +2983,197 @@ const WARLOCK_DESTRUCTION_TARGET = {
 };
 
 /**
+ * The Windwalker Monk profile (ONB-T1): the talents the pinned list reads as `talent.<name>`, and the talents an action of
+ * that list is built on (an action on `not_found()` is background, action.cpp:541-549). The list reads no `hero_tree.*`, but its `talent.`
+ * reads reach both hero trees, so a resolved tree proves the other tree's talents not taken.
+ */
+const MONK_WINDWALKER_TARGET = {
+  datasetId: "SIMC_TRAIT_MONK_WINDWALKER_TALENTS",
+  classId: 10,
+  specId: 269,
+  defaultOut: "src/data/game/monk-windwalker-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. That `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node is corroborated for Windwalker Monk on one real subject: b1PmaKrd6CDfzngc fight 48 actor 13.",
+  requiredTalents: [
+    {
+      simcName: "airborne_rhythm",
+      displayNameEn: "Airborne Rhythm",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5856 talent.windwalker.airborne_rhythm = _ST( "Airborne Rhythm" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "ascension",
+      displayNameEn: "Ascension",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5794 talent.windwalker.ascension = _ST( "Ascension" ); // TODO: NYI: EFFECT 2 ENERGY REGEN; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "celestial_conduit",
+      displayNameEn: "Celestial Conduit",
+      tree: "HERO",
+      binding:
+        'sc_monk.cpp:5894 talent.conduit_of_the_celestials.celestial_conduit = _HT( "Celestial Conduit" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "drinking_horn_cover",
+      displayNameEn: "Drinking Horn Cover",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5812 talent.windwalker.drinking_horn_cover = _ST( "Drinking Horn Cover" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "echo_technique",
+      displayNameEn: "Echo Technique",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5834 talent.windwalker.echo_technique = _ST( "Echo Technique" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "energy_burst",
+      displayNameEn: "Energy Burst",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5828 talent.windwalker.energy_burst = _ST( "Energy Burst" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "fists_of_fury",
+      displayNameEn: "Fists of Fury",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5784 talent.windwalker.fists_of_fury = _ST( "Fists of Fury" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "flurry_strikes",
+      displayNameEn: "Flurry Strikes",
+      tree: "HERO",
+      binding:
+        'sc_monk.cpp:5948 talent.shado_pan.flurry_strikes = _HT( "Flurry Strikes" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "harmonic_combo",
+      displayNameEn: "Harmonic Combo",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5852 talent.windwalker.harmonic_combo = _ST( "Harmonic Combo" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "invoke_xuen_the_white_tiger",
+      displayNameEn: "Invoke Xuen, the White Tiger",
+      tree: "HERO",
+      binding:
+        'sc_monk.cpp:5870 talent.conduit_of_the_celestials.invoke_xuen_the_white_tiger = _HT( "Invoke Xuen, the White Tiger" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "meridian_strikes",
+      displayNameEn: "Meridian Strikes",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5803 talent.windwalker.meridian_strikes = _ST( "Meridian Strikes" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "obsidian_spiral",
+      displayNameEn: "Obsidian Spiral",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5814 talent.windwalker.obsidian_spiral = _ST( "Obsidian Spiral" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "restore_balance",
+      displayNameEn: "Restore Balance",
+      tree: "HERO",
+      binding:
+        'sc_monk.cpp:5879 talent.conduit_of_the_celestials.restore_balance = _HT( "Restore Balance" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "revolving_whirl",
+      displayNameEn: "Revolving Whirl",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5833 talent.windwalker.revolving_whirl = _ST( "Revolving Whirl" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "rising_sun_kick",
+      displayNameEn: "Rising Sun Kick",
+      tree: "CLASS",
+      binding:
+        'sc_monk.cpp:5621 talent.monk.rising_sun_kick = _CT( "Rising Sun Kick" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "rushing_wind_kick",
+      displayNameEn: "Rushing Wind Kick",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5837 talent.windwalker.rushing_wind_kick = _ST( "Rushing Wind Kick" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "sequenced_strikes",
+      displayNameEn: "Sequenced Strikes",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5830 talent.windwalker.sequenced_strikes = _ST( "Sequenced Strikes" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "shadowboxing_treads",
+      displayNameEn: "Shadowboxing Treads",
+      tree: "SPECIALIZATION",
+      binding:
+        "sc_monk.cpp:5822 talent.windwalker.shadowboxing_treads = _STID( 392982 );; the pinned list reads it or an action of the list is built on it",
+    },
+    {
+      simcName: "slicing_winds",
+      displayNameEn: "Slicing Winds",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5844 talent.windwalker.slicing_winds = _ST( "Slicing Winds" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "spiritual_focus",
+      displayNameEn: "Spiritual Focus",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5813 talent.windwalker.spiritual_focus = _ST( "Spiritual Focus" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "strike_of_the_windlord",
+      displayNameEn: "Strike of the Windlord",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5823 talent.windwalker.strike_of_the_windlord = _ST( "Strike of the Windlord" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "whirling_dragon_punch",
+      displayNameEn: "Whirling Dragon Punch",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5824 talent.windwalker.whirling_dragon_punch = _ST( "Whirling Dragon Punch" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "zenith",
+      displayNameEn: "Zenith",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5805 talent.windwalker.zenith = _ST( "Zenith" );; the pinned list reads it or an action of the list is built on it',
+    },
+    {
+      simcName: "zenith_stomp",
+      displayNameEn: "Zenith Stomp",
+      tree: "CLASS",
+      binding:
+        'sc_monk.cpp:5674 talent.monk.zenith_stomp = _CT( "Zenith Stomp" );; the pinned list reads it or an action of the list is built on it',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data`: Conduit of the Celestials and Shado-Pan, both class 10. Master of Harmony has no Windwalker entry at the pin.
+    // Entry 125051 is a placeholder in the pinned table: named "0", with spell 0 (trait_data.inc:3119).
+    { simcName: "conduit_of_the_celestials", subTreeId: 64, placeholderEntryIds: [125051] },
+    { simcName: "shadopan", subTreeId: 65 },
+  ],
+};
+
+/**
  * The Unholy Death Knight profile (ONB-X5): the talents the pinned list reads as `talent.<name>`, and the talents an action of
  * that list is built on (an action on `not_found()` is background, action.cpp:541-549). The list reads no hero talent and no `hero_tree.*`:
  * the hero trees are here only so a build's tree is reported from entry membership.
@@ -3891,6 +4082,7 @@ export const TARGETS = {
   "demonhunter-havoc": DEMONHUNTER_HAVOC_TARGET,
   "druid-feral": DRUID_FERAL_TARGET,
   "demonhunter-devourer": DEMONHUNTER_DEVOURER_TARGET,
+  "monk-windwalker": MONK_WINDWALKER_TARGET,
   "deathknight-unholy": DEATHKNIGHT_UNHOLY_TARGET,
   "deathknight-frost": DEATHKNIGHT_FROST_TARGET,
   "shaman-enhancement": SHAMAN_ENHANCEMENT_TARGET,
@@ -4139,16 +4331,36 @@ export function resolveTalent(rows, required, target = ROGUE_ASSASSINATION_TARGE
  * make every hero-tree question UNKNOWN.
  */
 export function resolveHeroTree(rows, declared, target) {
-  const entries = rows
-    .filter(
-      (row) =>
-        row.classId === target.classId &&
-        row.treeIndex === TREE_INDEX.HERO &&
-        row.idSubTree === declared.subTreeId &&
-        // A row scoped to no specialization is class-wide (player.cpp:2778, :2898), which is how the
-        // pinned table holds all of Annihilator's rows, exactly as `resolveTalent` reads it.
-        (row.specIds.length === 0 || row.specIds.includes(target.specId)),
-    )
+  const inTree = rows.filter(
+    (row) =>
+      row.classId === target.classId &&
+      row.treeIndex === TREE_INDEX.HERO &&
+      row.idSubTree === declared.subTreeId &&
+      // A row scoped to no specialization is class-wide (player.cpp:2778, :2898), which is how the
+      // pinned table holds all of Annihilator's rows, exactly as `resolveTalent` reads it.
+      (row.specIds.length === 0 || row.specIds.includes(target.specId)),
+  );
+  // ONB-T1: a row with no spell names no talent, and the artifact cannot state one. Each is declared by id, so
+  // a new one in a later table fails here rather than vanishing. Dropped, an observed id of one proves no tree.
+  const placeholders = new Set(declared.placeholderEntryIds ?? []);
+  const undeclared = inTree.filter((row) => row.talentSpellId === 0 && !placeholders.has(row.traitEntryId));
+  if (undeclared.length > 0) {
+    return {
+      ok: false,
+      error: `hero sub-tree ${String(declared.subTreeId)} ('${declared.simcName}') has spell-less rows nothing declares: ${undeclared.map((row) => row.traitEntryId).join(", ")}`,
+    };
+  }
+  const missing = [...placeholders].filter(
+    (id) => !inTree.some((row) => row.traitEntryId === id && row.talentSpellId === 0),
+  );
+  if (missing.length > 0) {
+    return {
+      ok: false,
+      error: `hero sub-tree ${String(declared.subTreeId)} ('${declared.simcName}') declares placeholders that are not spell-less rows: ${missing.join(", ")}`,
+    };
+  }
+  const entries = inTree
+    .filter((row) => row.talentSpellId !== 0)
     .map((row) => ({
       traitEntryId: row.traitEntryId,
       traitNodeId: row.traitNodeId,

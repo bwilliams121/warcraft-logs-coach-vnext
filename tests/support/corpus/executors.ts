@@ -57,6 +57,7 @@ import * as devastationEvoker from "./executors/spec-devastation-evoker.js";
 import * as vengeanceDemonHunter from "./executors/spec-vengeance-demon-hunter.js";
 import * as demonologyWarlock from "./executors/spec-demonology-warlock.js";
 import * as unholyDeathKnight from "./executors/spec-unholy-death-knight.js";
+import * as windwalkerMonk from "./executors/spec-windwalker-monk.js";
 import * as outlawRogue from "./executors/spec-outlaw-rogue.js";
 import * as enhancementShaman from "./executors/spec-enhancement-shaman.js";
 import * as sharedEngine from "./executors/shared-decision-engine.js";
@@ -727,6 +728,8 @@ export async function executeAssertion(
       return demonologyWarlock.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_UNHOLY_DEATH_KNIGHT.SPEC_GATE":
       return unholyDeathKnight.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_WINDWALKER_MONK.SPEC_GATE":
+      return windwalkerMonk.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_OUTLAW_ROGUE.SPEC_GATE":
       return outlawRogue.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE":
@@ -881,6 +884,7 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_VENGEANCE_DEMON_HUNTER.SPEC_GATE",
   "SPEC_DEMONOLOGY_WARLOCK.SPEC_GATE",
   "SPEC_UNHOLY_DEATH_KNIGHT.SPEC_GATE",
+  "SPEC_WINDWALKER_MONK.SPEC_GATE",
   "SPEC_OUTLAW_ROGUE.SPEC_GATE",
   "SPEC_ENHANCEMENT_SHAMAN.SPEC_GATE",
   "SPEC_PRESERVATION_EVOKER.REGISTRATION_RESULT",

@@ -176,7 +176,8 @@ export type AuthorityLivePtrPolicy =
   | "PTR_STUB_NEVER_DISPATCHED"
   | "PTR_BODY_IDENTICAL"
   | "PTR_BODY_DIFFERS"
-  | "PTR_SEPARATE_INCLUDE";
+  | "PTR_SEPARATE_INCLUDE"
+  | "PTR_DELEGATES_TO_LIVE";
 
 export const AUTHORITY_LIVE_PTR_POLICIES = [
   "NO_PTR_REGION",
@@ -185,6 +186,7 @@ export const AUTHORITY_LIVE_PTR_POLICIES = [
   "PTR_BODY_IDENTICAL",
   "PTR_BODY_DIFFERS",
   "PTR_SEPARATE_INCLUDE",
+  "PTR_DELEGATES_TO_LIVE",
 ] as const satisfies readonly AuthorityLivePtrPolicy[];
 
 /** One region statement the extractor dropped as proven inert, by exact text. */

@@ -178,7 +178,8 @@ export type LivePtrPolicyKind =
   | "PTR_STUB_NEVER_DISPATCHED"
   | "PTR_BODY_IDENTICAL"
   | "PTR_BODY_DIFFERS"
-  | "PTR_SEPARATE_INCLUDE";
+  | "PTR_SEPARATE_INCLUDE"
+  | "PTR_DELEGATES_TO_LIVE";
 
 export interface PinnedTargetRecord {
   readonly pinnedSource: PinnedSourceFile & { readonly commitSha: string; readonly regionSha256: string };
@@ -187,6 +188,7 @@ export interface PinnedTargetRecord {
     readonly ptrRegionStart?: string;
     readonly ptrRegionEnd?: string;
     readonly ptrIncludeLine?: string;
+    readonly entryFunctionHeader?: string;
     readonly ptrFunctionHeader: string;
   };
   readonly dispatch: PinnedSourceFile & {
