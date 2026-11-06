@@ -11959,6 +11959,160 @@ UNKNOWN vs NO_AUTHORITY_AVAILABLE, no inferred assignment, nothing actionable
 without evidence, no score key, consumables never omitted, no racial
 finding.
 
+## Owner decision (2026-11-05): ONB-S3 enemy-set and target-count model
+
+**Decision.** Approve a bounded, evidence-first enemy-set and target-count
+model.
+
+- `TARGET_COUNT` stops being a permanent unsupported domain in
+  `src/simc/decision-coverage.ts`.
+- The analyzer never manufactures an exact enemy count because a
+  SimulationCraft expression requests one.
+- The existing fail-closed evidence semantics are preserved.
+
+### Core model
+
+Enemy-set and target-count state is EXACT, BOUNDED or UNKNOWN. A count
+need not be exact for a condition to resolve. A condition resolves only
+when every count consistent with the evidence gives the same result.
+
+| Evidence | `active_enemies>=3` |
+| --- | --- |
+| proven lower bound 4 | TRUE |
+| proven upper bound 2 | FALSE |
+| possible range 2–4 | UNKNOWN |
+
+Uncertainty is never collapsed into an exact value.
+
+### Membership requires positive evidence
+
+An enemy enters the candidate set only from positive trusted evidence that
+makes it relevant to the encounter at the decision time.
+
+- **Never enough on its own:**
+  - the NPC existing in encounter metadata;
+  - an earlier appearance in the fight;
+  - another player's unrelated interaction;
+  - SimulationCraft expecting several enemies;
+  - a mechanic that normally spawns adds.
+- **Absence proves nothing.** Missing events never prove an enemy absent,
+  dead, untargetable or out of range.
+- **Lifecycle** follows established spawn, death, despawn or other trusted
+  encounter-state evidence.
+
+### Presence, targetability and range are distinct
+
+The states are PRESENT (encounter-active), TARGETABLE, IN-RANGE
+(action-applicable) and UNKNOWN.
+
+- Existence does not prove the selected player could target the enemy.
+- One targetable enemy does not prove every present enemy targetable.
+- One spell reaching a target does not prove that another spell, with
+  different targeting, range or geometry, could reach it.
+
+An expression needing a stronger fact than the evidence establishes is
+UNKNOWN.
+
+### Expression families
+
+- **`active_enemies`** uses the shared model only as far as the evidence
+  supports, preferring a bound when membership cannot be proven exactly.
+  It never equals "hostile actors seen in the log".
+- **`spell_targets.<ability>`** is action-specific and never aliased to
+  `active_enemies`.
+  - It resolves only with registered mechanics establishing that ability's
+    target applicability, including targeting, range and geometry where
+    they apply.
+  - Otherwise it is UNKNOWN.
+  - The shared layer supplies the candidate set and bounds; the
+    specialization or action binding owns any further meaning.
+- **`target_if`, including FIRST mode,** is evaluated only when the
+  candidate domain and the ordering the pinned APL requires are
+  established.
+  - An unobserved or insufficiently proven target that could change the
+    selected target or action makes the decision UNKNOWN.
+  - It is never evaluated over only the targets with convenient
+    observations.
+  - Parser order, actor id, event order and any other accidental ordering
+    are never gameplay authority unless the pinned SimulationCraft
+    semantics make them so.
+- **Target-dependent `if=`** uses the same bounded-world approach.
+  - It resolves only if every evidence-consistent target and count world
+    selects the same supported action; otherwise it is UNKNOWN.
+  - This is the existing rule that an unresolved higher-priority condition
+    never falls through.
+
+### Evidence sources
+
+ONB-S3 may use already-trusted normalized combat and encounter evidence and
+pinned mechanics in the repository. A new source needs explicit provenance
+and semantics.
+
+Never introduced:
+
+- speculative proximity inference;
+- synthetic target counts;
+- remembered encounter layouts;
+- guide-derived counts;
+- top-log behavior as authority;
+- client assumptions not represented by trusted evidence.
+
+No Warcraft Logs network request is authorized by this decision.
+
+### Shared versus specialization responsibility
+
+The shared layer stays gameplay-neutral, with no spec conditionals. It may
+own:
+
+- candidate hostile-actor identity;
+- enemy lifecycle evidence;
+- the EXACT, BOUNDED and UNKNOWN enemy-set state;
+- generic target-count queries;
+- convergence across possible count worlds.
+
+Specialization or action code owns:
+
+- ability target eligibility;
+- spell geometry and range;
+- spec target-selection semantics;
+- anything not genuinely generic.
+
+### Promotion semantics
+
+Lifting `TARGET_COUNT` makes no specialization PUBLIC. After ONB-S3, the
+queue entry ONB-S3R:
+
+1. re-replays the affected INTERNAL_ONLY specs against retained real
+   evidence, at minimum:
+   - Subtlety, Fury and Protection Warrior;
+   - Arms, Frost Death Knight, Enhancement, Devourer, Feral and
+     Destruction, which are on record as stopping there;
+   - any other onboarded spec whose first unresolved path is
+     `TARGET_COUNT`;
+2. records each one's next blocker;
+3. resolves only supported blockers;
+4. sends each promotion through the existing real MATCH and REJECTED gates,
+   unchanged.
+
+Cohort T (Windwalker, Guardian, Beast Mastery, Survival) follows through
+ONB-T1 and ONB-T2. Promotion requirements are never weakened because ONB-S3
+was meant to unblock several specs.
+
+### Success
+
+ONB-S3 succeeds when:
+
+- `TARGET_COUNT` is no longer a blanket blocker;
+- exact, bounded and unknown semantics are explicit and tested;
+- missing evidence still fails closed;
+- `active_enemies`, `spell_targets`, `target_if` and target-dependent
+  expressions resolve only to the strength their evidence permits;
+- existing PUBLIC analyzers stay invariant, except where compatible shared
+  semantics explicitly cover them;
+- the affected INTERNAL_ONLY specs can be replayed to find their next real
+  blocker;
+- no specialization is promoted solely because the capability exists.
+
 ## ONB-S4 — Shared cast and channel decision anchor
 
 Autopilot queue entry ONB-S4. Internal shared engine only: no public contract

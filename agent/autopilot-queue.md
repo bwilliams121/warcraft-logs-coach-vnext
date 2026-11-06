@@ -1130,12 +1130,92 @@ value. Prove the result against pinned source citations.
 ### ONB-S3: Enemy-set and target-count authority model
 
 ```autopilot
-status: OWNER_DECISION_REQUIRED
+status: READY
 dependsOn: none
 wcl: NONE
 publicContract: NONE
-ownerDecision: Whether, and on what evidence, the analyzer may model the enemy set and target count that SimulationCraft conditions read (active_enemies, spell_targets, target_if FIRST mode and target-dependent if=). TARGET_COUNT is currently declared a permanent blocker in src/simc/decision-coverage.ts. Lifting it changes evidence semantics (which enemies count as present, targetable and in range) and gates the target-selection cohort (Windwalker, Guardian, Beast Mastery, Survival). ONB-A2 found it also gates Fury and Protection Warrior, whose hero-talent list dispatches read the enemy count, and much of Subtlety, through variable.targets.
 ```
+
+**Owner resolution (2026-11-05): approve a bounded, evidence-first
+enemy-set and target-count model.** Recorded in full in
+`agent/architecture.md` "Owner decision (2026-11-05): ONB-S3 enemy-set and
+target-count model". `TARGET_COUNT` is no longer a permanent unsupported
+domain, but no exact count is ever manufactured because an expression
+asks for one.
+
+**Scope.**
+
+- **State.** Enemy-set and target-count state is EXACT, BOUNDED or UNKNOWN.
+  A condition resolves only when every count consistent with the evidence
+  gives the same result:
+  - a proven lower bound of 4 makes `active_enemies>=3` TRUE;
+  - a proven upper bound of 2 makes it FALSE;
+  - a range of 2–4 leaves it UNKNOWN.
+- **Membership needs positive evidence.** Only positive trusted evidence
+  placing the actor in the encounter at the decision time admits it.
+  - These never admit one: encounter metadata, an earlier appearance,
+    another player's unrelated interaction, SimulationCraft's expectation,
+    or a mechanic that "normally" spawns adds.
+  - Missing events never prove an enemy absent, dead, untargetable or out
+    of range.
+  - Lifecycle follows established spawn, death, despawn or other trusted
+    encounter-state evidence.
+- **Separate states.** PRESENT, TARGETABLE, IN-RANGE (action-applicable) and
+  UNKNOWN are distinct states. An expression needing a stronger fact than
+  the evidence establishes is UNKNOWN.
+- **`active_enemies`** uses the shared model only as far as the evidence
+  supports, preferring bounds. It is never "hostile actors seen in the
+  log".
+- **`spell_targets.<ability>`** is never aliased to `active_enemies`. It
+  resolves only through registered, action-owned target applicability,
+  including range and geometry where it applies; otherwise it is UNKNOWN.
+- **`target_if`, including FIRST mode,** is evaluated only when the
+  candidate domain and the ordering the pinned APL requires are
+  established.
+  - An unobserved or unproven target that could change the selection makes
+    the decision UNKNOWN.
+  - It is never evaluated over only the conveniently observed targets.
+  - Parser, actor-id or event order is never authority unless pinned
+    SimulationCraft semantics make it so.
+- **Target-dependent `if=`** resolves only when every evidence-consistent
+  world selects the same supported action. This fits the existing rule
+  that an unresolved higher line never falls through.
+- **Evidence.** Already-trusted normalized combat and encounter evidence and
+  pinned mechanics only. A new source needs explicit provenance and
+  semantics. Never used:
+  - proximity guesses;
+  - synthetic counts;
+  - remembered layouts;
+  - guide counts;
+  - top-log behavior;
+  - unrepresented client assumptions.
+- **Ownership.** The shared layer (gameplay-neutral, with no spec
+  conditionals) owns:
+  - hostile-actor identity;
+  - lifecycle evidence;
+  - the EXACT, BOUNDED and UNKNOWN set;
+  - generic count queries;
+  - convergence across count worlds.
+
+  Specialization or action code owns:
+  - ability target eligibility;
+  - range and geometry;
+  - spec target-selection meaning.
+- **Invariance.** Existing PUBLIC analyzers stay invariant except where
+  compatible shared semantics explicitly cover them; any change is
+  measured and pinned.
+- **Network.** No Warcraft Logs activity is authorized by this decision.
+
+**Done when:**
+
+- `TARGET_COUNT` is no longer a blanket permanent blocker;
+- exact, bounded and unknown semantics are explicit and tested;
+- missing evidence still fails closed;
+- the four expression families resolve only to the strength their
+  evidence permits;
+- public analyzers stay invariant as above;
+- affected INTERNAL_ONLY specs can be replayed (ONB-S3R);
+- no specialization is promoted by this tranche.
 
 **Direction.** The M11-D0 census (pinned `target_if` semantics), CLAUDE.md
 "Multi-Target Support", and `agent/follow-ups.md` "After M11-D3-B". ONB-B1 measured
@@ -1145,6 +1225,44 @@ ONB-B3 measured that every Devourer decision stops on it too. ONB-C1 found all f
 and builder dispatches read it, behind other open lines. ONB-D1 measured that every Destruction decision meets it
 first, on either hero tree's area list
 (`agent/follow-ups.md` "After ONB-B1", "After ONB-B2", "After ONB-B3", "After ONB-C1", "After ONB-D1").
+
+### ONB-S3R: Re-replay the TARGET_COUNT-gated INTERNAL_ONLY specializations
+
+```autopilot
+status: READY
+dependsOn: ONB-S3
+wcl: NONE
+publicContract: NONE
+```
+
+**Direction.** Owner decision (2026-11-05) on ONB-S3, "Promotion
+semantics": lifting `TARGET_COUNT` makes no specialization PUBLIC.
+
+**Scope.**
+
+1. **Replay.** Replay, offline against retained real evidence, every
+   INTERNAL_ONLY specialization whose first unresolved authority path was
+   `TARGET_COUNT`. At minimum this covers:
+   - Subtlety Rogue, Fury Warrior and Protection Warrior;
+   - Arms Warrior;
+   - Frost Death Knight and Enhancement Shaman;
+   - Devourer Demon Hunter;
+   - Feral Druid;
+   - Destruction Warlock;
+   - any other onboarded specialization whose recorded first stop is
+     `TARGET_COUNT`, found by searching the inventory and the
+     `agent/follow-ups.md` "After ONB-*" sections.
+
+   Cohort T (Windwalker, Guardian, Beast Mastery, Survival) is replayed
+   in ONB-T1 and ONB-T2.
+2. **Next blocker.** Record each one's next real blocker in
+   `agent/spec-onboarding-inventory.md` and `agent/follow-ups.md`.
+3. **Fixes.** Resolve only blockers that existing supported semantics
+   cover. A new authority or evidence-semantics question is an owner stop.
+4. **Promotion.** Where a specialization's internal validation (requirement
+   C) now passes, add a separate public re-promotion entry for it (`ONB-*P2`,
+   `publicContract: EXPECTED`) through the existing, unchanged MATCH and
+   REJECTED promotion gates. This tranche promotes nothing itself.
 
 ### ONB-S4: Shared cast and channel decision anchor
 
@@ -2101,7 +2219,7 @@ publicContract: EXPECTED
 
 ```autopilot
 status: READY
-dependsOn: M13-F, HEAL-AP, HEAL-B1P, HEAL-B2P, HEAL-B3P, HEAL-B4P, ONB-A1P, ONB-A2P, ONB-B1P, ONB-B2P, ONB-B3P, ONB-C1P, ONB-C2P, ONB-T1P, ONB-T2P, ONB-D1P, ONB-D2P, ONB-D3P, ONB-D4P, ONB-X1P, ONB-X2P, ONB-X3P, ONB-X4P, ONB-X5P
+dependsOn: M13-F, ONB-S3R, HEAL-AP, HEAL-B1P, HEAL-B2P, HEAL-B3P, HEAL-B4P, ONB-A1P, ONB-A2P, ONB-B1P, ONB-B2P, ONB-B3P, ONB-C1P, ONB-C2P, ONB-T1P, ONB-T2P, ONB-D1P, ONB-D2P, ONB-D3P, ONB-D4P, ONB-X1P, ONB-X2P, ONB-X3P, ONB-X4P, ONB-X5P
 wcl: NONE
 publicContract: NONE
 ```
