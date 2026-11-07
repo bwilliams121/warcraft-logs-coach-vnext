@@ -15527,3 +15527,78 @@ Eleven rotational subjects, one healer and, say, four contexts come to about 4.5
 ### What this does not do
 
 It makes no request, selects no fight, reads no candidate's outcome, commits no evidence, raises no line and promotes nothing. Capture alone resolves nothing for most of these specializations either, since their lists stop on inputs a subject cannot supply (`agent/follow-ups.md` "After ONB-A2" and the entries after it). The eligibility census and the page measurements read uncommitted retained captures, so they are not pinned by a test.
+
+## Owner decision (2026-11-07): WCL audit hardening and POLB-CENSUS
+
+**Audit gap.** The supervisor's Warcraft Logs and probe audit has a detection gap. A command such as `npx vitest run --config .probe/onb-ev/capture.config.ts` can execute network-capable code under `.probe/` without matching the current patterns. Until AUD-WCL-1 lands, an empty supervisor audit is not sufficient proof that a tranche made no Warcraft Logs request.
+
+**AUD-WCL-1** is a dedicated supervisor and audit tranche, `wcl: NONE`. It runs immediately after ONB-EV completes or reaches its next legitimate owner stop, and before any subsequent ordinary project tranche. ONB-EV attempt 2 is not interrupted for it. ONB-EV's grant, 60-request cap, cumulative accounting, retained ledger and written record stay authoritative for that campaign.
+
+**Required fix.**
+
+- **What to detect.** Execution of code or configuration rooted under `.probe/`, not merely literal probe names or `warcraftlogs.com`. That covers `node`, `npx`, `npm`, `pnpm`, `yarn`, `bun`, `tsx`, `ts-node`, `vitest`, PowerShell and Bash, whenever an executable script, config, loader, test configuration or other code-bearing argument resolves beneath `.probe/`, in any relative or Windows spelling.
+- **Avoid false positives.** Reading inert files under `.probe/` (`Get-Content`, `ls`, `grep` over a saved artifact) may be recorded as probe-related inspection, and stays distinguishable from executing code rooted there. The audit says what triggered the finding.
+- **Self-tests:** direct Node execution, Vitest with `--config .probe/...`, TS runners, PowerShell and Bash, and Windows and slash-normalized paths are all detected; simple reads and listings do not claim network activity; the known ONB-EV command is detected.
+- **Conservative semantics.** Detected `.probe` execution does not by itself prove a request occurred. It means the tranche executed code able to bypass the old boundary, so it needs the normal audit classification. Command and transcript evidence, any campaign ledger, retained request records and the tranche's explicit grant then determine whether Warcraft Logs activity occurred and whether it was authorized.
+
+**Historical backfill.** One read-only retrospective audit over retained autopilot transcripts, for previously undetected execution of `.probe/` code or configuration.
+
+- No tranche is accused merely for executing `.probe` code.
+- Findings are classified as confirmed no network, confirmed authorized network, confirmed unauthorized network, or insufficient evidence.
+- If any historical `wcl: NONE` tranche has evidence of actual Warcraft Logs activity that was not previously reviewed, it stops with OWNER_DECISION_REQUIRED and reports it.
+- No network request is authorized for the backfill.
+
+**Empty-audit rule.** After AUD-WCL-1 merges, the operating documentation states: an empty Warcraft Logs audit is meaningful only once all supported network-capable execution paths are covered by the detector. Before AUD-WCL-1, historical empty audits alone are not proof of no network activity.
+
+**Branch hygiene.** Before its merge and switch-back step, the supervisor verifies that no intended tracked edits remain uncommitted. If the only failure is intended tranche edits left uncommitted, they are included in the candidate and the normal gate reruns. They are never silently discarded, and unrelated changes are never swept into a tranche.
+
+**POLB-CENSUS: DECLINED.** The proposed Warcraft Logs census is not authorized: no 243-request grant and no Policy B 1 MiB archive exception. The SimC fallback program is the active remediation path for the encounter-state gap. POLB-CENSUS is not an unresolved dependency of ONB-EV or later remediation. POLB-B and POLB-C are BLOCKED with it, and ONB-Z no longer depends on Policy B.
+
+**Recording notes.**
+
+- AUD-WCL-1 runs ahead of ONB-EV's continuation as well, since ONB-EV and REM-CENSUS depend on it, so the campaign's remaining requests run under the fixed detector.
+- ONB-EV's own pending question is unchanged by this decision.
+- A supervisor change only takes effect in a new process, so AUD-WCL-1 also makes the supervisor exit after merging a change to `scripts/autopilot/`.
+
+## Owner decision (2026-11-07): ONB-EV completion
+
+**1. Complete the remaining six. APPROVED.** ONB-EV does not stop at 6 of 12. It completes the existing predetermined twelve-specialization cohort.
+
+- The total cap rises from 60 to 119 requests, an extension of 59. The counter stays cumulative and does not reset, and every request already made stays charged.
+- The same acquisition rules stay in force: deterministic selection; the same qualifying-fight rule; no rankings, comparisons or top-log search; no outcome shopping; no alternate-subject search because a result is unfavorable; minimum required evidence only; provenance retained. HTTP or API failures do not authorize changing the evidence-selection policy.
+- The extension exists only to complete the already-defined cohort. It is not a general Warcraft Logs grant.
+
+**2. Listing revision 2 is accepted.** The diagnostic retry established that the original listing failed on query complexity ("Max query complexity should be 50000 but got 100701"). Splitting the same listing universe into three 34-report pages is the permitted API-compatibility repair, not a new sampling policy, and stays in use.
+
+**3. Archive policy.**
+
+- The general archive limit is not raised to 6,376,343 bytes. The committed limit stays unchanged during acquisition and initial remediation analysis.
+- Raw ONB-EV captures may stay in their approved uncommitted raw location while REM-CENSUS determines which captured subjects actually provide evidence needed for PUBLIC promotion.
+- For each specialization whose captured evidence must become committed promotion evidence:
+  1. derive the smallest sanitized fixture the unchanged promotion gate requires;
+  2. measure its exact byte cost;
+  3. deduplicate or slice where that preserves reproducibility and required evidence;
+  4. determine whether it fits under the existing allowance;
+  5. if it does not, present a byte-pinned archive exception for that evidence.
+- Exceptions tied to specific qualifying evidence are preferred over a speculative global expansion.
+
+**4. Unsuccessful evidence is not discarded.** Evidence does not become disposable because a specialization does not immediately pass promotion. A captured subject that truthfully establishes a blocker, a discrimination result or another remediation fact that must stay reproducible keeps enough evidence to reproduce that conclusion. The objective is minimum sufficient retained evidence, not only evidence from immediate successes.
+
+**5. AUD-WCL-1 runs first.** Before ONB-EV makes another request, AUD-WCL-1 must merge and the supervisor must restart. ONB-EV and REM-CENSUS stay dependent on AUD-WCL-1.
+
+**6. PR #103 is reconciled, not discarded.** After the audit-hardening PR and AUD-WCL-1 merge, PR #103 is reconciled against current main, semantically rather than by choosing a side wholesale. It preserves PR #103's factual record of attempt 2, its request ledger, its captured-evidence changes and revision 2. It also preserves main's dependency on AUD-WCL-1, its owner-stop history, this 119-request authorization and the POLB-CENSUS decline. Superseded 60-only wording is not resurrected. The normal OpenAI review, CI and merge gate then rerun on the reconciled tree.
+
+**7. Stop conditions.** ONB-EV stops again if:
+
+- completing the six would exceed 119;
+- the repaired deterministic listing itself proves unusable;
+- another material change to selection policy is required;
+- authentication or authorization changes are required;
+- evidence would require an archive exception before REM-CENSUS can safely determine what must be committed;
+- another owner-controlled boundary is encountered.
+
+Otherwise it completes all twelve captures and REM-CENSUS follows.
+
+**Completion intent.** ONB-EV is an evidence-acquisition step toward the objective that every playable specialization becomes PUBLIC. Stopping halfway through the defined cohort solely because the original request estimate was low is not the desired outcome.
+
+**Recording note: the restart.** The scheduled task runs the supervisor with `-MaxTranches 0`, so the process that merges AUD-WCL-1 is still running the old code and would continue into ONB-EV under the old detector. AUD-WCL-1's own exit-after-merge only takes effect in later processes. So the owner runs AUD-WCL-1 alone (`-TrancheId AUD-WCL-1 -MaxTranches 1`) and then restarts the task. ONB-EV's entry also stops if its supervisor started before AUD-WCL-1's merge.

@@ -1339,16 +1339,84 @@ events), plus pet-count and pet-active state for APL reads (for example
 - An ambiguous mapping is UNKNOWN, never a guess.
 - Pet-heavy specs (Demonology, Unholy, Beast Mastery) consume it.
 
-### ONB-EV: Neutral evidence campaign for specializations without retained real evidence
+### AUD-WCL-1: Supervisor Warcraft Logs audit hardening
 
 ```autopilot
 status: READY
-dependsOn: ONB-EV-PLAN
-wcl: OWNER-GRANT: agent/autopilot-queue.md ONB-EV owner grant (2026-11-06); ONB-EV only; one neutral campaign running ONB-EV-PLAN's frozen plan for its listed specializations; per specialization the first qualifying public raid fight under the recorded fixed discovery rule, with no replacement fight or alternate subject because of any result; only the minimum actor and fight evidence the existing evaluator and promotion gate need (casts, auras, resources, combatant information and the fight context and actor identification they require); no rankings, comparison or top-log data; at most 60 Warcraft Logs HTTP requests in total, counting OAuth token requests and refreshes, discovery, fight and context lookups, actor identification, event retrieval, pagination and completeness requests; stop with OWNER_DECISION_REQUIRED before exceeding 60; no archive-limit increase and no promotion
+dependsOn: none
+wcl: NONE
 publicContract: NONE
 ```
 
-**Owner grant (2026-11-06): APPROVED with a hard campaign cap of 60 Warcraft Logs HTTP requests in total** (`agent/architecture.md` "Owner grant (2026-11-06): ONB-EV"). This entry acquires evidence and promotes nothing. It runs ONB-EV-PLAN's frozen plan.
+**Direction.** Owner decision (2026-11-07) "WCL audit hardening" (`agent/architecture.md`). It runs after ONB-EV's current stop and before any subsequent ordinary project tranche. ONB-EV and REM-CENSUS depend on it.
+
+**Problem.** `npx vitest run --config .probe/onb-ev/capture.config.ts` executed network-capable code under `.probe/` and matched none of `$script:WclActivityPatterns`. Until this lands, an empty audit is not proof that a tranche made no Warcraft Logs request.
+
+**Scope.** In `scripts/autopilot/` and `agent/autopilot.md`, with no live Warcraft Logs access:
+
+1. **Detect execution rooted under `.probe/`,** not only literal probe names or `warcraftlogs.com`. That covers `node`, `npx`, `npm`, `pnpm`, `yarn`, `bun`, `tsx`, `ts-node`, `vitest`, PowerShell and Bash, whenever an executable script, config, loader, test configuration or other code-bearing argument resolves beneath `.probe/`, in relative, absolute, Windows or slash-normalized spelling.
+2. **Classify, and say what triggered it.** Executing `.probe` code is distinct from inspecting inert `.probe` files (`Get-Content`, `ls`, `grep` over a saved artifact). Inspection may be recorded but never claims network activity. Execution does not by itself prove a request: it requires the normal audit classification, which uses command and transcript evidence, any campaign ledger, retained request records and the tranche's explicit grant.
+3. **Self-tests,** at least:
+   - direct Node execution under `.probe/` is detected;
+   - Vitest with `--config .probe/...` is detected;
+   - TS runners under `.probe/` are detected;
+   - PowerShell and Bash execution of `.probe` code is detected;
+   - Windows and slash-normalized paths are detected;
+   - simple reads and listings of `.probe` artifacts do not claim network activity;
+   - the known ONB-EV command is detected.
+4. **Branch hygiene.** Before the merge and switch-back step, verify that no tracked edits remain uncommitted.
+   - If the only failure is intended tranche edits left uncommitted, include them in the candidate and rerun the normal gate. Never discard them silently.
+   - Never sweep unrelated changes into the tranche; that is a stop for the owner.
+5. **Self-update.** A supervisor change takes effect only in a new supervisor process. After merging a change to `scripts/autopilot/`, the supervisor exits instead of auditing the next tranche with the old detector.
+6. **Read-only historical backfill** over the retained autopilot transcripts, looking for previously undetected execution of `.probe/` code or configuration.
+   - Classify each finding as confirmed no network, confirmed authorized network, confirmed unauthorized network, or insufficient evidence.
+   - Never accuse a tranche merely for executing `.probe` code.
+   - Record the results in the review packet.
+   - If any historical `wcl: NONE` tranche shows actual Warcraft Logs activity that was not previously reviewed, stop with OWNER_DECISION_REQUIRED and report it.
+   - No network request is authorized for the backfill.
+7. **Empty-audit rule.** `agent/autopilot.md` states that an empty audit is meaningful only once all supported network-capable execution paths are covered by the detector, and that before AUD-WCL-1, historical empty audits alone are not proof of no network activity.
+
+ONB-EV's grant, cap, cumulative ledger and written record stay authoritative for that campaign.
+
+**Restart (owner, 2026-11-07).** ONB-EV makes no further request until this tranche is merged and the supervisor has restarted. The process that merges this tranche still runs the old code, so item 5's exit cannot stop it. The owner runs this tranche alone (`-TrancheId AUD-WCL-1 -MaxTranches 1`), then restarts the scheduled task. ONB-EV's entry also checks this before its first request.
+
+### ONB-EV: Neutral evidence campaign for specializations without retained real evidence
+
+```autopilot
+status: PR_OPEN
+dependsOn: ONB-EV-PLAN, AUD-WCL-1
+branch: autopilot/onb-ev
+wcl: OWNER-GRANT: agent/autopilot-queue.md ONB-EV owner grant (2026-11-06); ONB-EV only; one neutral campaign running ONB-EV-PLAN's frozen plan for its listed specializations; per specialization the first qualifying public raid fight under the recorded fixed discovery rule, with no replacement fight or alternate subject because of any result; only the minimum actor and fight evidence the existing evaluator and promotion gate need (casts, auras, resources, combatant information and the fight context and actor identification they require); no rankings, comparison or top-log data; at most 119 Warcraft Logs HTTP requests in total (60 granted 2026-11-06, extended by 59 on 2026-11-07 only to complete the twelve-specialization cohort; cumulative, never reset), counting OAuth token requests and refreshes, discovery, fight and context lookups, actor identification, event retrieval, pagination and completeness requests; stop with OWNER_DECISION_REQUIRED before exceeding 119; no archive-limit increase and no promotion; owner decisions (2026-11-07): the 2 requests of attempt 1 are authorized and count; one identical retry of the failed listing was permitted to classify its response; plan revision 2, which splits the same listing universe into three 34-report pages after a query-complexity refusal, is the accepted API-compatibility repair and stays in use, with all later requests inside the same total cap; no later request may run until AUD-WCL-1 is merged and a supervisor process started after that merge runs this tranche
+pr: 103
+publicContract: NONE
+```
+
+**Owner decision (2026-11-07, second): complete the cohort** (`agent/architecture.md` "Owner decision (2026-11-07): ONB-EV completion"). This supersedes the 60-request cap stated in older text in this entry.
+
+1. **Cap 119 in total.** Complete the remaining six specializations of the predetermined twelve. The cap rises from 60 to 119, cumulative and never reset, with every earlier request still charged. It is not a general grant.
+2. **Same rules:** deterministic selection, the same qualifying-fight rule, no rankings, no comparisons, no top-log search, no outcome shopping, no alternate subject because a result is unfavorable, minimum required evidence, provenance retained. An HTTP or API failure never authorizes changing the evidence-selection policy.
+3. **Revision 2 is accepted.** Its three 34-report pages are the permitted API-compatibility repair of the refused listing ("Max query complexity should be 50000 but got 100701"), not a new sampling policy. Keep using it.
+4. **AUD-WCL-1 first.** No further request runs until AUD-WCL-1 is merged and a supervisor process started after that merge launches this attempt. Before any request, check that the running supervisor started after AUD-WCL-1's merge commit, and stop with OWNER_DECISION_REQUIRED if it did not.
+5. **Reconcile PR #103 with main semantically,** never choosing a side wholesale:
+   - keep the branch's factual record of attempt 2, its request ledger, its captured-evidence changes and plan revision 2;
+   - keep main's dependency on AUD-WCL-1, this decision, the 119 cap and the POLB-CENSUS decline;
+   - never resurrect superseded 60-only wording.
+
+   Then rerun the normal OpenAI review, CI and merge gate on the reconciled tree.
+6. **Archive.** The committed archive limit is unchanged. Raw captures stay in their approved uncommitted location until REM-CENSUS decides what must be committed. Committing nothing here is not discarding: keep every raw capture.
+7. **Stop again with OWNER_DECISION_REQUIRED if:**
+   - completing the six would exceed 119;
+   - the repaired listing proves unusable;
+   - another material change to selection policy is needed;
+   - authentication or authorization must change;
+   - evidence would need an archive exception before REM-CENSUS can determine what must be committed;
+   - another owner-controlled boundary is met.
+
+   Otherwise capture all twelve, and REM-CENSUS follows.
+
+**Attempt 2 (PR #103, unmerged).** It stopped at 56 of 60 requests with six of twelve captured: Discipline, Subtlety, Fury, Survival, Protection Warrior and Enhancement. The PR holds the listing-retry record, plan revision 2, the ledger and the capture record.
+
+**Owner grant (2026-11-06): APPROVED with a hard campaign cap of 60 Warcraft Logs HTTP requests in total** (`agent/architecture.md` "Owner grant (2026-11-06): ONB-EV"). Raised to 119 in total on 2026-11-07, above. This entry acquires evidence and promotes nothing. It runs ONB-EV-PLAN's frozen plan.
 
 **The frozen plan (ONB-EV-PLAN).** `agent/onb-ev-plan.json`, digest `48066f986e7035542bf81c0263f4cec0d9d70e0f3d892ab6eb7ed535e6fa0013`, with its rule in `scripts/corpus/onb-ev-selection.mjs`, run as written. It removes no specialization. Its worst case exceeds the cap, and no fixture fits the archive's notice line, so expect both stops below.
 
@@ -1356,7 +1424,7 @@ publicContract: NONE
 
 **Acquisition rules.**
 
-- The 60-request cap includes all Warcraft Logs network activity of this campaign: OAuth token requests and refreshes, report and fight discovery, fight and context lookups, actor identification, casts, auras, resources, combatant information, and pagination or completeness requests.
+- The cap (119 in total since 2026-11-07) includes all Warcraft Logs network activity of this campaign: OAuth token requests and refreshes, report and fight discovery, fight and context lookups, actor identification, casts, auras, resources, combatant information, and pagination or completeness requests.
 - Follow the recorded neutral discovery rule: per specialization, the first qualifying public raid fight in the fixed order ONB-EV-PLAN froze.
 - Acquire only the minimum actor and fight evidence the existing evaluator and promotion gate need.
 - Query no rankings and no comparison or top-log data.
@@ -1366,7 +1434,7 @@ publicContract: NONE
 - Any detected activity stops for the owner's audit confirmation, as `agent/autopilot.md` requires.
 - This grant covers ONB-EV only. It does not cover the Policy B census (POLB-CENSUS).
 
-**If the cap would be exceeded:** stop with OWNER_DECISION_REQUIRED before exceeding 60. Report:
+**If the cap would be exceeded:** stop with OWNER_DECISION_REQUIRED before exceeding the total cap (119 since 2026-11-07). Report:
 
 - requests consumed and requests remaining;
 - specializations completed and specializations still requiring evidence;
@@ -2360,16 +2428,15 @@ No curated row is entered here, and no request is made.
 ### POLB-CENSUS: Policy B neutral census acquisition
 
 ```autopilot
-status: OWNER_DECISION_REQUIRED
+status: BLOCKED
 dependsOn: POLB-A
-wcl: OWNER_DECISION_REQUIRED
+wcl: NONE
 publicContract: NONE
-ownerDecision: Approve POLB-A's frozen census plan (src/data/encounter-census/census-plan.json) with a cap of 243 Warcraft Logs requests and a named archive exception of up to 1 MiB, or decline it. POLB-A found the census cannot justify any upper bound or closed set, so approving it buys lower-bound and candidate evidence only, reaching at most 421 count decisions, all Arms. Since the SimC profile fallback (2026-11-06), declining no longer leaves those decisions without an answer: tier 3 of the precedence applies with no curated tier. Declining needs POLB-B, POLB-C and ONB-Z's Policy B condition reworded. ONB-EV's grant does not cover this tranche.
 ```
 
 **Direction.** Owner decision (2026-11-06) "Policy B source", items 8, 11 and 12.
 
-**Not authorized yet.** No network activity occurs until the owner approves the plan and a cap, and an `OWNER-GRANT:` replaces the `wcl` value above. ONB-EV's campaign authorization is not implicit permission for this tranche.
+**Owner decision (2026-11-07): DECLINED.** The proposed census is not authorized: no 243-request grant and no Policy B 1 MiB archive exception. The SimC profile fallback is the active remediation path for the encounter-state gap. This entry is BLOCKED and never runs, and nothing depends on it.
 
 **Scope once granted.** Run the frozen plan exactly, retaining the evidence separately from analyzed pulls.
 
@@ -2380,11 +2447,13 @@ ownerDecision: Approve POLB-A's frozen census plan (src/data/encounter-census/ce
 ### POLB-B: Policy B curated data and enemy-count bounds
 
 ```autopilot
-status: READY
+status: BLOCKED
 dependsOn: POLB-CENSUS
 wcl: NONE
 publicContract: NONE
 ```
+
+**Not scheduled: POLB-CENSUS was declined (2026-11-07),** so there is no census to derive rows from. BLOCKED, and nothing depends on it.
 
 **Scope.** Curated rows derived reproducibly from the retained census only, and their use in `active_enemies` through the existing EXACT, BOUNDED and UNKNOWN model. SimulationCraft never dictates the count: the census supplies evidence and the pinned APL consumes it.
 
@@ -2397,11 +2466,13 @@ publicContract: NONE
 ### POLB-C: Policy B target domains and availability windows
 
 ```autopilot
-status: READY
+status: BLOCKED
 dependsOn: POLB-B
 wcl: NONE
 publicContract: NONE
 ```
+
+**Not scheduled: POLB-CENSUS was declined (2026-11-07).** BLOCKED, and nothing depends on it.
 
 **Scope.** Where the retained census supports them: candidate-set evidence, targetability and attackability windows, and add-availability intervals.
 
@@ -2489,11 +2560,13 @@ Nothing is promoted here.
 ### ONB-EV-PLAN: Freeze the neutral evidence campaign plan
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: SIMC-FB-R
 branch: autopilot/onb-ev-plan
 wcl: NONE
 publicContract: NONE
+pr: 102
+mergeSha: 50fb71e40dc68695861deaa0dae6a34760a55384
 ```
 
 **Outcome.** The plan is `agent/onb-ev-plan.json`, digest `48066f986e7035542bf81c0263f4cec0d9d70e0f3d892ab6eb7ed535e6fa0013`. All twelve specializations stay. Its worst case is 200 requests against the cap of 60, and no fixture fits the 5,212 bytes left under the notice line, so ONB-EV will stop for the owner (`agent/architecture.md` "ONB-EV-PLAN"; `agent/follow-ups.md` "After ONB-EV-PLAN").
@@ -2514,7 +2587,7 @@ The plan must not read any candidate's outcome, and no later step may replace a 
 
 ```autopilot
 status: READY
-dependsOn: HEAL-B1P2, SIMC-FB-R, ONB-EV
+dependsOn: HEAL-B1P2, SIMC-FB-R, ONB-EV, AUD-WCL-1
 wcl: NONE
 publicContract: NONE
 ```
@@ -2535,6 +2608,16 @@ Then add the tranches the census shows are missing, in this order, before REM-GA
 - `REM-P<n>`: PUBLIC promotion retries, each only for specializations whose prerequisites changed.
 
 Add every new entry to REM-GATE's `dependsOn`. New Warcraft Logs needs are recorded as an owner stop under rule 7. This tranche implements nothing and promotes nothing.
+
+**Archive (owner, 2026-11-07).** Replay the ONB-EV raw captures from their uncommitted location. For each specialization whose captured evidence must become committed:
+
+1. derive the smallest sanitized fixture the unchanged gate requires;
+2. measure its exact byte cost;
+3. deduplicate or slice where reproducibility and required evidence survive;
+4. check whether it fits under the existing allowance;
+5. if it does not, present a byte-pinned archive exception for that evidence.
+
+Never propose a speculative global increase. Evidence is not disposable because a specialization does not pass immediately: retain the minimum sufficient evidence that reproduces any blocker, discrimination result or other remediation fact the census relies on.
 
 Restoration Druid enters with one measured blocker, archive capacity (agent/follow-ups.md "After HEAL-B1P2"). Its `REM-P<n>` is eligible only after an owner capacity decision; bring its row into any measured capacity proposal.
 
@@ -2558,7 +2641,7 @@ Re-measure the first blockers. Where a pass exposed a next blocker that remediat
 
 ```autopilot
 status: READY
-dependsOn: M13-F, ONB-S3R, HEAL-AP, HEAL-B1P, HEAL-B2P, HEAL-B3P, HEAL-B4P, ONB-A1P, ONB-A2P, ONB-B1P, ONB-B2P, ONB-B3P, ONB-C1P, ONB-C2P, ONB-T1P, ONB-T2P, ONB-D1P, ONB-D2P, ONB-D3P, ONB-D4P, ONB-X1P, ONB-X2P, ONB-X3P, ONB-X4P, ONB-X5P, HEAL-B1P2, POLB-C, SIMC-FB-R, ONB-EV, REM-CENSUS, REM-GATE
+dependsOn: M13-F, ONB-S3R, HEAL-AP, HEAL-B1P, HEAL-B2P, HEAL-B3P, HEAL-B4P, ONB-A1P, ONB-A2P, ONB-B1P, ONB-B2P, ONB-B3P, ONB-C1P, ONB-C2P, ONB-T1P, ONB-T2P, ONB-D1P, ONB-D2P, ONB-D3P, ONB-D4P, ONB-X1P, ONB-X2P, ONB-X3P, ONB-X4P, ONB-X5P, HEAL-B1P2, SIMC-FB-R, ONB-EV, REM-CENSUS, REM-GATE
 wcl: NONE
 publicContract: NONE
 ```
@@ -2569,7 +2652,7 @@ publicContract: NONE
 
 - Restoration Druid's public-entry path has completed;
 - ONB-EV has been resolved and applicable evidence collected;
-- Policy B has been implemented and validated, or the owner has declined POLB-CENSUS and this condition has been reworded;
+- Policy B is not a condition: the owner declined POLB-CENSUS on 2026-11-07, and the SimC profile fallback is the path for the encounter-state gap;
 - the SimC profile fallback has been implemented and the affected specializations replayed;
 - all known shared and spec-owned remediation inputs have been queued and executed;
 - every INTERNAL_ONLY specialization has received at least one remediation pass against its documented blockers;
