@@ -15428,3 +15428,102 @@ Totals: 8546 eligible, 4 MATCH, 0 REJECTED, 8542 UNKNOWN; 1652 decisions with a 
 **A committed negative.** The archive's Arms slice (fight 48 actor 5, first 6 s) grants no DAMAGE, so on a proven build it reads nothing from the profile: damage it does not hold could prove another enemy. The 203 Arms decisions with facts come from the whole-fight capture, which is not committed.
 
 **What the tests do not prove.** `tests/unit/specs/simc-fb-r-wiring.test.ts` takes each wiring through the production row on synthetic casts: that facts reach the view decision by decision, that an unproven build binds nothing, and that a failed page binds nothing resting on the count. It proves no gameplay result. The numbers above come from uncommitted retained captures (recipe `.probe/simcfbr`), so they are not pinned.
+
+## ONB-EV-PLAN — the frozen plan of the neutral evidence campaign
+
+Autopilot queue entry ONB-EV-PLAN, on the owner's ONB-EV grant. Offline: no Warcraft Logs request, no public contract change, nothing promoted. The plan is `agent/onb-ev-plan.json`, digest `48066f986e7035542bf81c0263f4cec0d9d70e0f3d892ab6eb7ed535e6fa0013`, and its rule is `scripts/corpus/onb-ev-selection.mjs`. ONB-EV runs them as written. `tests/unit/onb-ev-plan.test.ts` recomputes the digest and the arithmetic, and holds the rows to the production registrations and the deploy calendar while the plan is unexecuted.
+
+**The result, plainly.** All twelve recorded specializations stay. The worst case is **200 requests against the cap of 60**, so ONB-EV runs in the frozen order and stops at the cap with its report. Capacity will stop it as well: every fixture is larger than the 5,212 bytes left under the notice line, so ONB-EV will end at an owner decision however its requests go. The plan does not drop or reorder anything to fit, as the queue reserves that for the owner.
+
+### Eligibility, checked against retained files
+
+A census of every retained JSON over 500 bytes under `.probe/` and `tests/`, 5,695 parsed of 5,696 (the other is the deliberately invalid `.probe/m11d2c/bad.json`), with Mortal Strike as its positive control (985 events, 559 casts). Its route is the combatant info, because every unfiltered capture states it for every player at the fight's start, and a subject needs it. Hits on a list's pinned ids alone do not make a subject, since those ids are shared across a class: the top hits belong to actors whose combatant info names another specialization.
+
+| Specialization | Combatantinfo rows | Real casts retained | Why it stays |
+| --- | ---: | --- | --- |
+| Discipline Priest | 2, one actor, two-second diagnostic pages | filtered M13-A actor 9 | no unfiltered capture, no whole-fight casts |
+| Subtlety Rogue | 0 | filtered M13-A actor 17 | no combatant info |
+| Fury Warrior | 0 | none | contexts only |
+| Protection Warrior | 0 | none | one context only |
+| Enhancement Shaman | 0 | filtered M13-A actor 7 | no combatant info |
+| Outlaw Rogue | 0 | none | listing rows only |
+| Guardian Druid | 2, one actor, two-second diagnostic pages | one cast off its list | not a subject |
+| Survival Hunter | 0 | none | listing rows only |
+| Frost Mage | 2, one actor, two-second diagnostic pages | filtered M13-A actor 6 | no whole capture of it |
+| Affliction Warlock | 0 | filtered M13-A actor 20 | no combatant info |
+| Marksmanship Hunter | 0 | filtered M13-A actors 14 and 18 | no combatant info |
+| Vengeance Demon Hunter | 0 | none | listing rows only |
+
+So none is removed and none is added. Devourer, Destruction, Balance, Shadow, Fire and Unholy also have no provable subject ("SIMC-FB-R"), but each has analyzable retained subjects and is not on the recorded list. Adding one needs a new owner decision, and evidence is not the first gap of any of them.
+
+### The capture has to be unfiltered, and that sets the budget
+
+The grant asks for the minimum the existing evaluator and gate need. The obvious reading, an actor-filtered stream of casts, auras and resources, would cost one to three pages a subject and fit the cap easily. It would also buy nothing:
+
+- A filtered capture retains no coverage. The loader refuses any grant on one (`FILTERED_CAPTURE_GRANTED`, "M13-A"). Every listing read from it is OBSERVED_ONLY, and M13-A and G2 show this on real evidence.
+- A certificate against a trusted table is the only way back, and on G2 none certified, because tables omit melee, pet casts and more.
+- So a filtered subject could only ever be UNKNOWN or refused, which is not "sufficient for a truthful promotion evaluation".
+
+The minimum that can satisfy the gate is therefore the production stream: one `dataType: All`, unfiltered, re-cut offline by `--actor-slice`, as M11-E2, HEAL-B4P and every granted slice were. Other players' events are in the raw pages under `.probe/` and are never committed. **This is the reading of "minimum" the plan rests on, and the owner may read the grant differently.**
+
+Measured on the two retained whole-fight, all-source captures, at the 10,000 page limit:
+
+| Capture | Events | Whole fight | First 165 s | First 90 s | First 60 s |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| b1PmaKrd6CDfzngc f48, Mythic, 345 s | 268,100 | 27 pages | 13 | 7 | 5 |
+| gtKb2xHn87pNcFfW f22, Heroic, 285 s | 225,399 | 23 pages | 14 | 9 | 6 |
+
+Two choices follow, each fixed before any candidate is known:
+
+- **Rotational rows take the first 90 s.** No rotational gate has a window, and the gate needs one real MATCH and two distinct tokens. Havoc passed both gates on a single first-90-s segment (`wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90`), the smallest window on record to do that alone. A shorter one has no such precedent, and a longer one costs about 60% more for no gate requirement. It is a prefix, so it says nothing about later phases.
+- **Discipline takes the whole fight.** The healer gate needs a COMPLETE cooldown listing, which HEAL-B3P established a part of a fight cannot give. Its fight must last at most 360 s, so its page ceiling can hold it. That limit reads a duration and no outcome.
+
+### Discovery, fixed before any request
+
+- **Listing.** `reportData.reports(zoneID: 53, startTime, endTime, limit: 100, page)`, with `code`, `startTime`, `region.slug`, `zone.id`, `masterData.actors(type: Player) { id subType }` and `fights(killType: Encounters) { id encounterID difficulty startTime endTime friendlyPlayers friendlySpecs }`. No event, ranking, parse, percentile, amount or comparison field, and not even `kill` is requested, so no outcome can be read.
+- **Proven build.** A fight qualifies only if its start lies in a US interval of the deploy calendar: 12.1.0.69933 [2026-09-30T03:00Z, 2026-10-12T04:18:14Z) or 12.1.0.69587 [2026-09-09T04:00Z, 2026-09-12T06:45:21Z). The calendar also proves 12.1.5.70575 for one day. That is excluded with its reason, because the SimC profile record does not list it, so the fallback would refuse it, and 12.1.5 is deferred (M11-G4-5). Only the US is proven, so any other or unstated region does not qualify.
+- **Qualifying.** Zone 53, a real encounter, Heroic or Mythic, at least 90 s. Wipes count: filtering on the outcome would be a choice this plan does not need, and a listing's kills are few (15 of 125 fights on the retained M13-A listing).
+- **Order.** Pages in a fixed sequence: 69933 page 1 and 2, then 69587 page 1 and 2. Within a page, ascending `sha256("onb-ev-v1|<reportCode>|<fightId>")`, so upload order chooses nothing. A later page is read only if a specialization still has no candidate.
+- **Subject.** The first fight in that order with the specialization, class and spec together, because Frost and Protection name two classes each. The lowest actor id. An actor listed twice in a roster does not qualify.
+- **The gate.** The production `FIGHT_CONTEXT_QUERY` per subject, before any page of that fight: accessible, fight and actor listed once, class and spec as listed, region US and `resolveSimulationContext` RESOLVED on a named build. A refusal moves that subject to its next candidate, at most two more, from the pages already read. This reads no event.
+- **Afterwards, nothing replaces a chosen fight.** A fight whose pages have been requested stays selected, whatever it holds. No combatant info on the subject, a conflict with the stated identity, PARTIAL retrieval, or any UNKNOWN, MATCH or REJECTED is recorded and stands. A specialization with no candidate after page 4 is reported, and the listing is not widened.
+
+**What the listing has not proven.** M13-A exercised this listing at `limit: 10` with no time arguments, no region and no master data. Those fields are in the retained schema capture and have not been requested together. If the first listing is refused or too complex, ONB-EV stops for the owner. It does not try another query.
+
+### Requests, counted as the grant counts them
+
+One fight serves every specialization whose first it is. Its contexts come first, so the gate reads no event. A capture starts only if every subject's context, its whole page ceiling and its revision check fit in what is left. So the budget can never end a capture part way. The campaign stops at the first capture in the frozen order that does not fit, and it never skips ahead to one that does, because that would be reordering. Reaching a page ceiling is PARTIAL, stays selected, and is recorded.
+
+| Item | Worst case |
+| --- | ---: |
+| OAuth token and one refresh | 2 |
+| Listing pages | 4 |
+| Contexts, 12 subjects with two gate retries each | 36 |
+| Event pages, 36 for the whole fight and 10 × 11 for the first 90 s | 146 |
+| Report revision after pagination, 12 fights | 12 |
+| **Total, against the hard cap of 60** | **200** |
+
+The ceilings: 36 pages is 360 s at 1,000 events a second, above every measured whole-fight rate (791) and 90-s rate (896); 10 pages at 90 s is 1,111 events a second. A normal run should spend less, and it still exceeds the cap unless fights are shared widely:
+
+- **With no sharing, at the measured pages:** 2 + 1 + 12 + 27 + 99 + 12 = 153.
+- **An illustration of sharing.** The first-qualifying rule over the retained M13-A listing, which is outside these intervals and carries no region, gives 6 distinct fights for 11 specializations, one with six subjects, and no Survival Hunter. At the measured pages that fight costs 34, and each other costs 11, so the cap stops the campaign after three captures, at 59 requests, with 8 of the 12 specializations served. This shows the shape and predicts nothing.
+
+Discipline comes first in the recorded order and costs the most. Moving it later could serve more specializations within the cap. That is a reordering to fit, so it is the owner's, and the plan keeps the recorded order.
+
+### Storage, under rule 8
+
+- **Raw.** `.probe/onb-ev/`, gitignored and never deleted: the request ledger, listing pages, contexts and event pages, with their digests. Real report codes stay here, as in M13-A.
+- **Provenance committed.** `tests/evidence/onb-ev-capture.md`, which no test reads: the plan's digest, every request, the selection, and each subject's identity under a pseudonym. Markdown is not counted against the line. No selection frame is committed: the one committed frame is 29,010 bytes, more than the room left, and the retained listing digest stands in for it.
+- **Capacity.** The archive holds 19,773,410 bytes. Without the M11-E2 (3,422,168) and M11-G2 (12,162,150) exceptions, 4,189,092 count against the 4,194,304 line, so **5,212 are left**.
+
+| What one subject or fight needs, by committed precedent | Bytes |
+| --- | ---: |
+| Rotational, first 90 s (Havoc) | 364,068 |
+| Healer, whole-fight casts (Restoration Druid dry run; Holy Priest) | 131,911 to 137,685 |
+| Fight context (M13-A; rXAf) | 86,164 to 387,275 |
+
+Eleven rotational subjects, one healer and, say, four contexts come to about 4.5 MB, and Discipline's Atonement families are unmeasured on top. **Not one of these fits.** So ONB-EV retains the raw captures, cuts nothing to fit, commits no fixture, and stops with OWNER_DECISION_REQUIRED and the measured proposal the grant asks for: the real bytes per subject, deduplication and compression considered, and the smallest justified limit. HEAL-B1P2's row belongs in that same proposal. A cap stop and a capacity stop are reported together, once.
+
+### What this does not do
+
+It makes no request, selects no fight, reads no candidate's outcome, commits no evidence, raises no line and promotes nothing. Capture alone resolves nothing for most of these specializations either, since their lists stop on inputs a subject cannot supply (`agent/follow-ups.md` "After ONB-A2" and the entries after it). The eligibility census and the page measurements read uncommitted retained captures, so they are not pinned by a test.

@@ -1,0 +1,367 @@
+{
+  "planVersion": 1,
+  "planRevision": "onb-ev-plan/1",
+  "acquisitionRuleId": "ONB_EV_V1",
+  "selectionRevision": "onb-ev-selection/1",
+  "frozenOn": "2026-11-07",
+  "status": "FROZEN",
+  "grant": "agent/autopilot-queue.md ONB-EV; agent/architecture.md \"Owner grant (2026-11-06): ONB-EV\"",
+  "specializations": [
+    {
+      "specId": "priest/discipline",
+      "wclClassName": "Priest",
+      "wclSpecName": "Discipline",
+      "scope": "FULL_RAID",
+      "includeResources": false,
+      "resources": [],
+      "evidenceCategories": [
+        "ACTORS",
+        "CASTS",
+        "AURAS",
+        "DAMAGE",
+        "HEALING",
+        "ABSORBS"
+      ],
+      "gate": "HEALER_GATE",
+      "evidenceWindow": {
+        "kind": "WHOLE_FIGHT",
+        "minFightDurationMs": 90000,
+        "maxFightDurationMs": 360000
+      },
+      "retainedEvidence": "Filtered M13-A casts of actor 9, and a two-second diagnostic page with combatant info for G2 cohort 246 fight 33 actor 88. No unfiltered capture and no whole-fight casts."
+    },
+    {
+      "specId": "rogue/subtlety",
+      "wclClassName": "Rogue",
+      "wclSpecName": "Subtlety",
+      "scope": "PLAYER_CONTEXT",
+      "includeResources": true,
+      "resources": [
+        "ENERGY",
+        "COMBO_POINTS"
+      ],
+      "evidenceCategories": [
+        "CASTS",
+        "RESOURCES",
+        "COMBATANT_INFO"
+      ],
+      "gate": "ROTATIONAL_GATES",
+      "evidenceWindow": {
+        "kind": "FIRST_MS",
+        "ms": 90000,
+        "minFightDurationMs": 90000
+      },
+      "retainedEvidence": "Filtered M13-A casts of actor 17, with no combatant info."
+    },
+    {
+      "specId": "warrior/fury",
+      "wclClassName": "Warrior",
+      "wclSpecName": "Fury",
+      "scope": "PLAYER_CONTEXT",
+      "includeResources": true,
+      "resources": [
+        "RAGE"
+      ],
+      "evidenceCategories": [
+        "CASTS",
+        "RESOURCES",
+        "COMBATANT_INFO"
+      ],
+      "gate": "ROTATIONAL_GATES",
+      "evidenceWindow": {
+        "kind": "FIRST_MS",
+        "ms": 90000,
+        "minFightDurationMs": 90000
+      },
+      "retainedEvidence": "Fight contexts only. No event of a Fury Warrior is retained."
+    },
+    {
+      "specId": "warrior/protection",
+      "wclClassName": "Warrior",
+      "wclSpecName": "Protection",
+      "scope": "PLAYER_CONTEXT",
+      "includeResources": true,
+      "resources": [
+        "RAGE"
+      ],
+      "evidenceCategories": [
+        "CASTS",
+        "RESOURCES",
+        "COMBATANT_INFO"
+      ],
+      "gate": "ROTATIONAL_GATES",
+      "evidenceWindow": {
+        "kind": "FIRST_MS",
+        "ms": 90000,
+        "minFightDurationMs": 90000
+      },
+      "retainedEvidence": "One fight context only. No event of a Protection Warrior is retained."
+    },
+    {
+      "specId": "shaman/enhancement",
+      "wclClassName": "Shaman",
+      "wclSpecName": "Enhancement",
+      "scope": "PLAYER_CONTEXT",
+      "includeResources": false,
+      "resources": [],
+      "evidenceCategories": [
+        "CASTS",
+        "COMBATANT_INFO"
+      ],
+      "gate": "ROTATIONAL_GATES",
+      "evidenceWindow": {
+        "kind": "FIRST_MS",
+        "ms": 90000,
+        "minFightDurationMs": 90000
+      },
+      "retainedEvidence": "Filtered M13-A casts of actor 7, with no combatant info."
+    },
+    {
+      "specId": "rogue/outlaw",
+      "wclClassName": "Rogue",
+      "wclSpecName": "Outlaw",
+      "scope": "PLAYER_CONTEXT",
+      "includeResources": true,
+      "resources": [
+        "ENERGY",
+        "COMBO_POINTS"
+      ],
+      "evidenceCategories": [
+        "CASTS",
+        "RESOURCES",
+        "COMBATANT_INFO"
+      ],
+      "gate": "ROTATIONAL_GATES",
+      "evidenceWindow": {
+        "kind": "FIRST_MS",
+        "ms": 90000,
+        "minFightDurationMs": 90000
+      },
+      "retainedEvidence": "Retained listing rows only. No event of an Outlaw Rogue is retained."
+    },
+    {
+      "specId": "druid/guardian",
+      "wclClassName": "Druid",
+      "wclSpecName": "Guardian",
+      "scope": "PLAYER_CONTEXT",
+      "includeResources": false,
+      "resources": [],
+      "evidenceCategories": [
+        "CASTS",
+        "COMBATANT_INFO"
+      ],
+      "gate": "ROTATIONAL_GATES",
+      "evidenceWindow": {
+        "kind": "FIRST_MS",
+        "ms": 90000,
+        "minFightDurationMs": 90000
+      },
+      "retainedEvidence": "A two-second diagnostic page with combatant info for G2 cohort 246 fight 33 actor 91, 7 events, and fight contexts. Not a subject."
+    },
+    {
+      "specId": "hunter/survival",
+      "wclClassName": "Hunter",
+      "wclSpecName": "Survival",
+      "scope": "PLAYER_CONTEXT",
+      "includeResources": false,
+      "resources": [],
+      "evidenceCategories": [
+        "CASTS",
+        "COMBATANT_INFO"
+      ],
+      "gate": "ROTATIONAL_GATES",
+      "evidenceWindow": {
+        "kind": "FIRST_MS",
+        "ms": 90000,
+        "minFightDurationMs": 90000
+      },
+      "retainedEvidence": "Retained listing rows only. No event of a Survival Hunter is retained."
+    },
+    {
+      "specId": "mage/frost",
+      "wclClassName": "Mage",
+      "wclSpecName": "Frost",
+      "scope": "PLAYER_CONTEXT",
+      "includeResources": false,
+      "resources": [],
+      "evidenceCategories": [
+        "CASTS",
+        "COMBATANT_INFO"
+      ],
+      "gate": "ROTATIONAL_GATES",
+      "evidenceWindow": {
+        "kind": "FIRST_MS",
+        "ms": 90000,
+        "minFightDurationMs": 90000
+      },
+      "retainedEvidence": "Filtered M13-A casts of actor 6, with no combatant info, and a two-second diagnostic page for G2 cohort 246 fight 33 actor 142."
+    },
+    {
+      "specId": "warlock/affliction",
+      "wclClassName": "Warlock",
+      "wclSpecName": "Affliction",
+      "scope": "PLAYER_CONTEXT",
+      "includeResources": false,
+      "resources": [],
+      "evidenceCategories": [
+        "CASTS",
+        "COMBATANT_INFO"
+      ],
+      "gate": "ROTATIONAL_GATES",
+      "evidenceWindow": {
+        "kind": "FIRST_MS",
+        "ms": 90000,
+        "minFightDurationMs": 90000
+      },
+      "retainedEvidence": "Filtered M13-A casts of actor 20, with no combatant info."
+    },
+    {
+      "specId": "hunter/marksmanship",
+      "wclClassName": "Hunter",
+      "wclSpecName": "Marksmanship",
+      "scope": "PLAYER_CONTEXT",
+      "includeResources": false,
+      "resources": [],
+      "evidenceCategories": [
+        "CASTS",
+        "COMBATANT_INFO"
+      ],
+      "gate": "ROTATIONAL_GATES",
+      "evidenceWindow": {
+        "kind": "FIRST_MS",
+        "ms": 90000,
+        "minFightDurationMs": 90000
+      },
+      "retainedEvidence": "Filtered M13-A casts of actors 14 and 18, with no combatant info."
+    },
+    {
+      "specId": "demonhunter/vengeance",
+      "wclClassName": "DemonHunter",
+      "wclSpecName": "Vengeance",
+      "scope": "PLAYER_CONTEXT",
+      "includeResources": true,
+      "resources": [
+        "FURY"
+      ],
+      "evidenceCategories": [
+        "CASTS",
+        "RESOURCES",
+        "COMBATANT_INFO"
+      ],
+      "gate": "ROTATIONAL_GATES",
+      "evidenceWindow": {
+        "kind": "FIRST_MS",
+        "ms": 90000,
+        "minFightDurationMs": 90000
+      },
+      "retainedEvidence": "Retained listing rows only. No event of a Vengeance Demon Hunter is retained."
+    }
+  ],
+  "removedSpecializations": [],
+  "provenIntervals": [
+    {
+      "region": "US",
+      "gameBuild": "12.1.0.69933",
+      "fromUtc": "2026-09-30T03:00:00.000Z",
+      "toUtc": "2026-10-12T04:18:14.000Z"
+    },
+    {
+      "region": "US",
+      "gameBuild": "12.1.0.69587",
+      "fromUtc": "2026-09-09T04:00:00.000Z",
+      "toUtc": "2026-09-12T06:45:21.000Z"
+    }
+  ],
+  "excludedProvenIntervals": [
+    {
+      "region": "US",
+      "gameBuild": "12.1.5.70575",
+      "reason": "The calendar proves it, and the SimC profile record does not list it, so the fallback would be BUILD_NOT_COVERED, and 12.1.5 is deferred (agent/architecture.md M11-G4-5). A fight on it could not be a truthful promotion subject."
+    }
+  ],
+  "discovery": {
+    "listing": "reportData.reports(zoneID, startTime, endTime, limit, page)",
+    "listingFields": [
+      "code",
+      "startTime",
+      "region.slug",
+      "zone.id",
+      "masterData.actors(type: Player) { id subType }",
+      "fights(killType: Encounters) { id encounterID difficulty startTime endTime friendlyPlayers friendlySpecs }"
+    ],
+    "pageSize": 100,
+    "zoneId": 53,
+    "region": "US",
+    "difficulties": [
+      4,
+      5
+    ],
+    "orderSalt": "onb-ev-v1",
+    "maxGateRetriesPerSpecialization": 2,
+    "listingSequence": [
+      {
+        "gameBuild": "12.1.0.69933",
+        "page": 1
+      },
+      {
+        "gameBuild": "12.1.0.69933",
+        "page": 2
+      },
+      {
+        "gameBuild": "12.1.0.69587",
+        "page": 1
+      },
+      {
+        "gameBuild": "12.1.0.69587",
+        "page": 2
+      }
+    ]
+  },
+  "capture": {
+    "contextQuery": "FIGHT_CONTEXT_QUERY",
+    "eventsQuery": "EVENTS_QUERY",
+    "dataType": "All",
+    "hostilityType": "OMITTED",
+    "actorFilter": "NONE",
+    "filterExpression": "NONE",
+    "revisionQuery": "REPORT_REVISION_QUERY",
+    "gateChecks": [
+      "report accessible",
+      "fight listed once",
+      "actor listed once in the fight and in master data as Player of the row's class",
+      "the row's specialization at the actor's friendlySpecs index",
+      "region US, and resolveSimulationContext RESOLVED on a build this plan names"
+    ]
+  },
+  "limits": {
+    "eventPageSize": 10000,
+    "prefixPageCeiling": 10,
+    "wholeFightPageCeiling": 36
+  },
+  "requestBudget": {
+    "hardCap": 60,
+    "tokenRequests": 2,
+    "listingPages": 4,
+    "contextRequests": 36,
+    "eventPages": 146,
+    "revisionRequests": 12,
+    "worstCaseTotal": 200,
+    "exceedsHardCap": true
+  },
+  "storage": {
+    "rawRoot": ".probe/onb-ev/",
+    "committedProvenance": "tests/evidence/onb-ev-capture.md",
+    "reportCodes": "pseudonymized in committed bytes, the real codes stay in the raw root's ledger",
+    "noticeLineBytes": 4194304,
+    "countedBytes": 4189092,
+    "bytesLeftUnderNoticeLine": 5212,
+    "measuredCommittedSliceBytes": {
+      "rotationalFirst90s": 364068,
+      "healerWholeFightCastsLow": 131911,
+      "healerWholeFightCastsHigh": 137685,
+      "fightContextLow": 86164,
+      "fightContextHigh": 387275
+    }
+  },
+  "planDigest": "48066f986e7035542bf81c0263f4cec0d9d70e0f3d892ab6eb7ed535e6fa0013"
+}

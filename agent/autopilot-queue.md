@@ -1350,6 +1350,8 @@ publicContract: NONE
 
 **Owner grant (2026-11-06): APPROVED with a hard campaign cap of 60 Warcraft Logs HTTP requests in total** (`agent/architecture.md` "Owner grant (2026-11-06): ONB-EV"). This entry acquires evidence and promotes nothing. It runs ONB-EV-PLAN's frozen plan.
 
+**The frozen plan (ONB-EV-PLAN).** `agent/onb-ev-plan.json`, digest `48066f986e7035542bf81c0263f4cec0d9d70e0f3d892ab6eb7ed535e6fa0013`, with its rule in `scripts/corpus/onb-ev-selection.mjs`, run as written. It removes no specialization. Its worst case exceeds the cap, and no fixture fits the archive's notice line, so expect both stops below.
+
 **Recorded specializations (12).** Discipline Priest, Subtlety Rogue, Fury Warrior, Protection Warrior, Enhancement Shaman, Outlaw Rogue, Guardian Druid, Survival Hunter, Frost Mage, Affliction Warlock, Marksmanship Hunter and Vengeance Demon Hunter. ONB-EV-PLAN removes any that no longer qualify. Restoration Druid and Preservation Evoker were removed earlier: their evidence is retained.
 
 **Acquisition rules.**
@@ -2465,11 +2467,13 @@ mergeSha: d134126c4fe30cc7dc75358dce376479f52f111d
 ### SIMC-FB-R: Replay the encounter-state-blocked specializations under the fallback
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: SIMC-FB-B
 branch: autopilot/simc-fb-r
 wcl: NONE
 publicContract: NONE
+pr: 101
+mergeSha: 56d62788af4d3c5e696c406602092af7adee2bff
 ```
 
 **Outcome.** All 26 INTERNAL_ONLY trees with a pinned list read the fallback and disclose it, and 50 of 76 `target_if` tokens are attested. No new decision resolves: 4 MATCH, 0 REJECTED and 8,542 UNKNOWN of 8,546, unchanged, and no tier-3 decision resolved on real evidence, so no public entry is added. Only 12 of 49 analyzed subjects have a provable build. It also fixes a SIMC-FB-A defect: an UNKNOWN placeholder blocked tier 3 (`agent/architecture.md` "SIMC-FB-R"; `agent/follow-ups.md` "After SIMC-FB-R").
@@ -2485,11 +2489,14 @@ Nothing is promoted here.
 ### ONB-EV-PLAN: Freeze the neutral evidence campaign plan
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: SIMC-FB-R
+branch: autopilot/onb-ev-plan
 wcl: NONE
 publicContract: NONE
 ```
+
+**Outcome.** The plan is `agent/onb-ev-plan.json`, digest `48066f986e7035542bf81c0263f4cec0d9d70e0f3d892ab6eb7ed535e6fa0013`. All twelve specializations stay. Its worst case is 200 requests against the cap of 60, and no fixture fits the 5,212 bytes left under the notice line, so ONB-EV will stop for the owner (`agent/architecture.md` "ONB-EV-PLAN"; `agent/follow-ups.md` "After ONB-EV-PLAN").
 
 **Direction.** Owner decision (2026-11-06), item 2, and the ONB-EV owner grant. Offline only: no Warcraft Logs request.
 

@@ -27,6 +27,17 @@ Decided in `agent/architecture.md` "Owner decision (2026-11-06): SimC profile fa
 - **The exit criterion is 100% PUBLIC.** A terminal BLOCKED no longer closes the program.
 - **POLB-CENSUS is still open,** and no longer holds up the fallback, ONB-EV or REM-CENSUS.
 
+## After ONB-EV-PLAN: what ONB-EV must do, and where it will stop
+
+**Raised:** ONB-EV-PLAN (2026-11-07). Offline. The argument and the numbers are in `agent/architecture.md` "ONB-EV-PLAN", and the plan is `agent/onb-ev-plan.json`.
+
+- **It will stop for the owner.** The worst case is 200 requests against the cap of 60, and no fixture fits the 5,212 bytes left under the notice line. So ONB-EV retains raw captures, commits provenance and no fixture, and reports both the cap and the measured capacity proposal once, with HEAL-B1P2's row in it.
+- **The owner's levers, none taken here.** Whether Discipline stays first, since it costs the most (reordering). Whether to raise the cap, and by how much (the report measures it). The archive allowance. Whether unfiltered capture is the right reading of the grant's "minimum": a filtered stream fits the cap and can never pass a gate, because the loader refuses it any coverage.
+- **ONB-EV writes its own runner,** under `.probe/onb-ev/`, on `selectSubjects`, `capturesOf` and `mayStartCapture`, with a counter at the fetch layer that refuses a 61st request. It sets the plan's `status` to `EXECUTED`, which ends the drift checks in `tests/unit/onb-ev-plan.test.ts`. Editing anything else in the plan after the first request is not allowed: the digest shows it.
+- **Replaying what it captures is REM-CENSUS's.** Evidence is the first gap of these twelve, and it is not the only one. The lists stop on inputs a subject cannot supply, so expect UNKNOWN. A capture must first check what synthetic builds assumed: talent ids, wire shapes and resource fields.
+- **If POLB-CENSUS is ever approved,** ONB-EV's reports must join its exclusion list, which is a new plan revision there, because an evaluated pull's report may not be a census source.
+- **Provable builds are also missing outside this list.** Devourer, Destruction, Balance, Shadow, Fire and Unholy have analyzable subjects and none provable ("After SIMC-FB-R"). They are not on the grant's list and adding them is the owner's. REM-CENSUS should weigh this when it records their blockers.
+
 ## After SIMC-FB-R: what the fallback did not move
 
 **Raised:** SIMC-FB-R (2026-11-07). Offline. The tables are in `agent/architecture.md` "SIMC-FB-R".
