@@ -15320,3 +15320,40 @@ No established position means nothing is read, as for `withEnemyCountAt`. With n
 ### What this does not do
 
 It wires no specialization (SIMC-FB-R), adds no public field or wording (SIMC-FB-B), and resolves no `target_if` line by itself. `cycle_targets` and `cycling_variable` keep their rules, even though one target would settle them. `enemies` (`sim->enemy_targets`) and `target.distance` are not answered. Mythic+ has no normalized signal, so a dungeon pull would read `fight_style.dungeonroute` as false under this profile, disclosed as profile-relative.
+
+## SIMC-FB-B — public disclosure of SimC-profile-relative evaluation, as built
+
+Autopilot queue entry SIMC-FB-B, carrying the "Public disclosure" clause of the owner decision above. An additive public contract change under `warcraft-logs-coach.analysis/1` and `warcraft-logs-coach.raid-night/1`: nothing is removed, renamed or re-meant. No specialization is wired, so no document a caller can receive today changes. No Warcraft Logs request.
+
+**The rule.** A decision evaluated with any tier-3 fact bound is SimC-profile-relative. It answers what the priority would select under the pinned profile, and it says nothing about what the real encounter held. Every other decision is an observed-fight evaluation, stated by the field's absence, so that those documents stay byte-identical.
+
+**Where it starts.** `ObservedDecisionRecord.simcProfileFacts`, the `EncounterStateResolution.profileFacts` of that decision, which a specialization's adapter spreads in with `simcProfileFactsField`. `src/findings/observed-decision-view.ts` restates the provenance as plain data and keeps its five exports and one import, so no projector imports the fallback. `src/findings/simc-profile-view.ts` reads counts and sources from the decisions, so a count cannot disagree with them. The reporting layer reads producers' types only, so `src/reporting/restatement.ts` holds its own count, and a test pins the two equal.
+
+**What each surface says.**
+
+| Surface | Field | Meaning |
+| --- | --- | --- |
+| Decision | `encounterState` | The facts bound, each with its atom, cited semantic and source |
+| Analyzed document | `simcProfileEvaluation` | `encounterStateObserved: false`, how many decisions (`coverage`), and `sources`: dataset, pin, build, profile path and hash, environment, cited engine statements. `findingEffect` is NONE for confidence, suppression and actionability |
+| TLDR and report coverage | `gameplay.simcProfileRelative`, disclosure `DECISIONS_EVALUATED_UNDER_SIMC_PROFILE` | How much rests on the profile. The sentence comes straight after the coverage sentence |
+| TLDR highlight | `encounterStateBasis`, `profileSelectedToken` | "Under the pinned SimC profile assumptions, the priority would select X here" |
+| Report entry | `stateEvidence: SIMC_PROFILE_RELATIVE`, `profileSelectedToken` | The same, in the markdown too |
+| Diagnosis statement | `findingsUnderSimcProfile` | Which of its findings were resolved so. They stay findings |
+| Raid-night cell | `simcProfileEvaluation` | Counts and sources. The cited statements stay in the fight's document |
+| Raid-night coverage and disclosure | `simcProfileRelative`, the same code | A part of the totals, never an addition |
+| Recurrence | `simcProfileRelativeRejectedPatterns` | See below |
+
+**Decisions for evidence quality.**
+
+- **`SIMC_PROFILE_RELATIVE` is its own state evidence,** between PROVEN and INCOMPLETE. Calling a modeled state PROVEN would state it as observed, and INCOMPLETE would refuse a result the owner decision keeps authority-backed. The enum widens by the additive precedent, since the value appears only in a document with such a decision. A carried entry cannot have it, because an UNKNOWN resolved nothing under the profile and stays INCOMPLETE.
+- **It ranks after every proven divergence, and is always LOW_PRIORITY.** M15-A orders by state evidence first, so this follows from the list order. A separate label basis keeps labels non-increasing down the rank.
+- **A proven and a profile-relative rejection never pool,** and two profile-relative rejections pool only with the same selected token, so a pattern has one sentence to say.
+- **A modeled rejection is not in `rejectedPatterns`.** That collection keeps its published meaning, on observed encounter state. A fourth optional collection carries these, on the rule that collections with different meanings never merge. `rejectedTotal` still counts them, because it counts outcomes, and `simcProfileRelative.rejected` says how many.
+
+**What it never does.** It states no enemy or target count as something that happened, and a test checks every sentence of the TLDR, the report and the night against a list of such claims. The profile's environment appears only inside `sources`, labelled as the profile's. Actionability does not move: a rejected decision stays `OBSERVED_EXECUTION_ONLY`. Comparison behavior has no input to any of it, and a test shows the diagnosis's state changes nothing about a decision's disclosure.
+
+**The label is on what was bound, not on what was read.** A decision whose scan never reached a bound atom is still labelled. This errs toward disclosure, since a false absence would state a modeled result as observed. Narrowing it would take a counterfactual evaluation, left to SIMC-FB-R if its measurements justify one.
+
+**Byte-identical.** Digests of the REST bytes of four documents, taken from `fd0892d` before any edit, are pinned in `tests/integration/simc-fb-b-public-disclosure.test.ts`: M5-A, M5-D2, an unsupported specialization and the mixed raid night.
+
+**Not done.** No specialization reads the fallback, so disclosure on a real tier-3 decision is unmeasured until SIMC-FB-R. The tests attach real facts from the committed record to real views, which proves the disclosure and no gameplay result. The tool descriptions gained one paragraph each, and they are the only text a caller of an unwired specialization can see change.

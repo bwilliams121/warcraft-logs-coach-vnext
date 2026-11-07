@@ -13,6 +13,9 @@
  *                  MATCH    -> AUTHORITY_CONSISTENT, state PROVEN
  *                  UNKNOWN  -> UNKNOWN, state INCOMPLETE, reason = the
  *                              decisive blocker class, else the basis
+ *   profile        REJECTED or MATCH with SimC profile facts -> state
+ *                  SIMC_PROFILE_RELATIVE, with the authority's token (SIMC-FB-B).
+ *                  UNKNOWN stays INCOMPLETE: nothing resolved under the profile.
  *   usability      OBSERVED_EXECUTION -> OBSERVED_EXECUTION_ONLY: the cast
  *                  that happened proves the OBSERVED ability usable, never
  *                  the authority's alternative, so no view record is ever
@@ -38,7 +41,7 @@
 
 import type { ConsumableStatusReport } from "../analysis/preparation/consumable-status.js";
 import { PREPARATION_CONSUMABLE_KINDS } from "../data/game/preparation-consumables.js";
-import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
+import type { ObservedDecisionRecord, ObservedDecisionView } from "../findings/observed-decision-view.js";
 import type {
   ActionabilityLevel,
   FindingDisposition,
@@ -63,6 +66,32 @@ const USABILITY_ACTIONABILITY: Readonly<Record<string, ActionabilityLevel>> = {
   OBSERVED_EXECUTION: "OBSERVED_EXECUTION_ONLY",
   NOT_ESTABLISHED: "NOT_EVALUATED",
 };
+
+const readsSimcProfile = (decision: ObservedDecisionRecord): boolean =>
+  (decision.simcProfileFacts?.length ?? 0) > 0;
+
+/** How many decisions of a view rest on the pinned SimC profile. Absent from a document when none do. */
+export interface SimcProfileRelativeCounts {
+  readonly decisions: number;
+  readonly match: number;
+  readonly rejected: number;
+  readonly unknown: number;
+}
+
+/** Read from the decisions, so it cannot disagree with them. Null when none read the profile. */
+export function simcProfileRelativeCountsOf(
+  decisions: readonly ObservedDecisionRecord[],
+): SimcProfileRelativeCounts | null {
+  const relative = decisions.filter(readsSimcProfile);
+  if (relative.length === 0) return null;
+  const count = (outcome: string) => relative.filter((decision) => decision.outcome === outcome).length;
+  return {
+    decisions: relative.length,
+    match: count("MATCH"),
+    rejected: count("REJECTED"),
+    unknown: count("UNKNOWN"),
+  };
+}
 
 export type FindingRestatement =
   | { readonly kind: "RESTATED"; readonly records: readonly ReportableFinding[] }
@@ -92,6 +121,7 @@ export function restateObservedDecisions(
     if (actionability === undefined)
       return { kind: "REFUSED", reason: "UNREVIEWED_USABILITY_PROVENANCE", position: decision.position };
     const reasonCode = mapped.disposition === "UNKNOWN" ? (decision.decisiveBlocker ?? decision.basis) : null;
+    const profileRelative = mapped.state === "PROVEN" && readsSimcProfile(decision);
     records.push({
       findingId: `${identity.specId}:decision:${String(decision.position)}`,
       producer: OBSERVED_DECISION_PRODUCER,
@@ -102,12 +132,13 @@ export function restateObservedDecisions(
       producerStatus: decision.outcome,
       reasonCode,
       suppressionReason: null,
-      stateEvidence: mapped.state,
+      stateEvidence: profileRelative ? "SIMC_PROFILE_RELATIVE" : mapped.state,
       actionability,
       fightTimeMs: decision.fightTimeMs,
       evidence: [decision.locator],
       aggregationKey: JSON.stringify([decision.outcome, decision.observedToken, reasonCode]),
       subjectToken: decision.observedToken,
+      ...(profileRelative ? { profileSelectedToken: decision.authorityToken } : {}),
     });
   }
   return { kind: "RESTATED", records };

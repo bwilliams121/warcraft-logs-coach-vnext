@@ -318,6 +318,7 @@ describe("the public contract stays transport-neutral and secret-free", () => {
     // M14-F: the diagnosis projection's TYPES (projected field for field).
     // M13-F: the support-observation view (shared vocabulary under src/findings).
     // HEAL-AP: the healer view and the healer finding shape's category types (same).
+    // SIMC-FB-B: the counts and sources of a view's SimC-profile-relative decisions (same).
     expect([...specifiers].sort()).toEqual([
       "../analysis/preparation/consumable-status.js",
       "../diagnosis/diagnosis.js",
@@ -325,6 +326,7 @@ describe("the public contract stays transport-neutral and secret-free", () => {
       "../findings/healer-finding.js",
       "../findings/healer-view.js",
       "../findings/observed-decision-view.js",
+      "../findings/simc-profile-view.js",
       "../findings/spec-id.js",
       "../findings/support-observation-view.js",
       "../services/result.js",

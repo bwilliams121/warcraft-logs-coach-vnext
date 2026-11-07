@@ -88,8 +88,12 @@ describe("the view's fields are exactly the public schema's", () => {
   });
 
   it("a decision record has the schema's decision keys, no more and no fewer", () => {
+    // SIMC-FB-B: `encounterState` is the schema's one optional key, projected from
+    // `simcProfileFacts` only on a decision that read the pinned profile. This one did not.
+    const { encounterState: _optional, ...required } = DecisionSchema.shape;
+    void _optional;
     for (const decision of view.decisions) {
-      expect(Object.keys(decision).sort()).toEqual(Object.keys(DecisionSchema.shape).sort());
+      expect(Object.keys(decision).sort()).toEqual(Object.keys(required).sort());
     }
   });
 

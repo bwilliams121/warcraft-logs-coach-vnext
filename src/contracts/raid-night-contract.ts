@@ -65,6 +65,7 @@ import {
   CapabilitySchema,
   PUBLIC_CONSUMABLE_UNKNOWN_CODES,
   PUBLIC_PREPARATION_NOT_ASSESSED_REASONS,
+  SimcProfileRelativeCountsSchema,
 } from "./analysis-contract.js";
 import {
   ANALYSIS_UNAVAILABLE_REASONS,
@@ -329,6 +330,34 @@ const cellIdentityFields = {
 export const AbsentCellSchema = z.object({ kind: z.literal("ABSENT"), ...cellIdentityFields }).strict();
 
 /**
+ * How much of a cell was evaluated under the pinned SimC profile, and from which
+ * profile (SIMC-FB-B). The per-decision facts and the cited engine statements are
+ * in the fight's own document (`analysisRef`). Absent means no decision read it.
+ */
+export const CellSimcProfileEvaluationSchema = z
+  .object({
+    basis: z.literal("SIMC_PROFILE_RELATIVE"),
+    encounterStateObserved: z.literal(false),
+    coverage: SimcProfileRelativeCountsSchema,
+    sources: z
+      .array(
+        z
+          .object({
+            datasetRevision: z.string().min(1),
+            simcCommit: z.string().min(1),
+            clientBuild: z.string().min(1),
+            environmentCommit: z.string().min(1),
+            aplAuthorityId: z.string().min(1),
+            profilePath: z.string().min(1),
+            profileSha256: z.string().min(1),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict();
+
+/**
  * A present, analyzed player.
  *
  * The only variant carrying counts — which is what makes the other three
@@ -345,6 +374,7 @@ export const AnalyzedCellSchema = z
     specName: z.string().nullable(),
     provenance: CellProvenanceSchema,
     counts: CellCountsSchema,
+    simcProfileEvaluation: CellSimcProfileEvaluationSchema.optional(),
     analysisRef: AnalysisRefSchema,
     preparation: CellPreparationSchema.optional(),
   })
@@ -490,6 +520,11 @@ export const PublicCoverageSummarySchema = z
     unknownTotal: z.number().int().nonnegative(),
     resolvedComparisonsTotal: z.number().int().nonnegative(),
     excludedCastCountTotal: z.number().int().nonnegative(),
+    /**
+     * SIMC-FB-B: how much of the totals above was evaluated under the pinned SimC
+     * profile. A part of them, never an addition. Absent means none.
+     */
+    simcProfileRelative: SimcProfileRelativeCountsSchema.optional(),
 
     fightsRequested: z.number().int().nonnegative(),
     fightsIncluded: z.number().int().nonnegative(),
@@ -545,6 +580,12 @@ export const PublicRecurrenceSummarySchema = z
     rejectedPatterns: z.array(PublicRecurrenceGroupSchema),
     evidenceLimitations: z.array(PublicRecurrenceGroupSchema),
     exclusionPatterns: z.array(PublicRecurrenceGroupSchema),
+    /**
+     * SIMC-FB-B: rejections read under the pinned SimC profile, whose encounter
+     * state is modeled. Kept out of `rejectedPatterns`, never summed with it, and
+     * absent when there are none.
+     */
+    simcProfileRelativeRejectedPatterns: z.array(PublicRecurrenceGroupSchema).optional(),
   })
   .strict();
 
@@ -653,6 +694,7 @@ export const PUBLIC_RAID_NIGHT_DISCLOSURES = [
   "FIGHTS_FAILED",
   "CONSUMABLE_COUNT_UNKNOWN",
   "PREPARATION_NOT_ASSESSED",
+  "DECISIONS_EVALUATED_UNDER_SIMC_PROFILE",
   "PER_FIGHT_PRESENTATION_NOT_INCLUDED",
 ] as const;
 

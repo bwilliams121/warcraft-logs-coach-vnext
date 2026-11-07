@@ -68,6 +68,8 @@ import {
   type ProfileEnvironment,
 } from "../simc/expression/profile-environment-atoms.js";
 import type { SpecAtomBinding, SpecAtomBindings } from "../simc/expression/spec-vocabulary.js";
+import type { ObservedDecisionRecord } from "./observed-decision-view.js";
+import type { SimcProfileFactRecord } from "./simc-profile-view.js";
 import {
   PRODUCTION_ENCOUNTER_STATE_SUPPLIER,
   type EncounterStateSupplier,
@@ -78,7 +80,16 @@ import { provenGameBuildOf } from "./proven-fight-build.js";
 export type EncounterStateTier =
   "OBSERVED_OR_PROVEN" | "CURATED" | "SIMC_PROFILE_FALLBACK" | "NOT_ESTABLISHED";
 
-export type SimcProfileFact = "ACTIVE_ENEMIES" | "TARGET_DOMAIN" | ProfileAtomFact;
+export const SIMC_PROFILE_FACTS = [
+  "ACTIVE_ENEMIES",
+  "TARGET_DOMAIN",
+  "FIGHT_STYLE",
+  "ADD_AND_PULL_SCHEDULE",
+  "OTHER_RAID_EVENT_SCHEDULE",
+  "SPELL_TARGETS",
+] as const satisfies readonly ("ACTIVE_ENEMIES" | "TARGET_DOMAIN" | ProfileAtomFact)[];
+
+export type SimcProfileFact = (typeof SIMC_PROFILE_FACTS)[number];
 
 /** Where one tier-3 binding came from. It names no Warcraft Logs source, because it has none. */
 export interface SimcProfileProvenance {
@@ -99,6 +110,10 @@ export interface SimcProfileProvenance {
   readonly environment: ProfileEnvironment;
   readonly semantic: SimcProfileSemantic;
 }
+
+/** Compile-time guard: the view's restatement holds every provenance field it publishes. */
+const _provenanceIsAFactRecord = (fact: SimcProfileProvenance): SimcProfileFactRecord => fact;
+void _provenanceIsAFactRecord;
 
 export type ProfileNotProvenReason =
   /** The fight's build is not proven by the deploy calendar. */
@@ -228,6 +243,17 @@ export interface EncounterStateResolution {
   readonly profileFacts: readonly SimcProfileProvenance[];
   /** Why the fallback was not read at all. `null` when it was. */
   readonly fallbackNotApplied: FallbackNotAppliedReason | null;
+}
+
+/**
+ * What a specialization's view adapter spreads into a decision record (SIMC-FB-B), so a tier-3 result
+ * is disclosed. Nothing when the fallback bound nothing, so a record is byte-identical to one that never
+ * read it.
+ */
+export function simcProfileFactsField(
+  resolution: Pick<EncounterStateResolution, "profileFacts">,
+): Pick<ObservedDecisionRecord, "simcProfileFacts"> {
+  return resolution.profileFacts.length === 0 ? {} : { simcProfileFacts: resolution.profileFacts };
 }
 
 const SEMANTIC_OF_FACT: Readonly<Record<SimcProfileFact, string>> = {

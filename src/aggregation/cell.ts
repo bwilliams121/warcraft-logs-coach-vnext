@@ -117,6 +117,38 @@ export interface CellRecurrence {
   readonly evidenceLimitations: readonly CellTally[];
   /** From casts the analyzer excluded. Coverage limits, not player faults. */
   readonly exclusionPatterns: readonly CellTally[];
+  /**
+   * SIMC-FB-B: REJECTED under the pinned SimC profile, kept out of `rejectedPatterns`
+   * so that collection keeps meaning "on observed encounter state". Their
+   * encounter state is modeled. Absent when there are none.
+   */
+  readonly simcProfileRelativeRejectedPatterns?: readonly CellTally[];
+}
+
+/**
+ * How much of an ANALYZED cell was evaluated under the pinned SimC profile, and
+ * from which profile (SIMC-FB-B). Counts from the view's decisions. The semantic
+ * citations stay in the single-fight document, like every other per-decision
+ * detail. Absent on a cell with no such decision.
+ */
+export interface SimcProfileRelativeCounts {
+  readonly decisions: number;
+  readonly match: number;
+  readonly rejected: number;
+  readonly unknown: number;
+}
+
+export interface CellSimcProfileEvaluation {
+  readonly counts: SimcProfileRelativeCounts;
+  readonly sources: readonly {
+    readonly datasetRevision: string;
+    readonly simcCommit: string;
+    readonly clientBuild: string;
+    readonly environmentCommit: string;
+    readonly aplAuthorityId: string;
+    readonly profilePath: string;
+    readonly profileSha256: string;
+  }[];
 }
 
 /**
@@ -263,6 +295,7 @@ export type PlayerFightResult =
       readonly provenance: CellAnalysisProvenance;
       readonly counts: CellCounts;
       readonly recurrence: CellRecurrence;
+      readonly simcProfileEvaluation?: CellSimcProfileEvaluation;
       /** Consumable status (PREP-3), specialization-independent. */
       readonly preparation: CellPreparation;
     } & CellIdentity)

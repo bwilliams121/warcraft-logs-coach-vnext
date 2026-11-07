@@ -30,6 +30,16 @@
  *
  * `MATCH` MEANS AUTHORITY-COMPATIBLE ONLY, HERE AS EVERYWHERE. A view carries
  * no correctness vocabulary and no score.
+ *
+ * WHERE A DECISION'S ENCOUNTER STATE CAME FROM (SIMC-FB-B). A record's
+ * `simcProfileFacts` are the tier-3 facts bound when it was evaluated
+ * (`EncounterStateResolution.profileFacts`). Non-empty means the decision is
+ * SimC-profile-relative: it answers "under the pinned profile, what would the
+ * priority select here?", and says nothing about what the real encounter held.
+ * Absent means no tier-3 fact was bound, so nothing about it rests on the
+ * profile. The label is on what was bound, not on which lines the scan read, so
+ * it can over-disclose and cannot under-disclose. A specialization that reads
+ * the fallback must carry its facts here; a guard test pins that.
  */
 
 import type { EvidenceLocator } from "../engine/evidence/locator.js";
@@ -51,6 +61,44 @@ export interface ObservedDecisionRecord {
   readonly selectionPrecision: string | null;
   readonly decisiveBlocker: string | null;
   readonly usabilityProvenance: string;
+  /** See the header. Absent on every decision of a list that does not read the fallback. */
+  readonly simcProfileFacts?: readonly SimcProfileFactRecord[];
+}
+
+/** One engine statement a tier-3 fact rests on, as the pinned record cites it. */
+interface SimcProfileSemanticRecord {
+  readonly semanticId: string;
+  readonly sourcePath: string;
+  readonly sourceSha256: string;
+  readonly startLine: number;
+  readonly endLine: number;
+  readonly excerptSha256: string;
+}
+
+/**
+ * One tier-3 binding, restated as plain data. `SimcProfileProvenance` is
+ * assignable to it (checked where that type is declared), so this module still
+ * imports nothing but the locator, and the projectors stay free of the fallback.
+ */
+interface SimcProfileFactRecord {
+  readonly category: "SIMC_PROFILE_FALLBACK";
+  readonly fact: string;
+  readonly atomKey: string | null;
+  readonly datasetId: string;
+  readonly datasetRevision: string;
+  readonly simcCommit: string;
+  readonly clientBuild: string;
+  readonly environmentCommit: string;
+  readonly aplAuthorityId: string;
+  readonly profilePath: string;
+  readonly profileSha256: string;
+  readonly environment: {
+    readonly fightStyle: string;
+    readonly targetCount: number;
+    readonly raidEventCount: number;
+    readonly distanceTargetingEnabled: boolean;
+  };
+  readonly semantic: SimcProfileSemanticRecord;
 }
 
 export interface ExcludedCastRecord {

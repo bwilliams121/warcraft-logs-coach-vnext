@@ -29,6 +29,15 @@
  *   NO_AUTHORITY_DIVERGENCE_IN_ANALYZED_DECISIONS resolved decisions exist and
  *                                               none diverged; about them only
  *
+ * A DECISION READ UNDER THE PINNED SIMC PROFILE (SIMC-FB-B)
+ *
+ * Its encounter state is the profile's model, so its sentences say "under the
+ * pinned SimC profile assumptions, the priority would select X here", in the
+ * structure as well (`encounterStateBasis`, `gameplay.simcProfileRelative`, the
+ * DECISIONS_EVALUATED_UNDER_SIMC_PROFILE disclosure). They never state an
+ * enemy or target count as something that happened. A document with no such
+ * decision gains nothing: no key, no code, no sentence.
+ *
  * WHAT IT NEVER DOES
  *
  * - UNKNOWN never becomes certainty: unknown decisions are counted and
@@ -63,7 +72,12 @@ import {
   type ReportingCategory,
 } from "./finding-record.js";
 import { prioritizeFindings, type DivergenceStanding, type RankedItem } from "./prioritization.js";
-import { restateConsumableStatus, restateObservedDecisions } from "./restatement.js";
+import {
+  restateConsumableStatus,
+  restateObservedDecisions,
+  simcProfileRelativeCountsOf,
+  type SimcProfileRelativeCounts,
+} from "./restatement.js";
 
 export const TLDR_REVISION = "fight-tldr/1" as const;
 export const TLDR_CONFIG_REVISION = "fight-tldr-config/1" as const;
@@ -117,6 +131,7 @@ export const TLDR_DISCLOSURES = [
   "CONSUMABLE_COUNT_UNKNOWN",
   "PREPARATION_NOT_ASSESSED",
   "DAMAGE_DIAGNOSIS_NOT_ASSESSED",
+  "DECISIONS_EVALUATED_UNDER_SIMC_PROFILE",
   "SUPPORT_OBSERVATIONS_NOT_SUMMARIZED",
   "RAID_COOLDOWN_PLAN_NOT_EVALUATED",
   "HEALER_FINDINGS_NOT_SUMMARIZED",
@@ -210,6 +225,10 @@ export interface TldrHighlight {
   readonly category: ReportingCategory;
   readonly standing: DivergenceStanding;
   readonly subjectToken: string | null;
+  /** Present only on an item resolved under the pinned SimC profile. */
+  readonly encounterStateBasis?: "SIMC_PROFILE_RELATIVE";
+  /** With `encounterStateBasis`: the token selected under the profile, or null. */
+  readonly profileSelectedToken?: string | null;
   readonly occurrences: number;
   readonly firstFightTimeMs: number | null;
   readonly lastFightTimeMs: number | null;
@@ -227,6 +246,8 @@ export type TldrGameplay =
       readonly resolvedDecisions: number;
       readonly unknownDecisions: number;
       readonly excludedCasts: number;
+      /** How much of the above was evaluated under the pinned SimC profile. Absent means none. */
+      readonly simcProfileRelative?: SimcProfileRelativeCounts | undefined;
     }
   | { readonly status: Exclude<TldrGameplayStatus, "ANALYZED"> };
 
@@ -324,6 +345,28 @@ export const STANDING_SENTENCES: Readonly<Record<DivergenceStanding, string>> = 
   DIVERGENCE_ACTIONABILITY_NOT_ESTABLISHED: "Whether any alternative was possible was not established.",
 };
 
+/** How many decisions rest on the profile. States a model's use, never what the fight held. */
+export function simcProfileCoverageSentence(counts: SimcProfileRelativeCounts): string {
+  return (
+    `${plural(counts.decisions, "eligible observed decision was", "eligible observed decisions were")} evaluated under the pinned SimC profile assumptions ` +
+    `(${String(counts.match)} MATCH, ${String(counts.rejected)} REJECTED, ${String(counts.unknown)} UNKNOWN). ` +
+    "Their encounter state is the profile's model, not something this fight was observed to hold."
+  );
+}
+
+/** "Under the pinned SimC profile assumptions, the priority would select X here", in substance. */
+export function simcProfileSelection(
+  disposition: "AUTHORITY_DIVERGENCE" | "AUTHORITY_CONSISTENT",
+  token: string | null,
+): string {
+  const lead = "under the pinned SimC profile assumptions, the priority would";
+  if (disposition === "AUTHORITY_CONSISTENT")
+    return token === null ? `${lead} select the observed action here` : `${lead} select ${token} here`;
+  return token === null
+    ? `${lead} not select the observed action here`
+    : `${lead} select ${token} here, not the observed action`;
+}
+
 export const consumableText = (consumable: TldrConsumable): string =>
   consumable.countState === "OBSERVED" ? String(consumable.count) : "UNKNOWN (not zero)";
 
@@ -348,6 +391,8 @@ export type RestatedFight =
 export function restateFight(input: TldrInput): RestatedFight {
   const records: ReportableFinding[] = [];
   const { gameplay } = input;
+  const profileCounts =
+    gameplay.status === "ANALYZED" ? simcProfileRelativeCountsOf(gameplay.view.decisions) : null;
   if (gameplay.status === "ANALYZED") {
     const restated = restateObservedDecisions(gameplay.view, {
       specId: gameplay.specId,
@@ -388,6 +433,7 @@ export function restateFight(input: TldrInput): RestatedFight {
               resolvedDecisions: gameplay.view.coverage.resolvedComparisons,
               unknownDecisions: gameplay.view.coverage.unknown,
               excludedCasts: gameplay.view.coverage.excludedCastCount,
+              ...(profileCounts === null ? {} : { simcProfileRelative: profileCounts }),
             }
           : { status: gameplay.status },
       preparation:
@@ -432,6 +478,7 @@ export function coverageDisclosures(
     held.add("ONLY_OBSERVED_DECISIONS_VERIFIED");
     if (coverage.unknownDecisions > 0) held.add("DECISIONS_UNKNOWN");
     if (coverage.excludedCasts > 0) held.add("CASTS_EXCLUDED");
+    if (coverage.simcProfileRelative !== undefined) held.add("DECISIONS_EVALUATED_UNDER_SIMC_PROFILE");
   }
   if (prioritized.some((item) => item.standing !== "ACTIONABLE_AUTHORITY_DIVERGENCE"))
     held.add("DIVERGENCE_ACTIONABILITY_UNPROVEN");
@@ -470,6 +517,12 @@ export function summarizeFindings(
     category: item.category,
     standing: item.standing,
     subjectToken: item.subjectToken,
+    ...(item.stateEvidence === "SIMC_PROFILE_RELATIVE"
+      ? {
+          encounterStateBasis: "SIMC_PROFILE_RELATIVE" as const,
+          profileSelectedToken: item.profileSelectedToken ?? null,
+        }
+      : {}),
     occurrences: item.occurrences,
     firstFightTimeMs: item.firstFightTimeMs,
     lastFightTimeMs: item.lastFightTimeMs,
@@ -524,19 +577,31 @@ export function summarizeFindings(
           : "") +
         ". Only observed decisions were verified, not moments of inaction.",
     );
+  if (coverage.status === "ANALYZED" && coverage.simcProfileRelative !== undefined)
+    lines.push(simcProfileCoverageSentence(coverage.simcProfileRelative));
   if (headline === "NO_DECISION_RESOLVED")
     lines.push("No observed decision could be resolved, so nothing is claimed about rotational play.");
   if (headline === "NO_AUTHORITY_DIVERGENCE_IN_ANALYZED_DECISIONS")
     lines.push(
       "No resolved decision diverged from the authority. This describes the resolved decisions only, not the whole fight.",
     );
-  if (headline === "AUTHORITY_DIVERGENCES_IN_ANALYZED_DECISIONS")
-    lines.push(
-      `The authority rejected ${plural(divergences.records, "observed decision", "observed decisions")} in the proven state, in ${plural(divergences.items, "item", "items")}.`,
-    );
+  if (headline === "AUTHORITY_DIVERGENCES_IN_ANALYZED_DECISIONS") {
+    const profileItems = prioritized.filter((item) => item.stateEvidence === "SIMC_PROFILE_RELATIVE");
+    const profileRecords = profileItems.reduce((sum, item) => sum + item.occurrences, 0);
+    if (profileItems.length < prioritized.length)
+      lines.push(
+        `The authority rejected ${plural(divergences.records - profileRecords, "observed decision", "observed decisions")} in the proven state, in ${plural(divergences.items - profileItems.length, "item", "items")}.`,
+      );
+    if (profileItems.length > 0)
+      lines.push(
+        `Under the pinned SimC profile assumptions, the priority would not select ${plural(profileRecords, "observed decision", "observed decisions")}, in ${plural(profileItems.length, "item", "items")}.`,
+      );
+  }
   for (const highlight of highlights)
     lines.push(
-      `#${String(highlight.position)} ${highlight.subjectToken ?? highlight.category}: ${plural(highlight.occurrences, "decision", "decisions")} the authority rejected${highlight.itemKind === "PATTERN" ? " (pattern)" : ""}, ${spanOf(highlight)}. ${STANDING_SENTENCES[highlight.standing]}`,
+      highlight.encounterStateBasis === undefined
+        ? `#${String(highlight.position)} ${highlight.subjectToken ?? highlight.category}: ${plural(highlight.occurrences, "decision", "decisions")} the authority rejected${highlight.itemKind === "PATTERN" ? " (pattern)" : ""}, ${spanOf(highlight)}. ${STANDING_SENTENCES[highlight.standing]}`
+        : `#${String(highlight.position)} ${highlight.subjectToken ?? highlight.category}: ${simcProfileSelection("AUTHORITY_DIVERGENCE", highlight.profileSelectedToken ?? null)}, in ${plural(highlight.occurrences, "decision", "decisions")}${highlight.itemKind === "PATTERN" ? " (pattern)" : ""}, ${spanOf(highlight)}. ${STANDING_SENTENCES[highlight.standing]}`,
     );
   if (divergences.notListedItems > 0)
     lines.push(

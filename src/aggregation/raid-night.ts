@@ -45,7 +45,7 @@
 import type { RevisionCheck } from "../wcl/report-revision.js";
 import { participationFor, playerKeyOf } from "../wcl/roster-snapshot.js";
 import type { ReportRosterSnapshot, RosterParticipation } from "../wcl/roster-snapshot.js";
-import type { PlayerFightResult } from "./cell.js";
+import type { PlayerFightResult, SimcProfileRelativeCounts } from "./cell.js";
 
 // ---------------------------------------------------------------------------
 // Fight processing and batch failures
@@ -180,6 +180,11 @@ export interface CoverageSummary {
   readonly unknownTotal: number;
   readonly resolvedComparisonsTotal: number;
   readonly excludedCastCountTotal: number;
+  /**
+   * SIMC-FB-B: how much of the totals above was evaluated under the pinned SimC
+   * profile. A part of them, never an addition. Absent means none.
+   */
+  readonly simcProfileRelative?: SimcProfileRelativeCounts;
 
   readonly fightsRequested: number;
   readonly fightsIncluded: number;
@@ -232,6 +237,11 @@ export interface RecurrenceSummary {
   readonly rejectedPatterns: readonly RecurrenceGroup[];
   readonly evidenceLimitations: readonly RecurrenceGroup[];
   readonly exclusionPatterns: readonly RecurrenceGroup[];
+  /**
+   * SIMC-FB-B: rejections read under the pinned SimC profile, whose encounter
+   * state is modeled. Never summed with `rejectedPatterns`. Absent when none.
+   */
+  readonly simcProfileRelativeRejectedPatterns?: readonly RecurrenceGroup[];
 }
 
 // ---------------------------------------------------------------------------

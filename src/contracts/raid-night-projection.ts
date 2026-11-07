@@ -31,6 +31,8 @@ import type {
   CellConsumableStatus,
   CellCounts,
   CellPreparation,
+  CellSimcProfileEvaluation,
+  SimcProfileRelativeCounts,
   PlayerFightResult,
 } from "../aggregation/cell.js";
 import type {
@@ -86,6 +88,32 @@ function projectCounts(counts: CellCounts): PublicCellCounts {
     unknownBases: projectTallies(counts.unknownBases),
     unknownBlockerClasses: projectTallies(counts.unknownBlockerClasses),
     exclusions: projectTallies(counts.exclusions),
+  };
+}
+
+function projectProfileCounts(counts: SimcProfileRelativeCounts) {
+  return {
+    decisions: counts.decisions,
+    match: counts.match,
+    rejected: counts.rejected,
+    unknown: counts.unknown,
+  };
+}
+
+function projectCellSimcProfile(evaluation: CellSimcProfileEvaluation) {
+  return {
+    basis: "SIMC_PROFILE_RELATIVE" as const,
+    encounterStateObserved: false as const,
+    coverage: projectProfileCounts(evaluation.counts),
+    sources: evaluation.sources.map((source) => ({
+      datasetRevision: source.datasetRevision,
+      simcCommit: source.simcCommit,
+      clientBuild: source.clientBuild,
+      environmentCommit: source.environmentCommit,
+      aplAuthorityId: source.aplAuthorityId,
+      profilePath: source.profilePath,
+      profileSha256: source.profileSha256,
+    })),
   };
 }
 
@@ -176,6 +204,9 @@ export function projectCell(reportCode: string, cell: PlayerFightResult): Public
         specName: cell.specName,
         provenance: projectProvenance(cell.provenance),
         counts: projectCounts(cell.counts),
+        ...(cell.simcProfileEvaluation === undefined
+          ? {}
+          : { simcProfileEvaluation: projectCellSimcProfile(cell.simcProfileEvaluation) }),
         analysisRef: analysisRefFor(reportCode, cell),
         preparation: projectCellPreparation(cell.preparation),
         // `cell.recurrence` is NOT projected. Its patterns are already summed
@@ -255,6 +286,9 @@ function projectCoverage(coverage: CoverageSummary): PublicCoverageSummary {
     unknownTotal: coverage.unknownTotal,
     resolvedComparisonsTotal: coverage.resolvedComparisonsTotal,
     excludedCastCountTotal: coverage.excludedCastCountTotal,
+    ...(coverage.simcProfileRelative === undefined
+      ? {}
+      : { simcProfileRelative: projectProfileCounts(coverage.simcProfileRelative) }),
     fightsRequested: coverage.fightsRequested,
     fightsIncluded: coverage.fightsIncluded,
     fightsMissing: coverage.fightsMissing,
@@ -287,6 +321,12 @@ export function projectRecurrence(recurrence: RecurrenceSummary) {
     rejectedPatterns: recurrence.rejectedPatterns.map(projectRecurrenceGroup),
     evidenceLimitations: recurrence.evidenceLimitations.map(projectRecurrenceGroup),
     exclusionPatterns: recurrence.exclusionPatterns.map(projectRecurrenceGroup),
+    ...(recurrence.simcProfileRelativeRejectedPatterns === undefined
+      ? {}
+      : {
+          simcProfileRelativeRejectedPatterns:
+            recurrence.simcProfileRelativeRejectedPatterns.map(projectRecurrenceGroup),
+        }),
   };
 }
 

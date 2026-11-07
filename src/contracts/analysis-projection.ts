@@ -53,6 +53,12 @@ import {
   type HealerViewOutcome,
 } from "../findings/healer-view.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
+import {
+  SIMC_PROFILE_EVALUATION_REVISION,
+  simcProfileRelativeCountsOf,
+  simcProfileSourcesOf,
+  type SimcProfileRelativeCounts,
+} from "../findings/simc-profile-view.js";
 import { requirePublicSpecId } from "../findings/spec-id.js";
 import {
   SUPPORT_OBSERVATIONS_REVISION,
@@ -113,6 +119,15 @@ interface ProjectedDecision {
   readonly selectionPrecision: string | null;
   readonly decisiveBlocker: string | null;
   readonly usabilityProvenance: string;
+  readonly encounterState?: {
+    readonly basis: "SIMC_PROFILE_RELATIVE";
+    readonly facts: readonly {
+      readonly fact: string;
+      readonly atomKey: string | null;
+      readonly semanticId: string;
+      readonly sourceIndex: number;
+    }[];
+  };
 }
 
 interface ProjectedExclusion {
@@ -723,6 +738,9 @@ function projectDiagnosis(outcome: DiagnosisOutcome) {
       ...projectPair(statement),
       direction: statement.direction,
       findings: statement.findings.map(projectLocator),
+      ...(statement.findingsUnderSimcProfile === undefined
+        ? {}
+        : { findingsUnderSimcProfile: statement.findingsUnderSimcProfile.map(projectLocator) }),
       environmentalContext: statement.environmentalContext.map((entry) => ({
         itemId: entry.itemId,
         reason: entry.reason,
@@ -780,6 +798,15 @@ function projectTldrConsumable(consumable: TldrConsumableOutcome) {
 
 type TldrAssessedOutcome = Extract<TldrOutcome, { assessment: "ASSESSED" }>;
 
+function projectProfileCounts(counts: SimcProfileRelativeCounts) {
+  return {
+    decisions: counts.decisions,
+    match: counts.match,
+    rejected: counts.rejected,
+    unknown: counts.unknown,
+  };
+}
+
 function projectTldrGameplay(gameplay: TldrAssessedOutcome["gameplay"]) {
   return gameplay.status === "ANALYZED"
     ? {
@@ -788,6 +815,9 @@ function projectTldrGameplay(gameplay: TldrAssessedOutcome["gameplay"]) {
         resolvedDecisions: gameplay.resolvedDecisions,
         unknownDecisions: gameplay.unknownDecisions,
         excludedCasts: gameplay.excludedCasts,
+        ...(gameplay.simcProfileRelative === undefined
+          ? {}
+          : { simcProfileRelative: projectProfileCounts(gameplay.simcProfileRelative) }),
       }
     : { status: gameplay.status };
 }
@@ -827,6 +857,12 @@ function projectTldr(tldr: TldrOutcome) {
       category: highlight.category,
       standing: highlight.standing,
       subjectToken: highlight.subjectToken,
+      ...(highlight.encounterStateBasis === undefined
+        ? {}
+        : {
+            encounterStateBasis: highlight.encounterStateBasis,
+            profileSelectedToken: highlight.profileSelectedToken ?? null,
+          }),
       occurrences: highlight.occurrences,
       firstFightTimeMs: highlight.firstFightTimeMs,
       lastFightTimeMs: highlight.lastFightTimeMs,
@@ -875,6 +911,7 @@ function projectReportEntry(entry: ReportEntryOutcome) {
     reasonCode: entry.reasonCode,
     suppressionReason: entry.suppressionReason,
     subjectToken: entry.subjectToken,
+    ...(entry.profileSelectedToken === undefined ? {} : { profileSelectedToken: entry.profileSelectedToken }),
     occurrences: entry.occurrences,
     firstFightTimeMs: entry.firstFightTimeMs,
     lastFightTimeMs: entry.lastFightTimeMs,
@@ -973,6 +1010,7 @@ function projectCommon(analysis: FightAnalysis) {
  * that built it; see `src/specs/rogue/assassination/registration.ts`.
  */
 function projectDecisions(view: ObservedDecisionView): readonly ProjectedDecision[] {
+  const { sourceIndexOf } = simcProfileSourcesOf(view.decisions);
   return view.decisions.map((decision) => ({
     locator: projectLocator(decision.locator),
     position: decision.position,
@@ -987,7 +1025,63 @@ function projectDecisions(view: ObservedDecisionView): readonly ProjectedDecisio
     selectionPrecision: decision.selectionPrecision,
     decisiveBlocker: decision.decisiveBlocker,
     usabilityProvenance: decision.usabilityProvenance,
+    ...((decision.simcProfileFacts?.length ?? 0) === 0
+      ? {}
+      : {
+          encounterState: {
+            basis: "SIMC_PROFILE_RELATIVE" as const,
+            facts: (decision.simcProfileFacts ?? []).map((fact) => ({
+              fact: fact.fact,
+              atomKey: fact.atomKey,
+              semanticId: fact.semantic.semanticId,
+              sourceIndex: sourceIndexOf(fact),
+            })),
+          },
+        }),
   }));
+}
+
+/**
+ * The document's SimC-profile block (SIMC-FB-B), read from the decisions so it
+ * cannot disagree with them. Nothing at all when no decision read the profile.
+ */
+function projectSimcProfileEvaluation(view: ObservedDecisionView) {
+  const counts = simcProfileRelativeCountsOf(view.decisions);
+  if (counts === null) return {};
+  return {
+    simcProfileEvaluation: {
+      revision: SIMC_PROFILE_EVALUATION_REVISION,
+      basis: "SIMC_PROFILE_RELATIVE",
+      encounterStateObserved: false,
+      coverage: projectProfileCounts(counts),
+      sources: simcProfileSourcesOf(view.decisions).sources.map((source) => ({
+        category: source.category,
+        datasetId: source.datasetId,
+        datasetRevision: source.datasetRevision,
+        simcCommit: source.simcCommit,
+        clientBuild: source.clientBuild,
+        environmentCommit: source.environmentCommit,
+        aplAuthorityId: source.aplAuthorityId,
+        profilePath: source.profilePath,
+        profileSha256: source.profileSha256,
+        environment: {
+          fightStyle: source.environment.fightStyle,
+          targetCount: source.environment.targetCount,
+          raidEventCount: source.environment.raidEventCount,
+          distanceTargetingEnabled: source.environment.distanceTargetingEnabled,
+        },
+        semantics: source.semantics.map((semantic) => ({
+          semanticId: semantic.semanticId,
+          sourcePath: semantic.sourcePath,
+          sourceSha256: semantic.sourceSha256,
+          startLine: semantic.startLine,
+          endLine: semantic.endLine,
+          excerptSha256: semantic.excerptSha256,
+        })),
+      })),
+      findingEffect: { confidence: "NONE", suppression: "NONE", actionability: "NONE" },
+    },
+  } as const;
 }
 
 function projectExclusions(view: ObservedDecisionView): readonly ProjectedExclusion[] {
@@ -1073,6 +1167,7 @@ export function projectAnalysisResult(analysis: FightAnalysis): PublicAnalysisRe
         // Only when the service ran the diagnosis projection (M14-F); the
         // single-fight service always does on ANALYZED.
         ...(analysis.diagnosis === undefined ? {} : { diagnosis: projectDiagnosis(analysis.diagnosis) }),
+        ...projectSimcProfileEvaluation(view),
       });
     }
 

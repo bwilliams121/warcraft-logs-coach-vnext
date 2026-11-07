@@ -34,6 +34,11 @@
  * (actionability, and for a divergence its standing), when (fight-time span)
  * and where (evidence locators into the published result).
  *
+ * An entry whose `stateEvidence` is SIMC_PROFILE_RELATIVE (SIMC-FB-B) reads
+ * "under the pinned SimC profile assumptions, the priority would select X here",
+ * and the coverage section says how many decisions rest on the profile. No
+ * sentence states an enemy or target count as something that happened.
+ *
  * WHAT IT NEVER DOES
  *
  * - UNKNOWN never becomes certainty and SUPPRESSED never becomes failure:
@@ -69,6 +74,8 @@ import {
   coverageDisclosures,
   plural,
   restateFight,
+  simcProfileCoverageSentence,
+  simcProfileSelection,
   STANDING_SENTENCES,
   TLDR_DISCLOSURES,
   UNSUMMARIZED_DISCLOSURE_ORDER,
@@ -118,6 +125,8 @@ export interface ReportEntry {
   readonly reasonCode: string | null;
   readonly suppressionReason: SuppressionReason | null;
   readonly subjectToken: string | null;
+  /** SIMC_PROFILE_RELATIVE state only: the token selected under the profile, or null. */
+  readonly profileSelectedToken?: string | null | undefined;
   readonly occurrences: number;
   readonly firstFightTimeMs: number | null;
   readonly lastFightTimeMs: number | null;
@@ -195,6 +204,7 @@ function entryOf(item: ReportItem, position: number | null): ReportEntry {
     reasonCode: item.reasonCode,
     suppressionReason: item.suppressionReason,
     subjectToken: item.subjectToken,
+    ...(item.profileSelectedToken === undefined ? {} : { profileSelectedToken: item.profileSelectedToken }),
     occurrences: item.occurrences,
     firstFightTimeMs: item.firstFightTimeMs,
     lastFightTimeMs: item.lastFightTimeMs,
@@ -306,6 +316,19 @@ const DISPOSITION_PHRASES: Readonly<Record<FindingDisposition, string>> = {
   UNSUPPORTED: "the analyzer does not support this decision; nothing is claimed",
 };
 
+/** What an entry concluded. A profile-relative result says so, and never reads as observed. */
+function dispositionPhrase(entry: ReportEntry): string {
+  if (entry.stateEvidence === "SIMC_PROFILE_RELATIVE") {
+    const token = entry.profileSelectedToken ?? null;
+    const selected = token === null ? null : code(token);
+    if (entry.disposition === "AUTHORITY_DIVERGENCE")
+      return `${simcProfileSelection(entry.disposition, selected)}; the encounter state is modeled, not observed`;
+    if (entry.disposition === "AUTHORITY_CONSISTENT")
+      return `${simcProfileSelection(entry.disposition, selected)}; compatible only, not an endorsement, and the encounter state is modeled, not observed`;
+  }
+  return DISPOSITION_PHRASES[entry.disposition];
+}
+
 function evidenceText(evidence: readonly EvidenceLocator[]): string {
   const first = evidence[0];
   if (first === undefined) return "Evidence: none located.";
@@ -320,7 +343,7 @@ function entryLines(entry: ReportEntry): string[] {
   const head =
     `${entry.position === null ? "-" : `${String(entry.position)}.`} **${subject}**: ` +
     `${plural(entry.occurrences, "occurrence", "occurrences")}${entry.itemKind === "PATTERN" ? " (pattern)" : ""}, ${spanOf(entry)}; ` +
-    `${code(entry.disposition)}, ${DISPOSITION_PHRASES[entry.disposition]}.`;
+    `${code(entry.disposition)}, ${dispositionPhrase(entry)}.`;
   const why =
     `Why: producer ${code(entry.producer)}, authority ${code(entry.authority)}, state evidence ${code(entry.stateEvidence)}` +
     (entry.reasonCode === null ? "" : `, reason ${code(entry.reasonCode)}`) +
@@ -382,6 +405,9 @@ export function renderReportMarkdown(body: ReportBody): string {
     "## Coverage",
     "",
     `- Gameplay: ${gameplayText(coverage.gameplay)}`,
+    ...(coverage.gameplay.status === "ANALYZED" && coverage.gameplay.simcProfileRelative !== undefined
+      ? [`- SimC profile: ${simcProfileCoverageSentence(coverage.gameplay.simcProfileRelative)}`]
+      : []),
     `- Preparation: ${preparationText(coverage.preparation)}`,
     `- Damage diagnosis: ${diagnosisText(coverage.damageDiagnosis)}`,
     `- Records by disposition: ${coverage.recordsByDisposition.map((row) => `${code(row.disposition)} ${String(row.records)}`).join(", ")}.`,
