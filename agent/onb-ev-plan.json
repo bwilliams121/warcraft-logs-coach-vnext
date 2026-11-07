@@ -4,7 +4,7 @@
   "acquisitionRuleId": "ONB_EV_V1",
   "selectionRevision": "onb-ev-selection/1",
   "frozenOn": "2026-11-07",
-  "status": "FROZEN",
+  "status": "EXECUTED",
   "grant": "agent/autopilot-queue.md ONB-EV; agent/architecture.md \"Owner grant (2026-11-06): ONB-EV\"",
   "specializations": [
     {

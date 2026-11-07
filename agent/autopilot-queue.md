@@ -1362,6 +1362,8 @@ publicContract: NONE
 
 **Owner grant (2026-11-06): APPROVED with a hard campaign cap of 60 Warcraft Logs HTTP requests in total** (`agent/architecture.md` "Owner grant (2026-11-06): ONB-EV"). This entry acquires evidence and promotes nothing. It runs ONB-EV-PLAN's frozen plan.
 
+**Second run (2026-11-07): stopped for the owner at the cap, 56 of 60.** Six of twelve captured, raw and uncommitted, and nothing promoted. The owner's cap and capacity decision is in `agent/follow-ups.md` "After ONB-EV's cap stop".
+
 **Plan revision 2 (2026-11-07), an API-compatibility correction under the owner's decision.** Digest `49303e1c03d0a056829b3474c1c47dc8cf0a37ca99ba5c532c74650c5519828f`. The retry showed "Max query complexity should be 50000 but got 100701", so one listing request of limit 100 is now three of limit 34, reassembled into the same 100 positions. Nothing else changes (`agent/architecture.md` "ONB-EV plan revision 2"). The text below describes revision 1 where it differs.
 
 **The frozen plan (ONB-EV-PLAN).** `agent/onb-ev-plan.json`, digest `48066f986e7035542bf81c0263f4cec0d9d70e0f3d892ab6eb7ed535e6fa0013`, with its rule in `scripts/corpus/onb-ev-selection.mjs`, run as written. It removes no specialization. Its worst case exceeds the cap, and no fixture fits the archive's notice line, so expect both stops below.

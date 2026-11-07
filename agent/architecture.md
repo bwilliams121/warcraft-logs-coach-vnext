@@ -15592,3 +15592,19 @@ Under "Owner decision (2026-11-07): ONB-EV listing retry". The plan is now `agen
 **Can a specialization go without a candidate because of this? No.** It reads the same rows, and the listing's worst case of 18 requests is far under the cap. What it can change is how far the captures reach: up to 8 fewer requests remain for them than under revision 1, plus the 2 spent on the refusals and the extra token. After one listing page, 51 are left at the worst, so a first capture with all twelve subjects still fits. After all four, 42 are left, so a first capture with five subjects fits and one with six stops at the cap. A specialization left out that way is reported as the cap's, and its place in the order is unchanged.
 
 **Order of work.** The owner requires review before acquisition continues. So this revision was reviewed and committed before request 5. The runner stays under the gitignored `.probe/onb-ev/`, now continuing the ledger rather than refusing it, and keeping any GraphQL error body with credentials scrubbed. The token body and the authorization header are never read into it.
+
+## ONB-EV — stopped at the cap, with six of twelve captured
+
+The run of plan revision 2. **It stopped with OWNER_DECISION_REQUIRED at 56 of the campaign's 60 requests, before any request that could exceed the cap.** Nothing is promoted, no fixture is committed, no limit is raised and no public contract changed. The requests, selection and captures are in `tests/evidence/onb-ev-capture.md`, and the owner's report is in `agent/follow-ups.md` "After ONB-EV's cap stop".
+
+**The correction worked.** Limit 34 was accepted on all three requests. The first listing page gave all twelve specializations a first candidate and two retries, so no later page was needed. Page 3's 2 rows past the page's end were retained and reached no selection.
+
+**Six captured.** Discipline Priest, Subtlety Rogue, Fury Warrior, Survival Hunter, Protection Warrior and Enhancement Shaman, over five fights. Survival shares Fury's fight, so it was served early, as the rule says: one capture serves every specialization whose first it is. The gate refused nothing. Every capture is COMPLETE, and each subject has one combatant-info row with talents and gear, so the "no combatant info" reason for these six is gone.
+
+**Six not captured.** Outlaw Rogue, Guardian Druid, Frost Mage, Affliction Warlock, Marksmanship Hunter and Vengeance Demon Hunter. The next capture needed 12 at its ceiling with 4 left, and the campaign does not skip ahead, so the 4 are unspent.
+
+**What this does not establish.** Evidence existed to be gathered, and it now exists. Whether any of it resolves a decision or passes a gate is REM-CENSUS's. The lists stop on inputs a subject cannot supply, so expect UNKNOWN. Nothing here reads a decision, and nothing has chosen a fight or a subject after seeing one.
+
+**The runner's real paths.** The listing split, the context gate, whole-fight and prefix event paging and the revision check have now all met the real service. It stopped on its cap path, and no gate refusal, page ceiling or transport failure occurred, so those are still proved only offline.
+
+**Plan status: `EXECUTED`,** as ONB-EV-PLAN's follow-up asks. That is the run, not six more captures. Digest unchanged, because status is not in it. Going on needs the owner's decision and a cap change, and that is a new plan revision.
