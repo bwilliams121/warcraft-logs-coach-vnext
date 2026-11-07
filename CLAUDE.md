@@ -1696,6 +1696,15 @@ subset of single-target decisions.
 
 Unsupported AoE/multi-target decisions must fail closed.
 
+**Owner change (2026-11-06): pinned SimC profile fallback.** Where observed
+evidence and approved curated authority cannot establish enemy-count or
+target-domain state, the pinned SimulationCraft profile may supply it, with
+explicit `SIMC_PROFILE_FALLBACK` provenance and public disclosure. Observed
+evidence always outranks it, and UNKNOWN remains correct when the profile does
+not answer. This is not silent single-target evaluation, and it does not make a
+decision ACTIONABLE. See agent/architecture.md "Owner decision (2026-11-06): SimC
+profile fallback".
+
 ---
 
 # First Vertical Slice

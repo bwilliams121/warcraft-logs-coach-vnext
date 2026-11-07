@@ -19,6 +19,14 @@ This changes what older entries here say. They stay as written, as the record of
 - **ONB-EV is approved,** with a hard cap of 60 Warcraft Logs requests (`agent/architecture.md` "Owner grant (2026-11-06): ONB-EV"). The grant authorizes no archive-limit increase and no promotion.
 - **Restoration Druid's promotion is queued** (HEAL-B1P2), which supersedes "is not queued" under "After HEAL-B4P". HEAL-B1P2 ran and did not promote it: "After HEAL-B1P2".
 
+## Owner decision (2026-11-06): SimC profile fallback
+
+Decided in `agent/architecture.md` "Owner decision (2026-11-06): SimC profile fallback", and queued as SIMC-FB-A, SIMC-FB-B and SIMC-FB-R. It changes what older entries say, and they stay as the record:
+
+- **"Stay UNKNOWN whatever the census returns" is superseded where the pinned profile answers.** Tier 3 can supply those counts and domains, disclosed as SimC-profile-relative. Other blockers behind them, such as Arms' Charge, are unchanged.
+- **The exit criterion is 100% PUBLIC.** A terminal BLOCKED no longer closes the program.
+- **POLB-CENSUS is still open,** and no longer holds up the fallback, ONB-EV or REM-CENSUS.
+
 ## After POLB-A: the census cannot supply an upper bound
 
 **Raised:** POLB-A (2026-11-06). Offline. The argument and the counts are in `agent/architecture.md` "POLB-A".

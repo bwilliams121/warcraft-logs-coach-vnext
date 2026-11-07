@@ -2286,13 +2286,15 @@ Onboarding does not close at 12 of 40 PUBLIC. The objective is every playable sp
 
 1. **Gates never weaken.** Pinned authority and provenance, real sanitized evidence, qualifying observation and discrimination, truthful MATCH, REJECTED and UNKNOWN, cross-spec isolation, public schema compatibility, REST, MCP and raid-night parity, invariance of existing public analyzers, and CI and review all still apply. The goal is to remove legitimate blockers.
 2. **A retry needs a changed prerequisite.** A promotion-only tranche is queued only when a known prerequisite of that specialization has changed. A failed retry records the next blocker and the specialization stays in remediation.
-3. **BLOCKED** is assigned only when remediation demonstrates that a required fact or authority cannot currently be obtained or implemented truthfully, with that demonstration recorded in the inventory.
+3. **BLOCKED** is assigned only when remediation demonstrates that a required fact or authority cannot currently be obtained or implemented truthfully, with that demonstration recorded in the inventory. Since the owner's 2026-11-06 completion rule it records a state and does not close the program: the specialization stays an open item and goes to the owner.
 4. **DEFERRED** is assigned only by an explicit owner decision to postpone otherwise feasible work.
 5. **Never a reason for either:** a failed first promotion, only UNKNOWN decisions, an already-merged implementation tranche, or remediation needing more work.
 6. **Ownership.** Prefer a shared tranche when several specializations share a genuinely generic capability. Specialization mechanics stay under `src/specs/<class>/<spec>/`, with no generic gameplay evaluator and no spec conditionals in shared infrastructure.
 7. **Network.** `wcl: NONE` unless the entry carries an `OWNER-GRANT:` from an owner decision. A tranche that finds it needs a new request stops with OWNER_DECISION_REQUIRED, naming the exact evidence and the smallest campaign.
 8. **Capacity.** Promotion needs committed evidence, and the existing caps and notice lines stay in force. A tranche whose minimal fixture cannot fit records its measured size. When several cannot fit, raise the measured proposal for the owner; never raise a line silently.
 9. **No production deployment** under this program.
+10. **Exit criterion (owner, 2026-11-06).** 100% of the playable roster PUBLIC. UNKNOWN stays correct when neither real evidence nor the pinned profile answers, and stays an open remediation item.
+11. **No spinning.** A wave that changes no specialization's prerequisite stops with OWNER_DECISION_REQUIRED, naming each stuck specialization and what would move it. It never repeats a retry, and it never weakens a gate to pass.
 
 ### HEAL-B1P2: Restoration Druid (public)
 
@@ -2319,11 +2321,13 @@ mergeSha: 6351a7c72d8c4c8428bc0d80cbd0efe1dcf04d0a
 ### POLB-A: Policy B schema, sampling policy and census plan
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-S3R, HEAL-B1P2
 branch: autopilot/polb-a
 wcl: NONE
 publicContract: NONE
+pr: 97
+mergeSha: 608bef7abbed1b1f055e027ee133e7f47cdc31fa
 ```
 
 **Outcome.** Schema, seam, frozen plan and proposal committed, with no row and no request. No acquisition and completeness contract can justify an upper bound, an exact `spell_targets` or a closed `target_if` set, so 1,414 count decisions and 2,301 `target_if` decisions stay UNKNOWN whatever the census returns (`agent/architecture.md` "POLB-A"; `agent/follow-ups.md` "After POLB-A").
@@ -2358,7 +2362,7 @@ status: OWNER_DECISION_REQUIRED
 dependsOn: POLB-A
 wcl: OWNER_DECISION_REQUIRED
 publicContract: NONE
-ownerDecision: Approve POLB-A's frozen census plan (src/data/encounter-census/census-plan.json) with a cap of 243 Warcraft Logs requests and a named archive exception of up to 1 MiB, or decline it. POLB-A found the census cannot justify any upper bound or closed set, so approving it buys lower-bound and candidate evidence only, reaching at most 421 count decisions, all Arms, and POLB-A recommends declining if the upper-bound gap was the purpose (agent/architecture.md "POLB-A"). Declining leaves those decisions UNKNOWN under Option E and needs POLB-B, POLB-C, REM-CENSUS and ONB-Z reworded. ONB-EV's grant does not cover this tranche.
+ownerDecision: Approve POLB-A's frozen census plan (src/data/encounter-census/census-plan.json) with a cap of 243 Warcraft Logs requests and a named archive exception of up to 1 MiB, or decline it. POLB-A found the census cannot justify any upper bound or closed set, so approving it buys lower-bound and candidate evidence only, reaching at most 421 count decisions, all Arms. Since the SimC profile fallback (2026-11-06), declining no longer leaves those decisions without an answer: tier 3 of the precedence applies with no curated tier. Declining needs POLB-B, POLB-C and ONB-Z's Policy B condition reworded. ONB-EV's grant does not cover this tranche.
 ```
 
 **Direction.** Owner decision (2026-11-06) "Policy B source", items 8, 11 and 12.
@@ -2405,11 +2409,75 @@ publicContract: NONE
 - Validate against retained real evidence, with negative tests that uncertain evidence stays BOUNDED or UNKNOWN.
 - Record which facts the census could not establish, by specialization, for REM-CENSUS.
 
+### SIMC-FB-A: Shared SimC profile fallback for encounter state (internal)
+
+```autopilot
+status: READY
+dependsOn: POLB-A
+wcl: NONE
+publicContract: NONE
+```
+
+**Direction.** Owner decision (2026-11-06) "SimC profile fallback" (`agent/architecture.md`).
+
+**Scope.** Shared, gameplay-neutral infrastructure, with no spec conditionals, implementing the precedence for a decision that needs enemy-count or target-domain state:
+
+1. observed or proven fight evidence, when sufficient;
+2. approved curated encounter authority, if one exists;
+3. pinned SimulationCraft profile state, when the first two cannot establish the fact;
+4. UNKNOWN only when none of them can answer.
+
+- **The pinned environment.** The repository pins APL artifacts, and those hold no environment. Define a versioned, provenance-bearing record of each specialization's profile and environment at its pin, from the pinned sources. `src/simulation/`'s execution profiles are a separate thing and are not this record, unless a review shows they are the applicable one.
+- **Permitted facts,** only where the pinned profile or pinned engine semantics deterministically establish them, each with a source citation: `active_enemies`; `spell_targets.<ability>` where SimC aliases or deterministically derives it; a candidate target domain the profile defines as closed; `fight_style`; the add and pull schedule the profile represents; target availability the profile represents; other explicit consequences of the profile plus engine semantics. A value the profile does not establish stays UNKNOWN.
+- **Default environment, as already documented:** Patchwerk, one target, no raid events; `active_enemies` is 1 with one target and no `adds` or `pull` event; with distance targeting off, `spell_targets` falls back to `active_enemies`.
+- **Provenance.** A binding records `SIMC_PROFILE_FALLBACK` (or equivalent) with the SimC pin, client build, specialization and profile identity, the relevant environment configuration, and the specific semantic used. It must be distinguishable from observed WCL evidence, curated evidence and spec-owned mechanics, and it never claims to have come from Warcraft Logs.
+- **Conflict rule.** Real evidence outranks the fallback. A proven lower bound above the profile's count contradicts it: the fallback is not applied, the strongest real evidence is used, and uncertainty is preserved. So a proven lower bound of 2 makes `active_enemies=1` false and leaves `active_enemies>=3` UNKNOWN. Test this on real evidence, including Destruction's existing MATCHes.
+- **`target_if` and target-dependent `if=`.** Evaluated over the target universe the pinned profile defines, with its semantics. Observed WCL actors are never the candidate list, and no ordering is invented. Decide how a target-scoped atom is read for the profile's target against the player's real target, with UNKNOWN where the mapping is not established.
+- **Build.** A fallback applies only where the build and profile are proven. Otherwise UNKNOWN.
+- **Actionability is separate.** The fallback answers APL inputs. It does not make a decision ACTIONABLE, and an observed intermission or unavailability stands.
+- **Public analyzers stay invariant.** Reading the fallback is opt-in per specialization. Any public analyzer that adopts it does so in its own measured entry.
+- **Supersession.** Amend the code comments, tests and READMEs that state a simulation setting is never bound, as the decision now allows it at tier 3 with provenance. Do not weaken any test of tiers 1 and 2 or of fail-closed behavior.
+
+Negative tests: the fallback never appears as observed evidence, never overrides a contradiction, never answers what the profile leaves open, and never runs on an unproven build.
+
+### SIMC-FB-B: Public disclosure of SimC-profile-relative evaluation
+
+```autopilot
+status: READY
+dependsOn: SIMC-FB-A
+wcl: NONE
+publicContract: EXPECTED
+```
+
+**Scope.** An additive public field, on REST, MCP and raid night alike, distinguishing observed-fight evaluation from SimC-profile-relative evaluation on every finding the fallback resolves, with its provenance.
+
+- Reporting and the TLDR say, in substance, "Under the pinned SimC profile assumptions, the priority would select X here". They never say an unobserved target count definitely happened, and a contract test pins that.
+- Confidence keeps describing evidence quality, so a modeled encounter state is never stated as observed. Comparison behavior still moves nothing.
+- Coverage disclosure names how much of a report rests on the fallback.
+- Findings on specializations that do not read the fallback are byte-identical, and a test pins that.
+
+### SIMC-FB-R: Replay the encounter-state-blocked specializations under the fallback
+
+```autopilot
+status: READY
+dependsOn: SIMC-FB-B
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Offline, on retained real evidence. Wire the fallback into each INTERNAL_ONLY specialization whose recorded blockers include `active_enemies`, `spell_targets`, `target_if`, target-dependent conditions or other encounter-state inputs explicit in its pinned profile, in that specialization's own tree. Then:
+
+- replay every retained subject and record newly resolved decisions, with MATCH, REJECTED and UNKNOWN counts, and each next blocker in `agent/spec-onboarding-inventory.md`;
+- **measure build proof by subject.** The decision requires the build and profile to be proven for promotion evidence, and POLB-A found few retained pulls have a provable build (`agent/follow-ups.md` "After POLB-A"). Record which specializations this leaves without a provable subject, and what extending the deploy calendar would take. A new external source or request is an owner stop;
+- where a specialization's observation and discrimination now qualify, add a separate public entry through the unchanged gates (rule 2). A real logged action evaluated against the fallback may count; a synthetic action never does.
+
+Nothing is promoted here.
+
 ### ONB-EV-PLAN: Freeze the neutral evidence campaign plan
 
 ```autopilot
 status: READY
-dependsOn: POLB-C
+dependsOn: SIMC-FB-R
 wcl: NONE
 publicContract: NONE
 ```
@@ -2419,7 +2487,7 @@ publicContract: NONE
 **Scope.** Before any request, freeze and commit the plan ONB-EV will execute:
 
 - the specializations in ONB-EV's recorded list whose remaining blocker is still insufficient retained real evidence, each checked against current retained files; a specialization that now has adequate evidence is removed with the reason, and none is added without a new owner decision;
-- the fixed discovery order and its digest, set before any event of a candidate is read, with no ranking or comparison query;
+- the fixed discovery order and its digest, set before any event of a candidate is read, with no ranking or comparison query. A candidate qualifies only if its build can be proven under the existing rules, because the SimC profile fallback requires that for promotion evidence and POLB-A found few pulls qualify. This is set before any outcome is known;
 - for each specialization, the minimum data families its evaluator or healer gate requires, and the worst-case request count, counted as the grant counts them;
 - the total against ONB-EV's hard cap of 60 requests. If the worst case exceeds the cap, say so in the plan: ONB-EV then runs in the frozen order and stops at the cap with its report. Dropping or reordering specializations to fit is the owner's call, not this plan's;
 - the raw and committed storage plan, including provenance and the measured capacity under rule 8.
@@ -2430,7 +2498,7 @@ The plan must not read any candidate's outcome, and no later step may replace a 
 
 ```autopilot
 status: READY
-dependsOn: HEAL-B1P2, POLB-C, ONB-EV
+dependsOn: HEAL-B1P2, SIMC-FB-R, ONB-EV
 wcl: NONE
 publicContract: NONE
 ```
@@ -2474,7 +2542,7 @@ Re-measure the first blockers. Where a pass exposed a next blocker that remediat
 
 ```autopilot
 status: READY
-dependsOn: M13-F, ONB-S3R, HEAL-AP, HEAL-B1P, HEAL-B2P, HEAL-B3P, HEAL-B4P, ONB-A1P, ONB-A2P, ONB-B1P, ONB-B2P, ONB-B3P, ONB-C1P, ONB-C2P, ONB-T1P, ONB-T2P, ONB-D1P, ONB-D2P, ONB-D3P, ONB-D4P, ONB-X1P, ONB-X2P, ONB-X3P, ONB-X4P, ONB-X5P, HEAL-B1P2, POLB-C, ONB-EV, REM-CENSUS, REM-GATE
+dependsOn: M13-F, ONB-S3R, HEAL-AP, HEAL-B1P, HEAL-B2P, HEAL-B3P, HEAL-B4P, ONB-A1P, ONB-A2P, ONB-B1P, ONB-B2P, ONB-B3P, ONB-C1P, ONB-C2P, ONB-T1P, ONB-T2P, ONB-D1P, ONB-D2P, ONB-D3P, ONB-D4P, ONB-X1P, ONB-X2P, ONB-X3P, ONB-X4P, ONB-X5P, HEAL-B1P2, POLB-C, SIMC-FB-R, ONB-EV, REM-CENSUS, REM-GATE
 wcl: NONE
 publicContract: NONE
 ```
@@ -2485,7 +2553,8 @@ publicContract: NONE
 
 - Restoration Druid's public-entry path has completed;
 - ONB-EV has been resolved and applicable evidence collected;
-- Policy B has been implemented and validated;
+- Policy B has been implemented and validated, or the owner has declined POLB-CENSUS and this condition has been reworded;
+- the SimC profile fallback has been implemented and the affected specializations replayed;
 - all known shared and spec-owned remediation inputs have been queued and executed;
 - every INTERNAL_ONLY specialization has received at least one remediation pass against its documented blockers;
 - all resulting eligible promotion retries have run.
@@ -2494,8 +2563,8 @@ publicContract: NONE
 
 - PUBLIC count against the playable roster;
 - terminally dispositioned count against the playable roster;
-- no unexplained INTERNAL_ONLY entry;
-- every non-PUBLIC specialization has a genuine documented terminal reason, under remediation rules 3 to 5.
+- no INTERNAL_ONLY entry;
+- every playable specialization is PUBLIC, the exit criterion the owner set on 2026-11-06.
 
 Any specialization failing this is an open item, not completion. It fails this tranche, and a mass reclassification never satisfies it. Add a contract test that pins the matrix against the registry and the roster.
 
