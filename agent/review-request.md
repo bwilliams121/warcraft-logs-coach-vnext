@@ -4,53 +4,38 @@ Rolling file: overwritten for each review cycle.
 
 ## Change
 
-SIMC-FB-R: replay the encounter-state-blocked specializations under the SimC profile fallback. Branch `autopilot/simc-fb-r`, from `main` at d134126.
+ONB-EV-PLAN: freeze the neutral evidence campaign plan. Branch `autopilot/onb-ev-plan`, from `main` at 56d6278.
 
-- **Public contract change: NONE.** No file under `src/contracts/`, `src/api/` or `src/mcp/` changes. Every wired row is INTERNAL_ONLY.
-- **Warcraft Logs: no request was made.** The replay reads retained captures through a fake transport.
-- **Nothing is promoted,** and no public entry is added, because nothing qualifies.
+- **Public contract change: NONE.** No file under `src/contracts/`, `src/api/` or `src/mcp/` changes.
+- **Warcraft Logs: no request was made.** All measurements read retained captures.
+- **Nothing is selected, captured, committed as evidence or promoted.**
 
 ## The result
 
-No new decision resolves. Over 8,546 eligible decisions of 49 analyzed subjects: 4 MATCH, 0 REJECTED, 8,542 UNKNOWN, before and after, on the real calendar and with every build injected. The 4 MATCH are Destruction's existing Summon Infernal presses, each at a real bound of 2 or 3, with no tier-3 fact bound. So no tier-3 decision has resolved on real evidence. `agent/architecture.md` "SIMC-FB-R" has the table by specialization.
+All twelve recorded specializations stay. The plan's worst case is 200 requests against ONB-EV's hard cap of 60, so ONB-EV runs in the frozen order and stops at the cap with its report. Every fixture is also larger than the 5,212 bytes left under the archive's notice line, so ONB-EV will end at an owner decision either way. Nothing is dropped or reordered to fit. `agent/architecture.md` "ONB-EV-PLAN" has the argument and the numbers.
 
 ## What changed
 
-1. **26 trees wired.** Each `observed-analysis.ts` calls `withEncounterStateAt`, and each `registration.ts` spreads `simcProfileFactsField` into its view, decision by decision. Five (Feral, Subtlety, Outlaw, Vengeance, Protection Warrior) read no count before and read the cast's own position now, as Arms does.
-2. **A SIMC-FB-A defect fixed, in shared code.** `src/findings/simc-profile-fallback.ts` treated a resolver's UNKNOWN placeholder for `spell_targets.*` or `raid_event.*` as a stronger reading the caller held, so tier 3 never answered those atoms for a list that binds one. A placeholder is now replaced. A known or bounded value still stands, and after a contradiction the placeholder stays UNKNOWN. Two tests were added to `tests/unit/simc-fb-a-profile-fallback.test.ts`, and no assertion there moved.
-3. **`target_if` attestations.** `src/specs/<class>/<spec>/sole-target-attestations.ts` in 17 trees: 50 attested, 26 refused, each refusal recorded with its reason in the file.
-4. **Prose.** Each wired README gains a section, the `active_enemies` row is corrected where it had one, each vocabulary gains a note, and the unpublished limits prose no longer says the count can only be a lower bound.
-5. **One guard moved.** `tests/unit/onb-s3-enemy-set.test.ts` "every wired specialization is INTERNAL_ONLY" now looks for `withEncounterStateAt(` instead of `withEnemyCountAt(`, because that call replaced it and reads the same enemy set first. Its sibling "no PUBLIC specialization binds it" now forbids both.
+1. **`agent/onb-ev-plan.json`.** The frozen plan, digest `48066f986e7035542bf81c0263f4cec0d9d70e0f3d892ab6eb7ed535e6fa0013`: the twelve rows with their families and retained evidence, the proven intervals and the one excluded, the listing, order and gate, the capture shape, the ceilings, the budget and the storage numbers.
+2. **`scripts/corpus/onb-ev-selection.mjs` and its types.** The selection rule as pure code, so ONB-EV executes what the plan says and a test can hold it to that. It makes no request. It reads identity and bounds only.
+3. **`tests/unit/onb-ev-plan.test.ts`.** The digest, including that the queue names it. The list and its order, the arithmetic, and that the listing asks for nothing excluded. While the plan is unexecuted, each row against its production registration, and the intervals against the deploy calendar and the profile record. Neutrality: listing order and every non-identity field move nothing. Negatives: an unproven or excluded build, a missing region, another class's Frost or Protection, a misaligned roster, missing master data, an actor listed twice, and windows at their edges.
+4. **Records.** `agent/architecture.md`, `agent/follow-ups.md`, `agent/spec-onboarding-inventory.md`, and in `agent/autopilot-queue.md` the supervisor's merged list, this entry's status and ONB-EV's pointer to the plan. ONB-EV's grant text is not touched.
 
 ## Decisions for the reviewer to check
 
-1. **The placeholder rule.** Is `UNKNOWN_NUMBER` correctly "no reading"? `BOUNDED_NUMBER` and `ONE_OF_NUMBERS` stand, as stronger readings a caller established. No resolver binds either of those to one of these atoms today.
-2. **The attestation rule is conservative on purpose.** All warlock tokens are refused on `warlock_spell_t::select_target` (`sc_warlock_actions.cpp:548`) without reading it as harmless. Pseudo-actions are refused even where the engine would yield a one-element list, because their `target` need not be the enemy.
-3. **How the audit was verified.** A subagent read each chain, then a script walked each attested struct's inheritance over the pinned source for `available_targets`, `target_filter_callback =`, `target_ready`, `select_target` and `harmful = false`. It flagged five rows, and I read each by hand: four filters are on background children, and Pyre's override returns the one enemy for its foreground object. CI cannot check the C++, because the clone is not committed, so CI checks shape only.
-4. **The over-disclosure question from SIMC-FB-B.** No tier-3 decision resolved, so the label has cost nothing and no counterfactual evaluation was built.
-5. **`resolved[index]` pairs a view row with its facts,** by position, with `?? []`. Both arrays are pushed together once per eligible cast, and the per-spec test pins equal lengths and row-by-row equality. Is that enough, given a misalignment would under-disclose?
-6. **Build proof.** Only 12 of 49 analyzed subjects, all in b1Pm, are provable, and only with b1Pm's region from its committed capture, as a live request would retrieve it. The records list what extending the calendar takes, by report. Each is a new request or source, so nothing was done.
-
-## Tests
-
-- `tests/unit/specs/simc-fb-r-wiring.test.ts`, each of the 26 through the production row on synthetic casts: facts reach the view decision by decision; no report or Warcraft Logs source is named; an unproven build binds nothing; unretrieved DAMAGE binds nothing resting on the count; usability provenance does not move. Attestations are checked against each list's own `target_if` tokens. A proven second enemy takes the count from the profile, through the Destruction facade. The committed Arms slice has no DAMAGE grant, so on a proven build it reads nothing from the profile.
-- **What they do not prove.** No gameplay result. Casts are synthetic, and the replay's numbers come from uncommitted captures, recipe `.probe/simcfbr`, so they are recorded and not pinned.
-
-## Bookkeeping
-
-The queue's SIMC-FB-R entry is `PR_OPEN` with its outcome. The supervisor's merged list was compared with the queue, and SIMC-FB-B was the one written. `agent/architecture.md`, `agent/follow-ups.md` and `agent/spec-onboarding-inventory.md` record the above.
+1. **Unfiltered capture is the reading of "minimum".** The grant says "minimum actor and fight evidence the existing evaluator and promotion gate need (casts, auras, resources, combatant information ...)". A server-filtered actor stream would fit the cap and could never pass a gate, because the loader refuses a filtered capture any coverage (`FILTERED_CAPTURE_GRANTED`). So the plan takes the unfiltered `dataType: All` stream, re-cut offline into actor slices, with other players' events staying in gitignored raw pages. If this is outside the grant's words, say so: it is the one thing here that could be an owner decision.
+2. **The first 90 s for rotational rows.** No rotational gate has a window. Havoc passed both gates on one first-90-s segment, the smallest solo precedent. Fixed before any candidate is known.
+3. **Wipes qualify, and `kill` is not even requested.** Reading no outcome seemed stronger than a kill filter, and kills are few on the retained listing. POLB-A chose kills for a reason that does not apply here (later phases).
+4. **A gate refusal may move to the next candidate; nothing after a page is requested may.** The queue says "no replacement fight or alternate subject because of any result". The plan reads a context refusal as the candidate not qualifying, since it reads no event, and bounds it at two retries a specialization.
+5. **Stop at the first capture that does not fit, with no skipping ahead.** This can leave requests unspent. Skipping would serve a later specialization first, which is the reordering the queue reserves for the owner.
+6. **12.1.5.70575 is excluded though the calendar proves it,** because the profile record does not list it and 12.1.5 is deferred. Both facts are tested.
+7. **Discipline stays first in the recorded order,** though it costs the most. The plan says so and does not move it.
+8. **The listing is partly unverified.** M13-A proved it at `limit: 10`, without time arguments, region or master data. A refusal stops ONB-EV for the owner rather than trying another query.
 
 ## Validation
 
-Run on this tree, with no Warcraft Logs request:
-
-- `npm run typecheck`, `npm run format:check`, `npm run test:corpus` and `npm run test:evidence` all exit 0.
-- Full suite, `npx vitest run --testTimeout=60000`: 20,740 of 20,743, run before one last edit to the new test file. The failures:
-  - `m9a-corpus-layering`: the new test imported `fightOf`. It now imports the sanctioned `stateOf`. Fixed, and that one-import edit is the only change since the full run.
-  - `m9b-corpus-harness` SPEC_PROTECTION_PALADIN: the timeout seen in earlier full runs (ONB-S3, POLB-A, SIMC-FB-A, SIMC-FB-B).
-  - `runner-service-queue` W: a leftover job directory under parallel load, also seen in earlier runs (ONB-D1P, ONB-X5P).
-- Focused after that edit, alone: the new test, `m9a-corpus-layering`, `simc-fb-b-disclosure-contract`, `m9b-corpus-harness` and `runner-service-queue`, 2,823 of 2,823. The two load failures pass here. They were not compared against base in the same parallel run.
-
-The four untracked local paths (`.claude/` and the three `scripts/probe/wcl-*.probe.ts` files) are the standing CLAUDE.md exclusions and are not part of this change.
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
+- `tests/unit/onb-ev-plan.test.ts`: 28 tests pass.
+- `npm run typecheck` and `npm run format:check`: clean. `git diff --check`: clean.
+- `npm run test:corpus`: PASSED, 253 cases, 848 assertions. `npm run test:evidence`: PASSED, 32 cases, 80 assertions.
+- Full suite in parallel, `--testTimeout=60000`: 20,768 of 20,770. The two failures are `m9b-corpus-harness` SPEC_PROTECTION_PALADIN and `runner-service-queue` W, which failed the same way on earlier tranches under parallel load. Rerun serially on this tree, both files pass. This tranche touches neither.
+- The eligibility census and page measurements read uncommitted retained captures, so they are recorded and not pinned (recipe in `.probe/onbevplan`).

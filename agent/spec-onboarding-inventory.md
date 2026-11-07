@@ -40,6 +40,7 @@ The 12-of-40 first pass is not closure (`agent/architecture.md` "Owner decision 
 - **`BLOCKED`** needs remediation to demonstrate that a required fact or authority cannot currently be obtained or implemented truthfully. **`DEFERRED`** needs an explicit owner decision.
 - **Neither is assigned merely because** a first promotion failed, a specialization has only UNKNOWN decisions, an implementation tranche already merged, or remediation needs more work.
 - **After SIMC-FB-R,** next blockers below name the root scan's stop and the engine's block, each with every build injected, because most subjects have no provable build (`agent/architecture.md` "SIMC-FB-R").
+- **After ONB-EV-PLAN,** all twelve specializations on ONB-EV stay on it, each checked against retained files, and the frozen plan is `agent/onb-ev-plan.json`. Its worst case exceeds ONB-EV's cap, and no fixture fits the archive's notice line, so ONB-EV will stop for the owner (`agent/architecture.md` "ONB-EV-PLAN"). No state changes.
 - **Owning entries:** HEAL-B1P2, POLB-A, POLB-CENSUS, POLB-B, POLB-C, SIMC-FB-A, SIMC-FB-B, SIMC-FB-R, ONB-EV-PLAN, ONB-EV, REM-CENSUS and the `REM-*` tranches it adds, REM-GATE, ONB-Z. REM-CENSUS records each specialization's blockers here.
 
 ## State vocabulary
