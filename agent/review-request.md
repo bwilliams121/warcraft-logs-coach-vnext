@@ -4,40 +4,56 @@ Rolling file: overwritten for each review cycle.
 
 ## Change
 
-Record the owner's SimC profile fallback decision (2026-11-06) and update the queue. Working tree on `main` at 608bef7, uncommitted.
+SIMC-FB-A: shared SimC profile fallback for encounter state (internal). Branch `autopilot/simc-fb-a`, from `main` at 6d7eb39.
 
-- Documentation and queue only: no source, test, analyzer, runtime-data or public-contract change.
-- **Warcraft Logs: no request was made, and no grant changed.**
-- The four untracked local paths (`.claude/` and the three `scripts/probe/wcl-*.probe.ts` files) are the standing CLAUDE.md exclusions and are not part of this change.
+- Implements the precedence in `agent/architecture.md` "Owner decision (2026-11-06): SimC profile fallback": observed or proven evidence, approved curated authority, the pinned profile, UNKNOWN.
+- **No specialization is wired**, so no decision, finding or public output moves. Reading it is opt-in, and SIMC-FB-R does that. Disclosure is SIMC-FB-B.
+- **No public contract change:** `src/contracts/`, `src/api/` and `src/mcp/` are untouched.
+- **Warcraft Logs: no request was made.** Everything reads committed or retained bytes.
 
-## The decision
+## What was added
 
-The pinned SimC profile becomes fallback authority for encounter-state facts: observed evidence, then curated authority, then the pinned profile, then UNKNOWN. It carries explicit `SIMC_PROFILE_FALLBACK` provenance and public disclosure, and observed evidence always outranks it. A real logged action evaluated against it may count as promotion evidence, under unchanged gates. The exit criterion is 100% of the roster PUBLIC.
+- `scripts/authority/extract-simc-profile-environment.mjs` and `src/data/simc-profile/simc-profile-environment.{json,ts}`: the versioned record of 32 specializations' profiles and environment, with 13 engine statements cited by path, file hash, line span and excerpt hash. It is generated from the pinned clone through `git show`.
+- `src/simc/expression/profile-environment-atoms.ts`: what the pinned engine makes of `fight_style.*`, `raid_event.*` and `spell_targets[.*]` in that environment.
+- `src/findings/simc-profile-fallback.ts`: `withEncounterStateAt`, the precedence, and the `SimcProfileProvenance` for each binding.
+- `src/findings/proven-fight-build.ts`: the proven build through the existing resolver.
+- `src/simc/target-if.ts` and `evaluate.ts`: an optional `TargetDomain.universe: "PROFILE_SOLE_TARGET"`, which reads the pinned one-candidate branch for MIN and MAX. No other domain gets it.
+- `tests/unit/simc-fb-a-profile-fallback.test.ts`: 47 tests.
 
-## Files
+## Decisions for the reviewer to check
 
-- `agent/architecture.md`: the decision, what it supersedes, and recording notes.
-- `CLAUDE.md`: a dated owner-change note under "Multi-Target Support", because its fail-closed rule would otherwise read as forbidding this.
-- `agent/follow-ups.md`, `agent/spec-onboarding-inventory.md`: pointers and the exit criterion. Counts unchanged.
-- `agent/autopilot-queue.md`:
-  - new SIMC-FB-A (shared, internal), SIMC-FB-B (public disclosure, `publicContract: EXPECTED`) and SIMC-FB-R (replay), all `wcl: NONE`;
-  - ONB-EV-PLAN and REM-CENSUS now depend on SIMC-FB-R rather than POLB-C, so they no longer wait on the census decision;
-  - ONB-Z also depends on SIMC-FB-R, keeps POLB-C, and passes only at 100% PUBLIC;
-  - remediation rules 10 and 11 added, and rule 3 amended;
-  - POLB-CENSUS's decision text updated, still the owner's;
-  - ONB-EV-PLAN: a candidate must have a provable build, set before any outcome is known. The grant text is unchanged;
-  - bookkeeping: POLB-A recorded MERGED (#97).
+1. **Build.** The record lists 12.1.0.69587 and also 12.1.0.69933 (`0a72e6a746`, the second approved model), because every cited excerpt and every profile's option lines are identical at both. This is an environment claim only, and the APL stays at the analyzer pin as it does today. Listing only 69587 would leave the fallback unusable on every retained pull. Is this "the build and profile are proven", or is it an owner question?
+2. **A reviewed layering change.** `m11g4-simulation-context-layering` now names a second importer of `src/simulation-context/`, `src/findings/proven-fight-build.ts`. POLB-A said this seam would need a reviewed change. Nothing on a public path imports it.
+3. **What a contradiction takes away.** A lower bound above the profile's 1 withholds `active_enemies`, `spell_targets`, the target domain and the `adds` and `pull` schedule, and the real bound is read. `fight_style.*` and `raid_event.movement.*` stay, because they do not rest on the count.
+4. **`spell_targets` under contradiction stays unbound** rather than reading the real bound, because geometry stays action-owned.
+5. **`target_if`.**
+   - The candidate is the profile's own target and never an observed actor. Its reads are the base bindings, so a target-scoped atom is read as on the player's real target at D, and an unbound atom stays undecided.
+   - Readiness needs a per-action attestation with a citation, because 21 `available_targets` overrides and 48 live `target_filter_callback` assignments can change `target_list()`. An unattested action gets no domain and reads as before. So the shared code alone resolves no `target_if` line.
+6. **Fail closed where evidence conflicts or is missing.** A contradiction between proofs, an unresolved position or a non-monotonic timeline stays UNKNOWN rather than taking the profile's 1. So does a decision where the subject's `AURAS` or `DAMAGE` were not retrieved from the pull's start to D, because a failed page is missing evidence that could contradict the profile, not an unobservable gap.
 
-## Please check
+## Real evidence
 
-1. **Actionability.** I recorded that the fallback supplies APL inputs and does not make a decision ACTIONABLE, under CLAUDE.md "ACTIONABLE Requires Positive Evidence". The decision lists "target availability represented by that profile" as a permitted fact and also says it weakens no evidence rule. Is that the right reading?
-2. **The exit criterion.** The earlier decision accepted a lower final count for a demonstrably unsolvable specialization. This one states 100% and calls it unchanged. I recorded it as replacing the earlier allowance, and flag it for the owner. Rule 11 stops for the owner rather than spinning.
-3. **The ONB-EV-PLAN build rule.** It narrows "qualifying" before any request. Does it stay within the grant's "first qualifying public raid fight under the recorded fixed discovery rule"?
-4. **Moved dependencies.** Is taking POLB-C out of ONB-EV-PLAN and REM-CENSUS consistent with the owner's "may interleave independent work"?
-5. **Tier 3 REJECTED.** A decision before any add is touched reads the profile's 1, so a REJECTED can arise where the real fight had more enemies. The decision accepts this with disclosure, and SIMC-FB-B carries it.
+- **b1PmaKrd6CDfzngc fight 48, actor 15, in the committed test.** The calendar proves 12.1.0.69933. Of 668 casts, 661 read tier 3 and 7 have a lower bound above 1 and read it, equal to `withEnemyCountAt`'s binding. Removing every later event changes no reading. With no region the same fight is not proven.
+- **A7R6 fight 7, Destruction actors 12 and 15, offline** (raw pages not committed, recipe in `.probe/simcfb/m`, not part of the tree). With a build injected, since the capture has no region, the 4 existing MATCHes stay, each at a real bound of 2 or 3, with coverage unchanged at 2 MATCH and 113 UNKNOWN, and 2 MATCH and 103 UNKNOWN, and 0 REJECTED. On production that fight is `BUILD_UNRESOLVED`.
+
+## Negative tests the queue names
+
+The fallback never appears as observed evidence, never overrides a contradiction, never answers what the profile leaves open, and never runs on an unproven build. Also: it never settles a conflict between proofs, never binds under a contradiction beyond the rule above, and never reads an unattested action's target list. No PUBLIC tree or public path imports it.
+
+## Supersession
+
+Comments, READMEs and four test titles that said a simulation setting is never bound now say it may be bound at tier 3 with provenance. No assertion moved, and no test of tiers 1 and 2 or of fail-closed behavior was weakened. Every facade test stays as it was, because no list reads the fallback yet.
+
+## Bookkeeping
+
+The queue's SIMC-FB-A entry is `PR_OPEN`, and the supervisor's merged list was compared with the queue, 75 entries, 0 written. `agent/architecture.md`, `agent/follow-ups.md` and `scripts/authority/README.md` record the above.
 
 ## Validation
 
-- The supervisor's own `ConvertFrom-QueueText` reads 91 entries, with unique IDs and known dependencies.
-- Simulated selection after main: SIMC-FB-A, SIMC-FB-B, SIMC-FB-R, ONB-EV-PLAN, ONB-EV, REM-CENSUS, REM-GATE. It then stops at POLB-CENSUS's owner decision, with POLB-B, POLB-C and ONB-Z behind it. REM-CENSUS adds more entries before REM-GATE. M15-E and M11-G4-5-R stay BLOCKED.
-- `prettier --check` and `git diff --check` pass. No test suite was run: nothing executable changed.
+Run on this tree, with no Warcraft Logs request:
+
+- `npm run typecheck`, `npm run format:check`, `npm run test:corpus` and `npm run test:evidence` all exit 0, and the gates change no report.
+- Focused: `tests/unit/simc-fb-a-profile-fallback.test.ts` 48 of 48.
+- Full suite, `npx vitest run --testTimeout=60000`: 20,269 of 20,270. The one failure is `m9b-corpus-harness` SPEC_PROTECTION_PALADIN, a timeout seen in earlier full runs (ONB-S3, POLB-A). It passes alone on this tree. It was not compared against base in the same parallel run.
+
+The four untracked local paths (`.claude/` and the three `scripts/probe/wcl-*.probe.ts` files) are the standing CLAUDE.md exclusions and are not part of this change.

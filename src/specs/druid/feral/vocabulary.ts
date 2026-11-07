@@ -53,9 +53,9 @@
  *   buff.bs_inc.down
  *       bound from the decision's aura state where it is established; the shared parser has no `.down` form
  *   fight_style.dungeonroute
- *       the simulation's fight style has no difficulty authority here
+ *       the simulation's fight style has no difficulty authority here. SIMC-FB-A may bind it as a disclosed profile fact, and this list does not read that yet
  *   fight_style.dungeonslice
- *       the simulation's fight style has no difficulty authority here
+ *       the simulation's fight style has no difficulty authority here. SIMC-FB-A may bind it as a disclosed profile fact, and this list does not read that yet
  *   raid_event.adds.up
  *       the simulation's raid events are not reconstructed
  *   prev_gcd.1.rip

@@ -11,7 +11,7 @@
  *   active_enemies
  *       bound by the shared enemy-set model as far as its evidence proves (ONB-S3); declared so its gates parse
  *   fight_style.dungeonroute
- *       a simulation setting, with no authority for a real fight. It gates the list's `retarget` line, so it stops every scan
+ *       a simulation setting, with no authority for a real fight. SIMC-FB-A may bind it as a disclosed profile fact, and this list does not read that yet. It gates the list's `retarget` line, so it stops every scan
  *   howl_summon.ready, target.distance
  *       the Pack Leader's own buffs and a position, neither read
  *   full_recharge_time, cooldown.*, debuff.*.remains, gcd

@@ -13,7 +13,7 @@
  *   focus
  *       a contract says what the wire's Focus is, and the retained casts carry it, but this slice reads none: one line reads it, behind the stops below, and Wailing Arrow is decided at its begin, not its completion. A later slice that binds it must declare it first
  *   fight_style.dungeonroute
- *       a simulation setting, with no authority for a real fight. It gates the list's `retarget` line, so it stops every scan
+ *       a simulation setting, with no authority for a real fight. SIMC-FB-A may bind it as a disclosed profile fact, and this list does not read that yet. It gates the list's `retarget` line, so it stops every scan
  *   apex.3, howl_summon.ready, max_prio_damage
  *       a tiered talent's rank, the Pack Leader's own buffs and a simulation's target priority, none of them read
  *   dot.*.remains, full_recharge_time, cooldown.*, buff.*.at_max_stacks, execute_time, gcd, time_to_die.remains

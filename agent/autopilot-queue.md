@@ -2412,8 +2412,9 @@ publicContract: NONE
 ### SIMC-FB-A: Shared SimC profile fallback for encounter state (internal)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: POLB-A
+branch: autopilot/simc-fb-a
 wcl: NONE
 publicContract: NONE
 ```

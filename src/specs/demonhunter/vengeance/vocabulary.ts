@@ -37,7 +37,7 @@
  *   in_combat
  *       no contract says what a logged pull proves of it
  *   fight_style.*, raid_event.*
- *       a simulation's options and scripted events; a real fight has neither
+ *       a simulation's options and scripted events; a real fight has neither. SIMC-FB-A may bind it as a disclosed profile fact, and this list does not read that yet
  *
  * BOUND, from the observed tree or the decision cast's own observation:
  *

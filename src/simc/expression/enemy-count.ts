@@ -21,7 +21,9 @@
  * `active_enemies` AND `spell_targets.<ability>` ARE DIFFERENT QUESTIONS. Nothing here aliases one
  * to the other. In the pinned simulation they coincide only because distance targeting is off
  * (action.cpp:3878-3887), which says nothing about geometry in a real encounter. So
- * `spell_targets.<ability>` binds only through an action-owned registration, and has no other path.
+ * `spell_targets.<ability>` binds only through an action-owned registration, or through the pinned
+ * profile as tier 3 (SIMC-FB-A, `src/findings/simc-profile-fallback.ts`), where it is the engine's
+ * constant under that profile and is disclosed as such. It is still never this count.
  */
 
 import {

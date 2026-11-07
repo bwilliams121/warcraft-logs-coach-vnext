@@ -541,9 +541,13 @@ export interface TargetCandidate {
  *
  *   CLOSED  every enemy that could be chosen is listed. A positive claim needing `provenance`.
  *   OPEN    these are proven candidates, and an enemy nobody observed may also exist.
+ *
+ * `universe` is set only for the pinned profile's own target (SIMC-FB-A), which reads the pinned
+ * one-candidate branch. A domain of observed enemies never sets it.
  */
 export interface TargetDomain {
   readonly closure: "CLOSED" | "OPEN";
+  readonly universe?: "PROFILE_SOLE_TARGET";
   readonly candidates: readonly TargetCandidate[];
   readonly provenance: string;
 }

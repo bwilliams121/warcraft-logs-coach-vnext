@@ -49,7 +49,7 @@ The list reads no Focus, so none is declared.
 
 | Stops at | Why |
 | --- | --- |
-| `default[0] retarget` | where every scan stops, on its `target_if`, before any rotation line. Its gate is `fight_style.dungeonroute`, a simulation setting. Synthetic |
+| `default[0] retarget` | where every scan stops, on its `target_if`, before any rotation line. Its gate is `fight_style.dungeonroute`, a simulation setting that only the SimC profile fallback may bind (SIMC-FB-A), which this list does not read yet. Synthetic |
 | `default[1] auto_attack` | past that, on a fight style only a test can state: off the GCD, with no reviewed contract, so the engine refuses. Synthetic |
 | `default[3]` to `default[6]` | the dispatches, gated on the enemy count. A lower bound can close one side only. Synthetic |
 | the rotation lists | Tip of the Spear, charges, cooldowns, `howl_summon.ready`, Sentinel's Mark, and `target_if` on the cleave lines |

@@ -25,9 +25,9 @@
  *   energy.time_to_max
  *       the time to a cap needs a regeneration model, and only the decision cast's own Energy is read
  *   fight_style.dungeonroute
- *       SIM_ONLY: a simulation's option. A real fight has none
+ *       SIM_ONLY: a simulation's option. A real fight has none. SIMC-FB-A may bind it as a disclosed profile fact, and this list does not read that yet
  *   fight_style.dungeonslice
- *       SIM_ONLY: a simulation's option. A real fight has none
+ *       SIM_ONLY: a simulation's option. A real fight has none. SIMC-FB-A may bind it as a disclosed profile fact, and this list does not read that yet
  *   gcd.max
  *       the live global, which the spec aura changes at init (sc_monk.cpp), is not reconstructed
  *   prev.celestial_conduit

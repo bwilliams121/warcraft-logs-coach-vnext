@@ -107,6 +107,13 @@
  * today (no upper bound is established), so every FIRST line on a real fight
  * still refuses unless a player-scoped fact or a proven candidate settles it.
  *
+ * THE PINNED PROFILE'S ONE TARGET (SIMC-FB-A). A domain may instead state the
+ * profile's own universe (`universe: "PROFILE_SOLE_TARGET"`, one candidate, from
+ * `src/findings/simc-profile-fallback.ts`). That is the pinned one-candidate
+ * branch above, so MIN and MAX need no score: they return the target without
+ * evaluating anything. FIRST keeps its truth-valued rule. No other domain gets
+ * this, so a closed domain of one observed enemy still needs a finite score.
+ *
  * `call_action_list` IS NOT HERE. `call_action_list_t::action_ready`
  * (action.cpp:4672-4685) overrides the base and never calls `select_target()`,
  * so a call's `target_if` has no effect on readiness; the traversal already
@@ -319,7 +326,8 @@ export type TargetIfVerdict =
       readonly structure: Extract<TargetIfStructure, { kind: "WELL_FORMED" }>;
       /**
        * The proof that MIN/MAX always chooses a target. `null` for FIRST (ONB-S3), whose proof
-       * is `overTargets`: a proven-ready candidate with a truth-valued score of TRUE.
+       * is `overTargets`: a proven-ready candidate with a truth-valued score of TRUE. Also `null`
+       * for MIN/MAX over the pinned profile's one target (SIMC-FB-A), which needs no score.
        */
       readonly scoreFiniteness: Extract<ScoreFiniteness, { kind: "PROVEN_FINITE" }> | null;
       /**
@@ -497,6 +505,9 @@ function verdictOverDomain(
       domain.candidates.some(
         (candidate, index) => candidate.targetReady === "PROVEN_READY" && truthOn(scores[index]) === "TRUE",
       );
+  } else if (domain.universe === "PROFILE_SOLE_TARGET" && domain.candidates.length === 1) {
+    // The pinned `target_list().size() == 1` branch returns the target without evaluating the score.
+    targetCertainlyChosen = domain.candidates[0]?.targetReady === "PROVEN_READY";
   } else {
     targetCertainlyChosen =
       finiteness.kind === "PROVEN_FINITE" &&

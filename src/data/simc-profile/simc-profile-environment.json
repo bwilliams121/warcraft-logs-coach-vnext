@@ -1,0 +1,654 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_PROFILE_ENVIRONMENT",
+  "datasetRevision": "simc-33622e9d-1",
+  "generatorRevision": 1,
+  "extractedOn": "2026-11-06",
+  "source": {
+    "repository": "simulationcraft/simc",
+    "analyzerPin": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "profileDirectory": "profiles/MID1"
+  },
+  "engineDefaultEnvironment": {
+    "fightStyle": "Patchwerk",
+    "targetCount": 1,
+    "raidEventCount": 0,
+    "distanceTargetingEnabled": false
+  },
+  "models": [
+    {
+      "simcCommit": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+      "gameDataBuild": "12.1.0.69587",
+      "commitDate": "2026-09-12T08:05:06+02:00",
+      "semantics": [
+        {
+          "semanticId": "DEFAULT_FIGHT_STYLE_IS_PATCHWERK",
+          "sourcePath": "engine/sim/sim.cpp",
+          "sourceSha256": "519bd104d02ec675dfbbe7b392ad51f2dcb8e858d6dd860ad5167303ccf574de",
+          "startLine": 2439,
+          "endLine": 2441,
+          "excerptSha256": "cd257336e7587ff636872e3cf8ecc1d73f26b19b75670fa0aa46098d167c60f3"
+        },
+        {
+          "semanticId": "PATCHWERK_HOLDS_NO_RAID_EVENTS",
+          "sourcePath": "engine/sim/sim.cpp",
+          "sourceSha256": "519bd104d02ec675dfbbe7b392ad51f2dcb8e858d6dd860ad5167303ccf574de",
+          "startLine": 2317,
+          "endLine": 2319,
+          "excerptSha256": "815ea3c035a63f372bf815a5275119255c8f03376023f0635423ab84e19c0285"
+        },
+        {
+          "semanticId": "DEFAULT_DESIRED_TARGETS_IS_ONE",
+          "sourcePath": "engine/sim/sim.cpp",
+          "sourceSha256": "519bd104d02ec675dfbbe7b392ad51f2dcb8e858d6dd860ad5167303ccf574de",
+          "startLine": 1460,
+          "endLine": 1460,
+          "excerptSha256": "5c70ec2eef90b60b9ddb0a2dcede1f5b733cdd8e7a38f7357233db42f61be781"
+        },
+        {
+          "semanticId": "DEFAULT_ENEMY_IS_THE_ONE_TARGET",
+          "sourcePath": "engine/sim/sim.cpp",
+          "sourceSha256": "519bd104d02ec675dfbbe7b392ad51f2dcb8e858d6dd860ad5167303ccf574de",
+          "startLine": 2778,
+          "endLine": 2787,
+          "excerptSha256": "9b010332f4965e088b461f32b3538418087456be41a26f5aa34054d385b1cf27"
+        },
+        {
+          "semanticId": "DISTANCE_TARGETING_DEFAULTS_OFF",
+          "sourcePath": "engine/sim/sim.cpp",
+          "sourceSha256": "519bd104d02ec675dfbbe7b392ad51f2dcb8e858d6dd860ad5167303ccf574de",
+          "startLine": 1548,
+          "endLine": 1548,
+          "excerptSha256": "4f2a569b61e8bdfeae4d77fec5942274551a732444649475ba698834aaba107d"
+        },
+        {
+          "semanticId": "ACTIVE_ENEMIES_IS_CONSTANT_ONE",
+          "sourcePath": "engine/sim/sim.cpp",
+          "sourceSha256": "519bd104d02ec675dfbbe7b392ad51f2dcb8e858d6dd860ad5167303ccf574de",
+          "startLine": 3599,
+          "endLine": 3608,
+          "excerptSha256": "78e7184448d4f09af1620fa1ee65d5bf08ca0fb9bc2b94854c5add3cc0a10ab7"
+        },
+        {
+          "semanticId": "FIGHT_STYLE_IS_A_NAME_COMPARISON",
+          "sourcePath": "engine/sim/sim.cpp",
+          "sourceSha256": "519bd104d02ec675dfbbe7b392ad51f2dcb8e858d6dd860ad5167303ccf574de",
+          "startLine": 3678,
+          "endLine": 3682,
+          "excerptSha256": "6d2ce27726be112421d6012d85150538cece4a01ae1b4e413762c050ef8ac80e"
+        },
+        {
+          "semanticId": "RAID_EVENT_EXPRESSION_IS_CONSTANT_WHEN_NONE_MATCH",
+          "sourcePath": "engine/sim/sim.cpp",
+          "sourceSha256": "519bd104d02ec675dfbbe7b392ad51f2dcb8e858d6dd860ad5167303ccf574de",
+          "startLine": 3716,
+          "endLine": 3728,
+          "excerptSha256": "d0ea6c65ca730a1bb8ee871c2ff2fb0fda6755c3923c79c0742c95f10de88393"
+        },
+        {
+          "semanticId": "RAID_EVENT_ABSENT_VALUES",
+          "sourcePath": "engine/sim/raid_event.cpp",
+          "sourceSha256": "d9ccb920174fa2a9b7b22f5ba8ca504839ac1c7676b07e5d0fa444204a77f638",
+          "startLine": 2608,
+          "endLine": 2618,
+          "excerptSha256": "8b891585b34e508b642a4915f26eea48c9123b17afbbc0ba4de3b18d910fe1d2"
+        },
+        {
+          "semanticId": "TIMESPAN_MAXIMUM",
+          "sourcePath": "engine/util/timespan.hpp",
+          "sourceSha256": "ed2cb3f1fb9f888985d878ffc8034405ed93884afc1a2ee968c57b2101425541",
+          "startLine": 212,
+          "endLine": 215,
+          "excerptSha256": "96436939e934a1786ad215f19289c486d0dad8316141d220c3ebed667757399d"
+        },
+        {
+          "semanticId": "SPELL_TARGETS_WITHOUT_DISTANCE_TARGETING",
+          "sourcePath": "engine/action/action.cpp",
+          "sourceSha256": "b04a5f1e942c21ac7db3125f23247d3aecf6fc6701eb6d6c1350f0bb7a762e92",
+          "startLine": 3878,
+          "endLine": 3887,
+          "excerptSha256": "14106ac285cfe67d4fbc7d4f5cb0cd21b8038b244f75b3f2066858b7ce93d129"
+        },
+        {
+          "semanticId": "TARGET_IF_WITH_ONE_CANDIDATE",
+          "sourcePath": "engine/action/action.cpp",
+          "sourceSha256": "b04a5f1e942c21ac7db3125f23247d3aecf6fc6701eb6d6c1350f0bb7a762e92",
+          "startLine": 5360,
+          "endLine": 5369,
+          "excerptSha256": "b6ba2d8bfe761d31f1215a60b3ec6473a38cbbb924625c129b3acd6894f67ea1"
+        },
+        {
+          "semanticId": "TARGET_READY",
+          "sourcePath": "engine/action/action.cpp",
+          "sourceSha256": "b04a5f1e942c21ac7db3125f23247d3aecf6fc6701eb6d6c1350f0bb7a762e92",
+          "startLine": 2409,
+          "endLine": 2424,
+          "excerptSha256": "33c41539c1de73fe630a16ea0cb688b3714396d188278838bad6831999e061cc"
+        }
+      ]
+    },
+    {
+      "simcCommit": "0a72e6a74684d23c989b2d76143e429d2b4f1c91",
+      "gameDataBuild": "12.1.0.69933",
+      "commitDate": "2026-09-22T13:05:35-07:00",
+      "semantics": [
+        {
+          "semanticId": "DEFAULT_FIGHT_STYLE_IS_PATCHWERK",
+          "sourcePath": "engine/sim/sim.cpp",
+          "sourceSha256": "519bd104d02ec675dfbbe7b392ad51f2dcb8e858d6dd860ad5167303ccf574de",
+          "startLine": 2439,
+          "endLine": 2441,
+          "excerptSha256": "cd257336e7587ff636872e3cf8ecc1d73f26b19b75670fa0aa46098d167c60f3"
+        },
+        {
+          "semanticId": "PATCHWERK_HOLDS_NO_RAID_EVENTS",
+          "sourcePath": "engine/sim/sim.cpp",
+          "sourceSha256": "519bd104d02ec675dfbbe7b392ad51f2dcb8e858d6dd860ad5167303ccf574de",
+          "startLine": 2317,
+          "endLine": 2319,
+          "excerptSha256": "815ea3c035a63f372bf815a5275119255c8f03376023f0635423ab84e19c0285"
+        },
+        {
+          "semanticId": "DEFAULT_DESIRED_TARGETS_IS_ONE",
+          "sourcePath": "engine/sim/sim.cpp",
+          "sourceSha256": "519bd104d02ec675dfbbe7b392ad51f2dcb8e858d6dd860ad5167303ccf574de",
+          "startLine": 1460,
+          "endLine": 1460,
+          "excerptSha256": "5c70ec2eef90b60b9ddb0a2dcede1f5b733cdd8e7a38f7357233db42f61be781"
+        },
+        {
+          "semanticId": "DEFAULT_ENEMY_IS_THE_ONE_TARGET",
+          "sourcePath": "engine/sim/sim.cpp",
+          "sourceSha256": "519bd104d02ec675dfbbe7b392ad51f2dcb8e858d6dd860ad5167303ccf574de",
+          "startLine": 2778,
+          "endLine": 2787,
+          "excerptSha256": "9b010332f4965e088b461f32b3538418087456be41a26f5aa34054d385b1cf27"
+        },
+        {
+          "semanticId": "DISTANCE_TARGETING_DEFAULTS_OFF",
+          "sourcePath": "engine/sim/sim.cpp",
+          "sourceSha256": "519bd104d02ec675dfbbe7b392ad51f2dcb8e858d6dd860ad5167303ccf574de",
+          "startLine": 1548,
+          "endLine": 1548,
+          "excerptSha256": "4f2a569b61e8bdfeae4d77fec5942274551a732444649475ba698834aaba107d"
+        },
+        {
+          "semanticId": "ACTIVE_ENEMIES_IS_CONSTANT_ONE",
+          "sourcePath": "engine/sim/sim.cpp",
+          "sourceSha256": "519bd104d02ec675dfbbe7b392ad51f2dcb8e858d6dd860ad5167303ccf574de",
+          "startLine": 3599,
+          "endLine": 3608,
+          "excerptSha256": "78e7184448d4f09af1620fa1ee65d5bf08ca0fb9bc2b94854c5add3cc0a10ab7"
+        },
+        {
+          "semanticId": "FIGHT_STYLE_IS_A_NAME_COMPARISON",
+          "sourcePath": "engine/sim/sim.cpp",
+          "sourceSha256": "519bd104d02ec675dfbbe7b392ad51f2dcb8e858d6dd860ad5167303ccf574de",
+          "startLine": 3678,
+          "endLine": 3682,
+          "excerptSha256": "6d2ce27726be112421d6012d85150538cece4a01ae1b4e413762c050ef8ac80e"
+        },
+        {
+          "semanticId": "RAID_EVENT_EXPRESSION_IS_CONSTANT_WHEN_NONE_MATCH",
+          "sourcePath": "engine/sim/sim.cpp",
+          "sourceSha256": "519bd104d02ec675dfbbe7b392ad51f2dcb8e858d6dd860ad5167303ccf574de",
+          "startLine": 3716,
+          "endLine": 3728,
+          "excerptSha256": "d0ea6c65ca730a1bb8ee871c2ff2fb0fda6755c3923c79c0742c95f10de88393"
+        },
+        {
+          "semanticId": "RAID_EVENT_ABSENT_VALUES",
+          "sourcePath": "engine/sim/raid_event.cpp",
+          "sourceSha256": "7e15a2912f23547d7db3189ae1b7e441094e33628619a3a522dc88cc5d79d255",
+          "startLine": 2616,
+          "endLine": 2626,
+          "excerptSha256": "8b891585b34e508b642a4915f26eea48c9123b17afbbc0ba4de3b18d910fe1d2"
+        },
+        {
+          "semanticId": "TIMESPAN_MAXIMUM",
+          "sourcePath": "engine/util/timespan.hpp",
+          "sourceSha256": "ed2cb3f1fb9f888985d878ffc8034405ed93884afc1a2ee968c57b2101425541",
+          "startLine": 212,
+          "endLine": 215,
+          "excerptSha256": "96436939e934a1786ad215f19289c486d0dad8316141d220c3ebed667757399d"
+        },
+        {
+          "semanticId": "SPELL_TARGETS_WITHOUT_DISTANCE_TARGETING",
+          "sourcePath": "engine/action/action.cpp",
+          "sourceSha256": "b04a5f1e942c21ac7db3125f23247d3aecf6fc6701eb6d6c1350f0bb7a762e92",
+          "startLine": 3878,
+          "endLine": 3887,
+          "excerptSha256": "14106ac285cfe67d4fbc7d4f5cb0cd21b8038b244f75b3f2066858b7ce93d129"
+        },
+        {
+          "semanticId": "TARGET_IF_WITH_ONE_CANDIDATE",
+          "sourcePath": "engine/action/action.cpp",
+          "sourceSha256": "b04a5f1e942c21ac7db3125f23247d3aecf6fc6701eb6d6c1350f0bb7a762e92",
+          "startLine": 5360,
+          "endLine": 5369,
+          "excerptSha256": "b6ba2d8bfe761d31f1215a60b3ec6473a38cbbb924625c129b3acd6894f67ea1"
+        },
+        {
+          "semanticId": "TARGET_READY",
+          "sourcePath": "engine/action/action.cpp",
+          "sourceSha256": "b04a5f1e942c21ac7db3125f23247d3aecf6fc6701eb6d6c1350f0bb7a762e92",
+          "startLine": 2409,
+          "endLine": 2424,
+          "excerptSha256": "33c41539c1de73fe630a16ea0cb688b3714396d188278838bad6831999e061cc"
+        }
+      ]
+    }
+  ],
+  "specializations": [
+    {
+      "aplAuthorityId": "SIMC_APL_DEATHKNIGHT_BLOOD",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Death_Knight_Blood.simc",
+          "sha256": "4d76f73ca91896a3b91ddeacfe50f3994c0829a217c091c17da76eb9ee1bf98e",
+          "environmentOptionLines": []
+        },
+        {
+          "path": "profiles/MID1/MID1_Death_Knight_Blood_Deathbringer.simc",
+          "sha256": "6e6176227a175c3999fa89f6d1add1308e98c9bef19f0e6bcc38e6ceeeccfed4",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_DEATHKNIGHT_FROST",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Death_Knight_Frost.simc",
+          "sha256": "783c3e2037e2806250aec8fa8b56fa47a2283b002f9617b9992f01b45dfa7615",
+          "environmentOptionLines": []
+        },
+        {
+          "path": "profiles/MID1/MID1_Death_Knight_Frost_Rider.simc",
+          "sha256": "de9b482b799c171e658dcc884bd2269effaca810be61bb077a6c29f7ab7bb32b",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_DEATHKNIGHT_UNHOLY",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Death_Knight_Unholy.simc",
+          "sha256": "531d5a8a77a886106cc8463768a67340f02247180f9d415972fee9daa817081f",
+          "environmentOptionLines": []
+        },
+        {
+          "path": "profiles/MID1/MID1_Death_Knight_Unholy_San'layn.simc",
+          "sha256": "cc37eddfe9dc9932a9d6ff95492af07e6657f81c21c55c3156a05c1bcb747c83",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_DEMONHUNTER_DEVOURER",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Demon_Hunter_Devourer.simc",
+          "sha256": "03a549d47456e3db545cd5c6b4aa87a5d3a1cdc05e5df06bc14c08aed2e13d84",
+          "environmentOptionLines": []
+        },
+        {
+          "path": "profiles/MID1/MID1_Demon_Hunter_Devourer_Void-Scarred.simc",
+          "sha256": "56e63969609ba95fe2ccc8fd00edde6284e9803a829406713a0eb3d2317de858",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_DEMONHUNTER_HAVOC",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Demon_Hunter_Havoc.simc",
+          "sha256": "145fec839c7f486d0e7476141d8bb7d1a009bb7cb496bab878c0baae3078baf5",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_DEMONHUNTER_VENGEANCE",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Demon_Hunter_Vengeance.simc",
+          "sha256": "ea260ab109dc529a955cdbbc2729211b8af1a7502021f0747de85a4ecb01a73f",
+          "environmentOptionLines": []
+        },
+        {
+          "path": "profiles/MID1/MID1_Demon_Hunter_Vengeance_Aldrachi_Reaver.simc",
+          "sha256": "1d4577cfdc6e3d11e47c63b7139b099a84fdf3208c361ff012bec33a26234b50",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_DRUID_BALANCE",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Druid_Balance.simc",
+          "sha256": "eb7e4d27495a7539fbcac7450173629b69fe94df4b65b3f29f5da8f4baba1250",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_DRUID_FERAL",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Druid_Feral.simc",
+          "sha256": "46e173dcea0fa2388a9fe63f111a0094098ff36a0c9863fbc4380ef47c067fc0",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_DRUID_GUARDIAN",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Druid_Guardian.simc",
+          "sha256": "112d6c2a647da4cd942c5e422b7fcc341af12d1d49dc90cae226711d64012c11",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_EVOKER_DEVASTATION",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Evoker_Devastation.simc",
+          "sha256": "81793e80a05e828056153d01106df7189759cf216c120779d7c2e46cc4d2a975",
+          "environmentOptionLines": []
+        },
+        {
+          "path": "profiles/MID1/MID1_Evoker_Devastation_FS.simc",
+          "sha256": "d5e003ec839c27352fba64f136f0c59e276dfd538828e17326b22c5fe4c2c98f",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_HUNTER_BEAST_MASTERY",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Hunter_Beast_Mastery.simc",
+          "sha256": "c1e2c2eaa96b1008600a2636fb517feffa85854e13e57d74bd6b2adc33014cf8",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_HUNTER_MARKSMANSHIP",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Hunter_Marksmanship.simc",
+          "sha256": "110cd5afe5c45b40af72200f2d2cd3c6d4ff5520f6ea5a6d975671c15748ea7a",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_HUNTER_SURVIVAL",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Hunter_Survival.simc",
+          "sha256": "f9a58fbeb88270961fa6052e4e0b51a6fc7ee482fb873919e6725cc8e45cc47f",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_MAGE_ARCANE",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Mage_Arcane.simc",
+          "sha256": "d26a5909aee725a63ba0c3e238bd6644f2f54d778d83d93e5dfbe3b1c9fb73b3",
+          "environmentOptionLines": []
+        },
+        {
+          "path": "profiles/MID1/MID1_Mage_Arcane_Sunfury.simc",
+          "sha256": "7cdf79c41343b7818e05954c7930b310faf1d9dfc29dd101294583d4eb299627",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_MAGE_FIRE",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Mage_Fire.simc",
+          "sha256": "fccdc3b5f4dd4b777e2452ceed14702bb714808f20a31d2176d52020f13f6763",
+          "environmentOptionLines": []
+        },
+        {
+          "path": "profiles/MID1/MID1_Mage_Fire_Frostfire.simc",
+          "sha256": "728ffda7516c7cd4880d9a15167f98a12a510dcee59d3fdcd9f64107ebc14b6c",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_MAGE_FROST",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Mage_Frost.simc",
+          "sha256": "f1c00c8311ce3ca7cc42ded83c35eeff0ed9bf57aa1316245ca7d82130236c71",
+          "environmentOptionLines": []
+        },
+        {
+          "path": "profiles/MID1/MID1_Mage_Frost_Frostfire.simc",
+          "sha256": "65a970a449ec4a57d241db3e022e5c22294be627eeecb061f6d9f8d453bb7ba3",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_MONK_BREWMASTER",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Monk_Brewmaster.simc",
+          "sha256": "d594c27a27d5acb8d0248fb0ef02ebad551786ce990119e6bcae23a03ecd3381",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_MONK_WINDWALKER",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Monk_Windwalker.simc",
+          "sha256": "edadc23fb9501f8913fd003e7cfb33820e6a0f14676e48dfae8b17dfdcef5b40",
+          "environmentOptionLines": []
+        },
+        {
+          "path": "profiles/MID1/MID1_Monk_Windwalker_Conduit.simc",
+          "sha256": "06e9455be8be65645064e7496ef67b1088c9a2e17a3b43f0d45f27eaa2becde3",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_PALADIN_PROTECTION",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Paladin_Protection.simc",
+          "sha256": "6eeeeb4ccffe6d16290af4c01f690a0b18ad239b5806d0f7f00549d5bdaeef7a",
+          "environmentOptionLines": []
+        },
+        {
+          "path": "profiles/MID1/MID1_Paladin_Protection_Lightsmith.simc",
+          "sha256": "6d0221c5396b983aa980072388a3f822707de5ca79e379badcc68c8d7839f332",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Paladin_Retribution.simc",
+          "sha256": "f524fea463902b9af6d04a9eb76490df708d550dd8fa6bb09af5e0aef57e807c",
+          "environmentOptionLines": []
+        },
+        {
+          "path": "profiles/MID1/MID1_Paladin_Retribution_Herald.simc",
+          "sha256": "8831c60d9a39d147b22e3ab64f402c2ad4fadb91669fb4a61168419c7bd54e8f",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_PRIEST_SHADOW",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Priest_Shadow.simc",
+          "sha256": "a357fa9e38461f4c13a11c0d74428ef5afc964401fe70255f51f9b94d3d8b700",
+          "environmentOptionLines": []
+        },
+        {
+          "path": "profiles/MID1/MID1_Priest_Shadow_Archon.simc",
+          "sha256": "803d2a0df31419ab7c28642f9ac772d8296242d1a7af0f193d082e2f30bd2727",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_ROGUE_ASSASSINATION",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Rogue_Assassination.simc",
+          "sha256": "d8c305476a963ae5728f6bd86d1c445d1e3e02dc5ac6d1ac2792cc6847f6e392",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_ROGUE_OUTLAW",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Rogue_Outlaw.simc",
+          "sha256": "eb463128993cb7435598bd13b6d0c72ac75ed1cba7b3ad57505d9e956990124c",
+          "environmentOptionLines": []
+        },
+        {
+          "path": "profiles/MID1/MID1_Rogue_Outlaw_Trickster.simc",
+          "sha256": "bb050a9ed529ae34ea3e0cbe57c690f8a7e7d723e38a0b130bfcb4919e906383",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_ROGUE_SUBTLETY",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Rogue_Subtlety.simc",
+          "sha256": "c4174928d8618d7814fb02714350c0648c719457082b1d9cf65fc96808d94af7",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_SHAMAN_ELEMENTAL",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Shaman_Elemental.simc",
+          "sha256": "9deb02c1a7b6eb3378b2c0bd56edaba37903e8fc681a0a0f74e901c7ad223121",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_SHAMAN_ENHANCEMENT",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Shaman_Enhancement.simc",
+          "sha256": "faf4b39e743b903bff79ea3838b82d8da4fdf8aab560438f5105bdaedb83ea38",
+          "environmentOptionLines": []
+        },
+        {
+          "path": "profiles/MID1/MID1_Shaman_Enhancement_Stormbringer.simc",
+          "sha256": "edb57571838055fb380e7e3760054fdd6b03d9b38bc2269badd72f967bd3a839",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_WARLOCK_AFFLICTION",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Warlock_Affliction.simc",
+          "sha256": "762654f19c4bc7ffdd800ca632f59df66293c27edf0a5e25981a43aac22dbbb4",
+          "environmentOptionLines": []
+        },
+        {
+          "path": "profiles/MID1/MID1_Warlock_Affliction_Hellcaller.simc",
+          "sha256": "35e53b32fcd60ef290acaf4ffd48727e9ca56dc19497663a9c1879d9b67f965b",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_WARLOCK_DEMONOLOGY",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Warlock_Demonology.simc",
+          "sha256": "4fb452047ed982ec080d81ed8547fbe68c6181f12997b87b56909a7588f51185",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_WARLOCK_DESTRUCTION",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Warlock_Destruction.simc",
+          "sha256": "fb2234fb4904e0e8a610224ed18785ee9c616255bea68216484980c0a9ad6612",
+          "environmentOptionLines": []
+        },
+        {
+          "path": "profiles/MID1/MID1_Warlock_Destruction_Diabolist.simc",
+          "sha256": "83a10fa21ca57529d6cc653ddfcdd6a89171c564f8999e699ee0f74934d649cb",
+          "environmentOptionLines": []
+        },
+        {
+          "path": "profiles/MID1/MID1_Warlock_Destruction_Hellcaller.simc",
+          "sha256": "2ec64ef4d4b3562001567c0e4667399ff8855be883e76f314d879a4eff6f56a3",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_WARRIOR_ARMS",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Warrior_Arms.simc",
+          "sha256": "961b28d0bd1438a40eb8f8734d0d19b2de2791262acc0065c5d863cf935aa02b",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_WARRIOR_FURY",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Warrior_Fury.simc",
+          "sha256": "f87c68d1e7152d6829fd308fc978c8126fc720d6a039ef242a142a2aa04bd07c",
+          "environmentOptionLines": []
+        }
+      ]
+    },
+    {
+      "aplAuthorityId": "SIMC_APL_WARRIOR_PROTECTION",
+      "profiles": [
+        {
+          "path": "profiles/MID1/MID1_Warrior_Protection.simc",
+          "sha256": "a37b91ff4ecfb1b37e59a1cd91d8080208c16fb2bf98e2652068a097878a019c",
+          "environmentOptionLines": []
+        }
+      ]
+    }
+  ]
+}

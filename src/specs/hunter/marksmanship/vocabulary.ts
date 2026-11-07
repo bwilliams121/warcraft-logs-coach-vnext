@@ -14,7 +14,7 @@
  *       the wire carries Focus on a costed cast, at its completion, and a cast-time spell spends it. A completion's reading is not its decision's, and no
  *       shared wire contract row exists for it
  *   fight_style.dungeonroute
- *       a simulation setting, with no authority for a real fight. It gates the list's `retarget` line, so it stops every scan
+ *       a simulation setting, with no authority for a real fight. SIMC-FB-A may bind it as a disclosed profile fact, and this list does not read that yet. It gates the list's `retarget` line, so it stops every scan
  *   raid_event.pull.*, max_prio_damage, target.health
  *       simulation raid events and target priority, with no log stream behind them
  *   cooldown.*, buff.*.down, buff.*.max_stack, debuff.*.react, debuff.*.down, dot.*.remains, full_recharge_time, cast_time, execute_time, gcd, gcd.max, time, set_bonus.*, action.*
