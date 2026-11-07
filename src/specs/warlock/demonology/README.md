@@ -48,7 +48,7 @@ No haste is established, so `exactMs` is always null and no anchor is ever deriv
 | `talent.to_hell_and_back.enabled` | the same answer | an unresolved talent binds nothing |
 | `pet.demonic_tyrant.active` | shared pet presence, at the anchor | an undecided presence binds nothing, so the truth is enumerated |
 | `buff.wild_imps.stack` | shared pet count, at the anchor | a stack binding, explicit even when unknown, and never zero by default |
-| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `active_enemies` | the shared enemy set at the decision, then the pinned SimC profile (`withEncounterStateAt`, SIMC-FB-R) | a proven lower bound. Where nothing contradicts it on a proven build, the profile's 1, disclosed as SimC-profile-relative. Otherwise UNKNOWN, and no position means no reading |
 | `soul_shard`, `gcd.max`, every other `buff.*` and `debuff.*`, `cooldown.*`, `fight_remains` | none | unbound or UNKNOWN_NUMBER, stated as such |
 
 ## The pets (ONB-S6)
@@ -83,3 +83,9 @@ Seven retained Diabolist subjects, each replayed offline through production inge
 ## Not evaluated, deliberately
 
 Soul Shards, auras, cooldowns, haste, Tyrant setup and Ritual Clipping (`UNRESOLVED_DIABOLIST_HERO_TREE`, as recorded). See `agent/follow-ups.md` "After ONB-X4".
+
+## The pinned SimC profile (SIMC-FB-R)
+
+Every decision reads encounter state through `withEncounterStateAt`: real evidence first, then the pinned profile's environment, on a build the deploy calendar proves. The result says what the priority would select under the profile, never what the real encounter held. Each decision's `profileFacts` go into the view as `simcProfileFacts`, so it is disclosed. It makes nothing actionable. The measured results are in `agent/architecture.md` "SIMC-FB-R".
+
+`target_if`: nothing attested (`sole-target-attestations.ts`); not attested: `demonbolt`, each with its reason in that file. An unattested line reads as it did before.

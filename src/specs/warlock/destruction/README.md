@@ -55,7 +55,7 @@ The rows are hand-reviewed readings of the pinned `_cast_time` and of every warl
 | Atom | Source | Rule |
 | --- | --- | --- |
 | `talent.<x>`, `talent.cataclysm.enabled` | the three-way rule; another hero tree's talents are FALSE on a resolved tree | absent from the tree is UNKNOWN |
-| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `active_enemies` | the shared enemy set at the decision, then the pinned SimC profile (`withEncounterStateAt`, SIMC-FB-R) | a proven lower bound. Where nothing contradicts it on a proven build, the profile's 1, disclosed as SimC-profile-relative. Otherwise UNKNOWN, and no position means no reading |
 | `soul_shard`, `active_dot.*`, `dot.*`, `dot_refreshable_count.*`, `buff.*`, `cooldown.*`, `action.*`, `demonic_art`, `pet.infernal.active`, `target.health.pct`, `target.time_to_die`, `fight_remains`, `raid_event.*`, `time` | none | unbound or UNKNOWN_NUMBER, stated as such |
 
 ## Why 216 decisions stay UNKNOWN
@@ -75,3 +75,9 @@ Two retained subjects, replayed offline through production ingestion: A7R6kxPJ1h
 ## Not evaluated, deliberately
 
 Ritual Clipping stays `UNRESOLVED_DIABOLIST_HERO_TREE`, a deep-dive question this slice neither answers nor needs (no retained Destruction subject is a Diabolist). Auras, cooldowns, charges, Soul Shards, pets, the target's health, haste and movement are not modelled. See `agent/follow-ups.md` "After ONB-D1".
+
+## The pinned SimC profile (SIMC-FB-R)
+
+Every decision reads encounter state through `withEncounterStateAt`: real evidence first, then the pinned profile's environment, on a build the deploy calendar proves. The result says what the priority would select under the profile, never what the real encounter held. Each decision's `profileFacts` go into the view as `simcProfileFacts`, so it is disclosed. It makes nothing actionable. The measured results are in `agent/architecture.md` "SIMC-FB-R".
+
+`target_if`: nothing attested (`sole-target-attestations.ts`); not attested: `conflagrate`, `shadowburn`, `havoc`, `soul_fire`, `wither`, `immolate`, each with its reason in that file. An unattested line reads as it did before.

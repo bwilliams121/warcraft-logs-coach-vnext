@@ -55,7 +55,7 @@ The rows are hand-reviewed readings of the pinned `_cast_time` and of every cast
 | Atom | Source | Rule |
 | --- | --- | --- |
 | `talent.<x>` | the three-way rule; another hero tree's talents are FALSE on a resolved tree | absent from the tree is UNKNOWN |
-| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `active_enemies` | the shared enemy set at the decision, then the pinned SimC profile (`withEncounterStateAt`, SIMC-FB-R) | a proven lower bound. Where nothing contradicts it on a proven build, the profile's 1, disclosed as SimC-profile-relative. Otherwise UNKNOWN, and no position means no reading |
 | `insanity.deficit`, `spell_targets.*`, `active_dot.*`, `dot.*`, `buff.*`, `cooldown.*`, `target.health.pct`, `health.pct`, `pet.*`, `action.*`, `raid_event.*`, `priest.*`, `gcd.max`, `time_to_bloodlust`, `fight_remains`, `target.time_to_die` | none | unbound or UNKNOWN_NUMBER, stated as such |
 
 ## Why no decision resolves
@@ -73,3 +73,9 @@ Two retained subjects, replayed offline through production ingestion, both Archo
 ## Not evaluated, deliberately
 
 Voidweaver has no retained subject, and none casts Vampiric Touch, Void Torrent or Void Blast, so those lines are unmeasured. Insanity, auras, DoTs, cooldowns, targets' health, pets and haste are not modelled. See `agent/follow-ups.md` "After ONB-D2".
+
+## The pinned SimC profile (SIMC-FB-R)
+
+Every decision reads encounter state through `withEncounterStateAt`: real evidence first, then the pinned profile's environment, on a build the deploy calendar proves. The result says what the priority would select under the profile, never what the real encounter held. Each decision's `profileFacts` go into the view as `simcProfileFacts`, so it is disclosed. It makes nothing actionable. The measured results are in `agent/architecture.md` "SIMC-FB-R".
+
+`target_if`: attested for `shadow_word_death`, `shadow_word_madness`, `tentacle_slam`, `void_torrent`, `shadow_word_pain`, `void_blast`, `mind_blast`, `mind_flay_insanity`, `vampiric_touch`, `mind_flay` (`sole-target-attestations.ts`); not attested: `variable`, each with its reason in that file. An unattested line reads as it did before.

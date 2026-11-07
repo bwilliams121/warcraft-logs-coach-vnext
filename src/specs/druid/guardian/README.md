@@ -42,7 +42,7 @@ No press of this list has a positive cast time.
 | Atom | Source | Rule |
 | --- | --- | --- |
 | `talent.<x>`, `talent.<x>.enabled` | the three-way rule; another hero tree's talents are FALSE on a resolved tree | absent from the tree is UNKNOWN, and an unresolved `.enabled` has no row |
-| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `active_enemies` | the shared enemy set at the decision, then the pinned SimC profile (`withEncounterStateAt`, SIMC-FB-R) | a proven lower bound. Where nothing contradicts it on a proven build, the profile's 1, disclosed as SimC-profile-relative. Otherwise UNKNOWN, and no position means no reading |
 | `rage`, `talent.flashing_claws.rank`, `buff.*`, `cooldown.*`, `dot.*`, `gcd`, `set_bonus.*`, `target.cooldown.pause_action.remains` | none | unbound or UNKNOWN_NUMBER, stated as such |
 
 ## Why no decision resolves
@@ -59,3 +59,9 @@ No press of this list has a positive cast time.
 ## Not evaluated, deliberately
 
 Every row is unmeasured against a resolved build. Rage, auras, forms, cooldowns, DoTs, the enemy count and haste are not modelled. See `agent/follow-ups.md` "After ONB-T2".
+
+## The pinned SimC profile (SIMC-FB-R)
+
+Every decision reads encounter state through `withEncounterStateAt`: real evidence first, then the pinned profile's environment, on a build the deploy calendar proves. The result says what the priority would select under the profile, never what the real encounter held. Each decision's `profileFacts` go into the view as `simcProfileFacts`, so it is disclosed. It makes nothing actionable. The measured results are in `agent/architecture.md` "SIMC-FB-R".
+
+`target_if`: attested for `thrash` (`sole-target-attestations.ts`). An unattested line reads as it did before.

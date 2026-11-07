@@ -73,3 +73,9 @@ Measured on synthetic builds. There is nothing real to replay.
 ## Not evaluated, deliberately
 
 Auras (no wire identity is corroborated), cooldowns and charges, resources between casts, soul fragments, the enemy count, the target's casts, movement, and all of the tank's own domains. See `agent/follow-ups.md` "After ONB-X3".
+
+## The pinned SimC profile (SIMC-FB-R)
+
+Every decision reads encounter state through `withEncounterStateAt`: real evidence first, then the pinned profile's environment, on a build the deploy calendar proves. The result says what the priority would select under the profile, never what the real encounter held. Each decision's `profileFacts` go into the view as `simcProfileFacts`, so it is disclosed. It makes nothing actionable. The measured results are in `agent/architecture.md` "SIMC-FB-R".
+
+`target_if`: nothing attested (`sole-target-attestations.ts`); not attested: `retarget_auto_attack`, each with its reason in that file. An unattested line reads as it did before.

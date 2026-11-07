@@ -17,6 +17,7 @@
  */
 
 import type { AnalyzerRegistration } from "../../../findings/analyzer-registration.js";
+import { simcProfileFactsField } from "../../../findings/simc-profile-fallback.js";
 import { defineSpecModule, type SpecModule } from "../../../findings/spec-module.js";
 import type { ObservedDecisionView } from "../../../findings/observed-decision-view.js";
 import {
@@ -81,7 +82,7 @@ export function devourerDemonHunterObservedDecisionView(
 ): ObservedDecisionView {
   const { coverage } = analysis;
   return {
-    decisions: analysis.comparisons.map((comparison) => ({
+    decisions: analysis.comparisons.map((comparison, index) => ({
       locator: comparison.decision.locator,
       position: comparison.decision.position,
       fightTimeMs: comparison.decision.fightTimeMs,
@@ -95,6 +96,7 @@ export function devourerDemonHunterObservedDecisionView(
       selectionPrecision: comparison.selectionPrecision,
       decisiveBlocker: comparison.decisiveBlocker,
       usabilityProvenance: comparison.usabilityProvenance,
+      ...simcProfileFactsField({ profileFacts: analysis.resolved[index]?.profileFacts ?? [] }),
     })),
     exclusions: analysis.excluded.map((cast) => ({
       locator: cast.locator,
@@ -134,7 +136,7 @@ export const DEVOURER_DEMON_HUNTER_LIMITS = Object.freeze({
     "when the necessary state can be established. A Void-Scarred build with The Hunt reaches `voidscarred_melee` and stops on the enemy count, which events can only bound from below. An Annihilator build has its first line open on the count and on auras nothing binds. Behind the count, each pick-up line's `line_cd` is UNKNOWN from any log and has no reviewed contract, so no decision currently resolves.",
     "It does NOT evaluate defensive cooldowns, interrupts or survival, it does not score performance, and it does",
     "not read race, faction, gear use effects or consumables. It reconstructs no Fury between observations, no cooldown, no",
-    "aura and no enemy count. UNKNOWN is expected here and is not a fault.",
+    "aura and no enemy count of its own. UNKNOWN is expected here and is not a fault.",
   ].join("\n"),
   raidNight: [
     "Devourer Demon Hunter cells count only observed global-cooldown decisions compared against pinned class/spec authority,",

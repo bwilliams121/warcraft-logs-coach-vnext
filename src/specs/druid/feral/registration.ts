@@ -17,6 +17,7 @@
  */
 
 import type { AnalyzerRegistration } from "../../../findings/analyzer-registration.js";
+import { simcProfileFactsField } from "../../../findings/simc-profile-fallback.js";
 import { defineSpecModule, type SpecModule } from "../../../findings/spec-module.js";
 import type { ObservedDecisionView } from "../../../findings/observed-decision-view.js";
 import { FERAL_DRUID_AUTHORITY_BINDINGS, FERAL_DRUID_CAPABILITIES } from "./authority-bindings.js";
@@ -73,7 +74,7 @@ export function feralDruidObservedDecisionView(
 ): ObservedDecisionView {
   const { coverage } = analysis;
   return {
-    decisions: analysis.comparisons.map((comparison) => ({
+    decisions: analysis.comparisons.map((comparison, index) => ({
       locator: comparison.decision.locator,
       position: comparison.decision.position,
       fightTimeMs: comparison.decision.fightTimeMs,
@@ -87,6 +88,7 @@ export function feralDruidObservedDecisionView(
       selectionPrecision: comparison.selectionPrecision,
       decisiveBlocker: comparison.decisiveBlocker,
       usabilityProvenance: comparison.usabilityProvenance,
+      ...simcProfileFactsField({ profileFacts: analysis.resolved[index]?.profileFacts ?? [] }),
     })),
     exclusions: analysis.excluded.map((cast) => ({
       locator: cast.locator,
@@ -126,7 +128,7 @@ export const FERAL_DRUID_LIMITS = Object.freeze({
     "when the necessary state can be established. On every retained subject the first GCD query stays UNKNOWN: Prowl is open on an Incarnation build once it has been pressed, Tiger's Fury has no contract, and every finisher and builder sits behind the enemy count, which no action registers yet (ONB-S3). The pool line is modelled and can only be reached past that count, so no decision currently resolves.",
     "It does NOT evaluate defensive cooldowns, interrupts or survival, it does not score performance, and it does",
     "not read race, faction, gear use effects or consumables. It reconstructs no Energy and Combo Points between observations, no cooldown, no",
-    "DoT on the target and no enemy count. UNKNOWN is expected here and is not a fault.",
+    "DoT on the target and no enemy count of its own. UNKNOWN is expected here and is not a fault.",
   ].join("\n"),
   raidNight: [
     "Feral Druid cells count only observed global-cooldown decisions compared against pinned class/spec authority,",

@@ -55,7 +55,7 @@ The rows are hand-reviewed readings of the pinned `_cast_time` and of every cast
 | Atom | Source | Rule |
 | --- | --- | --- |
 | `talent.<x>` | the three-way rule; another hero tree's talents are FALSE on a resolved tree | absent from the tree is UNKNOWN |
-| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `active_enemies` | the shared enemy set at the decision, then the pinned SimC profile (`withEncounterStateAt`, SIMC-FB-R) | a proven lower bound. Where nothing contradicts it on a proven build, the profile's 1, disclosed as SimC-profile-relative. Otherwise UNKNOWN, and no position means no reading |
 | `mana.pct`, `buff.*`, `debuff.*`, `cooldown.*`, `prev_gcd.*`, `set_bonus.*`, `action.*`, `gcd.max`, `fight_remains` | none | unbound or UNKNOWN_NUMBER, stated as such |
 
 ## Why no decision resolves
@@ -74,3 +74,9 @@ Six retained subjects, replayed offline through production ingestion, all Sunfur
 ## Not evaluated, deliberately
 
 Spellslinger has no retained subject, and none casts Arcane Pulse, Evocation or Presence of Mind, so those lines are unmeasured. Mana, Arcane Charges, Arcane Salvo, Clearcasting, every other aura, cooldowns, charges, the enemy count and haste are not modelled. See `agent/follow-ups.md` "After ONB-D3".
+
+## The pinned SimC profile (SIMC-FB-R)
+
+Every decision reads encounter state through `withEncounterStateAt`: real evidence first, then the pinned profile's environment, on a build the deploy calendar proves. The result says what the priority would select under the profile, never what the real encounter held. Each decision's `profileFacts` go into the view as `simcProfileFacts`, so it is disclosed. It makes nothing actionable. The measured results are in `agent/architecture.md` "SIMC-FB-R".
+
+`target_if`: this list has no `target_if` line.

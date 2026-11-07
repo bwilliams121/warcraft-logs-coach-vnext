@@ -18,6 +18,7 @@
  */
 
 import type { AnalyzerRegistration } from "../../../findings/analyzer-registration.js";
+import { simcProfileFactsField } from "../../../findings/simc-profile-fallback.js";
 import { defineSpecModule, type SpecModule } from "../../../findings/spec-module.js";
 import type { ObservedDecisionView } from "../../../findings/observed-decision-view.js";
 import { FURY_WARRIOR_AUTHORITY_BINDINGS, FURY_WARRIOR_CAPABILITIES } from "./authority-bindings.js";
@@ -73,7 +74,7 @@ export function furyWarriorObservedDecisionView(
 ): ObservedDecisionView {
   const { coverage } = analysis;
   return {
-    decisions: analysis.comparisons.map((comparison) => ({
+    decisions: analysis.comparisons.map((comparison, index) => ({
       locator: comparison.decision.locator,
       position: comparison.decision.position,
       fightTimeMs: comparison.decision.fightTimeMs,
@@ -87,6 +88,7 @@ export function furyWarriorObservedDecisionView(
       selectionPrecision: comparison.selectionPrecision,
       decisiveBlocker: comparison.decisiveBlocker,
       usabilityProvenance: comparison.usabilityProvenance,
+      ...simcProfileFactsField({ profileFacts: analysis.resolved[index]?.profileFacts ?? [] }),
     })),
     exclusions: analysis.excluded.map((cast) => ({
       locator: cast.locator,
@@ -126,7 +128,7 @@ export const FURY_WARRIOR_LIMITS = Object.freeze({
     "when the necessary state can be established. Every decision first meets Charge, an off-GCD action whose effect has no reviewed contract, and then a hero-talent list dispatch gated on the enemy count, which events can only bound from below, so no decision currently resolves.",
     "It does NOT evaluate defensive cooldowns, interrupts or survival, it does not score performance, and it does",
     "not read race, faction, gear use effects or consumables. It reconstructs no Rage between observations, no cooldown, no",
-    "aura and no enemy count. UNKNOWN is expected here and is not a fault.",
+    "aura and no enemy count of its own. UNKNOWN is expected here and is not a fault.",
   ].join("\n"),
   raidNight: [
     "Fury Warrior cells count only observed global-cooldown decisions compared against pinned class/spec authority,",

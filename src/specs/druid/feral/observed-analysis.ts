@@ -32,6 +32,12 @@
  */
 
 import type { CombatState } from "../../../engine/state/combat-state.js";
+import {
+  aplAuthorityIdentityOf,
+  withEncounterStateAt,
+  type SimcProfileProvenance,
+} from "../../../findings/simc-profile-fallback.js";
+import { DRUID_FERAL_SOLE_TARGET_ATTESTATIONS } from "./sole-target-attestations.js";
 import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
 import type {
   AnalysisAuthorityMetadata,
@@ -207,6 +213,8 @@ export interface FeralDruidPayload {
   readonly build: FeralDruidBuildResolution;
   /** The resolver's diagnostics at each eligible decision, by position. */
   readonly resolved: readonly {
+    /** The tier-3 facts this decision was evaluated under, for the view to disclose. */
+    readonly profileFacts: readonly SimcProfileProvenance[];
     readonly position: number;
     readonly diagnostics: FeralDruidResolverDiagnostics;
     readonly selection: FeralDruidSelectionDiagnostics;
@@ -508,9 +516,14 @@ export function analyzeObservedFeralDruidDecisions(input: FeralDruidAnalysisInpu
       specAtoms: resolution.specAtoms,
     };
 
+    const encounterState = withEncounterStateAt(bindings, state, actorId, position, {
+      authority: aplAuthorityIdentityOf(authority),
+      soleTargetAttestations: DRUID_FERAL_SOLE_TARGET_ATTESTATIONS,
+    });
+
     const outcome = feralDruidFirstGcdSelectionAt({
       authority,
-      bindings,
+      bindings: encounterState.bindings,
       buildFacts,
       observedAbilityGameId: abilityGameId,
       prowl,
@@ -529,6 +542,7 @@ export function analyzeObservedFeralDruidDecisions(input: FeralDruidAnalysisInpu
     });
 
     resolved.push({
+      profileFacts: encounterState.profileFacts,
       position,
       diagnostics: resolution.diagnostics,
       selection: selectionDiagnosticsOf(outcome),

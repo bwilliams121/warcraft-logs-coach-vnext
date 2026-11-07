@@ -17,6 +17,7 @@
  */
 
 import type { AnalyzerRegistration } from "../../../findings/analyzer-registration.js";
+import { simcProfileFactsField } from "../../../findings/simc-profile-fallback.js";
 import { defineSpecModule, type SpecModule } from "../../../findings/spec-module.js";
 import type { ObservedDecisionView } from "../../../findings/observed-decision-view.js";
 import {
@@ -80,7 +81,7 @@ export function frostDeathKnightObservedDecisionView(
 ): ObservedDecisionView {
   const { coverage } = analysis;
   return {
-    decisions: analysis.comparisons.map((comparison) => ({
+    decisions: analysis.comparisons.map((comparison, index) => ({
       locator: comparison.decision.locator,
       position: comparison.decision.position,
       fightTimeMs: comparison.decision.fightTimeMs,
@@ -94,6 +95,7 @@ export function frostDeathKnightObservedDecisionView(
       selectionPrecision: comparison.selectionPrecision,
       decisiveBlocker: comparison.decisiveBlocker,
       usabilityProvenance: comparison.usabilityProvenance,
+      ...simcProfileFactsField({ profileFacts: analysis.resolved[index]?.profileFacts ?? [] }),
     })),
     exclusions: analysis.excluded.map((cast) => ({
       locator: cast.locator,
@@ -133,7 +135,7 @@ export const FROST_DEATH_KNIGHT_LIMITS = Object.freeze({
     "when the necessary state can be established. Every decision first meets off-GCD actions whose effects have no reviewed contract, then a cooldown line this slice cannot read (Reaper's Mark's target_if on a Deathbringer build, Frostwyrm's Fury's condition on a Rider build), and behind those a list dispatch on the enemy count, which events can only bound from below, so no decision currently resolves.",
     "It does NOT evaluate defensive cooldowns, interrupts or survival, it does not score performance, and it does",
     "not read race, faction, gear use effects or consumables. It reconstructs no Runes or Runic Power between observations, no cooldown, no",
-    "aura and no enemy count. UNKNOWN is expected here and is not a fault.",
+    "aura and no enemy count of its own. UNKNOWN is expected here and is not a fault.",
   ].join("\n"),
   raidNight: [
     "Frost Death Knight cells count only observed global-cooldown decisions compared against pinned class/spec authority,",

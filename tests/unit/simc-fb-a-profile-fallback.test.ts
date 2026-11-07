@@ -47,6 +47,7 @@ import { loadAplAuthority, type AplAction } from "../../src/simc/apl-authority.j
 import {
   evaluateSimcExpression,
   knownNumber,
+  unknownNumber,
   NO_ACTING_ACTION,
   type AtomBindings,
 } from "../../src/simc/expression/evaluate.js";
@@ -610,6 +611,47 @@ describe("what the profile establishes, and what it leaves open", () => {
     };
     const resolved = resolveAt(ONE_MEMBER(), {}, held);
     expect(outcomeOf("spell_targets.cleave>=2", resolved.bindings)).toBe("TRUE");
+    expect(factAtoms(resolved)).not.toContain("spell_targets.cleave");
+  });
+
+  it("a resolver's UNKNOWN placeholder is no reading, and the profile replaces it (SIMC-FB-R)", () => {
+    const placeholder: AtomBindings = {
+      ...BINDINGS,
+      specAtoms: {
+        vocabulary: VOCABULARY,
+        bound: [
+          {
+            key: "spell_targets.cleave",
+            actionToken: null,
+            value: { kind: "MAGNITUDE", binding: unknownNumber("STATE_NOT_MODELLED") },
+          },
+        ],
+      },
+    };
+    const resolved = resolveAt(ONE_MEMBER(), {}, placeholder);
+    expect(outcomeOf("spell_targets.cleave>=2", resolved.bindings)).toBe("FALSE");
+    expect(factAtoms(resolved)).toContain("spell_targets.cleave");
+    expect(
+      resolved.bindings.specAtoms?.bound.filter((entry) => entry.key === "spell_targets.cleave"),
+    ).toHaveLength(1);
+  });
+
+  it("a contradiction leaves that placeholder UNKNOWN: a proven enemy says nothing about the geometry", () => {
+    const placeholder: AtomBindings = {
+      ...BINDINGS,
+      specAtoms: {
+        vocabulary: VOCABULARY,
+        bound: [
+          {
+            key: "spell_targets.cleave",
+            actionToken: null,
+            value: { kind: "MAGNITUDE", binding: unknownNumber("STATE_NOT_MODELLED") },
+          },
+        ],
+      },
+    };
+    const resolved = resolveAt(TWO_MEMBERS(), {}, placeholder);
+    expect(outcomeOf("spell_targets.cleave>=2", resolved.bindings)).toBe("UNKNOWN");
     expect(factAtoms(resolved)).not.toContain("spell_targets.cleave");
   });
 

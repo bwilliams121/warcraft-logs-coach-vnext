@@ -41,7 +41,13 @@
  */
 
 import type { CombatState } from "../../../engine/state/combat-state.js";
-import { decisionPositionOfAnchor, withEnemyCountAt } from "../../../findings/enemy-count-bindings.js";
+import { decisionPositionOfAnchor } from "../../../findings/enemy-count-bindings.js";
+import {
+  aplAuthorityIdentityOf,
+  withEncounterStateAt,
+  type SimcProfileProvenance,
+} from "../../../findings/simc-profile-fallback.js";
+import { HUNTER_MARKSMANSHIP_SOLE_TARGET_ATTESTATIONS } from "./sole-target-attestations.js";
 import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
 import type {
   AnalysisAuthorityMetadata,
@@ -209,6 +215,8 @@ export interface MarksmanshipHunterPayload {
   readonly build: MarksmanshipBuildResolution;
   /** The resolver's diagnostics at each eligible decision, by position. */
   readonly resolved: readonly {
+    /** The tier-3 facts this decision was evaluated under, for the view to disclose. */
+    readonly profileFacts: readonly SimcProfileProvenance[];
     readonly position: number;
     readonly diagnostics: MarksmanshipResolverDiagnostics;
     readonly selection: MarksmanshipSelectionDiagnostics;
@@ -479,9 +487,20 @@ export function analyzeObservedMarksmanshipHunterDecisions(
       targetActorId,
     };
 
+    const encounterState = withEncounterStateAt(
+      bindings,
+      state,
+      actorId,
+      decisionPositionOfAnchor(anchor, position),
+      {
+        authority: aplAuthorityIdentityOf(authority),
+        soleTargetAttestations: HUNTER_MARKSMANSHIP_SOLE_TARGET_ATTESTATIONS,
+      },
+    );
+
     const outcome = marksmanshipFirstGcdSelectionAt({
       authority,
-      bindings: withEnemyCountAt(bindings, state, actorId, decisionPositionOfAnchor(anchor, position)),
+      bindings: encounterState.bindings,
       buildFacts,
       observedAbilityGameId: abilityGameId,
     });
@@ -495,6 +514,7 @@ export function analyzeObservedMarksmanshipHunterDecisions(
           );
 
     resolved.push({
+      profileFacts: encounterState.profileFacts,
       position,
       diagnostics: resolution.diagnostics,
       selection: selectionDiagnosticsOf({ result: authorityResult, rootScan: outcome.rootScan }),

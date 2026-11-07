@@ -15357,3 +15357,74 @@ Autopilot queue entry SIMC-FB-B, carrying the "Public disclosure" clause of the 
 **Byte-identical.** Digests of the REST bytes of four documents, taken from `fd0892d` before any edit, are pinned in `tests/integration/simc-fb-b-public-disclosure.test.ts`: M5-A, M5-D2, an unsupported specialization and the mixed raid night.
 
 **Not done.** No specialization reads the fallback, so disclosure on a real tier-3 decision is unmeasured until SIMC-FB-R. The tests attach real facts from the committed record to real views, which proves the disclosure and no gameplay result. The tool descriptions gained one paragraph each, and they are the only text a caller of an unwired specialization can see change.
+
+## SIMC-FB-R — the replay under the fallback, as built
+
+Autopilot queue entry SIMC-FB-R, on the owner decision above. Offline on retained captures, no Warcraft Logs request, no public contract change, and nothing promoted.
+
+**The result.** Wiring and attestation resolve no new decision. Over 8546 eligible decisions of 49 replayed subjects, the outcome is 4 MATCH, 0 REJECTED and 8542 UNKNOWN before and after, on the real calendar and with every build injected. The 4 MATCH are Destruction's existing Summon Infernal presses, each at a real bound of 2 or 3, and none has a tier-3 fact bound. So no tier-3 decision has resolved on real evidence, disclosure on a real one is still unmeasured, and no specialization qualifies for a public entry.
+
+**What moved.** Encounter state was the first stop for some lists and was not the engine's first refusal for most. The root scan moved past the count on Arms, Devourer, Unholy and Beast Mastery, and past `fight_style` on Beast Mastery's `retarget`. Each stop table reads "first unresolved line of the root scan", and the engine's block is often earlier, at an off-GCD or swing line with no readiness evidence: Charge, `auto_attack`, `auto_shot`, Counterspell, Quell, Power Infusion. Both are in the table. Read both before naming a next blocker.
+
+**Wiring.** The 26 INTERNAL_ONLY trees with a pinned list call `withEncounterStateAt` at the same decision position they used before, or the cast's own position for the five that read no count before (Feral, Subtlety, Outlaw, Vengeance, Protection Warrior). Each decision's `profileFacts` is on its `resolved` row and goes to the view through `simcProfileFactsField`. Restoration Druid and Discipline bind no list. PUBLIC trees are not wired, and a test keeps them so.
+
+**A defect in SIMC-FB-A, fixed here.** Resolvers bind `spell_targets.*` and `raid_event.*` to an UNKNOWN magnitude so their conditions read as undecided, and the shared code took that as a stronger reading the caller already held. Tier 3 therefore never answered those atoms for any list that binds such a placeholder, and Subtlety, Outlaw and Protection Warrior bound nothing at all. A placeholder is now replaced, a known or bounded value still stands, and after a contradiction the placeholder stays UNKNOWN. The per-specialization wiring test found this, and the SIMC-FB-A tests had used a vocabulary with no placeholder.
+
+**`target_if`.** 76 token rows audited at the pin, for the wired lists. 50 attested, 26 refused, each recorded in `src/specs/<class>/<spec>/sole-target-attestations.ts`.
+
+- The rule is conservative: an ordinary harmful action aimed at the enemy, with no `available_targets`, `target_ready` or `select_target` override and no `target_filter_callback` on the foreground object anywhere in its inheritance chain. Pyre's override was read and returns the one enemy for the foreground object.
+- Refused: pseudo-actions (`run_action_list`, `variable`, `retarget`, `retarget_auto_attack`), self-aimed or `harmful = false` actions (`prowl`, `shadowmeld`, `wildfire_bomb`), and any action whose `target_ready` can be false on the one target (`soul_reaper`, `black_arrow`, `kill_shot`, `touch_of_death`, `touch_of_karma`).
+- All ten warlock tokens are refused, because `warlock_spell_t` overrides `select_target` (`sc_warlock_actions.cpp:548`). Nine could be attested if that override is read and shown harmless, and `seed_of_corruption` has its own `available_targets`.
+- Method: a read of each chain, then a mechanical walk of every attested struct's inheritance over the pinned source for those overrides. It flagged five, and each was read by hand: the filters on Ferocious Bite, Explosive Shot, Tiger Palm and Rising Sun Kick are on background children, and the fifth is Pyre above. The clone is not committed, so CI checks shape and not the C++.
+- Attesting every token, the refused ones included, adds no MATCH on retained evidence (measured). An attested line can still stop: `reapers_mark` is FIRST mode, which stays truth-valued, and `shadow_word_madness` stops the same way as before on a condition this slice does not read.
+
+**The label.** SIMC-FB-B labels what was bound and not what was read. With no resolved tier-3 decision, over-disclosure has cost nothing yet, so no counterfactual evaluation was built.
+
+**Build proof by subject,** through the production resolver over the committed calendar:
+
+| Report | Fight start (UTC) | Retained region | If US | Subjects | What proving it would take |
+| --- | --- | --- | --- | ---: | --- |
+| b1PmaKrd6CDfzngc f48 | 2026-10-01 03:05 | committed capture (raw capture has none) | 12.1.0.69933 | 12 | nothing: a live request retrieves the region |
+| A7R6kxPJ1hC8YQ4w f7 | 2026-09-10 01:35 | none | 12.1.0.69587 | 10 | its region, one context request, which is an owner stop |
+| gtKb2xHn87pNcFfW f22 | 2026-09-13 23:13 | none | no interval: 69587 ends 09-12, and 69814 has no proven interval | 14 | its region, restart evidence for 69814, and a dataset model for it |
+| rXAfw9t1q8YpmkKD f13 | 2026-09-02 03:30 | none | no interval: before the 09-08 restart | 13 | its region, an earlier interval, and a dataset model for that build |
+| M13-A f1 | 2026-11-02 05:11 | US | no interval: after the observations end | 10, all refuse | 12.1.5 is deferred (M11-G4-5), and these subjects have no combatant info |
+
+Build proof is therefore a real limit. Only 12 of 49 analyzed subjects, all in b1Pm, have a provable build, across 9 specializations: Arms, Frost Death Knight, Feral, Elemental, Arcane, Devastation, Demonology, Windwalker and Beast Mastery. Devourer, Destruction, Balance, Shadow, Fire and Unholy have analyzable subjects and none provable. Enhancement, Subtlety, Frost Mage, Affliction and Marksmanship have only refusing subjects. Fury, Protection Warrior, Outlaw, Guardian, Survival and Vengeance have no subject. Injecting a build is a measurement and proves nothing, and each new source or request above is the owner's. No request was made.
+
+**The replay.** "Tier-3 decisions" counts decisions with a fact bound, so most of them are unresolved. "On the calendar" restates b1Pm's region from its committed capture, as a live request would retrieve it, and every other report is unresolved. "Every build injected" is the upper bound any calendar extension could give, and it is a measurement only. With no build, the counts equal ONB-S3R's on every subject both replays analyzed, which is what shows the wiring changes nothing where the fallback does not apply.
+
+| Specialization | Retained subjects | Build proven | Eligible | MATCH | REJECTED | UNKNOWN | Tier-3 decisions on the calendar / with every build injected | Root scan stops, every build injected | Engine blocks at |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |
+| `deathknight/frost` | 2 | 1 | 567 | 0 | 0 | 567 | 178 / 437 | 567x cooldowns[4] reapers_mark on NOT_EVALUATED:UNSUPPORTED_TARGETING | 567x default[0] auto_attack |
+| `deathknight/unholy` | 1 | 0 | 147 | 0 | 0 | 147 | 0 / 147 | 147x single_target[6] soul_reaper on NOT_EVALUATED:UNSUPPORTED_TARG... | 147x default[0] auto_attack |
+| `demonhunter/devourer` | 3 | 0 | 251 | 0 | 0 | 251 | 0 / 251 | 143x reaps[0] eradicate on APPLICABILITY:eradicate; 76x none | 251x vsm_st[0] pick_up_fragment |
+| `druid/balance` | 4, 1 refusing | 0 | 287 | 0 | 0 | 287 | 0 / 178 | 287x default[13] run_action_list on variable.opener | 178x default[13] run_action_list; 109x null |
+| `druid/feral` | 2 | 1 | 372 | 0 | 0 | 372 | 258 / 372 | 256x default[6] chomp on APPLICABILITY:chomp; 112x cooldown[13] convoke_the_spirits on UNSUPPORTED_EXPRESSION:TOO... | 199x default[3] auto_attack; 164x default[0] prowl |
+| `evoker/devastation` | 3 | 1 | 440 | 0 | 0 | 440 | 152 / 351 | 440x sc[0] deep_breath on NOT_EVALUATED:UNSUPPORTED_TARGETING | 351x default[6] quell; 89x null |
+| `hunter/beast_mastery` | 4 | 1 | 707 | 0 | 0 | 707 | 235 / 707 | 445x st[2] wild_thrash on APPLICABILITY:wild_thrash; 180x none | 707x default[1] auto_shot |
+| `hunter/marksmanship` | 2, all refuse for want of combatant info | 0 | 0 | 0 | 0 | 0 | 0 / 0 | none | none |
+| `mage/arcane` | 7, 1 refusing | 2 | 1039 | 0 | 0 | 1039 | 307 / 737 | 1039x cooldowns[4] evocation on APPLICABILITY:evocation | 875x default[0] counterspell; 164x null |
+| `mage/fire` | 1 | 0 | 113 | 0 | 0 | 113 | 0 / 4 | 113x default[7] run_action_list on time,variable.combustion_delay,c... | 85x null; 28x default[7] run_action_list |
+| `mage/frost` | 1, all refuse for want of combatant info | 0 | 0 | 0 | 0 | 0 | 0 / 0 | none | none |
+| `monk/windwalker` | 1 | 1 | 239 | 0 | 0 | 239 | 239 / 239 | 239x zenith[3] zenith on NOT_EVALUATED:UNSUPPORTED_TARGETING | 239x default[0] auto_attack |
+| `priest/shadow` | 3, 1 refusing | 0 | 356 | 0 | 0 | 356 | 0 / 300 | 348x main[3] shadow_word_madness on NOT_EVALUATED:UNSUPPORTED_TARGE...; 8x main[1] call_action_list on fight_remains,target.time_to_die,var... | 300x cds[7] power_infusion; 56x null |
+| `rogue/subtlety` | 1, all refuse for want of combatant info | 0 | 0 | 0 | 0 | 0 | 0 / 0 | none | none |
+| `shaman/elemental` | 7 | 2 | 1210 | 0 | 0 | 1210 | 40 / 103 | 1210x default[0] spiritwalkers_grace on ACTION_OPTION:moving | 1058x null; 152x default[0] spiritwalkers_grace |
+| `shaman/enhancement` | 1, all refuse for want of combatant info | 0 | 0 | 0 | 0 | 0 | 0 / 0 | none | none |
+| `warlock/affliction` | 1, all refuse for want of combatant info | 0 | 0 | 0 | 0 | 0 | 0 / 0 | none | none |
+| `warlock/demonology` | 8, 1 refusing | 2 | 1391 | 0 | 0 | 1391 | 40 / 136 | 1372x diabolist[4] summon_doomguard on APPLICABILITY:summon_doomguard; 19x default[4] call_action_list on USABILITY:call_action_list | 1245x null; 146x diabolist[1] hand_of_guldan |
+| `warlock/destruction` | 2 | 0 | 220 | 4 | 0 | 216 | 0 / 2 | 208x aoe_hc[2] rain_of_fire on APPLICABILITY:rain_of_fire; 6x default[3] call_action_list on USABILITY:call_action_list | 113x null; 101x aoe_hc[0] summon_infernal |
+| `warrior/arms` | 5 | 1 | 1207 | 0 | 0 | 1207 | 203 / 1008 | 1008x default[18] run_action_list on NOT_EVALUATED:UNSUPPORTED_TARG...; 147x default[17] run_action_list on active_enemies | 1207x default[0] charge |
+| `warrior/fury` | 0 | 0 | 0 | 0 | 0 | 0 | none | synthetic only | none |
+| `warrior/protection` | 0 | 0 | 0 | 0 | 0 | 0 | none | synthetic only | none |
+| `rogue/outlaw` | 0 | 0 | 0 | 0 | 0 | 0 | none | synthetic only | none |
+| `druid/guardian` | 0 | 0 | 0 | 0 | 0 | 0 | none | synthetic only | none |
+| `hunter/survival` | 0 | 0 | 0 | 0 | 0 | 0 | none | synthetic only | none |
+| `demonhunter/vengeance` | 0 | 0 | 0 | 0 | 0 | 0 | none | synthetic only | none |
+
+Totals: 8546 eligible, 4 MATCH, 0 REJECTED, 8542 UNKNOWN; 1652 decisions with a tier-3 fact on the calendar, and 4972 with every build injected.
+
+**A committed negative.** The archive's Arms slice (fight 48 actor 5, first 6 s) grants no DAMAGE, so on a proven build it reads nothing from the profile: damage it does not hold could prove another enemy. The 203 Arms decisions with facts come from the whole-fight capture, which is not committed.
+
+**What the tests do not prove.** `tests/unit/specs/simc-fb-r-wiring.test.ts` takes each wiring through the production row on synthetic casts: that facts reach the view decision by decision, that an unproven build binds nothing, and that a failed page binds nothing resting on the count. It proves no gameplay result. The numbers above come from uncommitted retained captures (recipe `.probe/simcfbr`), so they are not pinned.

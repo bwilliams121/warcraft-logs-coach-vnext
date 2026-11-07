@@ -52,7 +52,7 @@ The rows are hand-reviewed readings of the pinned `_cast_time` and of every cast
 | --- | --- | --- |
 | `talent.<x>` | the three-way rule; another hero tree's talents are FALSE on a resolved tree | absent from the tree is UNKNOWN |
 | `hero_tree.soul_harvester`, `hero_tree.hellcaller` | the resolved hero tree | a constant; on an unresolved tree, no row, so both dispatches stay open |
-| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `active_enemies` | the shared enemy set at the decision, then the pinned SimC profile (`withEncounterStateAt`, SIMC-FB-R) | a proven lower bound. Where nothing contradicts it on a proven build, the profile's 1, disclosed as SimC-profile-relative. Otherwise UNKNOWN, and no position means no reading |
 | `soul_shard`, `remains`, `refreshable`, `ticking`, `dot.*`, `active_dot.*`, `buff.*`, `pet.darkglare.*`, `cooldown.*`, `prev.*`, `prev_gcd.*`, `set_bonus.*`, `action.*`, `execute_time`, `duration`, `gcd`, `fight_remains` | none | unbound or UNKNOWN_NUMBER, stated as such |
 
 ## Why no decision resolves
@@ -73,3 +73,9 @@ None usable, so Affliction is on ONB-EV. Its only real casts are the filtered M1
 ## Not evaluated, deliberately
 
 Every row is unmeasured against a resolved build. Soul Shards, DoT windows, auras, the Darkglare, cooldowns, in-flight state, the enemy count and haste are not modelled. See `agent/follow-ups.md` "After ONB-D4".
+
+## The pinned SimC profile (SIMC-FB-R)
+
+Every decision reads encounter state through `withEncounterStateAt`: real evidence first, then the pinned profile's environment, on a build the deploy calendar proves. The result says what the priority would select under the profile, never what the real encounter held. Each decision's `profileFacts` go into the view as `simcProfileFacts`, so it is disclosed. It makes nothing actionable. The measured results are in `agent/architecture.md` "SIMC-FB-R".
+
+`target_if`: nothing attested (`sole-target-attestations.ts`); not attested: `seed_of_corruption`, `agony`, `wither`, each with its reason in that file. An unattested line reads as it did before.

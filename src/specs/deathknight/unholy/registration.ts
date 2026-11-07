@@ -17,6 +17,7 @@
  */
 
 import type { AnalyzerRegistration } from "../../../findings/analyzer-registration.js";
+import { simcProfileFactsField } from "../../../findings/simc-profile-fallback.js";
 import { defineSpecModule, type SpecModule } from "../../../findings/spec-module.js";
 import type { ObservedDecisionView } from "../../../findings/observed-decision-view.js";
 import {
@@ -80,7 +81,7 @@ export function unholyDeathKnightObservedDecisionView(
 ): ObservedDecisionView {
   const { coverage } = analysis;
   return {
-    decisions: analysis.comparisons.map((comparison) => ({
+    decisions: analysis.comparisons.map((comparison, index) => ({
       locator: comparison.decision.locator,
       position: comparison.decision.position,
       fightTimeMs: comparison.decision.fightTimeMs,
@@ -94,6 +95,7 @@ export function unholyDeathKnightObservedDecisionView(
       selectionPrecision: comparison.selectionPrecision,
       decisiveBlocker: comparison.decisiveBlocker,
       usabilityProvenance: comparison.usabilityProvenance,
+      ...simcProfileFactsField({ profileFacts: analysis.resolved[index]?.profileFacts ?? [] }),
     })),
     exclusions: analysis.excluded.map((cast) => ({
       locator: cast.locator,
@@ -133,7 +135,7 @@ export const UNHOLY_DEATH_KNIGHT_LIMITS = Object.freeze({
     "when the necessary state can be established. Every decision first meets the swing's entry, whose readiness is unobserved, then cooldown lines that read plagues, simulated raid events and the enemy count, and behind them a list dispatch on the enemy count, which events can only bound from below, so no decision currently resolves.",
     "It does NOT evaluate defensive cooldowns, interrupts or survival, it does not score performance, and it does",
     "not read race, faction, gear use effects or consumables. It reconstructs no Runes or Runic Power between observations, no cooldown, no",
-    "aura and no enemy count. Pet presence comes only from summons it can attribute, and no pet is proven up or gone today. UNKNOWN is expected here and is not a fault.",
+    "aura and no enemy count of its own. Pet presence comes only from summons it can attribute, and no pet is proven up or gone today. UNKNOWN is expected here and is not a fault.",
   ].join("\n"),
   raidNight: [
     "Unholy Death Knight cells count only observed global-cooldown decisions compared against pinned class/spec authority,",

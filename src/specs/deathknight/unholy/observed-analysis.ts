@@ -33,7 +33,12 @@
  */
 
 import type { CombatState } from "../../../engine/state/combat-state.js";
-import { withEnemyCountAt } from "../../../findings/enemy-count-bindings.js";
+import {
+  aplAuthorityIdentityOf,
+  withEncounterStateAt,
+  type SimcProfileProvenance,
+} from "../../../findings/simc-profile-fallback.js";
+import { DEATHKNIGHT_UNHOLY_SOLE_TARGET_ATTESTATIONS } from "./sole-target-attestations.js";
 import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
 import type {
   AnalysisAuthorityMetadata,
@@ -198,6 +203,8 @@ export interface UnholyDeathKnightPayload {
   readonly build: UnholyDeathKnightBuildResolution;
   /** The resolver's diagnostics at each eligible decision, by position. */
   readonly resolved: readonly {
+    /** The tier-3 facts this decision was evaluated under, for the view to disclose. */
+    readonly profileFacts: readonly SimcProfileProvenance[];
     readonly position: number;
     readonly diagnostics: UnholyDeathKnightResolverDiagnostics;
     readonly selection: UnholyDeathKnightSelectionDiagnostics;
@@ -480,14 +487,20 @@ export function analyzeObservedUnholyDeathKnightDecisions(
       },
     };
 
+    const encounterState = withEncounterStateAt(bindings, state, actorId, position, {
+      authority: aplAuthorityIdentityOf(authority),
+      soleTargetAttestations: DEATHKNIGHT_UNHOLY_SOLE_TARGET_ATTESTATIONS,
+    });
+
     const outcome = unholyDeathKnightFirstGcdSelectionAt({
       authority,
-      bindings: withEnemyCountAt(bindings, state, actorId, position),
+      bindings: encounterState.bindings,
       buildFacts,
       observedAbilityGameId: abilityGameId,
     });
 
     resolved.push({
+      profileFacts: encounterState.profileFacts,
       position,
       diagnostics: resolution.diagnostics,
       selection: selectionDiagnosticsOf(outcome),

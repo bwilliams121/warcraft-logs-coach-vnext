@@ -265,6 +265,11 @@ const SEMANTIC_OF_FACT: Readonly<Record<SimcProfileFact, string>> = {
   SPELL_TARGETS: "SPELL_TARGETS_WITHOUT_DISTANCE_TARGETING",
 };
 
+/** A declared magnitude a resolver bound to UNKNOWN only so that its conditions read as undecided. */
+function isOpenPlaceholder(entry: SpecAtomBinding): boolean {
+  return entry.value.kind === "MAGNITUDE" && entry.value.binding.state === "UNKNOWN_NUMBER";
+}
+
 /** Whether stronger evidence leaves the count open for the profile, and if not, what holds it. */
 function enemyCountTierReason(enemySet: EnemySetState, profileCount: number): EnemyCountTierReason {
   const { count } = enemySet;
@@ -386,8 +391,11 @@ export function withEncounterStateAt(
   for (const declaration of counted.vocabulary.declarations) {
     const fact = profileAtomFactOf(declaration.identifier);
     if (fact === null) continue;
-    // A stronger reading the caller already holds, such as an action's own registration, stands.
-    if (counted.bound.some((entry) => entry.key === declaration.identifier)) continue;
+    // A stronger reading the caller already holds, such as an action's own registration, stands. A
+    // resolver's UNKNOWN placeholder is no reading: it says the first two tiers left this open.
+    if (counted.bound.some((entry) => entry.key === declaration.identifier && !isOpenPlaceholder(entry))) {
+      continue;
+    }
     if ((fact === "ADD_AND_PULL_SCHEDULE" || fact === "SPELL_TARGETS") && !appliesToCount) continue;
     const binding = profileAtomBinding(declaration, environment);
     if (binding !== null && record(fact, declaration.identifier)) bound.push(binding);
@@ -418,7 +426,10 @@ export function withEncounterStateAt(
   return {
     bindings: {
       ...bindings,
-      specAtoms: { vocabulary: counted.vocabulary, bound: [...counted.bound, ...bound] },
+      specAtoms: {
+        vocabulary: counted.vocabulary,
+        bound: [...counted.bound.filter((entry) => !bound.some((made) => made.key === entry.key)), ...bound],
+      },
       ...(domainAllowed ? { targetDomainFor } : {}),
     },
     enemyCount: {

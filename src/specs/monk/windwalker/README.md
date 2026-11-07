@@ -75,3 +75,9 @@ Reaching a decision would take positive readiness for the swing and Touch of Kar
 - Touch of Karma's and Zenith's transitions. Both are off the GCD and write what later lines read, so they have no contract, and asking for either fails closed.
 - The racials. `arcane_pulse`, `haymaker` and `rocket_barrage` are `racial_spell_t`s the shared table omits, so `domain-boundary.ts` classifies them. No racial can preempt a class action.
 - No score, no severity, no coaching prose.
+
+## The pinned SimC profile (SIMC-FB-R)
+
+Every decision reads encounter state through `withEncounterStateAt`: real evidence first, then the pinned profile's environment, on a build the deploy calendar proves. The result says what the priority would select under the profile, never what the real encounter held. Each decision's `profileFacts` go into the view as `simcProfileFacts`, so it is disclosed. It makes nothing actionable. The measured results are in `agent/architecture.md` "SIMC-FB-R".
+
+`target_if`: attested for `zenith_stomp`, `tiger_palm`, `celestial_conduit`, `fists_of_fury`, `rising_sun_kick`, `rushing_wind_kick`, `blackout_kick`, `spinning_crane_kick` (`sole-target-attestations.ts`); not attested: `touch_of_karma`, `invoke_xuen_the_white_tiger`, `zenith`, `touch_of_death`, each with its reason in that file. An unattested line reads as it did before.

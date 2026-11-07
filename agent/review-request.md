@@ -4,71 +4,52 @@ Rolling file: overwritten for each review cycle.
 
 ## Change
 
-SIMC-FB-B: public disclosure of SimC-profile-relative evaluation. Branch `autopilot/simc-fb-b`, from `main` at fd0892d.
+SIMC-FB-R: replay the encounter-state-blocked specializations under the SimC profile fallback. Branch `autopilot/simc-fb-r`, from `main` at d134126.
 
-- **Public contract change: EXPECTED, additive, under `analysis/1` and `raid-night/1`.** No field is removed, renamed or re-meant. Each new field is optional and present only when a decision read the pinned profile.
-- **No specialization is wired,** so no document a caller can receive today changes. The only visible change is one paragraph in each of two tool descriptions. SIMC-FB-R wires specializations.
-- **Warcraft Logs: no request was made.** Everything reads committed bytes.
+- **Public contract change: NONE.** No file under `src/contracts/`, `src/api/` or `src/mcp/` changes. Every wired row is INTERNAL_ONLY.
+- **Warcraft Logs: no request was made.** The replay reads retained captures through a fake transport.
+- **Nothing is promoted,** and no public entry is added, because nothing qualifies.
 
-## The public change, precisely
+## The result
 
-Added to `src/contracts/analysis-contract.ts`:
+No new decision resolves. Over 8,546 eligible decisions of 49 analyzed subjects: 4 MATCH, 0 REJECTED, 8,542 UNKNOWN, before and after, on the real calendar and with every build injected. The 4 MATCH are Destruction's existing Summon Infernal presses, each at a real bound of 2 or 3, with no tier-3 fact bound. So no tier-3 decision has resolved on real evidence. `agent/architecture.md` "SIMC-FB-R" has the table by specialization.
 
-- `decisions[].encounterState` (optional): `{ basis: "SIMC_PROFILE_RELATIVE", facts: [{ fact, atomKey, semanticId, sourceIndex }] }`. Absent means an observed-fight evaluation.
-- `simcProfileEvaluation` (optional, ANALYZED only): `{ revision: "simc-profile-evaluation/1", basis, encounterStateObserved: false, coverage: { decisions, match, rejected, unknown }, sources: [...], findingEffect: { confidence: "NONE", suppression: "NONE", actionability: "NONE" } }`. Each source holds the dataset, pin, build, environment commit, APL authority, profile path and hash, environment, and the cited engine statements.
-- `tldr.gameplay.simcProfileRelative` and `report.coverage.gameplay.simcProfileRelative` (optional).
-- `tldr.highlights[].encounterStateBasis` and `.profileSelectedToken`, and `report...entries[].profileSelectedToken` (optional).
-- `diagnosis.statements[].findingsUnderSimcProfile` (optional).
-- Enums widened: `PUBLIC_REPORT_STATE_EVIDENCE` gains `SIMC_PROFILE_RELATIVE`, admitted on prioritized and informational entries and refused on carried ones. `PUBLIC_TLDR_DISCLOSURES` gains `DECISIONS_EVALUATED_UNDER_SIMC_PROFILE`, inserted before the unsummarized-block codes. New `PUBLIC_SIMC_PROFILE_FACTS`.
+## What changed
 
-Added to `src/contracts/raid-night-contract.ts`, and so to the encounter-context document, which reuses the cell and recurrence schemas:
-
-- `cells[ANALYZED].simcProfileEvaluation` (optional): counts and sources, without the cited statements.
-- `coverage.simcProfileRelative` and `recurrence.simcProfileRelativeRejectedPatterns` (optional).
-- `PUBLIC_RAID_NIGHT_DISCLOSURES` gains `DECISIONS_EVALUATED_UNDER_SIMC_PROFILE`.
-
-REST and MCP publish these through the same projections. `src/mcp/tools/` gains one description paragraph each. `src/api/` is untouched.
+1. **26 trees wired.** Each `observed-analysis.ts` calls `withEncounterStateAt`, and each `registration.ts` spreads `simcProfileFactsField` into its view, decision by decision. Five (Feral, Subtlety, Outlaw, Vengeance, Protection Warrior) read no count before and read the cast's own position now, as Arms does.
+2. **A SIMC-FB-A defect fixed, in shared code.** `src/findings/simc-profile-fallback.ts` treated a resolver's UNKNOWN placeholder for `spell_targets.*` or `raid_event.*` as a stronger reading the caller held, so tier 3 never answered those atoms for a list that binds one. A placeholder is now replaced. A known or bounded value still stands, and after a contradiction the placeholder stays UNKNOWN. Two tests were added to `tests/unit/simc-fb-a-profile-fallback.test.ts`, and no assertion there moved.
+3. **`target_if` attestations.** `src/specs/<class>/<spec>/sole-target-attestations.ts` in 17 trees: 50 attested, 26 refused, each refusal recorded with its reason in the file.
+4. **Prose.** Each wired README gains a section, the `active_enemies` row is corrected where it had one, each vocabulary gains a note, and the unpublished limits prose no longer says the count can only be a lower bound.
+5. **One guard moved.** `tests/unit/onb-s3-enemy-set.test.ts` "every wired specialization is INTERNAL_ONLY" now looks for `withEncounterStateAt(` instead of `withEnemyCountAt(`, because that call replaced it and reads the same enemy set first. Its sibling "no PUBLIC specialization binds it" now forbids both.
 
 ## Decisions for the reviewer to check
 
-1. **`SIMC_PROFILE_RELATIVE` is a state-evidence value,** not a flag beside PROVEN. PROVEN would state a modeled state as observed, and INCOMPLETE would refuse a result the owner decision keeps authority-backed. An UNKNOWN that read the profile stays INCOMPLETE, and is still counted in `coverage.unknown`.
-2. **Ranking.** Listed after PROVEN, so it ranks after every proven divergence. Always LOW_PRIORITY through a new basis, so labels stay non-increasing down the rank.
-3. **The label is on what was bound, not on what the scan read.** It can over-disclose and cannot under-disclose. A false absence would state a modeled result as observed. Is over-disclosure acceptable until SIMC-FB-R measures it? A counterfactual evaluation is the alternative, and it would be spec-owned work.
-4. **A fourth recurrence collection.** `rejectedPatterns` keeps meaning observed encounter state, so a modeled rejection goes in `simcProfileRelativeRejectedPatterns`. `rejectedTotal` still counts it, because that total counts outcomes, and `coverage.simcProfileRelative.rejected` says how many. So `rejectedPatterns` occurrences can be below `rejectedTotal` on such a night, and that field is disclosed in the tool description. Nothing in the code relies on them being equal.
-5. **A diagnosis statement may rest on a modeled rejection.** The owner decision keeps such a finding authority-backed, so it stays a finding and is named in `findingsUnderSimcProfile`. The deployed service retrieves no comparison fights, so no such statement is reachable today.
-6. **Provenance is deduplicated.** Decisions cite `sourceIndex` and `semanticId` into the document's block, because a fight can have hundreds of tier-3 decisions (661 for b1Pm fight 48, actor 15). A raid-night cell carries the sources without the citations, and `analysisRef` leads to the rest.
-7. **Three existing guards changed, each additively.**
-   - `m6a-mcp-layering` names `src/findings/simc-profile-view.ts` as an import of the analysis projection.
-   - `m5-boundary-and-vocabulary` admits that file to `COMPARISON_LAYER`, because it counts the view's outcome word `"MATCH"` and defines nothing.
-   - `m10a-observed-decision-view`'s "no more and no fewer" compares a real record with the schema's keys minus the one optional `encounterState`, so it stays exact.
-   - The other layering guards are untouched: `m15a-reporting-layering` is why reporting holds its own count, with a test pinning it equal, and `m7e-raid-night-layering` is why the cell states its own counts type.
-8. **A guard for SIMC-FB-R.** A contract test fails any `src/specs/<class>/<spec>/` that calls `withEncounterStateAt(` and never writes `simcProfileFacts`. It is vacuous today, and it checks the tree rather than each decision.
+1. **The placeholder rule.** Is `UNKNOWN_NUMBER` correctly "no reading"? `BOUNDED_NUMBER` and `ONE_OF_NUMBERS` stand, as stronger readings a caller established. No resolver binds either of those to one of these atoms today.
+2. **The attestation rule is conservative on purpose.** All warlock tokens are refused on `warlock_spell_t::select_target` (`sc_warlock_actions.cpp:548`) without reading it as harmless. Pseudo-actions are refused even where the engine would yield a one-element list, because their `target` need not be the enemy.
+3. **How the audit was verified.** A subagent read each chain, then a script walked each attested struct's inheritance over the pinned source for `available_targets`, `target_filter_callback =`, `target_ready`, `select_target` and `harmful = false`. It flagged five rows, and I read each by hand: four filters are on background children, and Pyre's override returns the one enemy for its foreground object. CI cannot check the C++, because the clone is not committed, so CI checks shape only.
+4. **The over-disclosure question from SIMC-FB-B.** No tier-3 decision resolved, so the label has cost nothing and no counterfactual evaluation was built.
+5. **`resolved[index]` pairs a view row with its facts,** by position, with `?? []`. Both arrays are pushed together once per eligible cast, and the per-spec test pins equal lengths and row-by-row equality. Is that enough, given a misalignment would under-disclose?
+6. **Build proof.** Only 12 of 49 analyzed subjects, all in b1Pm, are provable, and only with b1Pm's region from its committed capture, as a live request would retrieve it. The records list what extending the calendar takes, by report. Each is a new request or source, so nothing was done.
 
 ## Tests
 
-- `tests/unit/simc-fb-b-disclosure.test.ts`: restatement, ranking, labels, TLDR, report, cells, the night, the document, and diagnosis.
-- `tests/contracts/simc-fb-b-disclosure-contract.test.ts`: pinned vocabularies, what the schemas refuse (`encounterStateObserved: true`, a moved confidence, suppression or actionability, an enemy count field), the tool descriptions, and the guard.
-- `tests/integration/simc-fb-b-public-disclosure.test.ts`: real service, REST and MCP.
-
-Negative tests the queue names:
-
-- **Never states a count.** Every TLDR, report and night sentence is checked against a list of count and state claims.
-- **Confidence and comparison.** The schema pins `findingEffect` to NONE, and a test shows the diagnosis's state changes no decision's disclosure.
-- **Byte-identical.** REST-byte digests of four documents, taken from fd0892d before any edit, are pinned: M5-A, M5-D2, an unsupported specialization, and the mixed raid night. They pass on this tree.
-
-**What the tests do not prove.** Real tier-3 facts come from `withEncounterStateAt` over the committed record, on a synthetic fight with an injected build, and are attached to real views by wrapping the Assassination registration. That proves the disclosure on every surface. It says nothing about how those decisions evaluate under the profile, which is SIMC-FB-R's.
+- `tests/unit/specs/simc-fb-r-wiring.test.ts`, each of the 26 through the production row on synthetic casts: facts reach the view decision by decision; no report or Warcraft Logs source is named; an unproven build binds nothing; unretrieved DAMAGE binds nothing resting on the count; usability provenance does not move. Attestations are checked against each list's own `target_if` tokens. A proven second enemy takes the count from the profile, through the Destruction facade. The committed Arms slice has no DAMAGE grant, so on a proven build it reads nothing from the profile.
+- **What they do not prove.** No gameplay result. Casts are synthetic, and the replay's numbers come from uncommitted captures, recipe `.probe/simcfbr`, so they are recorded and not pinned.
 
 ## Bookkeeping
 
-The queue's SIMC-FB-B entry is `PR_OPEN`. The supervisor's merged list was compared with the queue: 76 entries, and SIMC-FB-A was the one written. `agent/architecture.md` and `agent/follow-ups.md` record the above.
+The queue's SIMC-FB-R entry is `PR_OPEN` with its outcome. The supervisor's merged list was compared with the queue, and SIMC-FB-B was the one written. `agent/architecture.md`, `agent/follow-ups.md` and `agent/spec-onboarding-inventory.md` record the above.
 
 ## Validation
 
 Run on this tree, with no Warcraft Logs request:
 
 - `npm run typecheck`, `npm run format:check`, `npm run test:corpus` and `npm run test:evidence` all exit 0.
-- Focused, with the failed guards and the two tests that are load-sensitive in parallel runs: 295 of 295. New tests: 52, including the four byte-identical digests.
-- Full suite, `npx vitest run --testTimeout=60000`: 20,332 of 20,333. The one failure is `m9b-corpus-harness` SPEC_PROTECTION_PALADIN, the timeout seen in earlier full runs (ONB-S3, POLB-A, SIMC-FB-A). It passed alone in the focused run on this code, and it was not compared against base in the same parallel run.
+- Full suite, `npx vitest run --testTimeout=60000`: 20,740 of 20,743, run before one last edit to the new test file. The failures:
+  - `m9a-corpus-layering`: the new test imported `fightOf`. It now imports the sanctioned `stateOf`. Fixed, and that one-import edit is the only change since the full run.
+  - `m9b-corpus-harness` SPEC_PROTECTION_PALADIN: the timeout seen in earlier full runs (ONB-S3, POLB-A, SIMC-FB-A, SIMC-FB-B).
+  - `runner-service-queue` W: a leftover job directory under parallel load, also seen in earlier runs (ONB-D1P, ONB-X5P).
+- Focused after that edit, alone: the new test, `m9a-corpus-layering`, `simc-fb-b-disclosure-contract`, `m9b-corpus-harness` and `runner-service-queue`, 2,823 of 2,823. The two load failures pass here. They were not compared against base in the same parallel run.
 
 The four untracked local paths (`.claude/` and the three `scripts/probe/wcl-*.probe.ts` files) are the standing CLAUDE.md exclusions and are not part of this change.
 
