@@ -27,6 +27,12 @@ Decided in `agent/architecture.md` "Owner decision (2026-11-06): SimC profile fa
 - **The exit criterion is 100% PUBLIC.** A terminal BLOCKED no longer closes the program.
 - **POLB-CENSUS is still open,** and no longer holds up the fallback, ONB-EV or REM-CENSUS.
 
+## After ONB-EV's retry: answered by the owner's decision
+
+**Raised:** ONB-EV (2026-11-07). The owner answered the question below ("Owner decision (2026-11-07): ONB-EV listing retry"), the retry named the cause, and revision 2 repairs it (`agent/architecture.md` "ONB-EV plan revision 2"). The audit gap below is still open: the retry and the run again match none of `WclActivityPatterns`, and the ledger and `tests/evidence/onb-ev-capture.md` remain the record the owner confirms from.
+
+- **The production client still drops the error text.** `graphql-client.ts` keeps only the error count, deliberately, so that prose is never parsed as a contract. A complexity refusal is therefore invisible to any production caller. Keeping sanitized text as a diagnostic, and never as a classification, may be worth its own tranche.
+
 ## After ONB-EV's first run: the listing was refused, and the owner decides the next step
 
 **Raised:** ONB-EV (2026-11-07). 2 of 60 requests spent, 58 left, no evidence captured. The record is `tests/evidence/onb-ev-capture.md`, and the argument is in `agent/architecture.md` "ONB-EV — stopped at the first listing".

@@ -29,6 +29,18 @@ export interface OnbEvSpecialization {
 export interface OnbEvPlan {
   readonly planVersion: number;
   readonly planRevision: string;
+  readonly revisionOf: {
+    readonly planRevision: string;
+    readonly planDigest: string;
+    readonly kind: string;
+    readonly reason: string;
+    readonly failedRequests: readonly {
+      readonly limit: number;
+      readonly page: number;
+      readonly errorText: string;
+      readonly stated: { readonly maxComplexity: number; readonly gotComplexity: number };
+    }[];
+  };
   readonly acquisitionRuleId: string;
   readonly selectionRevision: string;
   readonly frozenOn: string;
@@ -51,6 +63,7 @@ export interface OnbEvPlan {
     readonly listing: string;
     readonly listingFields: readonly string[];
     readonly pageSize: number;
+    readonly listingRequestLimit: number;
     readonly zoneId: number;
     readonly region: string;
     readonly difficulties: readonly number[];
@@ -67,7 +80,9 @@ export interface OnbEvPlan {
   readonly requestBudget: {
     readonly hardCap: number;
     readonly tokenRequests: number;
+    readonly refusedListingRequests: number;
     readonly listingPages: number;
+    readonly listingRequests: number;
     readonly contextRequests: number;
     readonly eventPages: number;
     readonly revisionRequests: number;
@@ -119,3 +134,9 @@ export function mayStartCapture(
   subjectCount: number,
 ): boolean;
 export function worstCaseRequests(plan: OnbEvPlan): number;
+export function listingRequestPagesOf(plan: OnbEvPlan, page: number): readonly number[];
+export function assembleListingPage(
+  plan: OnbEvPlan,
+  page: number,
+  rowsByRequestPage: ReadonlyMap<number, readonly unknown[]>,
+): OnbEvListingPage | null;

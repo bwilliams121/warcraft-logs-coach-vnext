@@ -15543,3 +15543,52 @@ Autopilot queue entry ONB-EV, on the owner's grant, running the frozen plan `age
 **Status of the plan.** Still `FROZEN`, unedited, and not executed. `tests/unit/onb-ev-plan.test.ts` therefore keeps its drift checks.
 
 **The other stops still stand.** The worst case of 200 requests against the cap of 60, and no fixture fitting the 5,212 bytes under the notice line, are unchanged from ONB-EV-PLAN. Neither has been reached. They are still expected to be reported together, once, with HEAL-B1P2's row.
+
+## Owner decision (2026-11-07): ONB-EV listing retry
+
+**Ruling.** The two Warcraft Logs HTTP requests ONB-EV attempt 1 made (an OAuth token and the refused listing) are authorized under the existing grant and count toward it. The campaign cap stays 60 in total, and is neither reset nor increased. No broader Warcraft Logs authorization is granted.
+
+**Diagnostic retry.** ONB-EV may send the identical failed listing exactly one more time, to preserve and classify the response. It retains enough to determine the HTTP status, the GraphQL or API error category, the error code if supplied, sanitized error text, and whether the failure is attributable to the listing's query or argument shape. It never retains or commits OAuth tokens, authorization headers, client secrets or other credentials. The retry counts toward the cap.
+
+**Permitted repair.** If the retained response demonstrates that the listing's API or query shape is invalid or unsupported, a reviewed new revision of the plan may change only the minimum listing mechanics necessary to obtain the same deterministic candidate population: correcting an unsupported argument, correcting a field or pagination shape, splitting one unsupported request into the minimum equivalent supported requests, or using an API-supported listing form that preserves the same selection universe and deterministic ordering.
+
+**What must not change.** The specialization set, the neutral purpose, the first-qualifying-fight rule, the deterministic selection semantics, the no-ranking and no-comparison rule, the no-outcome-shopping rule, the exclusions, the minimum-evidence acquisition principle, and the 60-request cap. Gameplay outcomes are never inspected to change selection criteria, and the search is never broadened because the original candidate population is inconvenient.
+
+**Review.** A listing-shape revision is recorded as a new plan revision, explained as an API-compatibility correction, tested and reviewed before acquisition continues, and provenance-preserving. The old failed request and the reason for the revision stay recorded.
+
+**Another owner stop, with no automatic revision,** if the retained error indicates authentication or credential failure, authorization or scope failure, an account or API access restriction, rate limiting, a service outage, request-budget exhaustion, or a cause that cannot be confidently attributed to listing shape. Also if the only workable repair would materially alter the candidate universe, the deterministic selection rule, the evidence predicate, the campaign's purpose, or the 60-request cap.
+
+**Accounting.** Requests are cumulative from attempt 1. The two already consumed stay charged, the retry counts, and requests under a corrected revision count normally toward the same remaining allowance.
+
+## ONB-EV plan revision 2 — the listing's API-compatibility correction
+
+Under "Owner decision (2026-11-07): ONB-EV listing retry". The plan is now `agent/onb-ev-plan.json` revision `onb-ev-plan/2`, digest `49303e1c03d0a056829b3474c1c47dc8cf0a37ca99ba5c532c74650c5519828f`. It replaces revision 1, digest `48066f986e7035542bf81c0263f4cec0d9d70e0f3d892ab6eb7ed535e6fa0013`, whose refused requests stay recorded in `tests/evidence/onb-ev-capture.md`.
+
+**What the retry showed.** Request 3 was a new token and request 4 the identical listing, with the same query and variables. Warcraft Logs answered HTTP 200 with the same 79-character body as request 2, sha256 `f9c86105ac35a6f8e6acc5fd0d9875603306ab673abb5e95750df67551e32a8e`, and this time its text was kept:
+
+    {"errors":[{"message":"Max query complexity should be 50000 but got 100701."}]}
+
+**The classification: the listing's query shape, with confidence.** The message states the cause and the numbers. It is the same both times, 90 minutes apart. It names no credential, scope, access restriction, rate limit or outage, and the token and request were accepted: HTTP 200, with `x-ratelimit-remaining` 798 of 800 at the retry. So this is not one of the decision's other stops, and it is the case the decision permits to repair: "splitting one unsupported request into the minimum equivalent supported requests".
+
+**The repair, and only this.** One request of `limit: 100` becomes three requests of `limit: 34`, and each listing page is reassembled by position.
+
+- **Why 34.** Half the rows cost at least half of 100,701 if cost is linear with a non-negative constant, which is above 50,000, so `limit: 50` cannot fit and two requests cannot read a page. Any limit from 34 to 49 takes three, and 34 reads the fewest rows past the page's end (2 rather than 47). At no constant it costs about 34,238, which leaves the margin the unknown constant may need. That linearity is an inference from one measurement. A refusal at 34 stops for the owner, and it is not revised further here.
+- **The same population.** `assembleListingPage` cuts page `n` to positions `100(n-1)` to `100n - 1`, so `selectSubjects` reads what one request of 100 would have returned and nothing else. Page 1 takes request pages 1 to 3, and page 2 takes 3 to 6, sharing page 3, which is sent once. Rows 101 and 102 are read and retained raw, and cannot reach the first page's selection.
+- **Unchanged.** A test recomputes revision 1's digest from revision 2 with only the listing's request limit, the revision record and the restated budget taken out, so the query, fields, zone, intervals, exclusions, difficulties, salt, gate retries, listing sequence, page size of 100, selection rule, capture rules, specialization list and order, and the cap of 60 are provably the same. `selectSubjects` is not edited, and `selectionRevision` stays `onb-ev-selection/1`.
+- **What it assumes.** That the service pages by offset over one ordering whatever the limit. Nothing has shown otherwise, but it cannot be proved without a request of 100 that the service refuses. If a short request page is followed by more rows the rows cannot be placed, so the campaign stops and does not guess. Reports uploaded between the requests could shift a position, as they could between revision 1's own pages, and a repeat takes no retry slot.
+
+**The budget, restated from the campaign's first request.**
+
+| Item | Revision 1 | Revision 2 |
+| --- | ---: | ---: |
+| OAuth tokens: 2 spent, this run's, one refresh | 2 | 4 |
+| Refused listings already spent | 0 | 2 |
+| Listing requests, 4 pages at most | 4 | 12 |
+| Contexts | 36 | 36 |
+| Event pages | 146 | 146 |
+| Report revisions | 12 | 12 |
+| **Worst case, against the unchanged cap of 60** | **200** | **212** |
+
+**Can a specialization go without a candidate because of this? No.** It reads the same rows, and the listing's worst case of 18 requests is far under the cap. What it can change is how far the captures reach: up to 8 fewer requests remain for them than under revision 1, plus the 2 spent on the refusals and the extra token. After one listing page, 51 are left at the worst, so a first capture with all twelve subjects still fits. After all four, 42 are left, so a first capture with five subjects fits and one with six stops at the cap. A specialization left out that way is reported as the cap's, and its place in the order is unchanged.
+
+**Order of work.** The owner requires review before acquisition continues. So this revision was reviewed and committed before request 5. The runner stays under the gitignored `.probe/onb-ev/`, now continuing the ledger rather than refusing it, and keeping any GraphQL error body with credentials scrubbed. The token body and the authorization header are never read into it.
