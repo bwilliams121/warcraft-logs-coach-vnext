@@ -33,13 +33,13 @@ stays in `agent/m11-spec-coaching-inventory.md` and
 
 ## Remediation (owner decision, 2026-11-06)
 
-The 12-of-40 first pass is not closure. The target is 40 of 40 PUBLIC if the available authority and evidence permit it (`agent/architecture.md` "Owner decision (2026-11-06): remediation before roster closure").
+The 12-of-40 first pass is not closure (`agent/architecture.md` "Owner decision (2026-11-06): remediation before roster closure"). The exit criterion is 100% of the playable roster PUBLIC (`agent/architecture.md` "Owner decision (2026-11-06): SimC profile fallback"), which replaces the earlier allowance for a lower final count and this file's terminal list above for completion purposes.
 
 - **`INTERNAL_ONLY` after a failed promotion is not terminal.** It means first-pass onboarding completed and remediation still required.
 - **Lifecycle:** `INTERNAL_ONLY` → blocker census → missing-input implementation → evidence acquisition if required → real-evidence replay → unchanged promotion gate → `PUBLIC`.
 - **`BLOCKED`** needs remediation to demonstrate that a required fact or authority cannot currently be obtained or implemented truthfully. **`DEFERRED`** needs an explicit owner decision.
 - **Neither is assigned merely because** a first promotion failed, a specialization has only UNKNOWN decisions, an implementation tranche already merged, or remediation needs more work.
-- **Owning entries:** HEAL-B1P2, POLB-A, POLB-CENSUS, POLB-B, POLB-C, ONB-EV-PLAN, ONB-EV, REM-CENSUS and the `REM-*` tranches it adds, REM-GATE, ONB-Z. REM-CENSUS records each specialization's blockers here.
+- **Owning entries:** HEAL-B1P2, POLB-A, POLB-CENSUS, POLB-B, POLB-C, SIMC-FB-A, SIMC-FB-B, SIMC-FB-R, ONB-EV-PLAN, ONB-EV, REM-CENSUS and the `REM-*` tranches it adds, REM-GATE, ONB-Z. REM-CENSUS records each specialization's blockers here.
 
 ## State vocabulary
 

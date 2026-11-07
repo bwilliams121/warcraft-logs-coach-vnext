@@ -4,42 +4,40 @@ Rolling file: overwritten for each review cycle.
 
 ## Change
 
-POLB-A: Policy B's versioned schema, its supplier seam, the frozen census plan, the per-fact completeness analysis, and the acquisition proposal for POLB-CENSUS's owner decision. Branch `autopilot/polb-a`.
+Record the owner's SimC profile fallback decision (2026-11-06) and update the queue. Working tree on `main` at 608bef7, uncommitted.
 
-- **Warcraft Logs: no request was made, and no grant is written.** Every measurement read retained captures offline.
-- **Public contract: unchanged.** Nothing under `src/contracts/`, `src/api/` or `src/mcp/`.
-- **No curated row, no promotion.** The dataset holds no row, so every count and decision is unchanged.
-- The four untracked local paths (`.claude/` and the three `scripts/probe/wcl-*.probe.ts` files) are the standing CLAUDE.md exclusions.
+- Documentation and queue only: no source, test, analyzer, runtime-data or public-contract change.
+- **Warcraft Logs: no request was made, and no grant changed.**
+- The four untracked local paths (`.claude/` and the three `scripts/probe/wcl-*.probe.ts` files) are the standing CLAUDE.md exclusions and are not part of this change.
 
-## The result to check first
+## The decision
 
-**No acquisition and completeness contract can justify an upper bound, an exact `spell_targets` or a closed `target_if` set from this census.** `agent/architecture.md` "POLB-A" considers six candidates. The decisive real evidence: on b1PmaKrd6CDfzngc fight 48, WCL's `enemyNPCs` is exactly the friendly-damaged set (45 instances), and 96 Malignant Totem instances (creature 269430) appear in events and in neither, while another retained pull's `enemyNPCs` lists that creature 48 times. By specialization: 1,414 retained count decisions and 2,301 `target_if` decisions cannot be settled by an upper bound or closed set. The section recommends the owner decline the grant if the upper-bound gap was the purpose.
+The pinned SimC profile becomes fallback authority for encounter-state facts: observed evidence, then curated authority, then the pinned profile, then UNKNOWN. It carries explicit `SIMC_PROFILE_FALLBACK` provenance and public disclosure, and observed evidence always outranks it. A real logged action evaluated against it may count as promotion evidence, under unchanged gates. The exit criterion is 100% of the roster PUBLIC.
 
-Please check that this is right, and that nothing else in the tree contradicts it.
+## Files
 
-## What changed
+- `agent/architecture.md`: the decision, what it supersedes, and recording notes.
+- `CLAUDE.md`: a dated owner-change note under "Multi-Target Support", because its fail-closed rule would otherwise read as forbidding this.
+- `agent/follow-ups.md`, `agent/spec-onboarding-inventory.md`: pointers and the exit criterion. Counts unchanged.
+- `agent/autopilot-queue.md`:
+  - new SIMC-FB-A (shared, internal), SIMC-FB-B (public disclosure, `publicContract: EXPECTED`) and SIMC-FB-R (replay), all `wcl: NONE`;
+  - ONB-EV-PLAN and REM-CENSUS now depend on SIMC-FB-R rather than POLB-C, so they no longer wait on the census decision;
+  - ONB-Z also depends on SIMC-FB-R, keeps POLB-C, and passes only at 100% PUBLIC;
+  - remediation rules 10 and 11 added, and rule 3 amended;
+  - POLB-CENSUS's decision text updated, still the owner's;
+  - ONB-EV-PLAN: a candidate must have a provable build, set before any outcome is known. The grant text is unchanged;
+  - bookkeeping: POLB-A recorded MERGED (#97).
 
-- `src/data/encounter-census/encounter-state-census-artifact.ts`: schema and parser. It refuses closure without a reviewed contract (`REVIEWED_CLOSURE_CONTRACTS`, pinned empty), an unwidened conflict, overlapping windows, one fact using another's predicate, fewer than five independent pulls, a foreign build, and overstated completeness.
-- `src/data/encounter-census/census-plan.json`: the frozen sampling plan, its budget and retained-bytes numbers, status `PROPOSED_NOT_AUTHORIZED`.
-- `src/data/encounter-census/encounter-state-census.json` and `encounter-state-census.ts`: the empty dataset and its loader.
-- `src/findings/encounter-state-supplier.ts`: `mapCensusDatum`, with a named UNKNOWN for each key it cannot establish, and `createEncounterStateSupplier`. The production supplier's `gameBuildOf` returns `null`, because only `src/publication/pipeline.ts` may import the build resolver.
-- `src/findings/enemy-count-bindings.ts`: `withEnemyCountAt` asks a supplier, defaulting to production.
-- `src/engine/game-state/enemies/enemy-set.ts`: `EnemySetUpperBoundEvidence.provenance` is a required citation, replacing a bare string. An incomplete one stays `UPPER_BOUND_WITHOUT_PROVENANCE`.
-- `tests/unit/polb-a-encounter-census.test.ts` (new), and `tests/unit/onb-s3-enemy-set.test.ts` updated for the citation, with its negative case widened to three incomplete citations.
-- `agent/architecture.md` "POLB-A", `agent/follow-ups.md` "After POLB-A", and `agent/autopilot-queue.md` (POLB-A outcome and PR_OPEN; POLB-CENSUS's decision now states the numbers). All 74 merged tranches the supervisor listed were already recorded, so none needed writing.
+## Please check
 
-## Decisions a reviewer should weigh
-
-1. **Build-keyed applicability.** The owner allowed "build or season". I chose build, failing closed, because a stale lower bound could produce a wrong finding. The cost is stated: only two retained analyzed pulls have a provable build.
-2. **Witness retention.** The proposal keeps whole captured events for deaths, first hits and enough of each track to reproduce the predicate, rather than whole streams (36.6 MB per pull). On the measured pull, full stream and witnesses gave identical presence intervals for all 45 instances, and identical exact minima for every cell. This is captured evidence, not derived conclusions, and the raw pages stay under `.probe/`.
-3. **The bracket predicate reads later events in a census pull.** O2 governs an analyzed pull's decision, and the census is not one. It says "arisen and not demised", never targetable.
-4. **The seam's upper-bound path is tested with a review state only the test holds,** so the positive route is exercised while production cannot reach it.
-5. **POLB-A's seam does not use a lower bound.** POLB-B owns that, and must show which windows can transfer one, because adds die at the group's speed.
+1. **Actionability.** I recorded that the fallback supplies APL inputs and does not make a decision ACTIONABLE, under CLAUDE.md "ACTIONABLE Requires Positive Evidence". The decision lists "target availability represented by that profile" as a permitted fact and also says it weakens no evidence rule. Is that the right reading?
+2. **The exit criterion.** The earlier decision accepted a lower final count for a demonstrably unsolvable specialization. This one states 100% and calls it unchanged. I recorded it as replacing the earlier allowance, and flag it for the owner. Rule 11 stops for the owner rather than spinning.
+3. **The ONB-EV-PLAN build rule.** It narrows "qualifying" before any request. Does it stay within the grant's "first qualifying public raid fight under the recorded fixed discovery rule"?
+4. **Moved dependencies.** Is taking POLB-C out of ONB-EV-PLAN and REM-CENSUS consistent with the owner's "may interleave independent work"?
+5. **Tier 3 REJECTED.** A decision before any add is touched reads the profile's 1, so a REJECTED can arise where the real fight had more enemies. The decision accepts this with disclosure, and SIMC-FB-B carries it.
 
 ## Validation
 
-- `npm run typecheck`, `format:check`, `test:corpus` and `test:evidence`: all exit 0.
-- Full suite (`--testTimeout=60000`): 20,177 of 20,180 passed, 3 failed: `m9b-corpus-gate` "passes every assertion", `m9b-corpus-harness` SPEC_PROTECTION_PALADIN, and `runner-service-queue` W (a leftover job directory). All three files then passed alone and serially (76 of 76, `--maxWorkers=1`). Earlier tranches recorded the same two kinds of failure under parallel load. I did not run them on the base at this load, so that is the likely explanation rather than a proven one.
-- `tests/unit/polb-a-encounter-census.test.ts`: 35 of 35, run alone after the fix. The full suite and gates above predate the fix, whose only source change is the new pure module, which nothing in production imports.
-- Review cycle 1 found that a minimum over 250 ms samples is not a lower bound. Fixed: `src/data/encounter-census/bracket-predicate.ts` computes the exact minimum and refuses a partly covered window, with a dip shorter than 250 ms in its tests. The cell minima on the measured pull did not change, except that the last 15 s are now refused.
-- Not re-run: the replays behind the by-specialization table. Those counts come from saved ONB-S3R, ONB-T1P and ONB-T2P outputs, which the section says.
+- The supervisor's own `ConvertFrom-QueueText` reads 91 entries, with unique IDs and known dependencies.
+- Simulated selection after main: SIMC-FB-A, SIMC-FB-B, SIMC-FB-R, ONB-EV-PLAN, ONB-EV, REM-CENSUS, REM-GATE. It then stops at POLB-CENSUS's owner decision, with POLB-B, POLB-C and ONB-Z behind it. REM-CENSUS adds more entries before REM-GATE. M15-E and M11-G4-5-R stay BLOCKED.
+- `prettier --check` and `git diff --check` pass. No test suite was run: nothing executable changed.

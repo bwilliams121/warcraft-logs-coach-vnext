@@ -15216,3 +15216,55 @@ Ten pulls at the measured size plus an estimated 70,000 bytes of selection frame
 ### What this does not do
 
 It makes no request, enters no row, promotes nothing, wires no build resolver, adds no predicate for any other fact, and creates no census evidence root. Observed counts and decisions are unchanged.
+
+## Owner decision (2026-11-06): SimC profile fallback
+
+**Decision.** The pinned SimulationCraft profile is approved as fallback authority for encounter-state facts that cannot be established from Warcraft Logs or another stronger approved source. An inability to reconstruct an exact encounter state does not end remediation.
+
+**Precedence,** for a decision requiring enemy-count or target-domain state:
+
+1. observed or proven fight evidence, when sufficient;
+2. approved curated encounter authority, if one exists;
+3. pinned SimulationCraft profile state, when the first two cannot establish the required fact;
+4. UNKNOWN only when none of the above can answer.
+
+The analyzer never pretends tier 3 came from Warcraft Logs.
+
+**What the fallback means.** It answers: "Under the pinned SimulationCraft profile and environment for this specialization and build, what action does the authoritative APL select?" It does not claim Warcraft Logs proved the real encounter had that enemy state.
+
+**Permitted facts,** where the pinned profile or pinned engine semantics deterministically establish them: `active_enemies`; `spell_targets.<ability>` where SimC itself aliases or deterministically derives it; a candidate target domain where the profile defines a closed one; `fight_style`; the add and pull schedule the profile represents; target availability the profile represents; other explicit consequences of the profile plus engine semantics. Values the profile does not establish are not invented.
+
+**Default-profile semantics,** preserved exactly where the applicable profile uses the ordinary default environment: fight style Patchwerk; one target and no raid events; `active_enemies` is 1 with one target and no `adds` or `pull` event; with distance targeting disabled, `spell_targets` falls back to `active_enemies`. These are never reinterpreted as observed raid facts.
+
+**Provenance.** A binding records a category equivalent to `SIMC_PROFILE_FALLBACK` and identifies at least the SimC commit or pin, client build, specialization and profile identity, the relevant profile and environment configuration, and the specific SimC semantic used. It is distinguishable from observed WCL evidence, curated encounter evidence and spec-owned mechanic authority.
+
+**Conflict rule.** Observed or proven real-fight evidence outranks the fallback. If real evidence positively contradicts the assumption, the SimC value is not forced onto the pull: the strongest real evidence is used and uncertainty is preserved where necessary. The fallback fills an unobservable gap and never overwrites contradictory observations.
+
+**`target_if`.** A profile target domain satisfies a closed-domain requirement only when the pinned profile actually defines it. Arbitrary observed WCL actors are never the SimC candidate list, and no ordering is invented. `FIRST`, MIN and MAX, and target-dependent `if=` are evaluated with the target universe and semantics the pinned profile defines, where those are deterministically available.
+
+**Public disclosure.** A finding resolved this way remains authority-backed, and its interpretation discloses that the encounter-state portion came from the pinned model. The product distinguishes observed-fight evaluation from SimC-profile-relative evaluation. It never tells a player an unobserved target count definitely happened. In substance: "Under the pinned SimC profile assumptions, the priority would select X here."
+
+**Promotion evidence.** A real logged action evaluated against the fallback is still a real observed action, and may participate provided the action comes from qualifying real retained evidence, the applicable profile and build are proven, the fallback fact is deterministic under that profile, provenance is explicit, and the observation and discrimination gates are unchanged. Synthetic actions are never real observation evidence.
+
+**What it does not weaken.** Specialization-owned authority, evidence provenance, MATCH, REJECTED and UNKNOWN truth semantics, cross-spec isolation, public contract tests and promotion gates.
+
+**Remediation.** Specializations blocked by `active_enemies`, `spell_targets`, `target_if`, target-dependent conditions or other encounter-state inputs explicit in the pinned profile are revisited. The fallback is implemented as shared, gameplay-neutral infrastructure where genuinely generic, and affected INTERNAL_ONLY specializations are replayed through the normal remediation loop.
+
+**Completion rule.** The exit criterion is 100% of the playable canonical roster PUBLIC. UNKNOWN remains correct when neither real evidence nor the pinned profile supplies an answer, and such an UNKNOWN remains a remediation item until every specialization is publicly supported.
+
+### What this supersedes
+
+Earlier text stays as the record of when it was true. It is superseded here:
+
+- ONB-S3's "the analyzer must not manufacture an exact enemy count merely because a SimulationCraft expression requests one" still holds for tiers 1 and 2. Tier 3 is not manufacture, because it is the profile's stated value under explicit provenance.
+- "Owner decision (2026-11-06): Policy B source" says SimulationCraft does not get to dictate the count. That still governs what the census may establish, and tier 3 comes after it.
+- Sections saying a simulation's fight style is never a fact of a real fight stay true as a statement about the fight. `fight_style` may now be bound at tier 3, as a profile fact.
+- "Owner decision (2026-11-06): remediation before roster closure" accepted a lower final count for a demonstrably unsolvable specialization, and ONB-Z verified terminal reasons. The completion rule above replaces that: ONB-Z now passes only at 100% PUBLIC.
+
+### Recording notes (please correct if wrong)
+
+- **Actionability is treated as separate.** CLAUDE.md requires positive evidence for ACTIONABLE, and this decision weakens no evidence rule. So the fallback supplies APL inputs, including profile target availability, and does not by itself make a decision ACTIONABLE. An observed intermission stands.
+- **A REJECTED is possible at tier 3 where the real fight had more enemies than evidence proved.** For example, a decision before any add is touched reads the profile's 1. That is the meaning the decision chooses, disclosed as SimC-profile-relative. SIMC-FB-B carries the disclosure.
+- **Build proof may limit promotion.** Promotion evidence needs a proven build, and POLB-A found few retained pulls have one, so SIMC-FB-R measures this by specialization.
+- **No exit if stuck.** With 100% as the only exit, the queue cannot close on a stuck specialization. Remediation rule 11 stops for the owner instead of repeating work.
+- **POLB-CENSUS stays the owner's.** This decision does not approve or decline it. Tier 2 applies only "if one exists", so the fallback, ONB-EV and the census of blockers no longer wait on Policy B. ONB-Z still does until POLB-CENSUS is resolved.
