@@ -454,6 +454,8 @@ describe("M5 forms no unearned verdict", () => {
       // M10-C: the comparison rule is shared, and the second specialization's
       // facade and domain vocabulary carry the same defined-and-tested word.
       "src/findings/observed-comparison.ts",
+      // SIMC-FB-B: counts the view's outcome word, and defines nothing.
+      "src/findings/simc-profile-view.ts",
       "src/specs/paladin/protection/observed-analysis.ts",
       "src/specs/paladin/protection/domains.ts",
       // M11-A4: the third specialization's facade and domain vocabulary.

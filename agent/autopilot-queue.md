@@ -2412,11 +2412,13 @@ publicContract: NONE
 ### SIMC-FB-A: Shared SimC profile fallback for encounter state (internal)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: POLB-A
 branch: autopilot/simc-fb-a
 wcl: NONE
 publicContract: NONE
+pr: 99
+mergeSha: fd0892d0765fa906bddafeac457f08d8dedfa635
 ```
 
 **Direction.** Owner decision (2026-11-06) "SimC profile fallback" (`agent/architecture.md`).
@@ -2444,8 +2446,9 @@ Negative tests: the fallback never appears as observed evidence, never overrides
 ### SIMC-FB-B: Public disclosure of SimC-profile-relative evaluation
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: SIMC-FB-A
+branch: autopilot/simc-fb-b
 wcl: NONE
 publicContract: EXPECTED
 ```

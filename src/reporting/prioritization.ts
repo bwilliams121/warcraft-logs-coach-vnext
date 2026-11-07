@@ -10,8 +10,9 @@
  *
  * THREE SECTIONS, NEVER MIXED
  *
- *   prioritized    AUTHORITY_DIVERGENCE records with PROVEN state and at
- *                  least one evidence locator. The only ranked section.
+ *   prioritized    AUTHORITY_DIVERGENCE records with PROVEN or
+ *                  SIMC_PROFILE_RELATIVE state and at least one evidence
+ *                  locator. The only ranked section.
  *   informational  AUTHORITY_CONSISTENT and OBSERVED_FACT. Never failures.
  *   carried        SUPPRESSED, UNKNOWN, NO_AUTHORITY_AVAILABLE and
  *                  UNSUPPORTED, each labelled with its reason. Never
@@ -22,7 +23,9 @@
  * By evidence quality, then actionability, and only then by deterministic
  * tie-breaks:
  *
- *   1. state evidence: PROVEN (the only kind admitted to the section)
+ *   1. state evidence: PROVEN, then SIMC_PROFILE_RELATIVE (the only kinds
+ *      admitted to the section), so a modeled encounter state never outranks
+ *      a proven one
  *   2. actionability standing, strongest first:
  *        ACTIONABLE_AUTHORITY_DIVERGENCE              decision proven possible
  *        DIVERGENCE_ALTERNATIVE_ACTIONABILITY_UNPROVEN observed action executed
@@ -42,7 +45,8 @@
  * Records group only when EVERYTHING that decides their standing is equal:
  * producer, category, specialization, disposition, authority, reason code,
  * suppression reason, state evidence, actionability, the producer's
- * aggregation key and its subject token. So a pattern has exactly its
+ * aggregation key, its subject token and the token selected under the SimC
+ * profile. So a pattern has exactly its
  * members' standing and subject, a proven member is never diluted by an
  * unproven one, and an UNKNOWN never pools with a divergence. A group at or above its category threshold is reported
  * as one PATTERN item; below it, every member stays a SINGLE item.
@@ -125,6 +129,8 @@ export interface ReportItem {
   readonly actionability: ActionabilityLevel;
   readonly aggregationKey: string | null;
   readonly subjectToken: string | null;
+  /** SIMC_PROFILE_RELATIVE state only; see `ReportableFinding`. Absent otherwise. */
+  readonly profileSelectedToken?: string | null;
   /** Members by fight time, then id. One for a SINGLE. */
   readonly findingIds: readonly string[];
   readonly occurrences: number;
@@ -218,7 +224,8 @@ function problemsOf(record: ReportableFinding): RecordProblem[] {
   )
     problems.push("SUPPRESSION_REASON_MISMATCH");
   if (record.disposition === "AUTHORITY_DIVERGENCE") {
-    if (record.stateEvidence !== "PROVEN") problems.push("DIVERGENCE_WITHOUT_PROVEN_STATE");
+    if (record.stateEvidence !== "PROVEN" && record.stateEvidence !== "SIMC_PROFILE_RELATIVE")
+      problems.push("DIVERGENCE_WITHOUT_PROVEN_STATE");
     if (!Array.isArray(record.evidence) || record.evidence.length === 0)
       problems.push("DIVERGENCE_WITHOUT_EVIDENCE");
   }
@@ -272,6 +279,7 @@ function groupKeyOf(record: ReportableFinding): string {
     record.actionability,
     record.aggregationKey,
     record.subjectToken,
+    record.profileSelectedToken ?? null,
   ]);
 }
 
@@ -307,6 +315,7 @@ function itemOf(members: readonly ReportableFinding[], itemKind: ReportItem["ite
     actionability: first.actionability,
     aggregationKey: first.aggregationKey,
     subjectToken: first.subjectToken,
+    ...(first.profileSelectedToken === undefined ? {} : { profileSelectedToken: first.profileSelectedToken }),
     findingIds: members.map((member) => member.findingId),
     occurrences: members.length,
     firstFightTimeMs: times.length === 0 ? null : Math.min(...times),

@@ -162,6 +162,19 @@ export const PUBLIC_ANALYSIS_STATUSES = [
   "INSUFFICIENT_EVIDENCE",
 ] as const;
 
+/**
+ * Which encounter-state fact a SimC-profile-relative decision read (SIMC-FB-B).
+ * Pinned equal to the internal list by `tests/contracts/simc-fb-b-disclosure-contract.test.ts`.
+ */
+export const PUBLIC_SIMC_PROFILE_FACTS = [
+  "ACTIVE_ENEMIES",
+  "TARGET_DOMAIN",
+  "FIGHT_STYLE",
+  "ADD_AND_PULL_SCHEDULE",
+  "OTHER_RAID_EVENT_SCHEDULE",
+  "SPELL_TARGETS",
+] as const;
+
 // No public evidence-scope vocabulary exists: ingestion scope is not published.
 // See the note on `commonFields`.
 
@@ -364,6 +377,36 @@ export const EvidenceLocatorSchema = z
   .strict();
 
 /**
+ * What marks one decision as evaluated under the pinned SimC profile (SIMC-FB-B).
+ *
+ * ABSENT MEANS OBSERVED-FIGHT EVALUATION: no profile fact was bound. PRESENT means
+ * part of the encounter state came from the profile, so the result answers "under
+ * the pinned profile, what would the priority select here?" and says nothing about
+ * what the real encounter held. `sourceIndex` is a position in
+ * `simcProfileEvaluation.sources`, and `semanticId` names a statement there. It is on
+ * what was bound, not on which lines the scan read, so it can over-disclose and
+ * cannot under-disclose. It never makes a decision actionable.
+ */
+export const DecisionEncounterStateSchema = z
+  .object({
+    basis: z.literal("SIMC_PROFILE_RELATIVE"),
+    facts: z
+      .array(
+        z
+          .object({
+            fact: z.enum(PUBLIC_SIMC_PROFILE_FACTS),
+            /** The APL atom bound, or null for a target domain. */
+            atomKey: z.string().min(1).nullable(),
+            semanticId: z.string().min(1),
+            sourceIndex: z.number().int().nonnegative(),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict();
+
+/**
  * One observed rotational decision, compared against the authority.
  *
  * `outcome` and `authorityCoverage`/`selectionPrecision` are separate axes and
@@ -405,6 +448,8 @@ export const DecisionSchema = z
      * for a reader to infer.
      */
     usabilityProvenance: z.enum(PUBLIC_USABILITY_PROVENANCES),
+    /** SIMC-FB-B. Optional, so adding it is not a version change. See its schema. */
+    encounterState: DecisionEncounterStateSchema.optional(),
     // THERE IS DELIBERATELY NO `observedActionRejected` BOOLEAN HERE.
     //
     // The internal observed-action judgment has three states — proven rejected,
@@ -475,6 +520,91 @@ export const CoverageSchema = z
     unknownBlockerClasses: tallyOf(PUBLIC_DECISION_BLOCKER_CLASSES),
     exclusions: tallyOf(PUBLIC_EXCLUSION_REASONS),
     excludedCastCount: z.number().int().nonnegative(),
+  })
+  .strict();
+
+// ---------------------------------------------------------------------------
+// SimC-profile-relative evaluation (SIMC-FB-B)
+// ---------------------------------------------------------------------------
+
+/** How many decisions rest on the profile: a part of the coverage totals, never an addition. */
+export const SimcProfileRelativeCountsSchema = z
+  .object({
+    decisions: z.number().int().positive(),
+    match: z.number().int().nonnegative(),
+    rejected: z.number().int().nonnegative(),
+    unknown: z.number().int().nonnegative(),
+  })
+  .strict();
+
+/**
+ * Which pinned profile and environment answered, and the engine statements cited.
+ * Every field is read from the committed record. It names no Warcraft Logs source,
+ * because it has none.
+ */
+export const SimcProfileSourceSchema = z
+  .object({
+    category: z.literal("SIMC_PROFILE_FALLBACK"),
+    datasetId: z.string().min(1),
+    datasetRevision: z.string().min(1),
+    /** The analyzer pin the list and the profile came from. */
+    simcCommit: z.string().min(1),
+    /** The fight's proven build, and the commit whose engine lines were read for it. */
+    clientBuild: z.string().min(1),
+    environmentCommit: z.string().min(1),
+    aplAuthorityId: z.string().min(1),
+    profilePath: z.string().min(1),
+    profileSha256: z.string().min(1),
+    environment: z
+      .object({
+        fightStyle: z.string().min(1),
+        targetCount: z.number().int().positive(),
+        raidEventCount: z.number().int().nonnegative(),
+        distanceTargetingEnabled: z.boolean(),
+      })
+      .strict(),
+    semantics: z
+      .array(
+        z
+          .object({
+            semanticId: z.string().min(1),
+            sourcePath: z.string().min(1),
+            sourceSha256: z.string().min(1),
+            startLine: z.number().int().positive(),
+            endLine: z.number().int().positive(),
+            excerptSha256: z.string().min(1),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict();
+
+/**
+ * The document's statement that some decisions were evaluated under the pinned
+ * SimC profile, with its provenance. Present exactly when a decision carries
+ * `encounterState`, so a specialization that does not read the fallback publishes
+ * nothing here.
+ *
+ * Each field is pinned so it cannot be misread. The environment is the profile's,
+ * never a fact of this fight (`encounterStateObserved`). The evaluation moves no
+ * confidence, suppresses nothing and makes nothing actionable (`findingEffect`), and
+ * comparison behavior has no input to it.
+ */
+export const SimcProfileEvaluationSchema = z
+  .object({
+    revision: z.literal("simc-profile-evaluation/1"),
+    basis: z.literal("SIMC_PROFILE_RELATIVE"),
+    encounterStateObserved: z.literal(false),
+    coverage: SimcProfileRelativeCountsSchema,
+    sources: z.array(SimcProfileSourceSchema).min(1),
+    findingEffect: z
+      .object({
+        confidence: z.literal("NONE"),
+        suppression: z.literal("NONE"),
+        actionability: z.literal("NONE"),
+      })
+      .strict(),
   })
   .strict();
 
@@ -811,6 +941,8 @@ export const DiagnosisStatementSchema = z
     ...diagnosedPairFields,
     direction: z.literal("SUBJECT_HIGHER"),
     findings: z.array(EvidenceLocatorSchema).min(1),
+    /** SIMC-FB-B: those of `findings` resolved under the pinned SimC profile. Absent when none. */
+    findingsUnderSimcProfile: z.array(EvidenceLocatorSchema).min(1).optional(),
     /** Named environmental reasons in effect at a finding's moment. Context only: nothing is suppressed. */
     environmentalContext: z.array(
       z
@@ -912,6 +1044,12 @@ export const PUBLIC_TLDR_DISCLOSURES = [
   "PREPARATION_NOT_ASSESSED",
   "DAMAGE_DIAGNOSIS_NOT_ASSESSED",
   /**
+   * SIMC-FB-B: some decisions read encounter state from the pinned SimC profile,
+   * so their results are profile-relative, and `gameplay.simcProfileRelative` says
+   * how many. Not a statement about what the fight held.
+   */
+  "DECISIONS_EVALUATED_UNDER_SIMC_PROFILE",
+  /**
    * M15-F: the document carries `supportObservations`, which neither the TLDR
    * nor the report summarizes. Observed facts, no verdict.
    */
@@ -981,6 +1119,8 @@ const TldrGameplaySchema = z.discriminatedUnion("status", [
       resolvedDecisions: z.number().int().nonnegative(),
       unknownDecisions: z.number().int().nonnegative(),
       excludedCasts: z.number().int().nonnegative(),
+      /** SIMC-FB-B: how much of the above rests on the pinned SimC profile. Absent means none. */
+      simcProfileRelative: SimcProfileRelativeCountsSchema.optional(),
     })
     .strict(),
   z.object({ status: z.literal("SPEC_NOT_SUPPORTED") }).strict(),
@@ -1032,6 +1172,10 @@ export const TldrHighlightSchema = z
     standing: z.enum(PUBLIC_TLDR_DIVERGENCE_STANDINGS),
     /** The observed action token, as the producer named it. */
     subjectToken: z.string().min(1).nullable(),
+    /** SIMC-FB-B: present only on an item resolved under the pinned SimC profile. */
+    encounterStateBasis: z.literal("SIMC_PROFILE_RELATIVE").optional(),
+    /** With `encounterStateBasis`: the token selected under the profile, or null when none was established. */
+    profileSelectedToken: z.string().min(1).nullable().optional(),
     occurrences: z.number().int().positive(),
     firstFightTimeMs: z.number().nullable(),
     lastFightTimeMs: z.number().nullable(),
@@ -1123,8 +1267,19 @@ export const PUBLIC_REPORT_DISPOSITIONS = [
   "UNSUPPORTED",
 ] as const;
 
-/** Whether the state a conclusion rests on was proven. */
-export const PUBLIC_REPORT_STATE_EVIDENCE = ["PROVEN", "INCOMPLETE"] as const;
+/**
+ * Whether the state a conclusion rests on was proven.
+ *
+ * SIMC_PROFILE_RELATIVE joined in SIMC-FB-B, by the additive-widening precedent:
+ * no existing document changes, and the value appears only in a document whose
+ * decisions read the pinned SimC profile. The conclusion is resolved and
+ * authority-backed, and part of the encounter state it read is the profile's
+ * model. It is weaker than PROVEN, and it is never stated as observed.
+ */
+export const PUBLIC_REPORT_STATE_EVIDENCE = ["PROVEN", "SIMC_PROFILE_RELATIVE", "INCOMPLETE"] as const;
+
+/** A carried entry resolved nothing under the profile, so it never has that state. */
+const REPORT_CARRIED_STATE_EVIDENCE = ["PROVEN", "INCOMPLETE"] as const;
 
 /**
  * What evidence there is that a decision was possible. There is no
@@ -1154,6 +1309,8 @@ const reportEntryCommon = {
   actionability: z.enum(PUBLIC_REPORT_ACTIONABILITY),
   /** What the finding is about, as the producer named it. */
   subjectToken: z.string().min(1).nullable(),
+  /** SIMC-FB-B: SIMC_PROFILE_RELATIVE state only. The token selected under the profile, or null. */
+  profileSelectedToken: z.string().min(1).nullable().optional(),
   occurrences: z.number().int().positive(),
   firstFightTimeMs: z.number().nullable(),
   lastFightTimeMs: z.number().nullable(),
@@ -1178,7 +1335,7 @@ export const ReportPrioritizedEntrySchema = z
     position: z.number().int().positive(),
     disposition: z.literal("AUTHORITY_DIVERGENCE"),
     standing: z.enum(PUBLIC_TLDR_DIVERGENCE_STANDINGS),
-    stateEvidence: z.literal("PROVEN"),
+    stateEvidence: z.enum(["PROVEN", "SIMC_PROFILE_RELATIVE"]),
     reasonCode: z.null(),
     suppressionReason: z.null(),
     ...reportEntryCommon,
@@ -1212,7 +1369,7 @@ const carriedEntry = <D extends (typeof PUBLIC_TLDR_NOT_ASSESSED_DISPOSITIONS)[n
       position: z.null(),
       disposition: z.literal(disposition),
       standing: z.literal(disposition),
-      stateEvidence: z.enum(PUBLIC_REPORT_STATE_EVIDENCE),
+      stateEvidence: z.enum(REPORT_CARRIED_STATE_EVIDENCE),
       /** The producer's reason, verbatim: a blocker, an unknown code. */
       reasonCode: z.string().min(1),
       /** Null: only a SUPPRESSED entry names an environmental reason. */
@@ -2154,6 +2311,11 @@ export const AnalyzedResultSchema = z
      * non-analyzed statuses: they carry nothing analysis-shaped.
      */
     diagnosis: DiagnosisSchema.optional(),
+    /**
+     * SIMC-FB-B. Present exactly when a decision carries `encounterState`, so
+     * every other document is byte-identical to one built before it existed.
+     */
+    simcProfileEvaluation: SimcProfileEvaluationSchema.optional(),
   })
   .strict();
 

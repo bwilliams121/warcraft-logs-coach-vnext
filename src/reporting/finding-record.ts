@@ -18,7 +18,8 @@
  *   disposition   what kind of conclusion the producer reached (below)
  *   authority     the explicit authority it rests on; NO_AUTHORITY_AVAILABLE
  *                 exactly when the disposition says so
- *   stateEvidence whether the state the conclusion rests on was PROVEN
+ *   stateEvidence whether the state the conclusion rests on was PROVEN, or read
+ *                 under the pinned SimC profile (SIMC_PROFILE_RELATIVE)
  *   actionability what evidence there is that the decision was possible
  *   evidence      locators, references only, never copied events
  *   aggregationKey the producer's own statement of which findings are "the
@@ -30,7 +31,8 @@
  *   AUTHORITY_DIVERGENCE    the authority cannot select what the player did
  *                           (an APL REJECTED). The ONLY disposition that can
  *                           rank as a coaching candidate, and only with
- *                           PROVEN state and at least one evidence locator.
+ *                           PROVEN or SIMC_PROFILE_RELATIVE state and at least
+ *                           one evidence locator.
  *   AUTHORITY_CONSISTENT    authority-compatible (MATCH, ASSIGNMENT_MET).
  *                           Never a failure, never an endorsement.
  *   OBSERVED_FACT           an observed fact with no verdict (consumable use
@@ -93,8 +95,14 @@ export const NON_ASSESSMENT_DISPOSITIONS = [
  * Whether the state a conclusion rests on was proven. INCOMPLETE is never
  * ranked as a divergence: a producer that diverged on unproven state is
  * refused, not trusted.
+ *
+ * SIMC_PROFILE_RELATIVE (SIMC-FB-B): the conclusion is fully resolved, and part
+ * of the encounter state it read came from the pinned SimC profile, not from
+ * the fight. Weaker evidence than PROVEN and listed after it, so it ranks after
+ * every PROVEN item; it remains authority-backed, and it is never stated as
+ * observed.
  */
-export const STATE_EVIDENCE_STATES = ["PROVEN", "INCOMPLETE"] as const;
+export const STATE_EVIDENCE_STATES = ["PROVEN", "SIMC_PROFILE_RELATIVE", "INCOMPLETE"] as const;
 export type StateEvidenceState = (typeof STATE_EVIDENCE_STATES)[number];
 
 /**
@@ -175,4 +183,10 @@ export interface ReportableFinding {
    * never parsed.
    */
   readonly subjectToken: string | null;
+  /**
+   * SIMC_PROFILE_RELATIVE state only: the token the authority selected under the
+   * profile, or null when it established only that the observed action could not
+   * be selected. Carried for display and compared for aggregation, never ranked.
+   */
+  readonly profileSelectedToken?: string | null;
 }

@@ -27,6 +27,15 @@ Decided in `agent/architecture.md` "Owner decision (2026-11-06): SimC profile fa
 - **The exit criterion is 100% PUBLIC.** A terminal BLOCKED no longer closes the program.
 - **POLB-CENSUS is still open,** and no longer holds up the fallback, ONB-EV or REM-CENSUS.
 
+## After SIMC-FB-B: what SIMC-FB-R must do to be disclosed
+
+**Raised:** SIMC-FB-B (2026-11-06). Offline. The design is in `agent/architecture.md` "SIMC-FB-B".
+
+- **A specialization that reads the fallback must carry its facts.** Spread `simcProfileFactsField(resolution)` into each `ObservedDecisionRecord` its adapter writes, or carry `resolution.profileFacts` to the adapter first. Without it a tier-3 result reads as observed. A contract test fails any `src/specs/<class>/<spec>/` that calls `withEncounterStateAt(` and never writes them, so this holds from the first wired specialization. It checks the tree, not each decision, so each wiring still needs its own test.
+- **The label is on what was bound, not on what was read.** Any decision with a tier-3 fact bound is labelled, even if its scan never reached the atom. It can over-disclose and cannot under-disclose. An over-disclosed result ranks as LOW_PRIORITY and last. If SIMC-FB-R measures this as a real loss, a counterfactual evaluation without the fallback could narrow the label, and that is its own reviewed change.
+- **Comparability across a night's points is unchanged.** `PublicComparabilitySchema` has no flag for "one pull read the profile and the other did not". Each cell says so itself, and a reader joins on it. Worth a flag if trend evidence starts being read as more than an ordered series.
+- **Only the public surfaces of an observed-decision view are covered.** A specialization whose only output is another block (healer findings, support observations) reads no fallback today. If one ever does, that block needs its own disclosure.
+
 ## After SIMC-FB-A: what SIMC-FB-R and SIMC-FB-B inherit
 
 **Raised:** SIMC-FB-A (2026-11-06). Offline. The design and the numbers are in `agent/architecture.md` "SIMC-FB-A".

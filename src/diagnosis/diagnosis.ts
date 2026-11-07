@@ -61,7 +61,11 @@ import {
 } from "../comparison-facts/strategy-context.js";
 import type { AlignmentInput } from "../comparison-facts/timing-alignment.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
-import { AUTHORITY_REJECTION_OUTCOME, restateDecisionEvidence } from "./decision-evidence.js";
+import {
+  AUTHORITY_REJECTION_OUTCOME,
+  decisionEvidenceIdOf,
+  restateDecisionEvidence,
+} from "./decision-evidence.js";
 import {
   DIAGNOSIS_OBSERVATION_CAUSES,
   type DiagnosisNotAssessedReason,
@@ -121,6 +125,11 @@ export interface CoachingStatement extends DiagnosedPair {
   readonly direction: "SUBJECT_HIGHER";
   /** The rejected observed decisions in scope, by their evidence locators, in time order. */
   readonly findings: readonly EvidenceLocator[];
+  /**
+   * Those of `findings` resolved under the pinned SimC profile (SIMC-FB-B). They stay
+   * authority-backed, and their encounter state is modeled. Absent when there are none.
+   */
+  readonly findingsUnderSimcProfile?: readonly EvidenceLocator[];
   /** M14-C named reasons in effect at any finding's moment. Context only. */
   readonly environmentalContext: readonly { readonly itemId: string; readonly reason: EnvironmentalReason }[];
   readonly magnitudeAttribution: "NONE";
@@ -241,6 +250,11 @@ export function diagnose(
   if (context.kind === "REFUSED") return notAssessed("COMPARISON_NOT_COMPARABLE");
 
   const byId = new Map(linkage.evidence.map((record) => [record.evidenceId, record]));
+  const underProfile = new Set(
+    view.decisions
+      .filter((decision) => (decision.simcProfileFacts?.length ?? 0) > 0)
+      .map(decisionEvidenceIdOf),
+  );
   const statements: CoachingStatement[] = [];
   const observations: DiagnosisObservation[] = [];
 
@@ -274,6 +288,9 @@ export function diagnose(
         continue;
       }
       const locators = findings.flatMap((record) => record.locators);
+      const profileLocators = findings
+        .filter((record) => underProfile.has(record.evidenceId))
+        .flatMap((record) => record.locators);
       const attached = attachStrategyContext(
         context,
         findings.map((record) => ({ findingId: record.evidenceId, reportTimeMs: record.interval.startMs })),
@@ -286,6 +303,7 @@ export function diagnose(
         statementKind: "AUTHORITY_FINDING_LINKED_TO_DELTA",
         direction: "SUBJECT_HIGHER",
         findings: locators,
+        ...(profileLocators.length === 0 ? {} : { findingsUnderSimcProfile: profileLocators }),
         environmentalContext: [...reasons.values()],
         magnitudeAttribution: "NONE",
       });

@@ -37,6 +37,11 @@
  */
 
 import type { ConsumableStatus } from "../analysis/preparation/consumable-status.js";
+import {
+  isSimcProfileRelative,
+  simcProfileRelativeCountsOf,
+  simcProfileSourcesOf,
+} from "../findings/simc-profile-view.js";
 import type { FightAnalysis, PreparationOutcome } from "../services/result.js";
 import { playerKeyOf } from "../wcl/roster-snapshot.js";
 import type {
@@ -208,6 +213,7 @@ export function toPlayerFightCell(input: CellProjectionInput): CellProjection {
   // later impossible: the aggregator never sees a decision, only three
   // already-distinct lists.
   const rejectedKeys: string[] = [];
+  const profileRejectedKeys: string[] = [];
   const evidenceKeys: string[] = [];
 
   for (const decision of view.decisions) {
@@ -215,7 +221,11 @@ export function toPlayerFightCell(input: CellProjectionInput): CellProjection {
       // The ONLY gameplay-incompatibility evidence in this whole model. The
       // observed token is the authority's own vocabulary, which is precisely
       // why it is flattened into an opaque key before it leaves this module.
-      rejectedKeys.push(patternKey(decision.observedToken, decision.basis));
+      // A rejection read under the pinned SimC profile goes in its own list: its
+      // encounter state is modeled, and that must not merge with observed state.
+      (isSimcProfileRelative(decision) ? profileRejectedKeys : rejectedKeys).push(
+        patternKey(decision.observedToken, decision.basis),
+      );
       continue;
     }
     if (decision.outcome === "UNKNOWN") {
@@ -234,7 +244,12 @@ export function toPlayerFightCell(input: CellProjectionInput): CellProjection {
     exclusionPatterns: tallyOf(
       view.exclusions.map((cast) => patternKey(cast.reason, String(cast.abilityGameId))),
     ),
+    ...(profileRejectedKeys.length === 0
+      ? {}
+      : { simcProfileRelativeRejectedPatterns: tallyOf(profileRejectedKeys) }),
   };
+
+  const profileCounts = simcProfileRelativeCountsOf(view.decisions);
 
   return {
     ok: true,
@@ -252,6 +267,22 @@ export function toPlayerFightCell(input: CellProjectionInput): CellProjection {
       },
       counts,
       recurrence,
+      ...(profileCounts === null
+        ? {}
+        : {
+            simcProfileEvaluation: {
+              counts: profileCounts,
+              sources: simcProfileSourcesOf(view.decisions).sources.map((source) => ({
+                datasetRevision: source.datasetRevision,
+                simcCommit: source.simcCommit,
+                clientBuild: source.clientBuild,
+                environmentCommit: source.environmentCommit,
+                aplAuthorityId: source.aplAuthorityId,
+                profilePath: source.profilePath,
+                profileSha256: source.profileSha256,
+              })),
+            },
+          }),
       // Compact: counts or lower bounds and reason codes, never the uses.
       preparation: cellPreparationOf(fightAnalysis.preparation),
       // NOTHING ELSE CROSSES. `result.comparisons` and `result.excluded` end

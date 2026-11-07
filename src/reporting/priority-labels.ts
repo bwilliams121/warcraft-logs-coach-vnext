@@ -15,7 +15,8 @@
  *
  *   section / standing  authority-backed divergence or not, and whether the
  *                       authority's decision was PROVEN actionable
- *   stateEvidence       evidence quality (only PROVEN reaches PRIORITIZED)
+ *   stateEvidence       evidence quality (only PROVEN and SIMC_PROFILE_RELATIVE
+ *                       reach PRIORITIZED)
  *   itemKind            a PATTERN is a demonstrated repetition at or above the
  *                       category's configured threshold; a SINGLE is one record
  *
@@ -32,7 +33,9 @@
  *   LOW_PRIORITY     a divergence whose actionability is not proven (the
  *                    other two M15-A standings), single or pattern: a reader
  *                    may look, but nothing establishes the alternative was
- *                    possible, so it never outranks a proven one
+ *                    possible, so it never outranks a proven one. Also every
+ *                    SIMC_PROFILE_RELATIVE divergence, whatever its standing:
+ *                    its encounter state is modeled, and M15-A ranks it last
  *   NOT_PRIORITIZED  everything informational (AUTHORITY_CONSISTENT,
  *                    OBSERVED_FACT) and every non-assessment (SUPPRESSED,
  *                    UNKNOWN, NO_AUTHORITY_AVAILABLE, UNSUPPORTED). This is
@@ -65,6 +68,7 @@ export const PRIORITY_BASES = [
   "REPEATED_ACTIONABLE_DIVERGENCE",
   "SINGLE_ACTIONABLE_DIVERGENCE",
   "DIVERGENCE_ACTIONABILITY_UNPROVEN",
+  "SIMC_PROFILE_RELATIVE_DIVERGENCE",
   "INFORMATIONAL",
   "NON_ASSESSMENT",
 ] as const;
@@ -74,6 +78,7 @@ export const PRIORITY_LABEL_OF_BASIS: Readonly<Record<PriorityBasis, PriorityLab
   REPEATED_ACTIONABLE_DIVERGENCE: "HIGH_PRIORITY",
   SINGLE_ACTIONABLE_DIVERGENCE: "MEDIUM_PRIORITY",
   DIVERGENCE_ACTIONABILITY_UNPROVEN: "LOW_PRIORITY",
+  SIMC_PROFILE_RELATIVE_DIVERGENCE: "LOW_PRIORITY",
   INFORMATIONAL: "NOT_PRIORITIZED",
   NON_ASSESSMENT: "NOT_PRIORITIZED",
 };
@@ -121,9 +126,12 @@ export type PriorityLabelling =
 export function basisOf(item: ReportItem): PriorityBasis {
   if (item.section === "INFORMATIONAL") return "INFORMATIONAL";
   if (item.section === "CARRIED") return "NON_ASSESSMENT";
-  // A PRIORITIZED item is a PROVEN divergence (M15-A refuses any other); the
-  // check is restated so an item built any other way never gains a priority.
-  if (item.disposition !== "AUTHORITY_DIVERGENCE" || item.stateEvidence !== "PROVEN") return "NON_ASSESSMENT";
+  // A PRIORITIZED item is a PROVEN or profile-relative divergence (M15-A refuses
+  // any other); the check is restated so an item built any other way never gains
+  // a priority.
+  if (item.disposition !== "AUTHORITY_DIVERGENCE") return "NON_ASSESSMENT";
+  if (item.stateEvidence === "SIMC_PROFILE_RELATIVE") return "SIMC_PROFILE_RELATIVE_DIVERGENCE";
+  if (item.stateEvidence !== "PROVEN") return "NON_ASSESSMENT";
   if (item.standing !== "ACTIONABLE_AUTHORITY_DIVERGENCE") return "DIVERGENCE_ACTIONABILITY_UNPROVEN";
   return item.itemKind === "PATTERN" ? "REPEATED_ACTIONABLE_DIVERGENCE" : "SINGLE_ACTIONABLE_DIVERGENCE";
 }

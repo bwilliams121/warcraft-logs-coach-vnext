@@ -45,6 +45,8 @@ export const RAID_NIGHT_DISCLOSURES = [
   "FIGHTS_FAILED",
   "CONSUMABLE_COUNT_UNKNOWN",
   "PREPARATION_NOT_ASSESSED",
+  /** SIMC-FB-B: some analyzed decisions read encounter state from the pinned SimC profile. */
+  "DECISIONS_EVALUATED_UNDER_SIMC_PROFILE",
   /**
    * Always held: cells carry counts only. Each fight's TLDR, report, diagnosis
    * and support observations are in its single-fight analysis (`analysisRef`).
@@ -97,6 +99,7 @@ export function discloseRaidNightCoverage(night: RaidNightAnalysis): RaidNightCo
   if (coverage.fightsFailed > 0) held.add("FIGHTS_FAILED");
   if (consumableUnknown > 0) held.add("CONSUMABLE_COUNT_UNKNOWN");
   if (preparationNotAssessed > 0) held.add("PREPARATION_NOT_ASSESSED");
+  if (coverage.simcProfileRelative !== undefined) held.add("DECISIONS_EVALUATED_UNDER_SIMC_PROFILE");
 
   // ---- the sentences, templated from the counts above and nothing else ----
   const present = coverage.cellsTotal - coverage.cellsAbsent;
@@ -127,6 +130,12 @@ export function discloseRaidNightCoverage(night: RaidNightAnalysis): RaidNightCo
     lines.push(
       `${plural(preparationNotAssessed, "cell's", "cells'")} consumable use was not assessed; nothing is claimed about it.`,
     );
+  if (coverage.simcProfileRelative !== undefined) {
+    const { decisions, match, rejected, unknown } = coverage.simcProfileRelative;
+    lines.push(
+      `${plural(decisions, "eligible observed decision was", "eligible observed decisions were")} evaluated under the pinned SimC profile assumptions (${String(match)} MATCH, ${String(rejected)} REJECTED, ${String(unknown)} UNKNOWN). Their encounter state is the profile's model, not something these fights were observed to hold.`,
+    );
+  }
   lines.push(
     "Each fight's summary, report, damage diagnosis and support observations are in its single-fight analysis (analysisRef), not in this night.",
   );

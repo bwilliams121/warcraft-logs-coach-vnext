@@ -132,10 +132,15 @@ function collectPatterns(
  * calls it with every cell, and the output for that call is identical.
  */
 export function summarizeRecurrence(cells: readonly PlayerFightResult[]): RecurrenceSummary {
+  const profileRejected = collectPatterns(
+    cells,
+    (cell) => cell.recurrence.simcProfileRelativeRejectedPatterns ?? [],
+  );
   return {
     rejectedPatterns: collectPatterns(cells, (cell) => cell.recurrence.rejectedPatterns),
     evidenceLimitations: collectPatterns(cells, (cell) => cell.recurrence.evidenceLimitations),
     exclusionPatterns: collectPatterns(cells, (cell) => cell.recurrence.exclusionPatterns),
+    ...(profileRejected.length === 0 ? {} : { simcProfileRelativeRejectedPatterns: profileRejected }),
   };
 }
 
@@ -162,6 +167,7 @@ function summarizeCoverage(
   let unknownTotal = 0;
   let resolvedComparisonsTotal = 0;
   let excludedCastCountTotal = 0;
+  const profile = { decisions: 0, match: 0, rejected: 0, unknown: 0 };
 
   for (const cell of cells) {
     switch (cell.kind) {
@@ -176,6 +182,12 @@ function summarizeCoverage(
         unknownTotal += cell.counts.unknown;
         resolvedComparisonsTotal += cell.counts.resolvedComparisons;
         excludedCastCountTotal += cell.counts.excludedCastCount;
+        if (cell.simcProfileEvaluation !== undefined) {
+          profile.decisions += cell.simcProfileEvaluation.counts.decisions;
+          profile.match += cell.simcProfileEvaluation.counts.match;
+          profile.rejected += cell.simcProfileEvaluation.counts.rejected;
+          profile.unknown += cell.simcProfileEvaluation.counts.unknown;
+        }
         break;
       case "ABSENT":
         cellsAbsent += 1;
@@ -217,6 +229,7 @@ function summarizeCoverage(
     unknownTotal,
     resolvedComparisonsTotal,
     excludedCastCountTotal,
+    ...(profile.decisions === 0 ? {} : { simcProfileRelative: profile }),
     fightsRequested: snapshot.requestedFightIds.length,
     fightsIncluded: snapshot.identity.includedFightIds.length,
     fightsMissing: snapshot.missingRequestedFightIds.length,
