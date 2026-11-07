@@ -4,38 +4,45 @@ Rolling file: overwritten for each review cycle.
 
 ## Change
 
-ONB-EV-PLAN: freeze the neutral evidence campaign plan. Branch `autopilot/onb-ev-plan`, from `main` at 56d6278.
+Record the owner's 2026-11-07 decisions on Warcraft Logs audit hardening, POLB-CENSUS and ONB-EV completion, and queue AUD-WCL-1. Working tree on `main` at 50fb71e, uncommitted.
 
-- **Public contract change: NONE.** No file under `src/contracts/`, `src/api/` or `src/mcp/` changes.
-- **Warcraft Logs: no request was made.** All measurements read retained captures.
-- **Nothing is selected, captured, committed as evidence or promoted.**
+- Documentation and queue only: no source, test, analyzer, runtime-data or public-contract change. AUD-WCL-1 implements the supervisor fix later.
+- **Warcraft Logs: no request was made.** The ONB-EV grant line changes to record the owner's 119 cap, the retry decision and revision 2. AUD-WCL-1 is `wcl: NONE`.
+- The four untracked local paths (`.claude/` and the three `scripts/probe/wcl-*.probe.ts` files) are the standing CLAUDE.md exclusions and are not part of this change.
 
-## The result
+## The decision
 
-All twelve recorded specializations stay. The plan's worst case is 200 requests against ONB-EV's hard cap of 60, so ONB-EV runs in the frozen order and stops at the cap with its report. Every fixture is also larger than the 5,212 bytes left under the archive's notice line, so ONB-EV will end at an owner decision either way. Nothing is dropped or reordered to fit. `agent/architecture.md` "ONB-EV-PLAN" has the argument and the numbers.
+- **AUD-WCL-1, `wcl: NONE`:** detect execution of code or configuration rooted under `.probe/` through common launchers; keep inspection distinct from execution; self-tests; read-only historical backfill with four classifications; the empty-audit rule; and a pre-merge check for uncommitted tracked edits. It runs after ONB-EV's current stop and before any later ordinary tranche.
+- **POLB-CENSUS: DECLINED.** No grant and no archive exception. The SimC fallback is the active path.
+- **ONB-EV completion: APPROVED.**
+  - The total cap rises from 60 to 119, cumulative, only to complete the twelve.
+  - Revision 2 is accepted.
+  - The archive line is unchanged, and REM-CENSUS proposes byte-pinned exceptions only for evidence that must be committed. Evidence that establishes a blocker is kept.
+  - AUD-WCL-1 must merge and the supervisor restart first.
+  - PR #103 is reconciled semantically with main.
 
-## What changed
+## Files
 
-1. **`agent/onb-ev-plan.json`.** The frozen plan, digest `48066f986e7035542bf81c0263f4cec0d9d70e0f3d892ab6eb7ed535e6fa0013`: the twelve rows with their families and retained evidence, the proven intervals and the one excluded, the listing, order and gate, the capture shape, the ceilings, the budget and the storage numbers.
-2. **`scripts/corpus/onb-ev-selection.mjs` and its types.** The selection rule as pure code, so ONB-EV executes what the plan says and a test can hold it to that. It makes no request. It reads identity and bounds only.
-3. **`tests/unit/onb-ev-plan.test.ts`.** The digest, including that the queue names it. The list and its order, the arithmetic, and that the listing asks for nothing excluded. While the plan is unexecuted, each row against its production registration, and the intervals against the deploy calendar and the profile record. Neutrality: listing order and every non-identity field move nothing. Negatives: an unproven or excluded build, a missing region, another class's Frost or Protection, a misaligned roster, missing master data, an actor listed twice, and windows at their edges.
-4. **Records.** `agent/architecture.md`, `agent/follow-ups.md`, `agent/spec-onboarding-inventory.md`, and in `agent/autopilot-queue.md` the supervisor's merged list, this entry's status and ONB-EV's pointer to the plan. ONB-EV's grant text is not touched.
+- `agent/architecture.md`: new section "Owner decision (2026-11-07): WCL audit hardening and POLB-CENSUS".
+- `agent/autopilot.md`: an interim warning that an empty audit is not yet proof of no requests.
+- `agent/follow-ups.md`, `agent/spec-onboarding-inventory.md`: pointers.
+- `agent/autopilot-queue.md`:
+  - new AUD-WCL-1 (READY, no dependencies), placed before ONB-EV;
+  - ONB-EV: PR_OPEN on PR #103, now depending on AUD-WCL-1. The grant is raised to 119 and records the retry decision and the accepted revision 2. Main lacked the branch's retry wording, so the grant line restates it. The entry holds the decision, the reconciliation rules and the stop conditions;
+  - AUD-WCL-1 states the restart procedure, and REM-CENSUS the archive procedure;
+  - REM-CENSUS depends on AUD-WCL-1;
+  - POLB-CENSUS, POLB-B and POLB-C are BLOCKED, and the census is recorded as declined;
+  - ONB-Z no longer depends on POLB-C, and its Policy B condition is reworded;
+  - bookkeeping: ONB-EV-PLAN recorded MERGED (#102).
 
-## Decisions for the reviewer to check
+## Please check
 
-1. **Unfiltered capture is the reading of "minimum".** The grant says "minimum actor and fight evidence the existing evaluator and promotion gate need (casts, auras, resources, combatant information ...)". A server-filtered actor stream would fit the cap and could never pass a gate, because the loader refuses a filtered capture any coverage (`FILTERED_CAPTURE_GRANTED`). So the plan takes the unfiltered `dataType: All` stream, re-cut offline into actor slices, with other players' events staying in gitignored raw pages. If this is outside the grant's words, say so: it is the one thing here that could be an owner decision.
-2. **The first 90 s for rotational rows.** No rotational gate has a window. Havoc passed both gates on one first-90-s segment, the smallest solo precedent. Fixed before any candidate is known.
-3. **Wipes qualify, and `kill` is not even requested.** Reading no outcome seemed stronger than a kill filter, and kills are few on the retained listing. POLB-A chose kills for a reason that does not apply here (later phases).
-4. **A gate refusal may move to the next candidate; nothing after a page is requested may.** The queue says "no replacement fight or alternate subject because of any result". The plan reads a context refusal as the candidate not qualifying, since it reads no event, and bounds it at two retries a specialization.
-5. **Stop at the first capture that does not fit, with no skipping ahead.** This can leave requests unspent. Skipping would serve a later specialization first, which is the reordering the queue reserves for the owner.
-6. **12.1.5.70575 is excluded though the calendar proves it,** because the profile record does not list it and 12.1.5 is deferred. Both facts are tested.
-7. **Discipline stays first in the recorded order,** though it costs the most. The plan says so and does not move it.
-8. **The listing is partly unverified.** M13-A proved it at `limit: 10`, without time arguments, region or master data. A refusal stops ONB-EV for the owner rather than trying another query.
+1. **The restart.** The scheduled task runs with `-MaxTranches 0`, so the process that merges AUD-WCL-1 still runs the old detector and would continue into ONB-EV. I recorded that the owner runs AUD-WCL-1 alone (`-TrancheId AUD-WCL-1 -MaxTranches 1`) and then restarts the task. ONB-EV also stops before any request if its supervisor started before AUD-WCL-1 merged. Is that guard sufficient?
+2. **Ordering.** Making ONB-EV and REM-CENSUS depend on AUD-WCL-1 enforces "before any subsequent ordinary tranche" for explicit `-TrancheId` selection too. It also means the campaign's remaining requests run under the fixed detector.
+3. **Self-update.** AUD-WCL-1 changes `scripts/autopilot/`, which the running supervisor has already loaded. Its scope makes the supervisor exit after merging such a change.
 
 ## Validation
 
-- `tests/unit/onb-ev-plan.test.ts`: 28 tests pass.
-- `npm run typecheck` and `npm run format:check`: clean. `git diff --check`: clean.
-- `npm run test:corpus`: PASSED, 253 cases, 848 assertions. `npm run test:evidence`: PASSED, 32 cases, 80 assertions.
-- Full suite in parallel, `--testTimeout=60000`: 20,768 of 20,770. The two failures are `m9b-corpus-harness` SPEC_PROTECTION_PALADIN and `runner-service-queue` W, which failed the same way on earlier tranches under parallel load. Rerun serially on this tree, both files pass. This tranche touches neither.
-- The eligibility census and page measurements read uncommitted retained captures, so they are recorded and not pinned (recipe in `.probe/onbevplan`).
+- The supervisor's own `ConvertFrom-QueueText` reads 92 entries, with unique IDs and known dependencies.
+- Simulated selection after main: AUD-WCL-1, then ONB-EV (PR #103), then REM-CENSUS and REM-GATE, with ONB-Z after the waves REM-CENSUS adds. No entry is OWNER_DECISION_REQUIRED. POLB-B, POLB-C, POLB-CENSUS, M15-E and M11-G4-5-R are BLOCKED.
+- `prettier --check` and `git diff --check` pass. No test suite was run: nothing executable changed.

@@ -225,6 +225,8 @@ the probe config, or runs a probe script. A queue entry may carry an `OWNER-GRAN
 owner decision authorizes that exact request, and the tranche must record
 every request in its review packet.
 
+**Interim warning (owner, 2026-11-07).** The audit does not yet detect execution of code under `.probe/` through a config or loader, such as `npx vitest run --config .probe/onb-ev/capture.config.ts`. Until AUD-WCL-1 lands, an empty audit is not proof that a tranche made no Warcraft Logs request, and historical empty audits alone are not proof of no network activity.
+
 **Grants do not exempt detected activity.** The audit cannot yet prove
 that a request is inside a grant's scope (report, fight, operation). So ANY
 detected Warcraft Logs or probe activity, under a grant or not, stops the

@@ -19,6 +19,14 @@ This changes what older entries here say. They stay as written, as the record of
 - **ONB-EV is approved,** with a hard cap of 60 Warcraft Logs requests (`agent/architecture.md` "Owner grant (2026-11-06): ONB-EV"). The grant authorizes no archive-limit increase and no promotion.
 - **Restoration Druid's promotion is queued** (HEAL-B1P2), which supersedes "is not queued" under "After HEAL-B4P". HEAL-B1P2 ran and did not promote it: "After HEAL-B1P2".
 
+## Owner decision (2026-11-07): WCL audit hardening and POLB-CENSUS declined
+
+Decided in `agent/architecture.md` "Owner decision (2026-11-07): WCL audit hardening and POLB-CENSUS".
+
+- **The audit gap is queued as AUD-WCL-1.** It runs before ONB-EV resumes and before REM-CENSUS.
+- **POLB-CENSUS is declined.** POLB-B and POLB-C are BLOCKED with it. Older text that waits on the census or Policy B is superseded.
+- **ONB-EV completes the cohort** with a total cap of 119 (`agent/architecture.md` "Owner decision (2026-11-07): ONB-EV completion"). The archive line is unchanged; REM-CENSUS proposes byte-pinned exceptions only for evidence that must be committed.
+
 ## Owner decision (2026-11-06): SimC profile fallback
 
 Decided in `agent/architecture.md` "Owner decision (2026-11-06): SimC profile fallback", and queued as SIMC-FB-A, SIMC-FB-B and SIMC-FB-R. It changes what older entries say, and they stay as the record:
