@@ -1342,11 +1342,14 @@ events), plus pet-count and pet-active state for APL reads (for example
 ### ONB-EV: Neutral evidence campaign for specializations without retained real evidence
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-EV-PLAN
+branch: autopilot/onb-ev
 wcl: OWNER-GRANT: agent/autopilot-queue.md ONB-EV owner grant (2026-11-06); ONB-EV only; one neutral campaign running ONB-EV-PLAN's frozen plan for its listed specializations; per specialization the first qualifying public raid fight under the recorded fixed discovery rule, with no replacement fight or alternate subject because of any result; only the minimum actor and fight evidence the existing evaluator and promotion gate need (casts, auras, resources, combatant information and the fight context and actor identification they require); no rankings, comparison or top-log data; at most 60 Warcraft Logs HTTP requests in total, counting OAuth token requests and refreshes, discovery, fight and context lookups, actor identification, event retrieval, pagination and completeness requests; stop with OWNER_DECISION_REQUIRED before exceeding 60; no archive-limit increase and no promotion
 publicContract: NONE
 ```
+
+**First run (2026-11-07): stopped for the owner.** Warcraft Logs refused the plan's first listing, so the campaign stopped after 2 of its 60 requests, with no evidence captured (`agent/follow-ups.md` "After ONB-EV's first run", `tests/evidence/onb-ev-capture.md`).
 
 **Owner grant (2026-11-06): APPROVED with a hard campaign cap of 60 Warcraft Logs HTTP requests in total** (`agent/architecture.md` "Owner grant (2026-11-06): ONB-EV"). This entry acquires evidence and promotes nothing. It runs ONB-EV-PLAN's frozen plan.
 
@@ -2489,11 +2492,13 @@ Nothing is promoted here.
 ### ONB-EV-PLAN: Freeze the neutral evidence campaign plan
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: SIMC-FB-R
 branch: autopilot/onb-ev-plan
 wcl: NONE
 publicContract: NONE
+pr: 102
+mergeSha: 50fb71e40dc68695861deaa0dae6a34760a55384
 ```
 
 **Outcome.** The plan is `agent/onb-ev-plan.json`, digest `48066f986e7035542bf81c0263f4cec0d9d70e0f3d892ab6eb7ed535e6fa0013`. All twelve specializations stay. Its worst case is 200 requests against the cap of 60, and no fixture fits the 5,212 bytes left under the notice line, so ONB-EV will stop for the owner (`agent/architecture.md` "ONB-EV-PLAN"; `agent/follow-ups.md` "After ONB-EV-PLAN").

@@ -15527,3 +15527,19 @@ Eleven rotational subjects, one healer and, say, four contexts come to about 4.5
 ### What this does not do
 
 It makes no request, selects no fight, reads no candidate's outcome, commits no evidence, raises no line and promotes nothing. Capture alone resolves nothing for most of these specializations either, since their lists stop on inputs a subject cannot supply (`agent/follow-ups.md` "After ONB-A2" and the entries after it). The eligibility census and the page measurements read uncommitted retained captures, so they are not pinned by a test.
+
+## ONB-EV — stopped at the first listing
+
+Autopilot queue entry ONB-EV, on the owner's grant, running the frozen plan `agent/onb-ev-plan.json` (digest `48066f986e7035542bf81c0263f4cec0d9d70e0f3d892ab6eb7ed535e6fa0013`). **It stopped with OWNER_DECISION_REQUIRED after 2 of its 60 requests, with no evidence captured.** No public contract changed and nothing is promoted. The request record is `tests/evidence/onb-ev-capture.md`.
+
+**What happened.** Request 1 was the token. Request 2 was the plan's first listing, 12.1.0.69933 page 1. Warcraft Logs answered HTTP 200 with one GraphQL error in a 79-character body, which the production client reports as `UPSTREAM_DATA_INVALID` at stage TRANSPORT. ONB-EV-PLAN named this risk ("What the listing has not proven") and its outcome: ONB-EV stops for the owner and does not try another query. So nothing was retried, narrowed or replaced, and no fight was selected.
+
+**What is known about the cause, and what is not.** The reason is unknown. The runner kept each body's length and digest and not its text, and the production client keeps only the error count. That is a gap in the runner, because the body is the one thing this stop needed. M13-A's listing succeeded on the same zone with `limit: 10`, no time arguments, no `region` and no `masterData`, so the refusal lies in what this listing adds, or in what it costs together. The retained schema types all of these arguments and fields and documents a maximum `limit` of 100, so the schema does not explain it. Trying likely messages against the digest offline matched nothing. Which addition matters is not established, and this section does not guess.
+
+**Why the owner decides, rather than the tranche.** Sending anything else, even the identical listing again to read its error, is outside what the plan permits after a refusal. Any changed listing also changes the plan's digest. The grant's rule is to run the frozen plan as written, and the plan reserves this call. The next step is recorded in `agent/follow-ups.md` "After ONB-EV's first run".
+
+**What the runner proved.** It is under the gitignored `.probe/onb-ev/`, on the plan's `selectSubjects`, `capturesOf`, `mayStartCapture` and `pageCeilingOf`, with a counter at the fetch layer. An offline stub checked its stops (cap, gate refusal, page ceiling, refused listing). Only the refused-listing path has met the real service. The other paths are unproven on it.
+
+**Status of the plan.** Still `FROZEN`, unedited, and not executed. `tests/unit/onb-ev-plan.test.ts` therefore keeps its drift checks.
+
+**The other stops still stand.** The worst case of 200 requests against the cap of 60, and no fixture fitting the 5,212 bytes under the notice line, are unchanged from ONB-EV-PLAN. Neither has been reached. They are still expected to be reported together, once, with HEAL-B1P2's row.

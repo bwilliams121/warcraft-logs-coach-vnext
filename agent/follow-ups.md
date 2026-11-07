@@ -27,6 +27,16 @@ Decided in `agent/architecture.md` "Owner decision (2026-11-06): SimC profile fa
 - **The exit criterion is 100% PUBLIC.** A terminal BLOCKED no longer closes the program.
 - **POLB-CENSUS is still open,** and no longer holds up the fallback, ONB-EV or REM-CENSUS.
 
+## After ONB-EV's first run: the listing was refused, and the owner decides the next step
+
+**Raised:** ONB-EV (2026-11-07). 2 of 60 requests spent, 58 left, no evidence captured. The record is `tests/evidence/onb-ev-capture.md`, and the argument is in `agent/architecture.md` "ONB-EV — stopped at the first listing".
+
+- **The owner's decision.** May ONB-EV send the identical listing once more, keeping the error text, and, if the text shows the listing's shape is the cause, change only that listing in a new plan revision before going on? The rest of the rule and the grant's cap stay as they are. Both requests would count against the 60. Selection would still read no outcome, so the change would not make the campaign less neutral.
+- **What the resuming run must do first.** Keep the body text of any GraphQL error, and carry the ledger's count of 2 into the counter, because the runner refuses to start while a ledger exists. A changed listing needs the plan's digest regenerated in the places that name it (the plan, the queue and `agent/architecture.md`) and a new review, before any further request.
+- **A changed listing may change what costs what.** Fewer reports a page means fewer candidates per listing request, and the plan bounds the sequence at four pages. A revision has to restate that budget and say whether a specialization can go without a candidate because of it.
+- **The audit did not see this run.** `npx vitest run --config .probe/onb-ev/capture.config.ts` matches none of the supervisor's `WclActivityPatterns`: the file name has no `.probe.ts` and the command names no `warcraftlogs.com`. So the transcript audit cannot be relied on to stop this tranche, as `agent/autopilot.md` expects of any detected activity, and the disclosure is in this record and the stop message. M13-A's runner has the same shape. A pattern for vitest configs under `.probe/` belongs in the supervisor, with its self-test. It is not changed here because this tranche's scope is the campaign.
+- **Still ahead, unchanged:** the cap and capacity stops under "After ONB-EV-PLAN".
+
 ## After ONB-EV-PLAN: what ONB-EV must do, and where it will stop
 
 **Raised:** ONB-EV-PLAN (2026-11-07). Offline. The argument and the numbers are in `agent/architecture.md` "ONB-EV-PLAN", and the plan is `agent/onb-ev-plan.json`.
