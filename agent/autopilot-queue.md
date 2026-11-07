@@ -2446,11 +2446,13 @@ Negative tests: the fallback never appears as observed evidence, never overrides
 ### SIMC-FB-B: Public disclosure of SimC-profile-relative evaluation
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: SIMC-FB-A
 branch: autopilot/simc-fb-b
 wcl: NONE
 publicContract: EXPECTED
+pr: 100
+mergeSha: d134126c4fe30cc7dc75358dce376479f52f111d
 ```
 
 **Scope.** An additive public field, on REST, MCP and raid night alike, distinguishing observed-fight evaluation from SimC-profile-relative evaluation on every finding the fallback resolves, with its provenance.
@@ -2463,11 +2465,14 @@ publicContract: EXPECTED
 ### SIMC-FB-R: Replay the encounter-state-blocked specializations under the fallback
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: SIMC-FB-B
+branch: autopilot/simc-fb-r
 wcl: NONE
 publicContract: NONE
 ```
+
+**Outcome.** All 26 INTERNAL_ONLY trees with a pinned list read the fallback and disclose it, and 50 of 76 `target_if` tokens are attested. No new decision resolves: 4 MATCH, 0 REJECTED and 8,542 UNKNOWN of 8,546, unchanged, and no tier-3 decision resolved on real evidence, so no public entry is added. Only 12 of 49 analyzed subjects have a provable build. It also fixes a SIMC-FB-A defect: an UNKNOWN placeholder blocked tier 3 (`agent/architecture.md` "SIMC-FB-R"; `agent/follow-ups.md` "After SIMC-FB-R").
 
 **Scope.** Offline, on retained real evidence. Wire the fallback into each INTERNAL_ONLY specialization whose recorded blockers include `active_enemies`, `spell_targets`, `target_if`, target-dependent conditions or other encounter-state inputs explicit in its pinned profile, in that specialization's own tree. Then:
 

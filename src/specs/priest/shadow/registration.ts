@@ -18,6 +18,7 @@
  */
 
 import type { AnalyzerRegistration } from "../../../findings/analyzer-registration.js";
+import { simcProfileFactsField } from "../../../findings/simc-profile-fallback.js";
 import { defineSpecModule, type SpecModule } from "../../../findings/spec-module.js";
 import type { ObservedDecisionView } from "../../../findings/observed-decision-view.js";
 import { SHADOW_AUTHORITY_BINDINGS, SHADOW_CAPABILITIES } from "./authority-bindings.js";
@@ -72,7 +73,7 @@ export function shadowObservedDecisionView(
 ): ObservedDecisionView {
   const { coverage } = analysis;
   return {
-    decisions: analysis.comparisons.map((comparison) => ({
+    decisions: analysis.comparisons.map((comparison, index) => ({
       locator: comparison.decision.locator,
       position: comparison.decision.position,
       fightTimeMs: comparison.decision.fightTimeMs,
@@ -86,6 +87,7 @@ export function shadowObservedDecisionView(
       selectionPrecision: comparison.selectionPrecision,
       decisiveBlocker: comparison.decisiveBlocker,
       usabilityProvenance: comparison.usabilityProvenance,
+      ...simcProfileFactsField({ profileFacts: analysis.resolved[index]?.profileFacts ?? [] }),
     })),
     exclusions: analysis.excluded.map((cast) => ({
       locator: cast.locator,
@@ -126,7 +128,7 @@ export const SHADOW_LIMITS = Object.freeze({
     "No decision currently resolves.",
     "It does NOT evaluate defensive cooldowns, interrupts or survival, it does not score performance, and it does",
     "not read race, faction, gear use effects or consumables. It reconstructs no Insanity, no cooldown, no aura,",
-    "no pet and no enemy count. UNKNOWN is expected here and is not a fault.",
+    "no pet and no enemy count of its own. UNKNOWN is expected here and is not a fault.",
   ].join("\n"),
   raidNight: [
     "Shadow Priest cells count only observed global-cooldown decisions compared against pinned class/spec authority,",

@@ -32,7 +32,12 @@
  */
 
 import type { CombatState } from "../../../engine/state/combat-state.js";
-import { withEnemyCountAt } from "../../../findings/enemy-count-bindings.js";
+import {
+  aplAuthorityIdentityOf,
+  withEncounterStateAt,
+  type SimcProfileProvenance,
+} from "../../../findings/simc-profile-fallback.js";
+import { WARRIOR_ARMS_SOLE_TARGET_ATTESTATIONS } from "./sole-target-attestations.js";
 import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
 import type {
   AnalysisAuthorityMetadata,
@@ -205,6 +210,8 @@ export interface ArmsWarriorPayload {
   readonly colossusSmashWindows: ColossusSmashWindowFill;
   /** The resolver's diagnostics at each eligible decision, by position. */
   readonly resolved: readonly {
+    /** The tier-3 facts this decision was evaluated under, for the view to disclose. */
+    readonly profileFacts: readonly SimcProfileProvenance[];
     readonly position: number;
     readonly diagnostics: ArmsWarriorResolverDiagnostics;
     readonly selection: ArmsWarriorSelectionDiagnostics;
@@ -476,14 +483,20 @@ export function analyzeObservedArmsWarriorDecisions(input: ArmsWarriorAnalysisIn
       specAtoms: resolution.specAtoms,
     };
 
+    const encounterState = withEncounterStateAt(bindings, state, actorId, position, {
+      authority: aplAuthorityIdentityOf(authority),
+      soleTargetAttestations: WARRIOR_ARMS_SOLE_TARGET_ATTESTATIONS,
+    });
+
     const outcome = armsWarriorFirstGcdSelectionAt({
       authority,
-      bindings: withEnemyCountAt(bindings, state, actorId, position),
+      bindings: encounterState.bindings,
       buildFacts,
       observedAbilityGameId: abilityGameId,
     });
 
     resolved.push({
+      profileFacts: encounterState.profileFacts,
       position,
       diagnostics: resolution.diagnostics,
       selection: selectionDiagnosticsOf(outcome),

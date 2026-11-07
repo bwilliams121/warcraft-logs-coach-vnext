@@ -69,3 +69,9 @@ before binding anything that could resolve a decision.
 
 Auras (no wire identity is corroborated), cooldowns (no pin is checked against real gaps), resources between
 casts, the enemy count, the target's health and casts, movement. See `agent/follow-ups.md` "After ONB-A2".
+
+## The pinned SimC profile (SIMC-FB-R)
+
+Every decision reads encounter state through `withEncounterStateAt`: real evidence first, then the pinned profile's environment, on a build the deploy calendar proves. The result says what the priority would select under the profile, never what the real encounter held. Each decision's `profileFacts` go into the view as `simcProfileFacts`, so it is disclosed. It makes nothing actionable. The measured results are in `agent/architecture.md` "SIMC-FB-R".
+
+`target_if`: this list has no `target_if` line.

@@ -38,7 +38,7 @@ No haste is established, so `exactMs` is always null and no anchor is ever deriv
 | Atom | Source | Rule |
 | --- | --- | --- |
 | `talent.<x>` | the three-way rule; another hero tree's talents are FALSE on a resolved tree | absent from the tree is UNKNOWN |
-| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `active_enemies` | the shared enemy set at the decision, then the pinned SimC profile (`withEncounterStateAt`, SIMC-FB-R) | a proven lower bound. Where nothing contradicts it on a proven build, the profile's 1, disclosed as SimC-profile-relative. Otherwise UNKNOWN, and no position means no reading |
 | `fight_style.dungeonroute`, `focus`, `apex.3`, `howl_summon.ready`, `max_prio_damage`, `buff.*`, `cooldown.*`, `dot.*`, `full_recharge_time`, `execute_time`, `gcd`, `time_to_die.remains`, `fight_remains` | none | unbound or UNKNOWN_NUMBER, stated as such |
 
 **No pet state is built.** The queue expected this slice to consume the shared pet mapping (ONB-S6), and the list gives it nothing to answer: no line reads a `pet.*` atom, and a test pins that. The one pet dependency is `kill_command_t::ready()` asking the main pet's own action. A press proves that, and no unobserved press is ever claimed. A main pet is tamed before the pull, so it has no summon and no pinned gameID, and its presence could only be UNKNOWN.
@@ -70,3 +70,9 @@ Every exclusion is `EXECUTION_LANE_NOT_ESTABLISHED`: a spell off the list, Dire 
 ## Not evaluated, deliberately
 
 Focus, auras, charges, cooldowns, the enemy count and haste are not modelled. See `agent/follow-ups.md` "After ONB-T2".
+
+## The pinned SimC profile (SIMC-FB-R)
+
+Every decision reads encounter state through `withEncounterStateAt`: real evidence first, then the pinned profile's environment, on a build the deploy calendar proves. The result says what the priority would select under the profile, never what the real encounter held. Each decision's `profileFacts` go into the view as `simcProfileFacts`, so it is disclosed. It makes nothing actionable. The measured results are in `agent/architecture.md` "SIMC-FB-R".
+
+`target_if`: attested for `barbed_shot` (`sole-target-attestations.ts`); not attested: `retarget`, each with its reason in that file. An unattested line reads as it did before.

@@ -33,7 +33,12 @@
  */
 
 import type { CombatState } from "../../../engine/state/combat-state.js";
-import { withEnemyCountAt } from "../../../findings/enemy-count-bindings.js";
+import {
+  aplAuthorityIdentityOf,
+  withEncounterStateAt,
+  type SimcProfileProvenance,
+} from "../../../findings/simc-profile-fallback.js";
+import { MONK_WINDWALKER_SOLE_TARGET_ATTESTATIONS } from "./sole-target-attestations.js";
 import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
 import type {
   AnalysisAuthorityMetadata,
@@ -193,6 +198,8 @@ export interface WindwalkerMonkPayload {
   readonly build: WindwalkerMonkBuildResolution;
   /** The resolver's diagnostics at each eligible decision, by position. */
   readonly resolved: readonly {
+    /** The tier-3 facts this decision was evaluated under, for the view to disclose. */
+    readonly profileFacts: readonly SimcProfileProvenance[];
     readonly position: number;
     readonly diagnostics: WindwalkerMonkResolverDiagnostics;
     readonly selection: WindwalkerMonkSelectionDiagnostics;
@@ -462,14 +469,20 @@ export function analyzeObservedWindwalkerMonkDecisions(
       specAtoms: resolution.specAtoms,
     };
 
+    const encounterState = withEncounterStateAt(bindings, state, actorId, position, {
+      authority: aplAuthorityIdentityOf(authority),
+      soleTargetAttestations: MONK_WINDWALKER_SOLE_TARGET_ATTESTATIONS,
+    });
+
     const outcome = windwalkerMonkFirstGcdSelectionAt({
       authority,
-      bindings: withEnemyCountAt(bindings, state, actorId, position),
+      bindings: encounterState.bindings,
       buildFacts,
       observedAbilityGameId: abilityGameId,
     });
 
     resolved.push({
+      profileFacts: encounterState.profileFacts,
       position,
       diagnostics: resolution.diagnostics,
       selection: selectionDiagnosticsOf(outcome),

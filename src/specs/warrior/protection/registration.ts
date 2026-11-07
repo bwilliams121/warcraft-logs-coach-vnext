@@ -18,6 +18,7 @@
  */
 
 import type { AnalyzerRegistration } from "../../../findings/analyzer-registration.js";
+import { simcProfileFactsField } from "../../../findings/simc-profile-fallback.js";
 import { defineSpecModule, type SpecModule } from "../../../findings/spec-module.js";
 import type { ObservedDecisionView } from "../../../findings/observed-decision-view.js";
 import {
@@ -82,7 +83,7 @@ export function protectionWarriorObservedDecisionView(
 ): ObservedDecisionView {
   const { coverage } = analysis;
   return {
-    decisions: analysis.comparisons.map((comparison) => ({
+    decisions: analysis.comparisons.map((comparison, index) => ({
       locator: comparison.decision.locator,
       position: comparison.decision.position,
       fightTimeMs: comparison.decision.fightTimeMs,
@@ -96,6 +97,7 @@ export function protectionWarriorObservedDecisionView(
       selectionPrecision: comparison.selectionPrecision,
       decisiveBlocker: comparison.decisiveBlocker,
       usabilityProvenance: comparison.usabilityProvenance,
+      ...simcProfileFactsField({ profileFacts: analysis.resolved[index]?.profileFacts ?? [] }),
     })),
     exclusions: analysis.excluded.map((cast) => ({
       locator: cast.locator,
@@ -135,7 +137,7 @@ export const PROTECTION_WARRIOR_LIMITS = Object.freeze({
     "when the necessary state can be established. Every decision first meets off-GCD actions whose effects have no reviewed contract, and a mitigation line whose condition exceeds what the evaluator enumerates, and the list dispatches behind them read the enemy count, which no action registers yet, so no decision currently resolves.",
     "It does NOT evaluate defensive cooldowns, active mitigation, interrupts or survival, it does not score performance, and it does",
     "not read race, faction, gear use effects or consumables. It reconstructs no Rage between observations, no cooldown, no",
-    "aura and no enemy count. UNKNOWN is expected here and is not a fault.",
+    "aura and no enemy count of its own. UNKNOWN is expected here and is not a fault.",
   ].join("\n"),
   raidNight: [
     "Protection Warrior cells count only observed global-cooldown decisions compared against pinned class/spec authority,",

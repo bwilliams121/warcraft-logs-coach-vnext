@@ -1088,7 +1088,8 @@ describe("ownership and invariance", () => {
     for (const spec of WIRED) {
       expect((PUBLIC_SPEC_IDS as readonly string[]).includes(spec), spec).toBe(false);
       expect(source(`src/specs/${spec}/vocabulary.ts`), spec).toMatch(/"active_enemies"|ACTIVE_ENEMIES/);
-      expect(source(`src/specs/${spec}/observed-analysis.ts`), spec).toContain("withEnemyCountAt(");
+      // SIMC-FB-R moved each to `withEncounterStateAt`, which reads the same enemy set first.
+      expect(source(`src/specs/${spec}/observed-analysis.ts`), spec).toContain("withEncounterStateAt(");
     }
   });
 
@@ -1101,6 +1102,7 @@ describe("ownership and invariance", () => {
         continue;
       }
       expect(text, spec).not.toContain("withEnemyCountAt");
+      expect(text, spec).not.toContain("withEncounterStateAt");
     }
   });
 

@@ -36,7 +36,7 @@ Every COMPLETE cast by the actor, classified by pinned data:
 | --- | --- | --- |
 
 | `talent.<x>`, `talent.<x>.enabled` | the three-way rule; another hero tree's talents are FALSE on a resolved tree | absent from the tree is UNKNOWN |
-| `active_enemies` | the shared enemy set at the decision (`withEnemyCountAt`, ONB-S3) | a proven lower bound, or UNKNOWN. No event proves an upper bound, and no position means no reading |
+| `active_enemies` | the shared enemy set at the decision, then the pinned SimC profile (`withEncounterStateAt`, SIMC-FB-R) | a proven lower bound. Where nothing contradicts it on a proven build, the profile's 1, disclosed as SimC-profile-relative. Otherwise UNKNOWN, and no position means no reading |
 | `buff.*`, `debuff.*`, `cooldown.*`, simulation options | none | unbound or UNKNOWN_NUMBER, stated as such |
 | `line_cd=600` on `bloodlust` | the shared cast attribution | a logged 2825 attributes to its sole entry; a timer read from a log is UNKNOWN |
 
@@ -65,3 +65,9 @@ ONB-S3 gives the count a proven lower bound and no upper bound. Every action out
 
 Auras (no wire identity is corroborated), cooldowns (no pin is checked against real gaps), resources between
 casts, the target's health and casts, movement. See `agent/follow-ups.md` "After ONB-B2".
+
+## The pinned SimC profile (SIMC-FB-R)
+
+Every decision reads encounter state through `withEncounterStateAt`: real evidence first, then the pinned profile's environment, on a build the deploy calendar proves. The result says what the priority would select under the profile, never what the real encounter held. Each decision's `profileFacts` go into the view as `simcProfileFacts`, so it is disclosed. It makes nothing actionable. The measured results are in `agent/architecture.md` "SIMC-FB-R".
+
+`target_if`: this list has no `target_if` line.

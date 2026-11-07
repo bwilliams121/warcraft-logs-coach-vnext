@@ -6,6 +6,10 @@
  * where evidence and pinned facts support one, and the shared evaluator enumerates an unbound
  * truth and refuses an unbound magnitude.
  *
+ * ENCOUNTER STATE (SIMC-FB-R). Whatever is listed below as `active_enemies`, `spell_targets`, `fight_style.*` or
+ * `raid_event.*` stays unbound by this resolver, and `withEncounterStateAt` may bind it at tier 3, with provenance,
+ * where the pinned profile answers on a proven build.
+ *
  * NEVER GIVEN A VALUE BY THIS SLICE, and why:
  *
  *   spell_targets.spirit_bomb

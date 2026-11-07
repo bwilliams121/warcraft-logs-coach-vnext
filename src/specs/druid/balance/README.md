@@ -73,3 +73,9 @@ Three retained subjects, replayed offline through production ingestion, all Elun
 ## Not evaluated, deliberately
 
 Keeper of the Grove has no retained subject, and none casts a moon, Wild Mushroom, Force of Nature or Convoke, so those lines and that channel are unmeasured. Astral Power, Eclipse, auras, cooldowns, charges, the enemy count and haste are not modelled. See `agent/follow-ups.md` "After ONB-D2".
+
+## The pinned SimC profile (SIMC-FB-R)
+
+Every decision reads encounter state through `withEncounterStateAt`: real evidence first, then the pinned profile's environment, on a build the deploy calendar proves. The result says what the priority would select under the profile, never what the real encounter held. Each decision's `profileFacts` go into the view as `simcProfileFacts`, so it is disclosed. It makes nothing actionable. The measured results are in `agent/architecture.md` "SIMC-FB-R".
+
+`target_if`: attested for `moonfire`, `sunfire` (`sole-target-attestations.ts`). An unattested line reads as it did before.

@@ -17,6 +17,7 @@
  */
 
 import type { AnalyzerRegistration } from "../../../findings/analyzer-registration.js";
+import { simcProfileFactsField } from "../../../findings/simc-profile-fallback.js";
 import { defineSpecModule, type SpecModule } from "../../../findings/spec-module.js";
 import type { ObservedDecisionView } from "../../../findings/observed-decision-view.js";
 import {
@@ -81,7 +82,7 @@ export function vengeanceDemonHunterObservedDecisionView(
 ): ObservedDecisionView {
   const { coverage } = analysis;
   return {
-    decisions: analysis.comparisons.map((comparison) => ({
+    decisions: analysis.comparisons.map((comparison, index) => ({
       locator: comparison.decision.locator,
       position: comparison.decision.position,
       fightTimeMs: comparison.decision.fightTimeMs,
@@ -95,6 +96,7 @@ export function vengeanceDemonHunterObservedDecisionView(
       selectionPrecision: comparison.selectionPrecision,
       decisiveBlocker: comparison.decisiveBlocker,
       usabilityProvenance: comparison.usabilityProvenance,
+      ...simcProfileFactsField({ profileFacts: analysis.resolved[index]?.profileFacts ?? [] }),
     })),
     exclusions: analysis.excluded.map((cast) => ({
       locator: cast.locator,
@@ -134,7 +136,7 @@ export const VENGEANCE_DEMON_HUNTER_LIMITS = Object.freeze({
     "when the necessary state can be established. Every build refuses first at the swing's entry, whose readiness is unobserved, with Disrupt behind it, which reads an enemy cast nothing binds. The Aldrachi Reaver list reads soul fragments, charges and the enemy count, and its time-to-next-glaive variables use a division that does not parse, so no decision currently resolves.",
     "It does NOT evaluate active mitigation, defensive cooldowns, self healing, interrupts or survival, it does not score performance, and it does",
     "not read race, faction, gear use effects or consumables. It reconstructs no Fury between observations, no soul fragment, no cooldown, no",
-    "aura and no enemy count. UNKNOWN is expected here and is not a fault.",
+    "aura and no enemy count of its own. UNKNOWN is expected here and is not a fault.",
   ].join("\n"),
   raidNight: [
     "Vengeance Demon Hunter cells count only observed global-cooldown decisions compared against pinned class/spec authority,",

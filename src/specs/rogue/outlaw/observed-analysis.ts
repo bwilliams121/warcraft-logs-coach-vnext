@@ -30,6 +30,11 @@
  */
 
 import type { CombatState } from "../../../engine/state/combat-state.js";
+import {
+  aplAuthorityIdentityOf,
+  withEncounterStateAt,
+  type SimcProfileProvenance,
+} from "../../../findings/simc-profile-fallback.js";
 import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
 import type {
   AnalysisAuthorityMetadata,
@@ -189,6 +194,8 @@ export interface OutlawRoguePayload {
   readonly build: OutlawBuildResolution;
   /** The resolver's diagnostics at each eligible decision, by position. */
   readonly resolved: readonly {
+    /** The tier-3 facts this decision was evaluated under, for the view to disclose. */
+    readonly profileFacts: readonly SimcProfileProvenance[];
     readonly position: number;
     readonly diagnostics: OutlawResolverDiagnostics;
     readonly selection: OutlawSelectionDiagnostics;
@@ -462,14 +469,19 @@ export function analyzeObservedOutlawRogueDecisions(input: OutlawAnalysisInput):
       specAtoms: resolution.specAtoms,
     };
 
+    const encounterState = withEncounterStateAt(bindings, state, actorId, position, {
+      authority: aplAuthorityIdentityOf(authority),
+    });
+
     const outcome = outlawFirstGcdSelectionAt({
       authority,
-      bindings,
+      bindings: encounterState.bindings,
       buildFacts,
       observedAbilityGameId: abilityGameId,
     });
 
     resolved.push({
+      profileFacts: encounterState.profileFacts,
       position,
       diagnostics: resolution.diagnostics,
       selection: selectionDiagnosticsOf(outcome),

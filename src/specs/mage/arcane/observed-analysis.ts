@@ -41,7 +41,12 @@
  */
 
 import type { CombatState } from "../../../engine/state/combat-state.js";
-import { decisionPositionOfAnchor, withEnemyCountAt } from "../../../findings/enemy-count-bindings.js";
+import { decisionPositionOfAnchor } from "../../../findings/enemy-count-bindings.js";
+import {
+  aplAuthorityIdentityOf,
+  withEncounterStateAt,
+  type SimcProfileProvenance,
+} from "../../../findings/simc-profile-fallback.js";
 import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
 import type {
   AnalysisAuthorityMetadata,
@@ -209,6 +214,8 @@ export interface ArcaneMagePayload {
   readonly build: ArcaneBuildResolution;
   /** The resolver's diagnostics at each eligible decision, by position. */
   readonly resolved: readonly {
+    /** The tier-3 facts this decision was evaluated under, for the view to disclose. */
+    readonly profileFacts: readonly SimcProfileProvenance[];
     readonly position: number;
     readonly diagnostics: ArcaneResolverDiagnostics;
     readonly selection: ArcaneSelectionDiagnostics;
@@ -474,9 +481,19 @@ export function analyzeObservedArcaneMageDecisions(input: ArcaneAnalysisInput): 
       targetActorId,
     };
 
+    const encounterState = withEncounterStateAt(
+      bindings,
+      state,
+      actorId,
+      decisionPositionOfAnchor(anchor, position),
+      {
+        authority: aplAuthorityIdentityOf(authority),
+      },
+    );
+
     const outcome = arcaneFirstGcdSelectionAt({
       authority,
-      bindings: withEnemyCountAt(bindings, state, actorId, decisionPositionOfAnchor(anchor, position)),
+      bindings: encounterState.bindings,
       buildFacts,
       observedAbilityGameId: abilityGameId,
     });
@@ -487,6 +504,7 @@ export function analyzeObservedArcaneMageDecisions(input: ArcaneAnalysisInput): 
         : decisionAnchorNotEstablished(ARCANE_FIRST_GCD_ROOT_LIST, `${anchor.reason}: ${anchor.detail}`);
 
     resolved.push({
+      profileFacts: encounterState.profileFacts,
       position,
       diagnostics: resolution.diagnostics,
       selection: selectionDiagnosticsOf({ result: authorityResult, rootScan: outcome.rootScan }),

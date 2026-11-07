@@ -27,6 +27,17 @@ Decided in `agent/architecture.md` "Owner decision (2026-11-06): SimC profile fa
 - **The exit criterion is 100% PUBLIC.** A terminal BLOCKED no longer closes the program.
 - **POLB-CENSUS is still open,** and no longer holds up the fallback, ONB-EV or REM-CENSUS.
 
+## After SIMC-FB-R: what the fallback did not move
+
+**Raised:** SIMC-FB-R (2026-11-07). Offline. The tables are in `agent/architecture.md` "SIMC-FB-R".
+
+- **No new decision resolves.** 4 MATCH, 0 REJECTED, 8542 UNKNOWN of 8546, with or without the fallback, and no tier-3 decision has resolved on real evidence. So no public entry was added, and rule 2's "changed prerequisite" holds for a retry only once one of the items below moves.
+- **For REM-CENSUS: the engine's refusal comes before the encounter state on most lists.** Positive readiness for off-GCD and swing lines (Charge, `auto_attack`, `auto_shot`, Counterspell, Quell, Power Infusion, `pick_up_fragment`) is the shared blocker the table shows, then each list's own inputs. Read `stoppingPoint` and `blockedAt` together.
+- **Build proof, by report.** Only b1Pm's 12 analyzed subjects are provable. A7R6 needs one context request for its region, and would then read 12.1.0.69587 if the region is US. gtKb needs its region, restart evidence for 69814 and a dataset model. rXAf needs its region, an earlier interval and a model. Each is a new request or source, so each is the owner's; ONB-EV-PLAN already requires a provable build of any fight it picks.
+- **Warlock `target_if`.** All ten tokens are refused on `warlock_spell_t::select_target` (`sc_warlock_actions.cpp:548`). Reading that override is the next step, and nine could then be attested.
+- **Attestations are checked for shape in CI, and the C++ only locally,** because the SimC clone is not committed. A pin move must redo the audit.
+- **Disclosure on a real tier-3 decision is still unmeasured,** and so is the cost of labelling what was bound rather than what was read. Revisit that when a tier-3 decision first resolves.
+
 ## After SIMC-FB-B: what SIMC-FB-R must do to be disclosed
 
 **Raised:** SIMC-FB-B (2026-11-06). Offline. The design is in `agent/architecture.md` "SIMC-FB-B".

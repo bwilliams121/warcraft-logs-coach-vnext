@@ -93,3 +93,9 @@ Feral plays in Cat Form from before the pull, so the log holds no transition unt
 
 Auras (no wire identity is corroborated), cooldowns (no pin is checked against real gaps), resources between
 casts, the enemy count, the target's health and casts, movement. See `agent/follow-ups.md` "After ONB-C1".
+
+## The pinned SimC profile (SIMC-FB-R)
+
+Every decision reads encounter state through `withEncounterStateAt`: real evidence first, then the pinned profile's environment, on a build the deploy calendar proves. The result says what the priority would select under the profile, never what the real encounter held. Each decision's `profileFacts` go into the view as `simcProfileFacts`, so it is disclosed. It makes nothing actionable. The measured results are in `agent/architecture.md` "SIMC-FB-R".
+
+`target_if`: attested for `rake`, `moonfire_cat`, `primal_wrath`, `rip`, `ferocious_bite` (`sole-target-attestations.ts`); not attested: `prowl`, `shadowmeld`, each with its reason in that file. An unattested line reads as it did before.
