@@ -1342,13 +1342,29 @@ events), plus pet-count and pet-active state for APL reads (for example
 ### ONB-EV: Neutral evidence campaign for specializations without retained real evidence
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: ONB-EV-PLAN
-wcl: OWNER-GRANT: agent/autopilot-queue.md ONB-EV owner grant (2026-11-06); ONB-EV only; one neutral campaign running ONB-EV-PLAN's frozen plan for its listed specializations; per specialization the first qualifying public raid fight under the recorded fixed discovery rule, with no replacement fight or alternate subject because of any result; only the minimum actor and fight evidence the existing evaluator and promotion gate need (casts, auras, resources, combatant information and the fight context and actor identification they require); no rankings, comparison or top-log data; at most 60 Warcraft Logs HTTP requests in total, counting OAuth token requests and refreshes, discovery, fight and context lookups, actor identification, event retrieval, pagination and completeness requests; stop with OWNER_DECISION_REQUIRED before exceeding 60; no archive-limit increase and no promotion
+branch: autopilot/onb-ev
+wcl: OWNER-GRANT: agent/autopilot-queue.md ONB-EV owner grant (2026-11-06); ONB-EV only; one neutral campaign running ONB-EV-PLAN's frozen plan for its listed specializations; per specialization the first qualifying public raid fight under the recorded fixed discovery rule, with no replacement fight or alternate subject because of any result; only the minimum actor and fight evidence the existing evaluator and promotion gate need (casts, auras, resources, combatant information and the fight context and actor identification they require); no rankings, comparison or top-log data; at most 60 Warcraft Logs HTTP requests in total, counting OAuth token requests and refreshes, discovery, fight and context lookups, actor identification, event retrieval, pagination and completeness requests; stop with OWNER_DECISION_REQUIRED before exceeding 60; no archive-limit increase and no promotion; owner decision (2026-11-07): the 2 requests of attempt 1 are authorized and count; one identical retry of the failed listing, to preserve and classify its response, counts; if that response demonstrates the listing's API or query shape is invalid or unsupported, a reviewed new plan revision may change only the minimum listing mechanics needed to obtain the same deterministic candidate population, with all later requests inside the same 60
 publicContract: NONE
 ```
 
+**First run (2026-11-07): stopped for the owner.** Warcraft Logs refused the plan's first listing, so the campaign stopped after 2 of its 60 requests, with no evidence captured (`agent/follow-ups.md` "After ONB-EV's first run", `tests/evidence/onb-ev-capture.md`).
+
+**Owner decision (2026-11-07): listing retry approved** (`agent/architecture.md` "Owner decision (2026-11-07): ONB-EV listing retry"). The owner confirmed the first run's 2 requests. The cap stays 60 in total and is not reset.
+
+1. **Carry the count forward.** Requests are cumulative from attempt 1, and the existing ledger is continued, never deleted or restarted. The runner's guard against a second run may be changed only to continue that count.
+2. **Retry once.** Send the identical failed listing exactly one more time. Retain the HTTP status, GraphQL or API error category, error code if supplied, sanitized error text, and whether the failure is attributable to the listing's query or argument shape. Never retain or commit OAuth tokens, authorization headers, client secrets or other credentials.
+3. **If the response demonstrates an invalid or unsupported listing shape,** make a new plan revision changing only the minimum listing mechanics needed for the same deterministic candidate population, such as correcting an unsupported argument, a field or pagination shape, splitting a request into the minimum equivalent supported requests, or using an API-supported form that preserves the same universe and ordering. Record it as an API-compatibility correction, test and review it before any further acquisition, and keep the old failed request and the reason recorded. Restate the budget.
+4. **Must not change:** the specialization set, neutral purpose, first-qualifying-fight rule, deterministic selection semantics, no-ranking and no-comparison rule, no-outcome-shopping rule, exclusions, minimum-evidence principle, and the 60-request cap. Never inspect gameplay outcomes and then change selection criteria, and never broaden the search because the candidate population is inconvenient.
+5. **Stop again with OWNER_DECISION_REQUIRED,** with no revision, if the response indicates authentication or credential failure, authorization or scope failure, an account or API access restriction, rate limiting, a service outage, budget exhaustion, or a cause that cannot be confidently attributed to listing shape. Stop also if the only workable repair would materially alter the candidate universe, selection rule, evidence predicate, purpose or cap.
+6. **Audit disclosure.** The supervisor's audit does not detect this runner (`agent/follow-ups.md` "After ONB-EV's first run"), so every request stays in the ledger and `tests/evidence/onb-ev-capture.md`, and the owner confirms from those. Commit this record with the attempt.
+
 **Owner grant (2026-11-06): APPROVED with a hard campaign cap of 60 Warcraft Logs HTTP requests in total** (`agent/architecture.md` "Owner grant (2026-11-06): ONB-EV"). This entry acquires evidence and promotes nothing. It runs ONB-EV-PLAN's frozen plan.
+
+**Second run (2026-11-07): stopped for the owner at the cap, 56 of 60.** Six of twelve captured, raw and uncommitted, and nothing promoted. The owner's cap and capacity decision is in `agent/follow-ups.md` "After ONB-EV's cap stop".
+
+**Plan revision 2 (2026-11-07), an API-compatibility correction under the owner's decision.** Digest `49303e1c03d0a056829b3474c1c47dc8cf0a37ca99ba5c532c74650c5519828f`. The retry showed "Max query complexity should be 50000 but got 100701", so one listing request of limit 100 is now three of limit 34, reassembled into the same 100 positions. Nothing else changes (`agent/architecture.md` "ONB-EV plan revision 2"). The text below describes revision 1 where it differs.
 
 **The frozen plan (ONB-EV-PLAN).** `agent/onb-ev-plan.json`, digest `48066f986e7035542bf81c0263f4cec0d9d70e0f3d892ab6eb7ed535e6fa0013`, with its rule in `scripts/corpus/onb-ev-selection.mjs`, run as written. It removes no specialization. Its worst case exceeds the cap, and no fixture fits the archive's notice line, so expect both stops below.
 
@@ -2489,11 +2505,13 @@ Nothing is promoted here.
 ### ONB-EV-PLAN: Freeze the neutral evidence campaign plan
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: SIMC-FB-R
 branch: autopilot/onb-ev-plan
 wcl: NONE
 publicContract: NONE
+pr: 102
+mergeSha: 50fb71e40dc68695861deaa0dae6a34760a55384
 ```
 
 **Outcome.** The plan is `agent/onb-ev-plan.json`, digest `48066f986e7035542bf81c0263f4cec0d9d70e0f3d892ab6eb7ed535e6fa0013`. All twelve specializations stay. Its worst case is 200 requests against the cap of 60, and no fixture fits the 5,212 bytes left under the notice line, so ONB-EV will stop for the owner (`agent/architecture.md` "ONB-EV-PLAN"; `agent/follow-ups.md` "After ONB-EV-PLAN").

@@ -197,7 +197,56 @@ export function mayStartCapture(plan, windowKind, requestsLeft, subjectCount) {
   return requestsLeft >= subjectCount + pageCeilingOf(plan, windowKind) + 1;
 }
 
-/** The worst case, counted as the grant counts. Recomputed so the stated total cannot drift. */
+/**
+ * Plan revision 2, an API-compatibility correction. One listing page stays `pageSize` positions of the
+ * listing, and is now read through requests of `listingRequestLimit` rows, because the service refuses one
+ * request of `pageSize`. These are the request pages that hold listing page `page`. Neighbouring listing
+ * pages can share a request page, and a shared one is sent once.
+ */
+export function listingRequestPagesOf(plan, page) {
+  const { pageSize, listingRequestLimit: limit } = plan.discovery;
+  const first = Math.floor(((page - 1) * pageSize) / limit) + 1;
+  const last = Math.ceil((page * pageSize) / limit);
+  return Array.from({ length: last - first + 1 }, (_, index) => first + index);
+}
+
+/**
+ * Listing page `page`, cut by position from its request pages (`rowsByRequestPage`: request page to rows),
+ * so `selectSubjects` reads the rows one request of `pageSize` would have returned and no others.
+ *
+ * Returns null if the rows cannot be placed: a request page is missing or longer than the limit, or a short
+ * one is followed by more rows. Then the split is not provably the same listing, and the caller stops.
+ */
+export function assembleListingPage(plan, page, rowsByRequestPage) {
+  const { pageSize, listingRequestLimit: limit } = plan.discovery;
+  const from = (page - 1) * pageSize;
+  const to = page * pageSize;
+  const reports = [];
+  let ended = false;
+  for (const requestPage of listingRequestPagesOf(plan, page)) {
+    const rows = rowsByRequestPage.get(requestPage);
+    if (!Array.isArray(rows) || rows.length > limit) return null;
+    if (ended && rows.length > 0) return null;
+    rows.forEach((row, index) => {
+      const position = (requestPage - 1) * limit + index;
+      if (position >= from && position < to) reports.push(row);
+    });
+    if (rows.length < limit) ended = true;
+  }
+  return { reports };
+}
+
+/** Every listing request the sequence can send, each request page once per build. */
+function listingRequestCount(plan) {
+  const distinct = new Set(
+    plan.discovery.listingSequence.flatMap((step) =>
+      listingRequestPagesOf(plan, step.page).map((requestPage) => `${step.gameBuild}|${String(requestPage)}`),
+    ),
+  );
+  return distinct.size;
+}
+
+/** The worst case, counted as the grant counts it, from the campaign's first request. Recomputed so the stated total cannot drift. */
 export function worstCaseRequests(plan) {
   const count = plan.specializations.length;
   const pages = plan.specializations.reduce(
@@ -206,7 +255,8 @@ export function worstCaseRequests(plan) {
   );
   return (
     plan.requestBudget.tokenRequests +
-    plan.discovery.listingSequence.length +
+    plan.requestBudget.refusedListingRequests +
+    listingRequestCount(plan) +
     count * (1 + plan.discovery.maxGateRetriesPerSpecialization) +
     pages +
     count

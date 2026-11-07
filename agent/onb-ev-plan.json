@@ -1,10 +1,10 @@
 {
-  "planVersion": 1,
-  "planRevision": "onb-ev-plan/1",
+  "planVersion": 2,
+  "planRevision": "onb-ev-plan/2",
   "acquisitionRuleId": "ONB_EV_V1",
   "selectionRevision": "onb-ev-selection/1",
   "frozenOn": "2026-11-07",
-  "status": "FROZEN",
+  "status": "EXECUTED",
   "grant": "agent/autopilot-queue.md ONB-EV; agent/architecture.md \"Owner grant (2026-11-06): ONB-EV\"",
   "specializations": [
     {
@@ -315,7 +315,8 @@
         "gameBuild": "12.1.0.69587",
         "page": 2
       }
-    ]
+    ],
+    "listingRequestLimit": 34
   },
   "capture": {
     "contextQuery": "FIGHT_CONTEXT_QUERY",
@@ -340,12 +341,14 @@
   },
   "requestBudget": {
     "hardCap": 60,
-    "tokenRequests": 2,
+    "tokenRequests": 4,
+    "refusedListingRequests": 2,
     "listingPages": 4,
+    "listingRequests": 12,
     "contextRequests": 36,
     "eventPages": 146,
     "revisionRequests": 12,
-    "worstCaseTotal": 200,
+    "worstCaseTotal": 212,
     "exceedsHardCap": true
   },
   "storage": {
@@ -363,5 +366,22 @@
       "fightContextHigh": 387275
     }
   },
-  "planDigest": "48066f986e7035542bf81c0263f4cec0d9d70e0f3d892ab6eb7ed535e6fa0013"
+  "revisionOf": {
+    "planRevision": "onb-ev-plan/1",
+    "planDigest": "48066f986e7035542bf81c0263f4cec0d9d70e0f3d892ab6eb7ed535e6fa0013",
+    "kind": "API_COMPATIBILITY_CORRECTION",
+    "reason": "API-compatibility correction under the owner decision of 2026-11-07. Warcraft Logs refuses one listing request of limit 100 for its query complexity, twice with the same body, so one listing page is read through three requests of limit 34. The same fields, the same positions of the same listing and the same selection rule.",
+    "failedRequests": [
+      {
+        "limit": 100,
+        "page": 1,
+        "errorText": "Max query complexity should be 50000 but got 100701.",
+        "stated": {
+          "maxComplexity": 50000,
+          "gotComplexity": 100701
+        }
+      }
+    ]
+  },
+  "planDigest": "49303e1c03d0a056829b3474c1c47dc8cf0a37ca99ba5c532c74650c5519828f"
 }

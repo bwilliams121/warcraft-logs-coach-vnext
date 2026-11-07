@@ -3,7 +3,9 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import {
+  assembleListingPage,
   capturesOf,
+  listingRequestPagesOf,
   mayStartCapture,
   ONB_EV_SELECTION_REVISION,
   pageCeilingOf,
@@ -129,10 +131,13 @@ describe("ONB-EV-PLAN: the frozen plan", () => {
   it("counts the worst case as the grant counts it, and says it exceeds the cap", () => {
     const budget = PLAN.requestBudget;
     expect(budget.hardCap).toBe(60);
-    expect(budget.tokenRequests + budget.listingPages + budget.contextRequests).toBe(42);
+    expect(budget.tokenRequests).toBe(4);
+    expect(budget.refusedListingRequests).toBe(2);
+    expect(budget.listingRequests).toBe(12);
+    expect(budget.contextRequests).toBe(36);
     expect(budget.eventPages).toBe(146);
     expect(budget.revisionRequests).toBe(12);
-    expect(budget.worstCaseTotal).toBe(200);
+    expect(budget.worstCaseTotal).toBe(212);
     expect(worstCaseRequests(PLAN)).toBe(budget.worstCaseTotal);
     expect(budget.listingPages).toBe(PLAN.discovery.listingSequence.length);
     expect(budget.exceedsHardCap).toBe(budget.worstCaseTotal > budget.hardCap);
@@ -493,9 +498,153 @@ describe("ONB-EV-PLAN: captures and the cap", () => {
     expect(mayStartCapture(PLAN, "WHOLE_FIGHT", 42, 6)).toBe(false);
   });
 
-  it("the first capture of the frozen order always fits inside the cap", () => {
+  it("the first capture of the frozen order fits after one listing page, with every subject on it", () => {
     const budget = PLAN.requestBudget;
-    const left = budget.hardCap - budget.tokenRequests - budget.listingPages;
+    const onePage = listingRequestPagesOf(PLAN, 1).length;
+    const left = budget.hardCap - budget.tokenRequests - budget.refusedListingRequests - onePage;
+    expect(left).toBe(51);
     expect(mayStartCapture(PLAN, "WHOLE_FIGHT", left, PLAN.specializations.length)).toBe(true);
+  });
+
+  it("after the whole listing sequence, a first capture of five subjects fits and six stops at the cap", () => {
+    const budget = PLAN.requestBudget;
+    const left =
+      budget.hardCap - budget.tokenRequests - budget.refusedListingRequests - budget.listingRequests;
+    expect(left).toBe(42);
+    expect(mayStartCapture(PLAN, "WHOLE_FIGHT", left, 5)).toBe(true);
+    expect(mayStartCapture(PLAN, "WHOLE_FIGHT", left, 6)).toBe(false);
+  });
+});
+
+describe("ONB-EV-PLAN revision 2: the listing's API-compatibility correction", () => {
+  const rows = (count: number): readonly Readonly<Record<string, unknown>>[] =>
+    Array.from({ length: count }, (_, index) =>
+      report(`R${String(index).padStart(3, "0")}`, { 1: "Rogue", 2: "Mage" }, [
+        {
+          id: 1,
+          roster: [
+            [1, "Subtlety"],
+            [2, "Frost"],
+          ],
+        },
+      ]),
+    );
+  const LIMIT = PLAN.discovery.listingRequestLimit;
+  const asRequested = (listing: readonly unknown[], last: number): ReadonlyMap<number, readonly unknown[]> =>
+    new Map(
+      Array.from({ length: last }, (_, index) => [
+        index + 1,
+        listing.slice(index * LIMIT, (index + 1) * LIMIT),
+      ]),
+    );
+
+  it("differs from revision 1 only in the listing's request limit, its record and the restated budget", () => {
+    const revision = PLAN as unknown as Record<string, unknown>;
+    const { revisionOf, ...rest } = revision;
+    const { listingRequestLimit, ...discovery } = PLAN.discovery;
+    expect(listingRequestLimit).toBe(34);
+    const restored = {
+      ...rest,
+      planVersion: 1,
+      planRevision: "onb-ev-plan/1",
+      discovery,
+      requestBudget: {
+        hardCap: 60,
+        tokenRequests: 2,
+        listingPages: 4,
+        contextRequests: 36,
+        eventPages: 146,
+        revisionRequests: 12,
+        worstCaseTotal: 200,
+        exceedsHardCap: true,
+      },
+    };
+    expect(revisionOf).toMatchObject({
+      planRevision: "onb-ev-plan/1",
+      kind: "API_COMPATIBILITY_CORRECTION",
+    });
+    expect(planDigest(restored)).toBe(PLAN.revisionOf.planDigest);
+    expect(PLAN.revisionOf.planDigest).toBe(
+      "48066f986e7035542bf81c0263f4cec0d9d70e0f3d892ab6eb7ed535e6fa0013",
+    );
+  });
+
+  it("the limit is the one the refusal justifies, under a cost linear in the rows with a constant of at least 0", () => {
+    const [failed] = PLAN.revisionOf.failedRequests;
+    if (failed === undefined) throw new Error("no failed request is recorded");
+    const { maxComplexity, gotComplexity } = failed.stated;
+    expect(failed.errorText).toContain(String(gotComplexity));
+    // Half the rows cost at least half the stated complexity, which is over the maximum, so 50 cannot fit.
+    expect(gotComplexity / 2).toBeGreaterThan(maxComplexity);
+    // Unknown is how much of the cost is constant, so a limit needs margin. 34 of 100 rows at no constant:
+    expect((gotComplexity * LIMIT) / failed.limit).toBeLessThan(maxComplexity);
+    // 34 is the smallest limit that still reads a page in three requests, so it reads the fewest extra rows.
+    expect(Math.ceil(PLAN.discovery.pageSize / LIMIT)).toBe(3);
+    expect(Math.ceil(PLAN.discovery.pageSize / (LIMIT - 1))).toBe(4);
+  });
+
+  it("names the request pages of each listing page, sharing the one between them", () => {
+    expect(listingRequestPagesOf(PLAN, 1)).toEqual([1, 2, 3]);
+    expect(listingRequestPagesOf(PLAN, 2)).toEqual([3, 4, 5, 6]);
+  });
+
+  it("assembles exactly the rows one request of the page size would return, and selects the same", () => {
+    const listing = rows(204);
+    const requested = asRequested(listing, 6);
+    const first = assembleListingPage(PLAN, 1, requested);
+    const second = assembleListingPage(PLAN, 2, requested);
+    expect(first?.reports).toEqual(listing.slice(0, 100));
+    expect(second?.reports).toEqual(listing.slice(100, 200));
+    if (first === null || second === null) throw new Error("not assembled");
+    const asOneRequest = [pageOf(...listing.slice(0, 100)), pageOf(...listing.slice(100, 200))];
+    expect(selectSubjects(PLAN, [first])).toEqual(
+      selectSubjects(PLAN, [asOneRequest[0] as OnbEvListingPage]),
+    );
+    expect(selectSubjects(PLAN, [first, second])).toEqual(selectSubjects(PLAN, asOneRequest));
+  });
+
+  it("a row past the page's end cannot reach the selection", () => {
+    const listing = rows(102);
+    const first = assembleListingPage(PLAN, 1, asRequested(listing, 3));
+    const beyond = report("BEYONDTHEPAGE", { 1: "Rogue" }, [{ id: 1, roster: [[1, "Outlaw"]] }]);
+    const withBeyond = [...listing.slice(0, 101), beyond];
+    const same = assembleListingPage(PLAN, 1, asRequested(withBeyond, 3));
+    expect(same).toEqual(first);
+    if (same === null) throw new Error("not assembled");
+    expect(candidateOf([same], "rogue/outlaw")).toEqual([]);
+  });
+
+  it("a listing that ends early is assembled as it stands, and a later page is empty", () => {
+    const listing = rows(50);
+    const requested = asRequested(listing, 6);
+    expect(assembleListingPage(PLAN, 1, requested)?.reports).toEqual(listing);
+    expect(assembleListingPage(PLAN, 2, requested)?.reports).toEqual([]);
+  });
+
+  it("refuses rows it cannot place, and never guesses the listing", () => {
+    const full = rows(LIMIT);
+    expect(assembleListingPage(PLAN, 1, new Map([[1, full]]))).toBeNull();
+    expect(
+      assembleListingPage(
+        PLAN,
+        1,
+        new Map([
+          [1, rows(LIMIT + 1)],
+          [2, []],
+          [3, []],
+        ]),
+      ),
+    ).toBeNull();
+    expect(
+      assembleListingPage(
+        PLAN,
+        1,
+        new Map([
+          [1, rows(LIMIT - 1)],
+          [2, rows(1)],
+          [3, []],
+        ]),
+      ),
+    ).toBeNull();
   });
 });

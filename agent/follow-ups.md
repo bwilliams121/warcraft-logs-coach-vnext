@@ -27,6 +27,84 @@ Decided in `agent/architecture.md` "Owner decision (2026-11-06): SimC profile fa
 - **The exit criterion is 100% PUBLIC.** A terminal BLOCKED no longer closes the program.
 - **POLB-CENSUS is still open,** and no longer holds up the fallback, ONB-EV or REM-CENSUS.
 
+## After ONB-EV's cap stop: the owner's report
+
+**Raised:** ONB-EV (2026-11-07). The grant's cap and capacity stops, reported together once, with HEAL-B1P2's row. The argument is in `agent/architecture.md` "ONB-EV — stopped at the cap", and the requests are in `tests/evidence/onb-ev-capture.md`.
+
+**Requests.** 56 consumed, 4 remaining, against the cap of 60: 3 tokens, 2 refused listings, 3 listing requests, 6 contexts, 37 event pages, 5 revisions.
+
+**Specializations.** Captured: Discipline Priest, Subtlety Rogue, Fury Warrior, Survival Hunter, Protection Warrior, Enhancement Shaman. Still requiring evidence: the six below.
+
+**Why each remaining request is necessary, and the amount proposed.** Each capture is the first qualifying fight already selected, and needs one context per subject before any page, its page ceiling, and one revision check.
+
+| Capture, in the frozen order | Contexts | Page ceiling | Revision | Total |
+| --- | ---: | ---: | ---: | ---: |
+| Outlaw Rogue, EV-R11 fight 8 | 1 | 10 | 1 | 12 |
+| Guardian Druid and Frost Mage, EV-R12 fight 20 | 2 | 10 | 1 | 13 |
+| Affliction Warlock, EV-R1 fight 39 | 1 | 10 | 1 | 12 |
+| Marksmanship Hunter, EV-R8 fight 39 | 1 | 10 | 1 | 12 |
+| Vengeance Demon Hunter, EV-R5 fight 5 | 1 | 10 | 1 | 12 |
+| Captures | | | | 61 |
+| A new run's token, and one refresh | | | | 2 |
+| Less the 4 left | | | | -4 |
+| **Additional requests proposed, a cap of 119** | | | | **59** |
+
+Prefix captures have taken 5 to 9 pages, so about 46 of the 59 should be spent. The cap has to hold the ceilings anyway, because a capture starts only if its ceiling fits. 59 assumes no gate refusal, and none has occurred in 6 contexts. Each refusal costs one more context, 12 at the very worst, and would stop at the cap instead of exceeding it.
+
+**Archive.** Artifacts and selection frames total 19,773,410 bytes (19,744,400 + 29,010, remeasured). Without the M11-E2 and M11-G2 exceptions, 4,189,092 count against the 4,194,304 line, so **5,212 are left**, unchanged. Nothing is committed. The raw captures are 84,017,185 bytes under `.probe/onb-ev/raw`, and stay there.
+
+Measured compact, with `scripts/sanitize-probe.mjs`'s predicates, over each subject's window:
+
+| Specialization | Actor slice | With owned pets | Actor slice, gzip | Its fight context |
+| --- | ---: | ---: | ---: | ---: |
+| Subtlety Rogue | 1,527,441 | 1,530,987 | 78,967 | 120,514 |
+| Fury Warrior | 696,085 | 696,085 | 39,980 | 243,471 |
+| Survival Hunter | 492,105 | 643,012 | 30,093 | 243,470 |
+| Protection Warrior | 710,789 | 710,789 | 42,790 | 91,883 |
+| Enhancement Shaman | 567,105 | 592,266 | 38,558 | 243,431 |
+| Discipline Priest | 1,564,217 | 1,590,519 | 87,105 | 353,512 |
+
+Narrower cuts:
+
+- **Rotational, only the families their registrations name:** `cast,begincast,combatantinfo`, plus `resourcechange` where the row declares resources, with owned pets. Subtlety 298,107, Fury 135,203, Survival 77,827, Protection 164,084, Enhancement 39,292: 714,513 in all. A slice cut this way grants only those families' categories, and Energy may read `classResources` on other events, so whether it serves a list is unmeasured.
+- **Discipline.** Casts and begincasts, HEAL-B1P2's shape, 22,453. With combatant info and pets, 44,546. Friendly-player slice, which would hold every Atonement heal, 11,887,583 (912,361 gzipped), not proposed.
+- **What the bytes come to:**
+
+| Retained evidence | Bytes | Line if raised (from 4,189,092) |
+| --- | ---: | ---: |
+| HEAL-B1P2's row, already measured | 131,911 | 4,321,003 |
+| The six at the narrow cuts (714,513 + 44,546), their six contexts (1,296,281), and HEAL-B1P2 | 2,187,251 | 6,376,343 |
+| The six at the full slices with pets (4,173,139 + 1,590,519), contexts, and HEAL-B1P2 | 7,191,850 | 11,380,942 |
+| The other six, an estimate from these means rather than a measurement, at the narrow cuts with one context each | about 2,150,000 | |
+
+**Deduplication and compression considered.**
+
+- **Gzip is the big lever and has a cost.** The five rotational actor slices, 3,993,525 bytes, gzip to 230,388, and the six contexts, 1,296,281, to 238,496. The loader reads no compressed artifact, so it needs a reviewed loader change and a decision on how a manifest digests compressed bytes. Git already compresses objects, so the line governs the working tree more than the clone.
+- **Contexts.** Fury and Survival have one fight's context twice, and Enhancement has the same report's. They are per-actor documents and the loader has no cross-artifact reference, so sharing them is also a loader change.
+- **Dropping fields** does not fit the archive's rule that the parsed payload is what the capture returned, as HEAL-B1P2 recorded.
+
+**The smallest justified change.** No raise now. Run REM-CENSUS from the retained raw captures first, which needs no committed byte, and approve a named exception pinned to the byte, as M11-E2's and M11-G2's are, only for a subject the unchanged gate actually passes. HEAL-B1P2's 131,911 is the one row already proven. If the owner prefers one line for all of it, 6,376,343 is the smallest that holds what is measured here at the narrow cuts, and it would have to grow if a list needs a full slice. That is the owner's to choose.
+
+- **The owner's other levers, none taken here.** Stop at six and let REM-CENSUS report the rest as the cap's. Reordering the remaining six is the owner's too, and with this budget it changes nothing, since all five captures fit.
+- **Resuming.** A raised cap is a plan revision (`requestBudget`, digest) under a new grant line. The runner's guard is at 4 and has to move to 56. It must not re-send the listing: its pages are retained, and selection must read those, because re-listing could change the order's input.
+- **If POLB-CENSUS is ever approved,** these fights' reports join its exclusion list, as "After ONB-EV-PLAN" says.
+
+## After ONB-EV's retry: answered by the owner's decision
+
+**Raised:** ONB-EV (2026-11-07). The owner answered the question below ("Owner decision (2026-11-07): ONB-EV listing retry"), the retry named the cause, and revision 2 repairs it (`agent/architecture.md` "ONB-EV plan revision 2"). The audit gap below is still open: the retry and the run again match none of `WclActivityPatterns`, and the ledger and `tests/evidence/onb-ev-capture.md` remain the record the owner confirms from.
+
+- **The production client still drops the error text.** `graphql-client.ts` keeps only the error count, deliberately, so that prose is never parsed as a contract. A complexity refusal is therefore invisible to any production caller. Keeping sanitized text as a diagnostic, and never as a classification, may be worth its own tranche.
+
+## After ONB-EV's first run: the listing was refused, and the owner decides the next step
+
+**Raised:** ONB-EV (2026-11-07). 2 of 60 requests spent, 58 left, no evidence captured. The record is `tests/evidence/onb-ev-capture.md`, and the argument is in `agent/architecture.md` "ONB-EV — stopped at the first listing".
+
+- **The owner's decision.** May ONB-EV send the identical listing once more, keeping the error text, and, if the text shows the listing's shape is the cause, change only that listing in a new plan revision before going on? The rest of the rule and the grant's cap stay as they are. Both requests would count against the 60. Selection would still read no outcome, so the change would not make the campaign less neutral.
+- **What the resuming run must do first.** Keep the body text of any GraphQL error, and carry the ledger's count of 2 into the counter, because the runner refuses to start while a ledger exists. A changed listing needs the plan's digest regenerated in the places that name it (the plan, the queue and `agent/architecture.md`) and a new review, before any further request.
+- **A changed listing may change what costs what.** Fewer reports a page means fewer candidates per listing request, and the plan bounds the sequence at four pages. A revision has to restate that budget and say whether a specialization can go without a candidate because of it.
+- **The audit did not see this run.** `npx vitest run --config .probe/onb-ev/capture.config.ts` matches none of the supervisor's `WclActivityPatterns`: the file name has no `.probe.ts` and the command names no `warcraftlogs.com`. So the transcript audit cannot be relied on to stop this tranche, as `agent/autopilot.md` expects of any detected activity, and the disclosure is in this record and the stop message. M13-A's runner has the same shape. A pattern for vitest configs under `.probe/` belongs in the supervisor, with its self-test. It is not changed here because this tranche's scope is the campaign.
+- **Still ahead, unchanged:** the cap and capacity stops under "After ONB-EV-PLAN".
+
 ## After ONB-EV-PLAN: what ONB-EV must do, and where it will stop
 
 **Raised:** ONB-EV-PLAN (2026-11-07). Offline. The argument and the numbers are in `agent/architecture.md` "ONB-EV-PLAN", and the plan is `agent/onb-ev-plan.json`.
