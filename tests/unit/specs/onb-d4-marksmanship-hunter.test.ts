@@ -868,7 +868,7 @@ describe("what this list asks that nothing answers", () => {
     }
   });
 
-  it("a simulation's fight style is never read as a fact of a real fight: it stays open, and is no row", () => {
+  it("a simulation's fight style is never read as a fact of a real fight: unwired to the SIMC-FB-A profile fallback it stays open, and is no row", () => {
     const keys = bindingsOf(factsOf(BUILD_A)).specAtoms?.bound.map((binding) => binding.key) ?? [];
     expect(keys).not.toContain("fight_style.dungeonroute");
     expect(MARKSMANSHIP_UNBOUND_TRUTH_ATOMS).toContain("fight_style.dungeonroute");

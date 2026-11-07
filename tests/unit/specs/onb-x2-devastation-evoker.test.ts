@@ -1107,7 +1107,7 @@ describe("what this list asks that nothing answers", () => {
     expect(outcome.rootScan.stoppingPoint?.at).toBe("sc[0] deep_breath");
   });
 
-  it("a simulation's raid schedule is never a fact of a real fight", () => {
+  it("a simulation's raid schedule is never a fact of a real fight, and stays open until a list reads the SIMC-FB-A profile fallback", () => {
     const declared = DEVASTATION_UNBOUND_NUMERIC_ATOMS as readonly string[];
     expect(declared).toEqual(expect.arrayContaining(["raid_event.adds.in", "raid_event.movement.in"]));
     expect(DEVASTATION_UNBOUND_TRUTH_ATOMS as readonly string[]).toContain("raid_event.adds.exists");

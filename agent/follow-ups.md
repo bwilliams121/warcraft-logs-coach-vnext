@@ -27,6 +27,18 @@ Decided in `agent/architecture.md` "Owner decision (2026-11-06): SimC profile fa
 - **The exit criterion is 100% PUBLIC.** A terminal BLOCKED no longer closes the program.
 - **POLB-CENSUS is still open,** and no longer holds up the fallback, ONB-EV or REM-CENSUS.
 
+## After SIMC-FB-A: what SIMC-FB-R and SIMC-FB-B inherit
+
+**Raised:** SIMC-FB-A (2026-11-06). Offline. The design and the numbers are in `agent/architecture.md` "SIMC-FB-A".
+
+- **Each `target_if` action needs its owner's attestation.** Of the 74 tokens, none resolves through the shared code until its specialization cites that `target_list()` is the one target at the pin. Audit it against the 21 `available_targets` overrides and 48 live `target_filter_callback` assignments in the pinned class modules. An inherited override counts.
+- **Build proof remains the limit.** Fights with no retrieved region stay `BUILD_UNRESOLVED`: of the retained analyzed pulls, b1Pm fight 48 is proven, and A7R6 fight 7 has no region in its capture, so its Destruction subjects get nothing on production. SIMC-FB-R measures this by subject.
+- **The 69933 listing is an environment claim only.** The APL stays at the analyzer pin, as it does today, so Protection Paladin's APL drift at `0a72e6a746` is untouched. A later build needs a new extraction. Nothing rolls forward by date.
+- **Disclosure must carry `profileFacts`.** Bindings hold no provenance themselves, so SIMC-FB-B must take `EncounterStateResolution.profileFacts` beside the decision. Without that a tier-3 finding would look observed.
+- **`cycle_targets` and `cycling_variable`** could read one target under the profile. They were left alone because no queue item names them, and they fail closed.
+- **`enemies`** (two Balance lines) reads `sim->enemy_targets`, which the record cites nothing for. It stays UNKNOWN until someone audits where that counter is written.
+- **A dungeon pull** would read `fight_style.dungeonroute` as false, since nothing normalized marks Mythic+. That is disclosed as profile-relative, and it should be revisited with the Mythic+ model.
+
 ## After POLB-A: the census cannot supply an upper bound
 
 **Raised:** POLB-A (2026-11-06). Offline. The argument and the counts are in `agent/architecture.md` "POLB-A".

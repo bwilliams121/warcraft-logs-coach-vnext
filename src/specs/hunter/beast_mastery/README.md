@@ -60,7 +60,7 @@ Every exclusion is `EXECUTION_LANE_NOT_ESTABLISHED`: a spell off the list, Dire 
 
 | Stops at | Why |
 | --- | --- |
-| `default[0] retarget` | where all 707 scans stop, on its `target_if`, before any rotation line. Its gate is `fight_style.dungeonroute`, a simulation setting |
+| `default[0] retarget` | where all 707 scans stop, on its `target_if`, before any rotation line. Its gate is `fight_style.dungeonroute`, a simulation setting that only the SimC profile fallback may bind (SIMC-FB-A), which this list does not read yet |
 | `default[1] auto_shot` | past that, on a fight style only a test can state: off the GCD, with no reviewed contract, so the engine refuses. Synthetic |
 | `default[4]` to `default[7]` | the dispatches, gated on the enemy count and on `talent.black_arrow` and `talent.beast_cleave`. Synthetic |
 | the rotation lists | `target_if` on Barbed Shot, charges, `full_recharge_time`, `howl_summon.ready`, `apex.3`, Focus |

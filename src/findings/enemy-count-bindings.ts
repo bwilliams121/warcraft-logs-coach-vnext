@@ -9,6 +9,9 @@
  * `spell_targets.<ability>` IS NOT HERE. It is never aliased to this count, and it binds only
  * through an action's own registration (`src/simc/expression/enemy-count.ts`).
  *
+ * THIS IS TIERS 1 AND 2. A list that opts in to the pinned profile as tier 3 calls
+ * `withEncounterStateAt` in `./simc-profile-fallback.ts` instead, which reads the same evidence first.
+ *
  * WHERE THE DECISION IS. The query is `BEFORE_EVENT` at the decision's position, so nothing at or
  * after the decision reaches it (O2). For a cast-time spell the decision is the begin, not the
  * completion: reading the state at the completion would admit evidence from after the player

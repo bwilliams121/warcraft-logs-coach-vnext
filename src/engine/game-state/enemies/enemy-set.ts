@@ -44,7 +44,8 @@
  *                supplier). None is supplied in production: the census holds no row, and no
  *                completeness contract is reviewed (POLB-A), so a real count today is BOUNDED below
  *                or UNKNOWN. A lower bound above a supplied upper bound is a contradiction, which
- *                yields UNKNOWN, never either number.
+ *                yields UNKNOWN, never either number. The pinned SimC profile (SIMC-FB-A) supplies no
+ *                bound here: this set stays real evidence alone, and that precedence sits above it.
  *
  * PRESENT, TARGETABLE AND IN-RANGE ARE DISTINCT. A member is PRESENT. Neither basis proves the
  * subject could target it (a DoT keeps ticking on an untargetable unit), and range is action-owned,

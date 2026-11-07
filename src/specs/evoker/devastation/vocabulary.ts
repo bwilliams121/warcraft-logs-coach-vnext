@@ -11,7 +11,7 @@
  *   active_enemies, active_dot.*
  *       no action or enemy-set binding establishes it (ONB-S3)
  *   raid_event.*
- *       a simulation's scripted raid events; a real fight has no such schedule
+ *       a simulation's scripted raid events; a real fight has no such schedule. SIMC-FB-A may bind it as a disclosed profile fact, and this list does not read that yet
  *   cooldown.*, gcd.*, action.*.usable_in, action.*.ready
  *       no cooldown, charge or GCD is derived
  *   buff.*.at_max_stacks, buff.*.down, dot.*.refreshable, execute_time

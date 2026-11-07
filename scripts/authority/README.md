@@ -992,6 +992,18 @@ Spender 117152/90692). The artifact records that scope explicitly and does **not
 claim the mapping holds for Warcraft Logs in general. Widening the claim needs a
 second independent report.
 
+## Pinned SimC profile environment
+
+`extract-simc-profile-environment.mjs` produces `src/data/simc-profile/simc-profile-environment.json` (`SIMC_PROFILE_ENVIRONMENT`, SIMC-FB-A): each APL-backed specialization's `profiles/MID1/` files with their hashes and any line that sets the environment, plus the engine statements that give the defaults meaning, each cited by path, file hash, line span and excerpt hash. An anchor that does not occur exactly once fails extraction. `--also` adds a second model only if every excerpt and every profile's option lines equal the pin's.
+
+```bash
+node scripts/authority/extract-simc-profile-environment.mjs --repo <clone> \
+  --pin 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --also 0a72e6a74684d23c989b2d76143e429d2b4f1c91 \
+  --extracted-on 2026-11-06 --out src/data/simc-profile/simc-profile-environment.json
+```
+
+It reads a local clone through `git show`, with no network. CI validates the committed record (`tests/unit/simc-fb-a-profile-fallback.test.ts`) and never needs the clone.
+
 ## Re-pinning either artifact
 
 1. Run the extractor with the new SHA and no `--expect-*` hashes.

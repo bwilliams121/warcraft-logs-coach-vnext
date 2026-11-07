@@ -83,10 +83,10 @@ describe("M11-G4-1 simulation-context layering", () => {
     }
   });
 
-  it("only the internal publication pipeline imports it (M11-G4-2)", () => {
+  it("only the internal publication pipeline (M11-G4-2) and the proven-build reader (SIMC-FB-A) import it", () => {
     const importers = tsFiles("src")
       .filter((file) => !file.startsWith("src/simulation-context/"))
       .filter((file) => importsOf(file).some((spec) => /(^|\/)simulation-context\//.test(spec)));
-    expect(importers).toEqual(["src/publication/pipeline.ts"]);
+    expect(importers).toEqual(["src/findings/proven-fight-build.ts", "src/publication/pipeline.ts"]);
   });
 });

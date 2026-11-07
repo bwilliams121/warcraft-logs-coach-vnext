@@ -59,7 +59,7 @@ The rows are hand-reviewed readings of the pinned `_cast_time` and of every cast
 
 | Stops at | Why |
 | --- | --- |
-| `default[2] retarget` | where every scan stops, on its `target_if`, before any rotation line. Its gate is `fight_style.dungeonroute`, a simulation setting. Synthetic |
+| `default[2] retarget` | where every scan stops, on its `target_if`, before any rotation line. Its gate is `fight_style.dungeonroute`, a simulation setting that only the SimC profile fallback may bind (SIMC-FB-A), which this list does not read yet. Synthetic |
 | `default[3] auto_shot` | past that, on a fight style only a test can state: off the GCD, with no reviewed contract, so the engine refuses. Synthetic |
 | `sentaoe[0]`, `draoe[0] explosive_shot` | past that, the area dispatch open on the enemy count, and the line's `target_if` refused. Synthetic |
 | the rotation lists | Focus, Precise Shots, Trick Shots, Lock and Load, Bulletstorm, the marks and charges; `target_if` on most lines |
