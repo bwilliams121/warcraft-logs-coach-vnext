@@ -15602,3 +15602,60 @@ Otherwise it completes all twelve captures and REM-CENSUS follows.
 **Completion intent.** ONB-EV is an evidence-acquisition step toward the objective that every playable specialization becomes PUBLIC. Stopping halfway through the defined cohort solely because the original request estimate was low is not the desired outcome.
 
 **Recording note: the restart.** The scheduled task runs the supervisor with `-MaxTranches 0`, so the process that merges AUD-WCL-1 is still running the old code and would continue into ONB-EV under the old detector. AUD-WCL-1's own exit-after-merge only takes effect in later processes. So the owner runs AUD-WCL-1 alone (`-TrancheId AUD-WCL-1 -MaxTranches 1`) and then restarts the task. ONB-EV's entry also stops if its supervisor started before AUD-WCL-1's merge.
+
+## Owner decision (2026-11-08): AUD-WCL-1 rescope
+
+**Decision.** Use both controls:
+
+1. replace the attempted precise shell detector with conservative over-approximate detection;
+2. queue credential isolation as the next security follow-up, so that a tranche without Warcraft Logs authorization cannot successfully contact Warcraft Logs even if detection misses something.
+
+**Why.** More than 30 review cycles showed that completely and precisely inferring arbitrary shell execution from command text is not a convergent design. AUD-WCL-1's current attempt is stopped. Its uncommitted branch work is kept for reuse, but individual shell edge cases are not patched further.
+
+### Conservative detector (AUD-WCL-1R)
+
+- **The question.** The audit asks: does this command reference `.probe/` in a way that could plausibly execute or load content from it? It is not required to prove whether arbitrary command text executes code.
+- **Default rule.** A command referencing a path beneath `.probe/` is `POSSIBLE_PROBE_EXECUTION`, unless it matches a deliberately small, reviewed set of clearly read-only forms. A possible-execution finding is not itself a claim that network traffic occurred. It enters the existing grant, ledger and transcript classification.
+- **Read-only allowlist,** intentionally narrow: simple invocations of `cat`, `type`, `Get-Content`, `ls`, `dir`, `Get-ChildItem`, `head`, `tail`, `grep`, `Select-String` and equivalent direct file-inspection commands. They qualify only when the parsed command contains no executable launcher, interpreter, command substitution, pipe into an executable, eval mechanism, inline-code mechanism or other execution-bearing construct. If classification is uncertain, the result is `POSSIBLE_PROBE_EXECUTION`. False positives are preferable to silent misses.
+- **Three separate concepts:** `READ_ONLY_PROBE_INSPECTION`, `POSSIBLE_PROBE_EXECUTION` and `CONFIRMED_WCL_NETWORK_ACTIVITY`. The second never collapses into the third.
+- **No exhaustive shell parser.** The tranche is specifically not required to enumerate every form of JavaScript `import`, `require` or `eval`, shell substitution, inline Node, PowerShell dynamic invocation, Bash `eval` or `source`, nested launchers, quoting tricks or future interpreters. The conservative boundary replaces that impossible requirement.
+- **Finite acceptance tests:** direct `.probe` execution is flagged; indirect launcher syntax referencing `.probe` is flagged; inline code referencing `.probe` is flagged; the known ONB-EV Vitest config form is flagged; ordinary direct reads using the allowlist are read-only; a command whose data argument merely contains text resembling a launcher does not become confirmed network activity; uncertain forms become `POSSIBLE_PROBE_EXECUTION` rather than silently passing. The matrix is not expanded to model every shell grammar.
+
+### Historical backfill
+
+The read-only backfill over retained autopilot transcripts continues.
+
+- That 62 historical transcripts executed or referenced `.probe` code is not, by itself, evidence of Warcraft Logs activity.
+- Each relevant tranche is classified as `CONFIRMED_NO_NETWORK`, `CONFIRMED_AUTHORIZED_NETWORK`, `CONFIRMED_UNAUTHORIZED_NETWORK` or `INSUFFICIENT_EVIDENCE`, using retained transcripts, ledgers, request records and grants.
+- No network request is made during the backfill.
+- If any `wcl: NONE` tranche is confirmed to have made a live Warcraft Logs request, it stops with OWNER_DECISION_REQUIRED.
+- Genuinely insufficient evidence is reported as insufficient, never converted into innocence or violation.
+
+### Credential isolation (AUD-WCL-2), `wcl: NONE`
+
+- **Required property.** A tranche without an explicit Warcraft Logs grant does not receive usable Warcraft Logs credentials. That holds even if Claude constructs an unexpected command, a `.probe` config launches code, the detector misses a form, or a test runner loads arbitrary project code.
+- **Preferred architecture.** The supervisor controls credential injection. For a `wcl: NONE` tranche, the child environment contains no usable WCL client id, client secret, OAuth token, refresh or access token, or equivalent material. For a tranche with an explicit owner grant, only the credentials that authorized run needs are exposed.
+- **`.dev.vars`.** A repository-visible `.dev.vars` is not the security boundary. If it holds live credentials that ordinary tranche processes can read, isolation is incomplete. The design puts secret material outside an ordinary tranche's accessible credentials, or has the supervisor withhold it and inject it only into an explicitly authorized process. Secret values are never printed, copied, committed or migrated into repository files.
+- **Defense in depth.** After AUD-WCL-2, credential isolation is the primary preventive control, conservative probe detection the secondary audit control, and the campaign ledger and counter an independent accounting control for authorized campaigns. No one control substitutes for the others.
+
+### Order
+
+1. Stop the current AUD-WCL-1 attempt.
+2. Rescope and finish AUD-WCL-1 with conservative detection.
+3. Merge it.
+4. Restart the supervisor so the new detector is active.
+5. Run AUD-WCL-2.
+6. Merge it, and restart the supervisor if required.
+7. Resume ONB-EV under both controls.
+8. Continue REM-CENSUS and later remediation.
+
+ONB-EV stays held until AUD-WCL-1's rescoped work is merged. AUD-WCL-2 runs before ONB-EV if it does not materially delay the already-authorized campaign.
+
+### Review-loop rule
+
+AUD-WCL-1 does not re-enter an unbounded edge-case review cycle. Once the conservative policy, the finite acceptance tests, the backfill and the documentation are satisfied, shell forms that merely demonstrate that perfect static interpretation is impossible are not grounds for reopening precise parsing work. The design intentionally chooses conservative classification over perfect static interpretation.
+
+### Recording notes
+
+- **Attempt 3 ran before this was recorded.** The scheduled task restarted the supervisor at 00:09 on 2026-11-08. Attempt 3 then continued the precise-parser design until the 6-hour run limit, and stopped for an audit confirmation, which the owner gave. Its uncommitted work is backed up in `.probe/roadmap/aud-wcl-1-attempt3/`.
+- **Rescoped as AUD-WCL-1R.** Attempts 1 to 3 used three of the four launches the supervisor allows per tranche, so the rescoped work runs as a new entry, AUD-WCL-1R, on the same branch. AUD-WCL-1 is BLOCKED as superseded. ONB-EV and REM-CENSUS depend on AUD-WCL-1R and AUD-WCL-2.

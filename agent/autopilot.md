@@ -21,6 +21,7 @@ It orchestrates the existing machinery and replaces none of it:
 | Offline self-test | `powershell -ExecutionPolicy Bypass -File scripts/autopilot/run-project.ps1 -SelfTest` |
 | Gate decision only | `... run-project.ps1 -TrancheId <ID> -GateOnly -NoMerge` |
 | Re-audit after an audit-rule fix | `... run-project.ps1 -TrancheId <ID> -Reaudit` (no model; rebuilds records from the same transcripts) |
+| Historical backfill (read-only) | `... run-project.ps1 -BackfillAudit` (no model, no lock, no network; audits every retained transcript with the current detector and writes only `.probe/autopilot/backfill-<time>.json`) |
 | Auto-start at logon | `powershell -ExecutionPolicy Bypass -File scripts/autopilot/install-autopilot-task.ps1` (the owner runs it; `-WhatIf` previews, `-Uninstall` removes) |
 
 Other parameters:
@@ -117,10 +118,34 @@ would not notice. It then merges directly with
 `gh pr merge <n> --squash --match-head-commit <sha>`. GitHub refuses that
 if the head moved. It never uses `--admin`.
 
+**Branch hygiene (AUD-WCL-1).** Immediately before merging, the supervisor
+checks for uncommitted tracked edits (`git status --porcelain
+--untracked-files=no`). Nothing uncommitted is ever discarded, and nothing
+unrelated is ever swept into a tranche.
+
+- Clean: it merges.
+- On the tranche branch, with every edit to a file the tranche already
+  changes: these are intended tranche edits left uncommitted. It does not
+  merge; Claude is relaunched to put them into the candidate through the
+  normal workflow (local review, commit, push, CI), and the gate reruns.
+- Anything else (another branch checked out, or an edit to a file outside
+  the tranche's changes): an owner stop.
+
+The same check runs again after the merge, before switching back to main.
+If edits appeared meanwhile, the merge is recorded, main is not checked out,
+and the supervisor stops for the owner.
+
 **After a merge.** The supervisor waits for GitHub to report `MERGED`. It
 then fetches, fast-forwards main only, verifies that main contains the merge
 commit, deletes the tranche branch where safe, and records the merge in its
 ledger.
+
+**Self-update (AUD-WCL-1).** A running supervisor keeps the code it loaded.
+If the merged change touches `scripts/autopilot/`, the supervisor exits
+(exit 0, phase `RESTART_REQUIRED`) instead of selecting and auditing the
+next tranche with the old code. A new supervisor process continues; the
+scheduled task does not restart a clean exit, so the owner (or the next
+logon) starts it.
 
 Repository auto-merge does not need to be enabled for this. Enabling it
 would add nothing without branch protection.
@@ -133,7 +158,10 @@ would add nothing without branch protection.
 - an `OWNER_DECISION_REQUIRED` from Claude, the local review or GitHub;
 - a next roadmap item that is itself `OWNER_DECISION_REQUIRED`;
 - an unexpected public change;
-- unauthorized Warcraft Logs activity;
+- detected Warcraft Logs or `.probe` execution activity awaiting the owner's
+  classification;
+- uncommitted tracked edits the branch-hygiene check cannot attribute to the
+  tranche;
 - Claude or `gh` authentication needing the owner.
 
 While blocked, a restart (for example at the next logon) only compares the
@@ -219,13 +247,112 @@ resolved only by recording it in the queue.
 ## Warcraft Logs
 
 The default is NONE. The prompt forbids requests, and the disallowed tools
-block the probe commands and web access. The transcript audit catches any
-executed command or web or MCP call that reaches `warcraftlogs.com`, runs
-the probe config, or runs a probe script. A queue entry may carry an `OWNER-GRANT:` only when an existing
-owner decision authorizes that exact request, and the tranche must record
-every request in its review packet.
+block the probe commands and web access. A queue entry may carry an
+`OWNER-GRANT:` only when an existing owner decision authorizes that exact
+request, and the tranche must record every request in its review packet.
 
-**Interim warning (owner, 2026-11-07).** The audit does not yet detect execution of code under `.probe/` through a config or loader, such as `npx vitest run --config .probe/onb-ev/capture.config.ts`. Until AUD-WCL-1 lands, an empty audit is not proof that a tranche made no Warcraft Logs request, and historical empty audits alone are not proof of no network activity.
+**What the transcript audit detects (AUD-WCL-1R).** The owner's decision
+of 2026-11-08 ("AUD-WCL-1 rescope", `agent/architecture.md`) replaced an
+attempted precise shell parser with conservative detection. The audit asks
+one question of each executed shell command: does it reference `.probe/` in
+a way that could plausibly execute or load content from it? It does not try
+to prove what arbitrary command text runs. Each finding names its class and
+its trigger.
+
+- `WCL_ACTIVITY` (a hit): an executed command or web or MCP call that names
+  `warcraftlogs.com`, runs the probe config (`vitest.probe.config`),
+  `npm run probe`, or runs a `scripts/probe/` or `*.probe.ts` script. These
+  literal patterns are unchanged.
+- `POSSIBLE_PROBE_EXECUTION` (a hit): a shell command (Bash, PowerShell or
+  Monitor, a subagent's included) that names a path beneath `.probe/`, in any
+  spelling (relative, absolute, Windows or slash, any case), and is not a
+  read-only inspection as defined below. This is the default for every
+  command naming a `.probe` path. The finding says what made it one: the
+  command that is not on the read-only list (`'node' is not a read-only
+  inspection command`), or the construct (`a command substitution`, `an
+  output redirection`, `an unquoted '('` and so on).
+- `READ_ONLY_PROBE_INSPECTION` (recorded in `probeInspections`, never a
+  hit): a command naming a `.probe` path that passes the read-only test.
+
+**The read-only test.** It is deliberately small, and the command must pass
+it under both Bash and PowerShell quoting rules, whichever tool ran it.
+
+- The command is a list of statements separated by `;`, `&&`, `||` or a
+  newline, each a pipeline of stages separated by `|`.
+- Every stage starts with an unquoted command from this list: the owner's
+  `cat`, `type`, `Get-Content`, `ls`, `dir`, `Get-ChildItem`, `head`,
+  `tail`, `grep` and `Select-String`, and the equivalent direct inspection
+  commands `gc`, `gci`, `sls`, `wc`, `findstr`, `sha256sum`,
+  `Get-FileHash`, `Test-Path`, `Get-Item`, `echo`, `Write-Output`,
+  `Select-Object`, `Measure-Object` and `Sort-Object`.
+- The only redirection allowed is `2>&1`, which writes no file under either
+  shell. Discard forms are not allowed: Bash writes a file named `nul` for
+  `>nul`, PowerShell writes `\dev\null` for `>/dev/null`, and Bash reads
+  `>$null` as an empty target.
+- The command contains none of: a command or process substitution or
+  subexpression (`$(`), a backtick, `${`, an unquoted `(`, `)`, `{`, `}`,
+  `#`, `@` or single `&`, an input redirection, heredoc or here-string, an
+  output redirection to a file, PowerShell's stop-parsing `--%`, Bash's
+  `$'...'` or `$"..."` quoting, non-ASCII text (PowerShell reads
+  typographic quotes as quotes), an unterminated quote or an empty pipeline
+  stage.
+
+If classification is uncertain, the result is `POSSIBLE_PROBE_EXECUTION`.
+False positives are preferable to silent misses: `mkdir`, `rm`, `cp`,
+`git`, `sed`, `cd` into or out of a `.probe` path, a committed script given
+a `.probe` data file, and output written into `.probe/` are all
+`POSSIBLE_PROBE_EXECUTION`, and the owner classifies them. Use the Read,
+Grep and Glob tools to inspect `.probe` files without a finding.
+
+**No exhaustive shell parser.** The audit does not enumerate the forms of
+JavaScript `import`, `require` or `eval`, shell substitution, inline Node,
+PowerShell dynamic invocation, Bash `eval` or `source`, nested launchers,
+quoting tricks or interpreters. Under the conservative rule it does not need
+to: none of them is on the read-only list, so any of them naming a `.probe`
+path is flagged. The supervisor's self-test is a finite acceptance matrix
+(direct execution, indirect launchers, inline code, the ONB-EV config form,
+allowlisted reads, data arguments resembling launchers, uncertain forms),
+not a model of every shell grammar.
+
+**Three separate concepts.** `READ_ONLY_PROBE_INSPECTION`,
+`POSSIBLE_PROBE_EXECUTION` and `CONFIRMED_WCL_NETWORK_ACTIVITY` are never
+collapsed. The supervisor never produces the third from command text: a
+possible execution, or a literal-pattern hit, is not a claim that a request
+was made. It stops the tranche for the owner like any hit. The owner
+classifies it from the command and transcript, any campaign ledger,
+retained request records and the tranche's explicit grant, then confirms the
+record (`ownerConfirmed`) only if no unauthorized request occurred.
+
+**Known limits.** The audit reads command text. A `.probe` path that the
+text never spells out (held in a variable from an earlier call, assembled
+at run time, or reached through an earlier `cd` whose own command was
+flagged), code copied out of `.probe/` before running, and unreviewed code
+outside `.probe/` are not seen by it. Detection is the secondary audit
+control: credential isolation (AUD-WCL-2) is the preventive control that
+makes a missed form harmless.
+
+**Empty-audit rule (owner, 2026-11-07).** An empty audit is meaningful only
+once all supported network-capable execution paths are covered by the
+detector. For records written with `detectorVersion` 3 or later, that is
+the coverage above: no executed command named a `.probe` path other than in
+a read-only inspection, and none matched a literal pattern. A record without
+`detectorVersion` was written before this audit (version 2 was an unmerged
+AUD-WCL-1 attempt): its empty `wclHits` alone is not proof of no network
+activity, and neither are historical empty audits in general.
+
+**Historical backfill.** `-BackfillAudit` audits every retained transcript
+with the current detector, read-only, and reports each transcript's tranche,
+its grant as the queue records it, and its findings, with `classification`
+left `UNCLASSIFIED`. The reviewer classifies each relevant tranche as
+`CONFIRMED_NO_NETWORK`, `CONFIRMED_AUTHORIZED_NETWORK`,
+`CONFIRMED_UNAUTHORIZED_NETWORK` or `INSUFFICIENT_EVIDENCE` from the
+transcripts, ledgers, request records and grants. Referencing or executing
+`.probe` code is not, by itself, evidence of Warcraft Logs activity, and
+genuinely insufficient evidence is reported as insufficient, never converted
+into innocence or violation. The backfill authorizes no network request. A
+`wcl: NONE` tranche confirmed to have made a live Warcraft Logs request is
+an owner stop. The AUD-WCL-1R results are recorded in its review packet (PR
+description).
 
 **Grants do not exempt detected activity.** The audit cannot yet prove
 that a request is inside a grant's scope (report, fight, operation). So ANY

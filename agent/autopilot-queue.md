@@ -1342,11 +1342,14 @@ events), plus pet-count and pet-active state for APL reads (for example
 ### AUD-WCL-1: Supervisor Warcraft Logs audit hardening
 
 ```autopilot
-status: READY
+status: BLOCKED
 dependsOn: none
+branch: autopilot/aud-wcl-1
 wcl: NONE
 publicContract: NONE
 ```
+
+**Superseded (owner, 2026-11-08): the rescoped work is AUD-WCL-1R.** Three attempts tried to infer shell execution precisely from command text, through more than 30 review cycles. The owner ruled that design non-convergent and replaced it with conservative detection. This entry is BLOCKED and never runs. Its uncommitted work on `autopilot/aud-wcl-1` is kept for reuse, with backups in `.probe/roadmap/aud-wcl-1-attempt2/` and `.probe/roadmap/aud-wcl-1-attempt3/`. The original scope below is the record.
 
 **Direction.** Owner decision (2026-11-07) "WCL audit hardening" (`agent/architecture.md`). It runs after ONB-EV's current stop and before any subsequent ordinary project tranche. ONB-EV and REM-CENSUS depend on it.
 
@@ -1380,11 +1383,72 @@ ONB-EV's grant, cap, cumulative ledger and written record stay authoritative for
 
 **Restart (owner, 2026-11-07).** ONB-EV makes no further request until this tranche is merged and the supervisor has restarted. The process that merges this tranche still runs the old code, so item 5's exit cannot stop it. The owner runs this tranche alone (`-TrancheId AUD-WCL-1 -MaxTranches 1`), then restarts the scheduled task. ONB-EV's entry also checks this before its first request.
 
+### AUD-WCL-1R: Conservative .probe execution audit (rescoped AUD-WCL-1)
+
+```autopilot
+status: PR_OPEN
+dependsOn: none
+branch: autopilot/aud-wcl-1
+wcl: NONE
+publicContract: NONE
+```
+
+**Direction.** Owner decision (2026-11-08) "AUD-WCL-1 rescope" (`agent/architecture.md`). It continues on AUD-WCL-1's branch and reuses its uncommitted work where that serves the conservative rule. It does not continue patching individual shell edge cases.
+
+**The question the audit answers.** "Does this command reference `.probe/` in a way that could plausibly execute or load content from it?" The audit is not required to prove whether arbitrary command text executes code.
+
+**Scope.**
+
+1. **Default rule.** A command that references a path beneath `.probe/` is `POSSIBLE_PROBE_EXECUTION`, unless it matches a deliberately small, reviewed set of clearly read-only forms. A possible-execution finding is not a claim that network traffic occurred; it enters the existing classification against the grant, any ledger and the transcript.
+2. **Narrow read-only allowlist.** Simple invocations of `cat`, `type`, `Get-Content`, `ls`, `dir`, `Get-ChildItem`, `head`, `tail`, `grep`, `Select-String` and equivalent direct file-inspection commands. They qualify only when the command contains no executable launcher, interpreter, command substitution, pipe into an executable, eval mechanism, inline-code mechanism or other execution-bearing construct. **If classification is uncertain, it is `POSSIBLE_PROBE_EXECUTION`.** False positives are preferable to silent misses.
+3. **Three separate concepts,** never collapsed: `READ_ONLY_PROBE_INSPECTION`, `POSSIBLE_PROBE_EXECUTION` and `CONFIRMED_WCL_NETWORK_ACTIVITY`. The audit says what triggered each finding.
+4. **No exhaustive shell parser.** The tranche does not enumerate every form of JavaScript `import`, `require` or `eval`, shell substitution, inline Node, PowerShell dynamic invocation, Bash `eval` or `source`, nested launchers, quoting tricks or future interpreters. The conservative boundary replaces that requirement. Remove or bypass precise-parsing code from earlier attempts that the conservative rule no longer needs, so it is not a second, divergent classifier.
+5. **Finite acceptance tests,** proving the policy rather than chasing syntax:
+   - direct `.probe` execution is flagged;
+   - indirect launcher syntax referencing `.probe` is flagged;
+   - inline code referencing `.probe` is flagged;
+   - the known ONB-EV Vitest config form is flagged;
+   - ordinary direct reads using the allowlist are read-only;
+   - a command whose data argument merely contains text resembling a launcher does not become confirmed network activity;
+   - uncertain forms become `POSSIBLE_PROBE_EXECUTION` rather than passing silently.
+
+   Do not expand the matrix to model every shell grammar.
+6. **Historical backfill,** read-only, over the retained autopilot transcripts.
+   - Classify each relevant tranche as `CONFIRMED_NO_NETWORK`, `CONFIRMED_AUTHORIZED_NETWORK`, `CONFIRMED_UNAUTHORIZED_NETWORK` or `INSUFFICIENT_EVIDENCE`, using transcripts, ledgers, request records and grants.
+   - Referencing or executing `.probe` code is not, by itself, evidence of Warcraft Logs activity. Genuinely insufficient evidence is reported as insufficient, never converted into innocence or violation.
+   - No network request.
+   - If any `wcl: NONE` tranche is confirmed to have made a live Warcraft Logs request, stop with OWNER_DECISION_REQUIRED.
+7. **AUD-WCL-1's other items stay in scope:** the empty-audit rule in `agent/autopilot.md`, the pre-merge check for uncommitted tracked edits, and the exit after merging a change to `scripts/autopilot/`.
+
+**Review-loop rule (owner).** This tranche must not re-enter an unbounded edge-case cycle. Once the conservative policy, the finite tests, the backfill and the documentation are satisfied, a reviewer finding that only shows that perfect static interpretation is impossible is not grounds for reopening precise parsing. Answer such a finding with `scripts/review/openai-review.ps1 -DisputeFile`, citing this decision. A finding that a form the policy says must be flagged is not flagged, or that a read-only form is allowlisted when it can execute, is substantive and is fixed.
+
+### AUD-WCL-2: Warcraft Logs credential isolation
+
+```autopilot
+status: READY
+dependsOn: AUD-WCL-1R
+wcl: NONE
+publicContract: NONE
+```
+
+**Direction.** Owner decision (2026-11-08) "AUD-WCL-1 rescope", follow-up. This makes the authorization boundary enforceable rather than merely detectable. It runs before ONB-EV resumes.
+
+**Required property.** A tranche without an explicit Warcraft Logs grant does not receive usable Warcraft Logs credentials. That holds even if Claude constructs an unexpected command, a `.probe` config launches code, the detector misses a form, or a test runner loads arbitrary project code.
+
+**Scope.**
+
+1. **Supervisor-controlled injection.** For a `wcl: NONE` tranche, the child process environment contains no usable WCL client id, client secret, OAuth token, refresh or access token, or equivalent credential material. For a tranche with an explicit owner grant, only the credentials that authorized run needs are exposed.
+2. **`.dev.vars` is not the boundary.** If it holds live WCL credentials and ordinary tranche processes can read it, isolation is incomplete. Design it so the secret material is outside an ordinary tranche's reach, or withheld by the supervisor and injected only into an explicitly authorized process.
+3. **No secret handling in the repository.** Never print, copy, commit or migrate secret values into repository files. If the design needs the owner to move or re-store a secret (CLAUDE.md: secret changes stay with the owner), implement and test everything else, then stop with OWNER_DECISION_REQUIRED naming the exact owner step.
+4. **Tests,** offline: a `wcl: NONE` child sees no credential, a granted child sees only what it needs, and `.dev.vars` is unreadable from a `wcl: NONE` run, or the residual exposure is stated plainly.
+5. **Defense in depth, documented in `agent/autopilot.md`:** credential isolation is the primary preventive control, conservative probe detection the secondary audit control, and a campaign ledger the independent accounting control for authorized campaigns. No one control substitutes for the others.
+6. **Restart.** A supervisor change only takes effect in a new process, so the supervisor exits after merging it and is restarted before ONB-EV.
+
 ### ONB-EV: Neutral evidence campaign for specializations without retained real evidence
 
 ```autopilot
 status: PR_OPEN
-dependsOn: ONB-EV-PLAN, AUD-WCL-1
+dependsOn: ONB-EV-PLAN, AUD-WCL-1R, AUD-WCL-2
 branch: autopilot/onb-ev
 wcl: OWNER-GRANT: agent/autopilot-queue.md ONB-EV owner grant (2026-11-06); ONB-EV only; one neutral campaign running ONB-EV-PLAN's frozen plan for its listed specializations; per specialization the first qualifying public raid fight under the recorded fixed discovery rule, with no replacement fight or alternate subject because of any result; only the minimum actor and fight evidence the existing evaluator and promotion gate need (casts, auras, resources, combatant information and the fight context and actor identification they require); no rankings, comparison or top-log data; at most 119 Warcraft Logs HTTP requests in total (60 granted 2026-11-06, extended by 59 on 2026-11-07 only to complete the twelve-specialization cohort; cumulative, never reset), counting OAuth token requests and refreshes, discovery, fight and context lookups, actor identification, event retrieval, pagination and completeness requests; stop with OWNER_DECISION_REQUIRED before exceeding 119; no archive-limit increase and no promotion; owner decisions (2026-11-07): the 2 requests of attempt 1 are authorized and count; one identical retry of the failed listing was permitted to classify its response; plan revision 2, which splits the same listing universe into three 34-report pages after a query-complexity refusal, is the accepted API-compatibility repair and stays in use, with all later requests inside the same total cap; no later request may run until AUD-WCL-1 is merged and a supervisor process started after that merge runs this tranche
 pr: 103
@@ -1396,7 +1460,7 @@ publicContract: NONE
 1. **Cap 119 in total.** Complete the remaining six specializations of the predetermined twelve. The cap rises from 60 to 119, cumulative and never reset, with every earlier request still charged. It is not a general grant.
 2. **Same rules:** deterministic selection, the same qualifying-fight rule, no rankings, no comparisons, no top-log search, no outcome shopping, no alternate subject because a result is unfavorable, minimum required evidence, provenance retained. An HTTP or API failure never authorizes changing the evidence-selection policy.
 3. **Revision 2 is accepted.** Its three 34-report pages are the permitted API-compatibility repair of the refused listing ("Max query complexity should be 50000 but got 100701"), not a new sampling policy. Keep using it.
-4. **AUD-WCL-1 first.** No further request runs until AUD-WCL-1 is merged and a supervisor process started after that merge launches this attempt. Before any request, check that the running supervisor started after AUD-WCL-1's merge commit, and stop with OWNER_DECISION_REQUIRED if it did not.
+4. **AUD-WCL-1R and AUD-WCL-2 first.** No further request runs until both are merged and a supervisor process started after the later merge launches this attempt. Before any request, check that, and stop with OWNER_DECISION_REQUIRED if it does not hold. (AUD-WCL-1 was rescoped as AUD-WCL-1R on 2026-11-08.)
 5. **Reconcile PR #103 with main semantically,** never choosing a side wholesale:
    - keep the branch's factual record of attempt 2, its request ledger, its captured-evidence changes and plan revision 2;
    - keep main's dependency on AUD-WCL-1, this decision, the 119 cap and the POLB-CENSUS decline;
@@ -2587,7 +2651,7 @@ The plan must not read any candidate's outcome, and no later step may replace a 
 
 ```autopilot
 status: READY
-dependsOn: HEAL-B1P2, SIMC-FB-R, ONB-EV, AUD-WCL-1
+dependsOn: HEAL-B1P2, SIMC-FB-R, ONB-EV, AUD-WCL-1R, AUD-WCL-2
 wcl: NONE
 publicContract: NONE
 ```
