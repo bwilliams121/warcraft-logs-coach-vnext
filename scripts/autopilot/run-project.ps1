@@ -58,6 +58,14 @@
 .PARAMETER SelfTest
   Run the offline self-tests (queue parsing, gate logic, argument quoting,
   transcript audit) and exit. No model, no network.
+
+.PARAMETER BackfillAudit
+  Read-only historical backfill (AUD-WCL-1): audit every retained
+  claude-*.jsonl transcript under .probe/autopilot/ with the CURRENT
+  detector, compare with the hits each audit record holds, and write a report
+  to .probe/autopilot/backfill-<time>.json. It changes no audit record, no
+  state and no queue, launches no model, holds no lock and makes no network
+  request. Classifying what it finds is the reviewer's job (agent/autopilot.md).
 #>
 [CmdletBinding()]
 param(
@@ -69,6 +77,7 @@ param(
   [switch]$GateOnly,
   [switch]$SelfTest,
   [switch]$Reaudit,
+  [switch]$BackfillAudit,
   [string]$ClaudePath = "",
   [int]$ClaudeTimeoutMinutes = 360,
   [int]$CiTimeoutMinutes = 90,
@@ -127,6 +136,53 @@ $script:WclActivityPatterns = @(
   '\b(node|npx(\.cmd)?|vitest|tsx|ts-node)\b[^|;&\n]*scripts[/\\]probe[/\\]',
   '\b(node|npx(\.cmd)?|vitest|tsx|ts-node)\b[^|;&\n]*\.probe\.ts\b'
 )
+# The detector generation. Records written before AUD-WCL-1R carry no
+# detectorVersion (version 2 was an unmerged AUD-WCL-1 attempt); their empty
+# wclHits are not proof of no network activity. Version 3 is the
+# conservative .probe audit below.
+$script:AuditDetectorVersion = 3
+
+# Conservative .probe execution audit (AUD-WCL-1R; owner decision 2026-11-08
+# "AUD-WCL-1 rescope", agent/architecture.md). Code under .probe/ is
+# uncommitted and unreviewed, so running it could reach Warcraft Logs without
+# naming the host or the probe. The audit asks one question of every executed
+# shell command (Bash, PowerShell, Monitor; a subagent's included): does it
+# reference .probe/ in a way that could plausibly execute or load content from
+# it? It does not try to prove what arbitrary command text runs.
+#   - A command that names no path beneath .probe/ is not a probe finding.
+#   - A command that does is READ_ONLY_PROBE_INSPECTION only when it is, under
+#     BOTH Bash and PowerShell quoting rules, a list of simple statements whose
+#     every pipeline stage starts with a command from the small reviewed list
+#     below, and it holds no execution-bearing construct: no command or
+#     process substitution, subexpression, backtick, ${ }, eval, call or
+#     dot-source operator, script block, group, here-string or heredoc, input
+#     redirection or output redirection to a file, background &, stop-parsing
+#     --%, splatting @, comment, ANSI-C or locale quoting, non-ASCII text,
+#     unterminated quote or empty pipeline stage.
+#   - Every other command naming a .probe path is POSSIBLE_PROBE_EXECUTION,
+#     with the construct or command that triggered it. If classification is
+#     uncertain, the result is POSSIBLE_PROBE_EXECUTION: false positives are
+#     preferable to silent misses.
+# POSSIBLE_PROBE_EXECUTION is not a claim that a request was made. The
+# supervisor never produces CONFIRMED_WCL_NETWORK_ACTIVITY from command text:
+# that is a classification (the owner's, or the read-only backfill's) from the
+# transcript, any campaign ledger, retained request records and the grant.
+$script:ProbeReadOnlyCommands = @(
+  # Named by the owner's decision.
+  "cat", "type", "get-content", "ls", "dir", "get-childitem", "head", "tail", "grep", "select-string",
+  # Equivalent direct inspection: PowerShell's own aliases of those cmdlets,
+  # counting, hashing, existence checks, printing text, and pure object filters.
+  "gc", "gci", "sls", "wc", "findstr", "sha256sum", "get-filehash", "test-path", "get-item",
+  "echo", "write-output", "select-object", "measure-object", "sort-object")
+# The only redirection a read-only command may carry: standard error merged
+# into standard output, which writes no file under either shell. Discard forms
+# are not: Bash writes a file named nul for >nul, PowerShell writes \dev\null
+# for >/dev/null, and Bash reads >$null as an empty target. Anything else is uncertain.
+$script:ProbeAllowedRedirect = '^2>&1(?=$|[\s;|])'
+# A reference to .probe as a path segment: ".probe" followed by a separator,
+# a quote or the end, never by a name character (so vitest.probe.config.ts and
+# x.probe.ts, which the literal patterns cover, are not .probe paths).
+$script:ProbeReferencePattern = '(?i)\.probe(?=$|[^A-Za-z0-9_.\-])'
 
 # ---------------------------------------------------------------------------
 # Paths, logging, state
@@ -159,6 +215,8 @@ $script:ClaudeProcess = $null
 $script:Claude = $null
 $script:Node = $null
 $script:Launcher = Join-Path $script:Repo "scripts\autopilot\run-claude.mjs"
+# Set when a merge changed scripts/autopilot/: this process must exit (AUD-WCL-1).
+$script:SupervisorUpdated = $false
 
 # Kept equal to redact() in scripts/autopilot/run-claude.mjs; the self-test
 # checks that both give the same output on the same secrets. A quoted secret
@@ -510,6 +568,7 @@ function New-ClaudePrompt($entry, $state, [string]$resumeNote) {
   $merged = @($state.merged | ForEach-Object { "- $($_.id): PR #$($_.pr), merge $($_.mergeSha)" }) -join "`n"
   if ($merged -eq "") { $merged = "- none recorded since the queue file was last updated" }
   $wclLine = if ($entry.Wcl -eq "NONE") { "Warcraft Logs network permission for this tranche: NONE. Do not make, plan to make, or run anything that makes a Warcraft Logs request (no probe, no vitest.probe.config.ts). If the tranche cannot be done without one, stop with OWNER_DECISION_REQUIRED." } else { "Warcraft Logs permission for this tranche: exactly the owner grant '$($entry.Wcl)' and nothing beyond it. Record every request you make in agent/review-request.md." }
+  $wclLine += " The transcript audit records every shell command that names a path under .probe/ as POSSIBLE_PROBE_EXECUTION, which stops the tranche until the owner classifies it, unless the command is a simple read-only inspection (cat, type, Get-Content, ls, dir, Get-ChildItem, head, tail, grep, Select-String and the like, with no substitution, redirection to a file, pipe into another program or other construct), which is only recorded. Use the Read, Grep and Glob tools to inspect .probe files."
   $publicLine = if ($entry.PublicContract -eq "NONE") { "This tranche declares NO public contract change: do not change src/contracts/, src/api/ or src/mcp/. If the work needs one, stop with OWNER_DECISION_REQUIRED." } else { "This tranche declares a public contract change as EXPECTED; describe it precisely in agent/review-request.md." }
   return @"
 Execute the next READY autopilot tranche according to CLAUDE.md and $queueRel. Complete the entire autonomous tranche workflow. Do not stop after implementation. Continue through local validation, Codex review, corrections, commit, push, PR creation, GitHub CI and GitHub review. Stop only for an explicit autopilot stop condition.
@@ -615,32 +674,195 @@ function Read-ClaudeResult([string]$transcript) {
   return [pscustomobject]@{ Final = $final; IsError = $isError; Markers = $markers }
 }
 
+# ---- conservative .probe execution audit (pure; see $script:ProbeReadOnlyCommands) ----
+
+# The .probe paths a command names, for the record (each a word around a
+# .probe segment). Empty when the command names none.
+function Get-ProbeReferences([string]$command) {
+  $found = New-Object System.Collections.ArrayList
+  if ([string]::IsNullOrEmpty($command) -or $command -notmatch $script:ProbeReferencePattern) { return $found.ToArray() }
+  foreach ($m in [regex]::Matches($command, '(?i)[^\s"''`|;&<>(){}]*\.probe(?=$|[^A-Za-z0-9_.\-])[^\s"''`|;&<>(){}]*')) {
+    if (-not $found.Contains($m.Value)) { [void]$found.Add($m.Value) }
+  }
+  if ($found.Count -eq 0) { [void]$found.Add(".probe") }
+  return $found.ToArray()
+}
+
+# Splits a command into statements, each a list of pipeline stages, each a
+# list of words, under one shell's quoting rules ("Bash" or "PowerShell").
+# It is deliberately small: it knows quotes, Bash backslash escapes, the
+# statement separators ; && || and newline, the pipe |, and the allowed
+# redirections; any other structural character is returned as Uncertain,
+# never interpreted. A word is { Text; Quoted } (Quoted: any quote or escape).
+function Split-ProbeCommand([string]$command, [string]$rules) {
+  $statements = New-Object System.Collections.ArrayList
+  $stages = New-Object System.Collections.ArrayList
+  $words = New-Object System.Collections.ArrayList
+  $word = New-Object System.Text.StringBuilder
+  $state = @{ InWord = $false; Quoted = $false }
+  $q = ""
+  $i = 0
+  $n = $command.Length
+  $endWord = {
+    if ($state.InWord) { [void]$words.Add([pscustomobject]@{ Text = $word.ToString(); Quoted = $state.Quoted }) }
+    [void]$word.Clear(); $state.InWord = $false; $state.Quoted = $false
+  }
+  # Returns an uncertainty reason, or "".
+  $endStage = {
+    param([bool]$final)
+    & $endWord
+    if ($words.Count -eq 0) {
+      if ($stages.Count -gt 0 -or -not $final) { return "an empty pipeline stage" }
+      return ""
+    }
+    [void]$stages.Add($words.ToArray()); $words.Clear()
+    return ""
+  }
+  $endStatement = {
+    & $endWord
+    if ($words.Count -eq 0 -and $stages.Count -gt 0) { return "an empty pipeline stage" }
+    if ($words.Count -gt 0) { [void]$stages.Add($words.ToArray()); $words.Clear() }
+    if ($stages.Count -gt 0) { [void]$statements.Add($stages.ToArray()); $stages.Clear() }
+    return ""
+  }
+  $uncertain = { param([string]$why) return [pscustomobject]@{ Statements = @(); Uncertain = $why } }
+  while ($i -lt $n) {
+    $ch = $command[$i]
+    if ($q -eq "'") {
+      if ($ch -eq "'") { $q = "" } else { [void]$word.Append($ch) }
+      $i++; continue
+    }
+    if ($q -eq '"') {
+      if ($ch -eq '"') { $q = ""; $i++; continue }
+      if ($rules -eq "Bash" -and $ch -eq '\' -and $i + 1 -lt $n) { [void]$word.Append($command[$i + 1]); $i += 2; continue }
+      [void]$word.Append($ch); $i++; continue
+    }
+    if ($ch -eq "'" -or $ch -eq '"') { $q = [string]$ch; $state.InWord = $true; $state.Quoted = $true; $i++; continue }
+    if ($rules -eq "Bash" -and $ch -eq '\') {
+      if ($i + 1 -ge $n) { return (& $uncertain "a trailing backslash") }
+      [void]$word.Append($command[$i + 1]); $state.InWord = $true; $state.Quoted = $true; $i += 2; continue
+    }
+    if ($ch -eq ' ' -or $ch -eq "`t" -or $ch -eq "`r") { & $endWord; $i++; continue }
+    if ($ch -eq "`n" -or $ch -eq ';') { $why = & $endStatement; if ($why -ne "") { return (& $uncertain $why) }; $i++; continue }
+    if ($ch -eq '|') {
+      if ($i + 1 -lt $n -and $command[$i + 1] -eq '|') { $why = & $endStatement; if ($why -ne "") { return (& $uncertain $why) }; $i += 2; continue }
+      $why = & $endStage $false; if ($why -ne "") { return (& $uncertain $why) }
+      $i++; continue
+    }
+    if ($ch -eq '&') {
+      if ($i + 1 -lt $n -and $command[$i + 1] -eq '&') { $why = & $endStatement; if ($why -ne "") { return (& $uncertain $why) }; $i += 2; continue }
+      return (& $uncertain "an unquoted & (a background job or the call operator)")
+    }
+    if ($ch -eq '>') {
+      $prefix = $word.ToString()
+      $start = $i - $prefix.Length
+      $m = [regex]::Match($command.Substring($start), $script:ProbeAllowedRedirect)
+      if (-not $state.Quoted -and $prefix -eq "2" -and $m.Success) {
+        [void]$word.Clear(); $state.InWord = $false; $i = $start + $m.Length; continue
+      }
+      return (& $uncertain "an output redirection")
+    }
+    if ($ch -eq '<') { return (& $uncertain "an input redirection, heredoc or here-string") }
+    if ('(){}#@'.IndexOf($ch) -ge 0) { return (& $uncertain "an unquoted '$ch'") }
+    if ($ch -eq '$' -and $i + 1 -lt $n -and ($command[$i + 1] -eq "'" -or $command[$i + 1] -eq '"')) { return (& $uncertain "ANSI-C or locale quoting") }
+    [void]$word.Append($ch); $state.InWord = $true; $i++
+  }
+  if ($q -ne "") { return (& $uncertain "an unterminated quote") }
+  $why = & $endStatement
+  if ($why -ne "") { return (& $uncertain $why) }
+  return [pscustomobject]@{ Statements = $statements.ToArray(); Uncertain = "" }
+}
+
+# Why a command is NOT a read-only inspection, or "" when it is one under
+# both Bash and PowerShell rules (the tool's shell is not trusted to decide).
+function Get-ProbeReadOnlyBlocker([string]$command) {
+  if ($command -match '[^\x00-\x7F]') { return "non-ASCII text (PowerShell reads typographic quotes and dashes as syntax)" }
+  foreach ($c in @(@('$(', "a command substitution or subexpression"), @('`', "a backtick (substitution or escape)"), @('${', "a braced variable expansion"), @('--%', "the PowerShell stop-parsing token"))) {
+    if ($command.Contains($c[0])) { return $c[1] }
+  }
+  foreach ($rules in @("Bash", "PowerShell")) {
+    $split = Split-ProbeCommand $command $rules
+    if ($split.Uncertain -ne "") { return "$($split.Uncertain) ($rules rules)" }
+    foreach ($statement in @($split.Statements)) {
+      foreach ($stage in @($statement)) {
+        $head = @($stage)[0]
+        if ($head.Quoted -or $script:ProbeReadOnlyCommands -notcontains $head.Text.ToLowerInvariant()) {
+          return "'$($head.Text)' is not a read-only inspection command ($rules rules)"
+        }
+      }
+    }
+  }
+  return ""
+}
+
+# Pure: the probe finding of one executed shell command, or $null when it
+# names no .probe path. Kind is READ_ONLY_PROBE_INSPECTION or
+# POSSIBLE_PROBE_EXECUTION; Trigger says why.
+function Get-ProbeCommandFinding([string]$command) {
+  $paths = @(Get-ProbeReferences $command)
+  if ($paths.Count -eq 0) { return $null }
+  $blocker = Get-ProbeReadOnlyBlocker $command
+  if ($blocker -eq "") { return [pscustomobject]@{ Kind = "READ_ONLY_PROBE_INSPECTION"; Trigger = "read-only inspection"; Paths = $paths } }
+  return [pscustomobject]@{ Kind = "POSSIBLE_PROBE_EXECUTION"; Trigger = "names $($paths -join ', ') with $blocker"; Paths = $paths }
+}
+
 # Every EXECUTED tool action Claude took (including a subagent's, which the
 # stream carries as its own tool_use messages), checked for Warcraft Logs or
 # probe activity. Reads and edits are not execution and are not checked.
-function Test-TranscriptWcl([string]$transcript) {
+# Hits are WCL_ACTIVITY (a literal Warcraft Logs or probe pattern) or
+# POSSIBLE_PROBE_EXECUTION (a shell command names a .probe path and is not a
+# read-only inspection), each naming its trigger; Inspections are the
+# READ_ONLY_PROBE_INSPECTION commands. Neither hit class is a claim that a
+# request was made (agent/autopilot.md "Warcraft Logs").
+function Get-TranscriptAudit([string]$transcript) {
   $hits = New-Object System.Collections.ArrayList
+  $inspections = New-Object System.Collections.ArrayList
   foreach ($line in ($transcript -split "`n")) {
     if ($line -notmatch '"tool_use"') { continue }
     try { $o = $line | ConvertFrom-Json } catch { continue }
     $content = @()
     if ($null -ne $o.PSObject.Properties["message"] -and $null -ne $o.message.PSObject.Properties["content"]) { $content = @($o.message.content) }
     foreach ($c in $content) {
-      if ($c.type -ne "tool_use") { continue }
+      if ($null -eq $c -or $null -eq $c.PSObject.Properties["type"] -or $c.type -ne "tool_use") { continue }
       $name = [string]$c.name
       if ($script:ExecutingTools -notcontains $name -and -not $name.StartsWith("mcp__")) { continue }
       $toolInput = ($c.input | ConvertTo-Json -Depth 6 -Compress)
+      $triggers = New-Object System.Collections.ArrayList
+      $wcl = $false
       foreach ($p in $script:WclActivityPatterns) {
-        if ($toolInput -match $p) {
-          $detail = Redact $toolInput
-          if ($detail.Length -gt 240) { $detail = $detail.Substring(0, 240) + "..." }
-          [void]$hits.Add("$($name) [$p]: $detail")
-          break
-        }
+        if ($toolInput -match $p) { [void]$triggers.Add("pattern $p"); $wcl = $true; break }
+      }
+      $command = ""
+      if ($null -ne $c.input -and $null -ne $c.input.PSObject.Properties["command"] -and $c.input.command -is [string]) { $command = [string]$c.input.command }
+      $finding = $null
+      if ($command -ne "" -and @("Bash", "PowerShell", "Monitor") -contains $name) { $finding = Get-ProbeCommandFinding $command }
+      if ($null -ne $finding -and $finding.Kind -eq "POSSIBLE_PROBE_EXECUTION") { [void]$triggers.Add("possible probe execution: $($finding.Trigger)") }
+      $detail = Redact $toolInput
+      if ($detail.Length -gt 240) { $detail = $detail.Substring(0, 240) + "..." }
+      if ($triggers.Count -gt 0) {
+        $class = if ($wcl) { "WCL_ACTIVITY" } else { "POSSIBLE_PROBE_EXECUTION" }
+        [void]$hits.Add("$class $name [$($triggers -join '; ')]: $detail")
+      }
+      elseif ($null -ne $finding) {
+        $short = if ($detail.Length -gt 160) { $detail.Substring(0, 160) + "..." } else { $detail }
+        [void]$inspections.Add("READ_ONLY_PROBE_INSPECTION $name [$($finding.Paths -join ', ')]: $short")
       }
     }
   }
-  return , $hits.ToArray()
+  return [pscustomobject]@{ Hits = $hits.ToArray(); Inspections = $inspections.ToArray() }
+}
+
+# A probe hit alone is not proof of a request: the owner classifies it from
+# the command and transcript, any campaign ledger, retained request records
+# and the grant (agent/autopilot.md "Warcraft Logs"). PROBE_EXECUTION is the
+# class an unmerged AUD-WCL-1 attempt wrote; it reads the same.
+function Get-ProbeExecutionNote($hits) {
+  if (@($hits | Where-Object { ([string]$_) -match '^(POSSIBLE_PROBE_EXECUTION|PROBE_EXECUTION)' }).Count -eq 0) { return "" }
+  return " (POSSIBLE_PROBE_EXECUTION means a command named a .probe path and was not a simple read-only inspection, which by itself does not prove a request; classify it from the command and transcript, any campaign ledger, retained request records and the grant)"
+}
+
+function Test-TranscriptWcl([string]$transcript) {
+  return , @((Get-TranscriptAudit $transcript).Hits)
 }
 
 # ---------------------------------------------------------------------------
@@ -822,7 +1044,8 @@ function New-AuditRecord([int]$attempt, [string]$transcript, [string]$path, [str
     }
   }
   if ($auditable -and -not $seenInit) { $auditable = $false; $why = "no init event" }
-  $hits = Test-TranscriptWcl $transcript
+  $scan = Get-TranscriptAudit $transcript
+  $hits = @($scan.Hits)
   $sha = [System.BitConverter]::ToString((New-Object System.Security.Cryptography.SHA256Managed).ComputeHash([System.Text.Encoding]::UTF8.GetBytes($transcript))).Replace("-", "").ToLowerInvariant()
   # The run's own result travels with its audit, so a decision Claude asked
   # for survives a supervisor crash: recovery re-reads it from the transcript.
@@ -841,6 +1064,8 @@ function New-AuditRecord([int]$attempt, [string]$transcript, [string]$path, [str
     auditable = $auditable
     unauditableReason = $why
     wclHits = @($hits)
+    probeInspections = @($scan.Inspections)
+    detectorVersion = $script:AuditDetectorVersion
     candidateSha = $binding.Sha
     at = (Get-Date).ToString("o")
   }
@@ -932,7 +1157,7 @@ function Test-AuditEvidence($records, [int]$attempts, [string]$headSha, [string]
     # The audit cannot yet prove a request is inside a grant's scope, so ANY
     # detected Warcraft Logs or probe activity, under a grant or not, needs
     # the owner's confirmation of that record (ownerConfirmed).
-    if (@($r.wclHits).Count -gt 0 -and -not (Test-OwnerConfirmed $r)) { [void]$owner.Add("attempt $($r.attempt) shows Warcraft Logs or probe activity (grant: $wcl); the owner must confirm it is within the grant: $(@($r.wclHits) -join '; ')") }
+    if (@($r.wclHits).Count -gt 0 -and -not (Test-OwnerConfirmed $r)) { [void]$owner.Add("attempt $($r.attempt) shows Warcraft Logs or probe activity (grant: $wcl); the owner must confirm it is within the grant$(Get-ProbeExecutionNote @($r.wclHits)): $(@($r.wclHits) -join '; ')") }
   }
   # The candidate is what the last run that actually RAN left; a withdrawn attempt ran nothing.
   $ran = @($records | Where-Object { $_.status -ne "WITHDRAWN" })
@@ -1039,6 +1264,63 @@ function Wait-Ci([int]$prNumber) {
 # Merge
 # ---------------------------------------------------------------------------
 
+# ---- branch hygiene and self-update (AUD-WCL-1) ----
+
+# Pure: the paths of `git status --porcelain --untracked-files=no` lines
+# (a rename yields its new path).
+function Get-PorcelainPaths($lines) {
+  $paths = New-Object System.Collections.ArrayList
+  foreach ($line in @($lines)) {
+    $l = ([string]$line).TrimEnd("`r")
+    if ($l.Length -lt 4) { continue }
+    $p = $l.Substring(3)
+    if ($p.Contains(" -> ")) { $p = $p.Substring($p.IndexOf(" -> ") + 4) }
+    $p = $p.Trim().Trim('"')
+    if ($p -ne "") { [void]$paths.Add($p) }
+  }
+  return $paths.ToArray()
+}
+
+# Pure: may the supervisor merge and switch back to main? Uncommitted tracked
+# edits are never discarded and never swept into a tranche.
+#   CLEAN: nothing uncommitted;
+#   RETRY: on the tranche branch, and every edit is to a file the tranche
+#          already changes (intended tranche edits left uncommitted): they go
+#          into the candidate through the normal workflow and the gate reruns;
+#   OWNER: anything else (another branch, or an unrelated file).
+function Get-BranchHygiene($dirtyPaths, [string]$currentBranch, [string]$trancheBranch, $trancheFiles) {
+  $dirty = @($dirtyPaths | Where-Object { $null -ne $_ -and "$_" -ne "" })
+  if ($dirty.Count -eq 0) { return [pscustomobject]@{ Decision = "CLEAN"; Reason = "" } }
+  $list = $dirty -join ", "
+  if ($currentBranch -ne $trancheBranch) {
+    return [pscustomobject]@{ Decision = "OWNER"; Reason = "uncommitted tracked edits on branch '$currentBranch', not the tranche branch $($trancheBranch): $list; nothing was merged, discarded or committed" }
+  }
+  $files = @($trancheFiles | ForEach-Object { ([string]$_).Trim() })
+  $outside = @($dirty | Where-Object { $files -notcontains $_ })
+  if ($outside.Count -gt 0) {
+    return [pscustomobject]@{ Decision = "OWNER"; Reason = "uncommitted tracked edits outside the tranche's changes: $($outside -join ', '); they are never swept into the tranche, and nothing was merged or discarded" }
+  }
+  return [pscustomobject]@{ Decision = "RETRY"; Reason = "intended tranche edits are left uncommitted on $($trancheBranch): $list" }
+}
+
+function Get-DirtyTrackedPaths {
+  return @(Get-PorcelainPaths ((Invoke-Git @("status", "--porcelain", "--untracked-files=no")) -split "`n"))
+}
+
+function Test-BranchHygiene($entry, [string]$sha) {
+  $current = (Invoke-Git @("rev-parse", "--abbrev-ref", "HEAD")).Trim()
+  $base = (Invoke-Git @("merge-base", "origin/$($entry.Base)", $sha)).Trim()
+  $files = @((Invoke-Git @("diff", "--name-only", "$base..$sha")) -split "`n" | Where-Object { $_ -ne "" })
+  return Get-BranchHygiene (Get-DirtyTrackedPaths) $current $entry.Branch $files
+}
+
+# Pure: does a merged change touch the supervisor itself? A running process
+# keeps the code it loaded, so it must exit and a new process must audit the
+# next tranche.
+function Test-SupervisorChange($files) {
+  return (@($files | Where-Object { ([string]$_).Trim().Replace('\', '/').StartsWith("scripts/autopilot/") }).Count -gt 0)
+}
+
 function Invoke-Merge($entry, $gate, $state) {
   if ($entry.Base -ne "main") {
     Write-Log "WOULD_MERGE: PR #$($gate.Pr) at $($gate.Sha) passes every gate, but it is stacked on $($entry.Base); the supervisor merges only into main"
@@ -1068,11 +1350,22 @@ function Invoke-Merge($entry, $gate, $state) {
   }
   if ($null -eq $merged) { throw "RECOVERABLE: PR #$($gate.Pr) did not report MERGED within 15 minutes" }
   $mergeSha = [string]$merged.mergeCommit.oid
+  # Switch-back hygiene: tracked edits made while merging are never carried
+  # onto main or discarded. The merge is recorded, then the owner decides.
+  $dirtyAfter = @(Get-DirtyTrackedPaths)
+  if ($dirtyAfter.Count -gt 0) {
+    $state.merged = @($state.merged) + @([pscustomobject]@{ id = $entry.Id; pr = $gate.Pr; mergeSha = $mergeSha; at = (Get-Date).ToString("o") })
+    $state.current = $null
+    Save-State $state
+    throw "OWNER:PR #$($gate.Pr) of $($entry.Id) merged as $mergeSha, but uncommitted tracked edits remain ($($dirtyAfter -join ', ')); main was not checked out and nothing was discarded"
+  }
   Invoke-Git @("fetch", "origin", "--prune") | Out-Null
   Invoke-Git @("checkout", "main") | Out-Null
   Invoke-Git @("merge", "--ff-only", "origin/main") | Out-Null
   $contains = Invoke-Native "git" @("-C", $script:Repo, "merge-base", "--is-ancestor", $mergeSha, "main") -AllowFail
   if ($contains.Code -ne 0) { throw "FATAL: main does not contain merge commit $mergeSha after fast-forward" }
+  $mergedFiles = @((Invoke-Git @("diff", "--name-only", "$mergeSha^", $mergeSha)) -split "`n" | Where-Object { $_ -ne "" })
+  if (Test-SupervisorChange $mergedFiles) { $script:SupervisorUpdated = $true }
   $del = Invoke-Native "git" @("-C", $script:Repo, "push", "origin", "--delete", $entry.Branch) -AllowFail
   if ($del.Code -ne 0) { Write-Log "note: remote branch $($entry.Branch) not deleted: $(Redact $del.Text)" }
   $local = Invoke-Native "git" @("-C", $script:Repo, "branch", "-d", $entry.Branch) -AllowFail
@@ -1258,7 +1551,7 @@ function Invoke-Tranche($entry, $state, $expectedChecks) {
         return "OWNER:the transcript of attempt $attempts cannot be audited ($($record.unauditableReason)); inspect $($run.Path) and set ownerConfirmed on its audit record"
       }
       if (@($record.wclHits).Count -gt 0) {
-        return "OWNER:attempt $attempts shows Warcraft Logs or probe activity (grant: $($entry.Wcl)); confirm it is authorized, then set ownerConfirmed on its audit record: $(@($record.wclHits) -join '; '); review $($run.Path)"
+        return "OWNER:attempt $attempts shows Warcraft Logs or probe activity (grant: $($entry.Wcl)); confirm it is authorized, then set ownerConfirmed on its audit record$(Get-ProbeExecutionNote @($record.wclHits)): $(@($record.wclHits) -join '; '); review $($run.Path)"
       }
       if (Test-Path $script:StopFile) { return "STOPPED" }
       $marker = $result.Markers["AUTOPILOT_RESULT"]
@@ -1294,6 +1587,15 @@ function Invoke-Tranche($entry, $state, $expectedChecks) {
     if ($gate.Decision -eq "OWNER_DECISION_REQUIRED") { return "OWNER:$(@($gate.Reasons) -join '; ')" }
     if ($gate.Decision -eq "READY_TO_MERGE") {
       if (Test-Path $script:StopFile) { return "STOPPED" }
+      # Branch hygiene before the merge and switch-back step.
+      $hygiene = Test-BranchHygiene $entry $gate.Sha
+      if ($hygiene.Decision -eq "OWNER") { return "OWNER:$($hygiene.Reason)" }
+      if ($hygiene.Decision -eq "RETRY") {
+        Write-Log "branch hygiene for $($entry.Id): $($hygiene.Reason); not merging"
+        if ($GateOnly) { return "GATE_NOT_READY:$($hygiene.Reason)" }
+        $resume = "The supervisor did not merge: $($hygiene.Reason). Include them in the candidate through the normal workflow (rerun the local OpenAI review, commit, push, CI); never discard them, and never commit unrelated changes."
+        continue
+      }
       $merged = Invoke-Merge $entry $gate $state
       if ($merged) { Set-Attempts $state $entry.Id 0; Save-State $state; return "MERGED" }
       return "WOULD_MERGE"
@@ -1301,6 +1603,73 @@ function Invoke-Tranche($entry, $state, $expectedChecks) {
     if ($GateOnly) { return "GATE_NOT_READY:$(@($gate.Reasons) -join '; ')" }
     $resume = "The supervisor's merge gate failed: $(@($gate.Reasons) -join '; '). Repair through the normal workflow (any code change goes through the local OpenAI review again)."
   }
+}
+
+# ---------------------------------------------------------------------------
+# Historical backfill (read-only; AUD-WCL-1)
+# ---------------------------------------------------------------------------
+
+# Audits every retained transcript with the current detector and reports what
+# the records written at the time did not hold. It writes only its report:
+# no audit record, state, status or queue changes, and no network.
+function Invoke-BackfillAudit {
+  $records = @{}
+  $auditDir = Join-Path $script:Dir "audit"
+  if (Test-Path $auditDir) {
+    foreach ($file in @(Get-ChildItem -Path $auditDir -Filter "*.json" -File)) {
+      $doc = $null
+      try { $doc = Get-Content -Raw -Encoding UTF8 $file.FullName | ConvertFrom-Json } catch { continue }
+      if ($null -eq $doc -or $null -eq $doc.PSObject.Properties["records"]) { continue }
+      foreach ($r in @($doc.records)) {
+        if ($null -eq $r -or $null -eq $r.PSObject.Properties["transcript"]) { continue }
+        $records[[System.IO.Path]::GetFileName([string]$r.transcript).ToLowerInvariant()] = [pscustomobject]@{ Tranche = [string]$doc.tranche; Record = $r }
+      }
+    }
+  }
+  # Each tranche's Warcraft Logs grant as the queue records it now, for the
+  # reviewer's classification (an unreadable queue leaves it blank).
+  $grants = @{}
+  # Read-Queue returns its entries as one array object; foreach unrolls it.
+  try { $queueEntries = Read-Queue; foreach ($e in $queueEntries) { $grants[[string]$e.Id] = [string]$e.Wcl } } catch { Write-Host "note: the queue could not be read; grants are blank" }
+  $rows = New-Object System.Collections.ArrayList
+  foreach ($file in @(Get-ChildItem -Path $script:Dir -Filter "claude-*.jsonl" -File | Sort-Object Name)) {
+    # A transcript still being written (a live run) is read with shared access.
+    $stream = [System.IO.File]::Open($file.FullName, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+    try { $reader = New-Object System.IO.StreamReader($stream, [System.Text.Encoding]::UTF8); $text = $reader.ReadToEnd(); $reader.Dispose() } finally { $stream.Dispose() }
+    $scan = Get-TranscriptAudit $text
+    $known = $records[$file.Name.ToLowerInvariant()]
+    $recordedHits = @()
+    $confirmed = $false
+    $tranche = ""
+    if ($null -ne $known) {
+      $tranche = $known.Tranche
+      if ($null -ne $known.Record.PSObject.Properties["wclHits"]) { $recordedHits = @($known.Record.wclHits) }
+      $confirmed = Test-OwnerConfirmed $known.Record
+    }
+    $newExecutions = @($scan.Hits | Where-Object { ([string]$_).StartsWith("POSSIBLE_PROBE_EXECUTION") })
+    [void]$rows.Add([pscustomobject]@{
+        transcript = $file.Name
+        tranche = $tranche
+        grant = $(if ($grants.ContainsKey($tranche)) { $grants[$tranche] } else { "" })
+        bytes = $file.Length
+        recordedHitCount = $recordedHits.Count
+        ownerConfirmed = $confirmed
+        currentHits = @($scan.Hits)
+        possibleProbeExecutions = $newExecutions
+        probeInspectionCount = @($scan.Inspections).Count
+        previouslyUndetected = ($newExecutions.Count -gt 0 -and $recordedHits.Count -eq 0)
+        # Never set here: CONFIRMED_NO_NETWORK, CONFIRMED_AUTHORIZED_NETWORK,
+        # CONFIRMED_UNAUTHORIZED_NETWORK or INSUFFICIENT_EVIDENCE is the
+        # reviewer's classification from the transcript, ledgers, request
+        # records and the grant (agent/autopilot.md "Historical backfill").
+        classification = "UNCLASSIFIED"
+      })
+    Write-Host ("{0}: hits {1} (recorded {2}), possible probe executions {3}, read-only inspections {4}" -f $file.Name, @($scan.Hits).Count, $recordedHits.Count, $newExecutions.Count, @($scan.Inspections).Count)
+  }
+  $report = Join-Path $script:Dir "backfill-$script:Stamp.json"
+  Write-JsonAtomic $report ([pscustomobject]@{ detectorVersion = $script:AuditDetectorVersion; at = (Get-Date).ToString("o"); transcripts = $rows.Count; rows = $rows.ToArray() })
+  Write-Host "backfill report: $report"
+  return 0
 }
 
 # ---------------------------------------------------------------------------
@@ -1747,11 +2116,18 @@ setTimeout(() => {}, 60000);
   $script:StubGateDecision = "READY_TO_MERGE"
   function Test-MergeGate($entry, $expectedChecks) { return [pscustomobject]@{ Decision = $script:StubGateDecision; Reasons = @("stub reason"); Pr = 99; Sha = "sha1" } }
   function Invoke-Merge($entry, $gate, $state) { $script:StubMerges++; return $true }
+  # Branch hygiene answers from a queue of stub decisions (then CLEAN).
+  $script:StubHygiene = New-Object System.Collections.ArrayList
+  function Test-BranchHygiene($entry, [string]$sha) {
+    if ($script:StubHygiene.Count -gt 0) { $d = $script:StubHygiene[0]; $script:StubHygiene.RemoveAt(0); return $d }
+    return [pscustomobject]@{ Decision = "CLEAN"; Reason = "" }
+  }
   function Reset-Stub {
     if (Test-Path $script:StopFile) { Remove-Item -Force $script:StopFile }
     $auditDir = Join-Path $script:Dir "audit"
     if (Test-Path $auditDir) { Remove-Item -Recurse -Force $auditDir }
     $script:StubMerges = 0
+    $script:StubHygiene.Clear()
   }
   $entry = $q[1]
 
@@ -1953,6 +2329,156 @@ setTimeout(() => {}, 60000);
   $outcome = Invoke-Tranche $entry (New-State) @("verify")
   Check "probe activity in the transcript stops for the owner and never merges" ($outcome -like "OWNER:*" -and $script:StubMerges -eq 0)
   Reset-Stub
+
+  # ---- AUD-WCL-1R: the conservative .probe execution audit (finite acceptance matrix) ----
+  function New-ToolLine([string]$tool, [string]$command, [string]$parent = "") {
+    $o = [ordered]@{ type = "assistant"; message = @{ content = @(@{ type = "tool_use"; name = $tool; input = @{ command = $command } }) } }
+    if ($parent -ne "") { $o["parent_tool_use_id"] = $parent }
+    return ($o | ConvertTo-Json -Depth 8 -Compress)
+  }
+  function Get-ScanOf([string[]]$lines) { return Get-TranscriptAudit ($lines -join "`n") }
+  function Get-KindOf([string]$tool, [string]$command) {
+    $scan = Get-ScanOf @(New-ToolLine $tool $command)
+    if (@($scan.Hits).Count -gt 0) { return (([string]@($scan.Hits)[0]) -split ' ')[0] }
+    if (@($scan.Inspections).Count -gt 0) { return "READ_ONLY_PROBE_INSPECTION" }
+    return "NONE"
+  }
+  $onbEv = "npx vitest run --config .probe/onb-ev/capture.config.ts"
+  $matrix = @(
+    # 1. Direct .probe execution is flagged.
+    @("direct", "Bash", "node .probe/onbx5/generate.mjs", "POSSIBLE_PROBE_EXECUTION"),
+    @("direct", "PowerShell", "node C:\warcraft-logs-coach-vnext\.probe\onbx5\generate.mjs", "POSSIBLE_PROBE_EXECUTION"),
+    @("direct", "Bash", "bash .probe/x/run.sh", "POSSIBLE_PROBE_EXECUTION"),
+    @("direct", "Bash", "./.probe/x/run.sh", "POSSIBLE_PROBE_EXECUTION"),
+    @("direct", "PowerShell", "& .\.probe\x\run.ps1", "POSSIBLE_PROBE_EXECUTION"),
+    @("direct", "PowerShell", ". .probe/x/lib.ps1", "POSSIBLE_PROBE_EXECUTION"),
+    @("direct", "PowerShell", "powershell -ExecutionPolicy Bypass -File .probe\x\run.ps1", "POSSIBLE_PROBE_EXECUTION"),
+    @("direct", "Bash", "python3 /c/warcraft-logs-coach-vnext/.PROBE/x/run.py", "POSSIBLE_PROBE_EXECUTION"),
+    # 2. Indirect launcher syntax referencing .probe is flagged.
+    @("indirect", "Bash", "npx tsx .probe/onbx5/replay.ts", "POSSIBLE_PROBE_EXECUTION"),
+    @("indirect", "Bash", "env -i NODE_OPTIONS=--import=./.probe/x/l.mjs node scripts/a.mjs", "POSSIBLE_PROBE_EXECUTION"),
+    @("indirect", "Bash", "cd .probe/x && npm test", "POSSIBLE_PROBE_EXECUTION"),
+    @("indirect", "PowerShell", "Set-Location .probe\x; npx vitest run", "POSSIBLE_PROBE_EXECUTION"),
+    @("indirect", "Bash", "cat .probe/x/steps.txt | sh", "POSSIBLE_PROBE_EXECUTION"),
+    @("indirect", "Bash", "node < .probe/x/gen.mjs", "POSSIBLE_PROBE_EXECUTION"),
+    @("indirect", "PowerShell", "Start-Process node -ArgumentList '.probe/x/run.mjs' -Wait", "POSSIBLE_PROBE_EXECUTION"),
+    @("indirect", "Bash", "npm exec --package=./.probe/x -- tool", "POSSIBLE_PROBE_EXECUTION"),
+    # 3. Inline code referencing .probe is flagged.
+    @("inline", "Bash", "node -e `"require('./.probe/x/run.cjs')`"", "POSSIBLE_PROBE_EXECUTION"),
+    @("inline", "Bash", "python3 -c `"exec(open('.probe/x/payload.txt').read())`"", "POSSIBLE_PROBE_EXECUTION"),
+    @("inline", "Bash", "bash -c 'node .probe/x/run.mjs'", "POSSIBLE_PROBE_EXECUTION"),
+    @("inline", "PowerShell", "pwsh -Command `". .probe/x/lib.ps1`"", "POSSIBLE_PROBE_EXECUTION"),
+    @("inline", "PowerShell", "Invoke-Expression (Get-Content -Raw .probe/x/run.ps1)", "POSSIBLE_PROBE_EXECUTION"),
+    @("inline", "Bash", "eval `"node .probe/x/run.mjs`"", "POSSIBLE_PROBE_EXECUTION"),
+    @("inline", "Bash", "node --input-type=module <<'EOF'`nimport './.probe/x/run.mjs'`nEOF", "POSSIBLE_PROBE_EXECUTION"),
+    # 4. The known ONB-EV Vitest config form is flagged, in either tool.
+    @("onb-ev", "PowerShell", $onbEv, "POSSIBLE_PROBE_EXECUTION"),
+    @("onb-ev", "Bash", "npx.cmd vitest run --config=.probe\onb-ev\capture.config.ts", "POSSIBLE_PROBE_EXECUTION"),
+    # 5. Ordinary direct reads using the allowlist are read-only.
+    @("read-only", "Bash", "cat .probe/x/notes.txt", "READ_ONLY_PROBE_INSPECTION"),
+    @("read-only", "PowerShell", "Get-Content -Raw .probe\x\out.json", "READ_ONLY_PROBE_INSPECTION"),
+    @("read-only", "PowerShell", "Get-Content `"C:\warcraft-logs-coach-vnext\.probe\my dir\notes.txt`"", "READ_ONLY_PROBE_INSPECTION"),
+    @("read-only", "Bash", "ls -la .probe/x", "READ_ONLY_PROBE_INSPECTION"),
+    @("read-only", "PowerShell", "dir .probe", "READ_ONLY_PROBE_INSPECTION"),
+    @("read-only", "PowerShell", "Get-ChildItem .probe/x -Recurse | Select-Object -First 5", "READ_ONLY_PROBE_INSPECTION"),
+    @("read-only", "Bash", "head -n 20 .probe/x/log.txt", "READ_ONLY_PROBE_INSPECTION"),
+    @("read-only", "Bash", "tail -5 .probe/x/log.txt 2>&1", "READ_ONLY_PROBE_INSPECTION"),
+    @("read-only", "Bash", "grep -n 'x' .probe/x/a.txt | head -5", "READ_ONLY_PROBE_INSPECTION"),
+    @("read-only", "PowerShell", "Select-String -Path .probe/x/a.txt -Pattern 'needle'", "READ_ONLY_PROBE_INSPECTION"),
+    @("read-only", "PowerShell", "type .probe\x\a.txt", "READ_ONLY_PROBE_INSPECTION"),
+    @("read-only", "Bash", "ls .probe/a; cat .probe/b.txt && wc -l .probe/c.txt", "READ_ONLY_PROBE_INSPECTION"),
+    @("read-only", "Monitor", "tail -n 3 .probe/x/run.log", "READ_ONLY_PROBE_INSPECTION"),
+    # 6. A data argument merely containing launcher-like text stays data: it is
+    # read-only under an allowlisted command, and never confirmed activity elsewhere.
+    @("data", "Bash", "grep -n `"npx vitest run --config .probe/onb-ev/capture.config.ts`" agent/review-request.md", "READ_ONLY_PROBE_INSPECTION"),
+    @("data", "PowerShell", "Select-String -Path .probe/x/notes.txt -Pattern 'node .probe/x/run.mjs; bash -c x | sh'", "READ_ONLY_PROBE_INSPECTION"),
+    @("data", "Bash", 'echo ''eval $(node .probe/x/run.mjs)''', "POSSIBLE_PROBE_EXECUTION"),
+    @("data", "Bash", "git commit -m `"ran node .probe/x/run.mjs`"", "POSSIBLE_PROBE_EXECUTION"),
+    # 7. Uncertain forms become POSSIBLE_PROBE_EXECUTION rather than passing.
+    @("uncertain", "Bash", "cat `$(ls .probe/x)", "POSSIBLE_PROBE_EXECUTION"),
+    @("uncertain", "Bash", "cat ``ls .probe``", "POSSIBLE_PROBE_EXECUTION"),
+    @("uncertain", "Bash", "cat .probe/x.txt > out.txt", "POSSIBLE_PROBE_EXECUTION"),
+    @("uncertain", "Bash", "cat .probe/x.txt >nul", "POSSIBLE_PROBE_EXECUTION"),
+    @("uncertain", "PowerShell", "Get-Content .probe/x.txt 2>/dev/null", "POSSIBLE_PROBE_EXECUTION"),
+    @("uncertain", "Bash", 'cat .probe/x.txt 2>$null', "POSSIBLE_PROBE_EXECUTION"),
+    @("uncertain", "Bash", "cat .probe/a.txt & node scripts/a.mjs", "POSSIBLE_PROBE_EXECUTION"),
+    @("uncertain", "PowerShell", "Get-Content .probe/a.json | ConvertFrom-Json", "POSSIBLE_PROBE_EXECUTION"),
+    @("uncertain", "Bash", "rm -rf .probe/x", "POSSIBLE_PROBE_EXECUTION"),
+    @("uncertain", "Bash", "`"cat`" .probe/x.txt", "POSSIBLE_PROBE_EXECUTION"),
+    @("uncertain", "Bash", "cat 'unterminated .probe/x.txt", "POSSIBLE_PROBE_EXECUTION"),
+    @("uncertain", "PowerShell", "cat --% `"x | node .probe/a.mjs`"", "POSSIBLE_PROBE_EXECUTION"),
+    @("uncertain", "PowerShell", "cat `"x$([char]0x201D) ; node .probe/a.mjs ; `"", "POSSIBLE_PROBE_EXECUTION"),
+    @("uncertain", "Bash", "cat `$'x\'' ; node .probe/a.mjs #'", "POSSIBLE_PROBE_EXECUTION"),
+    @("uncertain", "Bash", "cat x #`"`nnode .probe/a.mjs`n`"", "POSSIBLE_PROBE_EXECUTION"),
+    @("uncertain", "PowerShell", "cat `"a\`" ; node .probe/x.mjs ; `"", "POSSIBLE_PROBE_EXECUTION"),
+    @("uncertain", "PowerShell", "Get-Content @args .probe/x.txt", "POSSIBLE_PROBE_EXECUTION"),
+    @("uncertain", "PowerShell", "Get-ChildItem .probe | Sort-Object { node .probe/a.mjs }", "POSSIBLE_PROBE_EXECUTION"),
+    @("uncertain", "Bash", "cat .probe/x.txt |", "POSSIBLE_PROBE_EXECUTION"),
+    @("uncertain", "Bash", "cat `${X:-.probe/x.txt}", "POSSIBLE_PROBE_EXECUTION"),
+    # No .probe path: no probe finding (the literal patterns still apply).
+    @("none", "Bash", "npx vitest run tests/unit/a.test.ts", "NONE"),
+    @("none", "Bash", "node scripts/a.mjs; git log -- scripts/probe/", "NONE"),
+    @("none", "PowerShell", "npx vitest run --config vitest.probe.config.ts", "WCL_ACTIVITY")
+  )
+  foreach ($m in $matrix) {
+    $got = Get-KindOf $m[1] $m[2]
+    Check "$($m[0]): $($m[1]) '$($m[2] -replace "`n", '\n')' is $($m[3])" ($got -eq $m[3])
+  }
+  $probeTexts = @($matrix | ForEach-Object { $_[2] }) -join "`n"
+  Check "no command text ever yields CONFIRMED_WCL_NETWORK_ACTIVITY" ((@((Get-ScanOf @($matrix | ForEach-Object { New-ToolLine $_[1] $_[2] })).Hits) -match 'CONFIRMED').Count -eq 0 -and $probeTexts -ne "")
+  $why = (Get-ScanOf @(New-ToolLine "Bash" "cat .probe/a.txt | node")).Hits
+  Check "a finding says what triggered it" (@($why).Count -eq 1 -and ([string]@($why)[0]) -match "'node' is not a read-only inspection command")
+  Check "vitest.probe.config.ts and x.probe.ts are not .probe paths" (@(Get-ProbeReferences "npx vitest run --config vitest.probe.config.ts scripts/probe/a.probe.ts").Count -eq 0)
+  Check "a .probe path is found in every spelling" (@(Get-ProbeReferences "a .probe/x b C:\r\.probe\y '/c/r/.probe/z' --config=.probe\w").Count -eq 4)
+  Check "a Read of a .probe script is not execution" (@((Get-ScanOf @('{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Read","input":{"file_path":".probe/onb-ev/capture.config.ts"}}]}}')).Hits).Count -eq 0)
+  Check "a subagent's .probe execution is flagged" (@((Get-ScanOf @(New-ToolLine "Bash" "node .probe/x/run.mjs" "toolu_9")).Hits).Count -eq 1)
+
+  # The record keeps both classes; the gate sends possible execution to the owner.
+  $okTail = '{"type":"result","is_error":false,"result":"ok\nAUTOPILOT_RESULT: READY_FOR_GATE\nAUTOPILOT_PR: 99\nAUTOPILOT_SHA: sha1\nAUTOPILOT_DECISION: NONE"}'
+  $evRecord = New-AuditRecord 1 ($init + "`n" + (New-ToolLine "PowerShell" $onbEv) + "`n" + (New-ToolLine "PowerShell" "Get-Content .probe/onb-ev/ledger.json") + "`n" + $okTail) "t" "sha1"
+  Check "the record holds the possible execution, the inspection and detector version 3" (@($evRecord.wclHits).Count -eq 1 -and ([string]@($evRecord.wclHits)[0]).StartsWith("POSSIBLE_PROBE_EXECUTION") -and @($evRecord.probeInspections).Count -eq 1 -and $evRecord.detectorVersion -eq 3)
+  $evGate = Test-AuditEvidence @($evRecord) 1 "sha1" "NONE"
+  Check "possible execution needs the owner, and the gate says it is not proof of a request" ($evGate.Owner.Count -eq 1 -and $evGate.Owner[0] -match "does not prove a request")
+  $inspectRecord = New-AuditRecord 1 ($init + "`n" + (New-ToolLine "PowerShell" "Get-Content .probe/onb-ev/ledger.json") + "`n" + $okTail) "t" "sha1"
+  Check "read-only inspection alone never needs the owner" ((Test-AuditEvidence @($inspectRecord) 1 "sha1" "NONE").Owner.Count -eq 0 -and @($inspectRecord.probeInspections).Count -eq 1)
+  $legacy = [pscustomobject]@{ attempt = 1; status = "COMPLETED"; auditable = $true; wclHits = @("PROBE_EXECUTION Bash [x]: y"); candidateSha = "sha1"; candidateBinding = "bound" }
+  Check "an earlier attempt's PROBE_EXECUTION hit still needs the owner" ((Test-AuditEvidence @($legacy) 1 "sha1" "NONE").Owner.Count -eq 1)
+  foreach ($stop in @(@("Bash", "node .probe/x/run.mjs"), @("PowerShell", $onbEv), @("Bash", "cat .probe/x/steps.txt | sh"), @("Bash", "rm -rf .probe/x"), @("Bash", "cat .probe/x.txt >nul"))) {
+    Reset-Stub
+    $script:StubTranscript = $init + "`n" + (New-ToolLine $stop[0] $stop[1]) + "`n" + $okTail
+    $outcome = Invoke-Tranche $entry (New-State) @("verify")
+    Check "a wcl NONE tranche with possible .probe execution stops for the owner and never merges: $($stop[1])" ($outcome -like "OWNER:attempt 1 shows Warcraft Logs or probe activity*POSSIBLE_PROBE_EXECUTION*" -and $script:StubMerges -eq 0)
+  }
+  Reset-Stub
+  $script:StubTranscript = $init + "`n" + (New-ToolLine "Bash" "cat .probe/x/notes.txt") + "`n" + $okTail
+  $outcome = Invoke-Tranche $entry (New-State) @("verify")
+  Check "a wcl NONE tranche that only read .probe files merges" ($outcome -eq "MERGED" -and $script:StubMerges -eq 1)
+  Reset-Stub
+  $script:StubTranscript = $script:StubTranscriptSaved
+  Save-State (New-State)
+
+  # ---- AUD-WCL-1: branch hygiene and self-update ----
+  $pp = @(Get-PorcelainPaths @(" M agent/a.md", "R  old.md -> agent/new.md", "M  scripts/x.ps1", ""))
+  Check "porcelain paths, renames by their new path" ($pp.Count -eq 3 -and $pp[0] -eq "agent/a.md" -and $pp[1] -eq "agent/new.md" -and $pp[2] -eq "scripts/x.ps1")
+  Check "hygiene: nothing uncommitted is CLEAN" ((Get-BranchHygiene @() "autopilot/t" "autopilot/t" @("a")).Decision -eq "CLEAN")
+  Check "hygiene: intended tranche edits left uncommitted are RETRY" ((Get-BranchHygiene @("agent/a.md") "autopilot/t" "autopilot/t" @("agent/a.md", "x")).Decision -eq "RETRY")
+  Check "hygiene: an unrelated tracked edit is never swept in (OWNER)" ((Get-BranchHygiene @("agent/a.md", "agent/autopilot-queue.md") "autopilot/t" "autopilot/t" @("agent/a.md")).Decision -eq "OWNER")
+  Check "hygiene: edits on another branch are OWNER" ((Get-BranchHygiene @("agent/a.md") "main" "autopilot/t" @("agent/a.md")).Decision -eq "OWNER")
+  Reset-Stub
+  function Invoke-Claude([string]$prompt, [string]$label) { $script:Launches++; return [pscustomobject]@{ ExitCode = 0; Transcript = $script:StubTranscript; Stderr = ""; Path = "stub" } }
+  $script:Launches = 0
+  [void]$script:StubHygiene.Add([pscustomobject]@{ Decision = "RETRY"; Reason = "intended tranche edits are left uncommitted on autopilot/t: agent/a.md" })
+  $outcome = Invoke-Tranche $entry (New-State) @("verify")
+  Check "uncommitted tranche edits relaunch the workflow before merging, never merge as they are" ($outcome -eq "MERGED" -and $script:Launches -eq 2 -and $script:StubMerges -eq 1)
+  Reset-Stub
+  $script:Launches = 0
+  [void]$script:StubHygiene.Add([pscustomobject]@{ Decision = "OWNER"; Reason = "uncommitted tracked edits outside the tranche's changes: agent/autopilot-queue.md" })
+  $outcome = Invoke-Tranche $entry (New-State) @("verify")
+  Check "unrelated uncommitted edits stop for the owner and never merge" ($outcome -like "OWNER:uncommitted tracked edits outside*" -and $script:StubMerges -eq 0)
+  Reset-Stub
+  Save-State (New-State)
+  Check "a merged change to scripts/autopilot/ requires a new supervisor process" ((Test-SupervisorChange @("agent/autopilot.md", "scripts/autopilot/run-project.ps1")) -and (Test-SupervisorChange @("scripts\autopilot\status.ps1")))
+  Check "...and other changes do not" (-not (Test-SupervisorChange @("agent/autopilot.md", "src/x.ts", "scripts/review/openai-review.ps1")))
   Write-Host ""
   if ($script:SelfTestFailures -eq 0) { Write-Host "self-test: all passed"; return 0 } else { Write-Host "self-test: $($script:SelfTestFailures) failed"; return 1 }
 }
@@ -1962,6 +2488,7 @@ setTimeout(() => {}, 60000);
 # ---------------------------------------------------------------------------
 
 if ($SelfTest) { exit (Invoke-SelfTest) }
+if ($BackfillAudit) { exit (Invoke-BackfillAudit) }
 
 $lockStream = $null
 try {
@@ -2038,7 +2565,15 @@ try {
 
     $outcome = Invoke-Tranche $entry $state $expectedChecks
     Write-Log "tranche $($entry.Id) outcome: $outcome"
-    if ($outcome -eq "MERGED") { $completed++; continue }
+    if ($outcome -eq "MERGED") {
+      $completed++
+      if ($script:SupervisorUpdated) {
+        Write-Log "the merge of $($entry.Id) changed scripts/autopilot/; this process runs the old supervisor code, so it exits and a new process must audit the next tranche"
+        Set-Status @{ supervisorState = "IDLE"; phase = "RESTART_REQUIRED"; stopReason = "RESTART_REQUIRED: $($entry.Id) changed scripts/autopilot/; restart the supervisor" }
+        break
+      }
+      continue
+    }
     if ($outcome -eq "ALREADY_MERGED") {
       if ($TrancheId -ne "") { Set-Status @{ supervisorState = "IDLE"; stopReason = "$($entry.Id) is already merged" }; break }
       continue

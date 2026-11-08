@@ -24,6 +24,9 @@ This changes what older entries here say. They stay as written, as the record of
 Decided in `agent/architecture.md` "Owner decision (2026-11-07): WCL audit hardening and POLB-CENSUS".
 
 - **The audit gap is queued as AUD-WCL-1.** It runs before ONB-EV resumes and before REM-CENSUS.
+- **Rescoped (owner, 2026-11-08).** The precise detector is replaced by conservative detection, as AUD-WCL-1R, followed by credential isolation as AUD-WCL-2 (`agent/architecture.md` "Owner decision (2026-11-08): AUD-WCL-1 rescope").
+- **AUD-WCL-1R implements it:** conservative `.probe` detection (any shell command naming a `.probe` path is `POSSIBLE_PROBE_EXECUTION` unless it passes a small read-only test), branch hygiene, the self-update exit and the read-only backfill (`agent/autopilot.md` "Warcraft Logs"). Its known limits (a `.probe` path the command text never spells out, code copied out of `.probe/`, unreviewed code outside `.probe/`) are documented there and are AUD-WCL-2's to make harmless, not queued separately.
+- **Operational consequence.** Running or writing anything under `.probe/` from a shell now stops a tranche for the owner's classification, including the local generators and census scripts earlier tranches kept there. That is the decision's intended trade (false positives over silent misses); AUD-WCL-2's credential isolation is what could later let the owner relax it.
 - **POLB-CENSUS is declined.** POLB-B and POLB-C are BLOCKED with it. Older text that waits on the census or Policy B is superseded.
 - **ONB-EV completes the cohort** with a total cap of 119 (`agent/architecture.md` "Owner decision (2026-11-07): ONB-EV completion"). The archive line is unchanged; REM-CENSUS proposes byte-pinned exceptions only for evidence that must be committed.
 
